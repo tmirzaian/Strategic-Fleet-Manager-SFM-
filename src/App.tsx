@@ -1,0 +1,32 @@
+import { Routes, Route } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
+import MissionControl from './pages/MissionControl'
+import FleetDashboard from './pages/FleetDashboard'
+import ShipDetail from './pages/ShipDetail'
+import BuildManager from './pages/BuildManager'
+import HangarInventory from './pages/HangarInventory'
+import QuickUpdate from './pages/QuickUpdate'
+import DecisionCenter from './pages/DecisionCenter'
+import FleetRoadmap from './pages/FleetRoadmap'
+import CaptainsLog from './pages/CaptainsLog'
+
+export default function App() {
+  return (
+    <div className="flex min-h-screen bg-bg text-white">
+      <Sidebar />
+      <main className="flex-1 min-w-0 px-6 py-8 md:px-10 md:py-10 max-w-[1400px]">
+        <Routes>
+          <Route path="/" element={<MissionControl />} />
+          <Route path="/fleet" element={<FleetDashboard />} />
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+          <Route path="/builds" element={<BuildManager />} />
+          <Route path="/hangar" element={<HangarInventory />} />
+          <Route path="/quick-update" element={<QuickUpdate />} />
+          <Route path="/decision-center" element={<DecisionCenter />} />
+          <Route path="/roadmap" element={<FleetRoadmap />} />
+          <Route path="/log" element={<CaptainsLog />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}

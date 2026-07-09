@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: #071016;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(53, 208, 255, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(53, 208, 255, 0.04) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: #E7F2F6;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.panel {
+  background-color: #0D1B24;
+  border: 1px solid rgba(143, 176, 189, 0.15);
+  border-radius: 0.75rem;
+}
+
+.scanline-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(53, 208, 255, 0.4), transparent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #071016;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 176, 189, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(53, 208, 255, 0.4);
+}
+
+.readiness-bar-track {
+  background: rgba(143, 176, 189, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
