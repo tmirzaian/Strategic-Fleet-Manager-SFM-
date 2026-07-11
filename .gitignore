@@ -9,3 +9,10 @@ dist/
 coverage/
 
 .vscode/settings.json
+
+# Component Catalog Generator output (Mission M-007) — locally-generated
+# from a licensed Star Citizen install via StarBreaker. Not committed
+# until the licensing/redistribution decision in ADR-003 is resolved.
+# Narrowly scoped to this one file so other generated-data/*.json fixtures
+# stay tracked as before.
+generated-data/component-metadata-catalog.json

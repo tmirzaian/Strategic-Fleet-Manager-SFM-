@@ -10,6 +10,7 @@
     "lint": "eslint . --ext ts,tsx",
     "import:ships": "tsx scripts/importShips.ts",
     "import:ship": "tsx scripts/importShips.ts",
+    "generate:component-catalog": "tsx scripts/generateComponentCatalog.ts",
     "test": "vitest run"
   },
   "dependencies": {
