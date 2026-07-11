@@ -18,6 +18,8 @@ import { buildPortConstraints } from './portConstraintBuilder'
 import { buildFactoryLoadout } from './factoryLoadoutBuilder'
 import { resolveEquipmentAssignments } from './equipmentResolver'
 import { adaptLoadoutNodes } from './loadoutNodeAdapter'
+import { ComponentMetadataResolver } from './componentMetadataResolver'
+import { enrichCanonicalLoadout } from './componentMetadataEnrichment'
 
 const IMPORTER_VERSION = '1.0.0'
 
@@ -85,7 +87,10 @@ interface PortWithFactory {
  * document and the shared classifier/constraint/loadout builders.
  */
 export class ShipNormalizer implements Normalizer {
-  constructor(private overrideMap?: Record<string, string>) {}
+  constructor(
+    private overrideMap?: Record<string, string>,
+    private metadataResolver: ComponentMetadataResolver = new ComponentMetadataResolver()
+  ) {}
 
   normalize(raw: RawRecord, sourceFile: string): NormalizedShipPackage {
     const doc = raw as RawShipExport
@@ -104,6 +109,7 @@ export class ShipNormalizer implements Normalizer {
     let excludedCount = 0
 
     const canonicalLoadout = adaptLoadoutNodes(doc.loadout, '', normalizationWarnings)
+    const enrichedLoadout = enrichCanonicalLoadout(canonicalLoadout, this.metadataResolver, normalizationWarnings)
 
     const walk = (node: CanonicalLoadoutNode, nearestIncludedParentId: string | null, sourcePathPrefix: string) => {
       const classification = classifyPort(node.itemPortName, node.portType, this.overrideMap)
@@ -155,7 +161,7 @@ export class ShipNormalizer implements Normalizer {
       }
     }
 
-    for (const node of canonicalLoadout) {
+    for (const node of enrichedLoadout) {
       walk(node, null, '')
     }
 
