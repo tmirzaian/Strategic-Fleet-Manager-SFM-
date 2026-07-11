@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/*
+ * Dropdown / input contrast fix (Sprint 1.2).
+ * Native <select> option lists ignore most author CSS and instead render
+ * using the browser's inferred color scheme — without a hint, that defaults
+ * to a light popup (light gray background, blue selection) even on an
+ * otherwise dark page. Setting color-scheme: dark fixes the popup itself;
+ * the explicit rules below cover the closed control and give every select/
+ * input a consistent baseline even where a component doesn't set its own
+ * background and text classes.
+ */
+:root {
+  color-scheme: dark;
+}
+
+select,
+input,
+textarea {
+  background-color: #0D1B24;
+  color: #FFFFFF;
+  border: 1px solid #244354;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color 0.15s ease;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  border-color: #35D0FF;
+}
+
+select option {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+select option:checked,
+select option:hover {
+  background-color: #35D0FF;
+  color: #071016;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8FB0BD;
+  opacity: 0.65;
+}
+
+body {
+  background-color: #071016;
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(53, 208, 255, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(53, 208, 255, 0.04) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: #E7F2F6;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: 'Rajdhani', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.panel {
+  background-color: #0D1B24;
+  border: 1px solid rgba(143, 176, 189, 0.15);
+  border-radius: 0.75rem;
+}
+
+.scanline-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(53, 208, 255, 0.4), transparent);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #071016;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 176, 189, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(53, 208, 255, 0.4);
+}
+
+.readiness-bar-track {
+  background: rgba(143, 176, 189, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Branded fallback ship artwork gets a brief, subtle fade-in — just
+   enough to feel polished, never a dramatic entrance (Sprint 1.3H). */
+@keyframes ship-image-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-ship-image-fade-in {
+  animation: ship-image-fade-in 250ms ease-out;
+}

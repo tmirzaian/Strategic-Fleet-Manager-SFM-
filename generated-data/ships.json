@@ -1,0 +1,29 @@
+[
+  {
+    "id": "avenger-titan-imported",
+    "manufacturer": "Aegis Dynamics",
+    "name": "Avenger Titan",
+    "career": "Cargo",
+    "role": "Light Cargo / Combat",
+    "ownership": "Owned",
+    "factoryLoadoutId": "avenger-titan-imported-factory-loadout",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "gladius-imported",
+    "manufacturer": "Aegis Dynamics",
+    "name": "Gladius",
+    "career": "Combat",
+    "role": "Light Fighter",
+    "insurance": "6 Months",
+    "ownership": "Owned",
+    "factoryLoadoutId": "gladius-imported-factory-loadout",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  }
+]

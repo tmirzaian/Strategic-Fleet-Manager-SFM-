@@ -1,0 +1,422 @@
+{
+  "generatedAt": "2026-07-11T00:40:58.873Z",
+  "ships": [
+    {
+      "sourceFile": "raw-data/AEGS Avenger Titan.json",
+      "shipId": "avenger-titan-imported",
+      "shipName": "Avenger Titan",
+      "portsIncluded": 6,
+      "componentsDiscovered": 5,
+      "assignmentsCreated": 6,
+      "warnings": 11,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_gun_nose",
+          "displayName": "Nose Weapon",
+          "internalName": "hardpoint_gun_nose",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_nose"
+          ]
+        },
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_power_plant",
+          "displayName": "Power Plant",
+          "internalName": "hardpoint_power_plant",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_power_plant"
+          ]
+        },
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_shield_generator_left",
+          "displayName": "Left Shield Generator",
+          "internalName": "hardpoint_shield_generator_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_left"
+          ]
+        },
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_cooler_right",
+          "displayName": "Right Cooler",
+          "internalName": "hardpoint_cooler_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_right"
+          ]
+        },
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "unknown",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "avenger-titan-imported-port-hardpoint_cargo_grid",
+          "displayName": "Cargo Grid",
+          "internalName": "hardpoint_cargo_grid",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_cargo_grid"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [
+        "No size constraint available for \"hardpoint_quantum_drive\" — left null rather than invented."
+      ],
+      "conflicts": [],
+      "mixedMissileTypeWarnings": [],
+      "missingChildDefaults": [
+        "Cargo Grid (hardpoint_cargo_grid) has no factory item and is not a container port."
+      ]
+    },
+    {
+      "sourceFile": "raw-data/AEGS Gladius.json",
+      "shipId": "gladius-imported",
+      "shipName": "Gladius",
+      "portsIncluded": 24,
+      "componentsDiscovered": 9,
+      "assignmentsCreated": 24,
+      "warnings": 7,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_nose",
+          "displayName": "Nose Weapon",
+          "internalName": "hardpoint_gun_nose",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_nose",
+            "hardpoint_gun_nose_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_nose_weapon",
+          "displayName": "Nose Weapon Weapon",
+          "internalName": "hardpoint_gun_nose_weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_nose_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_left_wing",
+          "displayName": "Left Wing Weapon",
+          "internalName": "hardpoint_gun_left_wing",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_left_wing",
+            "hardpoint_gun_left_wing_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_left_wing_weapon",
+          "displayName": "Left Wing Weapon Weapon",
+          "internalName": "hardpoint_gun_left_wing_weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_left_wing_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_right_wing",
+          "displayName": "Right Wing Weapon",
+          "internalName": "hardpoint_gun_right_wing",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_right_wing",
+            "hardpoint_gun_right_wing_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_gun_right_wing_weapon",
+          "displayName": "Right Wing Weapon Weapon",
+          "internalName": "hardpoint_gun_right_wing_weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_gun_right_wing_weapon"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_power_plant",
+          "displayName": "Power Plant",
+          "internalName": "hardpoint_power_plant",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_power_plant"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_shield_generator_left",
+          "displayName": "Left Shield Generator",
+          "internalName": "hardpoint_shield_generator_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_left"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_shield_generator_right",
+          "displayName": "Right Shield Generator",
+          "internalName": "hardpoint_shield_generator_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_right"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_cooler_left",
+          "displayName": "Left Cooler",
+          "internalName": "hardpoint_cooler_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_left"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_cooler_right",
+          "displayName": "Right Cooler",
+          "internalName": "hardpoint_cooler_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_right"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_inner",
+          "displayName": "Left Inner Missile Rack",
+          "internalName": "hardpoint_missilerack_left_inner",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_inner",
+            "hardpoint_missilerack_left_inner_01",
+            "hardpoint_missilerack_left_inner",
+            "hardpoint_missilerack_left_inner_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_inner_01",
+          "displayName": "Left Inner Missile Rack 1",
+          "internalName": "hardpoint_missilerack_left_inner_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_inner_01"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_inner_02",
+          "displayName": "Left Inner Missile Rack 2",
+          "internalName": "hardpoint_missilerack_left_inner_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_inner_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_inner",
+          "displayName": "Right Inner Missile Rack",
+          "internalName": "hardpoint_missilerack_right_inner",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_inner",
+            "hardpoint_missilerack_right_inner_01",
+            "hardpoint_missilerack_right_inner",
+            "hardpoint_missilerack_right_inner_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_inner_01",
+          "displayName": "Right Inner Missile Rack 1",
+          "internalName": "hardpoint_missilerack_right_inner_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_inner_01"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_inner_02",
+          "displayName": "Right Inner Missile Rack 2",
+          "internalName": "hardpoint_missilerack_right_inner_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_inner_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_outer",
+          "displayName": "Left Outer Missile Rack",
+          "internalName": "hardpoint_missilerack_left_outer",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_outer",
+            "hardpoint_missilerack_left_outer_01",
+            "hardpoint_missilerack_left_outer",
+            "hardpoint_missilerack_left_outer_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_outer_01",
+          "displayName": "Left Outer Missile Rack 1",
+          "internalName": "hardpoint_missilerack_left_outer_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_outer_01"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_left_outer_02",
+          "displayName": "Left Outer Missile Rack 2",
+          "internalName": "hardpoint_missilerack_left_outer_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_left_outer_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_outer",
+          "displayName": "Right Outer Missile Rack",
+          "internalName": "hardpoint_missilerack_right_outer",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_outer",
+            "hardpoint_missilerack_right_outer_01",
+            "hardpoint_missilerack_right_outer",
+            "hardpoint_missilerack_right_outer_02"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_outer_01",
+          "displayName": "Right Outer Missile Rack 1",
+          "internalName": "hardpoint_missilerack_right_outer_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_outer_01"
+          ]
+        },
+        {
+          "portId": "gladius-imported-port-hardpoint_missilerack_right_outer_02",
+          "displayName": "Right Outer Missile Rack 2",
+          "internalName": "hardpoint_missilerack_right_outer_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missilerack_right_outer_02"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [],
+      "conflicts": [],
+      "mixedMissileTypeWarnings": [
+        "Port \"Right Outer Missile Rack\" has children with 2 different factory items — raw data preserved, no single item invented."
+      ],
+      "missingChildDefaults": [],
+      "goldenFixtureResults": [
+        {
+          "label": "Nose Weapon",
+          "pass": true
+        },
+        {
+          "label": "Left Wing Weapon",
+          "pass": true
+        },
+        {
+          "label": "Right Wing Weapon",
+          "pass": true
+        },
+        {
+          "label": "Power Plant",
+          "pass": true
+        },
+        {
+          "label": "Left Cooler",
+          "pass": true
+        },
+        {
+          "label": "Right Cooler",
+          "pass": true
+        },
+        {
+          "label": "Left Shield Generator",
+          "pass": true
+        },
+        {
+          "label": "Right Shield Generator",
+          "pass": true
+        },
+        {
+          "label": "Quantum Drive",
+          "pass": true
+        },
+        {
+          "label": "Left Inner Missile Rack",
+          "pass": true
+        },
+        {
+          "label": "Right Inner Missile Rack",
+          "pass": true
+        },
+        {
+          "label": "Left Outer Missile Rack",
+          "pass": true
+        },
+        {
+          "label": "Right Outer Missile Rack",
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "totalWarnings": 18,
+  "totalErrors": 0,
+  "images": {
+    "resolved": 0,
+    "manual": 12,
+    "preservedExisting": 12,
+    "fallback": 0,
+    "failed": 0,
+    "ambiguous": 0
+  }
+}

@@ -1,0 +1,372 @@
+[
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_gun_nose",
+    "displayName": "Nose Weapon",
+    "positionLabel": "Nose",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": null,
+    "resolvedItemId": "component-aegs_avenger_repeater_default",
+    "resolvedItemIds": [
+      "component-aegs_avenger_repeater_default"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_gun_nose"
+    ]
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_power_plant",
+    "displayName": "Power Plant",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-titan_v2",
+    "resolvedItemIds": [
+      "component-titan_v2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_power_plant"
+    ]
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_shield_generator_left",
+    "displayName": "Left Shield Generator",
+    "positionLabel": "Left",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-basic_allstop_ii",
+    "resolvedItemIds": [
+      "component-basic_allstop_ii"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_left"
+    ]
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_cooler_right",
+    "displayName": "Right Cooler",
+    "positionLabel": "Right",
+    "equipmentGroup": "Coolers",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-coolcore_i_default",
+    "resolvedItemIds": [
+      "component-coolcore_i_default"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_right"
+    ]
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": "component-rsi_atlas",
+    "resolvedItemIds": [
+      "component-rsi_atlas"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "portId": "avenger-titan-imported-port-hardpoint_cargo_grid",
+    "displayName": "Cargo Grid",
+    "equipmentGroup": "Cargo",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cargo_grid"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_gun_nose",
+    "displayName": "Nose Weapon",
+    "positionLabel": "Nose",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-mount_gimbal_s3",
+    "resolvedItemId": "component-cf337_panther_repeater",
+    "resolvedItemIds": [
+      "component-cf337_panther_repeater"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_gun_nose",
+      "hardpoint_gun_nose_weapon"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_gun_left_wing",
+    "displayName": "Left Wing Weapon",
+    "positionLabel": "Left Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-mount_gimbal_s3",
+    "resolvedItemId": "component-cf337_panther_repeater",
+    "resolvedItemIds": [
+      "component-cf337_panther_repeater"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_gun_left_wing",
+      "hardpoint_gun_left_wing_weapon"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_gun_right_wing",
+    "displayName": "Right Wing Weapon",
+    "positionLabel": "Right Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-mount_gimbal_s3",
+    "resolvedItemId": "component-cf337_panther_repeater",
+    "resolvedItemIds": [
+      "component-cf337_panther_repeater"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_gun_right_wing",
+      "hardpoint_gun_right_wing_weapon"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_power_plant",
+    "displayName": "Power Plant",
+    "equipmentGroup": "Power",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-titan_v1",
+    "resolvedItemIds": [
+      "component-titan_v1"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_power_plant"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_shield_generator_left",
+    "displayName": "Left Shield Generator",
+    "positionLabel": "Left",
+    "equipmentGroup": "Shields",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-basic_allstop",
+    "resolvedItemIds": [
+      "component-basic_allstop"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_left"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_shield_generator_right",
+    "displayName": "Right Shield Generator",
+    "positionLabel": "Right",
+    "equipmentGroup": "Shields",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-basic_allstop",
+    "resolvedItemIds": [
+      "component-basic_allstop"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_right"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-rsi_beacon",
+    "resolvedItemIds": [
+      "component-rsi_beacon"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_cooler_left",
+    "displayName": "Left Cooler",
+    "positionLabel": "Left",
+    "equipmentGroup": "Coolers",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-basilisk_bracer",
+    "resolvedItemIds": [
+      "component-basilisk_bracer"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_left"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_cooler_right",
+    "displayName": "Right Cooler",
+    "positionLabel": "Right",
+    "equipmentGroup": "Coolers",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-basilisk_bracer",
+    "resolvedItemIds": [
+      "component-basilisk_bracer"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_right"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_missilerack_left_inner",
+    "displayName": "Left Inner Missile Rack",
+    "positionLabel": "Left Inner",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-s2_missile_rack",
+    "resolvedItemId": "component-aegs_tempest_missile",
+    "resolvedItemIds": [
+      "component-aegs_tempest_missile"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_missilerack_left_inner",
+      "hardpoint_missilerack_left_inner_01",
+      "hardpoint_missilerack_left_inner",
+      "hardpoint_missilerack_left_inner_02"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_missilerack_right_inner",
+    "displayName": "Right Inner Missile Rack",
+    "positionLabel": "Right Inner",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-s2_missile_rack",
+    "resolvedItemId": "component-aegs_tempest_missile",
+    "resolvedItemIds": [
+      "component-aegs_tempest_missile"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_missilerack_right_inner",
+      "hardpoint_missilerack_right_inner_01",
+      "hardpoint_missilerack_right_inner",
+      "hardpoint_missilerack_right_inner_02"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_missilerack_left_outer",
+    "displayName": "Left Outer Missile Rack",
+    "positionLabel": "Left Outer",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-s2_missile_rack",
+    "resolvedItemId": "component-aegs_tempest_missile",
+    "resolvedItemIds": [
+      "component-aegs_tempest_missile"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_missilerack_left_outer",
+      "hardpoint_missilerack_left_outer_01",
+      "hardpoint_missilerack_left_outer",
+      "hardpoint_missilerack_left_outer_02"
+    ]
+  },
+  {
+    "shipId": "gladius-imported",
+    "portId": "gladius-imported-port-hardpoint_missilerack_right_outer",
+    "displayName": "Right Outer Missile Rack",
+    "positionLabel": "Right Outer",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-s2_missile_rack",
+    "resolvedItemId": null,
+    "resolvedItemIds": [
+      "component-aegs_tempest_missile",
+      "component-rsi_rattler_missile"
+    ],
+    "mixedChildItems": true,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_missilerack_right_outer",
+      "hardpoint_missilerack_right_outer_01",
+      "hardpoint_missilerack_right_outer",
+      "hardpoint_missilerack_right_outer_02"
+    ]
+  }
+]

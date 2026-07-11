@@ -1,0 +1,198 @@
+[
+  {
+    "id": "component-aegs_avenger_repeater_default",
+    "internalName": "aegs_avenger_repeater_default",
+    "displayName": "Bulldog Repeater II",
+    "manufacturer": "Aegis Dynamics",
+    "category": "WeaponGun",
+    "subtype": "Ballistic",
+    "size": 3,
+    "grade": "A",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-titan_v2",
+    "internalName": "titan_v2",
+    "displayName": "Regulus",
+    "manufacturer": "Aegis Dynamics",
+    "category": "PowerPlant",
+    "subtype": "Military",
+    "size": 2,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-basic_allstop_ii",
+    "internalName": "basic_allstop_ii",
+    "displayName": "AllStop II",
+    "manufacturer": "Basilisk",
+    "category": "Shield",
+    "subtype": "Military",
+    "size": 2,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-coolcore_i_default",
+    "internalName": "coolcore_i_default",
+    "displayName": "CoolCore I",
+    "manufacturer": "Basilisk",
+    "category": "Cooler",
+    "subtype": "Military",
+    "size": 1,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-rsi_atlas",
+    "internalName": "rsi_atlas",
+    "displayName": "Atlas",
+    "manufacturer": "RSI",
+    "category": "QuantumDrive",
+    "subtype": "Standard",
+    "size": 1,
+    "grade": "B",
+    "class": "Civilian",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-mount_gimbal_s3",
+    "internalName": "mount_gimbal_s3",
+    "displayName": "S3 Gimbal Mount",
+    "manufacturer": "Aegis Dynamics",
+    "category": "GimbalMount",
+    "subtype": "Fixed",
+    "size": 3,
+    "grade": "A",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-cf337_panther_repeater",
+    "internalName": "cf337_panther_repeater",
+    "displayName": "CF-337 Panther Repeater",
+    "manufacturer": "Aegis Dynamics",
+    "category": "WeaponGun",
+    "subtype": "Gun",
+    "size": 3,
+    "grade": "A",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-titan_v1",
+    "internalName": "titan_v1",
+    "displayName": "Regulus",
+    "manufacturer": "Aegis Dynamics",
+    "category": "PowerPlant",
+    "subtype": "Military",
+    "size": 1,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-basic_allstop",
+    "internalName": "basic_allstop",
+    "displayName": "AllStop",
+    "manufacturer": "Basilisk",
+    "category": "Shield",
+    "subtype": "Military",
+    "size": 1,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-rsi_beacon",
+    "internalName": "rsi_beacon",
+    "displayName": "Beacon",
+    "manufacturer": "RSI",
+    "category": "QuantumDrive",
+    "subtype": "Standard",
+    "size": 1,
+    "grade": "C",
+    "class": "Civilian",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-basilisk_bracer",
+    "internalName": "basilisk_bracer",
+    "displayName": "Bracer",
+    "manufacturer": "Basilisk",
+    "category": "Cooler",
+    "subtype": "Military",
+    "size": 1,
+    "grade": "B",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-s2_missile_rack",
+    "internalName": "s2_missile_rack",
+    "displayName": "S2 Missile Rack",
+    "manufacturer": "Aegis Dynamics",
+    "category": "MissileRack",
+    "subtype": "Fixed",
+    "size": 2,
+    "grade": "A",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-aegs_tempest_missile",
+    "internalName": "aegs_tempest_missile",
+    "displayName": "Tempest Missile",
+    "manufacturer": "Aegis Dynamics",
+    "category": "Missile",
+    "subtype": "Guided",
+    "size": 2,
+    "grade": "A",
+    "class": "Military",
+    "tags": [
+      "factory-default"
+    ]
+  },
+  {
+    "id": "component-rsi_rattler_missile",
+    "internalName": "rsi_rattler_missile",
+    "displayName": "Rattler Missile",
+    "manufacturer": "RSI",
+    "category": "Missile",
+    "subtype": "Guided",
+    "size": 2,
+    "grade": "B",
+    "class": "Civilian",
+    "tags": [
+      "factory-default"
+    ]
+  }
+]

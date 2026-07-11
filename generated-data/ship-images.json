@@ -1,0 +1,74 @@
+[
+  {
+    "shipId": "ghost",
+    "primaryUrl": "https://media.robertsspaceindustries.com/thvu42fxnagbh/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "corsair",
+    "primaryUrl": "https://media.robertsspaceindustries.com/9y19hajivybqc/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "mole",
+    "primaryUrl": "https://media.robertsspaceindustries.com/wgai60tvwa3vs/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "railen",
+    "primaryUrl": "https://media.robertsspaceindustries.com/3hlrf4bj6k5r7/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "135c",
+    "primaryUrl": "https://media.robertsspaceindustries.com/ftaf8t452ad1o/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "cutlass-black",
+    "primaryUrl": "https://media.robertsspaceindustries.com/56iszc92bl9oi/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "cutlass-red",
+    "primaryUrl": "https://media.robertsspaceindustries.com/wqa6lfco4amc0/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "m80",
+    "primaryUrl": "https://media.robertsspaceindustries.com/nledgsyyzmjov/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "starlite",
+    "primaryUrl": "https://media.robertsspaceindustries.com/6cdv5u7nvigrn/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "utv",
+    "primaryUrl": "https://media.robertsspaceindustries.com/szj2zc8m5hair/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "vulture",
+    "primaryUrl": "https://media.robertsspaceindustries.com/jggtvws2rhu3y/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  },
+  {
+    "shipId": "prospector",
+    "primaryUrl": "https://media.robertsspaceindustries.com/7rfmcpg9qcpmm/slideshow.jpg",
+    "source": "MANUAL_OVERRIDE",
+    "status": "manual"
+  }
+]

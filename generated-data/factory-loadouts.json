@@ -1,0 +1,134 @@
+[
+  {
+    "id": "avenger-titan-imported-factory-loadout",
+    "shipId": "avenger-titan-imported",
+    "portAssignments": [
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_gun_nose",
+        "componentId": "component-aegs_avenger_repeater_default"
+      },
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_power_plant",
+        "componentId": "component-titan_v2"
+      },
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_shield_generator_left",
+        "componentId": "component-basic_allstop_ii"
+      },
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_cooler_right",
+        "componentId": "component-coolcore_i_default"
+      },
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_quantum_drive",
+        "componentId": "component-rsi_atlas"
+      },
+      {
+        "portId": "avenger-titan-imported-port-hardpoint_cargo_grid",
+        "componentId": null
+      }
+    ]
+  },
+  {
+    "id": "gladius-imported-factory-loadout",
+    "shipId": "gladius-imported",
+    "portAssignments": [
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_nose",
+        "componentId": "component-mount_gimbal_s3"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_nose_weapon",
+        "componentId": "component-cf337_panther_repeater"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_left_wing",
+        "componentId": "component-mount_gimbal_s3"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_left_wing_weapon",
+        "componentId": "component-cf337_panther_repeater"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_right_wing",
+        "componentId": "component-mount_gimbal_s3"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_gun_right_wing_weapon",
+        "componentId": "component-cf337_panther_repeater"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_power_plant",
+        "componentId": "component-titan_v1"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_shield_generator_left",
+        "componentId": "component-basic_allstop"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_shield_generator_right",
+        "componentId": "component-basic_allstop"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_quantum_drive",
+        "componentId": "component-rsi_beacon"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_cooler_left",
+        "componentId": "component-basilisk_bracer"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_cooler_right",
+        "componentId": "component-basilisk_bracer"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_inner",
+        "componentId": "component-s2_missile_rack"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_inner_01",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_inner_02",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_inner",
+        "componentId": "component-s2_missile_rack"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_inner_01",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_inner_02",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_outer",
+        "componentId": "component-s2_missile_rack"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_outer_01",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_left_outer_02",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_outer",
+        "componentId": "component-s2_missile_rack"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_outer_01",
+        "componentId": "component-aegs_tempest_missile"
+      },
+      {
+        "portId": "gladius-imported-port-hardpoint_missilerack_right_outer_02",
+        "componentId": "component-rsi_rattler_missile"
+      }
+    ]
+  }
+]
