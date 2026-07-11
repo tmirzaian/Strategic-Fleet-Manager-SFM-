@@ -35,6 +35,16 @@ const INCLUDED_TYPE_TO_GROUP: Record<string, EquipmentGroup> = {
   PowerPlant: 'Power',
   Cooler: 'Coolers',
   QuantumDrive: 'QuantumDrive',
+  /** Added for Mission M-009 (Classification Translation): DataCore
+   * models jump drives as a distinct entity type from quantum drives
+   * (see `JDRV_TARS_S01_Explorer_SCItem`, nested under a QuantumDrive
+   * port in the real Gladius fixture), but SFM has no dedicated jump-drive
+   * equipment group. Folded into the existing "QuantumDrive" group rather
+   * than introducing a new one — both are FTL-adjacent propulsion
+   * equipment and this keeps the UI surface unchanged. See
+   * src/normalizer/classificationTranslator.ts for where this canonical
+   * type name is produced from DataCore's "JumpDrive" category. */
+  JumpDrive: 'QuantumDrive',
   Radar: 'Radar',
   LifeSupport: 'LifeSupport',
   Avionics: 'Avionics',

@@ -20,6 +20,7 @@ import { resolveEquipmentAssignments } from './equipmentResolver'
 import { adaptLoadoutNodes } from './loadoutNodeAdapter'
 import { ComponentMetadataResolver } from './componentMetadataResolver'
 import { enrichCanonicalLoadout } from './componentMetadataEnrichment'
+import { enrichClassification } from './classificationEnrichment'
 
 const IMPORTER_VERSION = '1.0.0'
 
@@ -110,13 +111,23 @@ export class ShipNormalizer implements Normalizer {
 
     const canonicalLoadout = adaptLoadoutNodes(doc.loadout, '', normalizationWarnings)
     const enrichedLoadout = enrichCanonicalLoadout(canonicalLoadout, this.metadataResolver, normalizationWarnings)
+    const classifiedLoadout = enrichClassification(enrichedLoadout, this.metadataResolver, normalizationWarnings)
 
     const walk = (node: CanonicalLoadoutNode, nearestIncludedParentId: string | null, sourcePathPrefix: string) => {
       const classification = classifyPort(node.itemPortName, node.portType, this.overrideMap)
       let thisPortId: string | null = null
 
       if (classification.include && classification.equipmentGroup) {
-        thisPortId = `${shipId}-port-${node.itemPortName}`
+        const sourcePath = `${sourcePathPrefix}/${node.itemPortName}`
+        // Keyed on the full ancestor path, not the bare leaf itemPortName:
+        // StarBreaker's raw export reuses generic, mount-local child port
+        // names (e.g. every gimbal mount's gun sits at "hardpoint_class_2",
+        // every missile rack's slots at "missile_01_attach"/"missile_02_attach")
+        // across otherwise-unrelated sibling subtrees. A leaf-name-only id
+        // collides across those siblings — this only became observable once
+        // Mission M-009's classification translation started including
+        // these nodes as real ports at all.
+        thisPortId = `${shipId}-port-${sourcePath}`
         const { constraints, warnings } = buildPortConstraints(node)
         normalizationWarnings.push(...warnings)
 
@@ -136,7 +147,7 @@ export class ShipNormalizer implements Normalizer {
           factoryItemId: undefined,
           targetItemId: undefined,
           childPortIds: [],
-          sourcePath: `${sourcePathPrefix}/${node.itemPortName}`,
+          sourcePath,
         }
         ports.push(port)
         portById.set(thisPortId, port)
@@ -161,7 +172,7 @@ export class ShipNormalizer implements Normalizer {
       }
     }
 
-    for (const node of enrichedLoadout) {
+    for (const node of classifiedLoadout) {
       walk(node, null, '')
     }
 

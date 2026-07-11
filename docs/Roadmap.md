@@ -12,19 +12,27 @@
 - Stable entity-prefix normalization
 - Legacy and StarBreaker loadout-node adapter
 - Focused adapter and envelope tests
+- Authoritative component metadata-source investigation (Mission M-006)
+- Component Catalog Generator, local-only, gitignored (Mission M-007)
+- Component Metadata Resolver + enrichment integration (Mission M-008)
+- Deterministic DataCore-to-SFM classification translation layer (Mission
+  M-009) — the real Gladius fixture now produces classified,
+  player-facing equipment ports instead of zero
 
 ### Active
 
-- Authoritative component metadata-source investigation
-- Component metadata resolver design
 - Test baseline reconciliation
 - Missing Avenger Titan fixture decision
+- Golden fixture reconciliation — several Sprint 1.3F hand-authored
+  expectations no longer match authoritative DataCore-derived values
+  (component identities, missile-rack loadout composition, one
+  parent/child equipment-resolution ordering question); see
+  docs/ImportPipeline.md and ADR-003 for the itemized differences from
+  Mission M-009 pending a decision on whether to update the golden
+  fixture or treat some as further mapping problems
 
 ### Remaining
 
-- Implement metadata resolver
-- Filter configurable equipment from geometry/internal hierarchy
-- Restore certified Gladius classification
 - Complete import certification
 - Resolve or intentionally replace missing fixture
 - Full build/test verification

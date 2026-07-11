@@ -176,8 +176,22 @@ raw-data/*.json
 StarBreakerImporter        (src/engine/importer/starBreakerImporter.ts)
       ↓  RawRecord (unknown, unparsed)
 ShipNormalizer              (src/normalizer/shipNormalizer.ts)
+  ├─ loadoutNodeAdapter.ts    adaptLoadoutNodes() — legacy/StarBreaker
+  │                           node schemas -> one CanonicalLoadoutNode shape
+  ├─ componentMetadataResolver.ts + componentMetadataEnrichment.ts
+  │                           (Mission M-008) — exact-key lookup into the
+  │                           locally-generated Component Metadata Catalog;
+  │                           fills factoryComponent fields the adapter
+  │                           couldn't supply, never overwriting verified
+  │                           (legacy) data
+  ├─ classificationTranslator.ts + classificationEnrichment.ts
+  │                           (Mission M-009) — the ONLY place DataCore's
+  │                           Type/SubType taxonomy is interpreted into a
+  │                           canonical node.portType classifyPort() already
+  │                           understands; never overwrites a legacy portType
   ├─ portClassifier.ts        classifyPort() — the one place that decides
-  │                           include/exclude and EquipmentGroup
+  │                           include/exclude and EquipmentGroup, from
+  │                           node.portType regardless of which stage set it
   ├─ displayNameGenerator.ts  generateDisplayName() — internal name →
   │                           player-friendly name + positionLabel
   ├─ portConstraintBuilder.ts real allowedTypes/allowedSubtypes/min/maxSize,
@@ -221,6 +235,77 @@ and `src/generated/importedShips.ts` reads that back with a plain Vite
 JSON import — no `StarBreakerImporter`/`ShipNormalizer` code ships to the
 browser bundle at all. This is what "the importer runs independently from
 React" means in practice.
+
+### Component Catalog Generator (Mission M-007)
+
+A separate, standalone offline tool — not part of the `ShipNormalizer`
+pipeline above, and not yet consumed by it:
+
+```
+raw-data/*.json
+      ↓ (scripts/componentCatalog/rawEntityCollector.ts — independent of src/normalizer)
+distinct entity classes actually mounted by SFM's ship exports
+      ↓ (scripts/componentCatalog/dcbQuery.ts)
+starbreaker.exe dcb query EntityClassDefinition --filter "EntityClassDefinition.<exact>"
+      ↓
+generated-data/component-metadata-catalog.json
+```
+
+Run via `npm run generate:component-catalog`. Requires a local install of
+both the [StarBreaker](https://github.com/diogotr7/StarBreaker) toolkit
+and Star Citizen itself (LIVE channel; `Data.p4k` read directly, never
+fully extracted) — this is a developer-machine tool, not something CI or
+the app runs.
+
+**Purpose:** produce the authoritative, exact-entity-class-keyed metadata
+(`category`/`subtype`/`size`/`grade`/`manufacturerRef`/`localizationKey`)
+that a future `ComponentMetadataResolver` (ADR-003, still "Proposed") will
+need — StarBreaker ship exports name entity classes but carry none of
+this metadata themselves.
+
+**Key policy:** exact full-record-name match only
+(`EntityClassDefinition.<entityClass>`). Bare substring/glob filters
+return unrelated collisions (confirmed during investigation — e.g.
+`Mount_Gimbal_S3` substring-matches 12 unrelated records across other
+ships) and are never used.
+
+**Local-only, no redistribution decision:** the generated catalog is
+gitignored and stays on the generating developer's machine. Committing
+derived DataCore data to the repository — or redistributing it at all —
+is an **open licensing question that has not been decided** (see
+ADR-003). Treat every catalog as personal, disposable build output, the
+same as any other `/generated-data` artifact, regenerable at any time
+from a licensed local game install.
+
+**Build/version tracking:** every catalog embeds the exact game
+`branch`/`version`/`p4ChangeNum` it was built from (read live from the
+install's `build_manifest.id`, never hard-coded) plus the StarBreaker
+tool version and a generation timestamp, so a catalog can never be
+mistaken for one built against a different patch.
+
+**Channel support:** LIVE only. PTU/EPTU are explicitly out of scope for
+the normal workflow.
+
+**Isolation guarantees:** the generator does not import from
+`src/normalizer`, does not write or modify any `generated-data/*.json`
+file other than `component-metadata-catalog.json`, and does not mutate
+`raw-data/`.
+
+### Component Metadata Resolver + Classification Translation (Missions M-008/M-009)
+
+`src/normalizer/componentMetadataResolver.ts` now reads the catalog above
+(lazily, once, cached) and `src/normalizer/classificationTranslator.ts`
+interprets its DataCore `Type`/`SubType` taxonomy into the canonical port
+types `portClassifier.ts` already recognizes — see
+docs/ImportPipeline.md's "Stage 4"/"Stage 4b" for the full pipeline
+placement, field-precedence rules, the initial translation table, and the
+`Mount_Gimbal_S3` decision. As of Mission M-009 the real Gladius fixture
+produces 26 classified ports across 9 equipment groups with zero
+validation errors — the "Nothing in `src/` reads the catalog" and
+"ADR-003, still Proposed" statements from earlier missions are superseded
+by this; ADR-003 itself remains "Proposed" only because the catalog's
+licensing/redistribution question is still unresolved, not because the
+resolver is unbuilt.
 
 ### Test fixtures
 
