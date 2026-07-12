@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate } from '../types'
+import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate, SeedAssetOverride } from '../types'
 import { ships as seedShips, builds as seedBuilds, hardpoints as seedHardpoints, hangarItems as seedHangarItems, initialLog } from '../data/seed'
 import { computeHardpointStatusWithValidation } from '../utils/hardpointStatus'
 import { shipDefinitions as allShipDefinitions, shipDefinitionById, shipFactoryTemplates } from '../data/shipDefinitions'
@@ -13,7 +13,7 @@ import { calculateComponentAvailability } from '../engine/logistics/availability
 import type { MissionReservation } from '../types'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
-const PERSIST_VERSION = 4
+const PERSIST_VERSION = 5
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -57,6 +57,17 @@ interface FleetState {
   // above stays the materialized join every existing page renders from.
   shipDefinitions: typeof allShipDefinitions
   fleetAssets: FleetAsset[]
+  // Mission M-012 incident fix — see SeedAssetOverride's doc comment.
+  // Persisted per-id diff against the hardcoded seed fleet (removal,
+  // rename, ownership, priority), applied on top of the fresh seed
+  // bake-in at rehydration time rather than replayed through
+  // materializeFleetAsset (which would discard hand-authored builds).
+  seedAssetOverrides: Record<string, SeedAssetOverride>
+  // True once real persisted user state has been merged in (i.e. this is
+  // not the very first-ever load). Lets the UI and tests distinguish "no
+  // localStorage entry exists yet" from "a save exists and the fleet is
+  // intentionally empty" — both cases can legitimately show zero ships.
+  hasPersistedState: boolean
   addFleetAsset: (
     shipDefinitionId: string,
     ownershipType: OwnershipType,
@@ -156,6 +167,17 @@ function isValidPersistedFleetAsset(raw: unknown): raw is FleetAsset {
   )
 }
 
+function isValidSeedAssetOverride(raw: unknown): raw is SeedAssetOverride {
+  if (!raw || typeof raw !== 'object') return false
+  const r = raw as Record<string, unknown>
+  if (typeof r.updatedAt !== 'string') return false
+  if (r.status !== undefined && r.status !== 'active' && r.status !== 'removed') return false
+  if (r.nickname !== undefined && typeof r.nickname !== 'string') return false
+  if (r.ownershipType !== undefined && r.ownershipType !== 'OWNED' && r.ownershipType !== 'PURCHASED' && r.ownershipType !== 'LOANER') return false
+  if (r.priority !== undefined && typeof r.priority !== 'number') return false
+  return true
+}
+
 function isValidPersistedReservation(raw: unknown): raw is MissionReservation {
   if (!raw || typeof raw !== 'object') return false
   const r = raw as Record<string, unknown>
@@ -245,6 +267,8 @@ export const useFleetStore = create<FleetState>()(
       quartermasterTemplates: seedQuartermasterTemplates,
       shipDefinitions: allShipDefinitions,
       fleetAssets: migrateSeedFleetToAssets(),
+      seedAssetOverrides: {},
+      hasPersistedState: false,
 
       addFleetAsset: (shipDefinitionId, ownershipType, nickname, priority) => {
         const definition = shipDefinitionById.get(shipDefinitionId)
@@ -286,17 +310,32 @@ export const useFleetStore = create<FleetState>()(
         const ship = get().ships.find((s) => s.id === assetId)
         if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
 
+        const now = new Date().toISOString()
+
         // Soft-delete the asset record (status: 'removed') rather than
         // splicing it out — Ship Definition and every other Fleet Asset
         // referencing it are completely untouched either way, but this
         // keeps a record that the asset existed rather than erasing history.
         set({
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, status: 'removed' as const, updatedAt: new Date().toISOString() } : a)),
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, status: 'removed' as const, updatedAt: now } : a)),
           ships: get().ships.filter((s) => s.id !== assetId),
           builds: get().builds.filter((b) => b.shipId !== assetId),
           hardpoints: get().hardpoints.filter((h) => h.shipId !== assetId),
           installedLoadouts: get().installedLoadouts.filter((e) => e.shipId !== assetId),
         })
+
+        // Mission M-012: the seed fleet's ships/builds/hardpoints are
+        // hardcoded and reconstructed fresh on every load — they're never
+        // persisted directly. Recording the removal here is what lets a
+        // seed ship's deletion survive a refresh (see `merge` below).
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], status: 'removed', updatedAt: now },
+            },
+          })
+        }
 
         get().addLogEntry({ action: 'Ship removed from fleet', shipName: ship.name, details: `Removed ${ship.name} from fleet` })
         return { success: true }
@@ -310,9 +349,10 @@ export const useFleetStore = create<FleetState>()(
         const definition = shipDefinitionById.get(asset.shipDefinitionId)
         const trimmed = nickname?.trim() || undefined
         const previousName = ship.name
+        const now = new Date().toISOString()
 
         set({
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, nickname: trimmed, updatedAt: new Date().toISOString() } : a)),
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, nickname: trimmed, updatedAt: now } : a)),
           ships: get().ships.map((s) =>
             s.id === assetId
               ? {
@@ -324,6 +364,15 @@ export const useFleetStore = create<FleetState>()(
           ),
         })
 
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], nickname: trimmed, updatedAt: now },
+            },
+          })
+        }
+
         get().addLogEntry({ action: 'Ship nickname changed', shipName: trimmed ?? previousName, details: `Renamed "${previousName}" to "${trimmed ?? definition?.displayName ?? previousName}"` })
         return { success: true }
       },
@@ -334,10 +383,20 @@ export const useFleetStore = create<FleetState>()(
         const ship = get().ships.find((s) => s.id === assetId)
         if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
 
+        const now = new Date().toISOString()
         set({
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, ownershipType, updatedAt: new Date().toISOString() } : a)),
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, ownershipType, updatedAt: now } : a)),
           ships: get().ships.map((s) => (s.id === assetId ? { ...s, ownership: ownershipTypeToLegacy(ownershipType) } : s)),
         })
+
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], ownershipType, updatedAt: now },
+            },
+          })
+        }
 
         get().addLogEntry({ action: 'Ownership changed', shipName: ship.name, details: `${ship.name} ownership set to ${ownershipType}` })
         return { success: true }
@@ -350,14 +409,24 @@ export const useFleetStore = create<FleetState>()(
         if (!ship || !asset) return { success: false, message: 'Fleet asset not found.' }
 
         const nextPriority = updates.priority ?? ship.priority
+        const now = new Date().toISOString()
         set({
           ships: get().ships.map((s) =>
             s.id === assetId
               ? { ...s, priority: nextPriority, primaryRole: updates.primaryRole ?? s.primaryRole, secondaryRole: updates.secondaryRole ?? s.secondaryRole }
               : s
           ),
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, priority: nextPriority, updatedAt: new Date().toISOString() } : a)),
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, priority: nextPriority, updatedAt: now } : a)),
         })
+
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], priority: nextPriority, updatedAt: now },
+            },
+          })
+        }
 
         get().addLogEntry({ action: 'Fleet Profile updated', shipName: ship.name, details: `Updated Fleet Profile for ${ship.name}` })
         return { success: true }
@@ -812,9 +881,12 @@ export const useFleetStore = create<FleetState>()(
       // (Part 24: "Do not persist derived... Derive those from
       // authoritative player state").
       migrate: (persistedState) => {
-        const state = persistedState as { fleetAssets?: unknown; hangarItems?: unknown; reservations?: unknown; installedLoadouts?: unknown } | null | undefined
+        const state = persistedState as
+          | { fleetAssets?: unknown; hangarItems?: unknown; reservations?: unknown; installedLoadouts?: unknown; seedAssetOverrides?: unknown }
+          | null
+          | undefined
         if (!state) {
-          return { fleetAssets: [], hangarItems: undefined, reservations: [], installedLoadouts: undefined }
+          return { fleetAssets: [], hangarItems: undefined, reservations: [], installedLoadouts: undefined, seedAssetOverrides: {} }
         }
 
         const validAssets: FleetAsset[] = []
@@ -829,6 +901,18 @@ export const useFleetStore = create<FleetState>()(
           else console.warn('[SFM] Skipping a persisted Reservation record that failed migration validation:', raw)
         }
 
+        // Mission M-012 (schemaVersion 5): pre-existing saves have no
+        // seedAssetOverrides field at all — an empty object is the
+        // correct default for those, since the full seed fleet was, in
+        // fact, still fully present and untouched when they were written.
+        const validOverrides: Record<string, SeedAssetOverride> = {}
+        if (state.seedAssetOverrides && typeof state.seedAssetOverrides === 'object') {
+          for (const [id, raw] of Object.entries(state.seedAssetOverrides as Record<string, unknown>)) {
+            if (isValidSeedAssetOverride(raw)) validOverrides[id] = raw
+            else console.warn('[SFM] Skipping a persisted Seed Asset Override record that failed migration validation:', id, raw)
+          }
+        }
+
         // Pre-Alpha-2.3 saves have no hangarItems/installedLoadouts field
         // at all — `undefined` here tells `merge` to keep the freshly
         // constructed defaults rather than overwriting them with nothing
@@ -841,38 +925,121 @@ export const useFleetStore = create<FleetState>()(
           hangarItems: Array.isArray(state.hangarItems) ? state.hangarItems : undefined,
           reservations: validReservations,
           installedLoadouts: Array.isArray(state.installedLoadouts) ? state.installedLoadouts : undefined,
+          seedAssetOverrides: validOverrides,
         }
       },
-      // Fleet Assets added via "Add Ship" still round-trip via replay (see
-      // merge below); Hangar Inventory, Reservations, and the Installed
-      // Loadout now persist directly in full — they're compact, entirely
-      // player-owned, and (unlike Fleet Assets) don't need a materialize
-      // step to reconstruct on load.
+      // Fleet Assets added via "Add Ship" (or any future non-seed source)
+      // still round-trip via replay (see merge below). The hardcoded seed
+      // fleet is never replayed this way — replaying it through
+      // materializeFleetAsset would silently discard its hand-authored
+      // Mission Configurations — so seedAssetOverrides carries only the
+      // minimal diff (removed / renamed / re-owned / re-prioritized) a
+      // user can apply to a seed ship. Hangar Inventory, Reservations, and
+      // the Installed Loadout persist directly in full.
       partialize: (state) => ({
         fleetAssets: state.fleetAssets.filter((a) => a.acquisitionSource !== 'SEED_MIGRATION' && a.status === 'active'),
         hangarItems: state.hangarItems,
         reservations: state.reservations,
         installedLoadouts: state.installedLoadouts,
+        seedAssetOverrides: state.seedAssetOverrides,
       }),
       // Replays every persisted manual Fleet Asset back into ships/builds/
       // hardpoints using the exact same materializeFleetAsset() the live
       // "Add Ship" action uses — `existingAsset` reuses the persisted id
       // verbatim so identity survives a refresh instead of minting a new one.
+      //
+      // `merge` only ever runs when a persisted value actually exists in
+      // storage (zustand skips it entirely on a true first-ever load) —
+      // so reaching this function at all is itself the "persisted user
+      // state exists" signal (Mission M-012, `hasPersistedState`).
       merge: (persistedState, currentState) => {
         const persisted = persistedState as
-          | { fleetAssets?: FleetAsset[]; hangarItems?: HangarItem[]; reservations?: MissionReservation[]; installedLoadouts?: InstalledLoadoutEntry[] }
+          | {
+              fleetAssets?: FleetAsset[]
+              hangarItems?: HangarItem[]
+              reservations?: MissionReservation[]
+              installedLoadouts?: InstalledLoadoutEntry[]
+              seedAssetOverrides?: Record<string, SeedAssetOverride>
+            }
           | null
           | undefined
+        // zustand's persist middleware calls `merge` unconditionally —
+        // even on a true first-ever load, with `persistedState` itself
+        // `undefined` (there was nothing in storage to migrate). That is
+        // the actual "no persisted state yet" signal (Mission M-012,
+        // `hasPersistedState`) — not whether this function ran at all.
+        const hadPersistedState = persistedState !== null && persistedState !== undefined
         const persistedAssets = persisted?.fleetAssets ?? []
+        const seedAssetOverrides = persisted?.seedAssetOverrides ?? {}
 
-        const ships = [...currentState.ships]
-        const builds = [...currentState.builds]
-        const hardpoints = [...currentState.hardpoints]
-        const fleetAssets = [...currentState.fleetAssets]
+        // Mission M-012: apply the persisted seed-fleet diff on top of the
+        // fresh seed bake-in BEFORE replaying manual assets. The seed
+        // ships/builds/hardpoints themselves always come from
+        // src/data/seed.ts verbatim — only presence (removed) and a few
+        // player-editable fields (nickname/ownership/priority) are
+        // overridden here, mirroring what removeFleetAsset/
+        // updateFleetAssetNickname/updateFleetAssetOwnership/
+        // updateFleetProfile already do live.
+        let ships = [...currentState.ships]
+        let builds = [...currentState.builds]
+        let hardpoints = [...currentState.hardpoints]
+        const fleetAssets = currentState.fleetAssets.map((a) => {
+          const override = seedAssetOverrides[a.id]
+          if (!override) return a
+          return {
+            ...a,
+            status: override.status ?? a.status,
+            nickname: 'nickname' in override ? override.nickname : a.nickname,
+            ownershipType: override.ownershipType ?? a.ownershipType,
+            priority: override.priority ?? a.priority,
+            updatedAt: override.updatedAt,
+          }
+        })
+
+        // A seed FleetAsset's own `id` (e.g. "ghost-asset-seed") is NOT the
+        // same as the ship id its materialized Ship/Build/Hardpoint rows
+        // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
+        // `seedAssetOverrides` is keyed by the asset id, so it must be
+        // resolved back to the ship id — via shipDefinitionId, which for
+        // every seed-migrated asset equals the plain seed ship id — before
+        // it can be used to filter ships/builds/hardpoints/installedLoadouts.
+        const seedShipIdByAssetId = new Map(currentState.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+        const removedSeedShipIds = new Set(
+          Object.entries(seedAssetOverrides)
+            .filter(([, override]) => override.status === 'removed')
+            .map(([assetId]) => seedShipIdByAssetId.get(assetId) ?? assetId)
+        )
+        if (removedSeedShipIds.size > 0) {
+          ships = ships.filter((s) => !removedSeedShipIds.has(s.id))
+          builds = builds.filter((b) => !removedSeedShipIds.has(b.shipId))
+          hardpoints = hardpoints.filter((h) => !removedSeedShipIds.has(h.shipId))
+        }
+        for (const [assetId, override] of Object.entries(seedAssetOverrides)) {
+          if (override.status === 'removed') continue
+          const shipId = seedShipIdByAssetId.get(assetId)
+          if (!shipId) continue
+          const asset = fleetAssets.find((a) => a.id === assetId)
+          const definition = asset ? shipDefinitionById.get(asset.shipDefinitionId) : undefined
+          ships = ships.map((s) => {
+            if (s.id !== shipId) return s
+            const next = { ...s }
+            if ('nickname' in override) {
+              next.name = override.nickname ?? definition?.displayName ?? s.name
+              next.role = override.nickname && definition ? `${definition.displayName} · ${definition.role}` : definition?.role ?? s.role
+            }
+            if (override.ownershipType) next.ownership = ownershipTypeToLegacy(override.ownershipType)
+            if (override.priority !== undefined) next.priority = override.priority
+            return next
+          })
+        }
+
         // Persisted Hangar/Reservations/InstalledLoadout replace the fresh
         // defaults outright when present — they're the full authoritative
         // player record, not something to merge item-by-item.
         let installedLoadouts = persisted?.installedLoadouts ?? [...currentState.installedLoadouts]
+        if (removedSeedShipIds.size > 0) {
+          installedLoadouts = installedLoadouts.filter((e) => !removedSeedShipIds.has(e.shipId))
+        }
         const hangarItems = persisted?.hangarItems ?? currentState.hangarItems
         const reservations = persisted?.reservations ?? currentState.reservations
 
@@ -895,7 +1062,7 @@ export const useFleetStore = create<FleetState>()(
           }
         }
 
-        return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations }
+        return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations, seedAssetOverrides, hasPersistedState: hadPersistedState }
       },
     }
   )

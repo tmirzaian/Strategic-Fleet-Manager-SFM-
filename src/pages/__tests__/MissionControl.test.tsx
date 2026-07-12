@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import MissionControl from '../MissionControl'
@@ -131,5 +131,21 @@ describe('Procurement sorting on Mission Control (tests 20-23)', () => {
     expect(asc.map((l) => l.availableToReserve)).toEqual([0, 1, 5])
     const desc = sortProcurementList(sample, 'unreserved', 'desc')
     expect(desc.map((l) => l.availableToReserve)).toEqual([5, 1, 0])
+  })
+})
+
+describe('<MissionControl /> — Mission M-012 empty-state', () => {
+  it('9. renders a valid, deliberate empty state with zero ships (not a blank page or crash)', () => {
+    useFleetStore.setState({ ships: [], builds: [], hardpoints: [] })
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    renderMissionControl()
+    expect(screen.getByText('No Vessels Assigned')).toBeInTheDocument()
+    expect(screen.getByText('Your fleet manifest is currently empty.')).toBeInTheDocument()
+    expect(screen.getByText('Add First Ship')).toBeInTheDocument()
+    // Stat tiles must still render (all zero), not crash.
+    expect(screen.getByText('Ships Active')).toBeInTheDocument()
+    // 10. no console errors in the empty state.
+    expect(consoleError).not.toHaveBeenCalled()
+    consoleError.mockRestore()
   })
 })

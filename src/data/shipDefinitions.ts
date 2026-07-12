@@ -17,6 +17,14 @@ export interface FactoryHardpointTemplate {
   type: string
   size: string
   factoryItem: string
+  /** When set, this row is a child of the row in the same template whose
+   * slotLabel matches this value (Mission M-011) — mirrors
+   * Hardpoint.parentSlotLabel so nested mount/turret/rack structure
+   * survives from a ShipDefinition's template all the way through
+   * materializeFleetAsset into real Hardpoint rows. See
+   * src/utils/portTree.ts for the generic tree-building logic that reads
+   * this on the materialized side. */
+  parentSlotLabel?: string
 }
 
 const seedDefinitions: ShipDefinition[] = seedShips.map((s) => ({
@@ -61,22 +69,74 @@ function seedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   if (!ship) return []
   return seedHardpoints
     .filter((h) => h.buildId === ship.activeBuildId)
-    .map((h) => ({ slotLabel: h.slotLabel, type: h.type, size: h.size, factoryItem: h.factoryItem }))
+    .map((h) => ({ slotLabel: h.slotLabel, type: h.type, size: h.size, factoryItem: h.factoryItem, parentSlotLabel: h.parentSlotLabel }))
 }
 
+/**
+ * Builds one template row per authoritative normalized Port — every
+ * physical port from the normalized pipeline (`view.ports`), not the
+ * collapsed one-row-per-mount `equipmentAssignments` view (Mission
+ * M-011). Using the collapsed view here was the root cause of Loadout
+ * Manager never being able to target a mount's child weapon/missile/
+ * jump-drive slots at all: a materialized FleetAsset's hardpoints came
+ * from `equipmentAssignments` alone, so the underlying child ports never
+ * existed as their own rows once a Fleet Asset was created from this
+ * template.
+ *
+ * The existing `Hardpoint`/`buildPortTree` mechanism (Alpha 2.5C) links
+ * parent->child purely by matching `parentSlotLabel` against the
+ * parent's own `slotLabel` string — there is no ID-based link. Real
+ * normalized port `displayName`s are NOT unique across different parents
+ * (confirmed directly against the generated catalog: every Gladius
+ * weapon mount's child gun port is literally named "Class 2", and every
+ * missile rack's first child is "01 Attach Missile") — joining on the
+ * raw displayName would silently merge unrelated subtrees the moment any
+ * of them gained their own children. Each port's template `slotLabel` is
+ * therefore built top-down as `<parent's already-unique label> — <this
+ * port's displayName>`, which is unique by construction (top-level
+ * labels are the ship's own distinct hardpoint names) without inventing
+ * or guessing anything — every segment is still a real, authoritative
+ * displayName, just disambiguated by real tree position rather than
+ * joined on a colliding raw string. `Hardpoint.id`/`Port.id` (the
+ * genuinely stable canonical id) is preserved unchanged as the row's own
+ * `id` in `materializeFleetAsset` regardless of this label.
+ */
 function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   const view = importedShipList.find((v) => v.ship.id === shipId)
   if (!view) return []
-  return view.equipmentAssignments.map((a) => {
-    const factoryComponentId = a.mountItemId ?? a.resolvedItemId
-    const factoryItem = factoryComponentId ? view.componentById.get(factoryComponentId)?.displayName ?? 'Unknown Factory Item' : '—'
-    return {
-      slotLabel: a.displayName,
-      type: a.equipmentGroup,
-      size: a.minSize !== null ? `S${a.minSize}` : 'S1',
-      factoryItem,
+
+  const ports = view.ports
+  const componentById = view.componentById
+  type PortT = (typeof ports)[number]
+
+  const childrenByParentId = new Map<string | null, PortT[]>()
+  for (const p of ports) {
+    const key = p.parentPortId ?? null
+    if (!childrenByParentId.has(key)) childrenByParentId.set(key, [])
+    childrenByParentId.get(key)!.push(p)
+  }
+
+  const factoryItemFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId)?.displayName ?? 'Unknown Factory Item' : '—')
+
+  const rows: FactoryHardpointTemplate[] = []
+  function walk(port: PortT, uniqueParentLabel: string | undefined) {
+    const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${port.displayName}` : port.displayName
+    rows.push({
+      slotLabel: uniqueLabel,
+      type: port.equipmentGroup,
+      size: port.minSize !== null ? `S${port.minSize}` : 'S1',
+      factoryItem: factoryItemFor(port),
+      parentSlotLabel: uniqueParentLabel,
+    })
+    for (const child of childrenByParentId.get(port.id) ?? []) {
+      walk(child, uniqueLabel)
     }
-  })
+  }
+  for (const top of childrenByParentId.get(null) ?? []) {
+    walk(top, undefined)
+  }
+
+  return rows
 }
 
 /** Factory hardpoint template per ShipDefinition id — see FactoryHardpointTemplate. */

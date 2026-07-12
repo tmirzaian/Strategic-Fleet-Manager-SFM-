@@ -129,6 +129,36 @@ Responsible for:
 
 Responsible for presenting domain state without reinterpreting raw exporter data.
 
+## Fleet ownership and persistence
+
+The hand-authored seed fleet (`src/data/seed.ts`) is demo/sample data, not
+user data — but a user can remove, rename, or re-own a seed ship, and
+that action is real user data the moment it happens. The store persists
+these as a small per-id diff (`seedAssetOverrides`, see
+`src/store/useFleetStore.ts`) layered on top of the seed bake-in at
+rehydration time, rather than replaying the seed fleet's hand-authored
+Builds through the generic Fleet Asset materializer (which would discard
+them).
+
+**A persisted-but-empty fleet is a valid state, not a sign of missing or
+corrupted storage.** `localStorage` having no entry at all for
+`sfm-fleet-store` (a true first-ever load) is architecturally
+distinguishable from an entry that exists and legitimately describes zero
+ships — the store exposes this as `hasPersistedState`. Demo data is only
+ever loaded fresh on that true first-ever case; once real persisted state
+exists, nothing may silently repopulate it.
+
+**Fleet ownership source and sync authority** (see
+`docs/ADR/ADR-004-Fleet-Ownership-Sync-Authority.md`): every Fleet Asset
+will eventually carry an `ownershipSource` (`rsi` / `in_game` / `loaner` /
+`manual`) that determines who is authoritative when a future
+RSI/CCUGame/LTP sync runs — RSI-sourced assets reconcile automatically
+(including pledge upgrades), in-game and loaner assets go through an
+explicit missing/expired review step rather than a hard delete, and
+manual assets are never touched by sync. The reconciliation engine itself
+is future work; this repo currently only implements the narrower
+persistence guarantee above.
+
 ## Engineering roles
 
 - **Founder / Product Owner:** Todd Mirzaian

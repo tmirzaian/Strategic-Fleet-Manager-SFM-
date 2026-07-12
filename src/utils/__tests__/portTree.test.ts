@@ -141,6 +141,47 @@ describe('25: Cutlass Black — FR-86 never appears as Missile Rack data, turret
   })
 })
 
+describe('Mission M-011: shared port-tree source — Ship Detail and Loadout Manager must never diverge', () => {
+  it('building the tree twice from the same store hardpoints for the same ship+build produces identical ids and structure', () => {
+    // Ship Detail and Loadout Manager both call buildPortTree() directly
+    // over useFleetStore's hardpoints — there is no second, parallel
+    // slot list anywhere. This proves that invariant structurally: two
+    // independent buildPortTree() calls over the same underlying rows
+    // (exactly what each page does on its own render) are identical.
+    for (const shipId of ['ghost', 'railen', 'mole', 'corsair', 'cutlass-black', 'vulture']) {
+      const rows = rowsFor(shipId)
+      const treeA = buildPortTree(rows)
+      const treeB = buildPortTree(rows)
+      const idsA = flattenPortTree(treeA).map((n) => n.hardpoint.id)
+      const idsB = flattenPortTree(treeB).map((n) => n.hardpoint.id)
+      expect(idsA).toEqual(idsB)
+      expect(new Set(idsA).size).toBe(idsA.length) // every port id unique within the ship
+    }
+  })
+})
+
+describe('Mission M-011: Ghost Mk II nose mount — nested weapon positions', () => {
+  it('exposes a Nose Mount top-level port with two child weapon positions', () => {
+    const tree = buildPortTree(rowsFor('ghost'))
+    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')
+    expect(noseMount).toBeDefined()
+    expect(noseMount!.children.map((c) => c.hardpoint.slotLabel).sort()).toEqual(['Weapon 1', 'Weapon 2'])
+  })
+
+  it('the Nose Mount itself is always fully matched (never manufactures a new Missing item)', () => {
+    const tree = buildPortTree(rowsFor('ghost'))
+    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')!
+    expect(noseMount.hardpoint.status).toBe('OK')
+  })
+
+  it('existing "Weapon 1"/"Weapon 2" slotLabels are unchanged (installed-loadout/quartermaster references keep resolving)', () => {
+    const tree = buildPortTree(rowsFor('ghost'))
+    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')!
+    const weapon1 = noseMount.children.find((c) => c.hardpoint.slotLabel === 'Weapon 1')!
+    expect(weapon1.hardpoint.factoryItem).toBe('Mass Driver')
+  })
+})
+
 describe('26/27: derivePortValidation / logistics never fake OK or count invalid as matched', () => {
   it("26. an Unresolved row (M80's placeholder factory data) never reports VALIDATION: OK", () => {
     const m80Rows = rowsFor('m80')

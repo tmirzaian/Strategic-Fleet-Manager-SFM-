@@ -10,7 +10,7 @@ export interface AppVersionInfo {
 }
 
 export const APP_VERSION: AppVersionInfo = {
-  productVersion: 'Alpha 2.5C',
+  productVersion: 'Alpha 2.5D',
   dataPackVersion: undefined,
   buildId: undefined,
 }

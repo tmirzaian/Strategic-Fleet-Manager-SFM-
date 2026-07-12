@@ -250,22 +250,92 @@ Certification should include:
 - synthetic legacy fixture
 - synthetic StarBreaker fixture
 - real AEGS Gladius fixture
+- real AEGS Avenger Titan fixture
 - equivalence cases where both formats represent the same equipment
 - malformed-node recovery
 - missing entity envelope
 - missing metadata
 - absent fixture detection
 
+### Real fixture provenance (Mission M-011A)
+
+Both `raw-data/AEGS Gladius.json` and `raw-data/AEGS Avenger Titan.json`
+are real exports from the frozen LIVE 4.8.184.64329 install, produced
+with:
+
+```
+starbreaker.exe entity export "<entity class>" "raw-data/<Ship Name>.json" --p4k "<Data.p4k path>" --dump-hierarchy
+```
+
+For the Avenger Titan specifically: the exact base-ship entity class was
+confirmed via `dcb query` before export (`EntityClassDefinition.AEGS_Avenger_Titan`,
+distinct from `_Renegade`/`_AI_Template`/`_PU_AI_*` variants also present
+in DataCore) —
+
+```
+starbreaker.exe dcb query "EntityClassDefinition" --p4k "<Data.p4k path>" --filter "*AEGS_Avenger*"
+```
+
+— then exported with:
+
+```
+starbreaker.exe entity export "AEGS_Avenger_Titan" "raw-data/AEGS Avenger Titan.json" --p4k "<Data.p4k path>" --dump-hierarchy
+```
+
+Both fixtures use the identical `root`/`root_nmc`/`loadout`/`interiors`
+envelope. Neither is hand-authored, and neither was edited after export.
+`npm run generate:component-catalog` was re-run afterward so the local
+Component Metadata Catalog covers both fixtures' entity classes together
+(82 distinct entities collected across both files, all 82 resolved, 0
+unresolved).
+
+**Synthetic-only scenarios deliberately kept out of the real fixtures:**
+missing size/allowedTypes constraints, a Cargo-classified port, and
+specific exclusion examples are covered by dedicated hand-built fixtures
+in `shipNormalizer.test.ts`/`validation.test.ts`, not forced into either
+real ship export. (The real Avenger Titan does have a real `CargoGrid`
+entity, `AEGS_Avenger_CargoGrid_Titan` — it stays unclassified today
+because the classification translation table has no `CargoGrid` rule
+yet, the same honest "no rule, no guess" outcome as `Armor` — not
+because anything was suppressed to avoid it appearing.)
+
+## Stage 4c — Equipment relationship resolution (Mission M-010)
+
+`src/normalizer/equipmentRelationship.ts` + the refactored `src/normalizer/equipmentResolver.ts`.
+
+**Root cause this stage fixes:** `equipmentResolver.ts` previously treated "this port has children" as the *only* signal that a port is a mount/rack container whose own factory item is incidental (mount hardware), with the real resolved item coming from its leaf descendants. That is correct for a weapon mount hosting a gun and a missile rack hosting missiles, but wrong for a `QuantumDrive` port hosting a nested `JumpDrive` port — DataCore nests the jump-drive entity under the quantum-drive entity in the raw export, but both are independently real, separately-named ship equipment, not a mount-and-its-cargo relationship. Unconditional leaf-collapsing showed the Jump Drive's item ("Explorer") where the Quantum Drive's own item ("Beacon") belonged.
+
+**The fix:** `Port` now carries `canonicalPortType` (the exact string `classifyPort()` was given — a legacy export's verified `portType`, or Stage 4b's translated value) forward from `shipNormalizer.ts`. `classifyPortRelationship(canonicalPortType)` decides, from that string alone — never a name — whether a port-with-children is:
+
+- **`container`** — `WeaponTurret`, `GimbalMount`, `Turret`, `MissileRack`. Unchanged behavior: collapses every descendant leaf into one assignment (mount+gun, rack+missiles).
+- **`independent`** — everything else (`QuantumDrive`, `JumpDrive`, `PowerPlant`, `Shield`, `Cooler`, `Missile`, `WeaponGun`, `Radar`, `LifeSupport`, `Avionics`, `Relay`, `Bomb`, ...). The port's own item is its own assignment; each direct child is resolved as its own separate assignment root (recursively), never collapsed into its parent's row.
+- **`unresolved`** — no canonical port type recorded (shouldn't happen in practice); treated the same as `independent` — preserving a port's own item is the safe default, collapsing it away is not.
+
+**Result:** Quantum Drive now resolves to `QDRV_WETK_S01_Beacon_SCItem` ("Beacon"), and Jump Drive appears as its own, separate, correctly-resolved equipment row (`JDRV_TARS_S01_Explorer_SCItem`, "Explorer") — both real, both visible, neither invented nor hidden.
+
+## Golden fixture reconciliation (Mission M-010)
+
+`goldenFixture.ts` has been reconciled against the authoritative LIVE 4.8 result (real `raw-data/AEGS Gladius.json`, the generated Component Metadata Catalog, and the now-corrected classification/equipment-resolution pipeline). Every change below is verified against that real data, not invented:
+
+| Row | Previous (Sprint 1.3F, hand-authored) | Authoritative replacement | Evidence | Kind |
+|---|---|---|---|---|
+| Nose Weapon | `CF-337 Panther Repeater` | `GATS BallisticGatling S3` | real catalog entity `GATS_BallisticGatling_S3`, category `WeaponGun`/`Gun` | factual |
+| Left/Right Wing Weapon | `CF-337 Panther Repeater` | `KLWE LaserRepeater S3` | real catalog entity `KLWE_LaserRepeater_S3` (a laser, not ballistic) mounted at both wings | factual |
+| Power Plant | `Regulus` | `POWR AEGS S01 Regulus SCItem` | same real component (`POWR_AEGS_S01_Regulus_SCItem`); only the display string differs | display-only |
+| Left/Right Cooler | `Bracer` | `COOL AEGS S01 Bracer SCItem` | same real component (`COOL_AEGS_S01_Bracer_SCItem`) | display-only |
+| Left/Right Shield Generator | `AllStop` | `SHLD GODI S01 AllStop SCItem` | same real component (`SHLD_GODI_S01_AllStop_SCItem`) | display-only |
+| Quantum Drive | `Beacon` | `QDRV WETK S01 Beacon SCItem` | same real component; **also the structural fix** — before Mission M-010 this row incorrectly resolved to the nested Jump Drive's item instead | display-only naming, but validates a structural fix |
+| Jump Drive *(new row)* | — did not exist | `JDRV TARS S01 Explorer SCItem` | real nested `JDRV_TARS_S01_Explorer_SCItem`, now independently represented | structural (new row) |
+| Left/Right Inner Missile Rack | displayName `"...Missile Rack"`, size 2-2, `Tempest Missile` | displayName `"...Wing Missile Rack"`, size 3-3, `MISL S03 CS FSKI Arrester`, single-slot rack (`MRCK_S03_BEHR_Single_S03`) | real raw port names include "wing"; real rack is a single-slot, size-3 rack carrying the Arrester missile | factual + display |
+| Left/Right Outer Missile Rack | displayName `"...Missile Rack"`, `Tempest Missile` / one deliberately `MIXED` | displayName `"...Wing Missile Rack"`, `MISL S02 IR FSKI Ignite`, dual-slot rack (`MRCK_S03_BEHR_Dual_S02`), **uniformly loaded, never mixed** | real rack has two Ignite missiles, not a mixed loadout — the old fixture's mixed-rack scenario was invented, not observed | factual + structural (removes an invented scenario) |
+
+The full comparison now runs 14/14 (13 original rows plus the new Jump Drive row) with zero failures.
+
 ## Current known gaps
 
-1. ~~Real StarBreaker nodes contain no direct classification fields.~~ Resolved by Mission M-009's classification translation layer — the real Gladius fixture now certifies to 26 classified ports across 9 equipment groups with zero validation errors.
-2. `raw-data/AEGS Avenger Titan.json` is referenced by tests but absent (unchanged, pre-existing — not a classification concern).
-3. `Armor` and unrecognized categories have no translation rule (deliberate — see Stage 4b).
-4. **Golden fixture reconciliation needed.** The authoritative DataCore-derived result differs from several Sprint 1.3F hand-authored `goldenFixture.ts` expectations:
-   - Component identities differ entirely (e.g. the old fixture invented `CF-337 Panther Repeater`/`Regulus`/`Bracer`/`AllStop`/`Beacon`; real DataCore names are `GATS_BallisticGatling_S3` (nose) / `KLWE_LaserRepeater_S3` (both wings) / `POWR_AEGS_S01_Regulus_SCItem` / `COOL_AEGS_S01_Bracer_SCItem` / `SHLD_GODI_S01_AllStop_SCItem`).
-   - Component `displayName` is not prettified for catalog-derived components — `displayNameGenerator.ts`'s heuristics were built for port internal names (`hardpoint_...`), not entity class names, so a catalog component with no legacy `displayName` renders as e.g. `"POWR AEGS S01 Regulus SCItem"`. Not addressed by this mission (out of scope for classification translation); flagged for a future mission.
-   - **A real mapping problem, not just a naming difference:** the "Quantum Drive" equipment assignment resolves to the nested jump drive (`JDRV_TARS_S01_Explorer_SCItem`, "Explorer") rather than the quantum drive itself (`QDRV_WETK_S01_Beacon_SCItem`, "Beacon"), because `equipmentResolver.ts`'s existing leaf-collapsing logic (built for mount+gun and rack+missiles, where the parent has no item of its own) shows the leaf child's resolved item for *any* parent/child pair — including this one, where both levels are independently real, separately-named equipment. Not fixed here (out of scope for a translation-focused mission); needs a future mission's attention.
-   - The real fixture's missile racks are **uniformly loaded** (no mixed-type rack), unlike the old golden fixture's deliberately-invented mixed-rack scenario (`Right Outer Missile Rack` → `MIXED`) — real inner racks are size-3 `MRCK_S03_BEHR_Dual_S02` racks carrying `MISL_S03_CS_FSKI_Arrester`, real outer racks are size-2 racks carrying `MISL_S02_IR_FSKI_Ignite`, uniformly.
-   - Generated missile-rack display names include an extra "Wing" token (e.g. `"Left Inner Wing Missile Rack"`) that the old fixture's hand-typed labels didn't anticipate, so `compareToGoldenFixture`'s displayName-based lookup fails to find a match at all for these rows (not "wrong value", but "no row found under that exact label").
-
-   None of this was force-passed. `goldenFixture.ts` was **not modified** by Mission M-009 — deciding whether to update it (and to keep, replace, or design new mixed-loadout test coverage) is an explicit product/test-design decision for a future mission, not something to resolve unilaterally inside a translation-layer change.
+1. ~~Real StarBreaker nodes contain no direct classification fields.~~ Resolved by Mission M-009.
+2. ~~Quantum Drive/Jump Drive parent-child equipment resolution collapsed to the wrong item.~~ Resolved by Mission M-010.
+3. ~~Golden fixture disagreed with authoritative DataCore-derived results.~~ Reconciled by Mission M-010 (table above).
+4. ~~`raw-data/AEGS Avenger Titan.json` is referenced by tests but absent.~~ Restored by Mission M-011A as a real StarBreaker export (see "Real fixture provenance" above) — all 508 tests pass, 0 failures.
+5. `Armor` and `CargoGrid` (and any other unrecognized category) have no translation rule (deliberate — see Stage 4b; `CargoGrid` newly confirmed absent by the real Avenger Titan fixture, which has a real cargo grid entity that stays honestly unclassified).
+6. Component `displayName` is not prettified for catalog-derived components (`displayNameGenerator.ts`'s heuristics were built for port internal names, not entity class names) — a documented display-only limitation, deliberately not addressed through Mission M-011A (out of scope: "do not solve general localization or display-name prettification").

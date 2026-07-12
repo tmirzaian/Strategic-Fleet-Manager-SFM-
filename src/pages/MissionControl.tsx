@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Gauge, ShipWheel, ScanSearch, Timer, LayoutGrid, ClipboardList, PackageCheck, CheckCircle2, AlertTriangle, Wrench, Factory } from 'lucide-react'
+import { Gauge, ShipWheel, ScanSearch, Timer, LayoutGrid, ClipboardList, PackageCheck, CheckCircle2, AlertTriangle, Wrench, Factory, PackageX, Plus } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import PriorityCard from '../components/PriorityCard'
 import SortableHeader from '../components/SortableHeader'
@@ -139,11 +139,25 @@ export default function MissionControl() {
             <LayoutGrid size={14} /> View full fleet
           </Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {topPriority.map((ship, i) => (
-            <PriorityCard key={ship.id} ship={ship} buildName={buildName(ship.activeBuildId)} rank={i + 1} progress={progressByShipId.get(ship.id)!} />
-          ))}
-        </div>
+        {ships.length === 0 ? (
+          <div className="panel p-8 flex flex-col items-center text-center gap-2">
+            <PackageX size={26} className="text-muted/60 mb-1" />
+            <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>
+            <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
+            <Link
+              to="/fleet"
+              className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+            >
+              <Plus size={15} /> Add First Ship
+            </Link>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-4">
+            {topPriority.map((ship, i) => (
+              <PriorityCard key={ship.id} ship={ship} buildName={buildName(ship.activeBuildId)} rank={i + 1} progress={progressByShipId.get(ship.id)!} />
+            ))}
+          </div>
+        )}
       </div>
 
       <div>

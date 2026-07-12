@@ -60,6 +60,25 @@ export interface FleetAsset {
   updatedAt: string
 }
 
+/**
+ * Persisted, per-id overrides for the hand-authored seed fleet (Mission
+ * M-012 incident fix). Seed ships' ships/builds/hardpoints stay
+ * hardcoded in src/data/seed.ts and are never replayed through
+ * materializeFleetAsset (that would silently discard their hand-authored
+ * Mission Configurations) — but a user's removal, rename, ownership
+ * change, or priority change against a seed ship must still survive a
+ * refresh. This is the minimal persisted "diff" layered on top of the
+ * fresh seed bake-in at rehydration time; see the `merge` function in
+ * src/store/useFleetStore.ts for how it's applied.
+ */
+export interface SeedAssetOverride {
+  status?: 'active' | 'removed'
+  nickname?: string
+  ownershipType?: OwnershipType
+  priority?: number
+  updatedAt: string
+}
+
 export interface Ship {
   id: string
   name: string

@@ -70,5 +70,17 @@
     "primaryUrl": "https://media.robertsspaceindustries.com/7rfmcpg9qcpmm/slideshow.jpg",
     "source": "MANUAL_OVERRIDE",
     "status": "manual"
+  },
+  {
+    "shipId": "avenger-titan-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "gladius-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
   }
 ]

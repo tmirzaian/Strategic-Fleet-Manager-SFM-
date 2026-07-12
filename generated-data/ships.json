@@ -1,10 +1,10 @@
 [
   {
     "id": "avenger-titan-imported",
-    "manufacturer": "Aegis Dynamics",
+    "manufacturer": "",
     "name": "Avenger Titan",
-    "career": "Cargo",
-    "role": "Light Cargo / Combat",
+    "career": "",
+    "role": "",
     "ownership": "Owned",
     "factoryLoadoutId": "avenger-titan-imported-factory-loadout",
     "classification": {
@@ -14,11 +14,10 @@
   },
   {
     "id": "gladius-imported",
-    "manufacturer": "Aegis Dynamics",
+    "manufacturer": "",
     "name": "Gladius",
-    "career": "Combat",
-    "role": "Light Fighter",
-    "insurance": "6 Months",
+    "career": "",
+    "role": "",
     "ownership": "Owned",
     "factoryLoadoutId": "gladius-imported-factory-loadout",
     "classification": {

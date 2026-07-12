@@ -45,6 +45,18 @@ the only layer today's app (via `src/data/seed.ts` and
 `src/store/useFleetStore.ts`) actually populates with real data, since
 Layers 1 and 2 don't have an importer yet.
 
+**Seed data is not player data.** `src/data/seed.ts` is demo/sample
+content — its ships, builds, and hardpoints are reconstructed fresh on
+every load and are never themselves written to `localStorage`. What *is*
+real player data is whether the user has removed, renamed, or re-owned
+one of those seed ships — persisted as a small diff
+(`seedAssetOverrides`) rather than by replaying seed content through the
+same pipeline as imported/manual ships. A player's fleet legitimately
+being empty (every ship removed) is a valid, persisted Layer-3 state, not
+evidence of missing storage — see
+`docs/ADR/ADR-004-Fleet-Ownership-Sync-Authority.md` and
+`docs/Architecture.md`'s "Fleet ownership and persistence" section.
+
 ## Where the code lives
 
 ```
@@ -196,8 +208,16 @@ ShipNormalizer              (src/normalizer/shipNormalizer.ts)
   │                           player-friendly name + positionLabel
   ├─ portConstraintBuilder.ts real allowedTypes/allowedSubtypes/min/maxSize,
   │                           or null + a warning — never invented
-  └─ factoryLoadoutBuilder.ts real factory components, or an explicit
-                              empty assignment — never "Factory Component"
+  ├─ factoryLoadoutBuilder.ts real factory components, or an explicit
+  │                           empty assignment — never "Factory Component"
+  └─ equipmentRelationship.ts + equipmentResolver.ts
+                              (Mission M-010) — collapses a mount/rack
+                              container port (WeaponTurret, GimbalMount,
+                              Turret, MissileRack) to its leaf item(s), but
+                              keeps independent equipment (QuantumDrive,
+                              JumpDrive, ...) as its own separate,
+                              never-collapsed assignment — decided from
+                              Port.canonicalPortType alone, never a name
       ↓  NormalizedShipPackage
 validateNormalizedPackage() (src/normalizer/validation.ts)
       ↓  same package, warnings/errors merged in
@@ -291,31 +311,49 @@ the normal workflow.
 file other than `component-metadata-catalog.json`, and does not mutate
 `raw-data/`.
 
-### Component Metadata Resolver + Classification Translation (Missions M-008/M-009)
+### Component Metadata Resolver, Classification Translation, Equipment Resolution (Missions M-008/M-009/M-010)
 
-`src/normalizer/componentMetadataResolver.ts` now reads the catalog above
-(lazily, once, cached) and `src/normalizer/classificationTranslator.ts`
+`src/normalizer/componentMetadataResolver.ts` reads the catalog above
+(lazily, once, cached); `src/normalizer/classificationTranslator.ts`
 interprets its DataCore `Type`/`SubType` taxonomy into the canonical port
-types `portClassifier.ts` already recognizes — see
-docs/ImportPipeline.md's "Stage 4"/"Stage 4b" for the full pipeline
-placement, field-precedence rules, the initial translation table, and the
-`Mount_Gimbal_S3` decision. As of Mission M-009 the real Gladius fixture
+types `portClassifier.ts` already recognizes; `src/normalizer/equipmentRelationship.ts`
++ the refactored `src/normalizer/equipmentResolver.ts` decide, from that
+same canonical port type, whether a port-with-children is a mount/rack
+container (collapse to its leaf item) or independently real equipment
+(never collapsed) — see docs/ImportPipeline.md's "Stage 4"/"Stage
+4b"/"Stage 4c" for the full pipeline placement, field-precedence rules,
+translation table, `Mount_Gimbal_S3` decision, and the Quantum
+Drive/Jump Drive fix. As of Mission M-010 the real Gladius fixture
 produces 26 classified ports across 9 equipment groups with zero
-validation errors — the "Nothing in `src/` reads the catalog" and
-"ADR-003, still Proposed" statements from earlier missions are superseded
-by this; ADR-003 itself remains "Proposed" only because the catalog's
-licensing/redistribution question is still unresolved, not because the
-resolver is unbuilt.
+validation errors, correctly resolving both the Quantum Drive (Beacon)
+and its nested Jump Drive (Explorer) as separate equipment, and the
+golden fixture (`goldenFixture.ts`) has been reconciled against this
+authoritative result (14/14, zero failures) — the "Nothing in `src/`
+reads the catalog" and "ADR-003, still Proposed" statements from earlier
+missions are superseded by this; ADR-003 itself remains "Proposed" only
+because the catalog's licensing/redistribution question is still
+unresolved, not because the resolver is unbuilt.
 
 ### Test fixtures
 
 `raw-data/AEGS Gladius.json` and `raw-data/AEGS Avenger Titan.json` are
-both illustrative, hand-authored StarBreaker-shaped exports (not real
-extracted CIG data). The Gladius fixture has a recursive missile rack
-(parent port with two child ports); the Avenger Titan fixture has no
-recursion, a Cargo-group port, and a port with no size constraint at all
-(to exercise the "missing constraint → warning, not an invented rule"
-path). Both include irrelevant nodes (doors, seats, controllers,
-thrusters, mesh helpers) to exercise `classifyPort()`'s exclusion logic.
+both **real** StarBreaker `entity export --dump-hierarchy` exports from
+the frozen LIVE 4.8.184.64329 install (Mission M-011A restored the
+Avenger Titan fixture, which had been missing since the schema
+migration — see docs/ImportPipeline.md's "Certification fixtures"
+section for the exact export command and provenance). Neither is
+hand-authored or synthetic. Both exercise recursive weapon-mount and
+missile-rack hierarchies and include plenty of irrelevant nodes (doors,
+seats, controllers, thrusters, mesh helpers) that exercise
+`classifyPort()`'s exclusion logic naturally, since that's what a real
+ship export actually contains.
+
+**Synthetic scenarios are covered separately, not forced into these real
+fixtures:** missing-constraint handling, cargo-port classification, and
+specific exclusion examples are tested with dedicated hand-built
+fixtures in `src/normalizer/__tests__/shipNormalizer.test.ts` and
+`validation.test.ts` — see Mission M-011A's report for why forcing such
+scenarios into a real ship export would misrepresent it.
+
 See `src/normalizer/__tests__/` for the unit and integration test suite
 (`npm run test`).

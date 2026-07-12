@@ -35,28 +35,49 @@ export interface GoldenComparisonResult {
 }
 
 /**
- * Authoritative golden fixture for the Gladius, per Sprint 1.3F. This is
+ * Authoritative golden fixture for the Gladius. Originally hand-authored
+ * (Sprint 1.3F) against an illustrative, non-authoritative fixture;
+ * reconciled in Mission M-010 against the real `raw-data/AEGS Gladius.json`
+ * StarBreaker export, the locally-generated Component Metadata Catalog,
+ * and the deterministic classification/equipment-resolution pipeline —
+ * see docs/ImportPipeline.md's "Golden fixture reconciliation" section
+ * for the itemized previous-value/new-value/evidence table. This is
  * test/QA data describing the expected result of importing the Gladius
  * fixture — it does not influence resolution logic at all, and nothing in
  * ShipNormalizer/equipmentResolver/etc. references it.
+ *
+ * `itemDisplayName` values are the real, authoritative component
+ * identities — rendered as their raw entity-class string (e.g.
+ * "POWR AEGS S01 Regulus SCItem") because catalog-sourced components
+ * don't yet have a prettified display name (`displayNameGenerator.ts`'s
+ * heuristics were built for port internal names, not entity class names).
+ * This is a documented display-only limitation (Mission M-009/M-010),
+ * not a factual error — the underlying component identity is correct.
  */
 export const goldenFixtures: Record<string, GoldenFixtureSpec> = {
   Gladius: {
     shipName: 'Gladius',
     expectations: [
-      { label: 'Nose Weapon', displayName: 'Nose Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'CF-337 Panther Repeater' },
-      { label: 'Left Wing Weapon', displayName: 'Left Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'CF-337 Panther Repeater' },
-      { label: 'Right Wing Weapon', displayName: 'Right Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'CF-337 Panther Repeater' },
-      { label: 'Power Plant', displayName: 'Power Plant', minSize: 1, maxSize: 1, itemDisplayName: 'Regulus' },
-      { label: 'Left Cooler', displayName: 'Left Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'Bracer' },
-      { label: 'Right Cooler', displayName: 'Right Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'Bracer' },
-      { label: 'Left Shield Generator', displayName: 'Left Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'AllStop' },
-      { label: 'Right Shield Generator', displayName: 'Right Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'AllStop' },
-      { label: 'Quantum Drive', displayName: 'Quantum Drive', minSize: 1, maxSize: 1, itemDisplayName: 'Beacon' },
-      { label: 'Left Inner Missile Rack', displayName: 'Left Inner Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'Tempest Missile' },
-      { label: 'Right Inner Missile Rack', displayName: 'Right Inner Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'Tempest Missile' },
-      { label: 'Left Outer Missile Rack', displayName: 'Left Outer Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'Tempest Missile' },
-      { label: 'Right Outer Missile Rack', displayName: 'Right Outer Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'MIXED' },
+      { label: 'Nose Weapon', displayName: 'Nose Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'GATS BallisticGatling S3' },
+      { label: 'Left Wing Weapon', displayName: 'Left Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'KLWE LaserRepeater S3' },
+      { label: 'Right Wing Weapon', displayName: 'Right Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'KLWE LaserRepeater S3' },
+      { label: 'Power Plant', displayName: 'Power Plant', minSize: 1, maxSize: 1, itemDisplayName: 'POWR AEGS S01 Regulus SCItem' },
+      { label: 'Left Cooler', displayName: 'Left Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'COOL AEGS S01 Bracer SCItem' },
+      { label: 'Right Cooler', displayName: 'Right Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'COOL AEGS S01 Bracer SCItem' },
+      { label: 'Left Shield Generator', displayName: 'Left Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'SHLD GODI S01 AllStop SCItem' },
+      { label: 'Right Shield Generator', displayName: 'Right Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'SHLD GODI S01 AllStop SCItem' },
+      { label: 'Quantum Drive', displayName: 'Quantum Drive', minSize: 1, maxSize: 1, itemDisplayName: 'QDRV WETK S01 Beacon SCItem' },
+      {
+        label: 'Jump Drive',
+        displayName: 'Jump Drive',
+        minSize: 1,
+        maxSize: 1,
+        itemDisplayName: 'JDRV TARS S01 Explorer SCItem',
+      },
+      { label: 'Left Inner Missile Rack', displayName: 'Left Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'MISL S03 CS FSKI Arrester' },
+      { label: 'Right Inner Missile Rack', displayName: 'Right Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'MISL S03 CS FSKI Arrester' },
+      { label: 'Left Outer Missile Rack', displayName: 'Left Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'MISL S02 IR FSKI Ignite' },
+      { label: 'Right Outer Missile Rack', displayName: 'Right Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'MISL S02 IR FSKI Ignite' },
     ],
   },
 }

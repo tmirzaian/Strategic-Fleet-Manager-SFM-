@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Send, X, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Plus, Send, X, CheckCircle2, AlertCircle, PackageX } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import Badge, { dispositionTone } from '../components/Badge'
 import SortableHeader from '../components/SortableHeader'
@@ -64,6 +64,13 @@ export default function HangarInventory() {
         </div>
       </div>
 
+      {hangarItems.length === 0 ? (
+        <div className="panel p-10 flex flex-col items-center text-center gap-2">
+          <PackageX size={28} className="text-muted/60 mb-1" />
+          <h2 className="font-display font-semibold text-white">No Inventory Recorded</h2>
+          <p className="text-sm text-muted max-w-sm">Quartermaster has no components recorded for this command.</p>
+        </div>
+      ) : (
       <div className="panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -72,14 +79,12 @@ export default function HangarInventory() {
                 <SortableHeader label="Item" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Type" column="type" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Size" column="size" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                <SortableHeader label="Qty" column="quantity" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                <th className="px-5 py-3 font-medium">Owned</th>
-                <th className="px-5 py-3 font-medium">Installed</th>
-                <th className="px-5 py-3 font-medium">Reserved</th>
-                <th className="px-5 py-3 font-medium">Available</th>
-                <th className="px-5 py-3 font-medium">Needed By</th>
-                <th className="px-5 py-3 font-medium">Disposition</th>
-                <th className="px-5 py-3 font-medium text-right">Actions</th>
+                <th className="px-3 py-3 font-medium">Installed</th>
+                <th className="px-3 py-3 font-medium">Reserved</th>
+                <th className="px-3 py-3 font-medium">Available</th>
+                <th className="px-3 py-3 font-medium">Needed By</th>
+                <th className="px-3 py-3 font-medium">Disposition</th>
+                <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -91,10 +96,8 @@ export default function HangarInventory() {
                   <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{item.name}</td>
                   <td className="px-5 py-3 text-muted whitespace-nowrap">{item.type}</td>
                   <td className="px-5 py-3 text-muted">{item.size}</td>
-                  <td className="px-5 py-3 font-mono">{item.qty}</td>
-                  <td className="px-5 py-3 font-mono text-white">{availability.ownedQuantity}</td>
-                  <td className="px-5 py-3 font-mono text-muted">{availability.installedQuantity}</td>
-                  <td className="px-5 py-3 font-mono">
+                  <td className="px-3 py-3 font-mono text-muted">{availability.installedQuantity}</td>
+                  <td className="px-3 py-3 font-mono">
                     {availability.reservedQuantity > 0 ? (
                       <span className="text-cyan" title={itemReservations.map((r) => `${r.fleetAssetId} — ${r.targetSlotLabel}`).join(', ')}>
                         {availability.reservedQuantity}
@@ -103,9 +106,13 @@ export default function HangarInventory() {
                       <span className="text-muted/50">0</span>
                     )}
                   </td>
-                  <td className="px-5 py-3 font-mono text-success">{availability.availableQuantity}</td>
-                  <td className="px-5 py-3 text-muted whitespace-nowrap">{item.neededBy}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-3 py-3 font-mono text-success">{availability.availableQuantity}</td>
+                  <td className="px-3 py-3 text-muted">
+                    <span className="block max-w-[150px] truncate" title={item.neededBy}>
+                      {item.neededBy}
+                    </span>
+                  </td>
+                  <td className="px-3 py-3">
                     {editingId === item.id ? (
                       <select
                         autoFocus
@@ -129,7 +136,7 @@ export default function HangarInventory() {
                       </button>
                     )}
                   </td>
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-3 py-3 text-right">
                     <button
                       onClick={() => openMove(item.id)}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:underline"
@@ -144,6 +151,7 @@ export default function HangarInventory() {
           </table>
         </div>
       </div>
+      )}
 
       {/* Add New Item modal */}
       {addOpen && (

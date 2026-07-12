@@ -67,6 +67,11 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       targetItem: slot.factoryItem,
       status,
       invalidMessage,
+      // Mission M-011: preserves nested mount/turret/rack structure from
+      // the ShipDefinition's template — previously dropped entirely here,
+      // so every newly materialized Fleet Asset (seed or imported) lost
+      // all parent/child structure regardless of its source template.
+      parentSlotLabel: slot.parentSlotLabel,
     }
   })
 

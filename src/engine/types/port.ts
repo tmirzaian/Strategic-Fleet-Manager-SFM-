@@ -29,6 +29,15 @@ export interface Port {
   /** Human-facing position, e.g. "Left Wing", "Nose", "Turret 1". */
   positionLabel?: string
 
+  /** The canonical port type `classifyPort()` included this port under
+   * (e.g. "WeaponTurret", "MissileRack", "QuantumDrive") — the same value
+   * passed to `classifyPort()`, whether it came from a legacy export's own
+   * `portType` or from the classification translation layer (Mission
+   * M-009). Preserved here (Mission M-010) so `equipmentResolver.ts` can
+   * tell a mount/rack container port apart from independently real
+   * equipment without inspecting any name. */
+  canonicalPortType?: string
+
   /** Compatibility constraints for what can be installed in this Port.
    * Empty arrays / null bounds mean "unknown/unconstrained", never
    * "nothing allowed" — see CompatibilityRule. */

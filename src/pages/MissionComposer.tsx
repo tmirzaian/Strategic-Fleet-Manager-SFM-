@@ -1,10 +1,12 @@
-import { useMemo, useState, Fragment } from 'react'
+import { useMemo, useState, Fragment, type ReactNode } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Library } from 'lucide-react'
+import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Library, Maximize2, Minimize2 } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import { validateTargetCompatibility } from '../data/componentCatalog'
 import { findItemCatalog } from '../data/seed'
 import Badge, { statusTone } from '../components/Badge'
+import { buildPortTree, flattenPortTree, type PortTreeNode } from '../utils/portTree'
+import type { Hardpoint } from '../types'
 
 type StartingState = 'FACTORY' | 'INSTALLED' | 'EMPTY' | 'EXISTING'
 
@@ -48,6 +50,7 @@ export default function MissionComposer() {
   const [existingBuildId, setExistingBuildId] = useState('')
   const [overrides, setOverrides] = useState<Record<string, string>>({})
   const [expandedSlot, setExpandedSlot] = useState<string | null>(null)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
   const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null)
 
@@ -79,6 +82,37 @@ export default function MissionComposer() {
     })
   }, [referenceRows, startingState, existingBuildId, templateId, overrides, quartermasterTemplates, hardpoints])
 
+  type PreviewRow = (typeof previewRows)[number]
+
+  // Shared Port Tree (Mission M-011): the exact same buildPortTree()
+  // utility Ship Detail's LoadoutPortTree uses, over the exact same
+  // Hardpoint rows (previewRows spread the full Hardpoint shape plus
+  // preview-only fields) — so a mount/turret/rack's children here are
+  // identically structured and identically ID'd to what Ship Detail
+  // shows for the same ship+build. Unlike Ship Detail (a read-only
+  // inspection view, collapsed by default), every row here starts
+  // expanded — this is an editing surface, and every configurable port
+  // must be reachable without an extra click before a target can be set.
+  const previewTree = useMemo(() => buildPortTree(previewRows), [previewRows])
+
+  function isCollapsed(id: string) {
+    return collapsed.has(id)
+  }
+  function toggleCollapsed(id: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+  function expandAll() {
+    setCollapsed(new Set())
+  }
+  function collapseAll() {
+    setCollapsed(new Set(flattenPortTree(previewTree).filter((n) => n.children.length > 0).map((n) => n.hardpoint.id)))
+  }
+
   function handleSave(setActive: boolean) {
     if (!ship) {
       setResult({ success: false, message: 'Select a Fleet Asset first.' })
@@ -101,6 +135,89 @@ export default function MissionComposer() {
   }
 
   const shipName = (id: string) => ships.find((s) => s.id === id)?.name ?? 'Unknown Ship'
+
+  // Recursive, nested render of the shared Port Tree — depth-indented
+  // exactly like Ship Detail's LoadoutPortTree, but every row remains
+  // directly editable (Target input) since this is the editing surface,
+  // not a read-only inspection view. A port with children still shows
+  // its own row (e.g. a turret mount's own Target/Status), immediately
+  // followed by its children when not collapsed — parent selection never
+  // hides or removes its child rows; a child mount/gimbal/rack always
+  // stays visible and independently editable alongside its parent.
+  function renderTargetRows(nodes: PortTreeNode[], depth: number): ReactNode[] {
+    return nodes.flatMap((node) => {
+      const row = node.hardpoint as PreviewRow
+      const hasChildren = node.children.length > 0
+      const rowCollapsed = isCollapsed(row.id)
+
+      const rowEl = (
+        <Fragment key={row.id}>
+          <tr className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+            <td className="px-5 py-3 text-white font-medium whitespace-nowrap">
+              <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1">
+                {hasChildren ? (
+                  <button onClick={() => toggleCollapsed(row.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={rowCollapsed ? 'Expand row' : 'Collapse row'}>
+                    {rowCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
+                  </button>
+                ) : (
+                  <span className="w-[13px] shrink-0" />
+                )}
+                <button onClick={() => setExpandedSlot(expandedSlot === row.id ? null : row.id)} className="flex items-center gap-1 hover:text-cyan transition-colors">
+                  {row.slotLabel}
+                </button>
+              </div>
+            </td>
+            <td className="px-5 py-3 text-muted whitespace-nowrap">{row.size} {row.type}</td>
+            <td className="px-5 py-3 text-muted/70">{row.factoryItem}</td>
+            <td className="px-5 py-3 text-muted">{row.installedItem}</td>
+            <td className="px-5 py-3">
+              <input
+                list={`catalog-${row.id}`}
+                value={row.previewTarget}
+                onChange={(e) => setOverrides((prev) => ({ ...prev, [row.slotLabel]: e.target.value }))}
+                className="w-full min-w-[9rem]"
+              />
+              <datalist id={`catalog-${row.id}`}>
+                {findItemCatalog.map((c) => (
+                  <option key={c.item} value={c.item} />
+                ))}
+              </datalist>
+            </td>
+            <td className="px-5 py-3">
+              {row.compatible ? (
+                <Badge tone={statusTone(row.previewTarget === '—' || !row.previewTarget ? 'OK' : row.previewTarget === row.installedItem ? 'OK' : 'Upgrade Available')}>
+                  {row.previewTarget === '—' || !row.previewTarget ? 'Not Required' : 'Ready to Save'}
+                </Badge>
+              ) : (
+                <Badge tone="invalid">Incompatible</Badge>
+              )}
+            </td>
+          </tr>
+          {expandedSlot === row.id && (
+            <tr className="bg-black/20">
+              <td colSpan={6} className="px-5 py-3">
+                <div className="flex items-start gap-2 text-xs text-muted">
+                  <Layers size={13} className="mt-0.5 shrink-0 text-cyan/70" />
+                  <div>
+                    <p className="text-white/80">Port &amp; Mount Detail</p>
+                    <p className="mt-1">
+                      internalName: <span className="font-mono text-muted/80">{row.slotLabel}</span> · type: {row.type} · size: {row.size} · port id: <span className="font-mono text-muted/80">{row.id}</span>
+                    </p>
+                    {!row.compatible && row.incompatibleMessage && <p className="mt-1 text-danger">{row.incompatibleMessage}</p>}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          )}
+        </Fragment>
+      )
+
+      if (hasChildren && !rowCollapsed) {
+        return [rowEl, ...renderTargetRows(node.children, depth + 1)]
+      }
+      return [rowEl]
+    })
+  }
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -184,15 +301,28 @@ export default function MissionComposer() {
       </div>
 
       <div className="panel overflow-hidden">
-        <div className="px-5 py-4 border-b border-white/5">
-          <h3 className="font-display font-semibold text-white">Target Equipment</h3>
-          <p className="text-xs text-muted mt-1">Only choices compatible with each port's size/type are treated as valid — an incompatible entry is flagged, never silently accepted.</p>
+        <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 className="font-display font-semibold text-white">Target Equipment</h3>
+            <p className="text-xs text-muted mt-1">
+              Every configurable port on this ship, nested exactly as Ship Detail shows it — only choices compatible with each port's size/type are treated as valid, an incompatible entry is
+              flagged, never silently accepted.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={expandAll} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
+              <Maximize2 size={12} /> Expand All
+            </button>
+            <button onClick={collapseAll} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
+              <Minimize2 size={12} /> Collapse All
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
-                <th className="px-5 py-3 font-medium">Slot</th>
+                <th className="px-5 py-3 font-medium">Port</th>
                 <th className="px-5 py-3 font-medium">Size / Type</th>
                 <th className="px-5 py-3 font-medium">Factory</th>
                 <th className="px-5 py-3 font-medium">Installed</th>
@@ -200,61 +330,7 @@ export default function MissionComposer() {
                 <th className="px-5 py-3 font-medium">Status</th>
               </tr>
             </thead>
-            <tbody>
-              {previewRows.map((row) => (
-                <Fragment key={row.id}>
-                  <tr className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                    <td className="px-5 py-3 text-white font-medium whitespace-nowrap">
-                      <button onClick={() => setExpandedSlot(expandedSlot === row.id ? null : row.id)} className="flex items-center gap-1 hover:text-cyan transition-colors">
-                        {expandedSlot === row.id ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                        {row.slotLabel}
-                      </button>
-                    </td>
-                    <td className="px-5 py-3 text-muted whitespace-nowrap">{row.size} {row.type}</td>
-                    <td className="px-5 py-3 text-muted/70">{row.factoryItem}</td>
-                    <td className="px-5 py-3 text-muted">{row.installedItem}</td>
-                    <td className="px-5 py-3">
-                      <input
-                        list={`catalog-${row.id}`}
-                        value={row.previewTarget}
-                        onChange={(e) => setOverrides((prev) => ({ ...prev, [row.slotLabel]: e.target.value }))}
-                        className="w-full min-w-[9rem]"
-                      />
-                      <datalist id={`catalog-${row.id}`}>
-                        {findItemCatalog.map((c) => (
-                          <option key={c.item} value={c.item} />
-                        ))}
-                      </datalist>
-                    </td>
-                    <td className="px-5 py-3">
-                      {row.compatible ? (
-                        <Badge tone={statusTone(row.previewTarget === '—' || !row.previewTarget ? 'OK' : row.previewTarget === row.installedItem ? 'OK' : 'Upgrade Available')}>
-                          {row.previewTarget === '—' || !row.previewTarget ? 'Not Required' : 'Ready to Save'}
-                        </Badge>
-                      ) : (
-                        <Badge tone="invalid">Incompatible</Badge>
-                      )}
-                    </td>
-                  </tr>
-                  {expandedSlot === row.id && (
-                    <tr className="bg-black/20">
-                      <td colSpan={6} className="px-5 py-3">
-                        <div className="flex items-start gap-2 text-xs text-muted">
-                          <Layers size={13} className="mt-0.5 shrink-0 text-cyan/70" />
-                          <div>
-                            <p className="text-white/80">Port & Mount Detail</p>
-                            <p className="mt-1">
-                              internalName: <span className="font-mono text-muted/80">{row.slotLabel}</span> · type: {row.type} · size: {row.size}
-                            </p>
-                            {!row.compatible && row.incompatibleMessage && <p className="mt-1 text-danger">{row.incompatibleMessage}</p>}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
+            <tbody>{renderTargetRows(previewTree, 0)}</tbody>
           </table>
         </div>
       </div>

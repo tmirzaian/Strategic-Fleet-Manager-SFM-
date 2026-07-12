@@ -47,6 +47,34 @@ describe('<MissionComposer /> (Loadout Manager)', () => {
     expect(screen.getByText('Shield 1')).toBeInTheDocument()
   })
 
+  it('Mission M-011: nested ports (Ghost Nose Mount + its two weapons) render fully expanded by default — an editing surface must not hide a configurable port behind an extra click', () => {
+    renderComposer('?shipId=ghost')
+    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
+    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+  })
+
+  it('Mission M-011: Collapse All hides the nested weapon rows, Expand All restores them', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Collapse All'))
+    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+  })
+
+  it("Mission M-011: empty optional ports (Railen's tractor beams) remain visible with a real target editable", () => {
+    renderComposer('?shipId=railen')
+    expect(screen.getByText('Fore Tractor Beam')).toBeInTheDocument()
+    expect(screen.getByText('Aft Tractor Beam')).toBeInTheDocument()
+  })
+
+  it("Mission M-011: turret child weapons (Railen) render nested, same slot labels Ship Detail shows", () => {
+    renderComposer('?shipId=railen')
+    expect(screen.getByText('Port Turret')).toBeInTheDocument()
+    expect(screen.getByText('Port Turret Left Weapon')).toBeInTheDocument()
+    expect(screen.getByText('Port Turret Right Weapon')).toBeInTheDocument()
+  })
+
   it('saving with a name creates a real Loadout (Build record) in the store', () => {
     renderComposer('?shipId=utv')
     const nameInput = screen.getByPlaceholderText(/Deep Salvage Run/i)

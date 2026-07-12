@@ -86,6 +86,15 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
     expect(screen.queryByText('Port Turret Left Weapon')).not.toBeInTheDocument()
   })
 
+  it('Mission M-011: Ghost Mk II exposes its Nose Mount with two child weapon positions, collapsed by default', () => {
+    renderShipDetail('ghost')
+    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
+    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+  })
+
   it('MOLE renders its mining turret hierarchy', () => {
     renderShipDetail('mole')
     expect(screen.getByText('Mining Turret 1')).toBeInTheDocument()

@@ -136,6 +136,7 @@ export class ShipNormalizer implements Normalizer {
           shipId,
           parentPortId: nearestIncludedParentId,
           equipmentGroup: classification.equipmentGroup,
+          canonicalPortType: node.portType,
           internalName: node.itemPortName,
           displayName: classification.displayName,
           positionLabel: classification.positionLabel,

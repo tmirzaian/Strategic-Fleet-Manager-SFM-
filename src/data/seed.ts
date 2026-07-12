@@ -30,7 +30,7 @@ function row(
   shipId: string,
   buildId: string,
   slotIndex: number,
-  overrides: Partial<{ factoryItem: string; installedItem: string; targetItem: string; type: string; size: string }> = {}
+  overrides: Partial<{ factoryItem: string; installedItem: string; targetItem: string; type: string; size: string; parentSlotLabel: string }> = {}
 ): Hardpoint {
   const slot = SLOTS[slotIndex]
   const factoryItem = overrides.factoryItem ?? 'Unknown Factory Item'
@@ -51,6 +51,7 @@ function row(
     targetItem,
     status,
     invalidMessage,
+    parentSlotLabel: overrides.parentSlotLabel,
   }
 }
 
@@ -105,8 +106,16 @@ function defaultBuildHardpoints(shipId: string, buildId: string): Hardpoint[] {
 // ---------------------------------------------------------------------------
 
 const ghostStealthHardpoints: Hardpoint[] = [
-  row('ghost', 'ghost-stealth', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
-  row('ghost', 'ghost-stealth', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
+  // Nose mount (Mission M-011): the Hornet Ghost's nose gimbal, with its
+  // two weapon positions nested as children — authored through the same
+  // generic customRow/parentSlotLabel mechanism Mole/Railen/Cutlass
+  // Black/Corsair already use for their own turrets, not a UI special
+  // case. The mount itself is always fully matched (factory = installed
+  // = target) so adding it doesn't manufacture a new Missing/Upgrade
+  // item for a ship that previously had none at these two slots.
+  customRow('ghost', 'ghost-stealth', { slotLabel: 'Nose Mount', type: 'Gimbal Mount', size: 'S4', factoryItem: 'S4 Gimbal Mount' }),
+  row('ghost', 'ghost-stealth', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
+  row('ghost', 'ghost-stealth', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
   row('ghost', 'ghost-stealth', 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Slipstream' }),
   row('ghost', 'ghost-stealth', 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
   row('ghost', 'ghost-stealth', 4, { factoryItem: 'AllStop', installedItem: 'Mirage', targetItem: 'Mirage' }),
@@ -120,8 +129,12 @@ const ghostStealthHardpoints: Hardpoint[] = [
 ]
 
 const ghostEscortHardpoints: Hardpoint[] = [
-  row('ghost', 'ghost-escort', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
-  row('ghost', 'ghost-escort', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
+  // Same Nose Mount + two child weapon positions as the Stealth build —
+  // every Loadout for a given ship shares the same physical port
+  // structure, only target/installed selections differ between builds.
+  customRow('ghost', 'ghost-escort', { slotLabel: 'Nose Mount', type: 'Gimbal Mount', size: 'S4', factoryItem: 'S4 Gimbal Mount' }),
+  row('ghost', 'ghost-escort', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
+  row('ghost', 'ghost-escort', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
   // Escort Build wants the same power upgrade as Stealth — demonstrates shared fleet-wide demand.
   row('ghost', 'ghost-escort', 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Slipstream' }),
   row('ghost', 'ghost-escort', 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
