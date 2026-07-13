@@ -5,23 +5,38 @@ import { useFleetStore } from '../store/useFleetStore'
 import PriorityCard from '../components/PriorityCard'
 import SortableHeader from '../components/SortableHeader'
 import FleetStatusTile from '../components/FleetStatusTile'
+import PageEnvironment from '../components/layout/PageEnvironment'
 import { buildProcurementList, sortProcurementList, type ProcurementSortColumn, type SortDirection } from '../utils/procurement'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
 import { buildTileContextNames } from '../utils/tileContextNames'
 
-function StatTile({ icon: Icon, label, value, accent, sub }: { icon: any; label: string; value: string | number; accent?: string; sub?: string }) {
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  accent,
+  sub,
+  emphasize,
+}: {
+  icon: any
+  label: string
+  value: string | number
+  accent?: string
+  sub?: string
+  emphasize?: boolean
+}) {
   return (
-    <div className="panel p-4 flex items-center gap-3">
-      <div className="w-10 h-10 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
+    <div className={`panel flex items-center gap-3 h-full min-w-0 ${emphasize ? 'p-4 sm:p-5' : 'p-4'}`}>
+      <div className={`hidden sm:flex rounded-lg bg-cyan/10 items-center justify-center shrink-0 w-10 h-10 ${emphasize ? 'sm:w-14 sm:h-14' : ''}`}>
         <Icon size={18} className="text-cyan" />
       </div>
-      <div>
-        <div className="text-2xl font-display font-bold leading-none" style={accent ? { color: accent } : undefined}>
+      <div className="min-w-0">
+        <div className={`font-display font-bold leading-none truncate ${emphasize ? 'text-2xl sm:text-4xl' : 'text-2xl'}`} style={accent ? { color: accent } : undefined}>
           {value}
         </div>
-        <div className="text-[11px] uppercase tracking-widest text-muted mt-1">{label}</div>
-        {sub && <div className="text-[11px] text-muted/80 mt-0.5">{sub}</div>}
+        <div className={`uppercase tracking-widest text-muted mt-1 truncate ${emphasize ? 'text-xs' : 'text-[11px]'}`}>{label}</div>
+        {sub && <div className="text-[11px] text-muted/80 mt-0.5 truncate">{sub}</div>}
       </div>
     </div>
   )
@@ -91,132 +106,159 @@ export default function MissionControl() {
     }
   }
 
-  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Build'
+  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Loadout'
+
+  // Visual balance for the Priority Ship row (Layout Requirement D): a
+  // single eligible ship gets a capped-width card rather than stretching
+  // across the whole command column, two ships split the row evenly, and
+  // three fill it exactly — every class below is a literal, complete
+  // string so Tailwind's static scanner always finds it.
+  const priorityGridClass =
+    topPriority.length === 1
+      ? 'grid-cols-1 max-w-md'
+      : topPriority.length === 2
+        ? 'grid-cols-1 sm:grid-cols-2'
+        : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3'
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Mission Control</p>
-        <h1 className="text-2xl font-display font-bold text-white">What should I work on?</h1>
-        <p className="text-sm text-muted mt-1">A single glance at fleet status, before you spend your two minutes.</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatTile icon={Gauge} label="Overall Fleet Readiness" value={`${overallReadiness}%`} accent="#35D0FF" />
-        <StatTile
-          icon={ShipWheel}
-          label="Ships Active"
-          value={ships.length}
-          sub={`Owned ${owned} · Purchased ${purchased} · Loaner ${loaner}`}
-        />
-        <StatTile icon={ScanSearch} label="Needed Items" value={neededItems} accent="#FFD166" />
-        <StatTile icon={Timer} label="Update Budget" value="2 min" />
-      </div>
-
-      <div>
-        <p className="text-xs uppercase tracking-widest text-muted mb-2 flex items-center gap-1.5">
-          <PackageCheck size={13} /> Quartermaster Logistics
-        </p>
-
-        <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-1.5">Fleet Status</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <FleetStatusTile icon={CheckCircle2} label="Mission Ready" count={missionReadyShips.length} accent="#42E695" context={missionReadyContext} />
-          <FleetStatusTile icon={Wrench} label="Loadouts In Progress" count={inProgressShips.length} accent="#FFD166" context={inProgressContext} />
-          <FleetStatusTile icon={Factory} label="Factory Loadout" count={factoryShips.length} context={factoryContext} />
+    <div className="relative">
+      <PageEnvironment id="mission-control" />
+      <div className="relative z-10 space-y-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Mission Control</p>
+          <h1 className="text-2xl font-display font-bold text-white">What should I work on?</h1>
+          <p className="text-sm text-muted mt-1">A single glance at fleet status, before you spend your two minutes.</p>
         </div>
 
-        <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-1.5">Inventory Status</p>
-        <div className="grid grid-cols-2 gap-3">
-          <StatTile icon={AlertTriangle} label="Missing Components" value={missingComponentsCount} accent={missingComponentsCount > 0 ? '#FF5F73' : undefined} />
-          <StatTile icon={ScanSearch} label="Unreserved Inventory" value={unreservedInventoryCount} />
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-semibold text-lg text-white">Top Priority Ships</h2>
-          <Link to="/fleet" className="text-sm text-cyan hover:underline flex items-center gap-1">
-            <LayoutGrid size={14} /> View full fleet
-          </Link>
-        </div>
-        {ships.length === 0 ? (
-          <div className="panel p-8 flex flex-col items-center text-center gap-2">
-            <PackageX size={26} className="text-muted/60 mb-1" />
-            <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>
-            <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
-            <Link
-              to="/fleet"
-              className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
-            >
-              <Plus size={15} /> Add First Ship
-            </Link>
+        {/* Operational Summary — Fleet Readiness keeps strongest emphasis (Layout Requirement B). */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div className="lg:col-span-4 min-w-0">
+            <StatTile icon={Gauge} label="Overall Fleet Readiness" value={`${overallReadiness}%`} accent="#35D0FF" emphasize />
           </div>
-        ) : (
-          <div className="grid md:grid-cols-3 gap-4">
-            {topPriority.map((ship, i) => (
-              <PriorityCard key={ship.id} ship={ship} buildName={buildName(ship.activeBuildId)} rank={i + 1} progress={progressByShipId.get(ship.id)!} />
-            ))}
+          <div className="lg:col-span-8 min-w-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <StatTile icon={ShipWheel} label="Ships Active" value={ships.length} sub={`Owned ${owned} · Purchased ${purchased} · Loaner ${loaner}`} />
+            <StatTile icon={ScanSearch} label="Needed Items" value={neededItems} accent="#FFD166" />
+            <StatTile icon={Timer} label="Update Budget" value="2 min" />
           </div>
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <ClipboardList size={18} className="text-cyan" />
-          <h2 className="font-display font-semibold text-lg text-white">Procurement List</h2>
         </div>
-        <p className="text-xs text-muted mb-3">
-          What to go get, fleet-wide — grouped by component so you don't chase the same part twice.
-        </p>
-        {procurement.length === 0 ? (
-          <div className="panel p-5 text-sm text-success">Every active Build target is satisfied. Nothing to procure.</div>
-        ) : (
-          <div className="panel overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
-                    <SortableHeader label="Component Name" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                    <SortableHeader label="Size / Type" column="sizeType" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                    <SortableHeader label="Qty Needed" column="quantity" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                    <SortableHeader label="Unreserved Inventory" column="unreserved" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                    <th className="px-5 py-3 font-medium">Needed By</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {procurement.map((line) => (
-                    <tr key={line.itemName} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{line.itemName}</td>
-                      <td className="px-5 py-3 text-muted whitespace-nowrap">{line.size} {line.type}</td>
-                      <td className="px-5 py-3 font-mono text-cyan">{line.qtyNeeded > 0 ? line.qtyNeeded : <span className="text-success">0</span>}</td>
-                      <td className="px-5 py-3 font-mono">
-                        {line.availableToReserve > 0 ? <span className="text-cyan">{line.availableToReserve} — reserve it</span> : <span className="text-muted/50">—</span>}
-                      </td>
-                      <td className="px-5 py-3 text-muted text-xs">{line.neededBy.join(', ') || '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+        {/* Priority Ships + Quartermaster Logistics band, side by side on desktop (Layout Requirements C/D/H). */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-8 min-w-0">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display font-semibold text-lg text-white">Top Priority Ships</h2>
+              <Link to="/fleet" className="text-sm text-cyan hover:underline flex items-center gap-1">
+                <LayoutGrid size={14} /> View full fleet
+              </Link>
+            </div>
+            {ships.length === 0 ? (
+              <div className="panel p-8 flex flex-col items-center text-center gap-2">
+                <PackageX size={26} className="text-muted/60 mb-1" />
+                <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>
+                <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
+                <Link
+                  to="/fleet"
+                  className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+                >
+                  <Plus size={15} /> Add First Ship
+                </Link>
+              </div>
+            ) : (
+              <div className={`grid gap-4 ${priorityGridClass}`}>
+                {topPriority.map((ship, i) => (
+                  <PriorityCard key={ship.id} ship={ship} buildName={buildName(ship.activeBuildId)} rank={i + 1} progress={progressByShipId.get(ship.id)!} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="lg:col-span-4 min-w-0">
+            <div className="panel p-4 h-full flex flex-col gap-4">
+              <p className="text-xs uppercase tracking-widest text-muted flex items-center gap-1.5 min-w-0">
+                <PackageCheck size={13} className="shrink-0" /> <span className="truncate">Quartermaster Logistics</span>
+              </p>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-1.5">Fleet Status</p>
+                <div className="grid grid-cols-1 gap-2">
+                  <FleetStatusTile icon={CheckCircle2} label="Mission Ready" count={missionReadyShips.length} accent="#42E695" context={missionReadyContext} />
+                  <FleetStatusTile icon={Wrench} label="Loadouts In Progress" count={inProgressShips.length} accent="#FFD166" context={inProgressContext} />
+                  <FleetStatusTile icon={Factory} label="Factory Loadout" count={factoryShips.length} context={factoryContext} />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-1.5">Inventory Status</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <StatTile icon={AlertTriangle} label="Missing Components" value={missingComponentsCount} accent={missingComponentsCount > 0 ? '#FF5F73' : undefined} />
+                  <StatTile icon={ScanSearch} label="Unreserved Inventory" value={unreservedInventoryCount} />
+                </div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <Link to="/decision-center" className="panel p-5 flex items-center justify-between hover:border-cyan/30 hover:shadow-glow transition-all">
-          <div>
-            <h3 className="font-display font-semibold text-white">Found loot? Check it.</h3>
-            <p className="text-xs text-muted mt-1">Run it through the Decision Center to see if you should keep it.</p>
+        {/* Procurement List + action panels, side by side on desktop (Layout Requirement E). */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-8 min-w-0">
+            <div className="flex items-center gap-2 mb-3">
+              <ClipboardList size={18} className="text-cyan" />
+              <h2 className="font-display font-semibold text-lg text-white">Procurement List</h2>
+            </div>
+            <p className="text-xs text-muted mb-3">
+              What to go get, fleet-wide — grouped by component so you don't chase the same part twice.
+            </p>
+            {procurement.length === 0 ? (
+              <div className="panel p-5 text-sm text-success">Every active Build target is satisfied. Nothing to procure.</div>
+            ) : (
+              <div className="panel overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
+                        <SortableHeader label="Component Name" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="Size / Type" column="sizeType" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="Qty Needed" column="quantity" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="Unreserved Inventory" column="unreserved" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <th className="px-5 py-3 font-medium">Needed By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {procurement.map((line) => (
+                        <tr key={line.itemName} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                          <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{line.itemName}</td>
+                          <td className="px-5 py-3 text-muted whitespace-nowrap">{line.size} {line.type}</td>
+                          <td className="px-5 py-3 font-mono text-cyan">{line.qtyNeeded > 0 ? line.qtyNeeded : <span className="text-success">0</span>}</td>
+                          <td className="px-5 py-3 font-mono">
+                            {line.availableToReserve > 0 ? <span className="text-cyan">{line.availableToReserve} — reserve it</span> : <span className="text-muted/50">—</span>}
+                          </td>
+                          <td className="px-5 py-3 text-muted text-xs">{line.neededBy.join(', ') || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-          <ScanSearch className="text-cyan" size={22} />
-        </Link>
-        <Link to="/quick-update" className="panel p-5 flex items-center justify-between hover:border-cyan/30 hover:shadow-glow transition-all">
-          <div>
-            <h3 className="font-display font-semibold text-white">Something changed?</h3>
-            <p className="text-xs text-muted mt-1">Log it in under two minutes with Quick Update.</p>
+
+          <div className="lg:col-span-4 min-w-0 flex flex-col gap-4">
+            <Link to="/decision-center" className="panel p-5 flex items-center justify-between hover:border-cyan/30 hover:shadow-glow transition-all">
+              <div>
+                <h3 className="font-display font-semibold text-white">Found loot? Check it.</h3>
+                <p className="text-xs text-muted mt-1">Run it through the Decision Center to see if you should keep it.</p>
+              </div>
+              <ScanSearch className="text-cyan" size={22} />
+            </Link>
+            <Link to="/quick-update" className="panel p-5 flex items-center justify-between hover:border-cyan/30 hover:shadow-glow transition-all">
+              <div>
+                <h3 className="font-display font-semibold text-white">Something changed?</h3>
+                <p className="text-xs text-muted mt-1">Log it in under two minutes with Quick Update.</p>
+              </div>
+              <Timer className="text-cyan" size={22} />
+            </Link>
           </div>
-          <Timer className="text-cyan" size={22} />
-        </Link>
+        </div>
       </div>
     </div>
   )

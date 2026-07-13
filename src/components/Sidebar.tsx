@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { APP_VERSION_LABEL } from '../config/appVersion'
+import { resolveBrandingSrc } from '../config/assets'
 import {
   Radar,
   LayoutGrid,
@@ -31,10 +32,16 @@ const navItems = [
 ]
 
 export default function Sidebar() {
+  const logoSrc = resolveBrandingSrc('compactMark')
+
   return (
     <aside className="w-64 shrink-0 h-screen sticky top-0 flex flex-col border-r border-white/5 bg-panel/60 backdrop-blur-sm">
       <div className="px-5 py-6 flex items-center gap-2 border-b border-white/5">
-        <Satellite className="text-cyan" size={22} />
+        {logoSrc ? (
+          <img src={logoSrc} alt="Strategic Fleet Manager" className="w-[22px] h-[22px] object-contain shrink-0" />
+        ) : (
+          <Satellite className="text-cyan" size={22} />
+        )}
         <div>
           <div className="font-display font-bold text-lg tracking-wide leading-none text-white">
             STRATEGIC<span className="text-cyan"> FLEET</span>

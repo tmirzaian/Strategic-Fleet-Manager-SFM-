@@ -6,6 +6,7 @@ import { useFleetStore } from '../../store/useFleetStore'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../../utils/fleetBuildState'
 import { calculateBuildProgress } from '../../utils/buildProgress'
 import { sortProcurementList, type ProcurementLine } from '../../utils/procurement'
+import { SHIP_PLACEHOLDER_URL } from '../../constants/shipImage'
 
 const initialState = useFleetStore.getState()
 
@@ -131,6 +132,94 @@ describe('Procurement sorting on Mission Control (tests 20-23)', () => {
     expect(asc.map((l) => l.availableToReserve)).toEqual([0, 1, 5])
     const desc = sortProcurementList(sample, 'unreserved', 'desc')
     expect(desc.map((l) => l.availableToReserve)).toEqual([5, 1, 0])
+  })
+})
+
+describe('<MissionControl /> — EWO-004 command layout', () => {
+  it('renders the operational summary with all four existing metrics, Fleet Readiness most prominent', () => {
+    renderMissionControl()
+    expect(screen.getByText('Overall Fleet Readiness')).toBeInTheDocument()
+    expect(screen.getByText('Ships Active')).toBeInTheDocument()
+    expect(screen.getByText('Needed Items')).toBeInTheDocument()
+    expect(screen.getByText('Update Budget')).toBeInTheDocument()
+  })
+
+  it('groups Quartermaster Logistics (Fleet Status + Inventory Status) into a single operational band, not five unrelated cards', () => {
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Logistics').closest('.panel')
+    expect(band).not.toBeNull()
+    expect(band).toHaveTextContent('Fleet Status')
+    expect(band).toHaveTextContent('Mission Ready')
+    expect(band).toHaveTextContent('Inventory Status')
+    expect(band).toHaveTextContent('Missing Components')
+  })
+
+  it('Priority Ship section uses live fleet data — the real lowest-priority-number seed ship renders first, never a hard-coded name', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const expectedFirst = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const priorityOneCard = screen.getByText('PRIORITY 1').closest('.panel')
+    expect(priorityOneCard).toHaveTextContent(expectedFirst.name)
+  })
+
+  it('a single fleet asset produces exactly one priority card, with no fake filler cards', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    useFleetStore.setState({
+      ships: [ghost],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints.filter((h) => h.shipId === 'ghost'),
+    })
+    renderMissionControl()
+    expect(screen.getByText('PRIORITY 1')).toBeInTheDocument()
+    expect(screen.queryByText('PRIORITY 2')).not.toBeInTheDocument()
+    expect(screen.queryByText('PRIORITY 3')).not.toBeInTheDocument()
+  })
+
+  it('multiple eligible ships render up to the intended display limit of 3 priority cards', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    expect(ships.length).toBeGreaterThan(3)
+    expect(screen.getByText('PRIORITY 1')).toBeInTheDocument()
+    expect(screen.getByText('PRIORITY 2')).toBeInTheDocument()
+    expect(screen.getByText('PRIORITY 3')).toBeInTheDocument()
+    expect(screen.queryByText('PRIORITY 4')).not.toBeInTheDocument()
+  })
+
+  it('a priority ship with no resolved image falls back through the existing ShipImage fallback mechanism', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    useFleetStore.setState({
+      ships: [{ ...ghost, imageUrl: undefined }],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints.filter((h) => h.shipId === 'ghost'),
+    })
+    const { container } = renderMissionControl()
+    const img = container.querySelector('img')
+    expect(img).not.toBeNull()
+    expect(img!.getAttribute('src')).toBe(SHIP_PLACEHOLDER_URL)
+  })
+
+  it('existing navigation and action links remain functional', () => {
+    renderMissionControl()
+    expect(screen.getByText('View full fleet').closest('a')).toHaveAttribute('href', '/fleet')
+    expect(screen.getByText('Found loot? Check it.').closest('a')).toHaveAttribute('href', '/decision-center')
+    expect(screen.getByText('Something changed?').closest('a')).toHaveAttribute('href', '/quick-update')
+  })
+
+  it('mounts PageEnvironment for "mission-control" without any runtime failure while every environment definition stays disabled', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { container } = renderMissionControl()
+    // Disabled by design (see docs/ASSET_PIPELINE.md) — renders nothing, never throws.
+    expect(container.querySelector('[data-environment-id="mission-control"]')).toBeNull()
+    expect(consoleError).not.toHaveBeenCalled()
+    consoleError.mockRestore()
+  })
+
+  it('never renders a second decorative SFM logo inside the page content — the one official mark lives in the sidebar identity area', () => {
+    const { container } = renderMissionControl()
+    const brandImages = Array.from(container.querySelectorAll('img')).filter((img) => img.getAttribute('alt') === 'Strategic Fleet Manager')
+    expect(brandImages.length).toBe(0)
   })
 })
 

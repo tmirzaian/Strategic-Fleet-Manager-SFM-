@@ -23,11 +23,11 @@ export default function FleetStatusTile({
   context: TileContextResult
 }) {
   return (
-    <div className="panel p-4 flex items-start gap-3">
-      <div className="w-10 h-10 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
+    <div className="panel p-4 flex items-start gap-3 min-w-0">
+      <div className="hidden sm:flex w-10 h-10 rounded-lg bg-cyan/10 items-center justify-center shrink-0">
         <Icon size={18} className="text-cyan" />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="text-2xl font-display font-bold leading-none" style={accent ? { color: accent } : undefined}>
           {count}
         </div>
