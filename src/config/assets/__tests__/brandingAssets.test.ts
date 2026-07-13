@@ -3,7 +3,7 @@ import { BRANDING_ASSETS, getBrandingAsset, resolveBrandingSrc } from '../brandi
 import type { BrandingAssetKey } from '../types'
 
 describe('Mission M-022: branding asset registry', () => {
-  const keys: BrandingAssetKey[] = ['primaryLogo', 'compactMark', 'monochromeMark', 'appIcon']
+  const keys: BrandingAssetKey[] = ['primaryLogo', 'compactMark', 'sidebarCommissioningMark', 'monochromeMark', 'appIcon']
 
   it('11. every semantic branding key resolves deterministically to a definition', () => {
     for (const key of keys) {
@@ -29,5 +29,15 @@ describe('Mission M-022: branding asset registry', () => {
     expect(BRANDING_ASSETS.compactMark.enabled).toBe(true)
     const src = resolveBrandingSrc('compactMark')
     expect(src).toBe('/assets/branding/logo/sfm-logo-64.png')
+  })
+
+  it('EWO-014A: sidebarCommissioningMark is enabled and resolves to the 256px derivative — never the compact 64px asset upscaled, never the 1024px master', () => {
+    expect(BRANDING_ASSETS.sidebarCommissioningMark.enabled).toBe(true)
+    const src = resolveBrandingSrc('sidebarCommissioningMark')
+    expect(src).toBe('/assets/branding/logo/sfm-logo-256.png')
+  })
+
+  it('EWO-014A: compactMark and sidebarCommissioningMark remain distinct keys resolving to different derivatives, so a future compact (16-64px) use case is unaffected', () => {
+    expect(resolveBrandingSrc('compactMark')).not.toBe(resolveBrandingSrc('sidebarCommissioningMark'))
   })
 })
