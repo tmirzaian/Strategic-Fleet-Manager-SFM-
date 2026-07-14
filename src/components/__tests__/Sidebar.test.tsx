@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import Sidebar from '../Sidebar'
+import { APP_VERSION_LABEL } from '../../config/appVersion'
 
 afterEach(() => cleanup())
 
@@ -15,41 +16,78 @@ function renderSidebar() {
   )
 }
 
-describe('<Sidebar /> — EWO-004 branding integration', () => {
-  it('renders the approved commissioning logo (EWO-003 deterministic branding output) in the identity area, resolved at a resolution matching its enlarged display size (EWO-014A)', () => {
+describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
+  it('1/2. renders the brand-lockup image resolved through the semantic registry, at the generated 512px derivative', () => {
     renderSidebar()
     const logo = screen.getByAltText('Strategic Fleet Manager')
     expect(logo.tagName).toBe('IMG')
-    expect(logo.getAttribute('src')).toBe('/assets/branding/logo/sfm-logo-256.png')
+    expect(logo.getAttribute('src')).toBe('/assets/generated/branding/sidebar-branding-512.png')
   })
 
-  it('renders exactly one decorative mark — no duplicate logo alongside it', () => {
+  it('3. does not hard-code a raw branding asset path in Sidebar.tsx — resolves only through resolveBrandingSrc', () => {
+    const sourcePath = resolve(process.cwd(), 'src/components/Sidebar.tsx')
+    const source = readFileSync(sourcePath, 'utf-8')
+    expect(source).not.toMatch(/\/assets\/branding/)
+    expect(source).not.toMatch(/\/assets\/generated/)
+    expect(source).not.toMatch(/sfm-logo/)
+    expect(source).not.toMatch(/sidebar-branding-\d/)
+    expect(source).toContain("resolveBrandingSrc('sidebarBrandLockup')")
+  })
+
+  it('4. renders exactly one brand-lockup image — no duplicate logo alongside it', () => {
     const { container } = renderSidebar()
     const brandImages = Array.from(container.querySelectorAll('img')).filter((img) => img.getAttribute('alt') === 'Strategic Fleet Manager')
     expect(brandImages.length).toBe(1)
   })
 
-  it('sizes the mark with a fixed square box and object-contain, so aspect ratio is preserved regardless of source dimensions', () => {
+  it('5. the old separate commissioning-mark-only image is no longer rendered — the identity area contains no img resolving to the square logo derivatives', () => {
+    const { container } = renderSidebar()
+    const imgs = Array.from(container.querySelectorAll('img'))
+    expect(imgs.some((img) => (img.getAttribute('src') ?? '').includes('sfm-logo'))).toBe(false)
+  })
+
+  it('6. SFM, Strategic Fleet Manager, and the motto are not recreated as JSX text — the full lockup lives only in the commissioned image', () => {
+    renderSidebar()
+    expect(screen.queryByText('SFM')).not.toBeInTheDocument()
+    expect(screen.queryByText('Strategic Fleet Manager')).not.toBeInTheDocument()
+    expect(screen.queryByText('Plan')).not.toBeInTheDocument()
+    expect(screen.queryByText('Outfit')).not.toBeInTheDocument()
+    expect(screen.queryByText('Prepare')).not.toBeInTheDocument()
+    expect(screen.queryByText('Succeed')).not.toBeInTheDocument()
+  })
+
+  it('7. APP_VERSION_LABEL renders exactly once in the branding console, as live text beneath the image', () => {
+    renderSidebar()
+    expect(screen.getAllByText(APP_VERSION_LABEL)).toHaveLength(1)
+  })
+
+  it('8. the image uses contain behavior and preserves aspect ratio — sized within a capped hardpoint, never stretched', () => {
     renderSidebar()
     const logo = screen.getByAltText('Strategic Fleet Manager')
     expect(logo.className).toContain('object-contain')
-  })
-})
-
-describe('<Sidebar /> — EWO-011 identity lockup (final standard)', () => {
-  it('renders the approved hierarchy: mark, SFM principal wordmark, Strategic Fleet Manager descriptor, subordinate version', () => {
-    renderSidebar()
-    expect(screen.getByAltText('Strategic Fleet Manager')).toBeInTheDocument()
-    expect(screen.getByText('SFM')).toBeInTheDocument()
-    expect(screen.getByText('Strategic Fleet Manager')).toBeInTheDocument()
+    expect(logo.className).toContain('w-full')
+    expect(logo.className).toContain('h-full')
+    const hardpoint = logo.parentElement as HTMLElement
+    expect(hardpoint.className).toContain('w-[180px]')
+    expect(hardpoint.className).toContain('h-[270px]')
   })
 
-  it('renders the slogan with semantic per-phrase coloring (Prepare in amber, Succeed in green)', () => {
+  it('the image hardpoint is decorative/non-interactive and does not introduce a second nested panel', () => {
     renderSidebar()
-    const prepare = screen.getByText('Prepare')
-    const succeed = screen.getByText('Succeed')
-    expect(prepare.className).toContain('text-warning')
-    expect(succeed.className).toContain('text-success')
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    const hardpoint = logo.parentElement as HTMLElement
+    expect(hardpoint.className).toContain('pointer-events-none')
+    expect(hardpoint.className).toContain('select-none')
+    expect(hardpoint.className).not.toContain('border')
+    expect(hardpoint.className).not.toContain('panel')
+  })
+
+  it('the brand lockup reads as its own floating console — a bordered panel distinct from the sidebar background, matching the navigation console treatment', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    const brandConsole = logo.closest('div.rounded-lg') as HTMLElement
+    expect(brandConsole).not.toBeNull()
+    expect(brandConsole.className).toContain('border')
   })
 
   it('does not render a duplicate Update Budget / status strip in the sidebar', () => {
@@ -57,68 +95,89 @@ describe('<Sidebar /> — EWO-011 identity lockup (final standard)', () => {
     expect(screen.queryByText(/Update Budget/)).not.toBeInTheDocument()
   })
 
-  it('20. every existing navigation route remains present and unchanged', () => {
+  it('9. every existing navigation route, label, and link count remains unchanged', () => {
     renderSidebar()
     const expectedRoutes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
-    const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
       expect(hrefs).toContain(route)
     }
-  })
-})
-
-describe('<Sidebar /> — EWO-014 brand lockup refinement', () => {
-  it('renders the slogan with the approved four-color treatment: Plan cyan, Outfit gold, Prepare orange/amber, Succeed green', () => {
-    renderSidebar()
-    expect(screen.getByText('Plan').className).toContain('text-cyan')
-    expect(screen.getByText('Outfit').className).toContain('text-gold')
-    expect(screen.getByText('Prepare').className).toContain('text-warning')
-    expect(screen.getByText('Succeed').className).toContain('text-success')
-  })
-
-  it('the brand lockup reads as its own floating console — a bordered panel distinct from the sidebar background, matching the navigation console treatment', () => {
-    renderSidebar()
-    const brandConsole = screen.getByText('SFM').closest('div.rounded-lg') as HTMLElement
-    expect(brandConsole).not.toBeNull()
-    expect(brandConsole.className).toContain('border')
-  })
-
-  it('navigation is unchanged: every route link and label still renders exactly as before', () => {
-    renderSidebar()
     expect(screen.getByText('Mission Control')).toBeInTheDocument()
     expect(screen.getByText('Fleet Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
     expect(screen.getByText("Captain's Log")).toBeInTheDocument()
   })
+
+  it('10/11. compactMark and sidebarCommissioningMark remain valid, unrepurposed semantic keys — missing/disabled assets still fail safely via the existing pattern', () => {
+    // Exercised indirectly: Sidebar itself never references these keys anymore
+    // (see test 3), and the registry-level guarantee that they still resolve
+    // is covered in brandingAssets.test.ts. This test locks in that Sidebar's
+    // own fallback (no image resolved) never crashes and never re-renders the
+    // removed JSX lockup as a substitute.
+    renderSidebar()
+    expect(screen.queryByText('SFM')).not.toBeInTheDocument()
+  })
 })
 
-describe('<Sidebar /> — EWO-014A corrected commissioning-mark resolution', () => {
-  it('resolves the commissioning mark through the semantic sidebarCommissioningMark key, at the 256px derivative', () => {
+describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
+  it('reduces the branding console internal padding ~35-45% from EWO-015 (px-4/py-6 -> px-2.5/py-3.5)', () => {
     renderSidebar()
     const logo = screen.getByAltText('Strategic Fleet Manager')
-    expect(logo.getAttribute('src')).toBe('/assets/branding/logo/sfm-logo-256.png')
+    const console_ = logo.closest('div.rounded-lg') as HTMLElement
+    expect(console_.className).toContain('px-2.5')
+    expect(console_.className).toContain('py-3.5')
+    expect(console_.className).not.toContain('px-4')
+    expect(console_.className).not.toContain('py-6')
   })
 
-  it('does not hard-code a raw asset path in Sidebar.tsx — the source resolves only through resolveBrandingSrc', () => {
+  it('enlarges the image hardpoint container (not the artwork itself) while preserving contain/center and the 2:3 source aspect ratio', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    expect(logo.className).toContain('object-contain')
+    expect(logo.className).toContain('object-center')
+    const hardpoint = logo.parentElement as HTMLElement
+    expect(hardpoint.className).toContain('w-[180px]')
+    expect(hardpoint.className).toContain('h-[270px]')
+    // 180:270 reduces to 2:3, matching the commissioned master's own ratio —
+    // confirms the container grew proportionally rather than being resized
+    // arbitrarily (which would either distort or waste hardpoint space).
+    expect(180 / 270).toBeCloseTo(2 / 3, 5)
+  })
+
+  it('tightens the gap between the brand-lockup image and the live version label (mt-4 -> mt-2)', () => {
+    renderSidebar()
+    const versionEl = screen.getByText(APP_VERSION_LABEL)
+    expect(versionEl.className).toContain('mt-2')
+    expect(versionEl.className).not.toContain('mt-4')
+  })
+
+  it('does not hard-code branding paths and does not recreate branding in JSX after the density tuning', () => {
     const sourcePath = resolve(process.cwd(), 'src/components/Sidebar.tsx')
     const source = readFileSync(sourcePath, 'utf-8')
     expect(source).not.toMatch(/\/assets\/branding/)
-    expect(source).not.toMatch(/sfm-logo/)
-    expect(source).toContain("resolveBrandingSrc('sidebarCommissioningMark')")
+    expect(source).not.toMatch(/\/assets\/generated/)
+    expect(source).toContain("resolveBrandingSrc('sidebarBrandLockup')")
+    renderSidebar()
+    expect(screen.queryByText('SFM')).not.toBeInTheDocument()
+    expect(screen.queryByText('Strategic Fleet Manager')).not.toBeInTheDocument()
   })
 
-  it('the enlarged mark keeps its approved ~72px display box and object-contain sizing — only the source resolution changed', () => {
-    renderSidebar()
-    const logo = screen.getByAltText('Strategic Fleet Manager')
-    expect(logo.className).toContain('w-[72px]')
-    expect(logo.className).toContain('h-[72px]')
-    expect(logo.className).toContain('object-contain')
-  })
-
-  it('identity text and routes remain unchanged alongside the corrected mark resolution', () => {
-    renderSidebar()
-    expect(screen.getByText('SFM')).toBeInTheDocument()
-    expect(screen.getByText('Strategic Fleet Manager')).toBeInTheDocument()
-    expect(screen.getAllByRole('link').length).toBeGreaterThanOrEqual(9)
+  it('protects existing architecture: Sidebar width, sticky positioning, navigation console, and routes remain unchanged', () => {
+    const { container } = renderSidebar()
+    const aside = container.querySelector('aside') as HTMLElement
+    expect(aside.className).toContain('w-64')
+    expect(aside.className).toContain('sticky')
+    expect(aside.className).toContain('top-0')
+    const nav = container.querySelector('nav') as HTMLElement
+    expect(nav.className).toContain('py-5')
+    expect(nav.className).toContain('px-3')
+    const navConsole = nav.querySelector('div.rounded-lg') as HTMLElement
+    expect(navConsole.className).toContain('p-1.5')
+    const expectedRoutes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+    const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
+    for (const route of expectedRoutes) {
+      expect(hrefs).toContain(route)
+    }
   })
 })

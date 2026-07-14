@@ -6,7 +6,11 @@ Registry Placeholder Master Integration, tuned by EWO-012B — Fleet
 Registry Record Art-Layer Tuning, density-finalized by EWO-013 — Fleet
 Registry Record Density & Design Freeze; §2 refined and §12.1's governing
 Environmental Philosophy established by EWO-014 — Mission Control Brand
-Lockup & Environmental Integration).** This document records the
+Lockup & Environmental Integration, mark resolution corrected by
+EWO-014A, §2 superseded again by EWO-015 — Sidebar Branding Hardpoint
+Integration, replacing the JSX-constructed lockup with one commissioned
+image, density-tuned and DESIGN FROZEN by EWO-015B — Sidebar Branding
+Presence Refinement).** This document records the
 permanent visual architecture of Mission Control and the application
 shell as approved by Design Authority. Future missions extend this
 architecture; they do not re-litigate it. Any section marked **APPROVED
@@ -39,47 +43,102 @@ No explanatory or marketing copy appears between these — the interface
 explains itself. `src/pages/MissionControl.tsx` is the reference
 implementation of this cadence.
 
-## 2. Sidebar identity hierarchy (IMPLEMENTED NOW, refined EWO-014)
+## 2. Sidebar Branding Console — DESIGN FROZEN (EWO-015, density-tuned and frozen by EWO-015B)
 
-`src/components/Sidebar.tsx`'s brand lockup, top to bottom, now reads as
-its own floating operational console — a bordered, lightly-tinted panel
+**Sidebar branding is a commissioned production asset, not a JSX
+construction (EWO-015).** `src/components/Sidebar.tsx`'s brand lockup is
+no longer built from separate elements (a mark image plus hand-laid-out
+"SFM"/"Strategic Fleet Manager"/motto text, as EWO-011/EWO-014 had it).
+It is now one Design-Authority-owned, transparent, portrait production
+image containing the commissioning mark, "SFM" wordmark, "Strategic
+Fleet Manager" title, and motto already composed together, plus one
+live text element beneath it:
+
+1. **Brand-lockup image** — resolved via `resolveBrandingSrc('sidebarBrandLockup')`
+   (semantic registry, never a hard-coded path), rendered inside a fixed
+   `180px × 270px` hardpoint (`w-full h-full object-contain
+   object-center`, `pointer-events-none select-none`, no border/shadow/
+   glow on the image itself). Source: the approved master at
+   `public/assets/branding/sidebar/sidebar-branding-master-1024.png`
+   (1024×1536, portrait, RGBA, true alpha), deterministically resized to
+   `public/assets/generated/branding/sidebar-branding-512.png` (and a
+   256px derivative) by `scripts/generateBrandingAssets.ts` — the
+   application never loads the 1024px master directly. The `180×270`
+   hardpoint exactly matches the master's own 2:3 aspect ratio, so the
+   artwork fills the entire hardpoint with zero internal letterboxing —
+   no crop, no stretch, no distortion, and no wasted space within its
+   own box.
+2. **`{APP_VERSION_LABEL}`** (e.g. "ALPHA 2.5D") — the only text still
+   rendered in JSX, `text-[8px] uppercase tracking-[0.15em] text-muted/40`,
+   separated from the image by `mt-2` (EWO-015B — tightened from `mt-4`
+   so it visually belongs to the lockup rather than reading as a
+   separate block). **The application version is never baked into the
+   brand-lockup artwork** — a future release requires only updating this
+   live text, never regenerating or replacing the image.
+
+**Console density (EWO-015B — Branding Presence Refinement).** Commander
+visual inspection of EWO-015 found the technically-correct hardpoint
+visually underutilized. The outer console's internal padding was reduced
+from `px-4 py-6` to `px-2.5 py-3.5` (~38–42% less padding at each edge),
+and the hardpoint itself grew from `170×240` to `180×270` — proportionally
+matching the master's 2:3 ratio exactly, so the enlarged container is
+fully utilized rather than letterboxed. The artwork now occupies
+approximately 85% of the console's usable interior width (180px hardpoint
+within a ~212px interior) while never touching the console's own border
+(≥16px clearance remains on every side). This was a **container and
+padding change only** — the source master and generated derivatives were
+not regenerated, the semantic registry was not touched, and the artwork
+itself was never scaled by any means other than the same `object-fit:
+contain` it already used.
+
+The outer console — a bordered, lightly-tinted panel
 (`rounded-lg border border-white/5 bg-white/[0.02]`) inset from the
 sidebar's own background, matching the navigation console's treatment
-below it — rather than a divider strip blended into the sidebar surface:
+below it — is unchanged in kind from EWO-014 and holds the image
+directly; no second panel is nested inside it around the image.
 
-1. Commissioning mark (`resolveBrandingSrc('compactMark')`, deterministic
-   branding pipeline — EWO-003), centered, `w-[72px] h-[72px]` (enlarged
-   ~29% from EWO-011's `w-14 h-14`/56px).
-2. **SFM** — the principal wordmark and primary visual anchor.
-   `text-3xl font-display font-bold tracking-[0.08em]` (up from
-   `text-2xl`/`tracking-[0.12em]` — larger and denser for a bolder,
-   more logotype-like mark).
-3. "Strategic Fleet Manager" — the descriptive lockup, visual weight
-   reduced further (`text-[9px] font-medium text-muted/70`, down from
-   `text-[10px] font-semibold text-muted`).
-4. `{APP_VERSION_LABEL}` (e.g. "ALPHA 2.5D") — subordinate again beneath
-   the descriptive lockup, weight reduced further
-   (`text-[8px] text-muted/40`, down from `text-[9px] text-muted/60`).
-5. Slogan, colored per the approved EWO-014 treatment: "Plan" in
-   Quartermaster Blue (`text-cyan/70`), "Outfit" in **Advisory Gold**
-   (`text-gold/80` — see §4), "Prepare" in Operational Amber
-   (`text-warning/80`, the token EWO-014 refers to as "Orange" — no
-   separate orange hue was introduced for one word), "Succeed" in
-   Readiness Green (`text-success/80`).
+**Design Authority owns the complete branding composition** (mark,
+wordmark, title, motto, their relative typography, spacing, and color,
+all baked into one commissioned image). **Engineering owns semantic
+resolution, hardpoint placement, and responsive scaling** — never
+reconstructing typography in React again. A future Sidebar branding
+revision requires only: replace the approved master at its fixed path,
+rerun `npm run generate:branding-assets`, and (if the semantic key or
+derivative size needs to change) update the registry entry — never
+editing `Sidebar.tsx`'s JSX. No breakpoint-specific manual image edits
+are permitted; CSS alone owns responsive presentation, and since the
+Sidebar's own width never changes across breakpoints, this one
+180×270 hardpoint applies uniformly at every width.
 
-Vertical rhythm was tightened and re-balanced around the larger mark and
-wordmark (`mt-3`/`mt-1.5`/`mt-2`/`mt-3` between lockup elements, replacing
-EWO-011's uniform `mt-4`/`mt-2`/`mt-3`/`mt-4`) so the lockup reads as one
-deliberately-paced console rather than evenly-spaced boilerplate.
+This Sidebar lockup is distinct from any future Welcome/About screen
+lockup: a Welcome/About composition, if ever commissioned, would be its
+own master and its own semantic key sized for that context — never a
+reuse of `sidebarBrandLockup` or its derivatives outside the Sidebar.
 
 Below the brand lockup, navigation remains wrapped in the same bordered,
 lightly-tinted panel it already used
 (`rounded-lg border border-white/5 bg-white/[0.02]`) so it continues to
 read as a floating operational panel rather than a generic full-height
-web menu — **EWO-014 made no changes here**: navigation routes,
-`NavLink` behavior, and markup are byte-for-byte unchanged. This identity
+web menu — **neither EWO-015 nor EWO-015B made any changes here**:
+navigation routes, `NavLink` behavior, active-state styling, icons, menu
+order, spacing, and markup are byte-for-byte unchanged. This identity
 lockup is the application-shell standard — every future compartment
 inherits it unmodified.
+
+This hardpoint is compatible with the future principle established in
+§12.1: *the room owns the background, the consoles own the information*
+— the transparent brand-lockup image is content for its console, not
+scenery, and can float over the sidebar's own console surface today and
+over a future Mission Control-wide environment later without any
+structural change.
+
+**DESIGN FROZEN (EWO-015B), pending Commander approval.** The Sidebar
+Branding Console — composition, hardpoint sizing, console padding, and
+version-label placement — is the final visual refinement in this
+sequence (EWO-015 → EWO-015B). Further modifications require a new
+Engineering Work Order; routine cosmetic experimentation is not
+authorized without one, consistent with the Design Freeze precedent
+already established for the Fleet Registry Record (§8.3).
 
 ## 3. Critical-data typography standard (IMPLEMENTED NOW)
 
@@ -113,7 +172,7 @@ Readiness percentage inside the readiness ring (`ReadinessRing`, local to
 | Navigation White | `white` | — | primary neutral text/guidance |
 | Readiness Green | `success` | `#42E695` | healthy / complete / operational / mission-ready |
 | Operational Amber | `warning` | `#FFD166` | incomplete / active work / pending readiness / attention required |
-| Advisory Gold | `gold` | `#C9A227` | reserved for restricted command/advisory authority only. Previously named but undefined; **EWO-014 is the first and only authorized use** — the sidebar brand lockup's "Outfit" slogan word. **Do not extend this to a general accent elsewhere without a new explicit Design Authority instruction.** |
+| Advisory Gold | `gold` | `#C9A227` | reserved for restricted command/advisory authority only. Defined by EWO-014 for the Sidebar slogan's "Outfit" word, which EWO-015 removed from live JSX — that word (and its gold color) is now baked into the commissioned brand-lockup image (§2) rather than rendered by the Tailwind token. The `gold` token itself remains defined (harmless, currently unreferenced in application code) in case a future JSX use case needs it. **Do not use it as a general accent without a new explicit Design Authority instruction.** |
 | Alert Red | `danger` | `#FF5F73` | genuine failure / critical / urgent only |
 
 Counts derive their color from operational state through the one existing

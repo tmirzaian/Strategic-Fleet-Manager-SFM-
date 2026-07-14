@@ -32,42 +32,41 @@ const navItems = [
 ]
 
 export default function Sidebar() {
-  // EWO-014A: the enlarged (~72px) brand-lockup mark resolves through its
-  // own semantic key at a matching source resolution — never the compact
-  // 64px derivative upscaled, and never a hard-coded asset path here.
-  const logoSrc = resolveBrandingSrc('sidebarCommissioningMark')
+  // EWO-015: the Sidebar's entire brand lockup — commissioning mark, SFM
+  // wordmark, "Strategic Fleet Manager" title, and motto — is one
+  // Design-Authority-owned commissioned image, resolved through its own
+  // semantic key. It deliberately does not include the application
+  // version (see APP_VERSION_LABEL below) or any panel/background —
+  // never a hard-coded asset path here.
+  const brandLockupSrc = resolveBrandingSrc('sidebarBrandLockup')
 
   return (
     <aside className="w-64 shrink-0 h-screen sticky top-0 flex flex-col border-r border-white/5 bg-panel/60 backdrop-blur-sm">
-      {/* Brand lockup — EWO-014: reads as a floating operational console mounted
-          in the compartment, matching the nav console's bordered-panel treatment
-          below, not a divider strip blended into the sidebar's own background.
-          SFM is the primary visual anchor; the mark is enlarged ~29%; the
-          descriptive lockup and release version are visually subordinate. */}
-      <div className="mx-3 mt-3 mb-1 rounded-lg border border-white/5 bg-white/[0.02] px-4 py-6 flex flex-col items-center text-center">
-        {logoSrc ? (
-          <img src={logoSrc} alt="Strategic Fleet Manager" className="w-[72px] h-[72px] object-contain shrink-0" />
+      {/* Brand lockup — EWO-015, density-tuned EWO-015B: reads as a floating
+          operational console mounted in the compartment, matching the nav
+          console's bordered-panel treatment below. The commissioned image is
+          the sole identity content; no second panel is nested inside this
+          console around the image itself. Internal padding is intentionally
+          tight (px-2.5/py-3.5, down from px-4/py-6) so the artwork reads as
+          the dominant element while still never touching the console's own
+          border. */}
+      <div className="mx-3 mt-3 mb-1 rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-3.5 flex flex-col items-center text-center">
+        {brandLockupSrc ? (
+          <div className="w-[180px] h-[270px] shrink-0 pointer-events-none select-none">
+            <img
+              src={brandLockupSrc}
+              alt="Strategic Fleet Manager"
+              className="w-full h-full object-contain object-center"
+            />
+          </div>
         ) : (
           <Satellite className="text-cyan" size={62} />
         )}
-        <div className="mt-3 font-display font-bold text-3xl tracking-[0.08em] leading-none text-white">SFM</div>
-        <div className="font-display font-medium text-[9px] uppercase tracking-[0.2em] text-muted/70 mt-1.5 leading-snug">
-          Strategic Fleet Manager
-        </div>
+        {/* Live application version — never baked into the brand-lockup
+            artwork, so a future release only requires updating this text,
+            not regenerating or replacing the image. Tightened to mt-2
+            (EWO-015B) so it reads as belonging to the lockup above it. */}
         <div className="text-[8px] uppercase tracking-[0.15em] text-muted/40 mt-2">{APP_VERSION_LABEL}</div>
-        {/* Slogan color treatment (EWO-014): Plan → Cyan, Outfit → Gold,
-            Prepare → Orange, Succeed → Green. "Gold" newly defines the
-            previously-reserved-but-undefined Advisory Gold token
-            (tailwind.config.js) for this one narrowly-scoped word only.
-            "Orange" reuses the existing Operational Amber (`warning`) token
-            rather than introducing a near-duplicate hue for a single word. */}
-        <div className="text-[9px] uppercase tracking-[0.15em] mt-3 leading-relaxed">
-          <span className="text-cyan/70">Plan</span> <span className="text-muted/30">•</span>{' '}
-          <span className="text-gold/80">Outfit</span>
-          <br />
-          <span className="text-warning/80">Prepare</span> <span className="text-muted/30">•</span>{' '}
-          <span className="text-success/80">Succeed</span>
-        </div>
       </div>
       {/* Navigation reads as a floating operational panel — a restrained bordered
           surface set inside the rail, not a generic full-height web menu. */}
