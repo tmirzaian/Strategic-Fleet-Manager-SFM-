@@ -7,7 +7,11 @@ import { OWNERSHIP_TYPE_LABELS } from '../utils/ownership'
 const OWNERSHIP_OPTIONS: OwnershipType[] = ['OWNED', 'PURCHASED', 'LOANER']
 
 export default function AddShipModal({ onClose }: { onClose: () => void }) {
-  const shipDefinitions = useFleetStore((s) => s.shipDefinitions)
+  // EWO-021: Add Ship offers exactly one selectable entry per real hull —
+  // `selectableShipDefinitions`, not the full `shipDefinitions` registry,
+  // which still includes every non-canonical duplicate for identity
+  // resolution elsewhere.
+  const shipDefinitions = useFleetStore((s) => s.selectableShipDefinitions)
   const addFleetAsset = useFleetStore((s) => s.addFleetAsset)
 
   const [query, setQuery] = useState('')

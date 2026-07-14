@@ -1,0 +1,29 @@
+# ADR-008 — Canonical Ship Definition Consolidation
+
+- **Status:** Accepted
+- **Date:** 2026-07-14
+
+## Context
+
+Commander Sea Trials confirmed Add Ship could show more than one selectable entry for the same real hull — "Cutlass Black" (seed) alongside "Cutlass Black" (deep-imported); "Cutlass Red" (seed) alongside "Drake Cutlass Red" (a Mission M-012 catalog placeholder). Selecting the non-canonical entry always produced worse data (`Unknown Factory Item`, placeholder imagery, empty hierarchy) — a genuine Single-Source-of-Truth violation, not a presentation defect.
+
+A direct audit (comparing every seed ship's name against `generated-data/ships.json` and `generated-data/ship-catalog.json`, correcting for the catalog's own habit of baking the manufacturer name directly into `displayName`) found this pattern is **not limited to Cutlass Black/Red** — 10 of the 12 seed ships (all but Corsair and Cutlass Black, which collide with a deep-import instead) have a same-hull Mission M-012 catalog placeholder competing for the same name in Add Ship today: Ghost, MOLE, Railen, 135c, Cutlass Red, M80, Starlite, UTV, Vulture, Prospector.
+
+## Decision
+
+**Completeness-ranked de-duplication, not a rigid source-type hierarchy.** Every definition describing the same real hull (grouped by a manufacturer-prefix-aware `bareHullName`) is ranked by `definitionCompletenessRank()`: deep-imported (real StarBreaker port tree) ranks best, a seed definition (hand-authored but real, non-empty hardpoints) ranks next, a bare Mission M-012 catalog entry (`portIds: []` by design) ranks worst. This differs from the mission's own illustrative numbered precedence list, which would literally rank "catalog with complete factory data" above seed — but our catalog-only entries never have complete factory data (that's the whole point of Mission M-012's documented scope), so applying the *intent* (prefer real, complete data; eliminate placeholder confusion) rather than the literal ordinal produces the correct, evidence-consistent result: seed beats an empty catalog placeholder; deep-import beats both.
+
+**Two-registry split**, discovered necessary after the first implementation attempt broke `runFullValidation`'s FleetAsset-id-existence check (which needs to recognize *every* valid id, not just newly-selectable ones):
+- `shipDefinitions` (`src/data/shipDefinitions.ts`) — the full registry, canonical and superseded alike. Anything checking "is this a real ship definition id" (validation, diagnostics, `shipDefinitionById`/`shipFactoryTemplates`) uses this.
+- `selectableShipDefinitions` — the de-duplicated subset Add Ship offers, exactly one entry per hull. This is the only new consumer-facing change; every other subsystem (Fleet Dashboard, Mission Control, Ship Detail, Loadout Manager, Hangar Inventory, Decision Center, Fleet Roadmap) already resolved ship identity exclusively through `shipDefinitionById` for an *existing* FleetAsset — confirmed by direct audit of every page's imports — so no additional "canonical resolver" wiring was needed there; the existing centralization already satisfied Task 4's mandate.
+
+**Migration is intentionally asymmetric**, by data-loss risk:
+- A superseded **catalog-only** definition (rank 2, `portIds: []`) is aliased directly to its canonical replacement in both `shipDefinitionById` and `shipFactoryTemplates` — the same mechanism ADR-006 established for deep-import identity aliasing. This is unconditionally safe: a catalog-only definition never had real hardpoint data, so there is nothing a Commander's existing FleetAsset could lose by resolving to the richer definition instead.
+- A superseded **seed** definition (Corsair, Cutlass Black) is **not** aliased. A seed ship's hand-authored port/slot-label structure is its own fiction, unrelated to the deep-imported ship's real StarBreaker port tree; a Commander-added FleetAsset that happened to reference the seed-flavored id could carry a custom Loadout built against those exact (fictional) slot labels. Remapping it onto a structurally different real port tree risks silently orphaning that customization — a risk no completeness gain justifies. The seed definition keeps resolving to itself, unchanged; it is simply no longer offered as a *new* pick in Add Ship.
+
+## Consequences
+
+- Verified: `selectableShipDefinitions` filtered to "Cutlass Black" returns exactly the deep-imported entry; filtered to "Cutlass Red" returns exactly the seed entry; the same holds for all 9 other affected seed ships.
+- Zero regressions across 752 tests (was 743) — including `runFullValidation`'s FleetAsset-id-existence check, which required the two-registry split to keep passing.
+- The Commander's actual, already-fielded seed fleet (Ghost, Corsair, MOLE, Railen, 135c, Cutlass Black, Cutlass Red, M80, Starlite, UTV, Vulture, Prospector) is completely unaffected — seed `FleetAsset`s are baked in directly at store initialization and never consult `ShipDefinition`/`shipFactoryTemplates` for their own rendering (see `useFleetStore.ts`'s `SEED_MIGRATION`/`seedAssetOverrides` mechanism); this change only affects what a Commander can newly *select* going forward.
+- Known residual scope not addressed here: a broader class of catalog-*internal* duplicates exists (multiple entityClasses sharing one display name within Mission M-012's own 294-ship catalog — e.g. `AEGS_Hammerhead`/`AEGS_Hammerhead_GS`, `RSI_Apollo_Medivac`/`_Tier_1`/`_Tier_2`/`_Tier_3`, roughly 20 groups total, mostly real paint/faction/tier variants of the same base hull). These were discovered during this mission's audit but were not in the Commander's reported reproduction and are a materially larger, separate decision (choosing one canonical variant among several *genuinely different* ship configurations, not a placeholder-vs-real distinction) — recommended as its own follow-up EWO rather than folded in here under time pressure.

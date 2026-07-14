@@ -3,9 +3,10 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate, SeedAssetOverride } from '../types'
 import { ships as seedShips, builds as seedBuilds, hardpoints as seedHardpoints, hangarItems as seedHangarItems, initialLog } from '../data/seed'
 import { computeHardpointStatusWithValidation } from '../utils/hardpointStatus'
-import { shipDefinitions as allShipDefinitions, shipDefinitionById, shipFactoryTemplates } from '../data/shipDefinitions'
+import { shipDefinitions as allShipDefinitions, selectableShipDefinitions, shipDefinitionById, shipFactoryTemplates } from '../data/shipDefinitions'
 import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
 import { materializeFleetAsset } from '../utils/fleetAssetMaterializer'
+import { resolveShipImage } from '../utils/resolveShipImage'
 import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
@@ -24,6 +25,23 @@ const PERSIST_VERSION = 5
  * go through `applyInstalledChange` below, which is the only mutation
  * path from here on.
  */
+/**
+ * EWO-021A-1 — the seed fleet's own hardcoded `imageUrl` (src/data/seed.ts)
+ * is only ever the *fallback* now, not the runtime source of truth: every
+ * seed Ship is re-resolved through the same canonical
+ * src/data/shipImageRegistry.ts a manually-added FleetAsset already goes
+ * through (src/utils/fleetAssetMaterializer.ts), so the Commander never
+ * has to maintain image URLs in two files. Nothing else about the seed
+ * Ship object changes — Build/Hardpoint/ownership/priority/nickname stay
+ * exactly as src/data/seed.ts and any applied seedAssetOverrides define
+ * them. Idempotent — re-running this on the same seed data always
+ * produces the same result, so it is safe to call on every fresh store
+ * construction (first load and every rehydration alike).
+ */
+function withResolvedSeedImages(ships: Ship[]): Ship[] {
+  return ships.map((s) => ({ ...s, imageUrl: resolveShipImage({ id: s.id, imageUrl: s.imageUrl }) ?? s.imageUrl }))
+}
+
 function deriveInitialInstalledLoadouts(ships: Ship[], hardpoints: Hardpoint[]): InstalledLoadoutEntry[] {
   const entries: InstalledLoadoutEntry[] = []
   for (const ship of ships) {
@@ -56,6 +74,10 @@ interface FleetState {
   // (never mutated at runtime); `fleetAssets` is player data. `ships`
   // above stays the materialized join every existing page renders from.
   shipDefinitions: typeof allShipDefinitions
+  // EWO-021 — the de-duplicated subset Add Ship should offer (exactly
+  // one entry per real hull); `shipDefinitions` above remains the full
+  // registry every other id-validity check should keep using.
+  selectableShipDefinitions: typeof selectableShipDefinitions
   fleetAssets: FleetAsset[]
   // Mission M-012 incident fix — see SeedAssetOverride's doc comment.
   // Persisted per-id diff against the hardcoded seed fleet (removal,
@@ -257,7 +279,7 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
 export const useFleetStore = create<FleetState>()(
   persist(
     (set, get) => ({
-      ships: [...seedShips],
+      ships: withResolvedSeedImages(seedShips),
       builds: [...seedBuilds],
       hardpoints: [...seedHardpoints],
       hangarItems: seedHangarItems,
@@ -266,6 +288,7 @@ export const useFleetStore = create<FleetState>()(
       reservations: [],
       quartermasterTemplates: seedQuartermasterTemplates,
       shipDefinitions: allShipDefinitions,
+      selectableShipDefinitions,
       fleetAssets: migrateSeedFleetToAssets(),
       seedAssetOverrides: {},
       hasPersistedState: false,
@@ -445,7 +468,7 @@ export const useFleetStore = create<FleetState>()(
     })
     if (previousBuildName && previousBuildName !== build.name) {
       get().addLogEntry({
-        action: 'Active Mission changed',
+        action: 'Operational Assignment Updated',
         shipName: ship.name,
         itemName: build.name,
         details: `${ship.name} switched from ${previousBuildName} to ${build.name}`,
@@ -456,10 +479,10 @@ export const useFleetStore = create<FleetState>()(
   reserveComponent: ({ missionConfigurationId, fleetAssetId, targetSlotLabel, componentName, quantity = 1 }) => {
     const build = get().builds.find((b) => b.id === missionConfigurationId)
     const ship = get().ships.find((s) => s.id === fleetAssetId)
-    if (!build || !ship) return { success: false, message: 'Mission Configuration or Fleet Asset not found.' }
+    if (!build || !ship) return { success: false, message: 'Loadout or Fleet Asset not found.' }
 
     const targetRow = get().hardpoints.find((h) => h.buildId === missionConfigurationId && h.slotLabel === targetSlotLabel)
-    if (!targetRow) return { success: false, message: 'Target requirement not found on this Mission Configuration.' }
+    if (!targetRow) return { success: false, message: 'Target requirement not found on this Loadout.' }
     if (targetRow.targetItem !== componentName) {
       return { success: false, message: `"${componentName}" does not match this slot's target ("${targetRow.targetItem}").` }
     }
@@ -516,10 +539,10 @@ export const useFleetStore = create<FleetState>()(
     const ship = get().ships.find((s) => s.id === reservation.fleetAssetId)
     const build = get().builds.find((b) => b.id === reservation.missionConfigurationId)
     get().addLogEntry({
-      action: 'Reservation released',
+      action: 'Component Returned to Quartermaster Stores',
       shipName: ship?.name,
       itemName: reservation.componentName,
-      details: `Released reservation for ${reservation.componentName} (${ship?.name ?? 'ship'} — ${build?.name ?? 'mission'}, ${reservation.targetSlotLabel})`,
+      details: `Returned ${reservation.componentName} to Quartermaster Stores (${ship?.name ?? 'ship'} — ${build?.name ?? 'Loadout'}, ${reservation.targetSlotLabel})`,
     })
 
     return { success: true }
@@ -528,7 +551,7 @@ export const useFleetStore = create<FleetState>()(
   saveMissionConfiguration: ({ shipId, name, startingState, existingBuildId, quartermasterTemplateId, targetOverrides, setActive }) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return { success: false, message: 'Fleet Asset not found.' }
-    if (!name.trim()) return { success: false, message: 'Name the Mission Configuration before saving.' }
+    if (!name.trim()) return { success: false, message: 'Name the Loadout before saving.' }
 
     // Every Mission Configuration for a ship shares the same slot
     // structure (they all trace back to the same Factory template), so
@@ -547,7 +570,7 @@ export const useFleetStore = create<FleetState>()(
       for (const row of referenceRows) baseTargets.set(row.slotLabel, '—')
     } else {
       const existingRows = get().hardpoints.filter((h) => h.shipId === shipId && h.buildId === existingBuildId)
-      if (existingRows.length === 0) return { success: false, message: 'Existing Mission Configuration not found for this Fleet Asset.' }
+      if (existingRows.length === 0) return { success: false, message: 'Existing Loadout not found for this Fleet Asset.' }
       for (const row of existingRows) baseTargets.set(row.slotLabel, row.targetItem)
     }
 
@@ -622,10 +645,10 @@ export const useFleetStore = create<FleetState>()(
 
     for (const stale of staleReservations) {
       get().addLogEntry({
-        action: 'Reservation released',
+        action: 'Component Returned to Quartermaster Stores',
         shipName: ship.name,
         itemName: stale.componentName,
-        details: `Released reservation for ${stale.componentName} — target for ${stale.targetSlotLabel} changed on "${name.trim()}"`,
+        details: `Returned ${stale.componentName} to Quartermaster Stores — target for ${stale.targetSlotLabel} changed on "${name.trim()}"`,
       })
     }
 
@@ -634,10 +657,10 @@ export const useFleetStore = create<FleetState>()(
     }
 
     get().addLogEntry({
-      action: isEditingExisting ? 'Mission Configuration updated' : 'Mission Configuration created',
+      action: isEditingExisting ? 'Loadout Updated' : 'New Loadout Entered into Fleet Registry',
       shipName: ship.name,
       itemName: name.trim(),
-      details: `${isEditingExisting ? 'Updated' : 'Created'} Mission Configuration "${name.trim()}" for ${ship.name}${setActive ? ' and set it as Active Mission' : ''}`,
+      details: `${isEditingExisting ? 'Updated' : 'Recorded'} Loadout "${name.trim()}" for ${ship.name}${setActive ? ' and set it as the Active Loadout' : ''}`,
     })
 
     return { success: true, buildId }
@@ -647,7 +670,7 @@ export const useFleetStore = create<FleetState>()(
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return
     const id = `${shipId}-build-${Date.now()}`
-    const newBuild: Build = { id, shipId, name: 'New Build', role: ship.role, readiness: 100, isActive: false, missing: [], kind: 'CUSTOM' }
+    const newBuild: Build = { id, shipId, name: 'New Loadout', role: ship.role, readiness: 100, isActive: false, missing: [], kind: 'CUSTOM' }
     const slots: Array<{ slotLabel: string; type: string; size: string }> = [
       { slotLabel: 'Weapon 1', type: 'Weapon', size: 'S4' },
       { slotLabel: 'Weapon 2', type: 'Weapon', size: 'S4' },
@@ -677,7 +700,7 @@ export const useFleetStore = create<FleetState>()(
       }
     })
     set({ builds: [...get().builds, newBuild], hardpoints: [...get().hardpoints, ...newHardpoints] })
-    get().addLogEntry({ action: 'Build created', shipName: ship.name, itemName: newBuild.name, details: `Created ${newBuild.name} for ${ship.name}` })
+    get().addLogEntry({ action: 'New Loadout Entered into Fleet Registry', shipName: ship.name, itemName: newBuild.name, details: `Recorded ${newBuild.name} for ${ship.name}` })
   },
 
   editBuild: (buildId, updates) => {
@@ -685,7 +708,7 @@ export const useFleetStore = create<FleetState>()(
     if (!build) return
     set({ builds: get().builds.map((b) => (b.id === buildId ? { ...b, ...updates } : b)) })
     const ship = get().ships.find((s) => s.id === build.shipId)
-    get().addLogEntry({ action: 'Build edited', shipName: ship?.name, itemName: updates.name ?? build.name, details: `Edited ${build.name}${updates.name ? ` → renamed to ${updates.name}` : ''}` })
+    get().addLogEntry({ action: 'Loadout Updated', shipName: ship?.name, itemName: updates.name ?? build.name, details: `Updated ${build.name}${updates.name ? ` → renamed to ${updates.name}` : ''}` })
   },
 
   duplicateBuild: (buildId) => {
@@ -697,7 +720,7 @@ export const useFleetStore = create<FleetState>()(
     const newHardpoints: Hardpoint[] = sourceHardpoints.map((h, i) => ({ ...h, id: `${id}-hp-${i}`, buildId: id }))
     set({ builds: [...get().builds, newBuild], hardpoints: [...get().hardpoints, ...newHardpoints] })
     const ship = get().ships.find((s) => s.id === build.shipId)
-    get().addLogEntry({ action: 'Build duplicated', shipName: ship?.name, itemName: newBuild.name, details: `Duplicated ${build.name} as ${newBuild.name}` })
+    get().addLogEntry({ action: 'Loadout Duplicated', shipName: ship?.name, itemName: newBuild.name, details: `Duplicated ${build.name} as ${newBuild.name}` })
   },
 
   deleteBuild: (buildId) => {
@@ -720,7 +743,7 @@ export const useFleetStore = create<FleetState>()(
         return fallback ? { ...s, activeBuildId: fallback.id, missing: fallback.missing, readiness: fallback.readiness } : s
       }),
     })
-    get().addLogEntry({ action: 'Build deleted', shipName: ship?.name, itemName: build.name, details: `Deleted ${build.name} from ${ship?.name ?? 'ship'} — any active reservations were released` })
+    get().addLogEntry({ action: 'Loadout Removed', shipName: ship?.name, itemName: build.name, details: `Removed ${build.name} from ${ship?.name ?? 'ship'} — any active reservations were returned to Quartermaster Stores` })
   },
 
   addHangarItem: (item) => {
@@ -743,7 +766,7 @@ export const useFleetStore = create<FleetState>()(
     if (!item || !ship) return { success: false, message: 'Item or ship not found.' }
     const result = get().installComponent(shipId, item.name)
     if (!result.matched) {
-      return { success: false, message: `${ship.name}'s active build has no open slot for ${item.name}.` }
+      return { success: false, message: `${ship.name}'s active Loadout has no open slot for ${item.name}.` }
     }
     set({
       hangarItems: get().hangarItems.map((i) => (i.id === itemId ? { ...i, qty: Math.max(0, i.qty - 1) } : i)),
