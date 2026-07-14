@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { resolveDisplayImageUrl } from '../resolveShipImage'
+import { resolveDisplayImageUrl, resolveShipImage, validRegistryUrl } from '../resolveShipImage'
 import { SHIP_PLACEHOLDER_URL } from '../../constants/shipImage'
+import { SHIP_IMAGE_URLS } from '../../data/shipImageRegistry'
+import { shipCatalogRecords } from '../../generated/shipCatalog'
 
 describe('resolveDisplayImageUrl', () => {
   it('prefers structured image.primaryUrl when present', () => {
@@ -21,5 +23,46 @@ describe('resolveDisplayImageUrl', () => {
   it('treats an empty-string primaryUrl as absent and falls through to imageUrl', () => {
     const url = resolveDisplayImageUrl({ image: { primaryUrl: '' }, imageUrl: 'https://example.com/legacy.jpg' })
     expect(url).toBe('https://example.com/legacy.jpg')
+  })
+})
+
+describe('EWO-021A: resolveShipImage', () => {
+  it('1. resolves a registry URL for a canonical seed id', () => {
+    expect(resolveShipImage({ id: 'ghost' })).toBe(SHIP_IMAGE_URLS.ghost)
+  })
+
+  it('2. a registry URL overrides the input\'s own existing definition/generated image', () => {
+    const url = resolveShipImage({ id: 'ghost', imageUrl: 'https://example.com/some-other-photo.jpg' })
+    expect(url).toBe(SHIP_IMAGE_URLS.ghost)
+    expect(url).not.toBe('https://example.com/some-other-photo.jpg')
+  })
+
+  it('4. a malformed (non-HTTPS) registry entry is rejected by the validator, whitespace-only entries too', () => {
+    expect(validRegistryUrl('/local/relative/path.png')).toBeUndefined()
+    expect(validRegistryUrl('http://example.com/insecure.jpg')).toBeUndefined()
+    expect(validRegistryUrl('   ')).toBeUndefined()
+    expect(validRegistryUrl(undefined)).toBeUndefined()
+    expect(validRegistryUrl('  https://example.com/ok.jpg  ')).toBe('https://example.com/ok.jpg')
+  })
+
+  it('5. a ship with no registry entry and no existing image falls through to undefined (placeholder territory)', () => {
+    expect(resolveShipImage({ id: 'totally-unregistered-ship-id' })).toBeUndefined()
+  })
+
+  it('5b. a ship with no registry entry but a real existing image still resolves that image (tier 2)', () => {
+    expect(resolveShipImage({ id: 'totally-unregistered-ship-id', imageUrl: 'https://example.com/legacy.jpg' })).toBe('https://example.com/legacy.jpg')
+  })
+
+  it('7/8. Cutlass Black resolves its registry image via either its generated id or its raw entity class (legacy alias)', () => {
+    if (shipCatalogRecords.length === 0) return // generated data not present on this machine
+    const byGeneratedId = resolveShipImage({ id: 'cutlass-black-imported' })
+    const byEntityClass = resolveShipImage({ id: 'DRAK_Cutlass_Black' })
+    expect(byGeneratedId).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
+    expect(byEntityClass).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
+  })
+
+  it('12. partial registry coverage does not throw for a canonical hull with no entry (e.g. Eclipse)', () => {
+    expect(() => resolveShipImage({ id: 'AEGS_Eclipse' })).not.toThrow()
+    expect(resolveShipImage({ id: 'AEGS_Eclipse' })).toBeUndefined()
   })
 })

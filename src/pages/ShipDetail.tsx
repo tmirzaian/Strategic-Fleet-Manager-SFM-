@@ -14,6 +14,7 @@ import { calculateBuildProgress } from '../utils/buildProgress'
 import { calculateMissionPackage } from '../engine/logistics/missionPackage'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { buildPortTree } from '../utils/portTree'
+import { resolveShipImage } from '../utils/resolveShipImage'
 
 function SummaryTile({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string | number; accent?: string }) {
   return (
@@ -157,7 +158,7 @@ export default function ShipDetail() {
               <Layers size={18} className="text-cyan shrink-0" />
               <div>
                 <span className="font-display font-bold text-cyan uppercase tracking-widest text-sm">Factory Loadout</span>
-                <p className="text-xs text-muted mt-0.5">Stock configuration installed — no custom Loadout assigned yet. This is valid and usable.</p>
+                <p className="text-xs text-muted mt-0.5">Factory-issued equipment installed — no custom Loadout assigned yet. This is valid and usable.</p>
               </div>
               <Link to={`/loadout-manager?shipId=${ship.id}`} className="ml-auto text-xs font-medium text-cyan hover:underline whitespace-nowrap">
                 Create Custom Loadout →
@@ -368,7 +369,14 @@ function ImportedShipDetail({ view, selectShip }: { view: ImportedShipView; sele
 
       <div className="panel overflow-hidden">
         <ShipHeroFrame
-          imageSrc={ship.imageUrl ?? ship.image?.primaryUrl ?? view.imageManifestEntry?.primaryUrl ?? undefined}
+          // EWO-021A: routed through the same shared resolver as every
+          // other ship-image consumer, so the Commander's registry
+          // (src/data/shipImageRegistry.ts) applies here too.
+          imageSrc={resolveShipImage({
+            id: ship.id,
+            imageUrl: ship.imageUrl,
+            image: { primaryUrl: ship.image?.primaryUrl ?? view.imageManifestEntry?.primaryUrl ?? undefined },
+          })}
           imageMeta={view.imageManifestEntry}
           name={ship.name}
           manufacturer={ship.manufacturer}

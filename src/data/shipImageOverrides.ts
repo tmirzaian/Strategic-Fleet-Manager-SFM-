@@ -11,6 +11,15 @@
  *
  * Keyed by the seed ship id used throughout src/data/seed.ts and
  * src/store/useFleetStore.ts.
+ *
+ * EWO-021A: this file feeds the *offline import pipeline* only
+ * (src/normalizer/shipImageManifest.ts, run by `npm run import:ships`) —
+ * it is not read by any runtime page/component. The Commander-editable,
+ * runtime-resolved registry is the separate src/data/shipImageRegistry.ts
+ * (keyed by canonical ship id, not seed id specifically — a deep-imported
+ * ship has no entry here at all), consumed by
+ * src/utils/resolveShipImage.ts. Two files, two distinct jobs — not a
+ * duplicate manually-maintained image map.
  */
 export const shipImageOverrides: Record<string, string> = {
   ghost: 'https://media.robertsspaceindustries.com/thvu42fxnagbh/slideshow.jpg',

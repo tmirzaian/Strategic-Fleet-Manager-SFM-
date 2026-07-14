@@ -2,6 +2,7 @@ import type { ShipDefinition, FleetAsset, Ship, Build, Hardpoint, OwnershipType,
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 import { computeHardpointStatusWithValidation } from './hardpointStatus'
 import { ownershipTypeToLegacy } from './ownership'
+import { resolveShipImage } from './resolveShipImage'
 
 let counter = 0
 function uniqueSuffix(): string {
@@ -54,6 +55,30 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
   const now = new Date().toISOString()
 
   const hardpoints: Hardpoint[] = template.map((slot, i) => {
+    // EWO-020: a structural assembly row (a mount/turret preserved only to
+    // explain physical hierarchy) has no component of its own to
+    // install/target — it never goes through status computation, never
+    // shows Missing/Upgrade Available, and is excluded from the
+    // readiness denominator below, exactly like it was excluded from
+    // factory-assignment resolution during normalization.
+    if (slot.isStructural) {
+      return {
+        id: `${buildId}-hp-${i}`,
+        shipId: assetId,
+        buildId,
+        slotLabel: slot.slotLabel,
+        type: slot.type,
+        size: slot.size,
+        factoryItem: '—',
+        installedItem: '—',
+        targetItem: '—',
+        status: 'OK' as const,
+        parentSlotLabel: slot.parentSlotLabel,
+        groupLabel: slot.groupLabel,
+        assemblyRole: slot.assemblyRole,
+        isStructural: true,
+      }
+    }
     const { status, invalidMessage } = computeHardpointStatusWithValidation(slot.factoryItem, slot.factoryItem, slot.factoryItem, slot.type, slot.size)
     return {
       id: `${buildId}-hp-${i}`,
@@ -72,12 +97,24 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       // so every newly materialized Fleet Asset (seed or imported) lost
       // all parent/child structure regardless of its source template.
       parentSlotLabel: slot.parentSlotLabel,
+      // EWO-019B: presentation-only system grouping (e.g. "Weapons",
+      // "Quantum Drive") for an otherwise-independent top-level port —
+      // see FactoryHardpointTemplate.groupLabel / Hardpoint.groupLabel.
+      groupLabel: slot.groupLabel,
+      assemblyRole: slot.assemblyRole,
     }
   })
 
-  const missing = hardpoints.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
-  const okCount = hardpoints.filter((h) => h.status === 'OK').length
-  const readiness = hardpoints.length > 0 ? Math.round((okCount / hardpoints.length) * 100) : 100
+  // EWO-020 (Task 4/13): structural rows never count toward readiness —
+  // they have no configurable component, so including them would either
+  // silently inflate readiness (counted as trivially "OK") or misreport
+  // a physically-fine ship as incomplete. Only real, configurable rows
+  // enter the denominator, same as before this mission for every ship
+  // that has no structural rows at all.
+  const configurableHardpoints = hardpoints.filter((h) => !h.isStructural)
+  const missing = configurableHardpoints.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
+  const okCount = configurableHardpoints.filter((h) => h.status === 'OK').length
+  const readiness = configurableHardpoints.length > 0 ? Math.round((okCount / configurableHardpoints.length) * 100) : 100
 
   const build: Build = {
     id: buildId,
@@ -123,7 +160,12 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     readiness,
     priority: resolvedPriority,
     missing,
-    imageUrl: definition.imageUrl ?? definition.image?.primaryUrl,
+    // EWO-021A: the canonical registry (src/data/shipImageRegistry.ts)
+    // takes precedence over whatever image the ShipDefinition already
+    // carries — this is the single materialization chokepoint every
+    // Fleet Dashboard/Mission Control/Ship Detail card already flows
+    // through, so no consumer needs its own resolution logic.
+    imageUrl: resolveShipImage(definition),
     lastUpdated: 'Just now',
   }
 
