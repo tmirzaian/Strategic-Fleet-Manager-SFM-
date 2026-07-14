@@ -361,6 +361,19 @@ function buildFor(shipId: string): Build {
   return builds.find((b) => b.shipId === shipId && b.isActive) ?? builds.find((b) => b.shipId === shipId)!
 }
 
+/**
+ * EWO-021A-1: each ship's `imageUrl` below is legacy fallback data only —
+ * it is never the runtime source of truth. src/store/useFleetStore.ts
+ * re-resolves every seed ship's image through the canonical registry
+ * (src/data/shipImageRegistry.ts, via resolveShipImage()) at store
+ * construction, and the registry always wins when it has an entry for
+ * that ship. This field only renders as-is if the registry has no entry
+ * for that hull — kept (Design Authority Ruling 3) as a safety net rather
+ * than removed, so an ever-blanked/edited registry entry can never regress
+ * an already-working seed photo to the placeholder. The Commander should
+ * never need to edit this file to change a live ship image — see
+ * shipImageRegistry.ts's header for the one-file editing contract.
+ */
 export const ships: Ship[] = [
   {
     id: 'ghost', name: 'F7C-S Hornet Ghost Mk II', manufacturer: 'Anvil', ownership: 'Owned', career: 'Combat',
@@ -463,10 +476,10 @@ export const initialLog: LogEntry[] = [
   {
     id: 'log-3',
     timestamp: '3 days ago',
-    action: 'Build created',
+    action: 'New Loadout Entered into Fleet Registry',
     shipName: 'F7C-S Hornet Ghost Mk II',
     itemName: 'Escort Build',
-    details: 'Created Escort Build for Ghost Mk II',
+    details: 'Recorded Escort Build for Ghost Mk II',
   },
   {
     id: 'log-4',
@@ -514,14 +527,14 @@ export const decisionCatalog: CatalogItem[] = [
   { name: 'Slipstream', headline: 'KEEP', stars: 5, reason: 'Needed by Ghost Stealth Build', disposition: 'Install' },
   { name: 'Snowblind', headline: 'KEEP', stars: 4, reason: 'Needed by Ghost Stealth Build', disposition: 'Install' },
   { name: 'FR-86', headline: 'KEEP', stars: 4, reason: 'Needed by Corsair or Cutlass Black', disposition: 'Store' },
-  { name: 'Revenant Gatling', headline: 'IGNORE', stars: 2, reason: 'No active build requires this item.', disposition: '—' },
+  { name: 'Revenant Gatling', headline: 'IGNORE', stars: 2, reason: 'No active Loadout requires this item.', disposition: '—' },
   { name: 'Helix II', headline: 'KEEP', stars: 4, reason: 'Needed by MOLE Mining Build', disposition: 'Install' },
   { name: 'Rieger-C3', headline: 'KEEP', stars: 4, reason: 'Needed by MOLE Mining Build', disposition: 'Install' },
   { name: 'Blizzard', headline: 'KEEP', stars: 3, reason: 'Needed by MOLE Mining Build', disposition: 'Install' },
 ]
 
 // Items in the typeahead list with no scripted decision still surface as
-// suggestions, but resolve to "CHECK BUILD" rather than a KEEP/IGNORE guess.
+// suggestions, but resolve to "CHECK LOADOUT" rather than a KEEP/IGNORE guess.
 export const decisionCatalogNames: string[] = [
   ...decisionCatalog.map((c) => c.name),
   'JS-300',
