@@ -52,11 +52,25 @@ export default function Sidebar() {
           border. */}
       <div className="mx-3 mt-3 mb-1 rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-3.5 flex flex-col items-center text-center">
         {brandLockupSrc ? (
-          <div className="w-[180px] h-[270px] shrink-0 pointer-events-none select-none">
+          // EWO-015C — optical-fit correction. The console/hardpoint CSS was
+          // already verified to match the EWO-015B spec exactly (no residual
+          // wrapper spacing bug); the perceived lack of visual dominance is
+          // baked into the approved master itself, which carries generous
+          // transparent margins around its content (measured: content fills
+          // only ~75% of the canvas in each dimension, asymmetric — the top
+          // margin is meaningfully smaller than the bottom margin). No new
+          // asset, no source-file edit: overflow-hidden + a calibrated
+          // uniform `scale` and `transform-origin` on the <img> optically
+          // crops those margins at render time only, fully reversible, with
+          // object-fit/object-position and the hardpoint's own box
+          // untouched. Values were derived from the master's measured
+          // content bounding box plus a safety margin so no real content is
+          // ever clipped.
+          <div className="w-[180px] h-[270px] shrink-0 overflow-hidden pointer-events-none select-none">
             <img
               src={brandLockupSrc}
               alt="Strategic Fleet Manager"
-              className="w-full h-full object-contain object-center"
+              className="w-full h-full object-contain object-center scale-125 origin-[50%_40%]"
             />
           </div>
         ) : (

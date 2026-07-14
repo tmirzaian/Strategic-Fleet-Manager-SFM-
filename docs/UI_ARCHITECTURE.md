@@ -9,8 +9,9 @@ Environmental Philosophy established by EWO-014 — Mission Control Brand
 Lockup & Environmental Integration, mark resolution corrected by
 EWO-014A, §2 superseded again by EWO-015 — Sidebar Branding Hardpoint
 Integration, replacing the JSX-constructed lockup with one commissioned
-image, density-tuned and DESIGN FROZEN by EWO-015B — Sidebar Branding
-Presence Refinement).** This document records the
+image, density-tuned by EWO-015B — Sidebar Branding Presence Refinement,
+optical-fit corrected and DESIGN FROZEN by EWO-015C — Sidebar Branding
+Console Optical Fit).** This document records the
 permanent visual architecture of Mission Control and the application
 shell as approved by Design Authority. Future missions extend this
 architecture; they do not re-litigate it. Any section marked **APPROVED
@@ -43,7 +44,7 @@ No explanatory or marketing copy appears between these — the interface
 explains itself. `src/pages/MissionControl.tsx` is the reference
 implementation of this cadence.
 
-## 2. Sidebar Branding Console — DESIGN FROZEN (EWO-015, density-tuned and frozen by EWO-015B)
+## 2. Sidebar Branding Console — DESIGN FROZEN (EWO-015, density-tuned by EWO-015B, optical-fit corrected and re-frozen by EWO-015C)
 
 **Sidebar branding is a commissioned production asset, not a JSX
 construction (EWO-015).** `src/components/Sidebar.tsx`'s brand lockup is
@@ -132,13 +133,43 @@ scenery, and can float over the sidebar's own console surface today and
 over a future Mission Control-wide environment later without any
 structural change.
 
-**DESIGN FROZEN (EWO-015B), pending Commander approval.** The Sidebar
-Branding Console — composition, hardpoint sizing, console padding, and
-version-label placement — is the final visual refinement in this
-sequence (EWO-015 → EWO-015B). Further modifications require a new
-Engineering Work Order; routine cosmetic experimentation is not
-authorized without one, consistent with the Design Freeze precedent
-already established for the Fleet Registry Record (§8.3).
+**Optical-fit correction (EWO-015C).** After EWO-015B, Commander visual
+inspection found the branding still visually underutilized despite the
+enlarged hardpoint. Engineering verified the console/hardpoint CSS live
+(computed padding, margins, and hardpoint box) and confirmed it matched
+the EWO-015B specification exactly — there was no residual wrapper-spacing
+bug. The actual cause: the approved master's own transparent margins.
+Direct pixel measurement of the corrected master (§ EWO-015A/EWO-015 art
+edit history) found its visible content — mark, wordmark, title, and
+motto together — fills only **~75% of the canvas in each dimension**,
+with asymmetric top/bottom margins (top margin measurably smaller than
+bottom margin). This is baked into the source pixels and cannot be
+closed by any amount of wrapper/hardpoint CSS sizing.
+
+Because no new asset or source-file edit was authorized, the correction
+is a render-time-only optical crop: the hardpoint gained `overflow-hidden`
+(box dimensions unchanged — still `180×270`), and the `<img>` gained a
+uniform `scale-125` with `origin-[50%_40%]` (`object-fit`/
+`object-position` unchanged). A single `scale-*` utility scales both axes
+by the same factor, which is what guarantees no distortion; the origin is
+biased toward the top (40% rather than 50%) to match the master's own
+asymmetric margins, so the crop removes more of the larger bottom margin
+than the smaller top margin. Both values were derived from the master's
+measured content bounding box plus a safety buffer and verified live to
+introduce zero clipping of real content (hexagonal mark, ship icon, all
+three accent dots, "SFM," title, and the full motto all confirmed intact
+at all four required breakpoints). This technique is fully reversible —
+the source master and both generated derivatives are byte-identical to
+EWO-015; only the `<img>`'s rendering is affected.
+
+**DESIGN FROZEN (EWO-015C), pending Commander approval.** The Sidebar
+Branding Console — composition, hardpoint sizing, console padding,
+version-label placement, and now this optical-fit crop — is the final
+visual refinement in this sequence (EWO-015 → EWO-015B → EWO-015C).
+Further modifications require a new Engineering Work Order; routine
+cosmetic experimentation is not authorized without one, consistent with
+the Design Freeze precedent already established for the Fleet Registry
+Record (§8.3).
 
 ## 3. Critical-data typography standard (IMPLEMENTED NOW)
 

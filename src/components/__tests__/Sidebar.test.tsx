@@ -181,3 +181,55 @@ describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
     }
   })
 })
+
+describe('<Sidebar /> — EWO-015C optical-fit correction', () => {
+  it('the hardpoint box itself is unchanged from EWO-015B (180x270) — the fix is a render-time crop, not a wrapper resize', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    const hardpoint = logo.parentElement as HTMLElement
+    expect(hardpoint.className).toContain('w-[180px]')
+    expect(hardpoint.className).toContain('h-[270px]')
+    expect(hardpoint.className).toContain('overflow-hidden')
+  })
+
+  it('the console padding and image-to-version gap from EWO-015B are untouched — no further wrapper spacing changes', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    const console_ = logo.closest('div.rounded-lg') as HTMLElement
+    expect(console_.className).toContain('px-2.5')
+    expect(console_.className).toContain('py-3.5')
+    const versionEl = screen.getByText(APP_VERSION_LABEL)
+    expect(versionEl.className).toContain('mt-2')
+  })
+
+  it('applies a uniform, non-distorting scale to the image — same factor on both axes, object-fit/object-position preserved', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    expect(logo.className).toContain('object-contain')
+    expect(logo.className).toContain('object-center')
+    expect(logo.className).toContain('scale-125')
+    // A single scale-125 utility scales both axes by the same factor —
+    // this alone guarantees no stretching/distortion (an X/Y-independent
+    // scale would require two different utilities, which this does not use).
+    expect(logo.className).not.toMatch(/scale-x-|scale-y-/)
+  })
+
+  it('does not introduce a new asset reference or hard-coded path — same semantic key, same generated derivative', () => {
+    renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    expect(logo.getAttribute('src')).toBe('/assets/generated/branding/sidebar-branding-512.png')
+    const sourcePath = resolve(process.cwd(), 'src/components/Sidebar.tsx')
+    const source = readFileSync(sourcePath, 'utf-8')
+    expect(source).not.toMatch(/\/assets\/branding/)
+    expect(source).not.toMatch(/\/assets\/generated/)
+    expect(source).toContain("resolveBrandingSrc('sidebarBrandLockup')")
+  })
+
+  it('does not recreate branding typography in JSX and does not alter navigation', () => {
+    renderSidebar()
+    expect(screen.queryByText('SFM')).not.toBeInTheDocument()
+    expect(screen.queryByText('Strategic Fleet Manager')).not.toBeInTheDocument()
+    expect(screen.getByText('Mission Control')).toBeInTheDocument()
+    expect(screen.getAllByRole('link').length).toBeGreaterThanOrEqual(9)
+  })
+})
