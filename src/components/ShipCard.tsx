@@ -6,6 +6,7 @@ import type { BuildProgressResult } from '../utils/buildProgress'
 import ReadinessBar from './ReadinessBar'
 import Badge, { ownershipTone } from './Badge'
 import ShipImage, { type ShipImagePresentationMode } from './ShipImage'
+import { formatShipIdentityLine } from '../utils/shipIdentityLine'
 
 /**
  * EWO-032 — THE CANONICAL SHIP CARD for Strategic Fleet Manager (Beta
@@ -22,80 +23,102 @@ import ShipImage, { type ShipImagePresentationMode } from './ShipImage'
  * Quartermaster Edition visual enhancements are deliberately deferred to a
  * future Beta sprint (EWO-032 Commander Intent) — this is presentation
  * standardization only, not a redesign.
+ *
+ * EWO-033 (Task 4/9) — the canonical Beta layout contract: four
+ * structural regions, each with a reserved minimum height regardless of
+ * which `buildState` branch is active, so cards never collapse to
+ * different heights within the same grid based on content alone (Ruling
+ * 8). Priority is deliberately NOT rendered here — it's page-level
+ * wrapper context (`PriorityLabel`, Ruling 2/3).
  */
 export default function ShipCard({
   ship,
   buildName,
   progress,
   buildState,
+  stockRoleFocus,
 }: {
   ship: Ship
   buildName: string
   progress: BuildProgressResult
   buildState: FleetBuildState
+  /** EWO-033 (Task 6/7) — resolved once per caller via the shared
+   * `resolveShipStockRoleFocus()` (never derived from `ship.role`, which
+   * mirrors the active Build's own role text, not stock ship metadata —
+   * see that resolver's doc comment). Undefined renders manufacturer alone. */
+  stockRoleFocus: string | undefined
 }) {
   const [mode, setMode] = useState<ShipImagePresentationMode>('cover')
 
   return (
     <Link
       to={`/ship/${ship.id}`}
-      className="panel p-4 flex flex-col gap-3 hover:shadow-glow hover:border-cyan/30 transition-all group"
+      className="panel p-4 flex flex-col gap-3 h-full hover:shadow-glow hover:border-cyan/30 transition-all group"
     >
+      {/* Region 1 — Image: fixed shared aspect ratio, full card width,
+          consistent height regardless of a real photo vs the branded
+          fallback (ShipImage handles that internally). EWO-033A (Task 4/6)
+          — both a real photo and the fallback now fill this frame via a
+          centered object-cover crop; only the hover-zoom is real-photo-only. */}
       <ShipImage
         src={ship.imageUrl}
         alt={ship.name}
         className="aspect-video rounded-lg bg-black/40 border border-white/5 overflow-hidden relative"
-        // Real photography keeps the hover-zoom cover treatment; branded
-        // fallback artwork gets a plain, uncropped, non-zooming contain
-        // presentation — letterboxed naturally against the dark background.
-        imageClassName={mode === 'contain' ? 'block w-full h-full object-contain animate-ship-image-fade-in' : 'block w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'}
+        imageClassName={mode === 'contain' ? 'block w-full h-full object-cover animate-ship-image-fade-in' : 'block w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'}
         presentation="auto"
         onPresentationChange={setMode}
       />
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h3 className="font-display font-semibold text-white leading-tight">{ship.name}</h3>
-          <p className="text-xs text-muted mt-0.5">{ship.manufacturer} · {ship.role}</p>
+
+      {/* Region 2 — Identity: name, ownership badge, manufacturer + stock
+          role/focus. Reserved minimum height covers two lines (name +
+          identity line) even when the identity line is manufacturer-only,
+          so a ship with no resolved stock role never renders a shorter
+          card than one with a two-part identity line. */}
+      <div className="flex items-start justify-between gap-2 min-h-11">
+        <div className="min-w-0">
+          <h3 className="font-display font-semibold text-white leading-tight truncate">{ship.name}</h3>
+          <p className="text-xs text-muted mt-0.5 line-clamp-1">{formatShipIdentityLine(ship.manufacturer, stockRoleFocus)}</p>
         </div>
         <Badge tone={ownershipTone(ship.ownership)}>{ship.ownership}</Badge>
       </div>
 
-      {buildState === 'INVALID_BUILD' ? (
-        <div className="flex items-center gap-1.5 text-danger text-xs font-semibold uppercase tracking-widest">
-          <AlertOctagon size={14} /> Invalid Loadout
-        </div>
-      ) : buildState === 'FACTORY_ONLY' ? (
-        <>
-          <div className="text-xs text-muted">
-            Active Loadout: <span className="text-cyan/90 font-medium">Factory Loadout</span>
+      {/* Region 3 — Active Loadout: always rendered (even for an Invalid
+          Loadout, where the Build reference itself is still real and
+          nameable), one reserved-height line, regardless of buildState. */}
+      <div className="text-xs text-muted min-h-5">
+        Active Loadout: <span className="text-cyan/90 font-medium">{buildState === 'FACTORY_ONLY' ? 'Factory Loadout' : buildName}</span>
+      </div>
+
+      {/* Region 4 — Readiness/status: reserved height sized for the
+          tallest real variant (progress bar + missing-item line) so the
+          three shorter variants (Invalid/Factory/Mission Ready, each one
+          line) never collapse the card — `flex-1` also lets this region
+          absorb any extra stretched grid-row height evenly. */}
+      <div className="flex-1 flex flex-col justify-start gap-1.5 min-h-11">
+        {buildState === 'INVALID_BUILD' ? (
+          <div className="flex items-center gap-1.5 text-danger text-xs font-semibold uppercase tracking-widest">
+            <AlertOctagon size={14} /> Invalid Loadout
           </div>
+        ) : buildState === 'FACTORY_ONLY' ? (
           <div className="flex items-center gap-1.5 text-xs text-cyan/80">
             <Settings2 size={13} /> No custom Loadout assigned yet
           </div>
-        </>
-      ) : buildState === 'MISSION_READY' ? (
-        <>
-          <div className="text-xs text-muted">
-            Active Loadout: <span className="text-cyan/90 font-medium">{buildName}</span>
-          </div>
+        ) : buildState === 'MISSION_READY' ? (
           <div className="flex items-center gap-1.5 text-success text-xs font-semibold uppercase tracking-widest">
             <CheckCircle2 size={14} /> Mission Ready
           </div>
-        </>
-      ) : (
-        <>
-          <div className="text-xs text-muted">
-            Active Loadout: <span className="text-cyan/90 font-medium">{buildName}</span>
-          </div>
-          <ReadinessBar value={progress.percentage} size="sm" />
-          <div className="flex items-start gap-1.5 text-xs text-warning">
-            <AlertTriangle size={13} className="mt-0.5 shrink-0" />
-            <span className="line-clamp-1">
-              Missing: {[...progress.missingAssignments, ...progress.upgradeOpportunities, ...progress.invalidTargets].join(', ')}
-            </span>
-          </div>
-        </>
-      )}
+        ) : (
+          <>
+            <ReadinessBar value={progress.percentage} size="sm" />
+            <div className="flex items-start gap-1.5 text-xs text-warning">
+              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <span className="line-clamp-1">
+                Missing: {[...progress.missingAssignments, ...progress.upgradeOpportunities, ...progress.invalidTargets].join(', ')}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
     </Link>
   )
 }

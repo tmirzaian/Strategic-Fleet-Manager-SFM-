@@ -43,12 +43,21 @@ export interface ShipImageProps {
  * for the underlying pure state machine, unit tested independently of
  * this component).
  *
- * Adaptive presentation (Sprint 1.3H): branded fallback artwork is a
- * complete composition, not a photo to crop — it renders with
- * object-contain, centered, on a flat dark background, with no overlay
- * and a brief fade-in, while real ship photography keeps the original
- * object-cover + gradient-overlay treatment. Pages never decide this
- * themselves; they only react to `onPresentationChange`.
+ * Adaptive presentation (Sprint 1.3H, frame-filling behavior corrected
+ * EWO-033A): both real ship photography and the branded fallback artwork
+ * render with `object-cover`, centered — the fallback asset
+ * (`SHIP_PLACEHOLDER_URL`, a square 1024×1024 composition with its
+ * "IMAGE UNAVAILABLE / DATA LINK PENDING" text and ship silhouette both
+ * confined to the vertical-center band) survives a centered cover-crop
+ * into any wider frame without cutting off that text — confirmed by
+ * direct visual inspection (EWO-033A, Task 3/4). This replaced the
+ * original `object-contain` + flat-background-color treatment, which
+ * left a large, empty letterboxed region in any frame wider than the
+ * asset's own 1:1 aspect ratio (the exact "oversized blank region"
+ * Sea Trials flagged on Ship Detail's hero). No overlay is still applied
+ * on top of the fallback (see below), so its own text stays fully crisp
+ * — "frame-filling," not "photographed and darkened." Pages never decide
+ * this themselves; they only react to `onPresentationChange`.
  *
  * Use this anywhere a ship image renders — Fleet Dashboard cards, Ship
  * Detail's hero, any future ship image view — rather than a raw <img>.
@@ -95,7 +104,13 @@ export default function ShipImage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode])
 
-  if (hardFailed) {
+  // A caller can explicitly pass fallbackSrc="" (e.g. the approved Fleet
+  // Registry placeholder not being delivered yet) to say "there is
+  // genuinely no image to show" — never attempt to load an empty <img
+  // src>, just render the same neutral icon treatment as a hard failure.
+  const hasNoImageSource = (!src || src.trim() === '') && (!fallbackSrc || fallbackSrc.trim() === '')
+
+  if (hardFailed || hasNoImageSource) {
     return (
       <div className={className}>
         <div className="w-full h-full flex items-center justify-center bg-black/40">
@@ -105,21 +120,26 @@ export default function ShipImage({
     )
   }
 
-  // Fallback artwork is a complete branded composition: shown in full
-  // (object-contain) on a flat dark background, centered, with no
-  // gradient overlay on top of it — real ship photography keeps the
-  // original cover + overlay treatment.
+  // EWO-033A (Task 4) — both real photography and the branded fallback
+  // composition now fill the frame with a centered object-cover crop
+  // (never distorted/stretched) — the fallback artwork's own "IMAGE
+  // UNAVAILABLE" text and ship silhouette sit within its vertical-center
+  // band, confirmed by direct visual inspection to survive any reasonable
+  // cover-crop. No gradient overlay renders on top of the fallback
+  // (unchanged from before) so its own text stays fully legible; real
+  // photography keeps its overlay via the `overlay` prop below. A brief
+  // fade-in still plays only when the fallback first appears.
   const resolvedImageClassName =
-    imageClassName ?? (mode === 'contain' ? 'block w-full h-full object-contain animate-ship-image-fade-in' : 'block w-full h-full object-cover')
+    imageClassName ?? (mode === 'contain' ? 'block w-full h-full object-cover animate-ship-image-fade-in' : 'block w-full h-full object-cover')
 
   return (
-    <div className={className} style={mode === 'contain' ? { backgroundColor: '#071016' } : undefined}>
+    <div className={className}>
       <img
         src={state.effectiveSrc}
         alt={alt}
         onError={handleError}
         className={resolvedImageClassName}
-        style={{ objectPosition: mode === 'contain' ? 'center' : objectPosition }}
+        style={{ objectPosition }}
       />
       {overlay && mode === 'cover' && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />}
     </div>

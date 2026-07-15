@@ -65,10 +65,13 @@ export default function ShipHeroFrame({
 
   return (
     <>
-      <div
-        data-testid="ship-hero-image-area"
-        className={`relative bg-black/40 border-b border-white/5 overflow-hidden ${isFallback ? 'h-[360px]' : 'h-44 sm:h-56'}`}
-      >
+      {/* EWO-033A (Task 5) — one fixed hero height regardless of image
+          availability (was h-[360px] for the fallback vs h-44 sm:h-56 for
+          a real photo, the exact cause of Sea Trials' "oversized blank
+          hero region" finding). The fallback artwork's own text/silhouette
+          survive this shorter frame fine now that it fills it via
+          object-cover instead of being letterboxed inside a taller box. */}
+      <div data-testid="ship-hero-image-area" className="relative bg-black/40 border-b border-white/5 overflow-hidden h-44 sm:h-56">
         <ShipImage
           src={imageSrc}
           image={imageMeta}

@@ -60,11 +60,14 @@ export default function ShipDetail() {
   const [editOpen, setEditOpen] = useState(false)
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
 
-  // Shared "Select Ship" control — the developer-only imported-ship options
-  // (from generated-data, produced offline by `npm run import:ships`) live
-  // in the same dropdown as every seed ship, appended at the end so they
-  // read as an addition, not a swap. Any number of imported ships can show
-  // up here — nothing about this list is Gladius-specific.
+  // Shared "Select Ship" control — lists only the Commander's actual live
+  // Fleet Assets (EWO-033A-V1). Developer-only imported preview ships
+  // (src/generated/importedShips.ts, produced offline by `npm run
+  // import:ships`) are deliberately NOT offered here — they have no
+  // corresponding Fleet Asset and must not appear as a selectable "ship in
+  // the fleet." That preview remains reachable directly by URL
+  // (importedShipById / ImportedShipDetail below), just not from this
+  // dropdown.
   const selectShip = (
     <div>
       <label className="text-[11px] uppercase tracking-widest text-muted flex items-center gap-1.5 mb-1.5">
@@ -74,11 +77,6 @@ export default function ShipDetail() {
         {sortedShips.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
-          </option>
-        ))}
-        {importedShipList.map((v) => (
-          <option key={v.ship.id} value={v.ship.id}>
-            {v.ship.name} (Imported)
           </option>
         ))}
       </select>

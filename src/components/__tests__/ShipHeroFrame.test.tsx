@@ -68,12 +68,13 @@ describe('<ShipHeroFrame /> adaptive layout', () => {
     expect(screen.queryByTestId('ship-hero-metadata-band')).not.toBeInTheDocument()
   })
 
-  it('the hero grows taller for fallback artwork than for real photography', () => {
+  it('EWO-033A (Task 5): the hero uses the exact same fixed height for fallback artwork and real photography — no height change based on image availability', () => {
     const { unmount } = render(
       <ShipHeroFrame name="Gladius" manufacturer="Aegis" ownership="Owned" activeBuildLabel="Factory Build" />
     )
     const fallbackHero = screen.getByTestId('ship-hero-image-area')
-    expect(fallbackHero.className).toContain('h-[360px]')
+    const fallbackClass = fallbackHero.className
+    expect(fallbackClass).toContain('h-44')
     unmount()
 
     render(
@@ -86,8 +87,8 @@ describe('<ShipHeroFrame /> adaptive layout', () => {
       />
     )
     const photoHero = screen.getByTestId('ship-hero-image-area')
-    expect(photoHero.className).not.toContain('h-[360px]')
     expect(photoHero.className).toContain('h-44')
+    expect(photoHero.className).toBe(fallbackClass)
   })
 
   it('16. Data Link Pending artwork/label displays for an imported ship definition with no resolved image', () => {

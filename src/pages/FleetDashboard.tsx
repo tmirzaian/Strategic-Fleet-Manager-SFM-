@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import ShipCard from '../components/ShipCard'
+import PriorityLabel from '../components/PriorityLabel'
 import Badge, { ownershipTone } from '../components/Badge'
 import ReadinessBar from '../components/ReadinessBar'
 import AddShipModal from '../components/AddShipModal'
@@ -10,6 +11,7 @@ import { calculateBuildProgress, type BuildProgressResult } from '../utils/build
 import { deriveFleetBuildState, compareByReadinessRank } from '../utils/fleetBuildState'
 import { ALL_RSI_ROLES } from '../data/shipClassification'
 import { shipDefinitionById } from '../data/shipDefinitions'
+import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
 import type { FleetBuildState, RsiRole } from '../types'
 
 type OwnershipPill = 'All' | 'Owned' | 'Purchased' | 'Loaner'
@@ -23,12 +25,13 @@ export default function FleetDashboard() {
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
+  const fleetAssets = useFleetStore((s) => s.fleetAssets)
   const [activeFilter, setActiveFilter] = useState<FilterPill>('All')
   const [sortMode, setSortMode] = useState<SortMode>('Priority')
   const [viewMode, setViewMode] = useState<ViewMode>('Card')
   const [addShipOpen, setAddShipOpen] = useState(false)
 
-  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Build'
+  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Loadout'
 
   // Single Build Progress engine, computed fresh from current
   // Installed + Active Target Build — never trusted from a stored
@@ -188,15 +191,23 @@ export default function FleetDashboard() {
       </div>
 
       {viewMode === 'Card' ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        // EWO-033 (Task 1) — every Fleet Asset gets its own Priority
+        // wrapper in Card view, always (not only while Priority sort is
+        // selected), showing that ship's own stored `priority` value —
+        // never a recomputed positional rank — so the label stays
+        // correct regardless of the active filter/sort mode (Ruling 7:
+        // existing gaps/duplicates render honestly, not repaired here).
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filtered.map((ship) => (
-            <ShipCard
-              key={ship.id}
-              ship={ship}
-              buildName={buildName(ship.activeBuildId)}
-              progress={progressByShipId.get(ship.id)!}
-              buildState={stateByShipId.get(ship.id)!}
-            />
+            <PriorityLabel key={ship.id} rank={ship.priority}>
+              <ShipCard
+                ship={ship}
+                buildName={buildName(ship.activeBuildId)}
+                progress={progressByShipId.get(ship.id)!}
+                buildState={stateByShipId.get(ship.id)!}
+                stockRoleFocus={resolveShipStockRoleFocus(ship.id, fleetAssets)}
+              />
+            </PriorityLabel>
           ))}
         </div>
       ) : (
@@ -209,8 +220,8 @@ export default function FleetDashboard() {
                   <th className="px-5 py-3 font-medium">Ownership</th>
                   <th className="px-5 py-3 font-medium">Career</th>
                   <th className="px-5 py-3 font-medium">Role</th>
-                  <th className="px-5 py-3 font-medium">Active Build</th>
-                  <th className="px-5 py-3 font-medium w-40">Build Progress</th>
+                  <th className="px-5 py-3 font-medium">Active Loadout</th>
+                  <th className="px-5 py-3 font-medium w-40">Loadout Progress</th>
                   <th className="px-5 py-3 font-medium">Missing Items</th>
                   <th className="px-5 py-3 font-medium text-right">Action</th>
                 </tr>
@@ -231,10 +242,10 @@ export default function FleetDashboard() {
                       <td className="px-5 py-3">
                         {state === 'INVALID_BUILD' ? (
                           <span className="inline-flex items-center gap-1.5 text-danger text-xs font-semibold uppercase tracking-widest">
-                            <AlertOctagon size={13} /> Invalid Build
+                            <AlertOctagon size={13} /> Invalid Loadout
                           </span>
                         ) : state === 'FACTORY_ONLY' ? (
-                          <span className="text-xs text-muted">No custom Build assigned</span>
+                          <span className="text-xs text-muted">No custom Loadout assigned</span>
                         ) : state === 'MISSION_READY' ? (
                           <span className="inline-flex items-center gap-1.5 text-success text-xs font-semibold uppercase tracking-widest">
                             <CheckCircle2 size={13} /> Mission Ready

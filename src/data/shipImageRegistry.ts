@@ -25,8 +25,20 @@
  *     by its `name`, and copy its `sourceEntityClass` field verbatim.
  *   - Seed-fleet ship: open src/data/seed.ts and copy the ship's own
  *     `id` field verbatim.
+ *   - A Mission M-012 catalog-only ship (no deep import, no seed entry —
+ *     the vast majority of the ~290-ship roster Add Ship offers): its
+ *     canonical id is already its raw entity class (e.g. "AEGS_Hammerhead"),
+ *     the same `id` field `selectableShipDefinitions` (src/data/shipDefinitions.ts)
+ *     exposes for it — open generated-data/ship-catalog.json, find the
+ *     ship by its `displayName`, and copy the record's own key
+ *     (`entityClass`) verbatim.
  * Either way it's one field lookup in a file you can Ctrl+F by ship
  * name — no need to run anything or understand the rest of the schema.
+ * `src/data/shipDefinitions.ts`'s exported `selectableShipDefinitions`
+ * array is also a valid, always-current read-only lookup for any of the
+ * three cases above (each entry's own `.id` is exactly the key this
+ * registry expects) — useful in a REPL/test/breakpoint if the generated
+ * JSON files feel unfamiliar.
  *
  * ── Values ────────────────────────────────────────────────────────────
  * Official RSI-hosted image URLs, acceptable for the Alpha/Beta testing

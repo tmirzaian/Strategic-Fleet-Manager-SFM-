@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { ShipWheel, ScanSearch, LayoutGrid, ClipboardList, PackageCheck, CheckCircle2, AlertTriangle, Wrench, Factory, PackageX, Plus } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import ShipCard from '../components/ShipCard'
+import PriorityLabel from '../components/PriorityLabel'
+import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
 import SortableHeader from '../components/SortableHeader'
 import FleetStatusTile from '../components/FleetStatusTile'
 import CriticalMetricTile from '../components/CriticalMetricTile'
@@ -57,6 +59,7 @@ export default function MissionControl() {
   const installedLoadouts = useFleetStore((s) => s.installedLoadouts)
   const reservations = useFleetStore((s) => s.reservations)
   const hangarItems = useFleetStore((s) => s.hangarItems)
+  const fleetAssets = useFleetStore((s) => s.fleetAssets)
 
   // Ships Active / Needed Items are computed fresh from the same Build
   // Progress engine every other page uses, never from a stored readiness/
@@ -67,11 +70,11 @@ export default function MissionControl() {
     const p = progressByShipId.get(s.id)
     return sum + (p ? p.missingAssignments.length + p.upgradeOpportunities.length + p.invalidTargets.length : 0)
   }, 0)
-  // EWO-012: the Priority Ship section is sized for up to three records —
-  // never invents a filler ship when fewer exist. EWO-032 (Task 6): this
-  // ordering/slicing logic is presentation-independent and unchanged by
-  // the Fleet Ship Card migration below.
-  const topPriority = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+  // EWO-012: the Priority Ship section is sized for up to four records —
+  // never invents a filler ship when fewer exist. EWO-033 (Task 2) raised
+  // this from 3 to 4 per Commander direction; the sort/slice logic itself
+  // is presentation-independent and unchanged by either card migration.
+  const topPriority = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
   const procurementRaw = buildProcurementList(hardpoints, builds, ships, installedLoadouts, reservations, hangarItems)
 
   // EWO-032: computed once and reused both by the Fleet Status partition
@@ -176,29 +179,39 @@ export default function MissionControl() {
             </div>
           ) : (
             <div
-              className={`grid gap-5 ${
+              // EWO-033 (Task 3) — the same lg/xl column thresholds Fleet
+              // Dashboard's own grid uses (sm:2 -> lg:3 -> xl:4), so a
+              // 4-card Priority section never renders narrower/cramped
+              // cards than the identical ShipCard would get on Fleet
+              // Dashboard at the same viewport width.
+              className={`grid gap-5 items-stretch ${
                 topPriority.length === 1
                   ? 'grid-cols-1 max-w-md'
                   : topPriority.length === 2
                     ? 'grid-cols-1 sm:grid-cols-2'
-                    : 'grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3'
+                    : topPriority.length === 3
+                      ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               }`}
             >
               {topPriority.map((ship, i) => (
-                // EWO-032 (Task 2/3/7): Mission Control is a consumer of the
-                // canonical Fleet Ship Card — the same component Fleet
-                // Dashboard renders, no duplicate implementation. The only
-                // Mission-Control-specific concept is this Priority label,
-                // rendered above the card rather than as a badge inside it.
-                <div key={ship.id} data-testid="priority-card-wrapper" className="flex flex-col gap-2">
-                  <span className="font-mono text-[10px] text-cyan/80 tracking-widest">PRIORITY {i + 1}</span>
+                // EWO-032/EWO-033 (Task 2/3/7): Mission Control is a
+                // consumer of the canonical Fleet Ship Card — the same
+                // component Fleet Dashboard renders, no duplicate
+                // implementation. The only Mission-Control-specific
+                // concept is the Priority label, rendered above the card
+                // via the shared PriorityLabel wrapper (positional rank
+                // within the Top 4, not the ship's own priority field —
+                // Fleet Dashboard's wrapper shows the latter instead).
+                <PriorityLabel key={ship.id} rank={i + 1}>
                   <ShipCard
                     ship={ship}
                     buildName={buildName(ship.activeBuildId)}
                     progress={progressByShipId.get(ship.id)!}
                     buildState={stateByShipId.get(ship.id)!}
+                    stockRoleFocus={resolveShipStockRoleFocus(ship.id, fleetAssets)}
                   />
-                </div>
+                </PriorityLabel>
               ))}
             </div>
           )}

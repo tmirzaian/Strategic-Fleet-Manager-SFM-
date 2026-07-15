@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ShipDetail from '../ShipDetail'
 import MissionComposer from '../MissionComposer'
@@ -205,5 +205,76 @@ describe('EWO-026 (round 2, Task 1): Ship Detail rebuilds the canonical Port Tre
     // buildState are still computed from the exact same shipHardpoints.
     renderShipDetail('corsair')
     expect(screen.getByText('Mission Ready')).toBeInTheDocument()
+  })
+})
+
+/**
+ * EWO-033A (Task 5/12) — Ship Detail Hero Standardization. Cutlass Black
+ * and 135c both have a real, registered image (src/data/shipImageRegistry.ts);
+ * Eclipse and Gladius are deep-imported-only (no seed entry — reachable via
+ * ShipDetail's "(Imported)" dev-inspection path) with no registry entry, so
+ * they exercise the fallback. All four render through the exact same
+ * `ShipHeroFrame` component and the exact same fixed hero height.
+ */
+describe('<ShipDetail /> — EWO-033A (Task 5): hero standardization across real-image and fallback ships', () => {
+  it('12. Cutlass Black (registered real image) renders the overlay layout, not the fallback metadata band', () => {
+    renderShipDetail('cutlass-black')
+    expect(screen.getByTestId('ship-hero-overlay-info')).toBeInTheDocument()
+    expect(screen.queryByTestId('ship-hero-metadata-band')).not.toBeInTheDocument()
+  })
+
+  it('12. 135c (registered real image) renders the overlay layout, not the fallback metadata band', () => {
+    renderShipDetail('135c')
+    expect(screen.getByTestId('ship-hero-overlay-info')).toBeInTheDocument()
+    expect(screen.queryByTestId('ship-hero-metadata-band')).not.toBeInTheDocument()
+  })
+
+  it('9/10. Eclipse (no registry entry, deep-imported-only) renders the fallback metadata band, filling the hero without excessive unused space (same fixed height as a real-image hero)', () => {
+    renderShipDetail('eclipse-imported')
+    expect(screen.getByTestId('ship-hero-metadata-band')).toBeInTheDocument()
+    expect(screen.queryByTestId('ship-hero-overlay-info')).not.toBeInTheDocument()
+    const heroArea = screen.getByTestId('ship-hero-image-area')
+    expect(heroArea.className).toContain('h-44')
+    expect(heroArea.className).not.toContain('h-[360px]')
+  })
+
+  it('Gladius (no registry entry, deep-imported-only) also renders the fallback cleanly', () => {
+    renderShipDetail('gladius-imported')
+    const band = screen.getByTestId('ship-hero-metadata-band')
+    expect(band).toBeInTheDocument()
+    expect(within(band).getByText('Gladius')).toBeInTheDocument()
+  })
+
+  it('15. the real-image hero and the fallback hero share the exact same image-area height class', () => {
+    renderShipDetail('cutlass-black')
+    const realHero = screen.getByTestId('ship-hero-image-area')
+    const realClass = realHero.className
+    cleanup()
+    renderShipDetail('eclipse-imported')
+    const fallbackHero = screen.getByTestId('ship-hero-image-area')
+    expect(fallbackHero.className).toBe(realClass)
+  })
+
+  it('20. ship identity (name, ownership) remains visible for both a real-image hero and a fallback hero', () => {
+    renderShipDetail('cutlass-black')
+    expect(within(screen.getByTestId('ship-hero-image-area')).getByText('Cutlass Black')).toBeInTheDocument()
+    cleanup()
+    renderShipDetail('eclipse-imported')
+    expect(within(screen.getByTestId('ship-hero-metadata-band')).getByText('Eclipse')).toBeInTheDocument()
+  })
+
+  it('11. a deliberately failing registered URL falls back cleanly on Ship Detail, with no broken-image state and no crash', () => {
+    const ghost = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    useFleetStore.setState({
+      ships: useFleetStore.getState().ships.map((s) => (s.id === 'ghost' ? { ...s, imageUrl: 'https://example.com/deliberately-failing-test-url.jpg' } : s)),
+    })
+    renderShipDetail('ghost')
+    const img = screen.getByRole('img', { name: ghost.name }) as HTMLImageElement
+    expect(() => fireEvent.error(img)).not.toThrow()
+    // Once the registered URL fails, the hero degrades to the fallback
+    // presentation entirely — identity moves from the overlay to the
+    // metadata band (ShipHeroFrame's existing, pre-EWO-033A architecture
+    // for the fallback case), but it never disappears.
+    expect(within(screen.getByTestId('ship-hero-metadata-band')).getByText(ghost.name)).toBeInTheDocument()
   })
 })

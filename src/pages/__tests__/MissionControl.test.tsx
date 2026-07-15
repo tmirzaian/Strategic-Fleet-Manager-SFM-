@@ -72,9 +72,14 @@ describe('Fleet Status invariant (Alpha 2.5A, Part 1/4)', () => {
 describe('<MissionControl /> rendering (terminology + context names)', () => {
   it('9/10/11: Fleet Status tiles show represented ship names', () => {
     renderMissionControl()
-    expect(screen.getByText('Mission Ready')).toBeInTheDocument()
-    expect(screen.getByText('Loadouts In Progress')).toBeInTheDocument()
-    expect(screen.getByText('Factory Loadout')).toBeInTheDocument()
+    // EWO-033 (Task 2): with the Priority section now showing the Top 4
+    // (not 3), a priority card's own status text ("Mission Ready"/"Factory
+    // Loadout") can legitimately also match one of the Top 4 ships' own
+    // ShipCard status region — getAllByText tolerates that overlap rather
+    // than asserting exclusivity this test was never actually about.
+    expect(screen.getAllByText('Mission Ready').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Loadouts In Progress').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Factory Loadout').length).toBeGreaterThan(0)
   })
 
   it('14. clicking a displayed ship name links to its Ship Detail route', () => {
@@ -187,13 +192,46 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     expect(screen.queryByText('PRIORITY 2')).not.toBeInTheDocument()
   })
 
-  it('multiple eligible ships render up to the intended display limit of 3 priority records (EWO-012)', () => {
+  it('multiple eligible ships render up to the intended display limit of 4 priority records (EWO-033, Task 2)', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    expect(ships.length).toBeGreaterThan(3)
+    expect(ships.length).toBeGreaterThan(4)
     expect(screen.getByText('PRIORITY 1')).toBeInTheDocument()
     expect(screen.getByText('PRIORITY 2')).toBeInTheDocument()
     expect(screen.getByText('PRIORITY 3')).toBeInTheDocument()
+    expect(screen.getByText('PRIORITY 4')).toBeInTheDocument()
+    expect(screen.queryByText('PRIORITY 5')).not.toBeInTheDocument()
+  })
+
+  it('8/9. EWO-033: exactly the four highest-priority Fleet Assets render when the fleet has 4+ ships — the fifth-highest is excluded', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const sorted = [...ships].sort((a, b) => a.priority - b.priority)
+    expect(sorted.length).toBeGreaterThan(4)
+    const top4 = sorted.slice(0, 4)
+    const fifth = sorted[4]
+    const wrapperNames = screen.getAllByTestId('priority-card-wrapper').map((w) => w.textContent ?? '')
+    for (const ship of top4) {
+      expect(wrapperNames.some((text) => text.includes(ship.name))).toBe(true)
+    }
+    // The fifth-highest-priority ship may legitimately still appear
+    // elsewhere on the page (Fleet Status tiles, Procurement, etc.) — the
+    // real assertion is that only 4 priority-card wrappers exist at all.
+    expect(wrapperNames).toHaveLength(4)
+    expect(wrapperNames.some((text) => text.includes(fifth.name))).toBe(false)
+  })
+
+  it('11. EWO-033: a small fleet (1-3 ships) renders safely, with no invented filler card', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const three = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    const ids = new Set(three.map((s) => s.id))
+    useFleetStore.setState({
+      ships: three,
+      builds: builds.filter((b) => ids.has(b.shipId)),
+      hardpoints: hardpoints.filter((h) => ids.has(h.shipId)),
+    })
+    renderMissionControl()
+    expect(screen.getAllByTestId('priority-card-wrapper')).toHaveLength(3)
     expect(screen.queryByText('PRIORITY 4')).not.toBeInTheDocument()
   })
 
@@ -212,10 +250,10 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     expect(screen.queryByText('PRIORITY 3')).not.toBeInTheDocument()
   })
 
-  it('5. priority ordering remains unchanged — records render in ascending priority order (EWO-032, Task 6: presentation-only migration, ordering logic untouched)', () => {
+  it('10. priority ordering remains unchanged — records render in ascending priority order (EWO-033, Task 2/6: Top 4, sort/slice logic untouched)', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
     const badges = screen.getAllByText(/^PRIORITY \d$/)
     expect(badges).toHaveLength(expected.length)
     badges.forEach((badge, i) => {
@@ -224,10 +262,10 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     })
   })
 
-  it('11. EWO-032 (Task 4): the entire card is the navigation target on every rendered priority record — no separate "Ship Detail" hyperlink', () => {
+  it('13. EWO-032/EWO-033 (Task 4): the entire card is the navigation target on every rendered priority record — no separate "Ship Detail" hyperlink', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
     expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
     const wrappers = screen.getAllByTestId('priority-card-wrapper')
     expect(wrappers).toHaveLength(expected.length)
@@ -356,9 +394,12 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
 
   it('6. Quartermaster Logistics renders all five critical cards', () => {
     renderMissionControl()
-    expect(screen.getByText('Mission Ready')).toBeInTheDocument()
-    expect(screen.getByText('Loadouts In Progress')).toBeInTheDocument()
-    expect(screen.getByText('Factory Loadout')).toBeInTheDocument()
+    // EWO-033 (Task 2): getAllByText tolerates a Top-4 priority card's own
+    // status text legitimately overlapping a Fleet Status tile's label —
+    // see the identical note on the "Fleet Status tiles" test above.
+    expect(screen.getAllByText('Mission Ready').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Loadouts In Progress').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Factory Loadout').length).toBeGreaterThan(0)
     expect(screen.getByText('Missing Components')).toBeInTheDocument()
     // Also appears as a Procurement column header — the Logistics tile is one of the matches.
     expect(screen.getAllByText('Unreserved Inventory').length).toBeGreaterThan(0)
