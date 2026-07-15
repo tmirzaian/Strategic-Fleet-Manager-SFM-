@@ -1,4 +1,4 @@
-import type { Ship, Build, FleetAsset, InstalledLoadoutEntry, MissionReservation } from '../types'
+import type { Ship, Build, FleetAsset, Hardpoint, InstalledLoadoutEntry, MissionReservation } from '../types'
 import { shipDefinitionById } from '../data/shipDefinitions'
 import { resolveShipDefinitionId } from './loadoutEditorModel'
 
@@ -101,4 +101,71 @@ export function formatDependencyLabel(dep: InventoryDependency): string {
 
 export function totalClaimedQuantity(dependencies: InventoryDependency[]): number {
   return dependencies.reduce((sum, d) => sum + d.quantity, 0)
+}
+
+/**
+ * EWO-029 (Task 4/8/9/12) — "which real, saved Builds currently have an
+ * unresolved (non-OK, non-Invalid, non-Unresolved) target requirement for
+ * this exact component, and does that requirement already have an ACTIVE
+ * reservation covering it?" One shared answer, reused by three different
+ * surfaces so they can never disagree with each other:
+ *   - the Needed By column (Task 12) — every entry here, reserved or not;
+ *   - the unreserved-match / "available upgrade" signal (Task 8/9/10) —
+ *     entries with `reserved: false`, cross-checked against
+ *     calculateComponentAvailability's own availableQuantity;
+ *   - the Reserve modal's candidate Build/target-slot list (Task 4) — for
+ *     a chosen Fleet Asset, its own unreserved entries here are exactly
+ *     the compatible, selectable requirements.
+ *
+ * Deliberately does NOT consult Hangar stock/availability itself — this
+ * answers "what does the fleet still need," not "can it be fulfilled
+ * right now." Callers combine it with calculateComponentAvailability for
+ * that second question, exactly like the pre-existing
+ * buildProcurementList (src/utils/procurement.ts) already does — this
+ * function does not replace that fleet-wide aggregate, it exposes the
+ * same per-row facts at the single-component granularity the Reserve
+ * workflow and Hangar Inventory row need.
+ */
+export interface NeededByEntry {
+  shipId: string
+  fleetAssetLabel: string
+  hullName: string
+  buildId: string
+  buildName: string
+  slotLabel: string
+  /** True when an ACTIVE reservation already commits a specific owned
+   * unit to this exact (Build, slot) requirement. */
+  reserved: boolean
+}
+
+export function resolveNeededByBuilds(
+  componentName: string,
+  ships: Ship[],
+  builds: Build[],
+  fleetAssets: FleetAsset[],
+  hardpoints: Hardpoint[],
+  reservations: MissionReservation[]
+): NeededByEntry[] {
+  const entries: NeededByEntry[] = []
+  for (const hp of hardpoints) {
+    if (hp.targetItem !== componentName) continue
+    if (hp.status === 'OK' || hp.status === 'Invalid Target' || hp.status === 'Unresolved') continue
+    const build = builds.find((b) => b.id === hp.buildId)
+    if (!build) continue
+    const ship = ships.find((s) => s.id === build.shipId)
+    if (!ship) continue
+    const reserved = reservations.some(
+      (r) => r.missionConfigurationId === hp.buildId && r.targetSlotLabel === hp.slotLabel && r.componentName === componentName && r.status === 'ACTIVE'
+    )
+    entries.push({
+      shipId: ship.id,
+      fleetAssetLabel: ship.name,
+      hullName: hullNameFor(ship, fleetAssets),
+      buildId: build.id,
+      buildName: build.name,
+      slotLabel: hp.slotLabel,
+      reserved,
+    })
+  }
+  return entries
 }

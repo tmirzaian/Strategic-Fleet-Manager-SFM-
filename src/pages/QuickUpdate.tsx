@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
-import { findItemCatalog } from '../data/seed'
+import { catalogComponentsByName } from '../generated/componentCatalog'
+import { isComponentSelectableForPort } from '../data/componentCatalog'
+import CatalogComponentSearch from '../components/CatalogComponentSearch'
 import type { Ship } from '../types'
 
 /**
@@ -16,12 +18,19 @@ function fleetAssetOptionLabel(ship: Ship): string {
 }
 
 type ChangeType = 'Add Component to Hangar' | 'Install Component' | 'Remove Component' | 'Move Component Between Ships' | 'Set Active Loadout'
-const changeTypes: ChangeType[] = ['Add Component to Hangar', 'Install Component', 'Remove Component', 'Move Component Between Ships', 'Set Active Loadout']
+// EWO-030 (Tasks 6/8) — Remove Component and Move Component Between Ships
+// are hidden from the visible tab list: Ship Detail's Port Tree is now the
+// official uninstall workflow (Task 7), and moving a component directly
+// between ships is deferred to a future roadmap item. Both branches' full
+// implementation below (state, JSX, and handleSave logic) is left intact —
+// only unreachable through this page's own UI.
+const changeTypes: ChangeType[] = ['Add Component to Hangar', 'Install Component', 'Set Active Loadout']
 const slots = ['Weapon 1', 'Weapon 2', 'Power 1', 'Power 2', 'Shield 1', 'Shield 2', 'Cooler 1', 'Cooler 2', 'Quantum Drive', 'Radar', 'Life Support']
 
 export default function QuickUpdate() {
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
+  const hardpoints = useFleetStore((s) => s.hardpoints)
   const addLogEntry = useFleetStore((s) => s.addLogEntry)
   const installComponent = useFleetStore((s) => s.installComponent)
   const removeComponent = useFleetStore((s) => s.removeComponent)
@@ -30,7 +39,10 @@ export default function QuickUpdate() {
   const setActiveBuild = useFleetStore((s) => s.setActiveBuild)
 
   const [changeType, setChangeType] = useState<ChangeType>('Install Component')
-  const [itemQuery, setItemQuery] = useState('')
+  // EWO-030 (Task 1) — set exclusively by CatalogComponentSearch picking a
+  // real catalog component, replacing the old free-text itemQuery search
+  // for both Install Component and Add Component to Hangar.
+  const [selectedComponentName, setSelectedComponentName] = useState('')
   const [shipId, setShipId] = useState(ships[0]?.id ?? '')
   const [slot, setSlot] = useState(slots[0])
   const [toShipId, setToShipId] = useState(ships[1]?.id ?? ships[0]?.id ?? '')
@@ -40,44 +52,86 @@ export default function QuickUpdate() {
   const [returnToHangar, setReturnToHangar] = useState(false)
   const [summary, setSummary] = useState<null | { success: boolean; headline: string; detail: string }>(null)
 
-  const matches = useMemo(() => {
-    if (!itemQuery.trim()) return []
-    return findItemCatalog.filter((c) => c.item.toLowerCase().includes(itemQuery.toLowerCase()))
-  }, [itemQuery])
-
   const selectedShip = ships.find((s) => s.id === shipId)
   const shipBuilds = builds.filter((b) => b.shipId === shipId)
-  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Build'
+  const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Loadout'
   // Loadout Context defaults to this Fleet Asset's Active Build, but Install
   // /Remove Component can target any Build assigned to it (Part 19-21) —
   // installing under a non-active context never changes activeBuildId.
   const effectiveBuildContextId = buildContextId && shipBuilds.some((b) => b.id === buildContextId) ? buildContextId : selectedShip?.activeBuildId ?? ''
   const buildContext = builds.find((b) => b.id === effectiveBuildContextId)
 
+  // EWO-030 (Task 3) — after a Component and a Loadout are both chosen,
+  // narrow to hardpoints that are (a) not already fulfilled and (b)
+  // positively type/size-compatible with the selected component, via the
+  // same isComponentSelectableForPort the Loadout Manager's Target picker
+  // already uses (EWO-024, Task 2) — "what's offered" can never disagree
+  // with "what installComponent will actually accept."
+  const compatibleSlotOptions = useMemo(() => {
+    if (!selectedComponentName || !effectiveBuildContextId) return []
+    return hardpoints.filter(
+      (h) => h.buildId === effectiveBuildContextId && h.status !== 'OK' && isComponentSelectableForPort(selectedComponentName, h.type, h.size)
+    )
+  }, [hardpoints, selectedComponentName, effectiveBuildContextId])
+
+  // EWO-030 (Task 4) — a single compatible destination is pre-selected
+  // automatically; the Commander is never asked to answer a question with
+  // only one possible answer.
+  useEffect(() => {
+    if (compatibleSlotOptions.length === 1) setSlot(compatibleSlotOptions[0].slotLabel)
+    else if (compatibleSlotOptions.length === 0) setSlot('')
+  }, [compatibleSlotOptions])
+
+  const canSave =
+    changeType === 'Install Component'
+      ? Boolean(selectedComponentName && shipId && effectiveBuildContextId && slot)
+      : changeType === 'Add Component to Hangar'
+        ? Boolean(selectedComponentName)
+        : changeType === 'Set Active Loadout'
+          ? Boolean(shipId && buildId)
+          : true
+
   function handleSave() {
     if (changeType === 'Install Component') {
       const before = buildContext?.readiness
-      const result = installComponent(shipId, itemQuery || 'Component', slot, effectiveBuildContextId || undefined)
+      const result = installComponent(shipId, selectedComponentName || 'Component', slot, effectiveBuildContextId || undefined)
       const after = useFleetStore.getState().builds.find((b) => b.id === effectiveBuildContextId)?.readiness
-      const contextNote = effectiveBuildContextId !== selectedShip?.activeBuildId ? ` (Loadout Context: ${buildContext?.name ?? 'selected build'} — Active Loadout unchanged)` : ''
+      const contextNote = effectiveBuildContextId !== selectedShip?.activeBuildId ? ` (Loadout Context: ${buildContext?.name ?? 'selected Loadout'} — Active Loadout unchanged)` : ''
       if (result.matched) {
         addLogEntry({
           action: 'Installed component',
           shipName: selectedShip?.name,
-          itemName: itemQuery,
-          details: `Installed ${itemQuery || 'component'} on ${selectedShip?.name ?? 'ship'} (${slot})${contextNote}`,
+          itemName: selectedComponentName,
+          details: `Installed ${selectedComponentName || 'component'} on ${selectedShip?.name ?? 'ship'} (${slot})${contextNote}`,
           readinessBefore: before,
           readinessAfter: after,
         })
-        setSummary({ success: true, headline: 'Update logged', detail: `Installed ${itemQuery || 'component'} on ${selectedShip?.name} (${slot})${contextNote} · Progress ${before}% → ${after}%` })
+        setSummary({ success: true, headline: 'Fleet Registry Updated', detail: `Installed ${selectedComponentName || 'component'} on ${selectedShip?.name} (${slot})${contextNote} · Progress ${before}% → ${after}%` })
+        // Component and its Slot are reset for the next install — Ship and
+        // Loadout are deliberately kept so installing several components
+        // in a row on the same Fleet Asset never re-asks those questions.
+        setSelectedComponentName('')
+        setSlot('')
+      } else if (result.blocked === 'reserved-elsewhere') {
+        // EWO-029 (Task 7, Scenario F) — never silently steal a unit
+        // committed to a different Fleet Asset/Build's active reservation.
+        setSummary({
+          success: false,
+          headline: 'Reserved for another Fleet Asset',
+          detail: `"${selectedComponentName || 'That item'}" has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout. Nothing was changed.`,
+        })
       } else {
-        setSummary({ success: false, headline: 'No open slot matched', detail: `${buildContext?.name ?? 'The selected build'} has no outstanding hardpoint for "${itemQuery || 'that item'}" in ${slot}. Nothing was changed.` })
+        // EWO-030 (Task 5) — the compatible-slot-filtering + auto-select
+        // above means the normal workflow can no longer reach this path;
+        // it remains as defensive programming only (e.g. a slot's status
+        // changed out from under a stale selection).
+        setSummary({ success: false, headline: 'No open slot matched', detail: `${buildContext?.name ?? 'The selected Loadout'} has no outstanding hardpoint for "${selectedComponentName || 'that item'}" in ${slot}. Nothing was changed.` })
       }
     } else if (changeType === 'Remove Component') {
       const before = buildContext?.readiness
       const result = removeComponent(shipId, slot, returnToHangar, effectiveBuildContextId || undefined)
       const after = useFleetStore.getState().builds.find((b) => b.id === effectiveBuildContextId)?.readiness
-      const contextNote = effectiveBuildContextId !== selectedShip?.activeBuildId ? ` (Loadout Context: ${buildContext?.name ?? 'selected build'} — Active Loadout unchanged)` : ''
+      const contextNote = effectiveBuildContextId !== selectedShip?.activeBuildId ? ` (Loadout Context: ${buildContext?.name ?? 'selected Loadout'} — Active Loadout unchanged)` : ''
       if (result.matched) {
         addLogEntry({
           action: returnToHangar ? 'Removed component to Hangar' : 'Removed component',
@@ -89,20 +143,26 @@ export default function QuickUpdate() {
         })
         setSummary({
           success: true,
-          headline: 'Update logged',
+          headline: 'Fleet Registry Updated',
           detail: `Removed ${result.itemName} from ${selectedShip?.name} (${slot})${contextNote} · Progress ${before}% → ${after}%${returnToHangar ? ' · Returned to Hangar' : ''}`,
         })
       } else {
-        setSummary({ success: false, headline: 'Nothing to remove', detail: `${slot} on ${selectedShip?.name} (${buildContext?.name ?? 'selected build'}) is already empty.` })
+        setSummary({ success: false, headline: 'Nothing to remove', detail: `${slot} on ${selectedShip?.name} (${buildContext?.name ?? 'selected Loadout'}) is already empty.` })
       }
     } else if (changeType === 'Add Component to Hangar') {
-      addHangarItem({ name: itemQuery || 'Component', type: 'Component', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-      setSummary({ success: true, headline: 'Update logged', detail: `Added ${itemQuery || 'item'} to Hangar` })
+      const entry = selectedComponentName ? catalogComponentsByName.get(selectedComponentName) : undefined
+      if (!selectedComponentName || !entry) {
+        setSummary({ success: false, headline: 'Select a component', detail: 'Choose a real catalog component before saving.' })
+        return
+      }
+      addHangarItem({ name: selectedComponentName, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass })
+      setSummary({ success: true, headline: 'Fleet Registry Updated', detail: `Added ${selectedComponentName} to Hangar` })
+      setSelectedComponentName('')
     } else if (changeType === 'Move Component Between Ships') {
       const toShip = ships.find((s) => s.id === toShipId)
       const result = moveComponentBetweenShips(shipId, slot, toShipId, toSlot)
       if (result.matched) {
-        setSummary({ success: true, headline: 'Update logged', detail: `Moved ${result.itemName} from ${selectedShip?.name} to ${toShip?.name}` })
+        setSummary({ success: true, headline: 'Fleet Registry Updated', detail: `Moved ${result.itemName} from ${selectedShip?.name} to ${toShip?.name}` })
       } else {
         setSummary({ success: false, headline: 'Move failed', detail: result.message ?? `Either ${slot} on ${selectedShip?.name} is empty, or ${toShip?.name} has no compatible open slot.` })
       }
@@ -113,19 +173,18 @@ export default function QuickUpdate() {
         const before = selectedShip.readiness
         setActiveBuild(shipId, buildId)
         addLogEntry({
-          action: 'Active Build changed',
+          action: 'Operational Assignment Updated',
           shipName: selectedShip.name,
           itemName: build.name,
           details: `Switched ${selectedShip.name} to ${build.name}`,
           readinessBefore: before,
           readinessAfter: build.readiness,
         })
-        setSummary({ success: true, headline: 'Update logged', detail: `${selectedShip.name} is now on ${build.name}` })
+        setSummary({ success: true, headline: 'Fleet Registry Updated', detail: `${selectedShip.name} is now on ${build.name}` })
       } else {
-        setSummary({ success: false, headline: 'Pick a build', detail: 'Select a ship and a Build to switch to.' })
+        setSummary({ success: false, headline: 'Select a Loadout', detail: 'Select a ship and a Loadout to switch to.' })
       }
     }
-    setItemQuery('')
   }
 
   return (
@@ -143,7 +202,10 @@ export default function QuickUpdate() {
             {changeTypes.map((type) => (
               <button
                 key={type}
-                onClick={() => setChangeType(type)}
+                onClick={() => {
+                  setChangeType(type)
+                  setSummary(null)
+                }}
                 className={`px-3 py-2.5 rounded-lg text-sm font-medium border text-left transition-colors ${
                   changeType === type
                     ? 'bg-cyan/10 border-cyan/40 text-cyan'
@@ -156,32 +218,97 @@ export default function QuickUpdate() {
           </div>
         </div>
 
-        {(changeType === 'Install Component' || changeType === 'Add Component to Hangar') && (
-          <div>
-            <label className="text-xs uppercase tracking-widest text-muted block mb-2">Find Item</label>
-            <input
-              value={itemQuery}
-              onChange={(e) => setItemQuery(e.target.value)}
-              placeholder="Start typing an item name…"
-              className="w-full"
-            />
-            {matches.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {matches.map((m) => (
-                  <button
-                    key={m.item}
-                    onClick={() => setItemQuery(m.item)}
-                    className="w-full text-left px-3 py-2 rounded-md bg-black/20 hover:bg-cyan/10 border border-white/5 hover:border-cyan/30 transition-colors"
-                  >
-                    <span className="font-mono text-xs text-muted">{m.path}</span>
-                  </button>
-                ))}
+        {/* EWO-030 (Task 2) — Install Component now walks Component -> Ship
+            -> Loadout -> Compatible Slot, each step revealed only once the
+            one before it is answered, and the canonical catalog search
+            renderer (Task 1) replaces the old free-text search. */}
+        {changeType === 'Install Component' && (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs uppercase tracking-widest text-muted block mb-2">Component</label>
+              <CatalogComponentSearch
+                selectedName={selectedComponentName}
+                onSelect={(name) => {
+                  setSelectedComponentName(name)
+                  setSlot('')
+                }}
+              />
+            </div>
+
+            {selectedComponentName && (
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Ship</label>
+                <select
+                  value={shipId}
+                  onChange={(e) => {
+                    setShipId(e.target.value)
+                    setBuildContextId('')
+                    setSlot('')
+                  }}
+                  className="w-full"
+                >
+                  {ships.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {fleetAssetOptionLabel(s)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {selectedComponentName && shipId && (
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Loadout</label>
+                <select
+                  value={effectiveBuildContextId}
+                  onChange={(e) => {
+                    setBuildContextId(e.target.value)
+                    setSlot('')
+                  }}
+                  className="w-full"
+                >
+                  {shipBuilds.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}{b.id === selectedShip?.activeBuildId ? ' (Active)' : ''}
+                    </option>
+                  ))}
+                </select>
+                {effectiveBuildContextId !== selectedShip?.activeBuildId && (
+                  <p className="text-[11px] text-cyan/80 mt-1.5">
+                    Installing under a non-active Loadout only changes that Loadout's progress — {selectedShip?.name}'s Active Loadout stays {buildName(selectedShip?.activeBuildId ?? '')}.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {selectedComponentName && effectiveBuildContextId && (
+              <div>
+                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Slot</label>
+                {compatibleSlotOptions.length === 0 ? (
+                  <p className="text-xs text-warning">No compatible open slot for {selectedComponentName} in {buildContext?.name ?? 'this Loadout'}.</p>
+                ) : (
+                  <select value={slot} onChange={(e) => setSlot(e.target.value)} className="w-full">
+                    {compatibleSlotOptions.length > 1 && <option value="">Select a slot…</option>}
+                    {compatibleSlotOptions.map((hp) => (
+                      <option key={hp.id} value={hp.slotLabel}>
+                        {hp.slotLabel} ({hp.size} {hp.type})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {(changeType === 'Install Component' || changeType === 'Remove Component') && (
+        {changeType === 'Add Component to Hangar' && (
+          <div>
+            <label className="text-xs uppercase tracking-widest text-muted block mb-2">Component</label>
+            <CatalogComponentSearch selectedName={selectedComponentName} onSelect={setSelectedComponentName} />
+          </div>
+        )}
+
+        {(changeType === 'Remove Component' || changeType === 'Move Component Between Ships') && (
           <div>
             <label className="text-xs uppercase tracking-widest text-muted block mb-2">Loadout Context</label>
             <select value={effectiveBuildContextId} onChange={(e) => setBuildContextId(e.target.value)} className="w-full">
@@ -193,13 +320,13 @@ export default function QuickUpdate() {
             </select>
             {effectiveBuildContextId !== selectedShip?.activeBuildId && (
               <p className="text-[11px] text-cyan/80 mt-1.5">
-                Installing under a non-active Build only changes that Build's progress — {selectedShip?.name}'s Active Build stays {buildName(selectedShip?.activeBuildId ?? '')}.
+                Installing under a non-active Loadout only changes that Loadout's progress — {selectedShip?.name}'s Active Loadout stays {buildName(selectedShip?.activeBuildId ?? '')}.
               </p>
             )}
           </div>
         )}
 
-        {(changeType === 'Install Component' || changeType === 'Remove Component' || changeType === 'Move Component Between Ships' || changeType === 'Set Active Loadout') && (
+        {(changeType === 'Remove Component' || changeType === 'Move Component Between Ships' || changeType === 'Set Active Loadout') && (
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs uppercase tracking-widest text-muted block mb-2">
@@ -215,9 +342,9 @@ export default function QuickUpdate() {
             </div>
             {changeType === 'Set Active Loadout' ? (
               <div>
-                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Build</label>
+                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Loadout</label>
                 <select value={buildId} onChange={(e) => setBuildId(e.target.value)} className="w-full">
-                  <option value="">Select a build…</option>
+                  <option value="">Select a Loadout…</option>
                   {shipBuilds.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name}
@@ -275,8 +402,9 @@ export default function QuickUpdate() {
         )}
 
         <button
+          disabled={!canSave}
           onClick={handleSave}
-          className="w-full inline-flex items-center justify-center gap-2 bg-cyan text-bg font-semibold text-sm py-3 rounded-lg hover:bg-cyan/90 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 bg-cyan text-bg font-semibold text-sm py-3 rounded-lg hover:bg-cyan/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Zap size={16} /> Save Update
         </button>
@@ -292,7 +420,7 @@ export default function QuickUpdate() {
           <div>
             <p className={`font-display font-semibold ${summary.success ? 'text-success' : 'text-warning'}`}>{summary.headline}</p>
             <p className="text-sm text-white/80 mt-1">{summary.detail}</p>
-            {summary.success && <p className="text-xs text-muted mt-2">Added to Captain's Log.</p>}
+            {summary.success && <p className="text-xs text-muted mt-2">Recorded in Captain's Log.</p>}
           </div>
         </div>
       )}

@@ -177,7 +177,12 @@ interface FleetState {
   moveToShip: (itemId: string, shipId: string) => { success: boolean; message: string }
 
   // Quick Update
-  installComponent: (shipId: string, itemName: string, slotLabel?: string, buildIdOverride?: string) => { matched: boolean }
+  installComponent: (
+    shipId: string,
+    itemName: string,
+    slotLabel?: string,
+    buildIdOverride?: string
+  ) => { matched: boolean; reservationFulfilled?: boolean; blocked?: 'reserved-elsewhere' }
   removeComponent: (shipId: string, slotLabel: string, returnToHangar?: boolean, buildIdOverride?: string) => { matched: boolean; itemName?: string }
   moveComponentBetweenShips: (
     fromShipId: string,
@@ -550,6 +555,13 @@ export const useFleetStore = create<FleetState>()(
   },
 
   reserveComponent: ({ missionConfigurationId, fleetAssetId, targetSlotLabel, componentName, quantity = 1 }) => {
+    // EWO-029 (Task 5) — quantity must be a positive whole number; this
+    // was never actually enforced here before (only "not more than
+    // Available" was checked), so an explicit `quantity: 0` (or a
+    // negative one) silently created a real reservation record.
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      return { success: false, message: 'Reservation quantity must be a positive whole number.' }
+    }
     const build = get().builds.find((b) => b.id === missionConfigurationId)
     const ship = get().ships.find((s) => s.id === fleetAssetId)
     if (!build || !ship) return { success: false, message: 'Loadout or Fleet Asset not found.' }
@@ -895,12 +907,23 @@ export const useFleetStore = create<FleetState>()(
     const ship = get().ships.find((s) => s.id === shipId)
     if (!item || !ship) return { success: false, message: 'Item or ship not found.' }
     const result = get().installComponent(shipId, item.name)
+    // EWO-029 (Task 7, Scenario F) — a unit already reserved for a
+    // different Fleet Asset/Build is never silently installed here.
+    if (result.blocked === 'reserved-elsewhere') {
+      return { success: false, message: `${item.name} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.` }
+    }
     if (!result.matched) {
       return { success: false, message: `${ship.name}'s active Loadout has no open slot for ${item.name}.` }
     }
-    set({
-      hangarItems: get().hangarItems.map((i) => (i.id === itemId ? { ...i, qty: Math.max(0, i.qty - 1) } : i)),
-    })
+    // EWO-029 (Task 7, Scenario E) — when installComponent already
+    // fulfilled this exact slot's own reservation, it already deducted
+    // Hangar quantity itself; deducting again here would double-count
+    // the same physical unit.
+    if (!result.reservationFulfilled) {
+      set({
+        hangarItems: get().hangarItems.map((i) => (i.id === itemId ? { ...i, qty: Math.max(0, i.qty - 1) } : i)),
+      })
+    }
     get().addLogEntry({ action: 'Component moved to ship', shipName: ship.name, itemName: item.name, details: `Moved ${item.name} from Hangar to ${ship.name}` })
     return { success: true, message: `${item.name} installed on ${ship.name}.` }
   },
@@ -919,8 +942,6 @@ export const useFleetStore = create<FleetState>()(
     const target = candidates.find((h) => h.targetItem.toLowerCase() === itemName.toLowerCase() && h.status !== 'OK') ?? candidates.find((h) => h.status !== 'OK')
     if (!target) return { matched: false }
 
-    applyInstalledChange(get, set, shipId, target.slotLabel, itemName)
-
     // Installing a reserved component fulfills the reservation atomically
     // as part of this same operation (Alpha 2.3, Part 12 / Golden C) — the
     // committed unit's Hangar quantity is consumed here too, since it was
@@ -928,6 +949,29 @@ export const useFleetStore = create<FleetState>()(
     const reservation = get().reservations.find(
       (r) => r.missionConfigurationId === buildId && r.targetSlotLabel === target.slotLabel && r.componentName === itemName && r.status === 'ACTIVE'
     )
+
+    // EWO-029 (Task 7, Scenario F / Design Authority Ruling 8) — a
+    // physical unit already committed to a DIFFERENT Fleet Asset/Build's
+    // active reservation must never be silently consumed by installing
+    // here instead. Deliberately scoped to only fire when a genuine
+    // competing reservation exists for this component — installing
+    // without ever having tracked any Hangar stock or reservation for it
+    // at all (a long-supported, pre-existing Quick Update use: directly
+    // recording an install with no inventory bookkeeping involved) must
+    // keep working exactly as before; `availableQuantity <= 0` alone is
+    // not evidence of a steal, only a competing ACTIVE reservation is.
+    if (!reservation) {
+      const hasCompetingReservation = get().reservations.some((r) => r.componentName === itemName && r.status === 'ACTIVE')
+      if (hasCompetingReservation) {
+        const availability = calculateComponentAvailability(itemName, get().hangarItems, get().installedLoadouts, get().reservations)
+        if (availability.availableQuantity <= 0) {
+          return { matched: false, blocked: 'reserved-elsewhere' }
+        }
+      }
+    }
+
+    applyInstalledChange(get, set, shipId, target.slotLabel, itemName)
+
     if (reservation) {
       set({
         reservations: get().reservations.map((r) => (r.id === reservation.id ? { ...r, status: 'FULFILLED' as const, updatedAt: new Date().toISOString() } : r)),
@@ -942,9 +986,10 @@ export const useFleetStore = create<FleetState>()(
         })
         .filter((h) => h.qty > 0)
       set({ hangarItems })
+      return { matched: true, reservationFulfilled: true }
     }
 
-    return { matched: true }
+    return { matched: true, reservationFulfilled: false }
   },
 
   removeComponent: (shipId, slotLabel, returnToHangar, buildIdOverride) => {

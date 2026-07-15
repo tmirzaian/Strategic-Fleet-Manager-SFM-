@@ -1,48 +1,44 @@
-import { useMemo, useState } from 'react'
-import { Plus, Send, X, CheckCircle2, AlertCircle, AlertOctagon, PackageX, Pencil, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Plus, Send, X, CheckCircle2, AlertCircle, AlertOctagon, PackageX, Pencil, Trash2, Lock, Sparkles } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
-import Badge, { dispositionTone } from '../components/Badge'
 import SortableHeader from '../components/SortableHeader'
-import type { Disposition, HangarItem } from '../types'
+import CatalogComponentSearch from '../components/CatalogComponentSearch'
+import type { HangarItem } from '../types'
 import { sortHangarItems, type HangarSortColumn, type SortDirection } from '../utils/hangarSort'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { catalogComponentsByName } from '../generated/componentCatalog'
-import { resolveComponentLabel } from '../utils/componentPresentation'
-import { manufacturerFullNameForCode, manufacturerNameForCode } from '../utils/manufacturerLogo'
-import { resolveInventoryDependencies, formatDependencyLabel, totalClaimedQuantity, type InventoryDependency } from '../utils/inventoryDependencies'
-
-const dispositions: Disposition[] = ['Install', 'Store', 'Stockpile', 'Trade', 'Ignore']
-// EWO-028 (Task 2) — authoritative component names for the catalog-driven
-// "Add New Item" search. Sorted once at module scope, same convention as
-// the pre-existing datalist this replaces.
-const componentCatalogNames = Array.from(catalogComponentsByName.keys()).sort((a, b) => a.localeCompare(b))
-const MAX_VISIBLE_CATALOG_MATCHES = 40
-
-function manufacturerNameFor(code: string | null): string | undefined {
-  if (!code) return undefined
-  return manufacturerFullNameForCode(code) ?? manufacturerNameForCode(code)
-}
+import {
+  resolveInventoryDependencies,
+  formatDependencyLabel,
+  totalClaimedQuantity,
+  resolveNeededByBuilds,
+  type InventoryDependency,
+  type NeededByEntry,
+} from '../utils/inventoryDependencies'
 
 export default function HangarInventory() {
   const hangarItems = useFleetStore((s) => s.hangarItems)
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
+  const hardpoints = useFleetStore((s) => s.hardpoints)
   const installedLoadouts = useFleetStore((s) => s.installedLoadouts)
   const reservations = useFleetStore((s) => s.reservations)
-  const updateHangarDisposition = useFleetStore((s) => s.updateHangarDisposition)
   const addHangarItem = useFleetStore((s) => s.addHangarItem)
   const updateHangarItemQuantity = useFleetStore((s) => s.updateHangarItemQuantity)
   const deleteHangarItem = useFleetStore((s) => s.deleteHangarItem)
   const moveToShip = useFleetStore((s) => s.moveToShip)
+  const reserveComponent = useFleetStore((s) => s.reserveComponent)
+  const releaseReservation = useFleetStore((s) => s.releaseReservation)
 
-  const [editingId, setEditingId] = useState<string | null>(null)
   const [addOpen, setAddOpen] = useState(false)
-  // EWO-028 (Task 2) — catalog-driven Add: `nameQuery` is free-text
-  // search only; `selectedName` is set exclusively by picking a real
-  // catalog match, never by typing — "Add to Hangar" stays disabled
-  // until a real selection exists (Design Authority Ruling 3).
-  const [nameQuery, setNameQuery] = useState('')
+  // EWO-028 (Task 2) — catalog-driven Add: `selectedName` is set
+  // exclusively by CatalogComponentSearch picking a real catalog match,
+  // never by typing — "Add to Hangar" stays disabled until a real
+  // selection exists (Design Authority Ruling 3). EWO-030 (Task 1)
+  // extracted the search/select renderer itself into the shared
+  // CatalogComponentSearch component (also used by Quick Update), so this
+  // page no longer owns the search-query or auto-select logic directly.
   const [selectedName, setSelectedName] = useState('')
   const [addQtyInput, setAddQtyInput] = useState('1')
   const [addResult, setAddResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -67,15 +63,23 @@ export default function HangarInventory() {
   // snapshot the Commander actually read.
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
 
+  // EWO-029 (Task 4) — Reserve. `reserveShipId`/`reserveBuildId`/
+  // `reserveSlotLabel` narrow step by step — each selection filters the
+  // next, exactly like the mission's own required flow (exact Fleet
+  // Asset -> exact Build -> exact target requirement).
+  const [reserveItemId, setReserveItemId] = useState<string | null>(null)
+  const [reserveShipId, setReserveShipId] = useState('')
+  const [reserveBuildId, setReserveBuildId] = useState('')
+  const [reserveSlotLabel, setReserveSlotLabel] = useState('')
+  const [reserveQtyInput, setReserveQtyInput] = useState('1')
+  const [reserveResult, setReserveResult] = useState<{ success: boolean; message: string } | null>(null)
+
+  // EWO-029 (Task 6) — Manage/Release Reservations for one component.
+  const [manageItemId, setManageItemId] = useState<string | null>(null)
+
   const sortedItems = sortHangarItems(hangarItems, sortColumn, sortDirection)
 
-  const filteredCatalogMatches = useMemo(() => {
-    const q = nameQuery.trim().toLowerCase()
-    const matches = q ? componentCatalogNames.filter((n) => n.toLowerCase().includes(q)) : componentCatalogNames
-    return matches.slice(0, MAX_VISIBLE_CATALOG_MATCHES)
-  }, [nameQuery])
   const selectedCatalogEntry = selectedName ? catalogComponentsByName.get(selectedName) : undefined
-  const selectedLabel = selectedName ? resolveComponentLabel(selectedName) : null
   const parsedAddQty = Number(addQtyInput)
   const isAddQtyValid = Number.isInteger(parsedAddQty) && parsedAddQty > 0
   const canAddToHangar = Boolean(selectedCatalogEntry) && isAddQtyValid
@@ -123,6 +127,68 @@ export default function HangarInventory() {
     }
   }
 
+  // EWO-029 (Task 4) — Reserve workflow. `reserveNeededBy` is this exact
+  // component's own unresolved-and-unreserved requirements fleet-wide
+  // (the shared resolver, Task 7's own EWO-028 principle extended) —
+  // narrowed by chosen ship, then by chosen Build, to the exact target
+  // slot list Design Authority Ruling 11 requires ("compatible Build
+  // requirements only").
+  const reserveItem = reserveItemId ? hangarItems.find((i) => i.id === reserveItemId) ?? null : null
+  const reserveAvailability = reserveItem ? calculateComponentAvailability(reserveItem.name, hangarItems, installedLoadouts, reservations) : null
+  const reserveNeededBy: NeededByEntry[] = reserveItem ? resolveNeededByBuilds(reserveItem.name, ships, builds, fleetAssets, hardpoints, reservations) : []
+  const reserveUnreservedNeededBy = reserveNeededBy.filter((e) => !e.reserved)
+  const reserveShipOptions = useMemo(() => {
+    const shipIds = new Set(reserveUnreservedNeededBy.map((e) => e.shipId))
+    return ships.filter((s) => shipIds.has(s.id))
+  }, [reserveUnreservedNeededBy, ships])
+  const reserveBuildOptions = reserveUnreservedNeededBy.filter((e) => e.shipId === reserveShipId)
+  const reserveSlotOptions = reserveBuildOptions.filter((e) => e.buildId === reserveBuildId)
+  const parsedReserveQty = Number(reserveQtyInput)
+  const isReserveQtyValid = Number.isInteger(parsedReserveQty) && parsedReserveQty > 0 && Boolean(reserveAvailability) && parsedReserveQty <= (reserveAvailability?.availableQuantity ?? 0)
+
+  useEffect(() => {
+    if (reserveShipOptions.length === 1) setReserveShipId(reserveShipOptions[0].id)
+  }, [reserveShipOptions])
+  useEffect(() => {
+    const buildIds = Array.from(new Set(reserveBuildOptions.map((e) => e.buildId)))
+    if (buildIds.length === 1) setReserveBuildId(buildIds[0])
+  }, [reserveBuildOptions])
+  useEffect(() => {
+    if (reserveSlotOptions.length === 1) setReserveSlotLabel(reserveSlotOptions[0].slotLabel)
+  }, [reserveSlotOptions])
+
+  function openReserve(item: HangarItem) {
+    setReserveItemId(item.id)
+    setReserveShipId('')
+    setReserveBuildId('')
+    setReserveSlotLabel('')
+    setReserveQtyInput('1')
+    setReserveResult(null)
+  }
+
+  function confirmReserve() {
+    if (!reserveItem || !reserveBuildId || !reserveShipId || !reserveSlotLabel || !isReserveQtyValid) return
+    const result = reserveComponent({
+      missionConfigurationId: reserveBuildId,
+      fleetAssetId: reserveShipId,
+      targetSlotLabel: reserveSlotLabel,
+      componentName: reserveItem.name,
+      quantity: parsedReserveQty,
+    })
+    if (result.success) {
+      setReserveResult({ success: true, message: `Reserved ${parsedReserveQty} ${reserveItem.name} for ${reserveBuildOptions.find((e) => e.buildId === reserveBuildId)?.buildName ?? 'the selected Loadout'}.` })
+      setTimeout(() => setReserveItemId(null), 900)
+    } else {
+      setReserveResult({ success: false, message: result.message ?? 'Could not reserve this component.' })
+    }
+  }
+
+  // EWO-029 (Task 6) — Manage/Release Reservations.
+  const manageItem = manageItemId ? hangarItems.find((i) => i.id === manageItemId) ?? null : null
+  const manageReservations: InventoryDependency[] = manageItem
+    ? resolveInventoryDependencies(manageItem.name, ships, builds, fleetAssets, installedLoadouts, reservations).filter((d) => d.kind === 'RESERVED')
+    : []
+
   const openMove = (itemId: string) => {
     setMoveItemId(itemId)
     setMoveShipId(ships[0]?.id ?? '')
@@ -139,7 +205,6 @@ export default function HangarInventory() {
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => {
-              setNameQuery('')
               setSelectedName('')
               setAddQtyInput('1')
               setAddResult(null)
@@ -163,69 +228,89 @@ export default function HangarInventory() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
+              {/* EWO-029 (Task 2/3) — the row-wide Disposition column is
+                  removed for Beta (Design Authority Rulings 3/9/10):
+                  Available/Reserved/Installed are the only authoritative,
+                  calculated allocation states now shown. Hangar Quantity
+                  is added so the raw owned-and-not-installed stock a
+                  Commander is editing is never ambiguous relative to the
+                  calculated columns beside it. */}
               <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
                 <SortableHeader label="Item" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Type" column="type" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Size" column="size" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                <th className="px-3 py-3 font-medium" title="Total units recorded in Hangar Inventory, before Installed is subtracted — Available + Reserved.">
+                  Hangar Qty
+                </th>
                 <th className="px-3 py-3 font-medium">Installed</th>
                 <th className="px-3 py-3 font-medium">Reserved</th>
                 <th className="px-3 py-3 font-medium">Available</th>
                 <th className="px-3 py-3 font-medium">Needed By</th>
-                <th className="px-3 py-3 font-medium">Disposition</th>
                 <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {sortedItems.map((item) => {
                 const availability = calculateComponentAvailability(item.name, hangarItems, installedLoadouts, reservations)
-                const itemReservations = reservations.filter((r) => r.componentName === item.name && r.status === 'ACTIVE')
+                const neededBy = resolveNeededByBuilds(item.name, ships, builds, fleetAssets, hardpoints, reservations)
+                const unreservedNeededBy = neededBy.filter((e) => !e.reserved)
+                // EWO-029 (Task 8/9/10) — an Available, unreserved match:
+                // real fleet demand exists AND stock is free to cover it.
+                // Never auto-reserved, never marked Installed — only surfaced.
+                const upgradeOpportunityCount = Math.min(unreservedNeededBy.length, availability.availableQuantity)
                 return (
                 <tr key={item.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
                   <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{item.name}</td>
                   <td className="px-5 py-3 text-muted whitespace-nowrap">{item.type}</td>
                   <td className="px-5 py-3 text-muted">{item.size}</td>
+                  <td className="px-3 py-3 font-mono text-muted/80">{item.qty}</td>
                   <td className="px-3 py-3 font-mono text-muted">{availability.installedQuantity}</td>
                   <td className="px-3 py-3 font-mono">
                     {availability.reservedQuantity > 0 ? (
-                      <span className="text-cyan" title={itemReservations.map((r) => `${r.fleetAssetId} — ${r.targetSlotLabel}`).join(', ')}>
+                      <button
+                        onClick={() => setManageItemId(item.id)}
+                        className="text-cyan hover:underline"
+                        title="Manage reservations for this component"
+                      >
                         {availability.reservedQuantity}
-                      </span>
+                      </button>
                     ) : (
                       <span className="text-muted/50">0</span>
                     )}
                   </td>
                   <td className="px-3 py-3 font-mono text-success">{availability.availableQuantity}</td>
                   <td className="px-3 py-3 text-muted">
-                    <span className="block max-w-[150px] truncate" title={item.neededBy}>
-                      {item.neededBy}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3">
-                    {editingId === item.id ? (
-                      <select
-                        autoFocus
-                        defaultValue={item.disposition}
-                        onBlur={() => setEditingId(null)}
-                        onChange={(e) => {
-                          updateHangarDisposition(item.id, e.target.value as Disposition)
-                          setEditingId(null)
-                        }}
-                        className="bg-black/30 border border-cyan/30 rounded-md px-2 py-1 text-xs text-white focus:outline-none"
-                      >
-                        {dispositions.map((d) => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
+                    {neededBy.length === 0 ? (
+                      <span className="text-muted/50">—</span>
                     ) : (
-                      <button onClick={() => setEditingId(item.id)}>
-                        <Badge tone={dispositionTone(item.disposition)}>{item.disposition}</Badge>
-                      </button>
+                      <div
+                        className="max-w-[190px]"
+                        title={neededBy.map((e) => `${formatDependencyLabel({ kind: 'RESERVED', fleetAssetId: e.shipId, fleetAssetLabel: e.fleetAssetLabel, hullName: e.hullName, buildId: e.buildId, buildName: e.buildName, quantity: 1 })}${e.reserved ? ' (Reserved)' : ' (Unreserved)'} — ${e.slotLabel}`).join('\n')}
+                      >
+                        <span className="block truncate">
+                          Needed by {neededBy.length} Build{neededBy.length === 1 ? '' : 's'}
+                        </span>
+                        {upgradeOpportunityCount > 0 && (
+                          <button
+                            onClick={() => openReserve(item)}
+                            className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-cyan hover:underline"
+                          >
+                            <Sparkles size={11} /> {upgradeOpportunityCount} unreserved match{upgradeOpportunityCount === 1 ? '' : 'es'} — Reserve
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-3">
+                      {availability.availableQuantity > 0 && (
+                        <button
+                          onClick={() => openReserve(item)}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
+                        >
+                          <Lock size={13} /> Reserve
+                        </button>
+                      )}
                       <button
                         onClick={() => openMove(item.id)}
                         className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:underline"
@@ -272,49 +357,14 @@ export default function HangarInventory() {
             <div className="space-y-3">
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Component Name</label>
-                <input
-                  value={nameQuery}
-                  onChange={(e) => {
-                    setNameQuery(e.target.value)
-                    setSelectedName('')
+                <CatalogComponentSearch
+                  selectedName={selectedName}
+                  onSelect={(name) => {
+                    setSelectedName(name)
                     setAddResult(null)
                   }}
-                  placeholder="Search catalog components…"
-                  className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-muted/50 focus:outline-none focus:ring-1 focus:ring-cyan/50"
                 />
-                <select
-                  size={6}
-                  value={selectedName}
-                  onChange={(e) => {
-                    setSelectedName(e.target.value)
-                    setAddResult(null)
-                  }}
-                  className="mt-2 w-full bg-black/30 border border-white/10 rounded-lg text-sm text-white"
-                >
-                  {filteredCatalogMatches.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-                {nameQuery && filteredCatalogMatches.length === 0 && <p className="text-xs text-muted mt-1.5">No matching catalog component — free-text entries are not accepted.</p>}
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Type</label>
-                  <div className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-muted/80">{selectedCatalogEntry?.category ?? '—'}</div>
-                </div>
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Size</label>
-                  <div className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-muted/80">{selectedCatalogEntry ? `S${selectedCatalogEntry.size}` : '—'}</div>
-                </div>
-              </div>
-              {selectedCatalogEntry && (selectedLabel?.gradeLabel || manufacturerNameFor(selectedCatalogEntry.manufacturerCode)) && (
-                <div className="text-xs text-muted flex flex-wrap gap-x-3 gap-y-1">
-                  {selectedLabel?.gradeLabel && <span>{selectedLabel.gradeLabel}</span>}
-                  {manufacturerNameFor(selectedCatalogEntry.manufacturerCode) && <span>{manufacturerNameFor(selectedCatalogEntry.manufacturerCode)}</span>}
-                </div>
-              )}
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Quantity</label>
                 <input
@@ -518,6 +568,146 @@ export default function HangarInventory() {
             >
               Confirm Move
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reserve modal — EWO-029 (Task 4/5): exact Fleet Asset -> exact
+          Build -> exact target requirement -> quantity, never automatic. */}
+      {reserveItem && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setReserveItemId(null)}>
+          <div className="panel p-6 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="font-display font-semibold text-white">Reserve "{reserveItem.name}"</h3>
+              <button onClick={() => setReserveItemId(null)} className="text-muted hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+            {reserveUnreservedNeededBy.length === 0 ? (
+              <p className="text-sm text-muted">No saved Loadout currently has an unresolved, unreserved requirement for "{reserveItem.name}".</p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-muted">{reserveAvailability?.availableQuantity ?? 0} available to reserve.</p>
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Fleet Asset</label>
+                  <select
+                    value={reserveShipId}
+                    onChange={(e) => {
+                      setReserveShipId(e.target.value)
+                      setReserveBuildId('')
+                      setReserveSlotLabel('')
+                    }}
+                    className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan/50"
+                  >
+                    <option value="">Select a Fleet Asset…</option>
+                    {reserveShipOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {reserveShipId && (
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Build / Loadout</label>
+                    <select
+                      value={reserveBuildId}
+                      onChange={(e) => {
+                        setReserveBuildId(e.target.value)
+                        setReserveSlotLabel('')
+                      }}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan/50"
+                    >
+                      <option value="">Select a Loadout…</option>
+                      {Array.from(new Map(reserveBuildOptions.map((e) => [e.buildId, e.buildName])).entries()).map(([buildId, buildName]) => (
+                        <option key={buildId} value={buildId}>
+                          {buildName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {reserveBuildId && (
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Target Requirement</label>
+                    <select
+                      value={reserveSlotLabel}
+                      onChange={(e) => setReserveSlotLabel(e.target.value)}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan/50"
+                    >
+                      <option value="">Select a target…</option>
+                      {reserveSlotOptions.map((e) => (
+                        <option key={e.slotLabel} value={e.slotLabel}>
+                          {e.slotLabel}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {reserveSlotLabel && (
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Quantity</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={reserveAvailability?.availableQuantity ?? 1}
+                      step={1}
+                      value={reserveQtyInput}
+                      onChange={(e) => setReserveQtyInput(e.target.value)}
+                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan/50"
+                    />
+                    {!isReserveQtyValid && <p className="text-xs text-danger mt-1">Quantity must be a positive whole number, no more than what's Available.</p>}
+                  </div>
+                )}
+                {reserveResult && (
+                  <p className={`text-xs ${reserveResult.success ? 'text-success' : 'text-danger'}`}>{reserveResult.message}</p>
+                )}
+                <button
+                  disabled={!reserveSlotLabel || !isReserveQtyValid}
+                  onClick={confirmReserve}
+                  className="w-full bg-cyan text-bg font-semibold text-sm py-2 rounded-lg hover:bg-cyan/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Confirm Reservation
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Manage / Release Reservations modal — EWO-029 (Task 6) */}
+      {manageItem && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setManageItemId(null)}>
+          <div className="panel p-6 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="font-display font-semibold text-white">Reservations for "{manageItem.name}"</h3>
+              <button onClick={() => setManageItemId(null)} className="text-muted hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+            {manageReservations.length === 0 ? (
+              <p className="text-sm text-muted">No active reservations.</p>
+            ) : (
+              <ul className="space-y-2">
+                {manageReservations.map((dep) => (
+                  <li key={dep.reservationId} className="flex items-center justify-between gap-3 bg-black/20 border border-white/5 rounded-lg px-3 py-2.5">
+                    <div className="text-sm text-white min-w-0">
+                      <div className="truncate">{formatDependencyLabel(dep)}</div>
+                      <div className="text-xs text-muted">Qty {dep.quantity}</div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (dep.reservationId) releaseReservation(dep.reservationId)
+                        if (manageReservations.length <= 1) setManageItemId(null)
+                      }}
+                      className="shrink-0 text-xs font-medium text-danger hover:underline"
+                    >
+                      Release
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       )}
