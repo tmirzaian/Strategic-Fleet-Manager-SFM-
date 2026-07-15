@@ -129,6 +129,8 @@ Responsible for:
 
 Responsible for presenting domain state without reinterpreting raw exporter data.
 
+Component search/selection (catalog-driven "add or install a component") and component display (an already-assigned Factory/Installed/Target value) are each governed by one shared, reused rendering contract rather than being reformatted independently per page — see `docs/UI_ARCHITECTURE.md` §16 ("Component presentation contract") and §16.1 ("Canonical component search renderer"). The Commander-facing install/remove workflow itself (Quick Update's Component → Ship → Loadout → Compatible Slot install path; Ship Detail's Loadout & Port Tree as the uninstall path) is documented in `docs/UI_ARCHITECTURE.md` §18.
+
 ## Fleet ownership and persistence
 
 The hand-authored seed fleet (`src/data/seed.ts`) is demo/sample data, not
@@ -147,6 +149,24 @@ distinguishable from an entry that exists and legitimately describes zero
 ships — the store exposes this as `hasPersistedState`. Demo data is only
 ever loaded fresh on that true first-ever case; once real persisted state
 exists, nothing may silently repopulate it.
+
+## Authoritative application catalogs (Mission M-012)
+
+Two full-universe catalogs, generated from the frozen LIVE 4.8 P4K via
+bulk DataCore field queries (see
+`docs/ADR/ADR-005-Authoritative-Application-Catalogs.md`), widen Add Ship
+and component selection/validation beyond the original narrow seed/demo
+scope: a ship/ground-vehicle roster (`generated-data/ship-catalog.json`,
+294 records) and the full player-usable component universe
+(`generated-data/component-metadata-catalog.json`, widened from M-007's
+~90-entity scope to 1,109 player-usable records). Both stay gitignored
+pending the same licensing decision ADR-003 already tracks, and the
+browser app degrades gracefully (falls back to the pre-existing narrower
+roster/table) when a local machine hasn't generated them.
+
+The ship catalog is a lightweight identity/classification roster, not a
+replacement for the deep, per-ship normalized port-tree pipeline below —
+see ADR-005's "Scope boundary" section.
 
 **Fleet ownership source and sync authority** (see
 `docs/ADR/ADR-004-Fleet-Ownership-Sync-Authority.md`): every Fleet Asset

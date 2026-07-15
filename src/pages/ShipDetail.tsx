@@ -15,6 +15,8 @@ import { calculateMissionPackage } from '../engine/logistics/missionPackage'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { buildPortTree } from '../utils/portTree'
 import { resolveShipImage } from '../utils/resolveShipImage'
+import { shipFactoryTemplates } from '../data/shipDefinitions'
+import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
 
 function SummaryTile({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string | number; accent?: string }) {
   return (
@@ -46,11 +48,14 @@ export default function ShipDetail() {
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
+  const fleetAssets = useFleetStore((s) => s.fleetAssets)
   const installedLoadouts = useFleetStore((s) => s.installedLoadouts)
   const reservations = useFleetStore((s) => s.reservations)
   const hangarItems = useFleetStore((s) => s.hangarItems)
   const setActiveBuild = useFleetStore((s) => s.setActiveBuild)
   const removeFleetAsset = useFleetStore((s) => s.removeFleetAsset)
+  const removeComponent = useFleetStore((s) => s.removeComponent)
+  const addLogEntry = useFleetStore((s) => s.addLogEntry)
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
@@ -108,7 +113,17 @@ export default function ShipDetail() {
   // logistics context (Part 2) — it never competes with Readiness
   // (Installed Match, "is it physically configured now?") for primary billing.
   const missionPackage = calculateMissionPackage(activeBuild?.id ?? '', hardpoints, installedLoadouts, reservations, hangarItems, activeBuild?.kind === 'FACTORY')
-  const portTree = buildPortTree(shipHardpoints)
+  // EWO-026 (Task 1) — the canonical, authoritative port hierarchy for
+  // this exact ship (same source MissionComposer's Loadout Manager
+  // already uses via EWO-025) overlaid onto `shipHardpoints` by stable
+  // slotLabel, for DISPLAY ONLY — `progress`/`buildState`/`missionPackage`
+  // above are computed from `shipHardpoints` unchanged, so this never
+  // touches readiness/logistics math, only the rendered tree shape.
+  const canonicalTemplate = (() => {
+    const definitionId = resolveShipDefinitionId(ship.id, fleetAssets)
+    return definitionId ? shipFactoryTemplates[definitionId] ?? [] : []
+  })()
+  const portTree = buildPortTree(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate))
   const isMissionReady = buildState === 'MISSION_READY'
 
   return (
@@ -305,7 +320,32 @@ export default function ShipDetail() {
         </div>
       )}
 
-      <LoadoutPortTree tree={portTree} reservations={reservations} hangarItems={hangarItems} installedLoadouts={installedLoadouts} />
+      <LoadoutPortTree
+        tree={portTree}
+        reservations={reservations}
+        hangarItems={hangarItems}
+        installedLoadouts={installedLoadouts}
+        onRemoveComponent={
+          activeBuild
+            ? (slotLabel, returnToHangarChecked) => {
+                const before = activeBuild.readiness
+                const result = removeComponent(ship.id, slotLabel, returnToHangarChecked, activeBuild.id)
+                if (result.matched) {
+                  const after = useFleetStore.getState().builds.find((b) => b.id === activeBuild.id)?.readiness
+                  addLogEntry({
+                    action: returnToHangarChecked ? 'Removed component to Hangar' : 'Removed component',
+                    shipName: ship.name,
+                    itemName: result.itemName,
+                    details: `Removed ${result.itemName} from ${ship.name} (${slotLabel})${returnToHangarChecked ? ' — returned to Hangar' : ''}`,
+                    readinessBefore: before,
+                    readinessAfter: after,
+                  })
+                }
+                return result
+              }
+            : undefined
+        }
+      />
     </div>
   )
 }

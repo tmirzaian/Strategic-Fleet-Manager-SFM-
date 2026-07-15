@@ -88,6 +88,21 @@
 
 ## Beta
 
+- **EWO-030 — Quick Update Workflow Simplification & Ship Detail Component
+  Removal (complete)**: Install Component now walks Component → Ship →
+  Loadout → Compatible Slot (filtered to type/size-compatible,
+  not-yet-fulfilled hardpoints via `isComponentSelectableForPort()`; a
+  single compatible slot auto-selects); the canonical catalog search
+  renderer (`CatalogComponentSearch`, extracted from Hangar Inventory's
+  own Add New Item search) now backs both Quick Update's Install
+  Component and Add Component to Hangar steps, so the search experience
+  never drifts between pages. "Remove Component" is hidden from Quick
+  Update — Ship Detail's Loadout & Port Tree is now the official
+  uninstall workflow (Remove → optional Return to Hangar → Save, on
+  every installed row). "Move Component Between Ships" is likewise
+  hidden pending the roadmap item below; both hidden workflows'
+  implementation is untouched, only unreachable through Quick Update's
+  own UI. See `docs/UI_ARCHITECTURE.md` §16.1 and §18.
 - Fleet dashboard stabilization
 - Current-versus-target build workflows
 - Missing-target aggregation
@@ -102,6 +117,9 @@
   so no consumer changes when it lands (see docs/ASSET_PIPELINE.md)
 - Import UX and warning presentation
 - User-data persistence and migration strategy
+- **Move Component Between Ships** — hidden from Quick Update's UI as of
+  EWO-030 (implementation intact, unreachable through the page's own
+  buttons); re-exposing it is a UI-only change when prioritized.
 
 ## Post-Beta
 

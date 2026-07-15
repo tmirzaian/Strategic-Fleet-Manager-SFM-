@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { ChevronDown, ChevronRight, Maximize2, Minimize2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
 import Badge from './Badge'
-import { flattenPortTree, derivePortLogistics, derivePortValidation, type PortTreeNode } from '../utils/portTree'
+import { derivePortLogistics, derivePortValidation, type PortTreeNode } from '../utils/portTree'
+import { groupPortTree, flattenDisplayTree, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
 import type { HangarItem, InstalledLoadoutEntry, MissionReservation } from '../types'
+import ComponentAssignmentLabel from './ComponentAssignmentLabel'
 
 function logisticsTone(state: string) {
   if (state === 'Installed') return 'success' as const
@@ -35,13 +37,26 @@ export default function LoadoutPortTree({
   reservations,
   hangarItems,
   installedLoadouts,
+  onRemoveComponent,
 }: {
   tree: PortTreeNode[]
   reservations: MissionReservation[]
   hangarItems: HangarItem[]
   installedLoadouts: InstalledLoadoutEntry[]
+  /** EWO-030 (Task 7) — when provided, every installed, non-structural row
+   * gets a "Remove" action opening the uninstall workflow (Remove ->
+   * optional Return to Hangar -> Save). Omitted entirely by read-only/
+   * dev-inspection callers (e.g. ImportedShipDetail) that have no real
+   * Build to mutate — the Actions column itself is only rendered when
+   * this is provided, so those callers' table is unchanged. */
+  onRemoveComponent?: (slotLabel: string, returnToHangar: boolean) => { matched: boolean; itemName?: string }
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [removeTarget, setRemoveTarget] = useState<{ slotLabel: string; itemLabel: string } | null>(null)
+  const [returnToHangar, setReturnToHangar] = useState(false)
+  const [removeError, setRemoveError] = useState<string | null>(null)
+  const displayTree = groupPortTree(tree)
+  const hasActions = Boolean(onRemoveComponent)
 
   function toggle(id: string) {
     setExpanded((prev) => {
@@ -53,52 +68,111 @@ export default function LoadoutPortTree({
   }
 
   function expandAll() {
-    setExpanded(new Set(flattenPortTree(tree).map((n) => n.hardpoint.id)))
+    setExpanded(new Set(flattenDisplayTree(displayTree).map((n) => n.id)))
   }
 
   function collapseAll() {
     setExpanded(new Set())
   }
 
-  function renderRows(nodes: PortTreeNode[], depth: number): ReactNode[] {
-    return nodes.flatMap((node) => {
-      const hp = node.hardpoint
-      const hasChildren = node.children.length > 0
-      const isExpanded = expanded.has(hp.id)
-      const logistics = derivePortLogistics(hp, reservations, hangarItems, installedLoadouts)
-      const validation = derivePortValidation(hp)
+  function renderPortRow(node: PortTreeNode, depth: number): ReactNode[] {
+    const hp = node.hardpoint
+    const hasChildren = node.children.length > 0
+    const isExpanded = expanded.has(hp.id)
 
-      const rowEl = (
-        <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-          <td className="px-4 py-2.5 text-white font-medium whitespace-nowrap">
+    // EWO-020 (Task 4): a structural assembly row (a mount/turret
+    // preserved only to explain hierarchy) never had a real assignment to
+    // validate or a logistics state to track — showing "OK"/"Not
+    // Required" would misrepresent it as a checked, empty configurable
+    // port rather than what it actually is: physical structure with no
+    // component of its own.
+    const logistics = hp.isStructural ? null : derivePortLogistics(hp, reservations, hangarItems, installedLoadouts)
+    const validation = hp.isStructural ? null : derivePortValidation(hp)
+
+    const rowEl = (
+      <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+        <td className={`px-4 py-2.5 whitespace-nowrap ${hp.isStructural ? 'text-white/80 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
+          <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1.5">
+            {hasChildren ? (
+              <button onClick={() => toggle(hp.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={isExpanded ? 'Collapse row' : 'Expand row'}>
+                {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              </button>
+            ) : (
+              <span className="w-[13px] shrink-0" />
+            )}
+            {hp.slotLabel}
+          </div>
+        </td>
+        <td className="px-4 py-2.5 text-muted whitespace-nowrap">{hp.size} {hp.type}</td>
+        <td className="px-4 py-2.5 text-muted/70">{hp.isStructural ? <span className="text-muted/50">—</span> : <ComponentAssignmentLabel value={hp.factoryItem} />}</td>
+        <td className="px-4 py-2.5 text-muted">{hp.isStructural ? <span className="text-muted/50">—</span> : <ComponentAssignmentLabel value={hp.installedItem} />}</td>
+        <td className="px-4 py-2.5 text-cyan/90">{hp.isStructural ? <span className="text-muted/50">—</span> : <ComponentAssignmentLabel value={hp.targetItem} />}</td>
+        <td className="px-4 py-2.5">{logistics && <Badge tone={logisticsTone(logistics)}>{logistics}</Badge>}</td>
+        <td className="px-4 py-2.5">{validation && <Badge tone={validationTone(validation)}>{validation}</Badge>}</td>
+        {hasActions && (
+          <td className="px-4 py-2.5 text-right whitespace-nowrap">
+            {!hp.isStructural && hp.installedItem && hp.installedItem !== '—' && (
+              <button
+                onClick={() => {
+                  setRemoveTarget({ slotLabel: hp.slotLabel, itemLabel: hp.installedItem })
+                  setReturnToHangar(false)
+                  setRemoveError(null)
+                }}
+                className="inline-flex items-center gap-1 text-xs font-medium text-muted hover:text-danger transition-colors"
+                title="Remove Installed Component"
+              >
+                <Trash2 size={13} /> Remove
+              </button>
+            )}
+          </td>
+        )}
+      </tr>
+    )
+
+    if (hasChildren && isExpanded) {
+      return [rowEl, ...node.children.flatMap((child) => renderPortRow(child, depth + 1))]
+    }
+    return [rowEl]
+  }
+
+  // EWO-019B/EWO-020: a "group" display node is a synthetic header (e.g.
+  // "Weapons", "Manned Turrets", "Detection / Navigation") wrapping
+  // otherwise-independent top-level ports — same row shape and
+  // expand/collapse behavior as a real parent port, but no assignment/
+  // logistics/validation data of its own to show. Uses the table's own
+  // base typeface (no `font-display` — Task 11: a competing display font
+  // read as distracting; weight/case/spacing/color differentiate a
+  // header row instead, matching this table's own existing <thead>
+  // treatment rather than introducing a second design language).
+  function renderRows(nodes: PortTreeDisplayNode[], depth: number): ReactNode[] {
+    return nodes.flatMap((node) => {
+      if (node.kind === 'port') return renderPortRow(node.node, depth)
+
+      const isExpanded = expanded.has(node.id)
+      const headerEl = (
+        <tr key={node.id} className="border-b border-white/5 last:border-0 bg-white/[0.015] hover:bg-white/[0.03]">
+          <td className="px-4 py-2.5 text-cyan/80 font-semibold uppercase tracking-wide text-xs whitespace-nowrap">
             <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1.5">
-              {hasChildren ? (
-                <button onClick={() => toggle(hp.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={isExpanded ? 'Collapse row' : 'Expand row'}>
-                  {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                </button>
-              ) : (
-                <span className="w-[13px] shrink-0" />
-              )}
-              {hp.slotLabel}
+              <button onClick={() => toggle(node.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={isExpanded ? 'Collapse group' : 'Expand group'}>
+                {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              </button>
+              {node.label}
             </div>
           </td>
-          <td className="px-4 py-2.5 text-muted whitespace-nowrap">{hp.size} {hp.type}</td>
-          <td className="px-4 py-2.5 text-muted/70">{hp.factoryItem}</td>
-          <td className="px-4 py-2.5 text-muted">{hp.installedItem}</td>
-          <td className="px-4 py-2.5 text-cyan/90">{hp.targetItem}</td>
-          <td className="px-4 py-2.5">
-            <Badge tone={logisticsTone(logistics)}>{logistics}</Badge>
-          </td>
-          <td className="px-4 py-2.5">
-            <Badge tone={validationTone(validation)}>{validation}</Badge>
-          </td>
+          <td className="px-4 py-2.5" />
+          <td className="px-4 py-2.5" />
+          <td className="px-4 py-2.5" />
+          <td className="px-4 py-2.5" />
+          <td className="px-4 py-2.5" />
+          <td className="px-4 py-2.5" />
+          {hasActions && <td className="px-4 py-2.5" />}
         </tr>
       )
 
-      if (hasChildren && isExpanded) {
-        return [rowEl, ...renderRows(node.children, depth + 1)]
+      if (isExpanded) {
+        return [headerEl, ...renderRows(node.children, depth + 1)]
       }
-      return [rowEl]
+      return [headerEl]
     })
   }
 
@@ -129,11 +203,53 @@ export default function LoadoutPortTree({
               <th className="px-4 py-3 font-medium">Target Loadout</th>
               <th className="px-4 py-3 font-medium">Logistics</th>
               <th className="px-4 py-3 font-medium">Validation</th>
+              {hasActions && <th className="px-4 py-3 font-medium text-right">Actions</th>}
             </tr>
           </thead>
-          <tbody>{renderRows(tree, 0)}</tbody>
+          <tbody>{renderRows(displayTree, 0)}</tbody>
         </table>
       </div>
+
+      {/* Remove Installed Component modal — EWO-030 (Task 7): Remove ->
+          optional Return Component To Hangar -> Save. The official
+          uninstall workflow, replacing Quick Update's now-hidden Remove
+          Component tab. */}
+      {removeTarget && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setRemoveTarget(null)}>
+          <div className="panel p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="font-display font-semibold text-white">Remove "{removeTarget.itemLabel}"?</h3>
+              <button onClick={() => setRemoveTarget(null)} className="text-muted hover:text-white">
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-sm text-muted mb-4">Removing from {removeTarget.slotLabel}. This clears the Installed assignment for the active Loadout.</p>
+            <label className="flex items-center gap-2 text-sm text-white cursor-pointer mb-4">
+              <input type="checkbox" checked={returnToHangar} onChange={(e) => setReturnToHangar(e.target.checked)} className="accent-cyan" />
+              Return removed component to Hangar
+            </label>
+            {removeError && <p className="text-xs text-danger mb-3">{removeError}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => setRemoveTarget(null)} className="flex-1 border border-white/15 text-white text-sm py-2 rounded-lg hover:border-white/35 transition-colors">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const result = onRemoveComponent?.(removeTarget.slotLabel, returnToHangar)
+                  if (result?.matched) {
+                    setRemoveTarget(null)
+                  } else {
+                    setRemoveError('Could not remove this component.')
+                  }
+                }}
+                className="flex-1 bg-danger text-white font-semibold text-sm py-2 rounded-lg hover:bg-danger/90 transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

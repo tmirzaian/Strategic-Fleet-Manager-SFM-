@@ -677,3 +677,62 @@ not commit changes to this architecture without that cycle completing.
   empty — every ship resolves through the override tier or the approved
   generic placeholder)
 - `primaryLogo`, `monochromeMark`, `appIcon` branding variants (`enabled: false`)
+
+## 16. Component presentation contract (EWO-019A)
+
+Factory/Installed/Target cells in the Loadout & Port Tree (`LoadoutPortTree.tsx`, Ship Detail) and MissionComposer's Factory/Installed columns share one rendering contract, `ComponentAssignmentLabel` (`src/components/ComponentAssignmentLabel.tsx`), backed by the pure formatter `resolveComponentLabel()` (`src/utils/componentPresentation.ts`):
+
+- **Raw CIG internal identifiers are engineering data** — never the primary label when any resolved name exists; exposed only via a `title` attribute for diagnostics/support/DataCore cross-checking, never as a permanent third line.
+- **Resolved display names are Commander-facing data.** Priority order: (1) Mission M-012's bulk catalog's real localized name (`generated-data/component-metadata-catalog.json`, joined by the component's own internal name — never guessed or reconstructed from a mangled string); (2) the deep-import pipeline's own resolved `Component.displayName`, when not itself raw-identifier-shaped; (3) a conservatively cleaned internal name (strips `_SCItem`, a leading category-code token, and bare size tokens) when the value is shaped like a raw identifier; (4) the original string unchanged — covers hand-authored seed values (already readable) and explicit "nothing assigned" sentinels (`—`, `Unknown Factory Item`).
+- **Class and grade are supporting metadata**, rendered as a secondary line (`Class · Grade X`, `Class`, `Grade X`, or omitted entirely — never a dangling separator, never `Unknown · Grade Unknown`). Grade is normalized from DataCore's raw 1–4 integer to the standard `Grade A`–`Grade D` display convention (`Component.grade`'s own doc comment already specifies "e.g. 'A', 'B', 'C'" as the intended contract) — a display-form conversion of a real resolved value, not a fabrication. `Component.class` (Stealth/Military/Civilian/Competition/Industrial) is currently unpopulated for every deep-imported component today (a pre-existing, honest metadata-resolution gap, not something this contract invents); the secondary line reduces to grade-only until that's resolved upstream.
+- **Size / Type remains a separate, port-context field** (`hp.size`/`hp.type`, Column 2) — the component cell never repeats the port's own category/size.
+- **No metadata is fabricated.** Both lookup layers are additive readers of already-generated data (`src/generated/importedShips.ts`'s `componentByDisplayName`, `src/generated/componentCatalog.ts`'s `catalogComponentsByEntityClass`); neither alters import/generation scripts, assignment identity, compatibility, readiness, procurement, or persistence.
+- **Future compartments** (Hangar Inventory, Quick Update, Decision Center, or any other view rendering a factory/installed/target-style component value) should adopt `ComponentAssignmentLabel`/`resolveComponentLabel()` when migrated, rather than reformatting independently.
+
+### 16.1 Canonical component *search* renderer (EWO-030, Task 1)
+
+`ComponentAssignmentLabel` (above) is the contract for *displaying* a component value already assigned to a cell. Picking a new component from the full catalog is a related but distinct surface — search text, a filterable listbox, and the candidate's Type/Size/Grade/Manufacturer — and now has its own single shared implementation: `CatalogComponentSearch` (`src/components/CatalogComponentSearch.tsx`), built on the same `resolveComponentLabel()` plus `manufacturerFullNameForCode`/`manufacturerNameForCode` (`src/utils/manufacturerLogo.ts`).
+
+- Originally Hangar Inventory's "Add New Item" search (EWO-028), extracted verbatim so **Quick Update's Install Component and Add Component to Hangar steps render an identical search experience** — same input, same `size={6}` listbox, same Type/Size fields, same Grade/Manufacturer line — by sharing the component outright, not by visual convention.
+- A search narrowing to exactly one catalog match auto-selects it (the EWO-029 Task 1 fix, now shared); every keystroke clears the prior selection first, so broadening the search or reaching zero matches never leaves a stale selection.
+- Ship Detail and the Loadout Manager's Target column continue to use `TargetComponentPicker` (`src/components/TargetComponentPicker.tsx`) for in-place target editing on an existing port row — a different interaction shape (inline combobox, not a standalone search-and-add step) that this mission left unchanged. `CatalogComponentSearch` is specifically for "add/install a new component" flows.
+
+## 17. Port hierarchy grouping (EWO-019B, extended EWO-020)
+
+`LoadoutPortTree.tsx` (Ship Detail) and MissionComposer's Target Equipment table both layer a generic grouping pass, `groupPortTree()` (`src/utils/portTreeGrouping.ts`), on top of the existing `buildPortTree()` output — never a per-ship or per-system special case. A top-level physical port carrying `Hardpoint.groupLabel` renders nested beneath a synthetic header sharing that label, alongside every sibling top-level port carrying the same one; ports without a `groupLabel` render exactly as before (unaffected systems keep their pre-existing flat presentation).
+
+- **Fixed, player-oriented category order (EWO-020, Task 10)** — `groupLabel` is now derived from the real, source-evidenced `assemblyRole` (see ADR-007), not just `equipmentGroup`, and top-level groups sort into a stable, Chief-Architect-approved order: Core Systems, Detection / Navigation, Weapons, Manned Turrets, Remote Turrets, Ordnance, Utility Systems, Support Systems (`TOP_LEVEL_GROUP_ORDER`, `src/data/shipDefinitions.ts`). A category this list doesn't define stays visible in its original relative position rather than being forced into an approximate bucket.
+- **Same table, same columns, same base typeface** (EWO-020, Task 11) — a group header is a normal row: `font-semibold uppercase tracking-wide` in the accent color, in the table's own inherited base font — never `font-display` (Rajdhani), which read as a second, competing design language on Commander review. Blank Size/Type/Factory/Installed/Target/Logistics/Validation cells, the same expand/collapse chevron and `id`-keyed expand state every real parent row already uses.
+- **A structural row** (a mount/turret preserved only to explain hierarchy — `Hardpoint.isStructural`, ADR-007) renders its own slotLabel in the same header-adjacent treatment, shows a neutral `"—"` in place of Factory/Installed/Target, and never shows a Logistics/Validation badge or (in MissionComposer) an editable target input — it never had a real assignment to validate.
+- **Default expand state matches each page's existing convention** — collapsed by default in Ship Detail (a read-only inspection view, matching every existing nested row there), expanded by default in MissionComposer (an editing surface, matching Mission M-011's "every configurable port must be reachable without an extra click" rule).
+- **A group is never invented from a name-shaped guess.** `assemblyRole` is derived from a mount's own raw entity class naming convention (`Mount_Gimbal_*`, `WeaponMount_*`, a `Turret` token disambiguated by `Remote`/`Nose` tokens — see `src/normalizer/assemblyRole.ts`), never from a port/hardpoint name (EWO-019B already proved that unreliable). `GENERIC_MOUNT`/`UNKNOWN` are legitimate outcomes, not forced into a specific role.
+- **Presentation-only**: `groupPortTree()` operates on the tree handed to it for rendering; it never touches the underlying `hardpoints` array, so compatibility, readiness, procurement, and persistence are unaffected. `derivePortLogistics`/`derivePortValidation` are never called for a synthetic group header or a structural row — only for real, configurable port nodes.
+
+## 18. Canonical Commander workflow: Install and Remove a component (EWO-030)
+
+Installing and removing an equipped component are now two deliberately separate, single-purpose workflows in two different places, replacing Quick Update's earlier one-page, five-branch form.
+
+### 18.1 Install — Quick Update, Component → Ship → Loadout → Compatible Slot
+
+Quick Update's "Install Component" step asks exactly one question at a time, each revealed only once the one before it is answered, and lets the application resolve everything it can determine on its own:
+
+1. **Component** — `CatalogComponentSearch` (§16.1). A single catalog match auto-selects.
+2. **Ship** — defaults to the first Fleet Asset; only shown once a Component is chosen.
+3. **Loadout** — filtered to the selected Ship's own Builds (`shipBuilds`), defaulting to that Ship's Active Loadout; installing under a non-active Loadout only changes that Loadout's own progress (pre-existing behavior, unchanged — see the "Loadout Context" note).
+4. **Compatible Slot** — the Slot dropdown is filtered to hardpoints on the selected Loadout that are (a) not already fulfilled (`status !== 'OK'`) and (b) positively type/size-compatible with the selected component, via `isComponentSelectableForPort()` (`src/data/componentCatalog.ts`) — the same function the Loadout Manager's Target picker already uses (EWO-024, Task 2), so "what's offered" can never disagree with "what `installComponent` will actually accept." **Exactly one compatible slot auto-selects.** Zero compatible slots renders a plain message ("No compatible open slot for X in Y") instead of a doomed dropdown.
+
+`installComponent`'s own store-side matching/compatibility checks (unchanged by this mission) remain fully in place — with the UI now only ever offering choices that already satisfy them, that logic is exercised as **defensive programming**, not as the normal path a Commander has to reason about or recover from.
+
+### 18.2 Remove — Ship Detail's Loadout & Port Tree, the official uninstall workflow
+
+Quick Update's old "Remove Component" tab (a fifth, generic-slot-list branch of the same form) is hidden from the UI — its implementation (`removeComponent` store action, `handleSave`'s branch, state) is untouched and still reachable programmatically, but no button in Quick Update's "What changed?" list sets `changeType` to it anymore.
+
+Removal now lives where the Commander is already looking at what's installed: every installed, non-structural row in `LoadoutPortTree` (Ship Detail's Loadout & Port Tree, §17) gets a **Remove** action (an `Actions` column, shown only when the host page supplies an `onRemoveComponent` callback — Ship Detail's own live Fleet Asset view does; the read-only/dev-inspection `ImportedShipDetail` path deliberately does not, since it has no real Build to mutate). The workflow is exactly: **Remove → optional Return Component To Hangar → Save**, mirroring the checkbox Quick Update's old Remove tab used. A successful removal is recorded in the Captain's Log the same way Quick Update's Install/Remove always have been.
+
+### 18.3 Hidden, not deleted: Move Component Between Ships
+
+"Move Component Between Ships" is likewise hidden from Quick Update's tab list — `moveComponentBetweenShips` and its full UI branch remain in the code, unreachable only through this page's own buttons. Deferred to a future roadmap item (see `docs/Roadmap.md`); re-exposing it is a UI-only change (no store work required) when that's prioritized.
+
+### 18.4 Set Active Loadout — unchanged
+
+Not touched by this mission (Commander-verified during Sea Trials, per EWO-030's own instruction) — still its own tab, still Ship → Loadout → Save.

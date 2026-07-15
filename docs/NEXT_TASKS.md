@@ -1,5 +1,16 @@
 # Next Tasks — Chief Architect Directive
 
+> **Status note:** Tasks 1–4 below (documentation bundle, test-baseline
+> reconciliation, metadata-source investigation, Avenger Titan fixture)
+> are historical — all resolved by Missions M-006 through M-012 (see
+> `docs/Roadmap.md`'s "Alpha 2.5D / Complete" list). Work since then is
+> tracked as numbered Engineering Work Orders (EWOs) rather than against
+> this document; `docs/Roadmap.md` is the current living source of truth
+> for what's complete, active, and remaining. Most recently: **EWO-030 —
+> Quick Update Workflow Simplification & Ship Detail Component Removal**
+> (see `docs/UI_ARCHITECTURE.md` §18). Preserved below for historical
+> record.
+
 ## Task 1 — Add the documentation bundle
 
 Copy these files into the repository's existing `docs` directory, preserving the `ADR` subdirectory.
