@@ -323,13 +323,35 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     expect(screen.getByText('Something Changed?').closest('a')).toHaveAttribute('href', '/quick-update')
   })
 
-  it('mounts PageEnvironment for "mission-control" without any runtime failure while every environment definition stays disabled', () => {
+  it('mounts PageEnvironment for "mission-control" without any runtime failure, rendering the EWO-035 Beta hero artwork', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { container } = renderMissionControl()
-    // Disabled by design (see docs/ASSET_PIPELINE.md) — renders nothing, never throws.
-    expect(container.querySelector('[data-environment-id="mission-control"]')).toBeNull()
+    const layer = container.querySelector('[data-environment-id="mission-control"]')
+    expect(layer).not.toBeNull()
+    expect(layer!.querySelector('[style*="mission-control-operations-wall.webp"]')).not.toBeNull()
     expect(consoleError).not.toHaveBeenCalled()
     consoleError.mockRestore()
+  })
+
+  it('EWO-035A: the Fleet Readiness rail gets its own translucent glass backdrop at the lg: breakpoint, not the fully transparent treatment, so it stays legible over the brighter hero artwork', () => {
+    renderMissionControl()
+    const rail = screen.getByText('Overall Fleet Readiness').closest('.panel')
+    expect(rail).not.toBeNull()
+    expect(rail!.className).toContain('lg:bg-panel/55')
+    expect(rail!.className).toContain('lg:backdrop-blur-md')
+    expect(rail!.className).not.toContain('lg:bg-transparent')
+  })
+
+  it('EWO-035A-R2: the hero region\'s own gradient background is removed entirely — no deliberate shading, tint, or dark gradient remains over the main artwork region', () => {
+    const { container } = renderMissionControl()
+    const heroRoot = container.querySelector('[data-environment-id="mission-control"]')?.parentElement
+    expect(heroRoot).not.toBeNull()
+    expect(heroRoot!.className).not.toContain('bg-gradient-to-br')
+    expect(heroRoot!.className).not.toContain('from-panel')
+    expect(heroRoot!.className).not.toContain('to-bg')
+    // Framing (border/rounding), not shading, remains untouched.
+    expect(heroRoot!.className).toContain('lg:border')
+    expect(heroRoot!.className).toContain('rounded-xl')
   })
 
   it('never renders a second decorative SFM logo inside the page content — the one official mark lives in the sidebar identity area', () => {

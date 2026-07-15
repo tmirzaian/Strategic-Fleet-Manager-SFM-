@@ -88,6 +88,73 @@
 
 ## Beta
 
+- **EWO-035 — Mission Control Visual Completion & Beta Artwork Integration
+  (complete)**: the first real production artwork lands in the app.
+  Mission Control's Fleet Operations region now renders the
+  Commander-supplied "Operations Wall" hero (`mission-control-operations-wall.webp`)
+  through the existing, previously-dormant `PageEnvironment`/
+  `environmentAssets.ts` pipeline (Mission M-022) — `enabled: true`, one
+  `sources.desktop` entry, no component or CSS change. The "Found Loot?
+  Check It." and "Something Changed?" `WorkflowDestinationCard`s (EWO-011)
+  likewise now render Commander-supplied illustrations
+  (`decision-center-found-loot.webp`, `quick-update-maintenance.webp`)
+  through the existing `workflowAssets.ts` registry — both flipped from
+  `enabled: false` to `enabled: true` with a real `src`, no change to
+  `WorkflowDestinationCard.tsx` itself. All three files live under
+  `public/assets/environments/mission-control/`, the canonical Beta
+  artwork location. This is Beta 1.0 artwork; a future Release 2.0
+  Quartermaster Edition commission may replace any of the three files
+  later with no consumer changes, same resolution-boundary guarantee as
+  every other asset registry in this pipeline. See
+  `docs/ASSET_PIPELINE.md`'s "EWO-035 — Beta Artwork Integration" and
+  `docs/UI_ARCHITECTURE.md` §11–12.
+- **EWO-033A — Beta Ship Image Coverage & Universal Fallback Standardization
+  (complete)**: real registered ship photography and the universal fallback
+  artwork now share the exact same frame-filling `object-cover` presentation
+  and the exact same fixed hero/card dimensions — the fallback previously
+  rendered `object-contain` (a small object inside a disproportionately large
+  blank region, root-caused to both candidate fallback PNGs being square
+  1024×1024 assets) and `ShipHeroFrame` grew taller for a fallback than for a
+  real photo. Confirmed `SHIP_PLACEHOLDER_URL` (via `resolveShipImage()`) is
+  Beta 1.0's one universal fallback source — the separate, unused
+  `FLEET_REGISTRY_PLACEHOLDER`/`resolveFleetRegistryImage()` path is now
+  explicitly marked `@deprecated` (zero live callers, confirmed by exhaustive
+  grep), not deleted. `src/data/shipImageRegistry.ts` remains the Commander's
+  one file to maintain (one canonical id, one HTTPS URL, no generation step);
+  end-to-end resolution precedence (registry → existing image → fallback) was
+  audited across seed, deep-imported, catalog-only, aliased, and freshly-added
+  Fleet Assets with no bypass found. Coverage as of this mission: 258 total
+  canonical selectable hulls, 12 resolving a registered image, 246 to the
+  universal fallback, 0 orphan/duplicate/malformed registry keys — Beta 1.0
+  ships with a **production-ready universal fallback and a stable visual
+  presentation**, not full photo coverage; incremental Commander-supplied URL
+  coverage continues after this mission. See `docs/UI_ARCHITECTURE.md` §19.2
+  and `docs/ASSET_PIPELINE.md`.
+- **EWO-033 — Beta Ship Card Lock Correction & Stock Role Normalization
+  (complete)**: Fleet Dashboard now shows a Priority wrapper above every
+  card in Card view, always (previously none, despite Priority sort
+  already existing); Mission Control now shows the Top 4 Priority Fleet
+  Assets (was 3), in a responsive grid using the same breakpoint
+  thresholds Fleet Dashboard's own grid uses. `ShipCard` gained one
+  canonical dimension contract — four structural regions (image,
+  identity, Active Loadout, readiness/status), each with a reserved
+  minimum height, present identically regardless of `buildState` — so
+  cards never render at different heights within the same grid based on
+  content alone. Traced and fixed why the secondary identity line
+  ("Manufacturer · Stock Role/Focus") was populated for some hulls
+  (Cutlass Red, 135c) but blank for others (Cutlass Black, Eclipse,
+  Gladius): `Ship.role` mirrors the active Build's role text, not stock
+  metadata, and three deep-imported hulls' own `ShipDefinition.role` is
+  genuinely empty (a real gap in the raw StarBreaker export envelope, not
+  a wiring bug). Added `resolveShipStockRoleFocus()`, a documented
+  precedence resolver falling back to Mission M-012's own catalog data for
+  those exact hulls — **100% of the 258 canonical selectable hull
+  definitions now resolve a real stock role/focus.** See
+  `docs/UI_ARCHITECTURE.md` §19.1, `docs/DataModel.md`'s "Stock role/focus
+  vs. operational role," and `docs/ImportPipeline.md`'s "Current known
+  gaps" #8. **Approved next mission: EWO-034 — Unique Fleet Priority
+  Ranking** (not implemented by this mission — existing duplicate/gapped
+  priorities are deliberately left as-is per Design Authority Ruling 7).
 - **EWO-032 — Universal Ship Card Standardization (Beta UI Lock)
   (complete)**: Mission Control's Priority Cards now render the exact same
   `ShipCard` component Fleet Dashboard uses (verified byte-identical via
@@ -141,14 +208,20 @@
 - Current-versus-target build workflows
 - Missing-target aggregation
 - Inventory integration
-- **EWO-022 — Local Fleet Registry Asset Pipeline**: replaces the interim
-  external RSI URLs in `src/data/shipImageRegistry.ts` (EWO-021A) with
-  locally generated SFM ship artwork — source art separated from
-  optimized runtime derivatives, deterministic generation, assets under
+- **EWO-022 — Local Fleet Registry Asset Pipeline / Release 2.0
+  Quartermaster Edition imagery** (not started; deferred past Beta 1.0 —
+  do not describe this as "Beta 2.0"): replaces the interim external RSI
+  URLs in `src/data/shipImageRegistry.ts` (EWO-021A) with locally managed,
+  commissioned SFM ship artwork and a richer branded presentation — source
+  art separated from optimized runtime derivatives, deterministic
+  generation, assets under
   `public/assets/fleet-registry/<manufacturer-slug>/`, no runtime
   dependency on RSI availability — while preserving the same canonical
   ship-id resolution boundary `resolveShipImage()` already established,
-  so no consumer changes when it lands (see docs/ASSET_PIPELINE.md)
+  so no consumer changes when it lands. Beta 1.0 (EWO-033A) ships RSI URL
+  coverage plus a universal production fallback and a stable, locked
+  visual presentation; Release 2.0 is the commissioned-imagery upgrade on
+  top of that same resolution boundary (see docs/ASSET_PIPELINE.md)
 - Import UX and warning presentation
 - User-data persistence and migration strategy
 - **Move Component Between Ships** — hidden from Quick Update's UI as of

@@ -63,9 +63,11 @@ ever appears.
 
 ## Environment lifecycle
 
-1. **Defined, disabled** (current state for all seven pages): a full
-   `EnvironmentAssetDefinition` exists in `environmentAssets.ts` with
-   `enabled: false` and empty `sources`. `PageEnvironment` renders `null`.
+1. **Defined, disabled** (current state for six of the seven pages —
+   `mission-control` is the first to move past this stage, see "EWO-035 —
+   Beta Artwork Integration" below): a full `EnvironmentAssetDefinition`
+   exists in `environmentAssets.ts` with `enabled: false` and empty
+   `sources`. `PageEnvironment` renders `null`.
 2. **Artwork arrives**: drop the production files into
    `public/assets/environments/<id>/`, following the naming standard
    below.
@@ -80,14 +82,37 @@ ever appears.
 A definition can be defined-and-disabled indefinitely; nothing about the
 app depends on any environment ever being enabled.
 
-## Future integration point (component is built, not mounted)
+## EWO-035 — Beta Artwork Integration
 
-`PageEnvironment` is not mounted anywhere yet — Mission M-022's own
-constraint was "add it to a shared shell only if the app stays
-pixel-identical," and the safer, zero-risk choice was to leave it ready
-but unmounted rather than retrofit positioning context onto `App.tsx`'s
-shared `<main>` (which has no `position: relative` today and isn't
-route-aware).
+`mission-control` is now the first `EnvironmentAssetDefinition` to
+complete the full lifecycle above: `enabled: true`, `sources.desktop`
+pointing at the Commander-supplied `mission-control-operations-wall.webp`
+(one production file, no per-breakpoint variants yet — every viewport
+renders it via `resolveResponsiveSource()`'s widest-available-first
+order). The two `WorkflowDestinationCard` illustrations on Mission
+Control's own workflow-destination cards ("Found Loot? Check It." /
+"Something Changed?", `workflowAssets.ts`'s `WORKFLOW_ILLUSTRATIONS`
+registry, EWO-011's infrastructure) are likewise now enabled with real
+artwork (`decision-center-found-loot.webp`, `quick-update-maintenance.webp`),
+both delivered into the same `public/assets/environments/mission-control/`
+directory — the canonical Beta artwork location, even though the
+workflow-card illustrations aren't page-background environments
+themselves. This is **Beta 1.0 artwork** — a Release 2.0 Quartermaster
+Edition pass may replace any of these three files later with no change
+to `PageEnvironment`, `WorkflowDestinationCard`, or any other consumer;
+same resolution-boundary guarantee as every other registry in this
+pipeline.
+
+## Future integration point (component already mounted on Mission Control)
+
+`PageEnvironment` is mounted on Mission Control (`src/pages/MissionControl.tsx`,
+inside the "Fleet Operations region" panel) and, as of EWO-035, renders
+real artwork there. It remains unmounted on the other six pages — Mission
+M-022's own constraint was "add it to a shared shell only if the app
+stays pixel-identical," and the safer, zero-risk choice was to leave
+those ready but unmounted rather than retrofit positioning context onto
+`App.tsx`'s shared `<main>` (which has no `position: relative` today and
+isn't route-aware).
 
 When a page is ready to receive its environment:
 
@@ -106,6 +131,20 @@ positioned ancestor. It does not itself add `relative` to anything, so
 each page opts in explicitly and only when it's actually ready.
 
 ## Fleet Registry fallback order
+
+> **EWO-033A note:** `resolveFleetRegistryImage()` and `FLEET_REGISTRY_PLACEHOLDER`
+> below are confirmed **dead code as of this mission** — exhaustive grep found
+> zero live callers anywhere in the app besides this file's own definition and
+> the barrel re-export in `src/config/assets/index.ts`. Every live ship-image
+> consumer (`ShipCard`, `ShipHeroFrame`) goes through `resolveShipImage()` and
+> `SHIP_PLACEHOLDER_URL` instead (see "Canonical ship image URL registry"
+> below) — confirmed as Beta 1.0's one universal fallback source. Both
+> fallback PNGs referenced here and there are, as of this audit, the
+> byte-identical "IMAGE UNAVAILABLE / DATA LINK PENDING" artwork — there was
+> never a visual difference to choose between, only an unused second code
+> path. Kept in place (not deleted), marked `@deprecated` in source, as
+> scaffolding for a possible future Fleet Registry manifest-driven pipeline
+> (Release 2.0 Quartermaster Edition).
 
 `resolveFleetRegistryImage({ manufacturerCode, shipSlug, variantSlug?, existingShipImage? })`
 resolves, in order:
@@ -232,6 +271,20 @@ input to the **offline** import pipeline (`npm run import:ships`,
 `src/normalizer/shipImageManifest.ts`), keyed specifically by seed ship
 id. It is not read by any runtime page/component and is not this
 mission's registry — see both files' headers for the full distinction.
+
+### EWO-033A — fit mode and fallback presentation
+
+Both a registered real image and the universal fallback now render with
+the same `object-cover` frame-filling treatment (`ShipImage.tsx`,
+`ShipCard.tsx`) — the fallback used to render `object-contain`, which
+letterboxed the (square, 1024×1024) artwork inside `ShipCard`'s 16:9
+frame and `ShipHeroFrame`'s full-width hero, the root cause of Sea
+Trials' "oversized blank hero region" finding. `ShipHeroFrame` also now
+uses one fixed hero height regardless of image availability (previously
+the fallback branch was taller). See `docs/UI_ARCHITECTURE.md` §19.2 for
+the full before/after and the coverage audit snapshot (258 selectable
+hulls / 12 registry hits / 246 falling to the universal fallback, 0
+orphan or malformed registry keys as of this mission).
 
 ### Future: EWO-022 — Local Fleet Registry Asset Pipeline
 

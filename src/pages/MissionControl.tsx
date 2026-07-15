@@ -134,8 +134,16 @@ export default function MissionControl() {
             reserved at the left/center; the right side is the permanent command-console
             rail. Height is sized for a meaningful cinematic viewport (not the excessively
             large empty rectangle used in earlier passes) so the environment can later dock
-            in without moving this information architecture. */}
-        <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:bg-gradient-to-br lg:from-panel/70 lg:to-bg/60 lg:min-h-[400px] flex flex-col lg:flex-row lg:items-stretch">
+            in without moving this information architecture.
+            EWO-035A-R2 — the root's own gradient (originally /70,/60 for atmospheric depth
+            before real artwork existed, then reduced to /15,/10 in EWO-035A-R1) is removed
+            entirely per Commander direction: PageEnvironment's artwork is opaque, full-cover,
+            and now rendered at full presentation strength (opacity/brightness/contrast/
+            saturation all 1.0, see environmentAssets.ts) — any background here would only
+            ever show through in the disabled/no-artwork case, and the goal is zero shading
+            over the loaded image, not a fallback tone. `lg:border` and `rounded-xl` are
+            framing, not shading, and are unchanged. */}
+        <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:min-h-[400px] flex flex-col lg:flex-row lg:items-stretch">
           <PageEnvironment id="mission-control" />
           <div className="hidden lg:block absolute top-3 left-3 w-5 h-5 border-t border-l border-cyan/20 pointer-events-none" aria-hidden="true" />
           <div className="hidden lg:block absolute bottom-3 left-3 w-5 h-5 border-b border-l border-cyan/10 pointer-events-none" aria-hidden="true" />
@@ -144,8 +152,15 @@ export default function MissionControl() {
           {/* Command-console rail — permanent. HP-002 (Commander identity/badge) and
               HP-003 (UTC time/date) are approved future hardpoints that will dock above
               the readiness console within this same vertical stack; no placeholder is
-              rendered for either today. */}
-          <div className="panel lg:bg-transparent lg:border-0 lg:border-l lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[300px] shrink-0 p-4 lg:pl-5 lg:pr-5 flex flex-col items-center gap-4 justify-center min-w-0">
+              rendered for either today.
+              EWO-035A — now that the hero artwork (§ above) reads brighter, the rail
+              gets its own translucent "glass" backdrop at the lg: breakpoint
+              (bg-panel/55 + backdrop-blur, the same treatment Sidebar.tsx already
+              uses) instead of `lg:bg-transparent`, rather than the artwork being
+              re-darkened globally to keep this column legible. Deliberately still
+              not the fully opaque `panel` fill (unchanged below lg:) — the artwork
+              must stay visible through it at the breakpoint where they overlap. */}
+          <div className="panel lg:bg-panel/55 lg:backdrop-blur-md lg:border-0 lg:border-l lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[300px] shrink-0 p-4 lg:pl-5 lg:pr-5 flex flex-col items-center gap-4 justify-center min-w-0">
             <ReadinessRing value={overallReadiness} />
             <div className="text-[11px] uppercase tracking-widest text-muted text-center">Overall Fleet Readiness</div>
             <div className="w-full h-px bg-white/10" />

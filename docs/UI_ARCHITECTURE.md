@@ -521,31 +521,42 @@ Used today for "Found Loot? Check It." → `/decision-center` and
 "Something Changed?" → `/quick-update`, placed near the bottom of the
 operational cadence, after Procurement.
 
-**Semantic illustration registry (APPROVED FUTURE HARDPOINT):**
+**Semantic illustration registry — EWO-035, Beta artwork live:**
 `src/config/assets/workflowAssets.ts` registers two semantic illustration
-IDs — `decision-center-found-loot` and `quick-update-hangar` — both
-`enabled: false` today, mirroring the branding/environment asset pattern.
-`MissionControl.tsx` references only the semantic ID, never a raw path.
-Approved future concepts (not yet commissioned): a citizen/technician
-standing among recovered components, uncertain what to keep
-(`decision-center-found-loot`); a spacecraft in a maintained hangar while
-components are fitted or hoisted into position (`quick-update-hangar`).
+IDs — `decision-center-found-loot` and `quick-update-hangar` — both now
+`enabled: true` with Commander-approved Beta illustrations
+(`decision-center-found-loot.webp`, `quick-update-maintenance.webp`,
+delivered under `public/assets/environments/mission-control/`), mirroring
+the branding/environment asset pattern. `MissionControl.tsx` references
+only the semantic ID, never a raw path. These are Beta 1.0 artwork — a
+future Release 2.0 Quartermaster Edition commission may replace either
+file with no change to `WorkflowDestinationCard` or `MissionControl.tsx`.
 
 ## 12. PageEnvironment and future hardpoints (APPROVED FUTURE HARDPOINT)
 
 `src/components/layout/PageEnvironment.tsx` is mounted inside Mission
-Control's Fleet Operations region (`id="mission-control"`) today. Every
-`EnvironmentAssetDefinition` in `src/config/assets/environmentAssets.ts`
-ships `enabled: false` — the component always renders `null` currently.
-This is intentional dormant infrastructure, not a bug. The Fleet
-Operations region's height (`lg:min-h-[400px]`) was sized to support a
-future cinematic environment without the current, asset-less page reading
-as an empty rectangle — every pixel in the region today is either the
-command-console rail or a reserved, bordered/bracketed frame.
+Control's Fleet Operations region (`id="mission-control"`). As of
+EWO-035, this is the first `EnvironmentAssetDefinition`
+(`src/config/assets/environmentAssets.ts`) to ship `enabled: true` —
+`sources.desktop` points at the Commander-supplied
+`mission-control-operations-wall.webp` (one production file, no
+per-breakpoint variants yet; every viewport renders it via
+`resolveResponsiveSource()`'s widest-available-first order), rendered
+`object-cover` at the existing conservative presentation defaults
+(0.16 opacity, 0.7 brightness) — no CSS/layout change, no new overlay.
+Every other page's `EnvironmentAssetDefinition` still ships
+`enabled: false` (the component still renders `null` for them) —
+intentional dormant infrastructure, not a bug. The Fleet Operations
+region's height (`lg:min-h-[400px]`) was sized to support this without
+the page ever reading as an empty rectangle — every pixel in the region
+is either the command-console rail, the artwork, or a reserved,
+bordered/bracketed frame.
 
-Do not claim the Commander badge (HP-002), UTC clock (HP-003), cinematic
-environment, workflow illustrations, or full Fleet Registry imagery exist
-— none are delivered as of this mission.
+This is Beta 1.0 artwork — a future Release 2.0 Quartermaster Edition
+commission may replace `mission-control-operations-wall.webp` with no
+change to `PageEnvironment` or `MissionControl.tsx`. Do not claim the
+Commander badge (HP-002), UTC clock (HP-003), or full Fleet Registry
+imagery exist — none are delivered as of this mission.
 
 ### 12.1 Mission Control Environmental Philosophy (EWO-014 — governing design rule)
 
@@ -769,8 +780,35 @@ Not touched by this mission (Commander-verified during Sea Trials, per EWO-030's
 
 **Click-anywhere navigation (Task 4):** the whole card is a single `<Link to={/ship/${ship.id}}>` — there is no separate "Ship Detail →" hyperlink anywhere inside it. This was already Fleet Dashboard's behavior; Mission Control's migration removed its own former "Ship Detail" text link to match exactly.
 
-**Mission Control's own addition (Task 3):** a "PRIORITY N" label renders as a sibling *above* the card (inside a shared wrapper `div[data-testid="priority-card-wrapper"]`), not as a badge inside it — this is the only Mission-Control-specific concept, matching the same "keep the reusable component generic" principle `ShipRecordCard`'s own `badge` slot originally established. Priority ordering/slicing logic (`[...ships].sort(...).slice(0, 3)`) is presentation-independent and untouched (Task 6).
+**Priority is page-level wrapper context, never embedded inside ShipCard** — a "PRIORITY N" label renders as a sibling *above* the card via the shared `PriorityLabel` component (`src/components/PriorityLabel.tsx`, `div[data-testid="priority-card-wrapper"]`), the only concept that varies per page. As of EWO-033, **both** pages render it: Mission Control shows positional rank 1-4 within its Top 4 slice (`[...ships].sort(...).slice(0, 4)` — see §19.1); Fleet Dashboard shows every Fleet Asset's own stored `priority` value, in Card view, always (not only while Priority sort is active) — never a recomputed rank, so it stays correct after any sort or filter.
 
 **Verified byte-identical** between Mission Control and Fleet Dashboard for the same ship via an automated `outerHTML` comparison test (`src/pages/__tests__/MissionControl.test.tsx`) — not just visually similar, the literal same component instance with the same props shape.
 
 **Out of scope, deliberately deferred** (Commander Intent): Quartermaster Edition visual enhancements/artwork — this mission is presentation standardization only, not a redesign. No readiness logic, logistics, importer, or persistence changes were made.
+
+### 19.1 Beta Ship Card Lock Correction (EWO-033)
+
+Sea Trials found three browser-verified gaps after EWO-032's migration, all corrected as presentation-only fixes (no redesign, no logic changes):
+
+- **Fleet Dashboard now always shows its Priority wrapper in Card view** (§19 above) — previously it showed no Priority indicator at all, even though Priority sort was already available.
+- **Mission Control now shows the Top 4** Priority Fleet Assets (`slice(0, 4)`, was 3) per Commander direction — the sort/slice logic itself, and the 0/1-3/4+ ship empty-and-small-fleet behavior, are otherwise unchanged.
+- **The Priority grid uses one shared responsive breakpoint contract** on both pages (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`, `items-stretch`) — Mission Control's 4-card case never renders narrower cards than Fleet Dashboard would at the same viewport width, and no page-specific compact card variant exists.
+
+**Canonical card dimension contract (Task 4):** `ShipCard` now has four structural regions, each with a Tailwind-scale reserved minimum height (`min-h-11` identity, `min-h-5` Active Loadout, `min-h-11 flex-1` status), present identically regardless of which `FleetBuildState` branch is active — INVALID_BUILD, FACTORY_ONLY, MISSION_READY, and the in-progress/readiness-bar branch all populate the exact same regions, so a shorter-content card never renders shorter than a longer-content one in the same grid. The root card is `h-full` so a CSS-grid row's automatic `items-stretch` fills any remaining height evenly via the status region's `flex-1`. No arbitrary fixed pixel height, no data-specific conditional heights, no second page-specific card variant — one contract, defined once in `ShipCard` itself.
+
+### 19.2 Beta Ship Image Coverage & Universal Fallback Standardization (EWO-033A)
+
+Sea Trials flagged the universal fallback artwork rendering as a small object surrounded by an oversized blank hero/card region on wide frames. Root cause: both candidate fallback PNGs (`public/images/ship-placeholder.png`, i.e. `SHIP_PLACEHOLDER_URL`, and the unused `ship-placeholder-master-1024.png` under Fleet Registry scaffolding — confirmed byte-identical artwork, both exactly 1024×1024) were rendered with `object-contain` inside 16:9 (`ShipCard`) and full-width (`ShipHeroFrame`) frames, necessarily letterboxing. `ShipHeroFrame` additionally hard-coded a taller fixed height (`h-[360px]`) for the fallback branch than the real-photo branch (`h-44 sm:h-56`), compounding the effect.
+
+**Fix — frame-filling presentation, one dimension contract regardless of image availability:**
+- `ShipImage.tsx`'s fallback (`mode === 'contain'`) branch now renders `object-cover` instead of `object-contain`, and no longer applies a flat `backgroundColor` box (nothing left to letterbox). `mode` itself (`'contain'` vs `'cover'`) remains the semantic real-vs-fallback flag every caller already branches on (e.g. `ShipHeroFrame`'s overlay-vs-metadata-band switch, §19.2 below) — only the rendered CSS changed, confirmed safe by direct visual inspection: the artwork's "IMAGE UNAVAILABLE" text and ship silhouette both sit in the vertical-center band and survive any reasonable center-crop.
+- `ShipCard.tsx`'s fallback `imageClassName` branch matches (`object-cover`, no hover-zoom — the zoom-on-hover treatment stays real-photo-only).
+- `ShipHeroFrame.tsx` now uses one fixed height (`h-44 sm:h-56`) for both branches — no layout shift based on image availability. This did **not** touch the EWO-033 `ShipCard` dimension contract (§19 above) — the reserved-height regions are unchanged; only the image's own fit-mode CSS moved.
+
+**Universal fallback source — one, not two:** `SHIP_PLACEHOLDER_URL`, reached via `src/utils/resolveShipImage.ts`'s default `fallbackSrc` on every live surface (`ShipCard`, `ShipHeroFrame`). The separate `FLEET_REGISTRY_PLACEHOLDER` / `resolveFleetRegistryImage()` path (§10 below, `fleetRegistryAssets.ts`) is confirmed via exhaustive grep to have **zero live callers** anywhere in the app — it is now explicitly marked `@deprecated` in its own file rather than deleted (kept only as possible Release 2.0 scaffolding). There was never a real visual choice to make between the two fallback assets — they are the same artwork.
+
+**Canonical registry, resolution precedence, and Commander editing workflow — unchanged, re-confirmed correct:** `src/data/shipImageRegistry.ts` remains the single Commander-maintained file (§ "Canonical ship image URL registry" in `docs/ASSET_PIPELINE.md`); `resolveShipImage()`'s three-tier precedence (registry → existing official/imported image → `undefined`/fallback) was audited end-to-end this mission, including seed ships (re-resolved fresh on every store construction via `withResolvedSeedImages()`, never persisted/frozen), deep-imported and catalog-only ships (via `presentationImageKeyById`'s alias keys), and manually-added Fleet Assets (`materializeFleetAsset()`'s own direct `resolveShipImage()` call, replayed on every rehydration) — no live surface bypasses it. No code changes were needed to `resolveShipImage.ts` itself.
+
+**Coverage audit (Task 9, as of this mission — a snapshot, not a static guarantee; re-run the live tests in `src/data/__tests__/shipImageRegistry.test.ts` for the current count):** 258 total canonical selectable hulls, 12 with a registry-resolved image, 246 falling through to the universal fallback, 0 orphan registry keys, 0 duplicate keys, 0 malformed entries. Partial coverage is the expected, approved Beta state — the Commander adds entries incrementally, one HTTPS URL per line, no generation step, no re-import.
+
+**Stock role/focus (Tasks 6-9):** the identity line's second segment ("Manufacturer · Stock Role/Focus") is resolved by `resolveShipStockRoleFocus()` (`src/utils/shipIdentityLine.ts`) — deliberately independent of `Ship.role` (which mirrors the active Build's role text at materialization time, not stock metadata — see `docs/DataModel.md`'s "Stock role/focus vs. operational role"). Precedence: (1) the canonical `ShipDefinition.role`, when genuinely populated; (2) for a deep-imported definition whose own role/career came back empty (a real gap in the raw StarBreaker export envelope, not a wiring bug — see `docs/ImportPipeline.md`'s "Current known gaps" #8), the Mission M-012 catalog's own record for that same real hull, cross-referenced by entity class; (3) no text — never invented from the ship's name, never substituted from a Build or the Commander's future Fleet Profile role. `formatShipIdentityLine()` joins manufacturer and the resolved role with " · ", or renders manufacturer alone — never a dangling separator. **Coverage: 100% of the 258 canonical selectable hull definitions resolve a real stock role/focus** (252 at tier 1, 6 — every deep-imported ship — at tier 2) — see the EWO-033 final report for the full numbers and representative examples (Cutlass Red, 135c, Cutlass Black, Eclipse, Gladius).
