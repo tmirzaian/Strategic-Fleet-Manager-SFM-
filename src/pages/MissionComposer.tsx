@@ -1,5 +1,5 @@
-import { useMemo, useState, Fragment, type ReactNode } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { useEffect, useMemo, useState, Fragment, type ReactNode } from 'react'
+import { useSearchParams, Link } from 'react-router-dom'
 import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import { validateTargetCompatibility, isComponentSelectableForPort } from '../data/componentCatalog'
@@ -73,7 +73,6 @@ type WorkflowMode = 'CREATE' | 'EDIT'
  * now live here instead of a separate destination.
  */
 export default function MissionComposer() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
@@ -96,6 +95,33 @@ export default function MissionComposer() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
   const [deleting, setDeleting] = useState<{ id: string; name: string } | null>(null)
+
+  // EWO-026 (Task 2) — `shipId` above only reads the URL's `?shipId=` once,
+  // at first mount. Navigating from `/loadout-manager?shipId=A` to
+  // `/loadout-manager?shipId=B` is the SAME route (only the query string
+  // differs), so React Router re-renders this exact component instance
+  // rather than remounting it — the `useState` initializer never runs
+  // again, and the Ship selector silently stayed on A. This kept the
+  // Fleet Asset context out of sync with the URL any time a Commander
+  // arrived at Loadout Manager for a different ship without a full
+  // remount — exactly the "correct Ship selected... Fleet Asset context"
+  // requirement this mission calls out. Mirrors the manual Ship dropdown's
+  // own onChange reset below, so switching ships via URL and switching
+  // ships by hand behave identically.
+  const shipIdParam = searchParams.get('shipId')
+  useEffect(() => {
+    if (shipIdParam && shipIdParam !== shipId) {
+      setShipId(shipIdParam)
+      setOverrides({})
+      setExistingBuildId('')
+      setWorkflowMode('CREATE')
+      setName('')
+      setResult(null)
+      setCollapsed(new Set())
+      setExpandedSlot(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shipIdParam])
 
   const ship = ships.find((s) => s.id === shipId)
   const shipBuilds = builds.filter((b) => b.shipId === shipId)
@@ -230,6 +256,15 @@ export default function MissionComposer() {
     )
   }
 
+  // EWO-026 (Task 1/2) — saving never navigates away from Loadout Manager
+  // (Design Authority Ruling 1): the Commander stays in this workspace to
+  // create, edit, clone, and compare several Loadouts in sequence.
+  // Instead, a successful save transitions straight into Edit Existing
+  // Loadout mode with the just-saved (or just-cloned) Build selected —
+  // `outcome.buildId` is always the Build that now holds what was just
+  // saved, whether that's a brand-new CREATE, the same Build from Save
+  // Changes, or a fresh clone from Save as New — so this one branch covers
+  // all three without needing to know which button was pressed.
   function handleSave(setActive: boolean, saveAsNew = false, nameOverride?: string) {
     if (!ship) {
       setResult({ success: false, message: 'Select a Fleet Asset first.' })
@@ -250,8 +285,17 @@ export default function MissionComposer() {
       setActive,
       saveAsNew,
     })
-    if (outcome.success) {
-      navigate(`/ship/${ship.id}`)
+    if (outcome.success && outcome.buildId) {
+      setWorkflowMode('EDIT')
+      setExistingBuildId(outcome.buildId)
+      setName(resolvedName)
+      setOverrides({})
+      setResult({ success: true, message: `"${resolvedName}" saved${setActive ? ' and set as the Active Loadout' : ''}.` })
+    } else if (outcome.success) {
+      // saveMissionConfiguration succeeded but returned no buildId — not a
+      // real path today (every success branch mints/reuses one), but
+      // guarded rather than silently assuming it here.
+      setResult({ success: true, message: `"${resolvedName}" saved.` })
     } else {
       setResult({ success: false, message: outcome.message ?? 'Could not save this Loadout.' })
       if (nameOverride) setName(nameOverride)
@@ -448,7 +492,20 @@ export default function MissionComposer() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => {
+                // EWO-027 (Scenario A) — starting a New Loadout is not
+                // "Copy Existing": every piece of the previous Build's own
+                // metadata and per-slot edits must reset, so only
+                // whichever Starting Source the Commander ultimately
+                // picks supplies equipment — never a stale Name, Category,
+                // or leftover override from whatever was being edited a
+                // moment ago (this button is reachable straight from an
+                // EDIT-mode Loadout, including the one this page itself
+                // switches into right after a save).
                 setWorkflowMode('CREATE')
+                setExistingBuildId('')
+                setName('')
+                setCategory('')
+                setOverrides({})
                 setResult(null)
               }}
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
@@ -594,6 +651,14 @@ export default function MissionComposer() {
           <AlertOctagon size={16} /> {result.message}
         </div>
       )}
+      {/* EWO-026 (Task 1/2) — saving no longer navigates away, so a
+          restrained local confirmation is the only signal the Commander
+          gets that the save succeeded and which Loadout is now selected. */}
+      {result && result.success && (
+        <div className="flex items-center gap-2 bg-success/10 border border-success/30 rounded-lg px-4 py-3 text-sm text-success">
+          <CheckCircle2 size={16} /> {result.message}
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <button
@@ -623,9 +688,16 @@ export default function MissionComposer() {
             <Copy size={15} /> Save as New Loadout
           </button>
         )}
+        {/* EWO-026 (Task 3) — explicit navigation only, never implied by a
+            save. `ship.id` is this exact selected Fleet Asset's own unique
+            materialized id (not the shared hull/ShipDefinition id), so two
+            owned copies of the same hull always route to the correct,
+            distinct instance (Ruling 4/5) — the existing `/ship/:shipId`
+            route already carries that per-instance identity; no second
+            navigation/selection mechanism is introduced here (Ruling 8). */}
         {ship && (
           <Link to={`/ship/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
-            <Rocket size={15} /> Back to Ship Detail
+            <Rocket size={15} /> View in Ship Detail
           </Link>
         )}
       </div>

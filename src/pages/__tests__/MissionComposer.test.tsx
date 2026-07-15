@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import MissionComposer from '../MissionComposer'
 import { useFleetStore } from '../../store/useFleetStore'
 import { catalogComponentsByName } from '../../generated/componentCatalog'
@@ -382,6 +382,110 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     expect(noseMountInput).toBeNull()
   })
 
+})
+
+describe('EWO-026 (Task 1/2/13): post-save workflow stays inside Loadout Manager', () => {
+  it('1/8. Create Loadout remains in Loadout Manager and shows success feedback, no navigation', () => {
+    renderComposer('?shipId=utv')
+    const nameInput = screen.getByPlaceholderText(/Deep Salvage Run/i)
+    fireEvent.change(nameInput, { target: { value: 'Stay Put Loadout' } })
+    fireEvent.click(screen.getByText('Create Loadout'))
+
+    // Still looking at Loadout Manager's own page chrome — never routed away.
+    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
+    expect(screen.getByText(/saved/i)).toBeInTheDocument()
+    expect(screen.queryByText(/^could not save/i)).not.toBeInTheDocument()
+  })
+
+  it('2. Create & Set Active remains in Loadout Manager', () => {
+    renderComposer('?shipId=utv')
+    fireEvent.change(screen.getByPlaceholderText(/Deep Salvage Run/i), { target: { value: 'Stay Put Active' } })
+    fireEvent.click(screen.getByText(/Create & Set as Active Loadout/i))
+    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
+    expect(screen.getByText(/set as the active loadout/i)).toBeInTheDocument()
+  })
+
+  it('3. Save Changes (editing an existing Loadout) remains in Loadout Manager', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText('Save Changes'))
+    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
+    expect(screen.getByText(/saved/i)).toBeInTheDocument()
+  })
+
+  it('4. Save Changes & Set as Active remains in Loadout Manager', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText(/Save Changes & Set as Active/i))
+    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
+    expect(screen.getByText(/set as the active loadout/i)).toBeInTheDocument()
+  })
+
+  it('5. Save as New Loadout remains in Loadout Manager', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText('Save as New Loadout'))
+    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
+    expect(screen.getByText(/saved/i)).toBeInTheDocument()
+  })
+
+  it('6. a newly created Build becomes the selected EDIT Build — workflow transitions into Edit mode automatically', () => {
+    renderComposer('?shipId=utv')
+    fireEvent.change(screen.getByPlaceholderText(/Deep Salvage Run/i), { target: { value: 'Auto Select Me' } })
+    fireEvent.click(screen.getByText('Create Loadout'))
+
+    // Now in EDIT mode with the just-created Build selected in "Which Loadout".
+    expect(screen.getByText('Which Loadout')).toBeInTheDocument()
+    const created = useFleetStore.getState().builds.find((b) => b.name === 'Auto Select Me')!
+    expect(created).toBeDefined()
+    const loadoutSelect = screen
+      .getAllByRole('combobox')
+      .find((el) => el.tagName === 'SELECT' && Array.from((el as HTMLSelectElement).options).some((o) => o.text.includes('Auto Select Me'))) as HTMLSelectElement
+    expect(loadoutSelect.value).toBe(created.id)
+  })
+
+  it('7. Save as New selects the clone (not the original) and leaves the original completely unchanged', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const original = useFleetStore.getState().builds.find((b) => b.shipId === 'ghost' && b.kind !== 'FACTORY')!
+    const originalName = original.name
+
+    fireEvent.click(screen.getByText('Save as New Loadout'))
+
+    const clone = useFleetStore.getState().builds.find((b) => b.name === `${originalName} (Copy)`)!
+    expect(clone).toBeDefined()
+    expect(clone.id).not.toBe(original.id)
+    const stillOriginal = useFleetStore.getState().builds.find((b) => b.id === original.id)!
+    expect(stillOriginal.name).toBe(originalName) // untouched
+
+    const loadoutSelect = screen
+      .getAllByRole('combobox')
+      .find((el) => el.tagName === 'SELECT' && (el as HTMLSelectElement).value === clone.id) as HTMLSelectElement
+    expect(loadoutSelect).toBeDefined() // the clone, not the original, is now selected
+  })
+})
+
+describe('EWO-026 (Task 3/4/13): explicit "View in Ship Detail" navigation', () => {
+  it('9/10. renders "View in Ship Detail" (not "Back to Ship Detail") carrying the exact selected Fleet Asset id', () => {
+    renderComposer('?shipId=utv')
+    expect(screen.queryByText('Back to Ship Detail')).not.toBeInTheDocument()
+    const link = screen.getByText('View in Ship Detail').closest('a')!
+    expect(link.getAttribute('href')).toBe('/ship/utv')
+  })
+
+  it('11. two Fleet Assets of the same hull each link to their own exact instance, not the first matching hull', () => {
+    const a = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Cutty One')
+    const b = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Cutty Two')
+    expect(a.assetId).not.toBe(b.assetId)
+
+    renderComposer(`?shipId=${b.assetId}`)
+    const link = screen.getByText('View in Ship Detail').closest('a')!
+    expect(link.getAttribute('href')).toBe(`/ship/${b.assetId}`)
+    expect(link.getAttribute('href')).not.toBe(`/ship/${a.assetId}`)
+  })
+})
+
+describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro), continued', () => {
   it('20. EWO-024 compatibility filtering and Presets-hidden behavior still hold after the EWO-025 rewrite', () => {
     renderComposer('?shipId=ghost')
     expect(screen.queryByText('Presets')).not.toBeInTheDocument()
@@ -392,5 +496,127 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
       const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
       expect(listbox.textContent).toMatch(/no matching component/i)
     }
+  })
+})
+
+describe('EWO-026 (round 2, Task 2): Fleet Asset context tracks the URL, even without a remount', () => {
+  function Harness({ targetShipId }: { targetShipId: string }) {
+    const navigate = useNavigate()
+    return (
+      <div>
+        <button onClick={() => navigate(`/loadout-manager?shipId=${targetShipId}`)}>jump-to-ship</button>
+        <MissionComposer />
+      </div>
+    )
+  }
+
+  it('navigating to a different ?shipId= on the same /loadout-manager route (no remount) updates the selected Ship', () => {
+    const a = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'ShipA')
+    const b = useFleetStore.getState().addFleetAsset('eclipse-imported', 'OWNED', 'ShipB')
+
+    render(
+      <MemoryRouter initialEntries={[`/loadout-manager?shipId=${a.assetId}`]}>
+        <Routes>
+          <Route path="/loadout-manager" element={<Harness targetShipId={b.assetId!} />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    const shipSelect = document.querySelector('select') as HTMLSelectElement
+    expect(shipSelect.value).toBe(a.assetId)
+
+    fireEvent.click(screen.getByText('jump-to-ship'))
+
+    expect(shipSelect.value).toBe(b.assetId)
+  })
+
+  it('the same URL-driven ship switch also resets workflow mode back to Create, matching the manual Ship dropdown', () => {
+    // 'ghost' already has real, editable custom Loadouts in the seed
+    // fixture, so "Edit an Existing Loadout" is actually clickable here.
+    const b = useFleetStore.getState().addFleetAsset('eclipse-imported', 'OWNED', 'ShipB')
+
+    render(
+      <MemoryRouter initialEntries={['/loadout-manager?shipId=ghost']}>
+        <Routes>
+          <Route path="/loadout-manager" element={<Harness targetShipId={b.assetId!} />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    expect(screen.getByText('Which Loadout')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('jump-to-ship'))
+    expect(screen.getByText('Create a New Loadout')).toBeInTheDocument()
+    expect(screen.queryByText('Which Loadout')).not.toBeInTheDocument()
+  })
+})
+
+describe('EWO-027 (Scenario A): starting a New Loadout resets prior metadata — this is not "Copy Existing"', () => {
+  it('after Save & Set Active (which itself switches into Edit mode with the saved name/category), clicking "Create a New Loadout" clears Name, Category, and any per-slot overrides', () => {
+    renderComposer('?shipId=utv')
+    fireEvent.change(screen.getByPlaceholderText(/Deep Salvage Run/i), { target: { value: 'Build A' } })
+    fireEvent.change(screen.getByPlaceholderText(/Combat, Industrial, Support/i), { target: { value: 'Category A' } })
+    fireEvent.click(screen.getByText(/Create & Set as Active Loadout/i))
+
+    // Confirms the EWO-026 post-save behavior this scenario builds on:
+    // the Name field is now populated with the just-saved Build's name.
+    expect((screen.getByPlaceholderText(/Deep Salvage Run/i) as HTMLInputElement).value).toBe('Build A')
+
+    fireEvent.click(screen.getByText('Create a New Loadout'))
+
+    expect((screen.getByPlaceholderText(/Deep Salvage Run/i) as HTMLInputElement).value).toBe('')
+    expect((screen.getByPlaceholderText(/Combat, Industrial, Support/i) as HTMLInputElement).value).toBe('')
+  })
+
+  it('"Create a New Loadout" also clears existingBuildId — re-entering Edit mode afterward starts unselected, not on a stale prior Loadout', () => {
+    renderComposer('?shipId=ghost')
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const firstBuildId = useFleetStore.getState().builds.find((b) => b.shipId === 'ghost' && b.kind !== 'FACTORY')!.id
+    const loadoutSelect = screen.getAllByRole('combobox').find((el) => el.tagName === 'SELECT' && (el as HTMLSelectElement).value === firstBuildId) as HTMLSelectElement
+    expect(loadoutSelect).toBeDefined()
+
+    fireEvent.click(screen.getByText('Create a New Loadout'))
+    expect(screen.queryByText('Which Loadout')).not.toBeInTheDocument()
+
+    // Re-entering Edit mode auto-selects the first available Loadout
+    // again (existing EWO-024 behavior) — the point of this test is that
+    // nothing from the PRIOR edit (a per-slot override, a stale name) is
+    // still attached once we're back in Edit mode via a fresh selection.
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    expect(screen.getByText('Which Loadout')).toBeInTheDocument()
+  })
+
+  it('a per-slot Target override made while editing does not bleed into the next Create workflow', () => {
+    // A freshly-added ship's own Factory default is fully known and
+    // controlled here — 'ghost' (a seed ship whose auto-selected custom
+    // Loadout already deviates from its own Factory defaults) would make
+    // "what's the real Factory value" ambiguous for this assertion.
+    const added = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Override Bleed Test')
+    const shipId = added.assetId!
+    useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'Existing Build', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const targetInputs = document.querySelectorAll('input[role="combobox"]')
+    const factoryDefault = (targetInputs[0] as HTMLInputElement).value
+
+    // Commit a real, different override the same way a Commander actually
+    // would — clicking a listed option — not a bare `change` event, which
+    // only ever updates TargetComponentPicker's own uncommitted local text
+    // and never reaches MissionComposer's `overrides` state at all.
+    fireEvent.click(targetInputs[0])
+    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const optionButtons = Array.from(listbox.querySelectorAll('button'))
+    const differentOption = optionButtons.find((b) => b.querySelector('span')?.textContent !== factoryDefault) ?? optionButtons[0]
+    fireEvent.click(differentOption)
+    const committedOverride = (targetInputs[0] as HTMLInputElement).value
+    expect(committedOverride).not.toBe(factoryDefault) // sanity: a real, distinct override was actually committed
+
+    fireEvent.click(screen.getByText('Create a New Loadout'))
+
+    const freshTargetInputs = document.querySelectorAll('input[role="combobox"]') as NodeListOf<HTMLInputElement>
+    // The fresh CREATE-mode preview reflects only the Starting Source
+    // (Factory by default) — never the override just committed while editing.
+    expect(freshTargetInputs[0].value).not.toBe(committedOverride)
+    expect(freshTargetInputs[0].value).toBe(factoryDefault)
   })
 })

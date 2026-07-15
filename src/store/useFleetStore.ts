@@ -14,7 +14,12 @@ import { calculateComponentAvailability } from '../engine/logistics/availability
 import type { MissionReservation } from '../types'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
-const PERSIST_VERSION = 5
+// EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
+// customBuildHardpoints/activeBuildByShipId — a pre-existing save simply
+// has none of these fields, which `migrate` below treats as "no custom
+// Loadouts recorded yet" (an honest, correct description of that save),
+// not an error.
+const PERSIST_VERSION = 6
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -134,6 +139,15 @@ interface FleetState {
     quartermasterTemplateId?: string
     targetOverrides: Record<string, string>
     setActive: boolean
+    /** EWO-024 (Task 4) — decouples "use this Loadout as today's baseline"
+     * (startingState/existingBuildId, unchanged) from "save into that same
+     * Loadout" (previously the same thing, the exact ambiguity Task 4
+     * reported). When true, always mints a new Build even though
+     * startingState is 'EXISTING' with a real existingBuildId — lets the
+     * UI offer an explicit "Save as New Loadout" action from an edit in
+     * progress without requiring a separate baseline-only mechanism.
+     * Defaults to false, preserving every existing call's behavior. */
+    saveAsNew?: boolean
   }) => { success: boolean; buildId?: string; message?: string }
 
   // Build Manager / Quartermaster Templates
@@ -211,6 +225,50 @@ function isValidPersistedReservation(raw: unknown): raw is MissionReservation {
     typeof r.componentName === 'string' &&
     typeof r.quantity === 'number' &&
     (r.status === 'ACTIVE' || r.status === 'FULFILLED' || r.status === 'RELEASED' || r.status === 'INVALID')
+  )
+}
+
+/**
+ * EWO-027 — a saved custom Loadout (`Build.kind !== 'FACTORY'`) was never
+ * included in `partialize` at all, for any ship, seed or manually added —
+ * confirmed directly against real `localStorage` output: no `builds` or
+ * `hardpoints` key existed there whatsoever. Every refresh silently
+ * reverted every ship to its Factory Loadout, because `merge` (below)
+ * only ever knew how to *reconstruct* the canonical Factory Loadout via
+ * `materializeFleetAsset`, never a Commander's actual saved assignments.
+ * These two validators mirror `isValidPersistedFleetAsset`'s defensive
+ * pattern exactly — a malformed record is dropped with a console warning,
+ * never crashes, never wipes the rest of the player's saved state.
+ */
+function isValidPersistedBuild(raw: unknown): raw is Build {
+  if (!raw || typeof raw !== 'object') return false
+  const r = raw as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    typeof r.shipId === 'string' &&
+    typeof r.name === 'string' &&
+    typeof r.readiness === 'number' &&
+    typeof r.isActive === 'boolean' &&
+    Array.isArray(r.missing) &&
+    typeof r.kind === 'string' &&
+    r.kind !== 'FACTORY'
+  )
+}
+
+function isValidPersistedHardpoint(raw: unknown): raw is Hardpoint {
+  if (!raw || typeof raw !== 'object') return false
+  const r = raw as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    typeof r.shipId === 'string' &&
+    typeof r.buildId === 'string' &&
+    typeof r.slotLabel === 'string' &&
+    typeof r.type === 'string' &&
+    typeof r.size === 'string' &&
+    typeof r.factoryItem === 'string' &&
+    typeof r.installedItem === 'string' &&
+    typeof r.targetItem === 'string' &&
+    typeof r.status === 'string'
   )
 }
 
@@ -548,7 +606,7 @@ export const useFleetStore = create<FleetState>()(
     return { success: true }
   },
 
-  saveMissionConfiguration: ({ shipId, name, startingState, existingBuildId, quartermasterTemplateId, targetOverrides, setActive }) => {
+  saveMissionConfiguration: ({ shipId, name, startingState, existingBuildId, quartermasterTemplateId, targetOverrides, setActive, saveAsNew }) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return { success: false, message: 'Fleet Asset not found.' }
     if (!name.trim()) return { success: false, message: 'Name the Loadout before saving.' }
@@ -591,7 +649,7 @@ export const useFleetStore = create<FleetState>()(
       if (baseTargets.has(slotLabel)) baseTargets.set(slotLabel, targetItem)
     }
 
-    const isEditingExisting = startingState === 'EXISTING' && Boolean(existingBuildId)
+    const isEditingExisting = !saveAsNew && startingState === 'EXISTING' && Boolean(existingBuildId)
     const buildId = isEditingExisting ? existingBuildId! : `${shipId}-mission-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
     const newRows: Hardpoint[] = referenceRows.map((refRow, i) => {
@@ -905,11 +963,29 @@ export const useFleetStore = create<FleetState>()(
       // authoritative player state").
       migrate: (persistedState) => {
         const state = persistedState as
-          | { fleetAssets?: unknown; hangarItems?: unknown; reservations?: unknown; installedLoadouts?: unknown; seedAssetOverrides?: unknown }
+          | {
+              fleetAssets?: unknown
+              hangarItems?: unknown
+              reservations?: unknown
+              installedLoadouts?: unknown
+              seedAssetOverrides?: unknown
+              customBuilds?: unknown
+              customBuildHardpoints?: unknown
+              activeBuildByShipId?: unknown
+            }
           | null
           | undefined
         if (!state) {
-          return { fleetAssets: [], hangarItems: undefined, reservations: [], installedLoadouts: undefined, seedAssetOverrides: {} }
+          return {
+            fleetAssets: [],
+            hangarItems: undefined,
+            reservations: [],
+            installedLoadouts: undefined,
+            seedAssetOverrides: {},
+            customBuilds: [],
+            customBuildHardpoints: [],
+            activeBuildByShipId: {},
+          }
         }
 
         const validAssets: FleetAsset[] = []
@@ -922,6 +998,29 @@ export const useFleetStore = create<FleetState>()(
         for (const raw of Array.isArray(state.reservations) ? state.reservations : []) {
           if (isValidPersistedReservation(raw)) validReservations.push(raw)
           else console.warn('[SFM] Skipping a persisted Reservation record that failed migration validation:', raw)
+        }
+
+        // EWO-027 — a pre-6 save has neither field at all (custom
+        // Loadouts were never persisted in the first place) — an empty
+        // array/object is the honest, correct description of that save,
+        // not a data-loss event to warn about.
+        const validCustomBuilds: Build[] = []
+        for (const raw of Array.isArray(state.customBuilds) ? state.customBuilds : []) {
+          if (isValidPersistedBuild(raw)) validCustomBuilds.push(raw)
+          else console.warn('[SFM] Skipping a persisted custom Build record that failed migration validation:', raw)
+        }
+        const validCustomBuildIds = new Set(validCustomBuilds.map((b) => b.id))
+        const validCustomBuildHardpoints: Hardpoint[] = []
+        for (const raw of Array.isArray(state.customBuildHardpoints) ? state.customBuildHardpoints : []) {
+          if (isValidPersistedHardpoint(raw) && validCustomBuildIds.has(raw.buildId)) validCustomBuildHardpoints.push(raw)
+          else console.warn('[SFM] Skipping a persisted custom Build Hardpoint record that failed migration validation:', raw)
+        }
+        const validActiveBuildByShipId: Record<string, string> = {}
+        if (state.activeBuildByShipId && typeof state.activeBuildByShipId === 'object') {
+          for (const [shipId, buildId] of Object.entries(state.activeBuildByShipId as Record<string, unknown>)) {
+            if (typeof buildId === 'string') validActiveBuildByShipId[shipId] = buildId
+            else console.warn('[SFM] Skipping a persisted Active Build reference that failed migration validation:', shipId, buildId)
+          }
         }
 
         // Mission M-012 (schemaVersion 5): pre-existing saves have no
@@ -949,6 +1048,9 @@ export const useFleetStore = create<FleetState>()(
           reservations: validReservations,
           installedLoadouts: Array.isArray(state.installedLoadouts) ? state.installedLoadouts : undefined,
           seedAssetOverrides: validOverrides,
+          customBuilds: validCustomBuilds,
+          customBuildHardpoints: validCustomBuildHardpoints,
+          activeBuildByShipId: validActiveBuildByShipId,
         }
       },
       // Fleet Assets added via "Add Ship" (or any future non-seed source)
@@ -965,6 +1067,20 @@ export const useFleetStore = create<FleetState>()(
         reservations: state.reservations,
         installedLoadouts: state.installedLoadouts,
         seedAssetOverrides: state.seedAssetOverrides,
+        // EWO-027 — the actual custom Loadout content, for ANY ship (seed
+        // or manually added). Factory builds are deliberately excluded:
+        // they're always correctly, deterministically regenerated fresh
+        // (materializeFleetAsset for manual assets, src/data/seed.ts for
+        // seed ones) — persisting them would only be redundant bytes.
+        customBuilds: state.builds.filter((b) => b.kind !== 'FACTORY'),
+        customBuildHardpoints: state.hardpoints.filter((h) => state.builds.some((b) => b.id === h.buildId && b.kind !== 'FACTORY')),
+        // A ship's actual selected Active Build. For a manually-added
+        // asset this duplicates FleetAsset.activeBuildId (already
+        // persisted above), but a seed ship's Ship object is baked in
+        // fresh every session and previously had no way at all to
+        // remember a Commander's setActiveBuild() choice — this single
+        // small map covers both sources uniformly.
+        activeBuildByShipId: Object.fromEntries(state.ships.map((s) => [s.id, s.activeBuildId])),
       }),
       // Replays every persisted manual Fleet Asset back into ships/builds/
       // hardpoints using the exact same materializeFleetAsset() the live
@@ -983,6 +1099,9 @@ export const useFleetStore = create<FleetState>()(
               reservations?: MissionReservation[]
               installedLoadouts?: InstalledLoadoutEntry[]
               seedAssetOverrides?: Record<string, SeedAssetOverride>
+              customBuilds?: Build[]
+              customBuildHardpoints?: Hardpoint[]
+              activeBuildByShipId?: Record<string, string>
             }
           | null
           | undefined
@@ -1084,6 +1203,42 @@ export const useFleetStore = create<FleetState>()(
             installedLoadouts = [...installedLoadouts, ...hp.map((row) => ({ shipId: ship.id, slotLabel: row.slotLabel, installedItem: row.installedItem }))]
           }
         }
+
+        // EWO-027 — restore the Commander's actual custom Loadouts. The
+        // replay loop above (and the fresh seed bake-in before it) only
+        // ever knows how to reconstruct each ship's canonical Factory
+        // Loadout — a real saved Build (kind !== 'FACTORY') is never
+        // rebuilt that way. Filtered to ships that still exist after the
+        // seed-removal/replay steps above, so a Loadout for a ship
+        // that's since been removed is never resurrected. A persisted
+        // custom Build's id can collide with a placeholder FACTORY-kind
+        // build the replay above minted under the same id (when a
+        // manually-added asset's own `activeBuildId` already pointed at
+        // a custom build, since `materializeFleetAsset` always labels
+        // whatever it builds `kind: 'FACTORY'`) — the real, persisted
+        // record always wins over that placeholder.
+        const survivingShipIds = new Set(ships.map((s) => s.id))
+        const customBuilds = (persisted?.customBuilds ?? []).filter((b) => survivingShipIds.has(b.shipId))
+        const customBuildIds = new Set(customBuilds.map((b) => b.id))
+        builds = [...builds.filter((b) => !customBuildIds.has(b.id)), ...customBuilds]
+        const customBuildHardpoints = (persisted?.customBuildHardpoints ?? []).filter((h) => customBuildIds.has(h.buildId))
+        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...customBuildHardpoints]
+
+        // Restore each ship's actual selected Active Build. For a
+        // replayed manually-added asset this is already correct (
+        // materializeFleetAsset used existingAsset.activeBuildId), but a
+        // seed ship's Ship object is baked in fresh every session and had
+        // no other mechanism to remember a live setActiveBuild() choice.
+        // Only applied when the referenced build genuinely exists for
+        // this ship after the restoration above — never left dangling.
+        const activeBuildByShipId = persisted?.activeBuildByShipId ?? {}
+        ships = ships.map((s) => {
+          const activeId = activeBuildByShipId[s.id]
+          if (!activeId) return s
+          const activeBuildRecord = builds.find((b) => b.id === activeId && b.shipId === s.id)
+          if (!activeBuildRecord) return s
+          return { ...s, activeBuildId: activeId, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
+        })
 
         return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations, seedAssetOverrides, hasPersistedState: hadPersistedState }
       },
