@@ -7,6 +7,22 @@ import ReadinessBar from './ReadinessBar'
 import Badge, { ownershipTone } from './Badge'
 import ShipImage, { type ShipImagePresentationMode } from './ShipImage'
 
+/**
+ * EWO-032 — THE CANONICAL SHIP CARD for Strategic Fleet Manager (Beta
+ * 1.0). Originally Fleet Dashboard-only; Sea Trials found it the
+ * application's strongest information presentation (Ship Image, Name,
+ * Manufacturer, Ownership Badge, Active Loadout, Readiness %, Missing
+ * Component Warning, Progress Bar, all in one click-anywhere-to-navigate
+ * card), so Mission Control's Priority Cards were migrated onto this exact
+ * component rather than maintaining a second, diverged layout
+ * (`ShipRecordCard`/`PriorityCard`, both retired — see their own
+ * deprecation notes). Every current and future ship-grid surface — Fleet
+ * Dashboard, Mission Control, and any future Fleet Roadmap/Squadron view —
+ * renders this one component; no page maintains its own card layout.
+ * Quartermaster Edition visual enhancements are deliberately deferred to a
+ * future Beta sprint (EWO-032 Commander Intent) — this is presentation
+ * standardization only, not a redesign.
+ */
 export default function ShipCard({
   ship,
   buildName,
@@ -46,21 +62,21 @@ export default function ShipCard({
 
       {buildState === 'INVALID_BUILD' ? (
         <div className="flex items-center gap-1.5 text-danger text-xs font-semibold uppercase tracking-widest">
-          <AlertOctagon size={14} /> Invalid Build
+          <AlertOctagon size={14} /> Invalid Loadout
         </div>
       ) : buildState === 'FACTORY_ONLY' ? (
         <>
           <div className="text-xs text-muted">
-            Active Configuration: <span className="text-cyan/90 font-medium">Factory Loadout</span>
+            Active Loadout: <span className="text-cyan/90 font-medium">Factory Loadout</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-cyan/80">
-            <Settings2 size={13} /> No custom Build assigned yet
+            <Settings2 size={13} /> No custom Loadout assigned yet
           </div>
         </>
       ) : buildState === 'MISSION_READY' ? (
         <>
           <div className="text-xs text-muted">
-            Active Build: <span className="text-cyan/90 font-medium">{buildName}</span>
+            Active Loadout: <span className="text-cyan/90 font-medium">{buildName}</span>
           </div>
           <div className="flex items-center gap-1.5 text-success text-xs font-semibold uppercase tracking-widest">
             <CheckCircle2 size={14} /> Mission Ready
@@ -69,7 +85,7 @@ export default function ShipCard({
       ) : (
         <>
           <div className="text-xs text-muted">
-            Active Build: <span className="text-cyan/90 font-medium">{buildName}</span>
+            Active Loadout: <span className="text-cyan/90 font-medium">{buildName}</span>
           </div>
           <ReadinessBar value={progress.percentage} size="sm" />
           <div className="flex items-start gap-1.5 text-xs text-warning">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ShipWheel, ScanSearch, LayoutGrid, ClipboardList, PackageCheck, CheckCircle2, AlertTriangle, Wrench, Factory, PackageX, Plus } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
-import PriorityCard from '../components/PriorityCard'
+import ShipCard from '../components/ShipCard'
 import SortableHeader from '../components/SortableHeader'
 import FleetStatusTile from '../components/FleetStatusTile'
 import CriticalMetricTile from '../components/CriticalMetricTile'
@@ -68,9 +68,18 @@ export default function MissionControl() {
     return sum + (p ? p.missingAssignments.length + p.upgradeOpportunities.length + p.invalidTargets.length : 0)
   }, 0)
   // EWO-012: the Priority Ship section is sized for up to three records —
-  // never invents a filler ship when fewer exist.
+  // never invents a filler ship when fewer exist. EWO-032 (Task 6): this
+  // ordering/slicing logic is presentation-independent and unchanged by
+  // the Fleet Ship Card migration below.
   const topPriority = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
   const procurementRaw = buildProcurementList(hardpoints, builds, ships, installedLoadouts, reservations, hangarItems)
+
+  // EWO-032: computed once and reused both by the Fleet Status partition
+  // below and by the Fleet Ship Card's `buildState` prop, so Mission
+  // Control can never disagree with itself about the same ship's state.
+  const stateByShipId = new Map(
+    ships.map((s) => [s.id, deriveFleetBuildState(builds.find((b) => b.id === s.activeBuildId), progressByShipId.get(s.id)!)])
+  )
 
   // Fleet Status (Alpha 2.5A, Part 1) — a strict 3-way partition of every
   // Fleet Asset's state, so Mission Ready + Loadouts In Progress + Factory
@@ -82,10 +91,7 @@ export default function MissionControl() {
   const inProgressShips: typeof ships = []
   const factoryShips: typeof ships = []
   for (const ship of ships) {
-    const build = builds.find((b) => b.id === ship.activeBuildId)
-    const progress = progressByShipId.get(ship.id)!
-    const state = deriveFleetBuildState(build, progress)
-    const tile = classifyFleetStatusTile(state)
+    const tile = classifyFleetStatusTile(stateByShipId.get(ship.id)!)
     if (tile === 'MISSION_READY') missionReadyShips.push(ship)
     else if (tile === 'FACTORY_LOADOUT') factoryShips.push(ship)
     else inProgressShips.push(ship)
@@ -179,7 +185,20 @@ export default function MissionControl() {
               }`}
             >
               {topPriority.map((ship, i) => (
-                <PriorityCard key={ship.id} ship={ship} buildName={buildName(ship.activeBuildId)} rank={i + 1} progress={progressByShipId.get(ship.id)!} />
+                // EWO-032 (Task 2/3/7): Mission Control is a consumer of the
+                // canonical Fleet Ship Card — the same component Fleet
+                // Dashboard renders, no duplicate implementation. The only
+                // Mission-Control-specific concept is this Priority label,
+                // rendered above the card rather than as a badge inside it.
+                <div key={ship.id} data-testid="priority-card-wrapper" className="flex flex-col gap-2">
+                  <span className="font-mono text-[10px] text-cyan/80 tracking-widest">PRIORITY {i + 1}</span>
+                  <ShipCard
+                    ship={ship}
+                    buildName={buildName(ship.activeBuildId)}
+                    progress={progressByShipId.get(ship.id)!}
+                    buildState={stateByShipId.get(ship.id)!}
+                  />
+                </div>
               ))}
             </div>
           )}

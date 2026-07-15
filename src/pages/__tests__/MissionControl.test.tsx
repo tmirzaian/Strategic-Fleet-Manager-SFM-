@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import MissionControl from '../MissionControl'
+import FleetDashboard from '../FleetDashboard'
 import { useFleetStore } from '../../store/useFleetStore'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../../utils/fleetBuildState'
 import { calculateBuildProgress } from '../../utils/buildProgress'
 import { sortProcurementList, type ProcurementLine } from '../../utils/procurement'
 import { SHIP_PLACEHOLDER_URL } from '../../constants/shipImage'
+import { FLEET_REGISTRY_PLACEHOLDER } from '../../config/assets'
 
 const initialState = useFleetStore.getState()
 
@@ -135,34 +137,44 @@ describe('Procurement sorting on Mission Control (tests 20-23)', () => {
   })
 })
 
-describe('<MissionControl /> — EWO-004 command layout', () => {
-  it('renders the operational summary with all four existing metrics, Fleet Readiness most prominent', () => {
+describe('<MissionControl /> — EWO-006 command surface composition', () => {
+  it('renders the Fleet Readiness command rail with its two supporting metrics, Fleet Readiness most prominent', () => {
     renderMissionControl()
     expect(screen.getByText('Overall Fleet Readiness')).toBeInTheDocument()
     expect(screen.getByText('Ships Active')).toBeInTheDocument()
     expect(screen.getByText('Needed Items')).toBeInTheDocument()
-    expect(screen.getByText('Update Budget')).toBeInTheDocument()
   })
 
-  it('groups Quartermaster Logistics (Fleet Status + Inventory Status) into a single operational band, not five unrelated cards', () => {
+  it('the two supporting metrics are contained within the same command rail panel as Fleet Readiness', () => {
+    renderMissionControl()
+    const readiness = screen.getByText('Overall Fleet Readiness').closest('.panel')
+    expect(readiness).not.toBeNull()
+    expect(readiness).toHaveTextContent('Ships Active')
+    expect(readiness).toHaveTextContent('Needed Items')
+  })
+
+  it('Quartermaster Logistics contains all five existing logistics/inventory values as one operational band', () => {
     renderMissionControl()
     const band = screen.getByText('Quartermaster Logistics').closest('.panel')
     expect(band).not.toBeNull()
-    expect(band).toHaveTextContent('Fleet Status')
     expect(band).toHaveTextContent('Mission Ready')
-    expect(band).toHaveTextContent('Inventory Status')
+    expect(band).toHaveTextContent('Loadouts In Progress')
+    expect(band).toHaveTextContent('Factory Loadout')
     expect(band).toHaveTextContent('Missing Components')
+    expect(band).toHaveTextContent('Unreserved Inventory')
   })
 
   it('Priority Ship section uses live fleet data — the real lowest-priority-number seed ship renders first, never a hard-coded name', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
     const expectedFirst = [...ships].sort((a, b) => a.priority - b.priority)[0]
-    const priorityOneCard = screen.getByText('PRIORITY 1').closest('.panel')
+    // EWO-032: the "PRIORITY N" label is a sibling above the Fleet Ship
+    // Card, not a badge inside it — look up the shared wrapper, not '.panel'.
+    const priorityOneCard = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]')
     expect(priorityOneCard).toHaveTextContent(expectedFirst.name)
   })
 
-  it('a single fleet asset produces exactly one priority card, with no fake filler cards', () => {
+  it('a single fleet asset produces exactly one priority record, with no fake filler', () => {
     const { ships, builds, hardpoints } = useFleetStore.getState()
     const ghost = ships.find((s) => s.id === 'ghost')!
     useFleetStore.setState({
@@ -173,10 +185,9 @@ describe('<MissionControl /> — EWO-004 command layout', () => {
     renderMissionControl()
     expect(screen.getByText('PRIORITY 1')).toBeInTheDocument()
     expect(screen.queryByText('PRIORITY 2')).not.toBeInTheDocument()
-    expect(screen.queryByText('PRIORITY 3')).not.toBeInTheDocument()
   })
 
-  it('multiple eligible ships render up to the intended display limit of 3 priority cards', () => {
+  it('multiple eligible ships render up to the intended display limit of 3 priority records (EWO-012)', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
     expect(ships.length).toBeGreaterThan(3)
@@ -186,7 +197,56 @@ describe('<MissionControl /> — EWO-004 command layout', () => {
     expect(screen.queryByText('PRIORITY 4')).not.toBeInTheDocument()
   })
 
-  it('a priority ship with no resolved image falls back through the existing ShipImage fallback mechanism', () => {
+  it('exactly two eligible fleet assets render exactly two priority records (EWO-012)', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const two = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 2)
+    const ids = new Set(two.map((s) => s.id))
+    useFleetStore.setState({
+      ships: two,
+      builds: builds.filter((b) => ids.has(b.shipId)),
+      hardpoints: hardpoints.filter((h) => ids.has(h.shipId)),
+    })
+    renderMissionControl()
+    expect(screen.getByText('PRIORITY 1')).toBeInTheDocument()
+    expect(screen.getByText('PRIORITY 2')).toBeInTheDocument()
+    expect(screen.queryByText('PRIORITY 3')).not.toBeInTheDocument()
+  })
+
+  it('5. priority ordering remains unchanged — records render in ascending priority order (EWO-032, Task 6: presentation-only migration, ordering logic untouched)', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    const badges = screen.getAllByText(/^PRIORITY \d$/)
+    expect(badges).toHaveLength(expected.length)
+    badges.forEach((badge, i) => {
+      const card = badge.closest('[data-testid="priority-card-wrapper"]')
+      expect(card).toHaveTextContent(expected[i].name)
+    })
+  })
+
+  it('11. EWO-032 (Task 4): the entire card is the navigation target on every rendered priority record — no separate "Ship Detail" hyperlink', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
+    const wrappers = screen.getAllByTestId('priority-card-wrapper')
+    expect(wrappers).toHaveLength(expected.length)
+    wrappers.forEach((wrapper, i) => {
+      const cardLink = within(wrapper).getByRole('link')
+      expect(cardLink).toHaveAttribute('href', `/ship/${expected[i].id}`)
+    })
+  })
+
+  it('EWO-032: a priority ship with no resolved image renders exactly the same fallback Fleet Dashboard\'s Fleet Ship Card renders — Mission Control no longer diverges', () => {
+    // Prior to EWO-032, Mission Control rendered ShipRecordCard, which
+    // explicitly passed the newer Fleet Registry placeholder as its own
+    // fallback (EWO-006A). Fleet Dashboard's ShipCard — now the one
+    // canonical card both pages share — has never done that; it relies on
+    // ShipImage's own default fallback (SHIP_PLACEHOLDER_URL). Now that
+    // Mission Control renders the exact same ShipCard component (Task
+    // 2/7), it correctly picks up that exact same fallback too — matching
+    // Fleet Dashboard's real, current behavior is the point of
+    // standardization, not a regression to guard against.
     const { ships, builds, hardpoints } = useFleetStore.getState()
     const ghost = ships.find((s) => s.id === 'ghost')!
     useFleetStore.setState({
@@ -200,11 +260,29 @@ describe('<MissionControl /> — EWO-004 command layout', () => {
     expect(img!.getAttribute('src')).toBe(SHIP_PLACEHOLDER_URL)
   })
 
+  it('the approved Fleet Registry placeholder constant itself is still correctly configured (used elsewhere in the app, e.g. Ship Detail)', () => {
+    expect(FLEET_REGISTRY_PLACEHOLDER).toBe('/assets/fleet-registry/placeholders/ship-placeholder-master-1024.png')
+  })
+
+  it('EWO-032: Mission Control never renders a broken/undefined image src, even with no resolved ship image', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    useFleetStore.setState({
+      ships: [{ ...ghost, imageUrl: undefined }],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints.filter((h) => h.shipId === 'ghost'),
+    })
+    const { container } = renderMissionControl()
+    const images = Array.from(container.querySelectorAll('img'))
+    expect(images.length).toBeGreaterThan(0)
+    expect(images.every((img) => Boolean(img.getAttribute('src')))).toBe(true)
+  })
+
   it('existing navigation and action links remain functional', () => {
     renderMissionControl()
-    expect(screen.getByText('View full fleet').closest('a')).toHaveAttribute('href', '/fleet')
-    expect(screen.getByText('Found loot? Check it.').closest('a')).toHaveAttribute('href', '/decision-center')
-    expect(screen.getByText('Something changed?').closest('a')).toHaveAttribute('href', '/quick-update')
+    expect(screen.getByText('Full fleet').closest('a')).toHaveAttribute('href', '/fleet')
+    expect(screen.getByText('Found Loot? Check It.').closest('a')).toHaveAttribute('href', '/decision-center')
+    expect(screen.getByText('Something Changed?').closest('a')).toHaveAttribute('href', '/quick-update')
   })
 
   it('mounts PageEnvironment for "mission-control" without any runtime failure while every environment definition stays disabled', () => {
@@ -221,6 +299,19 @@ describe('<MissionControl /> — EWO-004 command layout', () => {
     const brandImages = Array.from(container.querySelectorAll('img')).filter((img) => img.getAttribute('alt') === 'Strategic Fleet Manager')
     expect(brandImages.length).toBe(0)
   })
+
+  it('EWO-006: uses "Loadout target" terminology in the empty-procurement message, not the stale "Build target" phrase', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const corsair = ships.find((s) => s.id === 'corsair')!
+    useFleetStore.setState({
+      ships: [corsair],
+      builds: builds.filter((b) => b.shipId === 'corsair'),
+      hardpoints: hardpoints.filter((h) => h.shipId === 'corsair'),
+      hangarItems: [],
+    })
+    renderMissionControl()
+    expect(screen.queryByText(/Build target/)).not.toBeInTheDocument()
+  })
 })
 
 describe('<MissionControl /> — Mission M-012 empty-state', () => {
@@ -236,5 +327,127 @@ describe('<MissionControl /> — Mission M-012 empty-state', () => {
     // 10. no console errors in the empty state.
     expect(consoleError).not.toHaveBeenCalled()
     consoleError.mockRestore()
+  })
+})
+
+describe('<MissionControl /> — EWO-011 Design Freeze', () => {
+  it('1. no explanatory/marketing copy renders beyond the two-line identity header', () => {
+    renderMissionControl()
+    expect(screen.getByText('Mission Control')).toBeInTheDocument()
+    expect(screen.getByText('Fleet Operations')).toBeInTheDocument()
+    expect(screen.queryByText(/welcome/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/track your fleet/i)).not.toBeInTheDocument()
+  })
+
+  it('3. Update Budget appears exactly once on the page (footer only — the command rail no longer renders it)', () => {
+    renderMissionControl()
+    expect(screen.getAllByText('Update Budget · 2 min')).toHaveLength(1)
+    expect(screen.queryByText('Update Budget')).not.toBeInTheDocument()
+  })
+
+  it('4/5/7. the two rail supporting metrics and all five Quartermaster Logistics counts share one critical-metric-tile scale', () => {
+    const { container } = renderMissionControl()
+    // Every critical count (Ships Active, Needed Items, Mission Ready, Loadouts In
+    // Progress, Factory Loadout, Missing Components, Unreserved Inventory) renders
+    // through the shared CriticalMetricTile contract — same value/label typography.
+    const values = container.querySelectorAll('.panel .text-2xl.font-display.font-bold')
+    expect(values.length).toBe(7)
+  })
+
+  it('6. Quartermaster Logistics renders all five critical cards', () => {
+    renderMissionControl()
+    expect(screen.getByText('Mission Ready')).toBeInTheDocument()
+    expect(screen.getByText('Loadouts In Progress')).toBeInTheDocument()
+    expect(screen.getByText('Factory Loadout')).toBeInTheDocument()
+    expect(screen.getByText('Missing Components')).toBeInTheDocument()
+    // Also appears as a Procurement column header — the Logistics tile is one of the matches.
+    expect(screen.getAllByText('Unreserved Inventory').length).toBeGreaterThan(0)
+  })
+
+  it('9/10. EWO-032: Priority Ship renders through the canonical Fleet Ship Card — image and metadata share one integrated card, the exact same component Fleet Dashboard uses', () => {
+    renderMissionControl()
+    const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
+    // The Fleet Ship Card itself is the '.panel' — a sibling of the
+    // "PRIORITY 1" label within the shared wrapper, not a descendant of it
+    // (Task 3: only the Priority label is unique to Mission Control).
+    const card = wrapper.querySelector('.panel') as HTMLElement
+    expect(card).not.toBeNull()
+    const img = card.querySelector('img')
+    expect(img).not.toBeNull()
+    expect(card.contains(img)).toBe(true)
+  })
+
+  it("EWO-032 (Task 5): the Fleet Ship Card's info hierarchy lists manufacturer/role before Active Loadout — no information reduction from Fleet Dashboard", () => {
+    renderMissionControl()
+    const { ships, builds } = useFleetStore.getState()
+    const first = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
+    const roleLine = within(wrapper).getByText(`${first.manufacturer} · ${first.role}`)
+    const buildName = builds.find((b) => b.id === first.activeBuildId)?.name ?? 'Unknown Loadout'
+    const loadout = within(wrapper).getByText(buildName)
+    expect(roleLine.compareDocumentPosition(loadout) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('12. EWO-032 (Task 4): clicking anywhere on the Priority Ship card navigates to Ship Detail — behavior exactly matches Fleet Dashboard, no separate hyperlink', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const first = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
+    const cardLink = within(wrapper).getByRole('link')
+    expect(cardLink).toHaveAttribute('href', `/ship/${first.id}`)
+    expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
+  })
+
+  it('14/15. Workflow destinations link to Decision Center and Quick Update, and are not rendered as metric tiles', () => {
+    renderMissionControl()
+    const decisionCard = screen.getByText('Found Loot? Check It.').closest('a')
+    const quickUpdateCard = screen.getByText('Something Changed?').closest('a')
+    expect(decisionCard).toHaveAttribute('href', '/decision-center')
+    expect(quickUpdateCard).toHaveAttribute('href', '/quick-update')
+    // Workflow cards carry no numeric critical-metric value — only title, one
+    // supporting line, and an "Open" action.
+    expect(decisionCard!.querySelector('.text-2xl')).toBeNull()
+    expect(quickUpdateCard!.querySelector('.text-2xl')).toBeNull()
+    expect(within(decisionCard as HTMLElement).getByText('Open')).toBeInTheDocument()
+  })
+
+  it('16. the operational footer renders exactly once', () => {
+    renderMissionControl()
+    expect(screen.getAllByText(/Strategic Fleet Manager · Quartermaster Edition/)).toHaveLength(1)
+  })
+})
+
+describe('<MissionControl /> — EWO-032: canonical Fleet Ship Card parity with Fleet Dashboard', () => {
+  it('the same ship renders byte-identical Fleet Ship Card markup on Mission Control and Fleet Dashboard — one canonical component, no visual drift', () => {
+    renderMissionControl()
+    const { ships } = useFleetStore.getState()
+    const topShip = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const mcWrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
+    const mcCard = mcWrapper.querySelector('.panel') as HTMLElement
+    expect(mcCard).not.toBeNull()
+    cleanup()
+
+    render(
+      <MemoryRouter>
+        <FleetDashboard />
+      </MemoryRouter>
+    )
+    const fdCard = screen.getByText(topShip.name).closest('.panel') as HTMLElement
+    expect(fdCard).not.toBeNull()
+
+    expect(mcCard.outerHTML).toBe(fdCard.outerHTML)
+  })
+
+  it('Fleet Dashboard itself renders unaffected by the Mission Control migration — same card grid, same empty-state behavior', () => {
+    render(
+      <MemoryRouter>
+        <FleetDashboard />
+      </MemoryRouter>
+    )
+    expect(screen.queryByText('No Vessels Assigned')).not.toBeInTheDocument()
+    const { ships } = useFleetStore.getState()
+    for (const ship of ships) {
+      expect(screen.getByText(ship.name)).toBeInTheDocument()
+    }
   })
 })

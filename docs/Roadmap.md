@@ -88,6 +88,22 @@
 
 ## Beta
 
+- **EWO-032 — Universal Ship Card Standardization (Beta UI Lock)
+  (complete)**: Mission Control's Priority Cards now render the exact same
+  `ShipCard` component Fleet Dashboard uses (verified byte-identical via
+  an automated `outerHTML` comparison test) — no duplicate card
+  implementation anywhere in the app. `ShipCard` is declared the
+  application's one canonical Ship Card (Fleet Dashboard, Mission Control,
+  and any future Fleet Roadmap/Squadron view). A lightweight "PRIORITY N"
+  label now renders above each card (the only Mission-Control-specific
+  concept) instead of as a badge inside it; the whole card is the
+  navigation target (the old "Ship Detail →" hyperlink is gone, matching
+  Fleet Dashboard's existing click-anywhere behavior exactly); Priority
+  ordering/slicing logic is unchanged (presentation-only migration). The
+  prior Mission Control-only card (`ShipRecordCard`/`PriorityCard`) is
+  retired — kept on disk, not deleted, pending Commander verification.
+  Quartermaster Edition visual enhancements remain deliberately deferred
+  to a future Beta sprint. See `docs/UI_ARCHITECTURE.md` §19.
 - **EWO-031 — Canonical Catalog Completion & Final Workflow Validation
   (complete)**: `CatalogComponentSearch`'s blank-search listbox no longer
   truncates at 40 entries — it browses the complete, alphabetically

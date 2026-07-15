@@ -133,6 +133,8 @@ Component search/selection (catalog-driven "add or install a component") and com
 
 **The generated component catalog (`src/generated/componentCatalog.ts`'s `catalogComponentsByName`, sourced from `generated-data/component-metadata-catalog.json`, Mission M-012) is the single authoritative component list for every Commander-facing selection workflow** — Hangar Inventory, Quick Update, the Loadout Manager, and Decision Center all search and resolve against this exact same map; no page maintains its own separate or demo-only component list (EWO-031, Task 1). `CatalogComponentSearch` (§16.1) additionally never truncates it — a blank search browses the complete, alphabetically sorted catalog, and typed search is filtered from that same complete set (EWO-031, Task 2/3). See `docs/UI_ARCHITECTURE.md` §16.2–16.3.
 
+**`src/components/ShipCard.tsx` is the single canonical Ship Card for Beta 1.0** (EWO-032) — Fleet Dashboard, Mission Control, and every future ship-grid surface (Fleet Roadmap, Squadron views) render this one component; no page maintains its own card layout. The prior Mission Control-only card (`ShipRecordCard`/`PriorityCard`) is retired (kept on disk, not deleted, pending Commander verification). See `docs/UI_ARCHITECTURE.md` §19.
+
 ## Fleet ownership and persistence
 
 The hand-authored seed fleet (`src/data/seed.ts`) is demo/sample data, not

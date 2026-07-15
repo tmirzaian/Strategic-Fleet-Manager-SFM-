@@ -252,7 +252,16 @@ One `panel` division with two departments, separated by a restrained
 All five share identical card height, padding, number size, icon size,
 and label hierarchy because all five route through `CriticalMetricTile`.
 
-## 8. ShipRecordCard — the Fleet Registry Record standard (IMPLEMENTED NOW)
+## 8. ShipRecordCard — the Fleet Registry Record standard (RETIRED — see §19)
+
+> **@deprecated (EWO-032, Beta 1.0):** `ShipRecordCard` and its Mission
+> Control wrapper `PriorityCard` are retired — neither is rendered by the
+> live app anymore (Mission Control now consumes `ShipCard`, §19). Sea
+> Trials found this record wasted screen space, presented less
+> information than `ShipCard`, and required a secondary "Ship Detail"
+> hyperlink instead of a click-anywhere card. Both files are kept on disk,
+> not deleted, pending Commander migration verification — this section is
+> preserved below as historical record of the design this superseded.
 
 **DA-010 — Fleet Registry Record ("it is all one ship").** Frozen EWO-012,
 art-layer architecture established by EWO-012A, tuned by EWO-012B. Every
@@ -261,10 +270,11 @@ exist *inside* the record, not attached to it. Superseded EWO-009's 30/70
 image-left/content-right split, which read as an image panel bolted onto
 a data card — explicitly rejected by Design Authority visual review.
 
-`src/components/ShipRecordCard.tsx` is the canonical Fleet Registry
-Record template, used today by `PriorityCard` (Mission Control's Top
-Priority Ship section) via a thin Mission-Control-specific wrapper that
-adds only the "PRIORITY N" badge.
+`src/components/ShipRecordCard.tsx` was the canonical Fleet Registry
+Record template, used by `PriorityCard` (Mission Control's Top Priority
+Ship section) via a thin Mission-Control-specific wrapper that added only
+the "PRIORITY N" badge — until EWO-032 (§19) retired both in favor of the
+single canonical `ShipCard`.
 
 **Composition (EWO-012A, tuned EWO-012B):** Fleet Registry artwork is a
 **decorative integrated art layer**, not a photo panel and not the
@@ -750,3 +760,17 @@ Removal now lives where the Commander is already looking at what's installed: ev
 ### 18.4 Set Active Loadout — unchanged
 
 Not touched by this mission (Commander-verified during Sea Trials, per EWO-030's own instruction) — still its own tab, still Ship → Loadout → Save.
+
+## 19. ShipCard — THE canonical Ship Card (EWO-032, Beta UI Lock)
+
+**`src/components/ShipCard.tsx` is the application's one universal Ship Card.** Sea Trials found it the strongest information presentation already in the app (originally Fleet Dashboard-only) — Mission Control's Priority Cards were migrated onto this exact component rather than continuing to maintain a second, diverged layout (`ShipRecordCard`/`PriorityCard`, §8, both retired). Every current and future ship-grid surface consumes it: Fleet Dashboard, Mission Control, and (per Commander Intent) any future Fleet Roadmap or Squadron view — no page maintains its own card layout.
+
+**What it preserves (Task 5 — no information reduction from the pre-migration Fleet Dashboard card):** Ship Image, Ship Name, Manufacturer, Ownership Badge, Active Loadout, Readiness %, Missing Component Warning, Progress Bar.
+
+**Click-anywhere navigation (Task 4):** the whole card is a single `<Link to={/ship/${ship.id}}>` — there is no separate "Ship Detail →" hyperlink anywhere inside it. This was already Fleet Dashboard's behavior; Mission Control's migration removed its own former "Ship Detail" text link to match exactly.
+
+**Mission Control's own addition (Task 3):** a "PRIORITY N" label renders as a sibling *above* the card (inside a shared wrapper `div[data-testid="priority-card-wrapper"]`), not as a badge inside it — this is the only Mission-Control-specific concept, matching the same "keep the reusable component generic" principle `ShipRecordCard`'s own `badge` slot originally established. Priority ordering/slicing logic (`[...ships].sort(...).slice(0, 3)`) is presentation-independent and untouched (Task 6).
+
+**Verified byte-identical** between Mission Control and Fleet Dashboard for the same ship via an automated `outerHTML` comparison test (`src/pages/__tests__/MissionControl.test.tsx`) — not just visually similar, the literal same component instance with the same props shape.
+
+**Out of scope, deliberately deferred** (Commander Intent): Quartermaster Edition visual enhancements/artwork — this mission is presentation standardization only, not a redesign. No readiness logic, logistics, importer, or persistence changes were made.
