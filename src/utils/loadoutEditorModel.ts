@@ -1,0 +1,147 @@
+import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
+import type { FleetAsset } from '../types'
+
+/**
+ * EWO-025 — root cause of "Edit an Existing Loadout flattens the
+ * hierarchy": `saveMissionConfiguration` (src/store/useFleetStore.ts)
+ * builds each new Hardpoint row from only
+ * `{ slotLabel, type, size, factoryItem, installedItem, targetItem,
+ * status, invalidMessage }` — it never carries `parentSlotLabel`,
+ * `groupLabel`, `assemblyRole`, or `isStructural` onto a saved Build's
+ * own rows. CREATE mode looked correct only because it happened to
+ * preview the ACTIVE build's rows, and a fresh Fleet Asset's active build
+ * is the Factory Loadout — built by `materializeFleetAsset` straight from
+ * the canonical `FactoryHardpointTemplate`, which does carry all four
+ * fields. The moment a saved (therefore stripped) Loadout became the
+ * ship's active build, every page reading `hardpoints` directly for that
+ * build — Loadout Manager's preview and Ship Detail's Loadout & Port Tree
+ * alike — lost category headers and parent/child links, because the
+ * rows themselves never had that data to begin with.
+ *
+ * Design Authority Ruling 5 (EWO-025): category membership, ordering,
+ * parentage, structural status, and assembly roles belong to the
+ * canonical ShipDefinition, never to a saved Build. This module is the
+ * one shared builder (Ruling 1/4 — CREATE and EDIT both call it, nothing
+ * else constructs a loadout's row set) that enforces this: every
+ * structural/positional field always comes from
+ * `shipFactoryTemplates[definition.id]` (see src/data/shipDefinitions.ts),
+ * and a saved Build's own hardpoint rows are consulted ONLY for the
+ * Commander's actual factory/installed/target values, joined by
+ * `slotLabel`.
+ *
+ * `slotLabel` is deliberately the stable join key, not a new port ID —
+ * confirmed by construction, not assumed: `materializeFleetAsset` copies
+ * `slotLabel` verbatim from the ShipDefinition's own
+ * `FactoryHardpointTemplate`, and `saveMissionConfiguration`'s `newRows`
+ * copies `slotLabel: refRow.slotLabel` verbatim again when creating any
+ * later Loadout — so a real port's `slotLabel` is identical across every
+ * Build for that ship, today, with no migration required. This is not
+ * the kind of "display label" Design Authority Ruling 3 warns against
+ * (a resolved component/equipment name, which does change as
+ * presentation normalization improves — see EWO-023) — it is the port's
+ * own structural identity string (e.g. "Nose Mount — Weapon 1"), unique
+ * by construction within one ship's hierarchy (see
+ * `importedFactoryTemplate`'s own doc comment in shipDefinitions.ts).
+ */
+
+export interface LoadoutAssignment {
+  factoryItem: string
+  installedItem: string
+  targetItem: string
+}
+
+/** One row of the canonical, editable loadout hierarchy — shaped enough
+ * like `Hardpoint` that `buildPortTree()`/`groupPortTree()` (both already
+ * shared with Ship Detail) work on it completely unchanged (Ruling 4:
+ * no second tree implementation). `id` is the `slotLabel` itself — a
+ * real port's identity is now stable across every render, every save,
+ * and every Build, unlike the previous `${buildId}-hp-${i}` scheme whose
+ * id changed on every save and therefore could never carry
+ * expand/collapse state or React identity across a reopen. */
+export interface LoadoutEditorRow {
+  id: string
+  slotLabel: string
+  type: string
+  size: string
+  parentSlotLabel?: string
+  groupLabel?: string
+  assemblyRole?: string
+  isStructural?: boolean
+  factoryItem: string
+  installedItem: string
+  targetItem: string
+}
+
+export interface LoadoutEditorModel {
+  rows: LoadoutEditorRow[]
+  /** EWO-025 (Task 4) — a saved assignment whose slotLabel no longer
+   * matches anything in the canonical template (the ship's own port data
+   * changed shape since the Build was saved). Never crashes, never
+   * silently reattaches to a different port, never flattens the rest of
+   * the tree — simply excluded from `rows`, reported here so a caller can
+   * surface a restrained diagnostic. Expected to be empty for every
+   * current fixture (see EWO-025 report). */
+  orphanedSlotLabels: string[]
+}
+
+/**
+ * Builds `assignmentsBySlotLabel` from one Build's own Hardpoint rows —
+ * the shape `buildLoadoutEditorModel` overlays onto the canonical
+ * template. A thin, separately-testable step so callers (CREATE's
+ * reference build, EDIT/Clone's specific existing build) share the exact
+ * same join logic.
+ */
+export function assignmentsBySlotLabel(rows: Array<Pick<LoadoutAssignment, 'factoryItem' | 'installedItem' | 'targetItem'> & { slotLabel: string }>): Map<string, LoadoutAssignment> {
+  return new Map(rows.map((r) => [r.slotLabel, { factoryItem: r.factoryItem, installedItem: r.installedItem, targetItem: r.targetItem }]))
+}
+
+/**
+ * The one canonical editor-model builder (EWO-025, Task 2). `template` is
+ * always `shipFactoryTemplates[definition.id]` — the same authoritative
+ * source a fresh Factory Loadout materializes from — never a Build's own
+ * rows. `assignments` supplies only per-slot values; a canonical row with
+ * no matching assignment (a port added to the ship definition after this
+ * particular Build was saved) falls back to the template's own factory
+ * value, matching the existing "no data yet" convention rather than
+ * inventing one.
+ */
+export function buildLoadoutEditorModel(template: FactoryHardpointTemplate[], assignments: Map<string, LoadoutAssignment>): LoadoutEditorModel {
+  const rows: LoadoutEditorRow[] = template.map((t) => {
+    const a = assignments.get(t.slotLabel)
+    return {
+      id: t.slotLabel,
+      slotLabel: t.slotLabel,
+      type: t.type,
+      size: t.size,
+      parentSlotLabel: t.parentSlotLabel,
+      groupLabel: t.groupLabel,
+      assemblyRole: t.assemblyRole,
+      isStructural: t.isStructural,
+      factoryItem: t.factoryItem,
+      installedItem: a?.installedItem ?? t.factoryItem,
+      targetItem: a?.targetItem ?? t.factoryItem,
+    }
+  })
+
+  const templateSlotLabels = new Set(template.map((t) => t.slotLabel))
+  const orphanedSlotLabels = Array.from(assignments.keys()).filter((label) => !templateSlotLabels.has(label))
+
+  return { rows, orphanedSlotLabels }
+}
+
+/**
+ * Resolves the canonical ShipDefinition id for a ship id as it appears in
+ * `useFleetStore`'s materialized `ships` array. Mirrors
+ * `resolveFleetAssetId` (src/store/useFleetStore.ts, private to that
+ * module) exactly: a manually-added FleetAsset shares its id with its
+ * materialized Ship (`ship.id === asset.id`), but the original
+ * seed-migrated fleet's FleetAsset id is `${shipId}-asset-seed` while its
+ * Ship/Build/Hardpoint rows keep the plain seed id — both conventions are
+ * checked, never assumed.
+ */
+export function resolveShipDefinitionId(shipId: string, fleetAssets: FleetAsset[]): string | undefined {
+  const direct = fleetAssets.find((a) => a.id === shipId)
+  if (direct) return direct.shipDefinitionId
+  const seedAsset = fleetAssets.find((a) => a.id === `${shipId}-asset-seed`)
+  return seedAsset?.shipDefinitionId
+}

@@ -294,12 +294,34 @@ for (const [supersededId, canonicalId] of supersededByCanonical.entries()) {
   if (canonicalDefinition) shipDefinitionById.set(supersededId, canonicalDefinition)
 }
 
+/**
+ * EWO-025 — this previously dropped `isStructural` (and `groupLabel`/
+ * `assemblyRole`) when building a seed ship's canonical template,
+ * silently discarding hierarchy data the hand-authored seed fixture
+ * itself already carries (see e.g. Ghost's own `customRow(...,
+ * { isStructural: true })` in src/data/seed.ts) — the exact same class of
+ * bug this mission fixes for saved Builds, just one layer upstream. Seed
+ * fixtures predate EWO-019B/EWO-020's category-grouping work and were
+ * never authored with `groupLabel`/`assemblyRole`, so those two remain
+ * `undefined` here (an honest gap in the source fixture, not invented
+ * data) — but `isStructural` already exists on every seed row that needs
+ * it and must be passed through.
+ */
 function seedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   const ship = seedShips.find((s) => s.id === shipId)
   if (!ship) return []
   return seedHardpoints
     .filter((h) => h.buildId === ship.activeBuildId)
-    .map((h) => ({ slotLabel: h.slotLabel, type: h.type, size: h.size, factoryItem: h.factoryItem, parentSlotLabel: h.parentSlotLabel }))
+    .map((h) => ({
+      slotLabel: h.slotLabel,
+      type: h.type,
+      size: h.size,
+      factoryItem: h.factoryItem,
+      parentSlotLabel: h.parentSlotLabel,
+      groupLabel: h.groupLabel,
+      assemblyRole: h.assemblyRole,
+      isStructural: h.isStructural,
+    }))
 }
 
 /**
@@ -331,6 +353,131 @@ function seedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
  * genuinely stable canonical id) is preserved unchanged as the row's own
  * `id` in `materializeFleetAsset` regardless of this label.
  */
+/**
+ * EWO-023 (Task 5) — a mount/turret/rack Port's own `displayName` is
+ * generated purely from its raw port name (src/normalizer/displayNameGenerator.ts),
+ * which often reads exactly like the equipment it holds (e.g. a Gimbal
+ * Mount literally named "Nose Class2 Weapon") — the tree itself already
+ * correctly nests a distinct structural row above its child gun/missile/
+ * tool (confirmed against generated-data/ports.json), but nothing in
+ * either row's own text said "mount," so an intact hierarchy read as a
+ * skipped level ("Weapon > Class 2" with nothing mount-like between
+ * them). Suffixing the port's own already-computed, source-evidenced
+ * AssemblyRole (src/normalizer/assemblyRole.ts) — never invented or
+ * hardcoded per-ship — makes the structural row's real physical nature
+ * explicit. Applies uniformly to every current and future deep-imported
+ * ship (Mining Heads/Salvage Heads/Tractor Beams included, once any ship
+ * with those assembly roles is imported) since it derives from the role
+ * enum, not a per-ship or per-category special case.
+ */
+const MOUNT_ROLE_LABEL: Partial<Record<string, string>> = {
+  GIMBAL_MOUNT: 'Gimbal Mount',
+  DIRECT_WEAPON_MOUNT: 'Weapon Mount',
+  MANNED_TURRET: 'Manned Turret',
+  REMOTE_TURRET: 'Remote Turret',
+  GENERIC_MOUNT: 'Mount',
+  MISSILE_RACK: 'Missile Rack',
+}
+
+/**
+ * `hasChildren` is the deciding signal, not `assemblyRole` alone —
+ * `deriveAssemblyRole` (src/normalizer/assemblyRole.ts) assigns
+ * GENERIC_MOUNT to *any* port whose entity class doesn't match a known
+ * mount/turret naming pattern, including a plain terminal Power Plant or
+ * Cooler port that simply isn't turret/mount-shaped by name (confirmed
+ * against generated-data/ports.json: Avenger Titan's own "Power Plant"
+ * port carries `assemblyRole: "GENERIC_MOUNT"`). Suffixing every
+ * GENERIC_MOUNT row regardless would mislabel ordinary equipment as
+ * "(Mount)". Only a port that is actually a structural parent in the
+ * tree — has at least one child row — is the kind of node this mission's
+ * hierarchy-clarity fix is about.
+ */
+function presentationLabelFor(port: { displayName: string; assemblyRole?: string }, hasChildren: boolean): string {
+  if (!hasChildren) return port.displayName
+  const roleLabel = port.assemblyRole ? MOUNT_ROLE_LABEL[port.assemblyRole] : undefined
+  if (!roleLabel) return port.displayName
+  return port.displayName.toLowerCase().includes(roleLabel.toLowerCase()) ? port.displayName : `${port.displayName} (${roleLabel})`
+}
+
+/**
+ * EWO-023 (Task 6, follow-on fix) — `Port.equipmentGroup` (e.g. "Power",
+ * "Weapons", "Missiles" — a plural UI-organizational bucket, see
+ * src/engine/types/equipmentGroup.ts) was being used directly as a
+ * `FactoryHardpointTemplate`'s compatibility `type`, but
+ * `validateTargetCompatibility` (src/data/componentCatalog.ts) and the
+ * component catalog it checks against (`catalogComponentsByName`, via
+ * `CATEGORY_TO_PORT_TYPE`) both use a different, singular category
+ * vocabulary ("Power Plant", "Cooler", "Shield", "Weapon", "Missile
+ * Rack", "Quantum Drive") — the same vocabulary seed ships' own
+ * hand-authored `type` fields already use (src/data/seed.ts's `SLOTS`).
+ *
+ * This mismatch existed before EWO-023 but was silent: a deep-imported
+ * component's `factoryItem`/`targetItem` was itself an unresolved,
+ * raw-identifier-shaped string (the Task 6 bug), which never matched any
+ * `catalogComponentsByName` key at all, so `validateTargetCompatibility`
+ * always short-circuited to "valid — nothing to check" before the type
+ * comparison could run. Fixing Task 6 made the item names resolvable,
+ * which for the first time actually exercised this type comparison — and
+ * exposed it comparing "Power" against "Power Plant", flagging nearly
+ * every real component on every deep-imported ship as falsely
+ * incompatible. Translating equipmentGroup (further disambiguated by the
+ * already-computed, source-evidenced AssemblyRole for the Weapons/
+ * Missiles groups, which hold more than one distinct terminal type) into
+ * the same vocabulary seed ships already use closes that gap. Falls back
+ * to the equipmentGroup string unchanged for any group with no
+ * meaningful terminal-type translation (Avionics, Cargo, Customization,
+ * Defense, Utility, Mining, Salvage — categories no currently-imported
+ * ship uses) rather than guessing one.
+ */
+function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: string }): string {
+  switch (port.assemblyRole) {
+    case 'WEAPON':
+      return 'Weapon'
+    case 'MISSILE':
+    case 'MISSILE_SLOT':
+      return 'Missile'
+    case 'MISSILE_RACK':
+      return 'Missile Rack'
+    case 'QUANTUM_DRIVE':
+      return 'Quantum Drive'
+    case 'JUMP_MODULE':
+      return 'Jump Drive'
+    // A mount/turret row's own hardware component (e.g. "Turret",
+    // "VariPuck S3 Gimbal Mount") — when it isn't isStructural and
+    // carries a real factoryItem of its own — resolves through the bulk
+    // catalog's DataCore category "WeaponMount", which CATEGORY_TO_PORT_TYPE
+    // (src/generated/componentCatalog.ts) always translates to "Gimbal
+    // Mount" regardless of the finer gimbal/turret/direct-mount
+    // distinction AssemblyRole itself draws (confirmed against
+    // generated-data/component-metadata-catalog.json: a Valkyrie door
+    // "Turret" component is category WeaponMount even though its own
+    // AssemblyRole is DIRECT_WEAPON_MOUNT, not GIMBAL_MOUNT). Matching the
+    // catalog's own coarser vocabulary here — not inventing a finer one it
+    // doesn't have — is what actually resolves against real data.
+    case 'GIMBAL_MOUNT':
+    case 'DIRECT_WEAPON_MOUNT':
+    case 'MANNED_TURRET':
+    case 'REMOTE_TURRET':
+      return 'Gimbal Mount'
+  }
+  switch (port.equipmentGroup) {
+    case 'Power':
+      return 'Power Plant'
+    case 'Coolers':
+      return 'Cooler'
+    case 'Shields':
+      return 'Shield'
+    case 'Radar':
+      return 'Radar'
+    case 'Relays':
+      return 'Relay'
+    case 'LifeSupport':
+      return 'Life Support'
+    default:
+      return port.equipmentGroup
+  }
+}
+
 function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   const view = importedShipList.find((v) => v.ship.id === shipId)
   if (!view) return []
@@ -350,10 +497,12 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
 
   const rows: FactoryHardpointTemplate[] = []
   function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined) {
-    const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${port.displayName}` : port.displayName
+    const hasChildren = (childrenByParentId.get(port.id) ?? []).length > 0
+    const displayLabel = presentationLabelFor(port, hasChildren)
+    const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${displayLabel}` : displayLabel
     rows.push({
       slotLabel: uniqueLabel,
-      type: port.equipmentGroup,
+      type: compatibilityTypeFor(port),
       size: port.minSize !== null ? `S${port.minSize}` : 'S1',
       factoryItem: port.isStructural ? '—' : factoryItemFor(port),
       parentSlotLabel: uniqueParentLabel,

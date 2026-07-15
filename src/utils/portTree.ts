@@ -1,28 +1,35 @@
 import type { Hardpoint, MissionReservation, HangarItem, InstalledLoadoutEntry } from '../types'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 
-export interface PortTreeNode {
-  hardpoint: Hardpoint
-  children: PortTreeNode[]
+export interface PortTreeNode<T = Hardpoint> {
+  hardpoint: T
+  children: PortTreeNode<T>[]
 }
 
 /**
- * Builds the complete normalized port hierarchy from a flat Hardpoint
- * array (Alpha 2.5C) — purely structural, driven entirely by
- * `parentSlotLabel` links. Works identically for every ship; there is no
- * per-ship branching here. A row with no `parentSlotLabel` is a
- * top-level physical port; every top-level port is always included,
- * regardless of how many (or how few) children it has.
+ * Builds the complete normalized port hierarchy from a flat row array
+ * (Alpha 2.5C) — purely structural, driven entirely by `parentSlotLabel`
+ * links. Works identically for every ship; there is no per-ship branching
+ * here. A row with no `parentSlotLabel` is a top-level physical port;
+ * every top-level port is always included, regardless of how many (or how
+ * few) children it has.
+ *
+ * Generic over the row shape (EWO-025) — Ship Detail still calls this with
+ * real `Hardpoint[]`, unchanged; MissionComposer's Loadout Manager instead
+ * calls it with `LoadoutEditorRow[]` (see `utils/loadoutEditorModel.ts`) so
+ * CREATE and EDIT both build hierarchy from the canonical ship template
+ * rather than a saved Build's own (possibly hierarchy-stripped) rows. One
+ * tree-construction implementation either way (Design Authority Ruling 4).
  */
-export function buildPortTree(hardpoints: Hardpoint[]): PortTreeNode[] {
-  const byParent = new Map<string | undefined, Hardpoint[]>()
+export function buildPortTree<T extends { slotLabel: string; parentSlotLabel?: string }>(hardpoints: T[]): PortTreeNode<T>[] {
+  const byParent = new Map<string | undefined, T[]>()
   for (const hp of hardpoints) {
     const key = hp.parentSlotLabel
     if (!byParent.has(key)) byParent.set(key, [])
     byParent.get(key)!.push(hp)
   }
 
-  function buildChildren(parentSlotLabel: string | undefined): PortTreeNode[] {
+  function buildChildren(parentSlotLabel: string | undefined): PortTreeNode<T>[] {
     const rows = byParent.get(parentSlotLabel) ?? []
     return rows.map((hardpoint) => ({ hardpoint, children: buildChildren(hardpoint.slotLabel) }))
   }
@@ -32,8 +39,8 @@ export function buildPortTree(hardpoints: Hardpoint[]): PortTreeNode[] {
 
 /** Flattens a tree back into every node it contains, depth-first — used
  * for "Expand All" (collect every node id) and counting descendants. */
-export function flattenPortTree(nodes: PortTreeNode[]): PortTreeNode[] {
-  const result: PortTreeNode[] = []
+export function flattenPortTree<T>(nodes: PortTreeNode<T>[]): PortTreeNode<T>[] {
+  const result: PortTreeNode<T>[] = []
   for (const node of nodes) {
     result.push(node)
     result.push(...flattenPortTree(node.children))
