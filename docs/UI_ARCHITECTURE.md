@@ -697,6 +697,20 @@ Factory/Installed/Target cells in the Loadout & Port Tree (`LoadoutPortTree.tsx`
 - A search narrowing to exactly one catalog match auto-selects it (the EWO-029 Task 1 fix, now shared); every keystroke clears the prior selection first, so broadening the search or reaching zero matches never leaves a stale selection.
 - Ship Detail and the Loadout Manager's Target column continue to use `TargetComponentPicker` (`src/components/TargetComponentPicker.tsx`) for in-place target editing on an existing port row — a different interaction shape (inline combobox, not a standalone search-and-add step) that this mission left unchanged. `CatalogComponentSearch` is specifically for "add/install a new component" flows.
 
+### 16.2 Full-catalog browsing, no artificial truncation (EWO-031, Task 2/3)
+
+`CatalogComponentSearch`'s listbox previously capped at 40 visible entries (`MAX_VISIBLE_CATALOG_MATCHES`) regardless of query — with the real generated catalog at 679 selectable components, a blank search silently showed only the first 40 alphabetically, and a broad typed query could just as silently hide real matches past the same cap. The cap is removed entirely: a blank search now lists the complete, alphabetically sorted catalog, and a typed search is filtered from that same complete list — the native `size={6}` listbox scrolls to reach the rest. Typed search's filtering logic itself (case-insensitive substring match) is unchanged. Every canonical component is now discoverable both ways — confirmed against representative samples across Weapons, Shields, Coolers, Power Plants, Quantum Drives, Missile Racks, Missiles, Mining, and Salvage components (`src/components/__tests__/CatalogComponentSearch.test.tsx`).
+
+### 16.3 Decision Center reads the same canonical catalog (EWO-031, Task 1/4)
+
+Decision Center previously ran entirely against a hand-authored, ~8-item demo list (`decisionCatalog`/`decisionCatalogNames` in `src/data/seed.ts`) with zero connection to live fleet state — confirmed fully disconnected during EWO-029's own audit. Both are now removed. Decision Center's typeahead reads `catalogComponentsByName` directly (`src/generated/componentCatalog.ts`) — the same canonical source Hangar Inventory, Quick Update, and the Loadout Manager already search — so the Commander gets the same component results regardless of page. Its recommendation is no longer a static lookup table either: it queries live `useFleetStore` state (`ships`/`builds`/`hardpoints`/`reservations`) via `resolveNeededByBuilds()` (the same shared resolver Hangar Inventory's Needed By column and Reserve workflow already use, EWO-029), filtered to each Ship's own **Active** Loadout only (not every saved Build):
+
+- **Still required** by one or more active Loadouts → **KEEP**, a per-entry **Reserve** action (linking to Hangar Inventory) or **Already Reserved** label, and a Needed By listing naming the exact Fleet Asset/Build/slot.
+- **Every active Loadout already satisfied** (nothing currently targets it unresolved, or everything that does already has it installed) → **Already Satisfied** / **Store in Hangar** — no reservation required.
+- **No catalog match at all** → an honest "No Catalog Match" result, never a guessed verdict.
+
+Nothing here auto-reserves or auto-installs — same Design Authority principle EWO-029 established for the unreserved-match signal elsewhere in the app.
+
 ## 17. Port hierarchy grouping (EWO-019B, extended EWO-020)
 
 `LoadoutPortTree.tsx` (Ship Detail) and MissionComposer's Target Equipment table both layer a generic grouping pass, `groupPortTree()` (`src/utils/portTreeGrouping.ts`), on top of the existing `buildPortTree()` output — never a per-ship or per-system special case. A top-level physical port carrying `Hardpoint.groupLabel` renders nested beneath a synthetic header sharing that label, alongside every sibling top-level port carrying the same one; ports without a `groupLabel` render exactly as before (unaffected systems keep their pre-existing flat presentation).

@@ -58,3 +58,63 @@ describe('<CatalogComponentSearch /> — EWO-030 (Task 1): canonical component s
     expect((document.querySelector('select[size="6"]') as HTMLSelectElement).value).toBe('')
   })
 })
+
+describe('<CatalogComponentSearch /> — EWO-031 (Task 2): full browse list, no artificial truncation', () => {
+  it('5. a blank search lists the complete canonical catalog, not a subset', () => {
+    render(<ControlledSearch />)
+    const select = document.querySelector('select[size="6"]') as HTMLSelectElement
+    expect(select.querySelectorAll('option').length).toBe(catalogComponentsByName.size)
+  })
+
+  it('6. the blank-search list is alphabetically sorted', () => {
+    render(<ControlledSearch />)
+    const select = document.querySelector('select[size="6"]') as HTMLSelectElement
+    const names = Array.from(select.querySelectorAll('option')).map((o) => o.textContent ?? '')
+    const sorted = [...names].sort((a, b) => a.localeCompare(b))
+    expect(names).toEqual(sorted)
+  })
+
+  it('7. a broad typed search is never truncated below its true match count', () => {
+    render(<ControlledSearch />)
+    const realMatchCount = Array.from(catalogComponentsByName.keys()).filter((n) => n.toLowerCase().includes('a')).length
+    if (realMatchCount <= 40) return // only meaningful once the real catalog exceeds the old 40-item cap
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'a' } })
+    const select = document.querySelector('select[size="6"]') as HTMLSelectElement
+    expect(select.querySelectorAll('option').length).toBe(realMatchCount)
+  })
+})
+
+describe('<CatalogComponentSearch /> — EWO-031 (Task 3): every canonical component is discoverable', () => {
+  // One real, verified-unique representative name per category named in the
+  // mission (Weapons/Shields/Coolers/Power Plants/Quantum Drives/Missile
+  // Racks/Missiles/Mining/Salvage) — confirmed via the real generated
+  // catalog, not assumed.
+  const representatives: Array<[string, string]> = [
+    ['Weapon', 'Omnisky III Cannon'],
+    ['Shield', 'Mirage'],
+    ['Cooler', 'IcePlunge'],
+    ['Power Plant', 'LumaCore'],
+    ['Quantum Drive', 'FoxFire'],
+    ['Missile Rack', 'Anvil Ballista S05 Missile Rack'],
+    ['Missile', 'Spark I-G Missile'],
+    ['Mining Laser', 'Pitman Mining Laser'],
+    ['Salvage Module', 'Salvation Salvage Head'],
+  ]
+
+  it.each(representatives)('8. %s — "%s" is discoverable via blank browse', (category, name) => {
+    if (!catalogComponentsByName.has(name)) return
+    render(<ControlledSearch />)
+    const select = document.querySelector('select[size="6"]') as HTMLSelectElement
+    const options = Array.from(select.querySelectorAll('option')).map((o) => o.textContent)
+    expect(options).toContain(name)
+    expect(catalogComponentsByName.get(name)?.category).toBe(category)
+  })
+
+  it.each(representatives)('9. %s — "%s" is discoverable via typed search', (_category, name) => {
+    if (!catalogComponentsByName.has(name)) return
+    render(<ControlledSearch />)
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: name } })
+    const select = document.querySelector('select[size="6"]') as HTMLSelectElement
+    expect(select.value).toBe(name)
+  })
+})

@@ -4,7 +4,6 @@ import { resolveComponentLabel } from '../utils/componentPresentation'
 import { manufacturerFullNameForCode, manufacturerNameForCode } from '../utils/manufacturerLogo'
 
 const componentCatalogNames = Array.from(catalogComponentsByName.keys()).sort((a, b) => a.localeCompare(b))
-const MAX_VISIBLE_CATALOG_MATCHES = 40
 
 function manufacturerNameFor(code: string | null): string | undefined {
   if (!code) return undefined
@@ -27,14 +26,20 @@ export interface CatalogComponentSearchProps {
  * (EWO-029, Task 1); every keystroke clears the prior selection first, so
  * broadening the search or reaching zero matches never leaves a stale
  * selection pointed at an option no longer listed.
+ *
+ * EWO-031 (Task 2) — a blank search shows the complete, alphabetically
+ * sorted canonical catalog (no artificial cap); the listbox itself
+ * (`size={6}`) scrolls to reach the rest. Typed search is the same
+ * substring filter as before, also uncapped, so a broad query can never
+ * silently hide a real match past a fixed limit (Task 3 — every
+ * canonical component must be discoverable both blank and by search).
  */
 export default function CatalogComponentSearch({ selectedName, onSelect, placeholder = 'Search catalog components…' }: CatalogComponentSearchProps) {
   const [nameQuery, setNameQuery] = useState('')
 
   const filteredCatalogMatches = useMemo(() => {
     const q = nameQuery.trim().toLowerCase()
-    const matches = q ? componentCatalogNames.filter((n) => n.toLowerCase().includes(q)) : componentCatalogNames
-    return matches.slice(0, MAX_VISIBLE_CATALOG_MATCHES)
+    return q ? componentCatalogNames.filter((n) => n.toLowerCase().includes(q)) : componentCatalogNames
   }, [nameQuery])
 
   useEffect(() => {

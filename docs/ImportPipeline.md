@@ -299,6 +299,28 @@ because the classification translation table has no `CargoGrid` rule
 yet, the same honest "no rule, no guess" outcome as `Armor` — not
 because anything was suppressed to avoid it appearing.)
 
+### Deep-import roster expansion (EWO-019)
+
+A controlled 5-ship proof group certified the pipeline against real DataCore/`Data.p4k` source data beyond the original Gladius/Avenger Titan pair: **Aegis Eclipse**, **Drake Corsair**, and **Drake Cutlass Black**, chosen for structural diversity (Eclipse: nested weapon mount + torpedo rack + nested jump drive; Corsair: multi-crew, nested turrets, dual-slot missile racks, max port depth 4; Cutlass Black: manned turret, max port depth 8). All five ships: 0 normalization errors, Gladius's golden fixture unchanged (14/14), determinism confirmed byte-for-byte across two full pipeline runs.
+
+**Trailing-comma tolerance (general-purpose importer fix):** the `starbreaker.exe` build used for this proof group's `--dump-hierarchy` exports emits a trailing comma after the last element of every array/object it writes — JSON5-legal, not strict JSON. `StarBreakerImporter.read()` (`src/engine/importer/starBreakerImporter.ts`) now retries once with `stripTrailingCommas()` (`src/engine/importer/trailingCommaJson.ts`, string/escape-aware so it never touches a comma inside a string value) if strict `JSON.parse` fails, before giving up. This only ever runs on the already-failing path, so an export that already parses cleanly (Gladius, Avenger Titan) is untouched.
+
+**Deep-import identity aliasing (Task 7/8 — see [ADR-006](ADR/ADR-006-Deep-Import-Identity-Aliasing.md)):** `Ship.sourceEntityClass` now carries the canonical raw entity class (e.g. `AEGS_Eclipse`) through to `generated-data/ships.json`. `src/data/shipDefinitions.ts` derives `DEEP_IMPORTED_ENTITY_CLASSES` from this field (previously hand-maintained) and aliases each deep-imported `ShipDefinition`/factory template under both its generated id (`eclipse-imported`) and its canonical entity class (`AEGS_Eclipse`) — so a `FleetAsset` persisted while its ship was still catalog-only self-heals to real port/factory data on its next rehydration replay, with no change to the persisted record and no duplicate Add Ship entry.
+
+### Port hierarchy grouping and a known mount-orphaning gap (EWO-019B)
+
+A sixth ship, **Anvil Valkyrie**, was added to validate presentation-layer hierarchy work against a genuinely complex multi-turret vessel (8 top-level weapon-family ports: fixed pilot guns, two wing remote turrets, a top manned turret, a bottom "bubble" manned turret, two door gunner positions).
+
+Inspecting `generated-data/ports.json` directly across all six ships surfaced a real, pre-existing normalization characteristic: **a mount-level port sometimes fails to survive as its own row, leaving only its child leaf port as an orphaned top-level entry** (`parentPortId: null`) with no way to recover the mount's own position label. Confirmed via side-by-side comparison:
+
+- **Gladius**: every weapon mount (`hardpoint_gun_nose`, canonicalPortType `WeaponTurret`) survives as its own port, correctly linking to its child gun (`parentPortId` populated, child row's `parentPortId` matches). Quantum Drive same story (`hardpoint_quantum_drive` survives with a real `childPortIds` entry for `hardpoint_jump_drive`).
+- **Eclipse**: the equivalent weapon mounts (`hardpoint_weapon_left`/`_right`, entity `Mount_Gimbal_S2`) and the Quantum Drive mount (`hardpoint_quantum_drive`, entity `QDRV_RACO_S01_Drift_SCItem`) do **not** survive as their own rows — only their children (`Class 2` gun ×2, `Jump Drive`) exist, each orphaned to top-level with `parentPortId: null`. The raw StarBreaker export for both ships uses an identical nested-entity structure, so this is not a source-data difference; it is a normalization-stage outcome that was not investigated further, per this mission's explicit "do not modify Ship normalization" scope.
+- **Valkyrie** confirms the pattern is genuinely inconsistent, not merely "some ships lose the mount": of 8 weapon-family top-level ports, some retain a real position-named parent (`Left Turret`, `Right Turret`, `Left Weapon`, `Right Weapon` — children of an orphaned `hardpoint_turret_top`/`hardpoint_turret_bottom`), while the pilot's two fixed guns (`hardpoint_turret_pilot`'s children) surface with only generic `Left`/`Right` labels.
+
+**A true Turret-vs-Weapon-mount distinction was investigated and found not reliably derivable from already-generated data.** The raw entity class at each mount (`Mount_Gimbal_S4` for Valkyrie's wing remote turrets vs. `ANVL_Valkyrie_Turret_Top`/`ANVL_Valkyrie_Turret_Bubble` for its two genuine manned turrets vs. `WeaponMount_Gun_S1_ANVL_Asgard_Door_*` for its door guns) is the only signal that actually distinguishes them — and the raw export's own port-path naming is not a reliable proxy for it (a wing mount hosting a plain gimbal is named `turret_gun`; a door-mounted fixed gun is named `hardpoint_turret_door_*`; both contain "turret" despite neither being one). That entity class is never written to `ports.json`/`components.json` for an orphaned mount, so recovering it would require a normalizer change — explicitly out of scope for EWO-019B. `src/utils/portTreeGrouping.ts`'s grouping mechanism is generic and ready to add a `'Turrets'` bucket the moment a reliable signal is captured; until then, all weapon-family top-level ports (mounts and turrets alike) render under one `Weapons` group.
+
+**Resolved by EWO-020** — see [ADR-007](ADR/ADR-007-Compound-Assembly-Identity-Model.md) for the full architectural decision. In short: the "normalizer change" this section called out of scope turned out to be exactly what was needed, and the Chief Architect authorized it. `ShipNormalizer.walk()` now preserves an otherwise-excluded mount/turret node as a structural `Port` when it has a real included descendant, carrying a conservative `assemblyRole` (`src/normalizer/assemblyRole.ts`) derived from the mount's own entity class naming convention — never the port/hardpoint name this section already proved unreliable. Verified live: Valkyrie's wing mounts correctly separate into `REMOTE_TURRET` (their own entity class is explicitly `ANVL_Valkyrie_SCItem_Remote_Turret_Left/Right`), its top/bottom assemblies into `MANNED_TURRET`, and its door guns/nose gun into plain fixed mounts — with zero ship-specific code. Two additional general classification-translation fixes (a `subtype: null`/`"UNDEFINED"` equivalence bug, and a missing `WeaponMount` → `WeaponGun` rule) were found and fixed in the same pass; both apply to every ship, not just this proof group.
+
 ## Stage 4c — Equipment relationship resolution (Mission M-010)
 
 `src/normalizer/equipmentRelationship.ts` + the refactored `src/normalizer/equipmentResolver.ts`.
@@ -338,4 +360,33 @@ The full comparison now runs 14/14 (13 original rows plus the new Jump Drive row
 3. ~~Golden fixture disagreed with authoritative DataCore-derived results.~~ Reconciled by Mission M-010 (table above).
 4. ~~`raw-data/AEGS Avenger Titan.json` is referenced by tests but absent.~~ Restored by Mission M-011A as a real StarBreaker export (see "Real fixture provenance" above) — all 508 tests pass, 0 failures.
 5. `Armor` and `CargoGrid` (and any other unrecognized category) have no translation rule (deliberate — see Stage 4b; `CargoGrid` newly confirmed absent by the real Avenger Titan fixture, which has a real cargo grid entity that stays honestly unclassified).
-6. Component `displayName` is not prettified for catalog-derived components (`displayNameGenerator.ts`'s heuristics were built for port internal names, not entity class names) — a documented display-only limitation, deliberately not addressed through Mission M-011A (out of scope: "do not solve general localization or display-name prettification").
+6. ~~Component `displayName` is not prettified for catalog-derived components.~~ Partially resolved by Mission M-012: the component/ship catalogs now resolve real English display names via DataCore's own localization keys and the P4K's `global.ini` string table (see "Mission M-012" section below and ADR-005) — 969/1,109 catalog components and 262/294 catalog ships have a real resolved name. This is authoritative localization lookup, not the heuristic name-prettification `displayNameGenerator.ts` still applies to legacy port internal names — those two mechanisms remain separate and are not unified by this mission.
+7. ~~Origin 135c (and, discovered during the same audit, UTV/Mole/Cutlass Black (seed)/Vulture/Prospector) showed "Unknown Factory Item" for Factory and Installed while Target resolved to a real component.~~ Resolved by EWO-031's Canonical Factory Template Audit (Task 6/7) — **root cause was outside this pipeline entirely**: these are hand-authored `src/data/seed.ts` fixtures, not deep-imported ships, and six of them supplied zero `factoryItem`/`installedItem`/`targetItem` overrides for most of their hardpoint rows, so every one fell through to the `'Unknown Factory Item'` placeholder (`row()`'s default, `src/data/seed.ts`) — while `targetItem` resolved anyway because Target is fed independently through Loadout Manager/Quartermaster template selections, not from the same seed row. Fixed with real, already-proven-compatible component overrides, the same pattern EWO-023 already used for Cutlass Red. Starlite and M80 are deliberate, documented exceptions (Starlite is explicitly "Unknown / Future"; M80 is the fleet's own regression fixture proving genuine Unresolved status is reachable from real seed data, not just a synthetic one — see `src/utils/__tests__/unresolvedFactoryData.test.ts`) and were left as-is. See `docs/UI_ARCHITECTURE.md`'s canonical catalog notes and `src/data/__tests__/seedFactoryResolution.test.ts`.
+
+## Mission M-012 — Ship & component universe catalogs (separate from this pipeline)
+
+This pipeline (Stages 1-6 above) produces a deep, per-ship normalized
+port tree — currently for exactly two ships (Gladius, Avenger Titan).
+Mission M-012 added a **separate** discovery mechanism — full-universe
+bulk DataCore field queries, not per-ship `entity export
+--dump-hierarchy` — that produces:
+
+- `generated-data/ship-catalog.json`: 294 player-ownable ships/ground
+  vehicles (262 ships, 32 ground vehicles), discovered via
+  `VehicleComponentParams.movementClass` and filtered by a reviewed
+  non-player-variant name taxonomy (see ADR-005).
+- `generated-data/component-metadata-catalog.json` (the same file
+  Mission M-007 introduced, now widened): 1,109 player-usable
+  components across weapons/shields/coolers/power plants/quantum &
+  jump drives/missile racks & missiles/radar/life support/relays/
+  tractor beams/mining & salvage heads/bombs/mounts, discovered via
+  `SAttachableComponentParams.AttachDef.Type` filtered against a
+  reviewed category allowlist.
+
+These catalogs power Add Ship's roster and component
+selection/validation breadth in the live application — they do **not**
+replace or extend this pipeline's per-ship depth. A ship added from the
+catalog with no deep import has an empty factory template (zero
+hardpoints) until it goes through Stages 1-6 above. See ADR-005 for the
+full inclusion/exclusion policy, localization strategy, and known
+coverage gaps.

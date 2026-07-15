@@ -131,6 +131,8 @@ Responsible for presenting domain state without reinterpreting raw exporter data
 
 Component search/selection (catalog-driven "add or install a component") and component display (an already-assigned Factory/Installed/Target value) are each governed by one shared, reused rendering contract rather than being reformatted independently per page — see `docs/UI_ARCHITECTURE.md` §16 ("Component presentation contract") and §16.1 ("Canonical component search renderer"). The Commander-facing install/remove workflow itself (Quick Update's Component → Ship → Loadout → Compatible Slot install path; Ship Detail's Loadout & Port Tree as the uninstall path) is documented in `docs/UI_ARCHITECTURE.md` §18.
 
+**The generated component catalog (`src/generated/componentCatalog.ts`'s `catalogComponentsByName`, sourced from `generated-data/component-metadata-catalog.json`, Mission M-012) is the single authoritative component list for every Commander-facing selection workflow** — Hangar Inventory, Quick Update, the Loadout Manager, and Decision Center all search and resolve against this exact same map; no page maintains its own separate or demo-only component list (EWO-031, Task 1). `CatalogComponentSearch` (§16.1) additionally never truncates it — a blank search browses the complete, alphabetically sorted catalog, and typed search is filtered from that same complete set (EWO-031, Task 2/3). See `docs/UI_ARCHITECTURE.md` §16.2–16.3.
+
 ## Fleet ownership and persistence
 
 The hand-authored seed fleet (`src/data/seed.ts`) is demo/sample data, not

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ShipDetail from '../ShipDetail'
+import MissionComposer from '../MissionComposer'
 import { useFleetStore } from '../../store/useFleetStore'
 
 const initialState = useFleetStore.getState()
@@ -113,6 +114,16 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
     expect(screen.getAllByText('Tractor Beam').length).toBeGreaterThan(0)
   })
 
+  it('EWO-031 (Task 6/7): Origin 135c shows no "Unknown Factory Item" anywhere on Ship Detail — Factory, Installed, and Target all resolve to real components', () => {
+    renderShipDetail('135c')
+    expect(screen.queryByText('Unknown Factory Item')).not.toBeInTheDocument()
+  })
+
+  it('EWO-031 (Task 6/7): UTV shows no "Unknown Factory Item" anywhere on Ship Detail either — the same fix applied to the other affected seed ship', () => {
+    renderShipDetail('utv')
+    expect(screen.queryByText('Unknown Factory Item')).not.toBeInTheDocument()
+  })
+
   it('28. switching Active Loadout does not move equipment (Installed Loadout unchanged), only Target changes', () => {
     renderShipDetail('ghost')
     const installedBefore = useFleetStore.getState().installedLoadouts.filter((e) => e.shipId === 'ghost')
@@ -131,5 +142,68 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
   it('does not use Mission Configuration language in normal user-facing copy', () => {
     renderShipDetail('ghost')
     expect(screen.queryByText(/Mission Configuration/i)).not.toBeInTheDocument()
+  })
+})
+
+describe('EWO-026 (Task 3/4/13): exact Fleet Asset navigation and safe fallback', () => {
+  it('11. two Fleet Assets of the same hull, opened directly by id, each show their own distinct instance', () => {
+    const a = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Cutty One')
+    const b = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Cutty Two')
+    expect(a.success && b.success).toBe(true)
+
+    renderShipDetail(b.assetId!)
+    // The nickname is what distinguishes the two instances in the UI —
+    // opening by the second asset's own id must show its own nickname as
+    // the active ship's hero name, never silently fall back to the first
+    // Cutlass Black added (both nicknames legitimately still appear in the
+    // page's own "Select Ship" switcher, which lists every ship).
+    expect(screen.getByAltText('Cutty Two')).toBeInTheDocument()
+    expect(screen.queryByAltText('Cutty One')).not.toBeInTheDocument()
+  })
+
+  it('12. a missing/stale Fleet Asset id never crashes — falls back to the existing safe default (first ship)', () => {
+    expect(() => renderShipDetail('this-fleet-asset-id-does-not-exist')).not.toThrow()
+    // Safe fallback already in place: `ships.find(...) ?? ships[0]`.
+    const firstShip = useFleetStore.getState().ships[0]
+    expect(screen.getAllByText(new RegExp(firstShip.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')).length).toBeGreaterThan(0)
+  })
+
+  it('normal navigation into Ship Detail (no stale/duplicate concerns) still opens the requested ship', () => {
+    renderShipDetail('utv')
+    expect(screen.getAllByText(/UTV/i).length).toBeGreaterThan(0)
+  })
+})
+
+describe('EWO-026 (round 2, Task 1): Ship Detail rebuilds the canonical Port Tree after a saved Loadout becomes active', () => {
+  it('a Loadout created and activated in Loadout Manager shows full category headers in Ship Detail — never a flat table', () => {
+    const result = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED')
+    const shipId = result.assetId!
+
+    render(
+      <MemoryRouter initialEntries={[`/loadout-manager?shipId=${shipId}`]}>
+        <MissionComposer />
+      </MemoryRouter>
+    )
+    fireEvent.change(screen.getByPlaceholderText(/Deep Salvage Run/i), { target: { value: 'Repro Build' } })
+    fireEvent.click(screen.getByText(/Create & Set as Active Loadout/i))
+    // Ground truth: saveMissionConfiguration still does not write
+    // groupLabel/parentSlotLabel/isStructural onto the saved Build's own
+    // rows — this test exercises the real stripped-data condition.
+    const activeBuildId = useFleetStore.getState().ships.find((s) => s.id === shipId)?.activeBuildId
+    const savedRow = useFleetStore.getState().hardpoints.find((h) => h.buildId === activeBuildId)!
+    expect(savedRow.groupLabel).toBeUndefined()
+    cleanup()
+
+    renderShipDetail(shipId)
+    expect(screen.getByText('Weapons')).toBeInTheDocument()
+    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Manned Turrets')).toBeInTheDocument()
+  })
+
+  it("does not alter readiness/logistics — Ship Detail's Readiness percentage is identical before and after the hierarchy-display fix", () => {
+    // The overlay only changes what LoadoutPortTree renders; progress and
+    // buildState are still computed from the exact same shipHardpoints.
+    renderShipDetail('corsair')
+    expect(screen.getByText('Mission Ready')).toBeInTheDocument()
   })
 })

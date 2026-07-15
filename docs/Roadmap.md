@@ -88,6 +88,24 @@
 
 ## Beta
 
+- **EWO-031 — Canonical Catalog Completion & Final Workflow Validation
+  (complete)**: `CatalogComponentSearch`'s blank-search listbox no longer
+  truncates at 40 entries — it browses the complete, alphabetically
+  sorted 679-component canonical catalog, with typed search filtered from
+  that same complete set (both confirmed discoverable across
+  Weapons/Shields/Coolers/Power Plants/Quantum Drives/Missile
+  Racks/Missiles/Mining/Salvage). Decision Center's ~8-item hand-authored
+  demo lookup (`decisionCatalog`/`decisionCatalogNames`) is removed
+  entirely — it now searches the same canonical catalog as every other
+  page and recommends KEEP/Reserve/Needed By or Already
+  Satisfied/Store-in-Hangar against real, live Active-Loadout demand
+  (`resolveNeededByBuilds()`), never a static guess. Canonical Factory
+  Template Audit: traced and fixed the root cause of Origin 135c's
+  "Unknown Factory Item" bug — a hand-authored `seed.ts` gap, not an
+  importer defect — and found + fixed the identical gap on five more seed
+  ships (UTV, Mole, Cutlass Black, Vulture, Prospector); Starlite and M80
+  remain deliberate, documented exceptions. See `docs/UI_ARCHITECTURE.md`
+  §16.2–16.3 and `docs/ImportPipeline.md`'s "Current known gaps" #7.
 - **EWO-030 — Quick Update Workflow Simplification & Ship Detail Component
   Removal (complete)**: Install Component now walks Component → Ship →
   Loadout → Compatible Slot (filtered to type/size-compatible,

@@ -6,10 +6,10 @@
 > `docs/Roadmap.md`'s "Alpha 2.5D / Complete" list). Work since then is
 > tracked as numbered Engineering Work Orders (EWOs) rather than against
 > this document; `docs/Roadmap.md` is the current living source of truth
-> for what's complete, active, and remaining. Most recently: **EWO-030 —
-> Quick Update Workflow Simplification & Ship Detail Component Removal**
-> (see `docs/UI_ARCHITECTURE.md` §18). Preserved below for historical
-> record.
+> for what's complete, active, and remaining. Most recently: **EWO-031 —
+> Canonical Catalog Completion & Final Workflow Validation** (see
+> `docs/UI_ARCHITECTURE.md` §16.2–16.3 and `docs/ImportPipeline.md`'s
+> "Current known gaps" #7). Preserved below for historical record.
 
 ## Task 1 — Add the documentation bundle
 
