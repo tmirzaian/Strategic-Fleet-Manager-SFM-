@@ -300,6 +300,28 @@ export interface Hardpoint {
    * src/utils/portTree.ts for the generic tree-building logic that reads
    * this — nothing renders per-ship special cases. */
   parentSlotLabel?: string
+  /** EWO-019B — a top-level (no parentSlotLabel) physical port's real-world
+   * system grouping (e.g. "Weapons", "Turrets", "Quantum Drive"), when the
+   * source data resolves one. Presentation-only: never set on a nested
+   * child row (its parent's own group already covers it), never affects
+   * compatibility/readiness/persistence — src/utils/portTreeGrouping.ts
+   * is the sole consumer, used to render a synthetic header the same way
+   * a real parent port already renders one. Absent means "render as a
+   * flat top-level row," today's behavior, unchanged. */
+  groupLabel?: string
+  /** EWO-020 — a conservative, source-evidenced physical-assembly role
+   * (see src/normalizer/assemblyRole.ts's AssemblyRole union — this field
+   * carries the same string values, kept loosely typed here since the app
+   * layer doesn't otherwise depend on the normalizer). Set on every
+   * imported hardpoint, structural or real. */
+  assemblyRole?: string
+  /** EWO-020 — true only for a mount/turret/assembly row that exists
+   * purely to explain physical hierarchy (see Port.isStructural). A
+   * structural hardpoint always has factoryItem/installedItem/targetItem
+   * `'—'`, is excluded from readiness/procurement denominators
+   * (src/utils/buildProgress.ts, src/engine/logistics/*), and never
+   * renders an editable target selector (src/pages/MissionComposer.tsx). */
+  isStructural?: boolean
 }
 
 // Allowed dispositions for Hangar items. "Vendor" is intentionally excluded —
@@ -314,6 +336,20 @@ export interface HangarItem {
   qty: number
   neededBy: string
   disposition: Disposition
+  /** EWO-028 (Design Authority Ruling 1) — the canonical DataCore entity
+   * class (e.g. "COOL_AEGS_S02_Avalanche_SCItem"), when the record was
+   * added through the catalog-driven Add workflow. Two records sharing a
+   * display name are NEVER treated as the same component unless this
+   * also matches (or is absent on both — see the merge logic in
+   * addHangarItem for the full precedence). Absent on legacy/pre-EWO-028
+   * records and on anything hand-typed outside the catalog — those keep
+   * matching by name+type+size only, exactly as before; never
+   * retroactively assigned without a Commander re-adding the item
+   * through the catalog. Reservations/Installed Loadout/availability
+   * matching remain name-based throughout, unchanged (see
+   * src/engine/logistics/availability.ts) — this field identifies an
+   * inventory RECORD, it does not re-key the wider logistics engine. */
+  entityClass?: string
   // Future-ready: Components are location-bound (ships are not). Optional
   // and unused in the UI this sprint — reserved for a later Location column.
   location?: string

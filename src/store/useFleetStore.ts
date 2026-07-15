@@ -157,8 +157,23 @@ interface FleetState {
   deleteBuild: (buildId: string) => void
 
   // Hangar Inventory
-  addHangarItem: (item: Omit<HangarItem, 'id'>) => void
+  // EWO-028 (Task 3) — merges into an existing record by canonical
+  // identity (entityClass when both sides have one, else name+type+size)
+  // rather than always minting a new row; see the implementation's own
+  // doc comment for the full precedence.
+  addHangarItem: (item: Omit<HangarItem, 'id'>) => { success: boolean; message?: string; merged: boolean }
   updateHangarDisposition: (itemId: string, disposition: Disposition) => void
+  // EWO-028 (Task 4) — Beta scope is Quantity only; canonical identity
+  // and catalog metadata are read-only once a record exists (Design
+  // Authority Ruling 3) — the Commander deletes and re-adds instead of
+  // "reclassifying" a record into a different component.
+  updateHangarItemQuantity: (itemId: string, qty: number) => { success: boolean; message?: string }
+  // EWO-028 (Task 5) — the caller (HangarInventory.tsx) is responsible
+  // for surfacing resolveInventoryDependencies()'s result and getting
+  // explicit Commander confirmation first; this action itself performs
+  // the deletion unconditionally once called — it never silently deletes
+  // a reservation or installed-loadout record as a side effect (Ruling 9).
+  deleteHangarItem: (itemId: string) => { success: boolean; message?: string }
   moveToShip: (itemId: string, shipId: string) => { success: boolean; message: string }
 
   // Quick Update
@@ -804,10 +819,67 @@ export const useFleetStore = create<FleetState>()(
     get().addLogEntry({ action: 'Loadout Removed', shipName: ship?.name, itemName: build.name, details: `Removed ${build.name} from ${ship?.name ?? 'ship'} — any active reservations were returned to Quartermaster Stores` })
   },
 
+  // EWO-028 (Task 2/3) — quantity must be a positive whole number
+  // (Design Authority Ruling 4); a caller that violates this gets an
+  // honest rejection rather than a silently-created malformed record.
+  //
+  // Merge precedence for "is this the same inventory record":
+  //   1. Both sides carry a canonical `entityClass` -> match on that
+  //      alone (Ruling 1/6 — two distinct canonical components must
+  //      never merge even if their display names collide).
+  //   2. Exactly one side carries `entityClass` -> never merge (Task 3:
+  //      "do not silently merge legacy duplicates unless canonical
+  //      identity is proven identical" — an unmatched canonical id is
+  //      not proof).
+  //   3. Neither side carries `entityClass` (both legacy/hand-typed) ->
+  //      match on name+type+size, the same identity the rest of the
+  //      logistics engine already uses.
   addHangarItem: (item) => {
+    if (!Number.isInteger(item.qty) || item.qty <= 0) {
+      return { success: false, message: 'Quantity must be a positive whole number.', merged: false }
+    }
+    const existing = get().hangarItems.find((h) => {
+      if (item.entityClass && h.entityClass) return h.entityClass === item.entityClass
+      if (item.entityClass || h.entityClass) return false
+      return h.name === item.name && h.type === item.type && h.size === item.size
+    })
+    if (existing) {
+      const mergedQty = existing.qty + item.qty
+      set({ hangarItems: get().hangarItems.map((h) => (h.id === existing.id ? { ...h, qty: mergedQty } : h)) })
+      get().addLogEntry({
+        action: 'Hangar item quantity increased',
+        itemName: existing.name,
+        details: `Added ${item.qty} more ${existing.name} — quantity now ${mergedQty}`,
+      })
+      return { success: true, merged: true }
+    }
     const newItem: HangarItem = { ...item, id: `item-${Date.now()}` }
     set({ hangarItems: [newItem, ...get().hangarItems] })
     get().addLogEntry({ action: 'Hangar item added', itemName: newItem.name, details: `Added ${newItem.name} to Hangar` })
+    return { success: true, merged: false }
+  },
+
+  // EWO-028 (Task 4) — Quantity-only edit. Never reduces quantity below
+  // zero (Ruling 7); the caller is responsible for the Task 6
+  // below-allocation confirmation UX — this action performs the write
+  // once called, exactly like deleteHangarItem below.
+  updateHangarItemQuantity: (itemId, qty) => {
+    if (!Number.isInteger(qty) || qty < 0) {
+      return { success: false, message: 'Quantity must be a non-negative whole number.' }
+    }
+    const item = get().hangarItems.find((i) => i.id === itemId)
+    if (!item) return { success: false, message: 'Inventory record not found.' }
+    set({ hangarItems: get().hangarItems.map((i) => (i.id === itemId ? { ...i, qty } : i)) })
+    get().addLogEntry({ action: 'Hangar item quantity changed', itemName: item.name, details: `${item.name} quantity changed from ${item.qty} to ${qty}` })
+    return { success: true }
+  },
+
+  deleteHangarItem: (itemId) => {
+    const item = get().hangarItems.find((i) => i.id === itemId)
+    if (!item) return { success: false, message: 'Inventory record not found.' }
+    set({ hangarItems: get().hangarItems.filter((i) => i.id !== itemId) })
+    get().addLogEntry({ action: 'Hangar item deleted', itemName: item.name, details: `Removed ${item.name} from Hangar Inventory` })
+    return { success: true }
   },
 
   updateHangarDisposition: (itemId, disposition) => {
