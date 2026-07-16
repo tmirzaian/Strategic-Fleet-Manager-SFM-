@@ -11,6 +11,13 @@
     "import:ships": "tsx scripts/importShips.ts",
     "import:ship": "tsx scripts/importShips.ts",
     "generate:component-catalog": "tsx scripts/generateComponentCatalog.ts",
+    "generate:ship-catalog": "tsx scripts/generateShipCatalog.ts",
+    "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",
+    "golden-fleet:acquire": "vite-node scripts/goldenFleet/acquire.ts",
+    "golden-fleet:acquire:dry-run": "vite-node scripts/goldenFleet/acquire.ts -- --dry-run",
+    "ship-images:import:xlsx": "vite-node scripts/shipImages/cli.ts -- import-xlsx",
+    "ship-images:generate": "vite-node scripts/shipImages/cli.ts -- generate",
+    "ship-images:check": "vite-node scripts/shipImages/cli.ts -- check",
     "test": "vitest run"
   },
   "dependencies": {
@@ -29,11 +36,14 @@
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
     "jsdom": "^29.1.1",
+    "png-to-ico": "^3.0.2",
     "postcss": "^8.4.45",
+    "sharp": "^0.35.3",
     "tailwindcss": "^3.4.10",
     "tsx": "^4.19.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.3",
+    "vite-node": "^2.1.2",
     "vitest": "^2.1.2"
   }
 }
