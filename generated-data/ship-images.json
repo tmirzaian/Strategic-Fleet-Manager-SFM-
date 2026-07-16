@@ -78,7 +78,31 @@
     "status": "fallback"
   },
   {
+    "shipId": "eclipse-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
     "shipId": "gladius-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "corsair-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutlass-black-imported",
     "primaryUrl": null,
     "source": "FALLBACK",
     "status": "fallback"

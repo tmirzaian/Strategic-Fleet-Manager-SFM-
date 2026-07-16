@@ -1,12 +1,27 @@
 [
   {
     "id": "avenger-titan-imported",
-    "manufacturer": "",
+    "manufacturer": "Aegis",
     "name": "Avenger Titan",
     "career": "",
     "role": "",
     "ownership": "Owned",
     "factoryLoadoutId": "avenger-titan-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Avenger_Titan",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "eclipse-imported",
+    "manufacturer": "Aegis",
+    "name": "Eclipse",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "eclipse-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Eclipse",
     "classification": {
       "rsiRoles": [],
       "focusTags": []
@@ -14,12 +29,55 @@
   },
   {
     "id": "gladius-imported",
-    "manufacturer": "",
+    "manufacturer": "Aegis",
     "name": "Gladius",
     "career": "",
     "role": "",
     "ownership": "Owned",
     "factoryLoadoutId": "gladius-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Gladius",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "valkyrie-imported",
+    "manufacturer": "Anvil",
+    "name": "Valkyrie",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "valkyrie-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Valkyrie",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "corsair-imported",
+    "manufacturer": "Drake",
+    "name": "Corsair",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "corsair-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Corsair",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutlass-black-imported",
+    "manufacturer": "Drake",
+    "name": "Cutlass Black",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutlass-black-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutlass_Black",
     "classification": {
       "rsiRoles": [],
       "focusTags": []

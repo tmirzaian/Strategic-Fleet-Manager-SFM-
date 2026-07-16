@@ -288,6 +288,246 @@
     ]
   },
   {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_radar",
+    "displayName": "Radar",
+    "equipmentGroup": "Radar",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RADR_BLTR_S01_Pelerous",
+    "resolvedItemIds": [
+      "component-RADR_BLTR_S01_Pelerous"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_radar"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_powerplant",
+    "displayName": "Power Plant",
+    "equipmentGroup": "Power",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_TYDT_S01_DeltaMax_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_TYDT_S01_DeltaMax_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_powerplant"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_cooler",
+    "displayName": "Cooler",
+    "equipmentGroup": "Coolers",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_TYDT_S01_VaporBlock_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_TYDT_S01_VaporBlock_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_cooler_2",
+    "displayName": "Cooler 2",
+    "equipmentGroup": "Coolers",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_TYDT_S01_VaporBlock_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_TYDT_S01_VaporBlock_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_2"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-QDRV_RACO_S01_Drift_SCItem",
+    "resolvedItemIds": [
+      "component-QDRV_RACO_S01_Drift_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+    "displayName": "Jump Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-JDRV_TARS_S01_Explorer_SCItem",
+    "resolvedItemIds": [
+      "component-JDRV_TARS_S01_Explorer_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_jump_drive"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_shield_generator_A",
+    "displayName": "A Shield Generator",
+    "positionLabel": "A",
+    "equipmentGroup": "Shields",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_ASAS_S01_Veil_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_ASAS_S01_Veil_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_A"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_shield_generator_B",
+    "displayName": "B Shield Generator",
+    "positionLabel": "B",
+    "equipmentGroup": "Shields",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_ASAS_S01_Veil_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_ASAS_S01_Veil_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_B"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_weapon_left",
+    "displayName": "Left Weapon",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_weapon_right",
+    "displayName": "Right Weapon",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_torpedorack",
+    "displayName": "Torpedorack",
+    "equipmentGroup": "Missiles",
+    "minSize": 9,
+    "maxSize": 9,
+    "mountItemId": "component-MRCK_S09_AEGS_Eclipse",
+    "resolvedItemId": "component-MRCK_S09_AEGS_Eclipse",
+    "resolvedItemIds": [
+      "component-MRCK_S09_AEGS_Eclipse"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_torpedorack"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_relay",
+    "displayName": "Relay",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_2slot_slim",
+    "resolvedItemIds": [
+      "component-RELAY_2slot_slim"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay"
+    ]
+  },
+  {
+    "shipId": "eclipse-imported",
+    "portId": "eclipse-imported-port-/hardpoint_lifesupport",
+    "displayName": "Life Support",
+    "equipmentGroup": "LifeSupport",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-LFSP_TYDT_S01_ComfortAir",
+    "resolvedItemIds": [
+      "component-LFSP_TYDT_S01_ComfortAir"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_lifesupport"
+    ]
+  },
+  {
     "shipId": "gladius-imported",
     "portId": "gladius-imported-port-/hardpoint_power_plant",
     "displayName": "Power Plant",
@@ -613,6 +853,1561 @@
     "leafCount": 1,
     "mountPath": [
       "hardpoint_relay"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_powerplant_left",
+    "displayName": "Left Power Plant",
+    "positionLabel": "Left",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_AEGS_S02_Maelstrom_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_AEGS_S02_Maelstrom_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_powerplant_left"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_powerplant_right",
+    "displayName": "Right Power Plant",
+    "positionLabel": "Right",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_AEGS_S02_Maelstrom_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_AEGS_S02_Maelstrom_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_powerplant_right"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_cooler_left",
+    "displayName": "Left Cooler",
+    "positionLabel": "Left",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_AEGS_S02_Arctic_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_AEGS_S02_Arctic_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_left"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_cooler_right",
+    "displayName": "Right Cooler",
+    "positionLabel": "Right",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_AEGS_S02_Arctic_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_AEGS_S02_Arctic_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_right"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-QDRV_TARS_S02_Odyssey_SCItem",
+    "resolvedItemIds": [
+      "component-QDRV_TARS_S02_Odyssey_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+    "displayName": "Jump Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-JDRV_TARS_S02_Excelsior_SCItem",
+    "resolvedItemIds": [
+      "component-JDRV_TARS_S02_Excelsior_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_jump_drive"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_shield_generator_left",
+    "displayName": "Left Shield Generator",
+    "positionLabel": "Left",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_GODI_S02_FullStop_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_GODI_S02_FullStop_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_left"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_shield_generator_right",
+    "displayName": "Right Shield Generator",
+    "positionLabel": "Right",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_GODI_S02_FullStop_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_GODI_S02_FullStop_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_right"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_radar",
+    "displayName": "Radar",
+    "equipmentGroup": "Radar",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-RADR_CHCO_S02_Surveyor",
+    "resolvedItemIds": [
+      "component-RADR_CHCO_S02_Surveyor"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_radar"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_pilot",
+    "displayName": "Pilot Turret",
+    "positionLabel": "Pilot",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-ANVL_Valkyrie_Nose_Turret_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_turret_pilot",
+      "hardpoint_left",
+      "hardpoint_turret_pilot",
+      "hardpoint_right"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left",
+    "displayName": "Left Wing Weapon",
+    "positionLabel": "Left Wing",
+    "equipmentGroup": "Defense",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-ANVL_Valkyrie_SCItem_Remote_Turret_Left",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S4",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_wing_left",
+      "turret_gun",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right",
+    "displayName": "Right Wing Weapon",
+    "positionLabel": "Right Wing",
+    "equipmentGroup": "Defense",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-ANVL_Valkyrie_SCItem_Remote_Turret_Right",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S4",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_wing_right",
+      "turret_gun",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_top",
+    "displayName": "Top Turret",
+    "positionLabel": "Top",
+    "equipmentGroup": "Weapons",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_turret_top"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_left",
+    "displayName": "Left Turret",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "turret_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_right",
+    "displayName": "Right Turret",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "turret_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_bottom",
+    "displayName": "Bottom Turret",
+    "positionLabel": "Bottom",
+    "equipmentGroup": "Weapons",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_turret_bottom"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_left",
+    "displayName": "Left Weapon",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_right",
+    "displayName": "Right Weapon",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_door_right",
+    "displayName": "Right Door Turret",
+    "positionLabel": "Right Door",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": null,
+    "resolvedItemId": "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Right",
+    "resolvedItemIds": [
+      "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Right"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_turret_door_right"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_door_right/weapon",
+    "displayName": "Weapon",
+    "equipmentGroup": "Weapons",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel",
+    "resolvedItemIds": [
+      "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "weapon"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_door_left",
+    "displayName": "Left Door Turret",
+    "positionLabel": "Left Door",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": null,
+    "resolvedItemId": "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Left",
+    "resolvedItemIds": [
+      "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Left"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_turret_door_left"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_turret_door_left/weapon",
+    "displayName": "Weapon",
+    "equipmentGroup": "Weapons",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel",
+    "resolvedItemIds": [
+      "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "weapon"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_relay_01",
+    "displayName": "Relay 1",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_3slot",
+    "resolvedItemIds": [
+      "component-RELAY_3slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_01"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_relay_02",
+    "displayName": "Relay 2",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_2slot",
+    "resolvedItemIds": [
+      "component-RELAY_2slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_02"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_shield_03",
+    "displayName": "Shield 3",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_GODI_S02_FullStop_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_GODI_S02_FullStop_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_03"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_shield_04",
+    "displayName": "Shield 4",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_GODI_S02_FullStop_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_GODI_S02_FullStop_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_04"
+    ]
+  },
+  {
+    "shipId": "valkyrie-imported",
+    "portId": "valkyrie-imported-port-/hardpoint_lifesupport",
+    "displayName": "Life Support",
+    "equipmentGroup": "LifeSupport",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-LFSP_TYDT_S01_ComfortAir",
+    "resolvedItemIds": [
+      "component-LFSP_TYDT_S01_ComfortAir"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_lifesupport"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_power_plant_a",
+    "displayName": "A Power Plant",
+    "positionLabel": "A",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_SASU_S02_DayBreak_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_SASU_S02_DayBreak_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_power_plant_a"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_power_plant_b",
+    "displayName": "B Power Plant",
+    "positionLabel": "B",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_SASU_S02_DayBreak_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_SASU_S02_DayBreak_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_power_plant_b"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_cooler_a",
+    "displayName": "A Cooler",
+    "positionLabel": "A",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_JSPN_S02_FrostStarEX_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_JSPN_S02_FrostStarEX_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_a"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_cooler_b",
+    "displayName": "B Cooler",
+    "positionLabel": "B",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_JSPN_S02_FrostStarEX_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_JSPN_S02_FrostStarEX_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_b"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_shield_generator_a",
+    "displayName": "A Shield Generator",
+    "positionLabel": "A",
+    "equipmentGroup": "Shields",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_BEHR_S03_5CA_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_BEHR_S03_5CA_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_a"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-QDRV_ARCC_S02_Torrent_SCItem",
+    "resolvedItemIds": [
+      "component-QDRV_ARCC_S02_Torrent_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+    "displayName": "Jump Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-JDRV_TARS_S02_Excelsior_SCItem",
+    "resolvedItemIds": [
+      "component-JDRV_TARS_S02_Excelsior_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_jump_drive"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_left",
+    "displayName": "Left Manned Turret",
+    "positionLabel": "Left Manned",
+    "equipmentGroup": "Weapons",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_manned_turret_left"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_left",
+    "displayName": "Left Weapon",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_right",
+    "displayName": "Right Weapon",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_right",
+    "displayName": "Right Manned Turret",
+    "positionLabel": "Right Manned",
+    "equipmentGroup": "Weapons",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_manned_turret_right"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_left",
+    "displayName": "Left Weapon",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_right",
+    "displayName": "Right Weapon",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-Mount_Gimbal_S2",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_radar",
+    "displayName": "Radar",
+    "equipmentGroup": "Radar",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-RADR_WLOP_S02_Chernykh",
+    "resolvedItemIds": [
+      "component-RADR_WLOP_S02_Chernykh"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_radar"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_cheek_weapon_left",
+    "displayName": "Left Cheek Weapon",
+    "positionLabel": "Left Cheek",
+    "equipmentGroup": "Weapons",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-Mount_Gimbal_S4",
+    "resolvedItemId": "component-BEHR_LaserCannon_S4",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cheek_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_cheek_weapon_right",
+    "displayName": "Right Cheek Weapon",
+    "positionLabel": "Right Cheek",
+    "equipmentGroup": "Weapons",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-Mount_Gimbal_S4",
+    "resolvedItemId": "component-BEHR_LaserCannon_S4",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cheek_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_chin_weapon_right",
+    "displayName": "Right Chin Weapon",
+    "positionLabel": "Right Chin",
+    "equipmentGroup": "Weapons",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-Mount_Gimbal_S4",
+    "resolvedItemId": "component-BEHR_LaserCannon_S4",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_chin_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_chin_weapon_left",
+    "displayName": "Left Chin Weapon",
+    "positionLabel": "Left Chin",
+    "equipmentGroup": "Weapons",
+    "minSize": 4,
+    "maxSize": 4,
+    "mountItemId": "component-Mount_Gimbal_S4",
+    "resolvedItemId": "component-BEHR_LaserCannon_S4",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S4"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_chin_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_weapon_wing_bottom",
+    "displayName": "Bottom Wing Weapon",
+    "positionLabel": "Bottom Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 5,
+    "maxSize": 5,
+    "mountItemId": "component-Mount_Gimbal_S5",
+    "resolvedItemId": "component-BEHR_LaserCannon_S5",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S5"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_wing_bottom",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_weapon_wing_top",
+    "displayName": "Top Wing Weapon",
+    "positionLabel": "Top Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 5,
+    "maxSize": 5,
+    "mountItemId": "component-Mount_Gimbal_S5",
+    "resolvedItemId": "component-BEHR_LaserCannon_S5",
+    "resolvedItemIds": [
+      "component-BEHR_LaserCannon_S5"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_wing_top",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_tail_turret",
+    "displayName": "Tail Turret",
+    "positionLabel": "Tail",
+    "equipmentGroup": "Defense",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-DRAK_Corsair_Remote_Turret_S4",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S2",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S2"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_tail_turret",
+      "hardpoint_weapon_left",
+      "hardpoint_class_2",
+      "hardpoint_tail_turret",
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a",
+    "displayName": "Right Wing Mount A Missile",
+    "positionLabel": "Right Wing Mount A",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_wing_right_missile_mount_a",
+      "missile_01_attach",
+      "hardpoint_wing_right_missile_mount_a",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b",
+    "displayName": "Right Wing Mount B Missile",
+    "positionLabel": "Right Wing Mount B",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_wing_right_missile_mount_b",
+      "missile_01_attach",
+      "hardpoint_wing_right_missile_mount_b",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c",
+    "displayName": "Right Wing Mount C Missile",
+    "positionLabel": "Right Wing Mount C",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_wing_right_missile_mount_c",
+      "missile_01_attach",
+      "hardpoint_wing_right_missile_mount_c",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d",
+    "displayName": "Right Wing Mount D Missile",
+    "positionLabel": "Right Wing Mount D",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_wing_right_missile_mount_d",
+      "missile_01_attach",
+      "hardpoint_wing_right_missile_mount_d",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_relay_cockpit",
+    "displayName": "Cockpit Relay",
+    "positionLabel": "Cockpit",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_2slot",
+    "resolvedItemIds": [
+      "component-RELAY_2slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_cockpit"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_relay_engineering",
+    "displayName": "Engineering Relay",
+    "positionLabel": "Engineering",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_3slot",
+    "resolvedItemIds": [
+      "component-RELAY_3slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_engineering"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_relay_hold",
+    "displayName": "Hold Relay",
+    "positionLabel": "Hold",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_2slot",
+    "resolvedItemIds": [
+      "component-RELAY_2slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_hold"
+    ]
+  },
+  {
+    "shipId": "corsair-imported",
+    "portId": "corsair-imported-port-/hardpoint_lifesupport",
+    "displayName": "Life Support",
+    "equipmentGroup": "LifeSupport",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-LFSP_TYDT_S02_ComfortAirPlus",
+    "resolvedItemIds": [
+      "component-LFSP_TYDT_S02_ComfortAirPlus"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_lifesupport"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_power_plant",
+    "displayName": "Power Plant",
+    "equipmentGroup": "Power",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-POWR_SASU_S02_DayBreak_SCItem",
+    "resolvedItemIds": [
+      "component-POWR_SASU_S02_DayBreak_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_power_plant"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_cooler_left",
+    "displayName": "Left Cooler",
+    "positionLabel": "Left",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_LPLT_S02_ColdSnap_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_LPLT_S02_ColdSnap_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_left"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_cooler_right",
+    "displayName": "Right Cooler",
+    "positionLabel": "Right",
+    "equipmentGroup": "Coolers",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-COOL_LPLT_S02_ColdSnap_SCItem",
+    "resolvedItemIds": [
+      "component-COOL_LPLT_S02_ColdSnap_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_cooler_right"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_shield_generator_right",
+    "displayName": "Right Shield Generator",
+    "positionLabel": "Right",
+    "equipmentGroup": "Shields",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-SHLD_SECO_S02_STOP_SCItem",
+    "resolvedItemIds": [
+      "component-SHLD_SECO_S02_STOP_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_shield_generator_right"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_life_support",
+    "displayName": "Life Support",
+    "equipmentGroup": "LifeSupport",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-LFSP_TYDT_S02_ComfortAirPlus",
+    "resolvedItemIds": [
+      "component-LFSP_TYDT_S02_ComfortAirPlus"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_life_support"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_relay_front",
+    "displayName": "Front Relay",
+    "positionLabel": "Front",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_2slot",
+    "resolvedItemIds": [
+      "component-RELAY_2slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_front"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_relay_rear",
+    "displayName": "Rear Relay",
+    "positionLabel": "Rear",
+    "equipmentGroup": "Relays",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": null,
+    "resolvedItemId": "component-RELAY_1slot",
+    "resolvedItemIds": [
+      "component-RELAY_1slot"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_relay_rear"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive",
+    "displayName": "Quantum Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-QDRV_TARS_S02_Odyssey_SCItem",
+    "resolvedItemIds": [
+      "component-QDRV_TARS_S02_Odyssey_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_quantum_drive"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+    "displayName": "Jump Drive",
+    "equipmentGroup": "QuantumDrive",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-JDRV_TARS_S02_Excelsior_SCItem",
+    "resolvedItemIds": [
+      "component-JDRV_TARS_S02_Excelsior_SCItem"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_jump_drive"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_radar",
+    "displayName": "Radar",
+    "equipmentGroup": "Radar",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": null,
+    "resolvedItemId": "component-RADR_WLOP_S02_Chernykh",
+    "resolvedItemIds": [
+      "component-RADR_WLOP_S02_Chernykh"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_radar"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_turret",
+    "displayName": "Turret",
+    "equipmentGroup": "Weapons",
+    "minSize": null,
+    "maxSize": null,
+    "mountItemId": null,
+    "resolvedItemId": null,
+    "resolvedItemIds": [],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_turret"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_right",
+    "displayName": "Right Weapon",
+    "positionLabel": "Right",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_right",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_left",
+    "displayName": "Left Weapon",
+    "positionLabel": "Left",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_weapon_left",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Right_Body_Weapon",
+    "displayName": "Right Body Weapon",
+    "positionLabel": "Right Body",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-GATS_BallisticGatling_S3",
+    "resolvedItemIds": [
+      "component-GATS_BallisticGatling_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_Right_Body_Weapon",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Left_Body_Weapon",
+    "displayName": "Left Body Weapon",
+    "positionLabel": "Left Body",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-GATS_BallisticGatling_S3",
+    "resolvedItemIds": [
+      "component-GATS_BallisticGatling_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_Left_Body_Weapon",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Right_Wing_Weapon",
+    "displayName": "Right Wing Weapon",
+    "positionLabel": "Right Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_Right_Wing_Weapon",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Left_Wing_Weapon",
+    "displayName": "Left Wing Weapon",
+    "positionLabel": "Left Wing",
+    "equipmentGroup": "Weapons",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-Mount_Gimbal_S3",
+    "resolvedItemId": "component-KLWE_LaserRepeater_S3",
+    "resolvedItemIds": [
+      "component-KLWE_LaserRepeater_S3"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_Left_Wing_Weapon",
+      "hardpoint_class_2"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01",
+    "displayName": "Left Pylon 01",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_Left_Pylon_01",
+      "missile_01_attach",
+      "hardpoint_Left_Pylon_01",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02",
+    "displayName": "Left Pylon 02",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_Left_Pylon_02",
+      "missile_01_attach",
+      "hardpoint_Left_Pylon_02",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03",
+    "displayName": "Left Pylon 03",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-MRCK_S04_BEHR_Quad_S02",
+    "resolvedItemId": "component-MISL_S02_CS_FSKI_Tempest",
+    "resolvedItemIds": [
+      "component-MISL_S02_CS_FSKI_Tempest"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 4,
+    "mountPath": [
+      "hardpoint_Left_Pylon_03",
+      "missile_01_attach",
+      "hardpoint_Left_Pylon_03",
+      "missile_02_attach",
+      "hardpoint_Left_Pylon_03",
+      "missile_03_attach",
+      "hardpoint_Left_Pylon_03",
+      "missile_04_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01",
+    "displayName": "Right Pylon 01",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_Right_Pylon_01",
+      "missile_01_attach",
+      "hardpoint_Right_Pylon_01",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02",
+    "displayName": "Right Pylon 02",
+    "equipmentGroup": "Missiles",
+    "minSize": 3,
+    "maxSize": 3,
+    "mountItemId": "component-MRCK_S04_BEHR_Dual_S03",
+    "resolvedItemId": "component-MISL_S03_CS_FSKI_Arrester",
+    "resolvedItemIds": [
+      "component-MISL_S03_CS_FSKI_Arrester"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 2,
+    "mountPath": [
+      "hardpoint_Right_Pylon_02",
+      "missile_01_attach",
+      "hardpoint_Right_Pylon_02",
+      "missile_02_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03",
+    "displayName": "Right Pylon 03",
+    "equipmentGroup": "Missiles",
+    "minSize": 2,
+    "maxSize": 2,
+    "mountItemId": "component-MRCK_S04_BEHR_Quad_S02",
+    "resolvedItemId": "component-MISL_S02_CS_FSKI_Tempest",
+    "resolvedItemIds": [
+      "component-MISL_S02_CS_FSKI_Tempest"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 4,
+    "mountPath": [
+      "hardpoint_Right_Pylon_03",
+      "missile_01_attach",
+      "hardpoint_Right_Pylon_03",
+      "missile_02_attach",
+      "hardpoint_Right_Pylon_03",
+      "missile_03_attach",
+      "hardpoint_Right_Pylon_03",
+      "missile_04_attach"
+    ]
+  },
+  {
+    "shipId": "cutlass-black-imported",
+    "portId": "cutlass-black-imported-port-/hardpoint_tractor_turret",
+    "displayName": "Tractor Turret",
+    "positionLabel": "Tractor",
+    "equipmentGroup": "Defense",
+    "minSize": 1,
+    "maxSize": 1,
+    "mountItemId": "component-DRAK_Cutlass_Remote_Turret",
+    "resolvedItemId": "component-GRIN_TractorBeam_S1",
+    "resolvedItemIds": [
+      "component-GRIN_TractorBeam_S1"
+    ],
+    "mixedChildItems": false,
+    "leafCount": 1,
+    "mountPath": [
+      "hardpoint_tractor_turret",
+      "turret_weapon"
     ]
   }
 ]

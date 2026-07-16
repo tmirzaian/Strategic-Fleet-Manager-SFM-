@@ -94,6 +94,72 @@
     ]
   },
   {
+    "id": "eclipse-imported-factory-loadout",
+    "shipId": "eclipse-imported",
+    "portAssignments": [
+      {
+        "portId": "eclipse-imported-port-/hardpoint_radar",
+        "componentId": "component-RADR_BLTR_S01_Pelerous"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_powerplant",
+        "componentId": "component-POWR_TYDT_S01_DeltaMax_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_cooler",
+        "componentId": "component-COOL_TYDT_S01_VaporBlock_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_cooler_2",
+        "componentId": "component-COOL_TYDT_S01_VaporBlock_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_quantum_drive",
+        "componentId": "component-QDRV_RACO_S01_Drift_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+        "componentId": "component-JDRV_TARS_S01_Explorer_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_shield_generator_A",
+        "componentId": "component-SHLD_ASAS_S01_Veil_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_shield_generator_B",
+        "componentId": "component-SHLD_ASAS_S01_Veil_SCItem"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_torpedorack",
+        "componentId": "component-MRCK_S09_AEGS_Eclipse"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_relay",
+        "componentId": "component-RELAY_2slot_slim"
+      },
+      {
+        "portId": "eclipse-imported-port-/hardpoint_lifesupport",
+        "componentId": "component-LFSP_TYDT_S01_ComfortAir"
+      }
+    ]
+  },
+  {
     "id": "gladius-imported-factory-loadout",
     "shipId": "gladius-imported",
     "portAssignments": [
@@ -200,6 +266,544 @@
       {
         "portId": "gladius-imported-port-/hardpoint_relay",
         "componentId": "component-RELAY_3slot"
+      }
+    ]
+  },
+  {
+    "id": "valkyrie-imported-factory-loadout",
+    "shipId": "valkyrie-imported",
+    "portAssignments": [
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_powerplant_left",
+        "componentId": "component-POWR_AEGS_S02_Maelstrom_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_powerplant_right",
+        "componentId": "component-POWR_AEGS_S02_Maelstrom_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_cooler_left",
+        "componentId": "component-COOL_AEGS_S02_Arctic_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_cooler_right",
+        "componentId": "component-COOL_AEGS_S02_Arctic_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_quantum_drive",
+        "componentId": "component-QDRV_TARS_S02_Odyssey_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+        "componentId": "component-JDRV_TARS_S02_Excelsior_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_shield_generator_left",
+        "componentId": "component-SHLD_GODI_S02_FullStop_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_shield_generator_right",
+        "componentId": "component-SHLD_GODI_S02_FullStop_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_radar",
+        "componentId": "component-RADR_CHCO_S02_Surveyor"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_pilot",
+        "componentId": "component-ANVL_Valkyrie_Nose_Turret_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_pilot/hardpoint_left",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_pilot/hardpoint_right",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left",
+        "componentId": "component-ANVL_Valkyrie_SCItem_Remote_Turret_Left"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left/turret_gun",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left/turret_gun/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S4"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right",
+        "componentId": "component-ANVL_Valkyrie_SCItem_Remote_Turret_Right"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right/turret_gun",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right/turret_gun/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S4"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_left",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_right",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_door_right",
+        "componentId": "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Right"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_door_right/weapon",
+        "componentId": "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_door_left",
+        "componentId": "component-WeaponMount_Gun_S1_ANVL_Asgard_Door_Left"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_turret_door_left/weapon",
+        "componentId": "component-GATS_BallisticGatling_Mounted_S1_DRAK_Cutlass_Steel"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_relay_01",
+        "componentId": "component-RELAY_3slot"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_relay_02",
+        "componentId": "component-RELAY_2slot"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_shield_03",
+        "componentId": "component-SHLD_GODI_S02_FullStop_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_shield_04",
+        "componentId": "component-SHLD_GODI_S02_FullStop_SCItem"
+      },
+      {
+        "portId": "valkyrie-imported-port-/hardpoint_lifesupport",
+        "componentId": "component-LFSP_TYDT_S01_ComfortAir"
+      }
+    ]
+  },
+  {
+    "id": "corsair-imported-factory-loadout",
+    "shipId": "corsair-imported",
+    "portAssignments": [
+      {
+        "portId": "corsair-imported-port-/hardpoint_power_plant_a",
+        "componentId": "component-POWR_SASU_S02_DayBreak_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_power_plant_b",
+        "componentId": "component-POWR_SASU_S02_DayBreak_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cooler_a",
+        "componentId": "component-COOL_JSPN_S02_FrostStarEX_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cooler_b",
+        "componentId": "component-COOL_JSPN_S02_FrostStarEX_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_shield_generator_a",
+        "componentId": "component-SHLD_BEHR_S03_5CA_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_quantum_drive",
+        "componentId": "component-QDRV_ARCC_S02_Torrent_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+        "componentId": "component-JDRV_TARS_S02_Excelsior_SCItem"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_radar",
+        "componentId": "component-RADR_WLOP_S02_Chernykh"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cheek_weapon_left",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cheek_weapon_left/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cheek_weapon_right",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_cheek_weapon_right/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_chin_weapon_right",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_chin_weapon_right/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_chin_weapon_left",
+        "componentId": "component-Mount_Gimbal_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_chin_weapon_left/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_weapon_wing_bottom",
+        "componentId": "component-Mount_Gimbal_S5"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_weapon_wing_bottom/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S5"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_weapon_wing_top",
+        "componentId": "component-Mount_Gimbal_S5"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_weapon_wing_top/hardpoint_class_2",
+        "componentId": "component-BEHR_LaserCannon_S5"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_tail_turret",
+        "componentId": "component-DRAK_Corsair_Remote_Turret_S4"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S2"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_relay_cockpit",
+        "componentId": "component-RELAY_2slot"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_relay_engineering",
+        "componentId": "component-RELAY_3slot"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_relay_hold",
+        "componentId": "component-RELAY_2slot"
+      },
+      {
+        "portId": "corsair-imported-port-/hardpoint_lifesupport",
+        "componentId": "component-LFSP_TYDT_S02_ComfortAirPlus"
+      }
+    ]
+  },
+  {
+    "id": "cutlass-black-imported-factory-loadout",
+    "shipId": "cutlass-black-imported",
+    "portAssignments": [
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_power_plant",
+        "componentId": "component-POWR_SASU_S02_DayBreak_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_cooler_left",
+        "componentId": "component-COOL_LPLT_S02_ColdSnap_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_cooler_right",
+        "componentId": "component-COOL_LPLT_S02_ColdSnap_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_shield_generator_right",
+        "componentId": "component-SHLD_SECO_S02_STOP_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_life_support",
+        "componentId": "component-LFSP_TYDT_S02_ComfortAirPlus"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_relay_front",
+        "componentId": "component-RELAY_2slot"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_relay_rear",
+        "componentId": "component-RELAY_1slot"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive",
+        "componentId": "component-QDRV_TARS_S02_Odyssey_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+        "componentId": "component-JDRV_TARS_S02_Excelsior_SCItem"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_radar",
+        "componentId": "component-RADR_WLOP_S02_Chernykh"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_right",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_right/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_left",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_left/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Body_Weapon",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Body_Weapon/hardpoint_class_2",
+        "componentId": "component-GATS_BallisticGatling_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Body_Weapon",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Body_Weapon/hardpoint_class_2",
+        "componentId": "component-GATS_BallisticGatling_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Wing_Weapon",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Wing_Weapon/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Wing_Weapon",
+        "componentId": "component-Mount_Gimbal_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Wing_Weapon/hardpoint_class_2",
+        "componentId": "component-KLWE_LaserRepeater_S3"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03",
+        "componentId": "component-MRCK_S04_BEHR_Quad_S02"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_01_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_02_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_03_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_04_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02",
+        "componentId": "component-MRCK_S04_BEHR_Dual_S03"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02/missile_01_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02/missile_02_attach",
+        "componentId": "component-MISL_S03_CS_FSKI_Arrester"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03",
+        "componentId": "component-MRCK_S04_BEHR_Quad_S02"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_01_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_02_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_03_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_04_attach",
+        "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_tractor_turret",
+        "componentId": "component-DRAK_Cutlass_Remote_Turret"
+      },
+      {
+        "portId": "cutlass-black-imported-port-/hardpoint_tractor_turret/turret_weapon",
+        "componentId": "component-GRIN_TractorBeam_S1"
       }
     ]
   }

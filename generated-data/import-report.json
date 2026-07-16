@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T22:51:36.789Z",
+  "generatedAt": "2026-07-16T16:19:58.453Z",
   "ships": [
     {
       "sourceFile": "raw-data\\AEGS Avenger Titan.json",
@@ -269,6 +269,190 @@
         "Port \"Left Wing Weapon Missile Rack\" mount size (3-3) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
         "Port \"Right Wing Weapon Missile Rack\" mount size (3-3) disagrees with its leaf port size (2-2) — leaf value used as authoritative."
       ],
+      "mixedMissileTypeWarnings": [],
+      "missingChildDefaults": []
+    },
+    {
+      "sourceFile": "raw-data\\AEGS Eclipse.json",
+      "shipId": "eclipse-imported",
+      "shipName": "Eclipse",
+      "portsIncluded": 15,
+      "componentsDiscovered": 11,
+      "assignmentsCreated": 15,
+      "warnings": 102,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "eclipse-imported-port-/hardpoint_radar",
+          "displayName": "Radar",
+          "internalName": "hardpoint_radar",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_radar"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_powerplant",
+          "displayName": "Power Plant",
+          "internalName": "hardpoint_powerplant",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_powerplant"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_cooler",
+          "displayName": "Cooler",
+          "internalName": "hardpoint_cooler",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_cooler_2",
+          "displayName": "Cooler 2",
+          "internalName": "hardpoint_cooler_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_2"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+          "displayName": "Jump Drive",
+          "internalName": "hardpoint_jump_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_shield_generator_A",
+          "displayName": "A Shield Generator",
+          "internalName": "hardpoint_shield_generator_A",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_A"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_shield_generator_B",
+          "displayName": "B Shield Generator",
+          "internalName": "hardpoint_shield_generator_B",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_B"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_torpedorack",
+          "displayName": "Torpedorack",
+          "internalName": "hardpoint_torpedorack",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_torpedorack"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_relay",
+          "displayName": "Relay",
+          "internalName": "hardpoint_relay",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay"
+          ]
+        },
+        {
+          "portId": "eclipse-imported-port-/hardpoint_lifesupport",
+          "displayName": "Life Support",
+          "internalName": "hardpoint_lifesupport",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_lifesupport"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [
+        "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_powerplant\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_A\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_B\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_torpedorack\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
+      ],
+      "conflicts": [],
       "mixedMissileTypeWarnings": [],
       "missingChildDefaults": []
     },
@@ -646,15 +830,1634 @@
           "pass": true
         }
       ]
+    },
+    {
+      "sourceFile": "raw-data\\ANVL Valkyrie.json",
+      "shipId": "valkyrie-imported",
+      "shipName": "Valkyrie",
+      "portsIncluded": 37,
+      "componentsDiscovered": 19,
+      "assignmentsCreated": 35,
+      "warnings": 236,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_powerplant_left",
+          "displayName": "Left Power Plant",
+          "internalName": "hardpoint_powerplant_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_powerplant_left"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_powerplant_right",
+          "displayName": "Right Power Plant",
+          "internalName": "hardpoint_powerplant_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_powerplant_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_cooler_left",
+          "displayName": "Left Cooler",
+          "internalName": "hardpoint_cooler_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_left"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_cooler_right",
+          "displayName": "Right Cooler",
+          "internalName": "hardpoint_cooler_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+          "displayName": "Jump Drive",
+          "internalName": "hardpoint_jump_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_shield_generator_left",
+          "displayName": "Left Shield Generator",
+          "internalName": "hardpoint_shield_generator_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_left"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_shield_generator_right",
+          "displayName": "Right Shield Generator",
+          "internalName": "hardpoint_shield_generator_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_radar",
+          "displayName": "Radar",
+          "internalName": "hardpoint_radar",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_radar"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_pilot",
+          "displayName": "Pilot Turret",
+          "internalName": "hardpoint_turret_pilot",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_turret_pilot",
+            "hardpoint_left",
+            "hardpoint_turret_pilot",
+            "hardpoint_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_pilot/hardpoint_left",
+          "displayName": "Left",
+          "internalName": "hardpoint_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_left"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_pilot/hardpoint_right",
+          "displayName": "Right",
+          "internalName": "hardpoint_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left",
+          "displayName": "Left Wing Weapon",
+          "internalName": "hardpoint_weapon_wing_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_wing_left",
+            "turret_gun",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left/turret_gun",
+          "displayName": "Gun Turret",
+          "internalName": "turret_gun",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "turret_gun"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_left/turret_gun/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right",
+          "displayName": "Right Wing Weapon",
+          "internalName": "hardpoint_weapon_wing_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_wing_right",
+            "turret_gun",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right/turret_gun",
+          "displayName": "Gun Turret",
+          "internalName": "turret_gun",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "turret_gun"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_weapon_wing_right/turret_gun/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_top",
+          "displayName": "Top Turret",
+          "internalName": "hardpoint_turret_top",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_turret_top"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_left",
+          "displayName": "Left Turret",
+          "internalName": "turret_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "turret_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_right",
+          "displayName": "Right Turret",
+          "internalName": "turret_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "turret_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_top/turret_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_bottom",
+          "displayName": "Bottom Turret",
+          "internalName": "hardpoint_turret_bottom",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_turret_bottom"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_bottom/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_door_right",
+          "displayName": "Right Door Turret",
+          "internalName": "hardpoint_turret_door_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_turret_door_right"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_door_right/weapon",
+          "displayName": "Weapon",
+          "internalName": "weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "weapon"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_door_left",
+          "displayName": "Left Door Turret",
+          "internalName": "hardpoint_turret_door_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_turret_door_left"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_turret_door_left/weapon",
+          "displayName": "Weapon",
+          "internalName": "weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "weapon"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_relay_01",
+          "displayName": "Relay 1",
+          "internalName": "hardpoint_relay_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_01"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_relay_02",
+          "displayName": "Relay 2",
+          "internalName": "hardpoint_relay_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_02"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_shield_03",
+          "displayName": "Shield 3",
+          "internalName": "hardpoint_shield_03",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_03"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_shield_04",
+          "displayName": "Shield 4",
+          "internalName": "hardpoint_shield_04",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_04"
+          ]
+        },
+        {
+          "portId": "valkyrie-imported-port-/hardpoint_lifesupport",
+          "displayName": "Life Support",
+          "internalName": "hardpoint_lifesupport",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_lifesupport"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [
+        "No allowedTypes provided for \"hardpoint_powerplant_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_powerplant_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_turret_pilot\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_wing_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"turret_gun\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_wing_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"turret_gun\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"turret_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"turret_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_turret_door_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_turret_door_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_01\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_03\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_04\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
+      ],
+      "conflicts": [
+        "Port \"Left Wing Weapon\" mount size (5-5) disagrees with its leaf port size (4-4) — leaf value used as authoritative.",
+        "Port \"Right Wing Weapon\" mount size (5-5) disagrees with its leaf port size (4-4) — leaf value used as authoritative."
+      ],
+      "mixedMissileTypeWarnings": [],
+      "missingChildDefaults": []
+    },
+    {
+      "sourceFile": "raw-data\\DRAK Corsair.json",
+      "shipId": "corsair-imported",
+      "shipName": "Corsair",
+      "portsIncluded": 51,
+      "componentsDiscovered": 18,
+      "assignmentsCreated": 49,
+      "warnings": 289,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "corsair-imported-port-/hardpoint_power_plant_a",
+          "displayName": "A Power Plant",
+          "internalName": "hardpoint_power_plant_a",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_power_plant_a"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_power_plant_b",
+          "displayName": "B Power Plant",
+          "internalName": "hardpoint_power_plant_b",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_power_plant_b"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cooler_a",
+          "displayName": "A Cooler",
+          "internalName": "hardpoint_cooler_a",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_a"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cooler_b",
+          "displayName": "B Cooler",
+          "internalName": "hardpoint_cooler_b",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_b"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_shield_generator_a",
+          "displayName": "A Shield Generator",
+          "internalName": "hardpoint_shield_generator_a",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_a"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+          "displayName": "Jump Drive",
+          "internalName": "hardpoint_jump_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_left",
+          "displayName": "Left Manned Turret",
+          "internalName": "hardpoint_manned_turret_left",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_manned_turret_left"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_left/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_right",
+          "displayName": "Right Manned Turret",
+          "internalName": "hardpoint_manned_turret_right",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_manned_turret_right"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_manned_turret_right/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_radar",
+          "displayName": "Radar",
+          "internalName": "hardpoint_radar",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_radar"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cheek_weapon_left",
+          "displayName": "Left Cheek Weapon",
+          "internalName": "hardpoint_cheek_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cheek_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cheek_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cheek_weapon_right",
+          "displayName": "Right Cheek Weapon",
+          "internalName": "hardpoint_cheek_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cheek_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_cheek_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_chin_weapon_right",
+          "displayName": "Right Chin Weapon",
+          "internalName": "hardpoint_chin_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_chin_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_chin_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_chin_weapon_left",
+          "displayName": "Left Chin Weapon",
+          "internalName": "hardpoint_chin_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_chin_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_chin_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_weapon_wing_bottom",
+          "displayName": "Bottom Wing Weapon",
+          "internalName": "hardpoint_weapon_wing_bottom",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_wing_bottom",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_weapon_wing_bottom/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_weapon_wing_top",
+          "displayName": "Top Wing Weapon",
+          "internalName": "hardpoint_weapon_wing_top",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_wing_top",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_weapon_wing_top/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_tail_turret",
+          "displayName": "Tail Turret",
+          "internalName": "hardpoint_tail_turret",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_tail_turret",
+            "hardpoint_weapon_left",
+            "hardpoint_class_2",
+            "hardpoint_tail_turret",
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_tail_turret/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a",
+          "displayName": "Right Wing Mount A Missile",
+          "internalName": "hardpoint_wing_right_missile_mount_a",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_wing_right_missile_mount_a",
+            "missile_01_attach",
+            "hardpoint_wing_right_missile_mount_a",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_a/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b",
+          "displayName": "Right Wing Mount B Missile",
+          "internalName": "hardpoint_wing_right_missile_mount_b",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_wing_right_missile_mount_b",
+            "missile_01_attach",
+            "hardpoint_wing_right_missile_mount_b",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_b/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c",
+          "displayName": "Right Wing Mount C Missile",
+          "internalName": "hardpoint_wing_right_missile_mount_c",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_wing_right_missile_mount_c",
+            "missile_01_attach",
+            "hardpoint_wing_right_missile_mount_c",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_c/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d",
+          "displayName": "Right Wing Mount D Missile",
+          "internalName": "hardpoint_wing_right_missile_mount_d",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_wing_right_missile_mount_d",
+            "missile_01_attach",
+            "hardpoint_wing_right_missile_mount_d",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_wing_right_missile_mount_d/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_relay_cockpit",
+          "displayName": "Cockpit Relay",
+          "internalName": "hardpoint_relay_cockpit",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_cockpit"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_relay_engineering",
+          "displayName": "Engineering Relay",
+          "internalName": "hardpoint_relay_engineering",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_engineering"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_relay_hold",
+          "displayName": "Hold Relay",
+          "internalName": "hardpoint_relay_hold",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_hold"
+          ]
+        },
+        {
+          "portId": "corsair-imported-port-/hardpoint_lifesupport",
+          "displayName": "Life Support",
+          "internalName": "hardpoint_lifesupport",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_lifesupport"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [
+        "No allowedTypes provided for \"hardpoint_power_plant_a\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_power_plant_b\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_a\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_b\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_a\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cheek_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cheek_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_chin_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_chin_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_wing_bottom\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_wing_top\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_tail_turret\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_wing_right_missile_mount_a\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_wing_right_missile_mount_b\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_wing_right_missile_mount_c\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_wing_right_missile_mount_d\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_cockpit\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_engineering\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_hold\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
+      ],
+      "conflicts": [
+        "Port \"Tail Turret\" mount size (4-4) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
+        "Port \"Right Wing Mount A Missile\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Right Wing Mount B Missile\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Right Wing Mount C Missile\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Right Wing Mount D Missile\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative."
+      ],
+      "mixedMissileTypeWarnings": [],
+      "missingChildDefaults": []
+    },
+    {
+      "sourceFile": "raw-data\\DRAK Cutlass Black.json",
+      "shipId": "cutlass-black-imported",
+      "shipName": "Cutlass Black",
+      "portsIncluded": 47,
+      "componentsDiscovered": 18,
+      "assignmentsCreated": 46,
+      "warnings": 270,
+      "errors": 0,
+      "portSources": [
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_power_plant",
+          "displayName": "Power Plant",
+          "internalName": "hardpoint_power_plant",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_power_plant"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_cooler_left",
+          "displayName": "Left Cooler",
+          "internalName": "hardpoint_cooler_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_left"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_cooler_right",
+          "displayName": "Right Cooler",
+          "internalName": "hardpoint_cooler_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_cooler_right"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_shield_generator_right",
+          "displayName": "Right Shield Generator",
+          "internalName": "hardpoint_shield_generator_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_shield_generator_right"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_life_support",
+          "displayName": "Life Support",
+          "internalName": "hardpoint_life_support",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_life_support"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_relay_front",
+          "displayName": "Front Relay",
+          "internalName": "hardpoint_relay_front",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_front"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_relay_rear",
+          "displayName": "Rear Relay",
+          "internalName": "hardpoint_relay_rear",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_relay_rear"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive",
+          "displayName": "Quantum Drive",
+          "internalName": "hardpoint_quantum_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_drive"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
+          "displayName": "Jump Drive",
+          "internalName": "hardpoint_jump_drive",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_radar",
+          "displayName": "Radar",
+          "internalName": "hardpoint_radar",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_radar"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_turret",
+          "displayName": "Turret",
+          "internalName": "hardpoint_turret",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_turret"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_right",
+          "displayName": "Right Weapon",
+          "internalName": "hardpoint_weapon_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_right",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_right/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_left",
+          "displayName": "Left Weapon",
+          "internalName": "hardpoint_weapon_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_left",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_turret/hardpoint_weapon_left/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Body_Weapon",
+          "displayName": "Right Body Weapon",
+          "internalName": "hardpoint_Right_Body_Weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Right_Body_Weapon",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Body_Weapon/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Body_Weapon",
+          "displayName": "Left Body Weapon",
+          "internalName": "hardpoint_Left_Body_Weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Left_Body_Weapon",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Body_Weapon/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Wing_Weapon",
+          "displayName": "Right Wing Weapon",
+          "internalName": "hardpoint_Right_Wing_Weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Right_Wing_Weapon",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Wing_Weapon/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Wing_Weapon",
+          "displayName": "Left Wing Weapon",
+          "internalName": "hardpoint_Left_Wing_Weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Left_Wing_Weapon",
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Wing_Weapon/hardpoint_class_2",
+          "displayName": "Class 2",
+          "internalName": "hardpoint_class_2",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01",
+          "displayName": "Left Pylon 01",
+          "internalName": "hardpoint_Left_Pylon_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Left_Pylon_01",
+            "missile_01_attach",
+            "hardpoint_Left_Pylon_01",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_01/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02",
+          "displayName": "Left Pylon 02",
+          "internalName": "hardpoint_Left_Pylon_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Left_Pylon_02",
+            "missile_01_attach",
+            "hardpoint_Left_Pylon_02",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_02/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03",
+          "displayName": "Left Pylon 03",
+          "internalName": "hardpoint_Left_Pylon_03",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Left_Pylon_03",
+            "missile_01_attach",
+            "hardpoint_Left_Pylon_03",
+            "missile_02_attach",
+            "hardpoint_Left_Pylon_03",
+            "missile_03_attach",
+            "hardpoint_Left_Pylon_03",
+            "missile_04_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_03_attach",
+          "displayName": "03 Attach Missile",
+          "internalName": "missile_03_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_03_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Left_Pylon_03/missile_04_attach",
+          "displayName": "04 Attach Missile",
+          "internalName": "missile_04_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_04_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01",
+          "displayName": "Right Pylon 01",
+          "internalName": "hardpoint_Right_Pylon_01",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Right_Pylon_01",
+            "missile_01_attach",
+            "hardpoint_Right_Pylon_01",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_01/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02",
+          "displayName": "Right Pylon 02",
+          "internalName": "hardpoint_Right_Pylon_02",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Right_Pylon_02",
+            "missile_01_attach",
+            "hardpoint_Right_Pylon_02",
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_02/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03",
+          "displayName": "Right Pylon 03",
+          "internalName": "hardpoint_Right_Pylon_03",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_Right_Pylon_03",
+            "missile_01_attach",
+            "hardpoint_Right_Pylon_03",
+            "missile_02_attach",
+            "hardpoint_Right_Pylon_03",
+            "missile_03_attach",
+            "hardpoint_Right_Pylon_03",
+            "missile_04_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_01_attach",
+          "displayName": "01 Attach Missile",
+          "internalName": "missile_01_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_01_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_02_attach",
+          "displayName": "02 Attach Missile",
+          "internalName": "missile_02_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_02_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_03_attach",
+          "displayName": "03 Attach Missile",
+          "internalName": "missile_03_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_03_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_Right_Pylon_03/missile_04_attach",
+          "displayName": "04 Attach Missile",
+          "internalName": "missile_04_attach",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "missile_04_attach"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_tractor_turret",
+          "displayName": "Tractor Turret",
+          "internalName": "hardpoint_tractor_turret",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_tractor_turret",
+            "turret_weapon"
+          ]
+        },
+        {
+          "portId": "cutlass-black-imported-port-/hardpoint_tractor_turret/turret_weapon",
+          "displayName": "Weapon Turret",
+          "internalName": "turret_weapon",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "turret_weapon"
+          ]
+        }
+      ],
+      "unresolvedConstraints": [
+        "No allowedTypes provided for \"hardpoint_power_plant\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_cooler_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_shield_generator_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_life_support\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_front\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_relay_rear\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_right\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Right_Body_Weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Left_Body_Weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Right_Wing_Weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Left_Wing_Weapon\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Left_Pylon_01\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Left_Pylon_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Left_Pylon_03\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_03_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Right_Pylon_01\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Right_Pylon_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_Right_Pylon_03\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_03_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_tractor_turret\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"turret_weapon\" — left unconstrained rather than guessed."
+      ],
+      "conflicts": [
+        "Port \"Left Pylon 01\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Left Pylon 02\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Left Pylon 03\" mount size (4-4) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
+        "Port \"Right Pylon 01\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Right Pylon 02\" mount size (4-4) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
+        "Port \"Right Pylon 03\" mount size (4-4) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
+        "Port \"Tractor Turret\" mount size (4-4) disagrees with its leaf port size (1-1) — leaf value used as authoritative."
+      ],
+      "mixedMissileTypeWarnings": [],
+      "missingChildDefaults": []
     }
   ],
-  "totalWarnings": 250,
+  "totalWarnings": 1147,
   "totalErrors": 0,
   "images": {
     "resolved": 0,
     "manual": 12,
     "preservedExisting": 12,
-    "fallback": 2,
+    "fallback": 6,
     "failed": 0,
     "ambiguous": 0
   }
