@@ -14,14 +14,13 @@ afterEach(() => {
 describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canonical registry', () => {
   it('1/2. a fresh seed initialization resolves Cutlass Red through shipImageRegistry.ts, not just src/data/seed.ts', async () => {
     const { useFleetStore } = await import('../useFleetStore')
-    const seedRaw = seedShips.find((s) => s.id === 'cutlass-red')!
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'cutlass-red')!
     expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS['cutlass-red'])
-    // Today the seed-baked value and the registry value are identical by
-    // design (the registry was migrated verbatim from the same URL) — this
-    // does not by itself prove the registry is actually consulted. The
-    // mocked-registry test below proves that independently.
-    expect(seedRaw.imageUrl).toBe(SHIP_IMAGE_URLS['cutlass-red'])
+    // EWO-038: the registry is now authoritatively sourced from the
+    // Commander RSI workbook, which supersedes the seed file's own
+    // hand-baked legacy value — the two are no longer expected to match
+    // (see test 15 below, which mocks the registry to prove it is
+    // genuinely consulted rather than depending on this coincidence).
   })
 
   it("3. a second seed hull (Ghost) proves the behavior is general, not special-cased to Cutlass Red", async () => {

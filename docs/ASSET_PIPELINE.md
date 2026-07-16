@@ -272,6 +272,83 @@ input to the **offline** import pipeline (`npm run import:ships`,
 id. It is not read by any runtime page/component and is not this
 mission's registry — see both files' headers for the full distinction.
 
+### EWO-038 — Commander RSI Ship Image Registry import/maintenance pipeline
+
+`src/data/shipImageRegistry.ts` is now a **generated file** — it is
+regenerated deterministically from a Commander-maintained CSV, and must
+never be hand-edited again (its own header says the same). The tooling
+lives entirely under `scripts/shipImages/` and never downloads, stores,
+or redistributes any RSI image binary — only URL strings.
+
+**Commander maintenance workflow (the only file the Commander ever edits):**
+
+1. Open `data-maintenance/ship-images/ship-image-master.csv` in Excel or
+   Google Sheets.
+2. Find the ship by `manufacturer` and `ship_name`.
+3. Paste the official RSI image URL into that row's `rsi_image_url`
+   column. Leave it blank to intentionally use the universal fallback.
+4. Save the CSV.
+5. Run `npm run ship-images:generate`.
+6. Review the printed retained/replaced/added/removed counts.
+7. Refresh SFM.
+
+**Regenerating the CSV itself** (e.g. after CIG adds new ships and a
+fresh `npm run generate:ship-catalog` run picks them up): re-run
+`npm run ship-images:import:xlsx`. It rebuilds the CSV from the current
+258+ canonical hull list, but every row's existing `rsi_image_url` —
+whether it came from a prior workbook import or the Commander typed it
+directly into the CSV — is preserved untouched; only a genuinely new
+canonical hull gets added as a blank row, and a hull that disappeared is
+reported as an orphan rather than silently dropped.
+
+**Pipeline commands** (`scripts/shipImages/cli.ts`, run via `vite-node`
+since it needs `selectableShipDefinitions`, same constraint as
+`scripts/goldenFleet/`):
+
+- `npm run ship-images:import:xlsx` — reads
+  `data-maintenance/ship-images/Commander RSI URL Master.xlsx` (the
+  original Commander source workbook — 221 rows, columns A/B, no
+  header), matches every row against the canonical hull list, and
+  writes/updates `ship-image-master.csv` plus
+  `ship-image-import-report.json`. Never touches the runtime registry.
+- `npm run ship-images:generate` — reads the maintenance CSV (the
+  Commander's current state, not the workbook) and regenerates
+  `src/data/shipImageRegistry.ts` deterministically, plus the report's
+  registry diff. Exits non-zero on a duplicate registry key.
+- `npm run ship-images:check` — the dry-run/validation report: runs the
+  full validate → match → diff pipeline and prints it, writing nothing.
+  Exits non-zero if any malformed URL or unsafe duplicate registry key
+  would otherwise reach the registry.
+
+**Matching** (`scripts/shipImages/matcher.ts`) uses a controlled
+precedence — exact name, then whitespace/case/manufacturer-prefix/
+known-alias normalization, then a superseded-definition alias lookup,
+then a small explicit manual-review override table — never broad fuzzy
+matching, so legitimate variants (600i Explorer vs 600i Touring,
+Hercules A2/C2/M2, Cutlass Black vs Red, ...) can never collapse into
+each other. A name matching more than one canonical hull is classified
+`AMBIGUOUS` and is never written into the registry; a name matching none
+is `UNMATCHED` and reported, never invented.
+
+**Duplicate canonical identity** — the pre-existing Prospector/
+MISC_Prospector and Starlite/MISC_Starlite pairs (see
+`docs/OPERATION_GOLDEN_FLEET.md`) are accounted for explicitly
+(`scripts/shipImages/duplicateCanonicalPairs.ts`): the image resolves
+only to the preferred completeness-ranked winner (`prospector`/
+`starlite`); the catalog-only lesser sibling never receives its own
+duplicated registry entry. This mission does not implement the pending
+GF-002D identity merge.
+
+As of the initial EWO-038 import: 221 workbook rows, 214 matched into
+the runtime registry (16 exact, 198 normalized, 0 via alias), 7 rows with
+no canonical counterpart today (ATLS, ATLS GEO, Basher, MOLE Carbon
+Edition, MOLE Talus Edition, Mustang Alpha Vindicator, Pitbull — reported,
+never invented), 0 ambiguous, 0 malformed URLs. 214 of 258 canonical
+hulls (82.9%) now resolve a real registry image; the remaining 44 use the
+universal fallback (see `ship-image-import-report.json` for the exact
+list — no "flight ready" field exists in current repository data to
+filter that list by CIG production status).
+
 ### EWO-033A — fit mode and fallback presentation
 
 Both a registered real image and the universal fallback now render with

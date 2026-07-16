@@ -1,8 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
 import { SHIP_IMAGE_URLS } from '../shipImageRegistry'
 import { shipImageOverrides } from '../shipImageOverrides'
+import { selectableShipDefinitions, presentationImageKeyById } from '../shipDefinitions'
+import { resolveShipImage, validRegistryUrl } from '../../utils/resolveShipImage'
+import { useFleetStore } from '../../store/useFleetStore'
+
+const initialState = useFleetStore.getState()
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+})
 
 /** Every .ts/.tsx file directly under src/pages and src/components — not
  * src/data or src/config/assets, which are allowed to hold the actual
@@ -48,6 +57,80 @@ describe('EWO-021A (Task 9): single source of truth for ship image URLs', () => 
 
   it('partial coverage is valid — most canonical ids intentionally have no entry, and that must never throw at import time', () => {
     expect(() => Object.keys(SHIP_IMAGE_URLS)).not.toThrow()
-    expect(SHIP_IMAGE_URLS.AEGS_Eclipse).toBeUndefined()
+    // EWO-038: the Commander workbook covers 214 of 258 canonical hulls;
+    // AEGS_Javelin (a capital ship absent from that workbook) is a real,
+    // stable example still on fallback today.
+    expect(SHIP_IMAGE_URLS.AEGS_Javelin).toBeUndefined()
+  })
+})
+
+/**
+ * EWO-033A (Task 9/10) — Registry Integrity & Image Coverage Audit. A
+ * "duplicate literal key" (item 11) is already a TypeScript compile error
+ * for an object literal, so the real, checkable risk is an *orphan* key —
+ * a Commander-pasted id that no longer (or never did) match any canonical
+ * ship definition, silently doing nothing. Computed live against the real
+ * current registry/definitions, not a point-in-time snapshot, so this
+ * fails loudly if a future catalog regeneration ever orphans an entry.
+ */
+describe('EWO-033A (Task 9/10): registry integrity and image coverage audit', () => {
+  it('10. every registry key matches a real canonical selectable ship definition id, or a definition\'s own alias key — no orphans', () => {
+    const knownIds = new Set([
+      ...selectableShipDefinitions.map((d) => d.id),
+      ...Array.from(presentationImageKeyById.values()),
+    ])
+    const orphanKeys = Object.keys(SHIP_IMAGE_URLS).filter((k) => !knownIds.has(k))
+    expect(orphanKeys).toEqual([])
+  })
+
+  it('11. the registry object has no duplicate keys — key count matches unique key count', () => {
+    const keys = Object.keys(SHIP_IMAGE_URLS)
+    expect(new Set(keys).size).toBe(keys.length)
+  })
+
+  it('12. partial image coverage never throws when auditing the full canonical hull registry', () => {
+    expect(() => {
+      for (const d of selectableShipDefinitions) resolveShipImage({ id: d.id, imageUrl: d.imageUrl, image: d.image })
+    }).not.toThrow()
+  })
+
+  it('Task 9 coverage report: total hulls, registry hits, and fallback count are all real, non-negative numbers that sum correctly', () => {
+    let registryHit = 0
+    let fallback = 0
+    for (const d of selectableShipDefinitions) {
+      const direct = validRegistryUrl(SHIP_IMAGE_URLS[d.id])
+      const aliasKey = presentationImageKeyById.get(d.id)
+      const viaAlias = aliasKey ? validRegistryUrl(SHIP_IMAGE_URLS[aliasKey]) : undefined
+      if (direct || viaAlias) {
+        registryHit++
+      } else if (!resolveShipImage({ id: d.id, imageUrl: d.imageUrl, image: d.image })) {
+        fallback++
+      }
+    }
+    expect(registryHit).toBeGreaterThan(0) // EWO-038: 214 Commander-workbook-imported entries
+    expect(registryHit + fallback).toBeLessThanOrEqual(selectableShipDefinitions.length)
+  })
+})
+
+describe('EWO-033A (Task 10, item 6/7): live store resolution — seed and deep-import Fleet Assets', () => {
+  it('6. a seed Fleet Asset resolves its imageUrl through the registry at store construction time', () => {
+    const ghost = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    expect(ghost.imageUrl).toBe(SHIP_IMAGE_URLS.ghost)
+  })
+
+  it('7. a deep-import Fleet Asset (materialized via Add Ship) resolves through the registry via its entity-class alias', () => {
+    const result = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', undefined, 99)
+    if (!result.success) return // generated catalog not present on this machine
+    const asset = useFleetStore.getState().ships.find((s) => s.id === result.assetId)!
+    expect(asset.imageUrl).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
+  })
+
+  it('a manually-added ship with no registry entry resolves to no image (fallback territory), never throws', () => {
+    // EWO-038: AEGS_Javelin is absent from the Commander workbook and has
+    // no registry entry today (see the coverage test above).
+    const result = useFleetStore.getState().addFleetAsset('AEGS_Javelin', 'OWNED', undefined, 99)
+    if (!result.success) return
+    const asset = useFleetStore.getState().ships.find((s) => s.id === result.assetId)!
+    expect(asset.imageUrl).toBeUndefined()
   })
 })

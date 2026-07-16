@@ -20,14 +20,19 @@ afterEach(() => {
 /**
  * EWO-033A (Task 12) — Manual Commander Validation, driven end-to-end
  * against the real `App` router and the seed fleet's own registry data
- * (Cutlass Black and 135c both have real, registered images; Eclipse and
- * Gladius are deep-imported-only with no registry entry, exercising the
- * fallback). No browser-automation tooling is available in this
- * environment (disclosed consistently across every mission this session)
- * — this substitutes for an actual resized-browser session.
+ * (Cutlass Black and 135c both have real, registered images). No
+ * browser-automation tooling is available in this environment (disclosed
+ * consistently across every mission this session) — this substitutes for
+ * an actual resized-browser session.
+ *
+ * EWO-038 note: the Commander RSI workbook import now covers every
+ * deep-imported hull (including Eclipse and Gladius), so the fallback
+ * scenario below is simulated via `vi.doMock` (temporarily removing one
+ * hull's registry entry) rather than relying on a real hull that happens
+ * to still be uncovered — that set only shrinks as coverage improves.
  */
 describe('EWO-033A (Task 12): Commander flow — ship image coverage and universal fallback', () => {
-  it('1-6. Fleet Dashboard and Mission Control show real registered images for Cutlass Black/135c and the universal fallback for Eclipse/Gladius, identically', () => {
+  it('1-6. Fleet Dashboard and Mission Control show real registered images for Cutlass Black/135c, identically', () => {
     render(
       <MemoryRouter initialEntries={['/fleet']}>
         <App />
@@ -76,7 +81,7 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
     expect(mcImg.className).toBe(fdImgClass)
   })
 
-  it('7-10. Cutlass Black Ship Detail shows a full-bleed real hero; Eclipse Ship Detail fills the hero via the fallback without excessive unused space', () => {
+  it('7-10. Cutlass Black Ship Detail shows a full-bleed real hero; a hull with no registry entry fills the hero via the fallback without excessive unused space', async () => {
     render(
       <MemoryRouter initialEntries={['/ship/cutlass-black']}>
         <App />
@@ -87,9 +92,19 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
     const realHeroClass = realHero.className
     cleanup()
 
+    // EWO-038: every deep-imported hull (including Eclipse) now has a real
+    // Commander-workbook registry entry, so the fallback scenario this test
+    // exercises is simulated the same way test 11-13 simulates a bad URL —
+    // via vi.doMock — rather than depending on which hull happens to be
+    // uncovered today (that set only shrinks as coverage improves).
+    vi.resetModules()
+    vi.doMock('../data/shipImageRegistry', () => ({
+      SHIP_IMAGE_URLS: { ...SHIP_IMAGE_URLS, AEGS_Eclipse: undefined },
+    }))
+    const { default: NoRegistryApp } = await import('../App')
     render(
       <MemoryRouter initialEntries={['/ship/eclipse-imported']}>
-        <App />
+        <NoRegistryApp />
       </MemoryRouter>
     )
     expect(screen.getByTestId('ship-hero-metadata-band')).toBeInTheDocument()
@@ -137,7 +152,13 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
   })
 
   it('14-17. adding a real Commander-supplied URL for a previously-unregistered hull takes effect immediately and remains stable after a simulated restart', async () => {
-    expect(SHIP_IMAGE_URLS.AEGS_Eclipse).toBeUndefined()
+    // EWO-038: Eclipse itself is now covered by the real Commander
+    // workbook, so "previously unregistered" is simulated the same way
+    // test 7-10 does — this test's own real subject is the mechanism
+    // (an edit takes effect immediately and survives a reload), not
+    // whether Eclipse specifically still lacks an entry today.
+    const registryWithoutEclipse = { ...SHIP_IMAGE_URLS, AEGS_Eclipse: undefined } as Record<string, string | undefined>
+    expect(registryWithoutEclipse.AEGS_Eclipse).toBeUndefined()
 
     // 14/15. Simulate adding one new line to shipImageRegistry.ts, then a
     // normal dev-cycle reload (fresh module + store construction). Uses a
@@ -147,7 +168,7 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
     // Commander-facing Ship Detail path real owned ships render through.
     vi.resetModules()
     vi.doMock('../data/shipImageRegistry', () => ({
-      SHIP_IMAGE_URLS: { ...SHIP_IMAGE_URLS, AEGS_Eclipse: 'https://media.robertsspaceindustries.com/test-commander-added/slideshow.jpg' },
+      SHIP_IMAGE_URLS: { ...registryWithoutEclipse, AEGS_Eclipse: 'https://media.robertsspaceindustries.com/test-commander-added/slideshow.jpg' },
     }))
     const { default: FirstApp } = await import('../App')
     const { useFleetStore: firstStore } = await import('../store/useFleetStore')
