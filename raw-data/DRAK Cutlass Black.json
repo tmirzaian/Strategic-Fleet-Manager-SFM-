@@ -1,0 +1,1396 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.DRAK_Cutlass_Black",
+    "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Black.cga"
+  },
+  "root_nmc": [
+    {"node": "Body", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,6.8544],[0.0000,0.0000,1.0000,-0.5923]], "props": {"detach": "False", "class": "AnimatedJoint", "node": "Part"}},
+    {"node": "RTT_Text_To_Decal_VIN", "type": 0, "bone_to_world": [[1.0000,0.0000,-0.0000,0.0003],[-0.0000,1.0000,-0.0000,5.2534],[0.0000,0.0000,1.0000,-1.5507]]},
+    {"node": "Wing_Left", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,-5.7880],[0.0000,1.0000,-0.0000,-0.1434],[-0.0000,0.0000,1.0000,-1.8001]], "props": {"class": "AnimatedJoint", "detach": "True", "node": "Part"}},
+    {"node": "Wing_Right", "type": 0, "bone_to_world": [[1.0000,-0.0000,0.0000,5.7680],[0.0000,1.0000,0.0000,-0.1434],[-0.0000,-0.0000,1.0000,-1.8001]], "props": {"detach": "True", "node": "Part", "class": "AnimatedJoint"}},
+    {"node": "Canopy", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,6.0152],[-0.0000,0.0000,1.0000,0.6903]], "props": {"class": "AnimatedJoint", "detach": "False", "node": "Part"}},
+    {"node": "Tail", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,0.0009],[0.0000,1.0000,-0.0000,-16.0806],[-0.0000,0.0000,1.0000,0.0030]], "props": {"class": "AnimatedJoint", "detach": "False", "node": "Part"}},
+    {"node": "RTT_Text_To_Decal_VIN05", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,0.0054],[0.0000,1.0000,0.0000,-6.7897],[0.0000,0.0000,1.0000,4.2012]]},
+    {"node": "RTT_Text_To_Decal_VIN02", "type": 0, "bone_to_world": [[-1.0000,-0.0000,-0.0000,0.0089],[0.0000,-0.9063,-0.4226,9.7925],[0.0000,-0.4226,0.9063,-3.3628]]},
+    {"node": "RTT_Text_To_Decal", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,0.0030],[0.0000,1.0000,0.0000,2.9759],[0.0000,0.0000,1.0000,2.6942]]},
+    {"node": "Thruster_Main_Base_Left", "type": 0, "bone_to_world": [[1.0000,0.0000,-0.0000,-6.7575],[0.0000,1.0000,0.0000,-2.5067],[0.0000,-0.0000,1.0000,1.8580]], "props": {"node": "Part", "detach": "False", "class": "AnimatedJoint"}},
+    {"node": "Thruster_Main_Base_Right", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,7.2317],[0.0000,1.0000,0.0000,-2.5067],[0.0000,0.0000,1.0000,2.0631]], "props": {"detach": "False", "node": "Part", "class": "AnimatedJoint"}},
+    {"node": "Missile_Housing_Right", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,3.0969],[0.0000,1.0000,0.0000,-3.3003],[0.0000,0.0000,1.0000,3.1796]], "props": {"node": "Part", "class": "AnimatedJoint", "detach": "True"}},
+    {"node": "Missile_Housing_Left", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,-3.0974],[0.0000,1.0000,0.0000,-3.3003],[0.0000,0.0000,1.0000,3.1796]], "props": {"node": "Part", "class": "AnimatedJoint", "detach": "True"}},
+    {"node": "Thruster_Main_Right", "type": 0, "bone_to_world": [[1.0000,0.0000,-0.0000,3.5802],[0.0000,1.0000,0.0000,-0.3213],[0.0000,-0.0000,1.0000,0.2011]], "props": {"class": "AnimatedJoint", "detach": "True", "node": "Part"}},
+    {"node": "RTT_Text_To_Decal_VIN04", "type": 0, "bone_to_world": [[1.0000,-0.0000,0.0000,1.8377],[0.0000,1.0000,-0.0000,-0.4367],[0.0000,0.0000,1.0000,-1.2230]]},
+    {"node": "Thruster_Main_Left", "type": 0, "bone_to_world": [[1.0000,-0.0000,0.0000,-3.8856],[0.0000,1.0000,-0.0000,-0.3213],[0.0000,0.0000,1.0000,0.4061]], "props": {"node": "Part", "class": "AnimatedJoint", "detach": "True"}},
+    {"node": "RTT_Text_To_Decal_VIN03", "type": 0, "bone_to_world": [[1.0000,0.0000,0.0000,-2.0057],[0.0000,1.0000,0.0000,-0.4367],[0.0000,0.0000,1.0000,-1.2230]]},
+    {"node": "Wing_Right_Mount", "type": 0, "bone_to_world": [[1.0000,0.0000,-0.0000,-5.7680],[0.0000,1.0000,0.0000,6.1587],[0.0000,-0.0000,1.0000,2.4908]]},
+    {"node": "Wing_Left_Mount", "type": 0, "bone_to_world": [[1.0000,-0.0000,0.0000,5.7680],[0.0000,1.0000,-0.0000,6.1588],[0.0000,0.0000,1.0000,2.4908]]},
+    {"node": "DRAK_Cutlass_Black", "type": 3, "props": {"class": "Animated", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_lights_ext", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1189],[0.0000,1.0000,-0.0000,-4.7309],[-0.0000,0.0000,1.0000,2.7201]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "landingpad_helper", "type": 3, "bone_to_world": [[1.0000,-0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,0.0000],[-0.0000,-0.0000,1.0000,-6.4632]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "gascloud_contrail_dust_big_turret", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.0000],[0.0000,0.9925,0.1219,-3.7606],[-0.0000,-0.1219,0.9925,3.7829]]},
+    {"node": "gascloud_contrail_dust_fins_cutlass", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-6.8544],[-0.0000,0.0000,1.0000,0.5923]]},
+    {"node": "hardpoint_bed_cockpit", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,2.4750],[0.0000,1.0000,-0.0000,-4.9514],[-0.0000,0.0000,1.0000,-1.3067]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_cockpit_audio", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0095],[0.0000,1.0000,-0.0000,4.3956],[-0.0000,0.0000,1.0000,0.0923]]},
+    {"node": "hardpoint_cockpit_flair_hang", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-0.7120],[0.0000,1.0000,-0.0000,5.8266],[-0.0000,0.0000,1.0000,1.0673]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_controller_comms", "type": 2, "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_controller_door", "type": 2, "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_controller_light", "type": 2, "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_controller_missile", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-6.8544],[-0.0000,0.0000,1.0000,0.5923]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_controller_weapon_copilot", "type": 2, "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_copilot_seat", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,-0.0000,3.5216],[-0.0000,0.0000,1.0000,-1.7967]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_deathmask", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-7.0170],[-0.0000,0.0000,1.0000,0.5923]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_docking_collar", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-6.8544],[-0.0000,0.0000,1.0000,0.5923]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_int_body", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0120],[0.0000,1.0000,-0.0000,-15.4614],[-0.0000,0.0000,1.0000,-2.7397]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_int_cockpit", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0095],[0.0000,1.0000,-0.0000,3.8146],[-0.0000,0.0000,1.0000,0.0833]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_Landing_Gear_Front", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0095],[0.0000,1.0000,-0.0000,2.8709],[-0.0000,0.0000,1.0000,-3.1021]]},
+    {"node": "hardpoint_Left_Body_Weapon", "type": 2, "bone_to_world": [[-0.9659,0.0000,0.2588,-3.1938],[0.0000,1.0000,-0.0000,-2.5567],[-0.2588,0.0000,-0.9659,1.1537]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Man_Thruster_Left_Front", "type": 2, "bone_to_world": [[-0.0000,1.0000,-0.0000,-1.4407],[-1.0000,-0.0000,0.0000,-3.1216],[0.0000,0.0000,1.0000,2.7923]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Front", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.4646],[1.0000,-0.0000,0.0000,-3.1216],[-0.0000,0.0000,1.0000,2.7923]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_paint", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-7.8544],[-0.0000,0.0000,1.0000,0.5923]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_personal_storage_01", "type": 2, "bone_to_world": [[-0.4179,0.9085,-0.0000,-2.3403],[-0.9085,-0.4179,0.0000,-0.7613],[-0.0000,0.0000,1.0000,-1.5157]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_personal_storage_02", "type": 2, "bone_to_world": [[-0.4179,0.9085,-0.0000,-2.0151],[-0.9085,-0.4179,0.0000,0.0239],[-0.0000,0.0000,1.0000,-1.5157]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_ping", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-0.2544],[-0.0000,0.0000,1.0000,2.0923]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_quantum_interdiction_generator", "type": 2, "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_radar_copilot", "type": 2, "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_Right_Body_Weapon", "type": 2, "bone_to_world": [[-0.9659,-0.0000,-0.2588,3.1646],[-0.0000,1.0000,-0.0000,-2.5567],[0.2588,0.0000,-0.9659,1.1581]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_scanner", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0100],[0.0000,1.0000,-0.0000,-0.4544],[-0.0000,0.0000,1.0000,2.0923]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_seat_pilot", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,-0.0000,5.5106],[-0.0000,0.0000,1.0000,-1.7967]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_self_destruct_pilot", "type": 2, "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_transponder", "type": 2, "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_weapon_rack", "type": 2, "bone_to_world": [[-0.4035,-0.9150,0.0000,2.4620],[0.9150,-0.4035,0.0000,-0.6264],[0.0000,0.0000,1.0000,-1.2587]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_armour", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_computer", "type": 2, "bone_to_world": [[-0.4226,-0.9063,-0.0000,1.6970],[0.9063,-0.4226,0.0000,0.6540],[-0.0000,0.0000,1.0000,-2.5877]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_cockpit_selfdestruct", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_controller_capacitor_assignment", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3472],[0.0000,1.0000,-0.0000,4.7923],[-0.0000,0.0000,1.0000,-0.5859]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_controller_cooler", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_controller_energy", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_controller_flight", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_controller_shield", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_controller_weapon", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "helper_life_support", "type": 2, "bone_to_world": [[0.5000,0.8660,0.0000,3.0300],[-0.8660,0.5000,-0.0000,-1.9984],[-0.0000,0.0000,1.0000,-1.6906]]},
+    {"node": "hardpoint_quantum_drive", "type": 2, "bone_to_world": [[-1.0000,0.0000,-0.0000,2.6143],[-0.0000,-1.0000,0.0000,-6.8544],[-0.0000,0.0000,1.0000,-2.1077]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_radar", "type": 2, "bone_to_world": [[-0.4226,0.9063,-0.0000,-1.9400],[-0.9063,-0.4226,-0.0000,0.7166],[-0.0000,0.0000,1.0000,-2.0236]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_target_selector_pilot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.0144],[-0.0000,0.0000,1.0000,-0.9491]]},
+    {"node": "hardpoint_weapon_regen_pool", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,-0.0000,4.7923],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_weapon_regen_pool_turrets", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3472],[0.0000,1.0000,-0.0000,4.7923],[-0.0000,0.0000,1.0000,-0.9491]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_fuel_port", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,-1.8544],[0.0000,0.0000,1.0000,3.1923]]},
+    {"node": "hardpoint_seat_access_mannedturret", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,-0.0000,-4.8544],[-0.0000,0.0000,1.0000,-1.4077]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_controller_salvage", "type": 2, "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "helper_hardpoint_relay_front", "type": 2, "bone_to_world": [[-0.4051,-0.9143,0.0000,1.7815],[0.9143,-0.4051,0.0000,0.6139],[0.0000,0.0000,1.0000,-1.3747]]},
+    {"node": "helper_hardpoint_engineeringscreen", "type": 2, "bone_to_world": [[-0.4024,-0.9155,0.0000,3.3582],[0.9155,-0.4024,0.0000,-3.5462],[0.0000,0.0000,1.0000,-1.2641]]},
+    {"node": "hardpoint_gravity_generator", "type": 2, "bone_to_world": [[0.5000,0.8660,0.0000,3.0300],[-0.8660,0.5000,-0.0000,-1.9984],[-0.0000,0.0000,1.0000,-1.0607]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_seat_access", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,5.1456],[0.0000,0.0000,1.0000,-0.7077]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_seat_access_copilot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,3.1456],[0.0000,0.0000,1.0000,-0.7077]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "anim_landing_gear_dummy", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,-6.8544],[0.0000,0.0000,1.0000,0.5923]]},
+    {"node": "hardpoint_shield_generator_right", "type": 2, "bone_to_world": [[-0.3420,-0.0000,0.9397,-4.1509],[-0.9397,0.0000,-0.3420,12.3062],[0.0000,-1.0000,-0.0000,-1.0607]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_tail_remote_turret", "type": 2, "bone_to_world": [[-1.0000,0.0000,-0.0000,0.0000],[-0.0000,-1.0000,-0.0000,-10.5738],[-0.0000,0.0000,1.0000,2.5932]]},
+    {"node": "hardpoint_mountedgun_left_02", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-5.5100],[1.0000,-0.0000,0.0000,5.0262],[0.0000,0.0000,1.0000,-2.3155]]},
+    {"node": "hardpoint_mountedgun_left_01", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-5.5100],[1.0000,-0.0000,0.0000,8.2262],[0.0000,0.0000,1.0000,-2.3155]]},
+    {"node": "hardpoint_mountedgun_right_02", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,5.4900],[-1.0000,-0.0000,0.0000,5.0262],[0.0000,0.0000,1.0000,-2.3155]]},
+    {"node": "hardpoint_mountedgun_right_01", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,5.4900],[-1.0000,-0.0000,0.0000,8.2262],[0.0000,0.0000,1.0000,-2.3155]]},
+    {"node": "hardpoint_mountedgun_rear", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,0.8975],[-0.0000,-1.0000,0.0000,-3.9738],[0.0000,0.0000,1.0000,-2.7496]]},
+    {"node": "hardpoint_jump_seat_left_001", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,7.6439],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_002", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,6.6190],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_003", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,5.5942],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_004", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,4.5693],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_005", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,3.5443],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_006", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.9300],[1.0000,-0.0000,0.0000,2.5192],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_007", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-1.7728],[-1.0000,-0.0000,0.0000,-0.1429],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_008", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-1.7729],[-1.0000,-0.0000,0.0000,-1.1653],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_left_009", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-1.7728],[-1.0000,-0.0000,0.0000,-2.2041],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_001", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9100],[-1.0000,-0.0000,0.0000,7.6439],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_002", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9101],[-1.0000,-0.0000,0.0000,6.6190],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_003", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9100],[-1.0000,-0.0000,0.0000,5.5941],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_004", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9101],[-1.0000,-0.0000,0.0000,4.5692],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_005", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9100],[-1.0000,-0.0000,0.0000,3.5444],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_006", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.9101],[-1.0000,-0.0000,0.0000,2.5192],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_007", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.8743],[1.0000,-0.0000,0.0000,-0.2100],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_008", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.8743],[1.0000,-0.0000,0.0000,-1.2324],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_jump_seat_right_009", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.8743],[1.0000,-0.0000,0.0000,-2.2712],[0.0000,0.0000,1.0000,-2.7399]]},
+    {"node": "hardpoint_weapon_seat_rack_018", "type": 2, "bone_to_world": [[0.0000,1.0000,-0.0000,-1.9316],[-1.0000,0.0000,0.0000,-1.6804],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_017", "type": 2, "bone_to_world": [[0.0000,1.0000,-0.0000,-1.9321],[-1.0000,0.0000,0.0000,-0.6554],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_016", "type": 2, "bone_to_world": [[0.0000,1.0000,-0.0000,-1.9316],[-1.0000,0.0000,0.0000,0.3808],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_015", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,2.0335],[1.0000,-0.0000,0.0000,-1.7533],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_014", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,2.0335],[1.0000,-0.0000,0.0000,-0.7181],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_013", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,2.0335],[1.0000,-0.0000,0.0000,0.3078],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_012", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,3.0319],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_011", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,4.0569],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_010", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,5.0817],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_009", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,6.1066],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_008", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,7.1314],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_007", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,-0.7710],[1.0000,-0.0000,0.0000,8.1563],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_006", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7513],[-1.0000,-0.0000,0.0000,3.0319],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_005", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7513],[-1.0000,-0.0000,0.0000,4.0569],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_004", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7513],[-1.0000,-0.0000,0.0000,5.0817],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_003", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7513],[-1.0000,-0.0000,0.0000,6.1066],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_002", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7513],[-1.0000,-0.0000,0.0000,7.1314],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_weapon_seat_rack_001", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,0.7510],[-1.0000,-0.0000,0.0000,8.1563],[0.0000,0.0000,1.0000,-2.3637]]},
+    {"node": "hardpoint_quantum_fuel_tank", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0009],[0.0000,1.0000,0.0000,-5.0252],[0.0000,0.0000,1.0000,3.2358]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_power_plant", "type": 2, "bone_to_world": [[0.5000,0.8660,-0.0000,-3.5109],[-0.8660,0.5000,0.0000,1.3162],[0.0000,0.0000,1.0000,-1.2897]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Rear", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.4333],[1.0000,-0.0000,0.0000,3.4762],[0.0000,0.0000,1.0000,3.1060]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Center", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,1.5202],[1.0000,-0.0000,0.0000,6.9558],[0.0000,0.0000,1.0000,2.9932]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Rear", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-1.4502],[-1.0000,-0.0000,0.0000,3.4762],[0.0000,0.0000,1.0000,3.1060]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Center", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-1.5252],[-1.0000,-0.0000,0.0000,6.9558],[0.0000,0.0000,1.0000,2.9932]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Center_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0019],[0.0000,-0.0000,1.0000,6.8411],[0.0000,-1.0000,-0.0000,3.6495]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Center_Bot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0019],[0.0000,-0.0000,-1.0000,6.8411],[0.0000,1.0000,-0.0000,-2.9166]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_heat_sink", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.1208],[0.0000,1.0000,0.0000,4.3932],[0.0000,0.0000,1.0000,3.3132]]},
+    {"node": "hardpoint_fuel_tank_right", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,6.1537],[0.0000,1.0000,0.0000,-2.0037],[0.0000,0.0000,1.0000,3.3132]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_fuel_tank_left", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-6.3157],[0.0000,1.0000,0.0000,-2.3394],[0.0000,0.0000,1.0000,3.3132]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_cooler_right", "type": 2, "bone_to_world": [[-0.0000,0.5000,-0.8660,3.5948],[0.0000,0.8660,0.5000,1.2467],[1.0000,-0.0000,-0.0000,-1.9907]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_cooler_left", "type": 2, "bone_to_world": [[-0.0000,-0.3420,0.9397,-4.1399],[0.0000,-0.9397,-0.3420,12.3492],[1.0000,-0.0000,0.0000,-1.8687]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_cargogrid_rear", "type": 3, "bone_to_world": [[-1.0000,0.0000,0.0000,-0.0115],[-0.0000,-1.0000,0.0000,-1.6830],[0.0000,0.0000,1.0000,-2.6568]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_cargogrid_main", "type": 3, "bone_to_world": [[-1.0000,0.0000,0.0000,-0.0115],[-0.0000,-1.0000,0.0000,4.7262],[0.0000,0.0000,1.0000,-2.6568]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_door_right", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,5.0991],[0.0000,1.0000,0.0000,6.6262],[0.0000,0.0000,1.0000,-0.7107]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_door_left", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-5.1009],[0.0000,1.0000,0.0000,6.6262],[0.0000,0.0000,1.0000,-0.7107]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_door_rear", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,-3.7118],[0.0000,0.0000,1.0000,-2.8738]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "helper_cutlass_ramp", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,0.7190],[0.0000,1.0000,0.0000,-3.7115],[0.0000,0.0000,1.0000,-2.8734]]},
+    {"node": "contrail_04", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,2.0705],[0.0000,1.0000,0.0000,-2.0238],[0.0000,0.0000,1.0000,-3.8768]]},
+    {"node": "contrail_05", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-2.0895],[0.0000,1.0000,0.0000,-2.0238],[0.0000,0.0000,1.0000,-3.8768]]},
+    {"node": "contrail_01", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0095],[0.0000,1.0000,0.0000,-11.6238],[0.0000,0.0000,1.0000,3.5232]]},
+    {"node": "hardpoint_Landing_Gear_Left", "type": 3, "bone_to_world": [[1.0000,-0.0000,0.0000,-3.8255],[0.0000,1.0000,-0.0000,-0.7878],[0.0000,0.0000,1.0000,-3.2688]]},
+    {"node": "hardpoint_Landing_Gear_Right", "type": 3, "bone_to_world": [[1.0000,-0.0000,0.0000,3.8061],[0.0000,1.0000,-0.0000,-0.7873],[0.0000,0.0000,1.0000,-3.2688]]},
+    {"node": "side_left_helper_inside", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,-4.1587],[0.0000,-0.0000,-1.0000,3.8099],[0.0000,1.0000,-0.0000,-1.1279]]},
+    {"node": "side_right_helper_inside", "type": 3, "bone_to_world": [[1.0000,0.0000,0.0000,3.9815],[0.0000,-0.0000,-1.0000,3.8099],[0.0000,1.0000,-0.0000,-1.1279]]},
+    {"node": "hardpoint_Tail_Utility", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,-10.2731],[0.0000,0.0000,1.0000,1.7503]]},
+    {"node": "hardpoint_Man_Thruster_Left_Tail", "type": 2, "bone_to_world": [[-0.0000,1.0000,0.0000,-4.5593],[-1.0000,-0.0000,0.0000,-3.8759],[0.0000,0.0000,1.0000,-0.6042]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Tail", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,4.5383],[1.0000,-0.0000,0.0000,-3.8759],[0.0000,0.0000,1.0000,-0.6042]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_ramp_panel_ext", "type": 2, "bone_to_world": [[1.0000,0.0000,-0.0000,-3.1717],[0.0000,1.0000,0.0000,-2.5038],[0.0000,-0.0000,1.0000,-3.5068]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_ramp_panel_ext_02", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,3.1717],[0.0000,1.0000,0.0000,-2.5038],[0.0000,0.0000,1.0000,-3.5068]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "helper_sidepanel_right", "type": 2, "bone_to_world": [[-0.0000,0.9659,-0.2588,4.0443],[-1.0000,-0.0000,0.0000,3.8006],[0.0000,0.2588,0.9659,-1.0588]]},
+    {"node": "helper_sidepanel_left", "type": 2, "bone_to_world": [[-0.0000,-0.9659,0.2588,-4.0403],[1.0000,-0.0000,0.0000,3.7992],[0.0000,0.2588,0.9659,-1.0620]]},
+    {"node": "helper_sidedoor_right", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,4.2740],[0.0000,1.0000,0.0000,6.7480],[0.0000,0.0000,1.0000,1.0540]]},
+    {"node": "helper_sidedoor_left", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-4.0403],[0.0000,1.0000,0.0000,3.7992],[0.0000,0.0000,1.0000,1.0554]]},
+    {"node": "helper_ramp_panel", "type": 2, "bone_to_world": [[-0.0000,-0.9659,0.2588,-2.1307],[1.0000,-0.0000,0.0000,-2.8255],[0.0000,0.2588,0.9659,-1.0698]]},
+    {"node": "hardpoint_tractor_mount", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.0008],[0.0000,1.0000,-0.0000,-9.8258],[-0.0000,0.0000,1.0000,2.4955]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "ANIM_tractor_carriage", "type": 2, "bone_to_world": [[1.0000,0.0000,-0.0000,-1.6319],[-0.0000,1.0000,-0.0000,-5.4164],[0.0000,0.0000,1.0000,1.0176]]},
+    {"node": "helper_hardpoint_relay_rear", "type": 3, "bone_to_world": [[0.4650,-0.8853,0.0000,3.5132],[0.8853,0.4650,-0.0000,1.2908],[0.0000,0.0000,1.0000,-1.3197]]},
+    {"node": "hardpoint_battery", "type": 2, "bone_to_world": [[0.5000,0.8660,-0.0000,-3.6429],[-0.8660,0.5000,0.0000,1.5274],[0.0000,0.0000,1.0000,-2.4107]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_door_left_panel_ext", "type": 2, "bone_to_world": [[-0.0000,0.6428,-0.7660,-4.9276],[-1.0000,-0.0000,0.0000,3.9934],[0.0000,0.7660,0.6428,-2.7209]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_door_right_panel_ext", "type": 2, "bone_to_world": [[-0.0000,-0.6428,0.7660,4.9349],[1.0000,-0.0000,0.0000,3.8932],[0.0000,0.7660,0.6428,-2.7243]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_tractor_carriage", "type": 2, "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "ANIM_tractor_turret", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.5940],[0.0000,1.0000,-0.0000,-0.0003],[0.0000,0.0000,1.0000,-0.1637]]},
+    {"node": "hardpoint_tractor_turret", "type": 2, "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "hardpoint_Left_Pylon_03", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,-0.7216],[0.0000,1.0000,0.0000,1.3332],[-0.0000,0.0000,-1.0000,-0.2023]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Left_Pylon_02", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,-0.0132],[0.0000,1.0000,0.0000,1.5509],[-0.0000,0.0000,-1.0000,-0.1324]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Left_Pylon_01", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,0.8097],[0.0000,1.0000,0.0000,1.9388],[-0.0000,0.0000,-1.0000,-0.1224]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Right_Pylon_03", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,0.8068],[0.0000,1.0000,0.0000,1.3332],[-0.0000,0.0000,-1.0000,-0.2023]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Right_Pylon_02", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,0.0016],[0.0000,1.0000,0.0000,1.5509],[-0.0000,0.0000,-1.0000,-0.1324]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Right_Pylon_01", "type": 2, "bone_to_world": [[-1.0000,0.0000,0.0000,-0.8096],[0.0000,1.0000,0.0000,1.9388],[-0.0000,0.0000,-1.0000,-0.1224]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_fuel_intake_right", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0000],[0.0000,1.0000,0.0000,3.2775],[0.0000,0.0000,1.0000,0.0000]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "gascloud_contrail_dust_mid_back_right", "type": 2, "bone_to_world": [[0.9990,0.0436,-0.0000,-1.8664],[-0.0436,0.9990,0.0000,5.0984],[0.0000,0.0000,1.0000,-0.2527]]},
+    {"node": "hardpoint_cm_launcher_right", "type": 2, "bone_to_world": [[-1.0000,-0.0000,-0.0000,0.3751],[0.0000,-0.7660,-0.6428,-2.5398],[-0.0000,-0.6428,0.7660,-1.1027]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Right_Front_Bot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3838],[0.0000,-0.0000,-1.0000,2.3559],[0.0000,1.0000,-0.0000,-1.1645]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Front_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3838],[0.0000,-0.0000,1.0000,2.3561],[0.0000,-1.0000,-0.0000,0.7640]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Man_Thruster_Right_Rear_Bot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3838],[0.0000,-0.0000,-1.0000,-2.2203],[0.0000,1.0000,-0.0000,-1.4218]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Rear_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,-0.0000,-0.3838],[0.0000,0.0000,1.0000,-2.2202],[0.0000,-1.0000,0.0000,1.0582]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "gascloud_contrail_dust_small_thruster_right", "type": 2, "bone_to_world": [[0.9994,0.0349,-0.0000,-0.2250],[-0.0349,0.9994,-0.0000,3.3642],[-0.0000,0.0000,1.0000,1.8780]]},
+    {"node": "hardpoint_Main_Thruster_Right", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.2450],[0.0000,1.0000,-0.0000,-4.6119],[0.0000,0.0000,1.0000,1.0298]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Main_Retro_Right", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.2292],[0.0000,-1.0000,0.0000,4.7548],[0.0000,-0.0000,-1.0000,-1.1731]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_fuel_intake_left", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.4743],[0.0000,1.0000,-0.0000,3.3190],[0.0000,0.0000,1.0000,0.2051]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "gascloud_contrail_dust_mid_back_left", "type": 2, "bone_to_world": [[0.9990,-0.0436,0.0000,1.3922],[0.0436,0.9990,-0.0000,5.0984],[0.0000,0.0000,1.0000,-0.0476]]},
+    {"node": "hardpoint_cm_launcher_left", "type": 2, "bone_to_world": [[-1.0000,-0.0000,-0.0000,-0.8494],[0.0000,-0.7660,-0.6428,-2.5398],[0.0000,-0.6428,0.7660,-0.8976]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Front_Bot", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.0988],[0.0000,0.0000,-1.0000,2.3461],[0.0000,1.0000,0.0000,-0.9509]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Front_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0988],[0.0000,-0.0000,1.0000,2.3462],[0.0000,-1.0000,-0.0000,0.9588]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Left_Rear_Bot", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-0.0988],[0.0000,0.0000,-1.0000,-2.2211],[0.0000,1.0000,0.0000,-1.2148]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Rear_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.0988],[0.0000,-0.0000,1.0000,-2.2209],[0.0000,-1.0000,-0.0000,1.2434]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "gascloud_contrail_dust_small_thruster_left", "type": 2, "bone_to_world": [[0.9994,-0.0349,0.0000,0.0361],[0.0349,0.9994,-0.0000,3.3642],[0.0000,0.0000,1.0000,1.8780]]},
+    {"node": "hardpoint_Main_Thruster_Left", "type": 2, "bone_to_world": [[1.0000,0.0000,-0.0000,0.0761],[0.0000,1.0000,0.0000,-4.4130],[0.0000,-0.0000,1.0000,1.0298]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Main_Retro_Left", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.0603],[0.0000,-1.0000,-0.0000,4.7548],[0.0000,0.0000,-1.0000,-1.1731]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "contrail_03", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,3.6625],[0.0000,1.0000,-0.0000,3.2892],[0.0000,0.0000,1.0000,-2.9576]]},
+    {"node": "gascloud_contrail_dust_small_right_front", "type": 2, "bone_to_world": [[0.9986,0.0523,-0.0000,3.7792],[-0.0523,0.9986,-0.0000,4.5965],[-0.0000,0.0000,1.0000,2.9704]]},
+    {"node": "hardpoint_Man_Thruster_Right_Outer_Bot", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,4.2222],[1.0000,-0.0000,0.0000,1.5383],[0.0000,0.0000,1.0000,-0.0125]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Right_Outer_Top", "type": 2, "bone_to_world": [[-0.0000,-1.0000,0.0000,4.2222],[1.0000,-0.0000,0.0000,1.5383],[0.0000,0.0000,1.0000,0.8716]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Man_Thruster_Right_Wing_Bot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.3105],[0.0000,-0.0000,-1.0000,0.9312],[0.0000,1.0000,-0.0000,0.1120]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Right_Wing_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,0.3105],[0.0000,-0.0000,1.0000,0.9314],[0.0000,-1.0000,-0.0000,1.3836]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Right_Wing_Utility", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,3.3577],[0.0000,1.0000,-0.0000,7.1493],[0.0000,0.0000,1.0000,-1.7918]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Right_Wing_Weapon", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-1.2920],[0.0000,1.0000,-0.0000,1.6996],[0.0000,0.0000,1.0000,-0.0076]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+    {"node": "contrail_02", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-3.6815],[0.0000,1.0000,-0.0000,3.2892],[0.0000,0.0000,1.0000,-2.9576]]},
+    {"node": "gascloud_contrail_dust_small_left_front", "type": 2, "bone_to_world": [[0.9986,-0.0523,0.0000,-3.7792],[0.0523,0.9986,-0.0000,4.5965],[0.0000,0.0000,1.0000,2.9704]]},
+    {"node": "hardpoint_Left_Wing_Utility", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,-3.3577],[0.0000,1.0000,-0.0000,7.1493],[0.0000,0.0000,1.0000,-1.8466]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Left_Wing_Weapon", "type": 2, "bone_to_world": [[1.0000,-0.0000,0.0000,1.2903],[0.0000,1.0000,-0.0000,1.6732],[0.0000,0.0000,1.0000,-0.0076]], "props": {"class": "ItemPort", "detach": "False", "node": "Part"}},
+    {"node": "hardpoint_Man_Thruster_Left_Outer_Bot", "type": 2, "bone_to_world": [[-0.0000,1.0000,-0.0000,-4.2143],[-1.0000,-0.0000,0.0000,1.5383],[0.0000,0.0000,1.0000,0.8732]], "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Left_Outer_Top", "type": 2, "bone_to_world": [[-0.0000,1.0000,-0.0000,-4.2143],[-1.0000,-0.0000,0.0000,1.5383],[0.0000,0.0000,1.0000,-0.0109]], "props": {"class": "ItemPort", "node": "Part", "detach": "False"}},
+    {"node": "hardpoint_Man_Thruster_Left_Wing_Bot", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3105],[0.0000,-0.0000,-1.0000,0.9247],[0.0000,1.0000,-0.0000,0.0731]], "props": {"node": "Part", "detach": "False", "class": "ItemPort"}},
+    {"node": "hardpoint_Man_Thruster_Left_Wing_Top", "type": 2, "bone_to_world": [[1.0000,0.0000,0.0000,-0.3105],[0.0000,-0.0000,1.0000,0.9249],[0.0000,-1.0000,-0.0000,1.3260]], "props": {"node": "Part", "class": "ItemPort", "detach": "False"}},
+    {"node": "hardpoint_radar_turret", "type": 2, "props": {"detach": "False", "node": "Part", "class": "ItemPort"}},
+    {"node": "hardpoint_turret", "type": 3, "bone_to_world": [[1.0000,-0.0000,0.0000,0.0020],[0.0000,1.0000,-0.0000,-9.7150],[0.0000,0.0000,1.0000,2.9840]], "props": {"detach": "False", "class": "ItemPort", "node": "Part"}},
+  ],
+  "loadout": [
+    {
+      "entity": "ARMR_DRAK_Cutlass_Black",
+      "port": "hardpoint_armour",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "VHCL_SelfDestruct_30s",
+      "port": "hardpoint_self_destruct_pilot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Flight_DRAK_Cutlass_Black",
+      "port": "hardpoint_controller_flight",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/blades/s01/blad_mite_s01_pl01.cga"
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Shield_DRAK_Cutlass",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon_copilot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Fuel",
+      "port": "hardpoint_controller_fuel",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Missile",
+      "port": "hardpoint_controller_missile",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Salvage_Crus_C1",
+      "port": "hardpoint_controller_salvage",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutlass_ShipATCDataManager",
+      "port": "hardpoint_air_traffic_controller",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_DRAK_Cutlass_Black",
+      "port": "hardpoint_fuel_intake_left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_DRAK_Cutlass_Black",
+      "port": "hardpoint_fuel_intake_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "DockingTube_Fuel_Ports_DRAK_Cutlass",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_DRAK_Cutlass_Black",
+      "port": "hardpoint_fuel_tank_left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_DRAK_Cutlass_Black",
+      "port": "hardpoint_fuel_tank_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_SASU_S02_DayBreak_SCItem",
+      "port": "hardpoint_power_plant",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Power_Plants/medium_component/sasu/powr_sasu_s02_pl03.cga"
+    },
+    {
+      "entity": "COOL_LPLT_S02_ColdSnap_SCItem",
+      "port": "hardpoint_cooler_left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/medium_component/lplt/cool_lplt_s02_pl03.cga"
+    },
+    {
+      "entity": "COOL_LPLT_S02_ColdSnap_SCItem",
+      "port": "hardpoint_cooler_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/medium_component/lplt/cool_lplt_s02_pl03.cga"
+    },
+    {
+      "entity": "SHLD_SECO_S02_STOP_SCItem",
+      "port": "hardpoint_shield_generator_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Shields/medium_component/seco/shld_seco_s02_pl03.cga",
+      "nmc_properties": [
+        {"node": "mesh_shld_seco_s02_pl03", "props": {"MapChannel:1 ": " UVChannel_1"}},
+      ]
+    },
+    {
+      "entity": "LFSP_TYDT_S02_ComfortAirPlus",
+      "port": "hardpoint_life_support",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/life_support/medium_component/tydt/life_tydt_s02.cga"
+    },
+    {
+      "entity": "SoftLock_EngineeringScreen_StandardShip",
+      "port": "hardpoint_engineeringscreen",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/CRUS/Starlifter/Interior/Bridge/CRUS_Starlifter_EngineeringScreen.cgf"
+    },
+    {
+      "entity": "RELAY_2slot",
+      "port": "hardpoint_relay_front",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse.cga",
+      "children": [
+            {
+              "entity": "Fuse_subItem_standard",
+              "port": "$slot_fuse_01",
+              "parent": "RELAY_2slot",
+              "geometry": "Objects/Spaceships/relay/demo/fuse_demo.cgf"
+            },
+            {
+              "entity": "Fuse_subItem_standard",
+              "port": "$slot_fuse_02",
+              "parent": "RELAY_2slot",
+              "geometry": "Objects/Spaceships/relay/demo/fuse_demo.cgf"
+            },
+      ]
+    },
+    {
+      "entity": "RELAY_1slot",
+      "port": "hardpoint_relay_rear",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_1fuse.cga",
+      "children": [
+            {
+              "entity": "Fuse_subItem_standard",
+              "port": "$slot_fuse_01",
+              "parent": "RELAY_1slot",
+              "geometry": "Objects/Spaceships/relay/demo/fuse_demo.cgf"
+            },
+      ]
+    },
+    {
+      "entity": "QDRV_TARS_S02_Odyssey_SCItem",
+      "port": "hardpoint_quantum_drive",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Quantum_drives/medium_component/tars/qdrv_tars_s02_pl03.cga",
+      "children": [
+            {
+              "entity": "JDRV_TARS_S02_Excelsior_SCItem",
+              "port": "hardpoint_jump_drive",
+              "parent": "QDRV_TARS_S02_Odyssey_SCItem",
+              "geometry": "Objects/Spaceships/Jump_Modules/medium_component/tars/jmod_tars_s02_pl02.cga"
+            },
+      ]
+    },
+    {
+      "entity": "QTNK_DRAK_Cutlass_Black",
+      "port": "hardpoint_quantum_fuel_tank",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "RADR_WLOP_S02_Chernykh",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Radar/medium_component/grnp/radr_grnp_s02_pl01.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_SeatAccess_Pilot",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/ships/drak/cutlass/drak_cutlass_scitem_seataccess.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Seat_Pilot",
+      "port": "hardpoint_seat_pilot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/seats/drak/cutlass/drak_cutlass_pilot.cga",
+      "nmc_properties": [
+        {"node": "foot_paddle_left", "props": {"MapChannel:-2 ": " -none-"}},
+        {"node": "joystick_rod", "props": {"MapChannel:10 ": " UVChannel_10", "MapChannel:3 ": " UVChannel_3", "MapChannel:2 ": " UVChannel_2", "MapChannel:1 ": " UVChannel_1", "MapChannel:6 ": " UVChannel_6", "MapChannel:5 ": " UVChannel_5", "MapChannel:9 ": " UVChannel_9", "MapChannel:7 ": " UVChannel_7", "MapChannel:4 ": " UVChannel_4", "MapChannel:8 ": " UVChannel_8"}},
+        {"node": "foot_paddle_right", "props": {"MapChannel:-2 ": " -none-"}},
+        {"node": "console_arm_base", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_1", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_2", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_3", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "Button_Other_01", "props": {"MapChannel:4 ": " UVChannel_4", "MapChannel:2 ": " UVChannel_2", "MapChannel:3 ": " UVChannel_3", "MapChannel:5 ": " UVChannel_5", "MapChannel:6 ": " UVChannel_6", "MapChannel:1 ": " UVChannel_1"}},
+        {"node": "Button_Exit", "props": {"MapChannel:1 ": " UVChannel_1", "MapChannel:2 ": " UVChannel_2", "MapChannel:4 ": " UVChannel_4", "MapChannel:3 ": " UVChannel_3", "MapChannel:6 ": " UVChannel_6", "MapChannel:5 ": " UVChannel_5"}},
+        {"node": "Throttle_Handle", "props": {"MapChannel:2 ": " UVChannel_2", "MapChannel:4 ": " UVChannel_4", "MapChannel:8 ": " UVChannel_8", "MapChannel:9 ": " UVChannel_9", "MapChannel:1 ": " UVChannel_1", "MapChannel:3 ": " UVChannel_3", "MapChannel:7 ": " UVChannel_7", "MapChannel:5 ": " UVChannel_5", "MapChannel:6 ": " UVChannel_6", "MapChannel:10 ": " UVChannel_10"}},
+        {"node": "Joystick", "props": {"MapChannel:7 ": " UVChannel_7", "MapChannel:8 ": " UVChannel_8", "MapChannel:3 ": " UVChannel_3", "MapChannel:6 ": " UVChannel_6", "MapChannel:4 ": " UVChannel_4", "MapChannel:9 ": " UVChannel_9", "MapChannel:10 ": " UVChannel_10", "MapChannel:1 ": " UVChannel_1", "MapChannel:2 ": " UVChannel_2", "MapChannel:5 ": " UVChannel_5"}},
+      ],
+      "children": [
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Left_Upper_RTT",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Right_Upper_RTT",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Radar_Display_Screen_Cutlass",
+              "port": "Screen_Radar_RTT",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Annunciator_L",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Annunciator_R",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "screen_flight_hud_left",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "screen_flight_hud_left_upper",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Left_Upper_RTT_Small",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "screen_flight_hud_right",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "screen_flight_hud_right_upper",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Central_Compass",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Small_Radar1",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Small_Radar2",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Left_Lower_RTT",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Countermeasures_Screen",
+              "parent": "DRAK_Cutlass_Seat_Pilot",
+              "geometry": ""
+            },
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_SeatAccess_CoPilot",
+      "port": "hardpoint_seat_access_copilot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_SCItem_SeatAccess_CoPilot.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Seat_CoPilot",
+      "port": "hardpoint_copilot_seat",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/seats/drak/cutlass/drak_cutlass_copilot.cga",
+      "nmc_properties": [
+        {"node": "Copilot_Platform", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "joystick", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_base", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_1", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_2", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "console_arm_3", "props": {"MapChannel:1 ": " UVChannel_1"}},
+        {"node": "Button_Other_01", "props": {"MapChannel:5 ": " UVChannel_5", "MapChannel:4 ": " UVChannel_4", "MapChannel:6 ": " UVChannel_6", "MapChannel:1 ": " UVChannel_1", "MapChannel:2 ": " UVChannel_2", "MapChannel:3 ": " UVChannel_3"}},
+        {"node": "Button_Exit", "props": {"MapChannel:4 ": " UVChannel_4", "MapChannel:1 ": " UVChannel_1", "MapChannel:5 ": " UVChannel_5", "MapChannel:3 ": " UVChannel_3", "MapChannel:2 ": " UVChannel_2", "MapChannel:6 ": " UVChannel_6"}},
+        {"node": "Throttle_Handle", "props": {"MapChannel:3 ": " UVChannel_3", "MapChannel:8 ": " UVChannel_8", "MapChannel:9 ": " UVChannel_9", "MapChannel:6 ": " UVChannel_6", "MapChannel:4 ": " UVChannel_4", "MapChannel:10 ": " UVChannel_10", "MapChannel:1 ": " UVChannel_1", "MapChannel:5 ": " UVChannel_5", "MapChannel:7 ": " UVChannel_7", "MapChannel:2 ": " UVChannel_2"}},
+        {"node": "foot_paddle_left", "props": {"MapChannel:-2 ": " -none-"}},
+        {"node": "foot_paddle_right", "props": {"MapChannel:-2 ": " -none-"}},
+      ],
+      "children": [
+            {
+              "entity": "H_Dashboard_Projector_HUD_Generic",
+              "port": "Display_HUD",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Radar_Display_Screen_Template",
+              "port": "Screen_Radar_RTT",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Right_Upper_RTT",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Left_Upper_RTT",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Annunciator_L",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_Physical",
+              "port": "Screen_Annunciator_R",
+              "parent": "DRAK_Cutlass_Seat_CoPilot",
+              "geometry": ""
+            },
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_SeatAccess_MannedTurret",
+      "port": "hardpoint_seat_access_mannedturret",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_SCItem_SeatAccess_MannedTurret.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_SCItem_Turret_Black",
+      "port": "hardpoint_turret",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/seats/drak/cutlass/drak_cutlass_black_turret_seat.cga",
+      "nmc_properties": [
+        {"node": "Top_Exterior_Geometry", "props": {"mesh_visarea ": " exterior"}},
+        {"node": "Seat", "props": {"mesh_visarea ": " interior"}},
+        {"node": "Console", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "Pedal_Right", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "Pedal_Left", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "Joystick_R", "props": {"MapChannel:7 ": " UVChannel_7", "MapChannel:2 ": " UVChannel_2", "MapChannel:8 ": " UVChannel_8", "MapChannel:6 ": " UVChannel_6", "MapChannel:10 ": " UVChannel_10", "MapChannel:9 ": " UVChannel_9", "MapChannel:3 ": " UVChannel_3", "MapChannel:4 ": " UVChannel_4", "MapChannel:1 ": " UVChannel_1", "MapChannel:5 ": " UVChannel_5"}},
+        {"node": "Joystick_L", "props": {"MapChannel:3 ": " UVChannel_3", "MapChannel:5 ": " UVChannel_5", "MapChannel:8 ": " UVChannel_8", "MapChannel:1 ": " UVChannel_1", "MapChannel:4 ": " UVChannel_4", "MapChannel:9 ": " UVChannel_9", "MapChannel:10 ": " UVChannel_10", "MapChannel:6 ": " UVChannel_6", "MapChannel:7 ": " UVChannel_7", "MapChannel:2 ": " UVChannel_2"}},
+        {"node": "SearchLight_Mount", "props": {"MapChannel:1 ": " map1", "mesh_visarea ": " exterior"}},
+        {"node": "Side_Plating", "props": {"mesh_visarea ": " exterior"}},
+        {"node": "Gun_Mechanism", "props": {"mesh_visarea ": " exterior"}},
+      ],
+      "children": [
+            {
+              "entity": "Mount_Gimbal_S3",
+              "port": "hardpoint_weapon_right",
+              "parent": "DRAK_Cutlass_SCItem_Turret_Black",
+              "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+              "children": [
+                    {
+                      "entity": "KLWE_LaserRepeater_S3",
+                      "port": "hardpoint_class_2",
+                      "parent": "Mount_Gimbal_S3",
+                      "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+                      "nmc_properties": [
+                        {"node": "root", "props": {"dampingX": "1", "springTension": "0", "dampingZ": "1", "rotLimitMax": "0", "rotLimitMinY": "0", "springTensionX": "1", "relPosition": "", "rotLimitMin": "0", "drivenTensionCol": "100", "rotLimitMaxY": "0", "rotLimitMinZ": "0", "springTensionY": "1", "rotLimitMaxX": "0", "dampingY": "1", "rotLimitMinX": "0", "damping": "0", "proxyParams": "", "relRotation": "", "springTensionZ": "1", "rotLimitMaxZ": "0", "drivenTension": "1"}},
+                        {"node": "barrel_03", "props": {"rotLimitMinZ": "0", "dampingZ": "1", "relPosition": "", "proxyParams": "", "relRotation": "", "rotLimitMax": "0", "springTension": "0", "springTensionY": "1", "springTensionZ": "1", "drivenTension": "1", "rotLimitMaxX": "0", "rotLimitMaxZ": "0", "dampingX": "1", "drivenTensionCol": "100", "damping": "0", "rotLimitMaxY": "0", "rotLimitMinX": "0", "dampingY": "1", "rotLimitMin": "0", "rotLimitMinY": "0", "springTensionX": "1"}},
+                        {"node": "barrel_02", "props": {"rotLimitMaxZ": "0", "drivenTensionCol": "100", "proxyParams": "", "dampingY": "1", "rotLimitMinX": "0", "relPosition": "", "springTensionX": "1", "dampingZ": "1", "rotLimitMinZ": "0", "rotLimitMaxY": "0", "springTensionY": "1", "rotLimitMin": "0", "relRotation": "", "rotLimitMaxX": "0", "rotLimitMax": "0", "dampingX": "1", "springTension": "0", "springTensionZ": "1", "rotLimitMinY": "0", "damping": "0", "drivenTension": "1"}},
+                        {"node": "barrel_01", "props": {"rotLimitMinZ": "0", "rotLimitMaxX": "0", "relRotation": "", "springTension": "0", "damping": "0", "rotLimitMax": "0", "drivenTensionCol": "100", "springTensionX": "1", "rotLimitMinY": "0", "rotLimitMaxZ": "0", "dampingY": "1", "springTensionZ": "1", "dampingZ": "1", "drivenTension": "1", "rotLimitMinX": "0", "rotLimitMaxY": "0", "proxyParams": "", "relPosition": "", "springTensionY": "1", "rotLimitMin": "0", "dampingX": "1"}},
+                        {"node": "muzzle_out3", "props": {"MaxHandle": "465"}},
+                        {"node": "muzzle_out2", "props": {"MaxHandle": "466"}},
+                        {"node": "muzzle_out1", "props": {"MaxHandle": "467"}},
+                      ]
+                    },
+              ]
+            },
+            {
+              "entity": "Mount_Gimbal_S3",
+              "port": "hardpoint_weapon_left",
+              "parent": "DRAK_Cutlass_SCItem_Turret_Black",
+              "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+              "children": [
+                    {
+                      "entity": "KLWE_LaserRepeater_S3",
+                      "port": "hardpoint_class_2",
+                      "parent": "Mount_Gimbal_S3",
+                      "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+                      "nmc_properties": [
+                        {"node": "root", "props": {"relRotation": "", "rotLimitMaxY": "0", "dampingX": "1", "springTension": "0", "proxyParams": "", "springTensionX": "1", "rotLimitMin": "0", "dampingZ": "1", "dampingY": "1", "rotLimitMaxX": "0", "springTensionY": "1", "rotLimitMax": "0", "springTensionZ": "1", "damping": "0", "rotLimitMinX": "0", "drivenTension": "1", "drivenTensionCol": "100", "rotLimitMaxZ": "0", "rotLimitMinZ": "0", "relPosition": "", "rotLimitMinY": "0"}},
+                        {"node": "barrel_03", "props": {"rotLimitMaxX": "0", "rotLimitMinZ": "0", "rotLimitMaxY": "0", "relRotation": "", "rotLimitMax": "0", "dampingY": "1", "springTensionZ": "1", "rotLimitMinX": "0", "rotLimitMinY": "0", "damping": "0", "dampingZ": "1", "proxyParams": "", "rotLimitMin": "0", "drivenTensionCol": "100", "dampingX": "1", "rotLimitMaxZ": "0", "springTensionX": "1", "springTensionY": "1", "drivenTension": "1", "springTension": "0", "relPosition": ""}},
+                        {"node": "barrel_02", "props": {"springTensionZ": "1", "proxyParams": "", "drivenTension": "1", "rotLimitMin": "0", "springTension": "0", "dampingX": "1", "dampingY": "1", "springTensionX": "1", "drivenTensionCol": "100", "rotLimitMaxY": "0", "relPosition": "", "dampingZ": "1", "rotLimitMaxZ": "0", "relRotation": "", "rotLimitMax": "0", "damping": "0", "rotLimitMinZ": "0", "rotLimitMinX": "0", "rotLimitMaxX": "0", "rotLimitMinY": "0", "springTensionY": "1"}},
+                        {"node": "barrel_01", "props": {"dampingY": "1", "rotLimitMaxY": "0", "damping": "0", "rotLimitMinY": "0", "rotLimitMax": "0", "rotLimitMinX": "0", "rotLimitMin": "0", "springTensionX": "1", "dampingX": "1", "springTensionY": "1", "dampingZ": "1", "drivenTension": "1", "proxyParams": "", "relRotation": "", "springTensionZ": "1", "relPosition": "", "drivenTensionCol": "100", "rotLimitMinZ": "0", "rotLimitMaxZ": "0", "rotLimitMaxX": "0", "springTension": "0"}},
+                        {"node": "muzzle_out3", "props": {"MaxHandle": "465"}},
+                        {"node": "muzzle_out2", "props": {"MaxHandle": "466"}},
+                        {"node": "muzzle_out1", "props": {"MaxHandle": "467"}},
+                      ]
+                    },
+              ]
+            },
+            {
+              "entity": "Radar_Display_Screen_Template",
+              "port": "Screen_Radar",
+              "parent": "DRAK_Cutlass_SCItem_Turret_Black",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Right_Top_RTT",
+              "parent": "DRAK_Cutlass_SCItem_Turret_Black",
+              "geometry": ""
+            },
+            {
+              "entity": "Vehicle_Screen_MFD",
+              "port": "Screen_Left_Top_RTT",
+              "parent": "DRAK_Cutlass_SCItem_Turret_Black",
+              "geometry": ""
+            },
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Retro",
+      "port": "hardpoint_Main_Retro_Right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_retro.cga",
+      "nmc_properties": [
+        {"node": "Cutlass_Thruster_Retro", "props": {"class": "AnimatedJoint", "detach": "False", "node": "Part"}},
+        {"node": "Cutlass_Thruster_Retro_Nozzle", "props": {"class": "AnimatedJoint", "detach": "False", "node": "Part"}},
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Retro",
+      "port": "hardpoint_Main_Retro_Left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_retro.cga",
+      "nmc_properties": [
+        {"node": "Cutlass_Thruster_Retro", "props": {"class": "AnimatedJoint", "node": "Part", "detach": "False"}},
+        {"node": "Cutlass_Thruster_Retro_Nozzle", "props": {"detach": "False", "class": "AnimatedJoint", "node": "Part"}},
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Main",
+      "port": "hardpoint_Main_Thruster_Right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_main.cga",
+      "nmc_properties": [
+        {"node": "Cutlass_Thruster_Main", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "Cutlass_Thruster_Main_Nozzle", "props": {"MapChannel:1 ": " map1"}},
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Main",
+      "port": "hardpoint_Main_Thruster_Left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_main.cga",
+      "nmc_properties": [
+        {"node": "Cutlass_Thruster_Main", "props": {"MapChannel:1 ": " map1"}},
+        {"node": "Cutlass_Thruster_Main_Nozzle", "props": {"MapChannel:1 ": " map1"}},
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Positive",
+      "port": "hardpoint_Man_Thruster_Center_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Negative",
+      "port": "hardpoint_Man_Thruster_Center_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Center",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Center",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Front",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Front",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Rear",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Rear",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Tail",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Tail",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Right_Rear_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Right_Rear_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Right_Front_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Right_Front_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Left_Rear_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Left_Rear_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Left_Front_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver",
+      "port": "hardpoint_Man_Thruster_Left_Front_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Positive",
+      "port": "hardpoint_Man_Thruster_Right_Wing_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Negative",
+      "port": "hardpoint_Man_Thruster_Right_Wing_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Outer_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Right_Outer_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Negative",
+      "port": "hardpoint_Man_Thruster_Left_Wing_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Vertical_Positive",
+      "port": "hardpoint_Man_Thruster_Left_Wing_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Outer_Top",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Thruster_Maneuver_Lateral",
+      "port": "hardpoint_Man_Thruster_Left_Outer_Bot",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/thrusters/drak/drak_cutlass_thrusters/drak_cutlass_thruster_maneuver.cga"
+    },
+    {
+      "entity": "DRAK_CML_Noise_Small",
+      "port": "hardpoint_cm_launcher_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapons/Countermeasure_Launcher/JOKR/Joker_DefCon_M/JOKR_Defcon_M.cga"
+    },
+    {
+      "entity": "DRAK_CML_Decoy_Small",
+      "port": "hardpoint_cm_launcher_left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapons/Countermeasure_Launcher/JOKR/Joker_DefCon_M/JOKR_Defcon_M.cga"
+    },
+    {
+      "entity": "Mount_Gimbal_S3",
+      "port": "hardpoint_Right_Body_Weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+      "children": [
+            {
+              "entity": "GATS_BallisticGatling_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bas/gats_bal_gat_s3_bas.cgf",
+              "nmc_properties": [
+                {"node": "gats_bal_gat_s1-3_bas\\gats_bal_gat_s3_bas", "props": {"texelMultiplier ": " 1.0", "disableHelperLabel ": ""}},
+              ],
+              "children": [
+                    {
+                      "entity": "GATS_BallisticGatling_Barrel_S3",
+                      "port": "BAR1",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bar/gats_bal_gat_s3_bar_1.cga",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_bar\\gats_bal_gat_s3_bar_1", "props": {"AnimName ": " spin_up,spin,spin_down", "AnimRange ": " 0-27,28-40,41-80", "AnimRoot ": " 0,0,0"}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_FiringMechanism_S3",
+                      "port": "MEC",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_mec/gats_bal_gat_s3_mec_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_mec\\gats_bal_gat_s3_mec_1", "props": {"texelMultiplier ": " 0.36", "disableHelperLabel ": ""}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_PowerArray_S3",
+                      "port": "POW",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_pow/gats_bal_gat_s3_pow_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_pow\\gats_bal_gat_s3_pow_1", "props": {"disableHelperLabel ": "", "texelMultiplier ": " 0.42"}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_Ventilation_S3",
+                      "port": "VEN",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bas/gats_bal_gat_s3_ven_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_bas\\gats_bal_gat_s3_ven_1", "props": {"disableHelperLabel ": "", "texelMultiplier ": " 0.36"}},
+                      ]
+                    },
+              ]
+            },
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S3",
+      "port": "hardpoint_Left_Body_Weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+      "children": [
+            {
+              "entity": "GATS_BallisticGatling_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bas/gats_bal_gat_s3_bas.cgf",
+              "nmc_properties": [
+                {"node": "gats_bal_gat_s1-3_bas\\gats_bal_gat_s3_bas", "props": {"disableHelperLabel ": "", "texelMultiplier ": " 1.0"}},
+              ],
+              "children": [
+                    {
+                      "entity": "GATS_BallisticGatling_Barrel_S3",
+                      "port": "BAR1",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bar/gats_bal_gat_s3_bar_1.cga",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_bar\\gats_bal_gat_s3_bar_1", "props": {"AnimName ": " spin_up,spin,spin_down", "AnimRoot ": " 0,0,0", "AnimRange ": " 0-27,28-40,41-80"}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_FiringMechanism_S3",
+                      "port": "MEC",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_mec/gats_bal_gat_s3_mec_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_mec\\gats_bal_gat_s3_mec_1", "props": {"texelMultiplier ": " 0.36", "disableHelperLabel ": ""}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_PowerArray_S3",
+                      "port": "POW",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_pow/gats_bal_gat_s3_pow_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_pow\\gats_bal_gat_s3_pow_1", "props": {"texelMultiplier ": " 0.42", "disableHelperLabel ": ""}},
+                      ]
+                    },
+                    {
+                      "entity": "GATS_BallisticGatling_Ventilation_S3",
+                      "port": "VEN",
+                      "parent": "GATS_BallisticGatling_S3",
+                      "geometry": "objects/spaceships/weapons/gats/gats_bal_gat_s1-3_bas/gats_bal_gat_s3_ven_1.cgf",
+                      "nmc_properties": [
+                        {"node": "gats_bal_gat_s1-3_bas\\gats_bal_gat_s3_ven_1", "props": {"texelMultiplier ": " 0.36", "disableHelperLabel ": ""}},
+                      ]
+                    },
+              ]
+            },
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S3",
+      "port": "hardpoint_Right_Wing_Weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+      "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {"node": "root", "props": {"springTensionY": "1", "drivenTensionCol": "100", "drivenTension": "1", "relPosition": "", "rotLimitMinX": "0", "proxyParams": "", "springTensionZ": "1", "springTensionX": "1", "rotLimitMax": "0", "rotLimitMaxZ": "0", "damping": "0", "relRotation": "", "rotLimitMin": "0", "springTension": "0", "rotLimitMaxX": "0", "rotLimitMinZ": "0", "rotLimitMaxY": "0", "dampingY": "1", "rotLimitMinY": "0", "dampingX": "1", "dampingZ": "1"}},
+                {"node": "barrel_03", "props": {"rotLimitMin": "0", "springTensionY": "1", "rotLimitMinX": "0", "rotLimitMaxX": "0", "damping": "0", "springTensionZ": "1", "rotLimitMax": "0", "dampingX": "1", "drivenTension": "1", "proxyParams": "", "relPosition": "", "rotLimitMinZ": "0", "dampingY": "1", "rotLimitMaxY": "0", "rotLimitMinY": "0", "relRotation": "", "drivenTensionCol": "100", "dampingZ": "1", "springTension": "0", "rotLimitMaxZ": "0", "springTensionX": "1"}},
+                {"node": "barrel_02", "props": {"dampingZ": "1", "relPosition": "", "rotLimitMinX": "0", "drivenTension": "1", "rotLimitMaxY": "0", "rotLimitMaxX": "0", "proxyParams": "", "rotLimitMinZ": "0", "rotLimitMax": "0", "drivenTensionCol": "100", "springTensionX": "1", "rotLimitMinY": "0", "damping": "0", "dampingY": "1", "relRotation": "", "rotLimitMin": "0", "springTensionZ": "1", "dampingX": "1", "rotLimitMaxZ": "0", "springTension": "0", "springTensionY": "1"}},
+                {"node": "barrel_01", "props": {"rotLimitMinY": "0", "rotLimitMaxZ": "0", "rotLimitMaxY": "0", "rotLimitMax": "0", "springTension": "0", "springTensionX": "1", "rotLimitMaxX": "0", "rotLimitMinZ": "0", "springTensionZ": "1", "damping": "0", "dampingX": "1", "rotLimitMinX": "0", "drivenTension": "1", "dampingY": "1", "drivenTensionCol": "100", "springTensionY": "1", "relRotation": "", "relPosition": "", "rotLimitMin": "0", "dampingZ": "1", "proxyParams": ""}},
+                {"node": "muzzle_out3", "props": {"MaxHandle": "465"}},
+                {"node": "muzzle_out2", "props": {"MaxHandle": "466"}},
+                {"node": "muzzle_out1", "props": {"MaxHandle": "467"}},
+              ]
+            },
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S3",
+      "port": "hardpoint_Left_Wing_Weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+      "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {"node": "root", "props": {"proxyParams": "", "dampingY": "1", "springTensionY": "1", "rotLimitMax": "0", "rotLimitMinZ": "0", "rotLimitMaxZ": "0", "relPosition": "", "relRotation": "", "rotLimitMin": "0", "dampingX": "1", "springTensionZ": "1", "rotLimitMaxY": "0", "springTensionX": "1", "drivenTensionCol": "100", "rotLimitMaxX": "0", "rotLimitMinX": "0", "rotLimitMinY": "0", "springTension": "0", "damping": "0", "dampingZ": "1", "drivenTension": "1"}},
+                {"node": "barrel_03", "props": {"springTensionZ": "1", "springTensionY": "1", "rotLimitMinZ": "0", "rotLimitMax": "0", "springTensionX": "1", "rotLimitMinX": "0", "rotLimitMinY": "0", "dampingZ": "1", "rotLimitMaxZ": "0", "damping": "0", "drivenTension": "1", "relRotation": "", "drivenTensionCol": "100", "springTension": "0", "dampingY": "1", "rotLimitMin": "0", "dampingX": "1", "rotLimitMaxY": "0", "proxyParams": "", "rotLimitMaxX": "0", "relPosition": ""}},
+                {"node": "barrel_02", "props": {"drivenTensionCol": "100", "rotLimitMaxX": "0", "springTensionY": "1", "springTensionZ": "1", "rotLimitMinY": "0", "dampingX": "1", "rotLimitMinZ": "0", "dampingY": "1", "relPosition": "", "springTension": "0", "rotLimitMaxY": "0", "springTensionX": "1", "rotLimitMin": "0", "rotLimitMaxZ": "0", "proxyParams": "", "rotLimitMinX": "0", "relRotation": "", "damping": "0", "dampingZ": "1", "drivenTension": "1", "rotLimitMax": "0"}},
+                {"node": "barrel_01", "props": {"dampingX": "1", "relPosition": "", "springTensionX": "1", "dampingZ": "1", "rotLimitMaxZ": "0", "springTensionY": "1", "dampingY": "1", "damping": "0", "rotLimitMax": "0", "proxyParams": "", "rotLimitMin": "0", "rotLimitMinY": "0", "rotLimitMaxY": "0", "rotLimitMinZ": "0", "springTensionZ": "1", "drivenTension": "1", "drivenTensionCol": "100", "rotLimitMinX": "0", "relRotation": "", "rotLimitMaxX": "0", "springTension": "0"}},
+                {"node": "muzzle_out3", "props": {"MaxHandle": "465"}},
+                {"node": "muzzle_out2", "props": {"MaxHandle": "466"}},
+                {"node": "muzzle_out1", "props": {"MaxHandle": "467"}},
+              ]
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_Left_Pylon_01",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_Left_Pylon_02",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Quad_S02",
+      "port": "hardpoint_Left_Pylon_03",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_quad_s02.cga",
+      "children": [
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_03_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_04_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_Right_Pylon_01",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_Right_Pylon_02",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+            {
+              "entity": "MISL_S03_CS_FSKI_Arrester",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Dual_S03",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+            },
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Quad_S02",
+      "port": "hardpoint_Right_Pylon_03",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_quad_s02.cga",
+      "children": [
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_01_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_02_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_03_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+            {
+              "entity": "MISL_S02_CS_FSKI_Tempest",
+              "port": "missile_04_attach",
+              "parent": "MRCK_S04_BEHR_Quad_S02",
+              "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Tempest_S2.cga"
+            },
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Remote_Turret",
+      "port": "hardpoint_tractor_turret",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Tractor_Turret.cga",
+      "children": [
+            {
+              "entity": "GRIN_TractorBeam_S1",
+              "port": "turret_weapon",
+              "parent": "DRAK_Cutlass_Remote_Turret",
+              "geometry": "Objects/Spaceships/Utilities/Tractor_Beams/GRIN/grin_tractor_beam_s1.cga",
+              "nmc_properties": [
+                {"node": "mesh_ring_5", "props": {"MapChannel:4 ": "", "MapChannel:2 ": "", "MapChannel:3 ": ""}},
+              ]
+            },
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Tractor_Carriage",
+      "port": "hardpoint_tractor_carriage",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Tractor_Carriage.cgf"
+    },
+    {
+      "entity": "DRAK_Cutlass_Tractor_Mount",
+      "port": "hardpoint_tractor_mount",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Tractor_Mount.cga"
+    },
+    {
+      "entity": "Door_RN_RoomConnector_Breachable_OpenReverse_Cutlass",
+      "port": "hardpoint_door_right",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/ships/drak/cutlass/drak_cutlass_door_side_right.cga"
+    },
+    {
+      "entity": "Door_RN_RoomConnector_Breachable_OpenReverse_Cutlass",
+      "port": "hardpoint_door_left",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "objects/spaceships/ships/drak/cutlass/drak_cutlass_door_side_left.cga"
+    },
+    {
+      "entity": "Door_RN_RoomConnector_Breachable_OpenReverse_Cutlass_Ramp",
+      "port": "hardpoint_door_rear",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Door_Ramp.cga",
+      "nmc_properties": [
+        {"node": "Cargo_Door_Box", "props": {"mesh_visarea ": " interior"}},
+        {"node": "Door_Hydrolic_a_top", "props": {"mesh_visarea ": " interior"}},
+        {"node": "Int_Door", "props": {"mesh_visarea ": " auto"}},
+        {"node": "door_hydrolic_b_bot", "props": {"mesh_visarea ": " auto"}},
+        {"node": "Ext_Door", "props": {"mesh_visarea ": " exterior"}},
+        {"node": "Door_Ramp_Interaction", "props": {"mesh_visarea ": " exterior"}},
+        {"node": "door_hydrolic_b_pole", "props": {"mesh_visarea ": " auto"}},
+        {"node": "door_hydrolic_a_pole", "props": {"mesh_visarea ": " interior"}},
+      ]
+    },
+    {
+      "entity": "DRAK_Cutlass_Steel_Switch_Ramp_Ext",
+      "port": "hardpoint_ramp_panel_ext",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Steel_Switch_Ramp_Ext",
+      "port": "hardpoint_ramp_panel_ext_02",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_CargoGrid_Main",
+      "port": "hardpoint_cargogrid_main",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutlass_CargoGrid_Rear",
+      "port": "hardpoint_cargogrid_rear",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "Default_LandingSystem",
+      "port": "landingpad_helper",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutlass_Switch_SideDoor_Ext_Right",
+      "port": "hardpoint_door_right_panel_ext",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga"
+    },
+    {
+      "entity": "DRAK_Cutlass_Switch_SideDoor_Ext",
+      "port": "hardpoint_door_left_panel_ext",
+      "parent": "EntityClassDefinition.DRAK_Cutlass_Black",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga"
+    },
+  ],
+  "interiors": [
+    {
+      "container": "ext_lg",
+      "meshes": [
+      ],
+      "lights": 103
+    },
+    {
+      "container": "base_int_cockpit_main",
+      "meshes": [
+        {"cgf": "objects/buildingsets/human/lowtech/bravo/int/prop/light/light_fluorescent_f.cgf", "pos": [0.71, 1.93, 1.03], "scale": [0.200, 0.200, 0.200]},
+        {"cgf": "objects/buildingsets/human/lowtech/bravo/int/prop/light/light_fluorescent_f.cgf", "pos": [-0.70, 1.93, 1.03], "scale": [0.200, 0.200, 0.200]},
+        {"cgf": "objects/buildingsets/human/lowtech/prop/light/light_wall_02_a.cgf", "pos": [-1.00, 2.16, 0.32], "scale": [0.300, 0.300, 0.300]},
+        {"cgf": "objects/buildingsets/human/lowtech/bravo/int/prop/light/light_fluorescent_f.cgf", "pos": [0.00, -0.53, 2.30], "scale": [0.300, 0.300, 0.300]},
+        {"cgf": "objects/buildingsets/human/lowtech/prop/light/light_wall_02_a.cgf", "pos": [0.99, 2.16, 0.32], "scale": [0.300, 0.300, 0.300]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_black_int_cockpit.cgf", "pos": [0.00, -0.08, 0.01], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_black_int_body.cgf", "pos": [0.00, -7.11, -0.93], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Door_Locker.cga", "pos": [-2.01, -3.80, -1.60], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga", "pos": [-3.56, -8.74, -1.49], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Weapon_Rack.cga", "pos": [2.46, -4.45, -1.34], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall_Exterior.cga", "pos": [-1.53, -10.39, -1.46], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_bunk_bed.cga", "pos": [2.48, -8.77, -1.39], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_door_bulkhead.cga", "pos": [-2.46, -9.31, -2.73], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Door_Locker.cga", "pos": [-2.34, -4.58, -1.60], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/kegr_fire_extinguisher_cabinet_flush_1_c.cgf", "pos": [-1.31, -8.89, -1.55], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/fire_extinguisher_cabinet_nozzle_only_metric.cgf", "pos": [-1.31, -8.88, -1.55], "scale": [1.000, 1.000, 1.000]},
+      ],
+      "lights": 52
+    },
+    {
+      "container": "base_int_body_main",
+      "meshes": [
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_black_int_rear.cgf", "pos": [0.00, -0.10, 0.00], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_black_int_bulkhead.cgf", "pos": [0.00, 3.51, 1.65], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/ships/drak/cutlass/drak_cutlass_black_tractor_rail.cgf", "pos": [-1.70, -5.99, 3.63], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [-2.08, -0.86, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall.cga", "pos": [-4.01, 3.18, 1.67], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall.cga", "pos": [-2.09, -3.47, 1.67], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [-2.08, -1.76, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/kegr_fire_extinguisher_cabinet_flush_1_c.cgf", "pos": [2.50, -0.40, 1.14], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [2.08, -0.84, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [2.08, -1.74, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [2.08, -2.79, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "objects/spaceships/seats/drak/drak_folding_seat.cga", "pos": [-2.08, -2.81, 0.02], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/Spaceships/Ships/DRAK/Cutlass/DRAK_Cutlass_Control_Door_Wall.cga", "pos": [4.01, 3.18, 1.67], "scale": [1.000, 1.000, 1.000]},
+        {"cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/fire_extinguisher_cabinet_nozzle_only_metric.cgf", "pos": [2.50, -0.40, 1.14], "scale": [1.000, 1.000, 1.000]},
+      ],
+      "lights": 70
+    },
+  ]
+}
