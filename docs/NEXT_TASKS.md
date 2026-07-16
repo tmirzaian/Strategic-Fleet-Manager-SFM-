@@ -6,10 +6,16 @@
 > `docs/Roadmap.md`'s "Alpha 2.5D / Complete" list). Work since then is
 > tracked as numbered Engineering Work Orders (EWOs) rather than against
 > this document; `docs/Roadmap.md` is the current living source of truth
-> for what's complete, active, and remaining. Most recently: **EWO-031 —
-> Canonical Catalog Completion & Final Workflow Validation** (see
-> `docs/UI_ARCHITECTURE.md` §16.2–16.3 and `docs/ImportPipeline.md`'s
-> "Current known gaps" #7). Preserved below for historical record.
+> for what's complete, active, and remaining. Most recently: **EWO-033A —
+> Beta Ship Image Coverage & Universal Fallback Standardization** (see
+> `docs/UI_ARCHITECTURE.md` §19.2 and `docs/ASSET_PIPELINE.md`), preceded by
+> **EWO-033 — Beta Ship Card Lock Correction & Stock Role Normalization**
+> (see `docs/UI_ARCHITECTURE.md` §19.1, `docs/DataModel.md`'s "Stock
+> role/focus vs. operational role," and `docs/ImportPipeline.md`'s "Current
+> known gaps" #8). **Next approved mission: EWO-034 — Unique Fleet Priority
+> Ranking** (repairing existing duplicate/gapped Fleet Asset priorities —
+> deliberately not done by EWO-033, see Design Authority Ruling 7).
+> Preserved below for historical record.
 
 ## Task 1 — Add the documentation bundle
 

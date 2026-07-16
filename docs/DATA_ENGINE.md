@@ -57,6 +57,26 @@ evidence of missing storage — see
 `docs/ADR/ADR-004-Fleet-Ownership-Sync-Authority.md` and
 `docs/Architecture.md`'s "Fleet ownership and persistence" section.
 
+## Authoritative catalogs vs. the deep import pipeline (Mission M-012)
+
+The deep import pipeline below (Layer 2, `entity export
+--dump-hierarchy` + normalization + classification + equipment
+resolution) produces a fully-resolved, per-ship port tree — but only for
+ships that have actually gone through it (Gladius and Avenger Titan,
+plus the Aegis Eclipse, Drake Corsair, and Drake Cutlass Black certified
+as a proof group in EWO-019 — see docs/ImportPipeline.md's "Deep-import
+roster expansion" section and `docs/ADR/ADR-006-Deep-Import-Identity-Aliasing.md`).
+Mission M-012 added a *separate, lighter-weight* discovery path
+— bulk DataCore field queries across the whole game, not per-ship
+`entity export` — that produces a full ship/vehicle roster
+(`generated-data/ship-catalog.json`) and the full player-usable
+component universe (`generated-data/component-metadata-catalog.json`)
+without running every ship through the deep pipeline. See
+`docs/ADR/ADR-005-Authoritative-Application-Catalogs.md` for the
+inclusion/exclusion rules, localization strategy, and the explicit scope
+boundary between "roster breadth" (M-012) and "per-ship loadout depth"
+(this pipeline, ship-by-ship, ongoing future work).
+
 ## Where the code lives
 
 ```

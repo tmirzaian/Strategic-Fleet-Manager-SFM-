@@ -96,3 +96,37 @@ by M-009.
 **Still open, unchanged:** the licensing/redistribution question. This
 ADR stays "Proposed" for that reason alone — every other open question
 from the original list now has a concrete, implemented, tested answer.
+
+## Update — Mission M-012 (Universe Provisioning): discovery mechanism widened
+
+M-007's generator discovered entities to resolve by walking SFM's
+raw-data ship fixtures — a closed set (~90 entity classes, scoped to
+Gladius + Avenger Titan). Mission M-012 widened the *scope* of what this
+resolver answers (the full player-usable component universe, not just
+what two ships mount) without changing the resolver's core contract
+(exact-key lookup, explicit unresolved results, no name-based guessing):
+
+- A second discovery path was added — full-universe **bulk DataCore
+  field queries** (`EntityClassDefinition.Components[SAttachableComponentParams]
+  .AttachDef.<field>`), confirmed to resolve one field across all 25,544
+  entity classes with that component in ~3.5s, replacing what would
+  otherwise be thousands of per-record StarBreaker spawns. See
+  `scripts/universeCatalog/dcbBulkQuery.ts` and
+  `docs/ADR/ADR-005-Authoritative-Application-Catalogs.md` for the full
+  design.
+- `CatalogRecord.recordId` became optional (schemaVersion 1 -> 2): the
+  bulk path cannot reach a record's own `_RecordId_` (wrapper metadata,
+  not a property inside `_RecordValue_`) without falling back to
+  per-entity dumps, which would defeat bulk querying's performance
+  rationale. The original narrow, per-entity path (recordId included)
+  is preserved unchanged and still wins wherever both paths resolve the
+  same entity class.
+- `displayName` is now actually resolved via the English `global.ini`
+  localization table (see ADR-005) — M-007 always left this `null`;
+  1,109 player-usable components are now catalogued, 969 with a
+  resolved display name (140 remain explicit `null` — no localization
+  table entry, never a guessed name).
+
+**Licensing/redistribution status: still unresolved, unchanged by
+M-012** — the widened catalog stays gitignored under the same posture.
+This ADR remains "Proposed."

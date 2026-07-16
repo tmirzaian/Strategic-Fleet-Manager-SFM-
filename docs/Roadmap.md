@@ -88,6 +88,31 @@
 
 ## Beta
 
+- **EWO-038 — Commander RSI Ship Image Registry Import & Maintenance
+  Pipeline (complete)**: `src/data/shipImageRegistry.ts` is now a
+  generated file, regenerated deterministically from a Commander-editable
+  CSV (`data-maintenance/ship-images/ship-image-master.csv`) rather than
+  hand-edited — no TypeScript editing required for any future coverage
+  update. Imported the Commander's own 221-row RSI URL workbook
+  (`data-maintenance/ship-images/Commander RSI URL Master.xlsx`,
+  read-only, no images downloaded or redistributed) against all 258
+  canonical selectable hulls via a controlled, non-fuzzy name-matching
+  precedence (`scripts/shipImages/`) that never collapses legitimate
+  variants (600i Explorer vs Touring, Hercules A2/C2/M2, Cutlass Black vs
+  Red, ...). Result: 214 of 258 hulls (82.9%) now resolve a real
+  Commander-supplied image, up from 12; the remaining 44 (including 7
+  workbook rows with no canonical counterpart today — ATLS, Basher,
+  Pitbull, and others, correctly reported rather than invented) use the
+  existing universal fallback, unchanged. Three permanent npm commands
+  (`ship-images:import:xlsx` / `:generate` / `:check`) make future
+  coverage updates a CSV edit + one command, never a code change. The
+  known pre-existing Prospector/MISC_Prospector and
+  Starlite/MISC_Starlite duplicate-canonical-hull pairs (Operation Golden
+  Fleet, GF-002B-V1) were explicitly accounted for — image resolves only
+  to the completeness-ranked winner, no duplicate runtime entry for the
+  catalog-only sibling — without implementing the separate, still-pending
+  GF-002D identity merge. See `docs/ASSET_PIPELINE.md`'s "EWO-038"
+  section and `docs/OPERATION_GOLDEN_FLEET.md`'s EWO-038 addendum.
 - **EWO-035 — Mission Control Visual Completion & Beta Artwork Integration
   (complete)**: the first real production artwork lands in the app.
   Mission Control's Fleet Operations region now renders the
