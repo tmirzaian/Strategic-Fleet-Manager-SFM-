@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import LoadoutPortTree from '../LoadoutPortTree'
 import { buildPortTree } from '../../utils/portTree'
+import { hasComponentCatalog } from '../../generated/componentCatalog'
 import type { Hardpoint } from '../../types'
 
 afterEach(cleanup)
@@ -131,5 +132,68 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
     fireEvent.click(within(row).getByText('Remove'))
     fireEvent.click(screen.getByText('Save'))
     expect(onRemoveComponent).toHaveBeenCalledWith('Cooler 1', false)
+  })
+})
+
+describe('LoadoutPortTree — EWO-037 (Task 1): Core Systems expanded by default on first render', () => {
+  it("the Core Systems group is expanded on initial render — its child rows are visible without clicking Expand All", () => {
+    const hardpoints = [
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Power Plant')).toBeInTheDocument()
+  })
+
+  it('every other category (e.g. Weapons) stays collapsed on initial render', () => {
+    const hardpoints = [
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    expect(screen.getByText('Weapons')).toBeInTheDocument()
+    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+  })
+
+  it('Expand All and Collapse All still work exactly as before, on top of the new initial state', () => {
+    const hardpoints = [
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Collapse All'))
+    expect(screen.queryByText('Power Plant')).not.toBeInTheDocument()
+    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+  })
+
+  it('a ship with no Core Systems group at all renders with every category collapsed, same as prior behavior (no crash, no assumption a match exists)', () => {
+    const hardpoints = [hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' })]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    expect(screen.getByText('Weapons')).toBeInTheDocument()
+    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+  })
+})
+
+describe('LoadoutPortTree — EWO-036B (Task 8): Factory/Installed/Target share the same classification formatter', () => {
+  it('the same component value renders the identical classification subtitle in all three columns', () => {
+    // 'DayBreak' is real generated-data with a resolvable Grade (Grade C —
+    // see componentPresentation.test.ts) and no Class, so its
+    // classification subtitle is the "Grade C" fallback tier today; the
+    // point of this test is that Factory/Installed/Target all route
+    // through the same resolveComponentLabel/ComponentAssignmentLabel
+    // path and so never disagree with each other for the same value.
+    if (!hasComponentCatalog) return // real generated-data not present on this machine
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Power Plant', factoryItem: 'DayBreak', installedItem: 'DayBreak', targetItem: 'DayBreak' })]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    const row = screen.getByText('Power Plant').closest('tr')!
+    expect(within(row).getAllByText('Grade C')).toHaveLength(3)
   })
 })

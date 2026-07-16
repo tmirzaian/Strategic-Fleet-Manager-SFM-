@@ -34,6 +34,9 @@ function renderQuickUpdate() {
 describe('<QuickUpdate /> — EWO-030 (Task 1): canonical component search renderer', () => {
   it('1. Install Component renders the same search input + listbox + Type/Size fields Hangar Inventory uses, not a free-text search', () => {
     renderQuickUpdate()
+    // EWO-037 (Task 2): "Add Component to Hangar" is now the default
+    // landing tab, so Install Component is selected explicitly here.
+    fireEvent.click(screen.getByText('Install Component'))
     expect(screen.getByPlaceholderText('Search catalog components…')).toBeInTheDocument()
     expect(document.querySelector('select[size="6"]')).toBeInTheDocument()
     expect(screen.getByText('Type')).toBeInTheDocument()
@@ -60,6 +63,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 1): canonical component search rende
 describe('<QuickUpdate /> — EWO-030 (Task 2): Install Component follows Component -> Ship -> Loadout -> Slot', () => {
   it('4. Ship, Loadout, and Slot are all hidden until a Component is selected', () => {
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     expect(screen.queryByText('Loadout')).not.toBeInTheDocument()
     expect(screen.queryByText('Slot')).not.toBeInTheDocument()
   })
@@ -67,6 +71,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 2): Install Component follows Compon
   it('5. selecting a Component reveals Ship — with a Ship already implied by default, Loadout resolves in the same step rather than forcing a redundant click', () => {
     if (!catalogComponentsByName.has('Mirage')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Mirage' } })
     expect(screen.getByText('Ship')).toBeInTheDocument()
     expect(screen.getByText('Loadout')).toBeInTheDocument()
@@ -75,6 +80,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 2): Install Component follows Compon
   it('6. once a Ship is implied, Loadout appears, and Loadout options are filtered to that Ship\'s own Builds', () => {
     if (!catalogComponentsByName.has('Mirage')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Mirage' } })
     expect(screen.getByText('Loadout')).toBeInTheDocument()
     expect(screen.getByText('Stealth Build (Active)')).toBeInTheDocument()
@@ -95,6 +101,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
   it('7. the Slot dropdown only lists compatible hardpoints — an S4 Weapon slot never appears for an S1 Cooler component', () => {
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
     expect(screen.queryByText(/Weapon 1/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Quantum Drive/)).not.toBeInTheDocument()
@@ -103,6 +110,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
   it('8. exactly one compatible slot auto-selects — the Commander is never asked to answer an unnecessary question', () => {
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
     expect(screen.getByText(/Cooler 1/)).toBeInTheDocument()
     // Auto-selected immediately — Save is already enabled with no further
@@ -113,6 +121,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
   it('9. a component with zero compatible open slots on the chosen Loadout shows a clear message and keeps Save disabled', () => {
     if (!catalogComponentsByName.has('Atlas')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Atlas' } })
     const select = document.querySelector('select[size="6"]') as HTMLSelectElement
     if (select.value !== 'Atlas') return // only proceed if Atlas resolved to a single unambiguous catalog match
@@ -125,6 +134,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
   it('10. completing Component -> Ship -> Loadout -> Slot and saving installs the component and records it in the Captain\'s Log', () => {
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
     fireEvent.click(screen.getByText('Save Update'))
     expect(screen.getByText('Fleet Registry Updated')).toBeInTheDocument()
@@ -136,6 +146,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
 describe('<QuickUpdate /> — EWO-030 (Task 5): existing validation is defensive-only', () => {
   it('11. Save stays disabled until Component, Ship, Loadout, and Slot are all resolved — the normal workflow cannot submit an incomplete/invalid Install', () => {
     renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
     expect(screen.getByText('Save Update')).toBeDisabled()
   })
 })
@@ -164,6 +175,46 @@ describe('<QuickUpdate /> — EWO-030 (Task 9): Set Active Loadout unchanged', (
     fireEvent.change(loadoutSelect, { target: { value: 'ghost-escort' } })
     fireEvent.click(screen.getByText('Save Update'))
     expect(screen.getByText('Fleet Registry Updated')).toBeInTheDocument()
+    expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe('ghost-escort')
+  })
+})
+
+describe('<QuickUpdate /> — EWO-037 (Task 2): default landing workflow is Add Component to Hangar', () => {
+  it('16. Add Component to Hangar is selected on initial page load, not Install Component', () => {
+    renderQuickUpdate()
+    const addToHangarButton = screen.getByText('Add Component to Hangar').closest('button')!
+    const installButton = screen.getByText('Install Component').closest('button')!
+    expect(addToHangarButton.className).toContain('bg-cyan/10')
+    expect(installButton.className).not.toContain('bg-cyan/10')
+  })
+
+  it('17. on initial load the search field is empty, no component is selected, and no Ship selector is shown', () => {
+    renderQuickUpdate()
+    expect((screen.getByPlaceholderText('Search catalog components…') as HTMLInputElement).value).toBe('')
+    // No component committed yet — CatalogComponentSearch's own Type/Size
+    // readout (driven by `selectedName`, not the raw <select> highlight)
+    // still shows the empty placeholder.
+    const typeValue = screen.getByText('Type').parentElement!.querySelector('div:last-child')!
+    expect(typeValue.textContent).toBe('—')
+    expect(screen.queryByText('Ship')).not.toBeInTheDocument()
+  })
+
+  it('18. Install Component remains fully selectable and unchanged — only the initial tab differs', () => {
+    if (!catalogComponentsByName.has('Mirage')) return
+    renderQuickUpdate()
+    fireEvent.click(screen.getByText('Install Component'))
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Mirage' } })
+    expect(screen.getByText('Ship')).toBeInTheDocument()
+    expect(screen.getByText('Loadout')).toBeInTheDocument()
+  })
+
+  it('19. Set Active Loadout remains fully selectable and unchanged', () => {
+    renderQuickUpdate()
+    fireEvent.click(screen.getByText('Set Active Loadout'))
+    const shipSelects = screen.getAllByRole('combobox')
+    fireEvent.change(shipSelects[0], { target: { value: 'ghost' } })
+    fireEvent.change(shipSelects[1], { target: { value: 'ghost-escort' } })
+    fireEvent.click(screen.getByText('Save Update'))
     expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe('ghost-escort')
   })
 })

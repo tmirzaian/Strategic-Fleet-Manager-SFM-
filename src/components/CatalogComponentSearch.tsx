@@ -86,9 +86,9 @@ export default function CatalogComponentSearch({ selectedName, onSelect, placeho
           <div className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-muted/80">{selectedCatalogEntry ? `S${selectedCatalogEntry.size}` : '—'}</div>
         </div>
       </div>
-      {selectedCatalogEntry && (selectedLabel?.gradeLabel || manufacturerNameFor(selectedCatalogEntry.manufacturerCode)) && (
+      {selectedCatalogEntry && (selectedLabel?.classificationLabel || manufacturerNameFor(selectedCatalogEntry.manufacturerCode)) && (
         <div className="text-xs text-muted flex flex-wrap gap-x-3 gap-y-1 mt-2">
-          {selectedLabel?.gradeLabel && <span>{selectedLabel.gradeLabel}</span>}
+          {selectedLabel?.classificationLabel && <span>{selectedLabel.classificationLabel}</span>}
           {manufacturerNameFor(selectedCatalogEntry.manufacturerCode) && <span>{manufacturerNameFor(selectedCatalogEntry.manufacturerCode)}</span>}
         </div>
       )}

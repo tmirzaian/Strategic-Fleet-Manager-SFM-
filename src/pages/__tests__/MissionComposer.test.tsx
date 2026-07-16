@@ -485,6 +485,26 @@ describe('EWO-026 (Task 3/4/13): explicit "View in Ship Detail" navigation', () 
   })
 })
 
+describe('EWO-036B (Task 7/8): recursive hardpoint labels and the internalName diagnostic', () => {
+  it("Corsair's Quantum Drive slot renders the short Commander-facing label (\"Jump Drive\") as the clickable row text, while the Port & Mount Detail panel's internalName diagnostic still shows the full raw canonical slotLabel (\"Quantum Drive — Jump Drive\") unformatted", () => {
+    const result = useFleetStore.getState().addFleetAsset('corsair-imported', 'OWNED')
+    renderComposer(`?shipId=${result.assetId}`)
+
+    // The row itself shows the short, formatted leaf label — not the raw
+    // "Quantum Drive — Jump Drive" chain.
+    const rowButton = screen.getByText('Jump Drive')
+    expect(screen.queryByText('Quantum Drive — Jump Drive')).not.toBeInTheDocument()
+
+    // Expanding that row's Port & Mount Detail panel reveals the raw,
+    // unformatted internalName — the one diagnostic display this mission
+    // explicitly forbids touching.
+    fireEvent.click(rowButton)
+    expect(screen.getByText(/internalName:/)).toBeInTheDocument()
+    const panel = screen.getByText(/internalName:/).closest('td')!
+    expect(panel.textContent).toContain('Quantum Drive — Jump Drive')
+  })
+})
+
 describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro), continued', () => {
   it('20. EWO-024 compatibility filtering and Presets-hidden behavior still hold after the EWO-025 rewrite', () => {
     renderComposer('?shipId=ghost')

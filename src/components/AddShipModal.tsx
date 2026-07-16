@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { X, Plus, Search } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import type { OwnershipType } from '../types'
 import { OWNERSHIP_TYPE_LABELS } from '../utils/ownership'
+import { formatShipPickerLabel } from '../utils/shipDisplayLabel'
 
 const OWNERSHIP_OPTIONS: OwnershipType[] = ['OWNED', 'PURCHASED', 'LOANER']
 
@@ -21,13 +22,33 @@ export default function AddShipModal({ onClose }: { onClose: () => void }) {
   const [priority, setPriority] = useState('')
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
 
+  // EWO-026 (Task 9/12) — one shared formatter produces the label every
+  // option shows, is searched against, and is sorted by, so a seed
+  // definition without a manufacturer prefix ("135c") can neither drift
+  // out of alphabetical position (Task 11's "sort position is incorrect
+  // because the manufacturer prefix is absent" finding) nor show a raw
+  // string different from what search/sort actually reasoned about.
   const filteredDefinitions = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const list = q ? shipDefinitions.filter((d) => d.displayName.toLowerCase().includes(q) || d.manufacturer.toLowerCase().includes(q)) : shipDefinitions
-    return [...list].sort((a, b) => a.displayName.localeCompare(b.displayName))
+    const list = q
+      ? shipDefinitions.filter((d) => d.displayName.toLowerCase().includes(q) || d.manufacturer.toLowerCase().includes(q) || formatShipPickerLabel(d.displayName, d.manufacturer).toLowerCase().includes(q))
+      : shipDefinitions
+    return [...list].sort((a, b) => formatShipPickerLabel(a.displayName, a.manufacturer).localeCompare(formatShipPickerLabel(b.displayName, b.manufacturer)))
   }, [shipDefinitions, query])
 
   const selected = shipDefinitions.find((d) => d.id === selectedId)
+
+  // EWO-024 (Task 1) — a search narrow enough to leave exactly one
+  // selectable ship must never leave the Commander stuck on a highlighted
+  // but unselected row with "Add to Fleet" disabled. Re-runs whenever the
+  // filtered list changes (typing, clearing the search) so it also
+  // recovers correctly if a broader search briefly produces >1 result and
+  // then narrows again.
+  useEffect(() => {
+    if (filteredDefinitions.length === 1) {
+      setSelectedId(filteredDefinitions[0].id)
+    }
+  }, [filteredDefinitions])
 
   function handleConfirm() {
     if (!selected) {
@@ -76,7 +97,7 @@ export default function AddShipModal({ onClose }: { onClose: () => void }) {
             >
               {filteredDefinitions.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.displayName} — {d.manufacturer}
+                  {formatShipPickerLabel(d.displayName, d.manufacturer)}
                 </option>
               ))}
             </select>

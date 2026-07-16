@@ -95,7 +95,7 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
             onClick={handleSave}
             className="w-full inline-flex items-center justify-center gap-2 bg-cyan text-bg font-semibold text-sm py-2.5 rounded-lg hover:bg-cyan/90 transition-colors"
           >
-            Save Changes
+            Update Fleet Registry
           </button>
         </div>
       </div>

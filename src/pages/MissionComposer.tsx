@@ -25,6 +25,7 @@ import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import TargetComponentPicker from '../components/TargetComponentPicker'
 import { buildPortTree, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree, flattenDisplayTree, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
+import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import type { Hardpoint } from '../types'
 
 type StartingState = 'FACTORY' | 'INSTALLED' | 'EMPTY' | 'EXISTING'
@@ -345,7 +346,7 @@ export default function MissionComposer() {
                   <span className="w-[13px] shrink-0" />
                 )}
                 <button onClick={() => setExpandedSlot(expandedSlot === row.id ? null : row.id)} className="flex items-center gap-1 hover:text-cyan transition-colors">
-                  {row.slotLabel}
+                  {formatHardpointLabel(row.slotLabel)}
                 </button>
               </div>
             </td>

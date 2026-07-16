@@ -38,7 +38,10 @@ export default function QuickUpdate() {
   const addHangarItem = useFleetStore((s) => s.addHangarItem)
   const setActiveBuild = useFleetStore((s) => s.setActiveBuild)
 
-  const [changeType, setChangeType] = useState<ChangeType>('Install Component')
+  // EWO-037 (Task 2) — "Add Component to Hangar" is now the default landing
+  // workflow (was "Install Component"); Install Component itself is
+  // unchanged, just no longer pre-selected on page load.
+  const [changeType, setChangeType] = useState<ChangeType>('Add Component to Hangar')
   // EWO-030 (Task 1) — set exclusively by CatalogComponentSearch picking a
   // real catalog component, replacing the old free-text itemQuery search
   // for both Install Component and Add Component to Hangar.

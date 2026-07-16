@@ -6,6 +6,7 @@ import { derivePortLogistics, derivePortValidation, type PortTreeNode } from '..
 import { groupPortTree, flattenDisplayTree, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
 import type { HangarItem, InstalledLoadoutEntry, MissionReservation } from '../types'
 import ComponentAssignmentLabel from './ComponentAssignmentLabel'
+import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 
 function logisticsTone(state: string) {
   if (state === 'Installed') return 'success' as const
@@ -51,11 +52,21 @@ export default function LoadoutPortTree({
    * this is provided, so those callers' table is unchanged. */
   onRemoveComponent?: (slotLabel: string, returnToHangar: boolean) => { matched: boolean; itemName?: string }
 }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const displayTree = groupPortTree(tree)
+  // EWO-037 (Task 1) — first-run certification repeatedly read an
+  // all-collapsed Ship Detail as "no ship data exists" until Expand All was
+  // clicked. Seeding the initial expanded state with the Core Systems
+  // category (present for virtually every real ship — Power Plant at
+  // minimum) gives the page visible content on first paint without
+  // changing the expand/collapse model itself: this only affects the
+  // very first render's starting Set, never subsequent interaction.
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    const coreSystems = displayTree.find((node) => node.kind === 'group' && node.label === 'Core Systems')
+    return coreSystems ? new Set([coreSystems.id]) : new Set()
+  })
   const [removeTarget, setRemoveTarget] = useState<{ slotLabel: string; itemLabel: string } | null>(null)
   const [returnToHangar, setReturnToHangar] = useState(false)
   const [removeError, setRemoveError] = useState<string | null>(null)
-  const displayTree = groupPortTree(tree)
   const hasActions = Boolean(onRemoveComponent)
 
   function toggle(id: string) {
@@ -100,7 +111,7 @@ export default function LoadoutPortTree({
             ) : (
               <span className="w-[13px] shrink-0" />
             )}
-            {hp.slotLabel}
+            {formatHardpointLabel(hp.slotLabel)}
           </div>
         </td>
         <td className="px-4 py-2.5 text-muted whitespace-nowrap">{hp.size} {hp.type}</td>
@@ -202,7 +213,7 @@ export default function LoadoutPortTree({
               <th className="px-4 py-3 font-medium">Installed</th>
               <th className="px-4 py-3 font-medium">Target Loadout</th>
               <th className="px-4 py-3 font-medium">Logistics</th>
-              <th className="px-4 py-3 font-medium">Validation</th>
+              <th className="px-4 py-3 font-medium">VAL</th>
               {hasActions && <th className="px-4 py-3 font-medium text-right">Actions</th>}
             </tr>
           </thead>
@@ -223,7 +234,7 @@ export default function LoadoutPortTree({
                 <X size={18} />
               </button>
             </div>
-            <p className="text-sm text-muted mb-4">Removing from {removeTarget.slotLabel}. This clears the Installed assignment for the active Loadout.</p>
+            <p className="text-sm text-muted mb-4">Removing from {formatHardpointLabel(removeTarget.slotLabel)}. This clears the Installed assignment for the active Loadout.</p>
             <label className="flex items-center gap-2 text-sm text-white cursor-pointer mb-4">
               <input type="checkbox" checked={returnToHangar} onChange={(e) => setReturnToHangar(e.target.checked)} className="accent-cyan" />
               Return removed component to Hangar

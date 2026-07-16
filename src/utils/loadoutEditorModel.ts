@@ -1,5 +1,5 @@
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
-import type { FleetAsset } from '../types'
+import type { FleetAsset, Hardpoint } from '../types'
 
 /**
  * EWO-025 — root cause of "Edit an Existing Loadout flattens the
@@ -144,4 +144,39 @@ export function resolveShipDefinitionId(shipId: string, fleetAssets: FleetAsset[
   if (direct) return direct.shipDefinitionId
   const seedAsset = fleetAssets.find((a) => a.id === `${shipId}-asset-seed`)
   return seedAsset?.shipDefinitionId
+}
+
+/**
+ * EWO-026 (Task 1) — Ship Detail's own latent instance of EWO-025's root
+ * cause, deferred at the time (see that mission's report: "ShipDetail.tsx
+ * has the identical latent bug... flagged as a known, related,
+ * unaddressed latent defect"). `saveMissionConfiguration` still never
+ * writes `parentSlotLabel`/`groupLabel`/`assemblyRole`/`isStructural` onto
+ * a saved Build's own Hardpoint rows, so Ship Detail's Loadout & Port Tree
+ * flattens (no category headers, no real nesting) the moment a ship's
+ * active build is anything other than its pristine Factory Loadout.
+ *
+ * Unlike `buildLoadoutEditorModel` (which produces synthetic
+ * `LoadoutEditorRow`s for MissionComposer's editing surface),
+ * this returns real `Hardpoint` rows — identical `id`/`shipId`/`buildId`/
+ * `status`/`invalidMessage`/`factoryItem`/`installedItem`/`targetItem` —
+ * with only the four structural fields overlaid from the canonical
+ * template by stable `slotLabel`. That distinction matters: Ship Detail's
+ * readiness/logistics/validation calculations
+ * (`calculateBuildProgress`, `derivePortLogistics`, `derivePortValidation`)
+ * all consume `Hardpoint[]` directly and must keep doing so unchanged
+ * (EWO-026 Task 1 explicitly forbids touching readiness) — only the
+ * DISPLAY tree passed to `LoadoutPortTree` should be overlaid, never the
+ * rows readiness math reads. A row with no canonical match (the ship's
+ * own data changed shape since the build was saved) is returned
+ * unchanged, exactly like `buildLoadoutEditorModel`'s orphan handling —
+ * never crashes, never invents a match.
+ */
+export function overlayCanonicalHierarchy(hardpoints: Hardpoint[], template: FactoryHardpointTemplate[]): Hardpoint[] {
+  const templateBySlot = new Map(template.map((t) => [t.slotLabel, t]))
+  return hardpoints.map((hp) => {
+    const t = templateBySlot.get(hp.slotLabel)
+    if (!t) return hp
+    return { ...hp, parentSlotLabel: t.parentSlotLabel, groupLabel: t.groupLabel, assemblyRole: t.assemblyRole, isStructural: t.isStructural }
+  })
 }

@@ -51,7 +51,7 @@ export const seedQuartermasterTemplates: QuartermasterTemplate[] = [
   {
     id: 'template-medical-rescue',
     name: 'Medical / Rescue Support',
-    description: 'Life-support and shield-focused configuration for rescue operations.',
+    description: 'Life-support and shield-focused loadout for rescue operations.',
     category: 'Support',
     targetAssignments: [
       { slotLabel: 'Shield 1', targetItem: 'FR-66' },

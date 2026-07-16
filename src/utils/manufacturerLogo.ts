@@ -39,6 +39,76 @@ const MANUFACTURER_ALIASES: Record<string, string> = {
   'tumbril land systems': 'TMBL',
 }
 
+/**
+ * EWO-023 (Task 3) — the reverse of `MANUFACTURER_ALIASES`: a manufacturer
+ * CODE (e.g. "DRAK", as parsed from a StarBreaker entity class like
+ * "DRAK_Cutlass_Black") -> its short canonical display name ("Drake").
+ * Derived from the SAME reviewed alias table above rather than a second,
+ * separately-maintained name list — for a code with more than one alias
+ * (e.g. "drake" and "drake interplanetary" both map to DRAK), the
+ * shortest key wins, since this table's own convention is that the
+ * short form is always the bare brand name and the long form is the
+ * full corporate name. Never invents a manufacturer that isn't already
+ * a reviewed entry in `MANUFACTURER_ALIASES`.
+ */
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+const MANUFACTURER_CODE_TO_NAME: Record<string, string> = (() => {
+  const byCode: Record<string, string> = {}
+  for (const [alias, code] of Object.entries(MANUFACTURER_ALIASES)) {
+    const existing = byCode[code]
+    if (!existing || alias.length < existing.length) {
+      byCode[code] = alias
+    }
+  }
+  return Object.fromEntries(Object.entries(byCode).map(([code, alias]) => [code, titleCase(alias)]))
+})()
+
+/** Resolves a manufacturer code (e.g. "DRAK", "AEGS") to its short
+ * canonical display name (e.g. "Drake", "Aegis"), or `undefined` for a
+ * code with no reviewed entry — callers must keep their own fallback for
+ * that case, never guess a name from the bare code. */
+export function manufacturerNameForCode(code: string): string | undefined {
+  return MANUFACTURER_CODE_TO_NAME[code.trim().toUpperCase()]
+}
+
+/**
+ * EWO-026 (Task 9/10) — the reverse of `manufacturerNameForCode`, but the
+ * LONGEST alias per code (e.g. "drake interplanetary", "origin jumpworks")
+ * rather than the shortest — this table's own convention is that the long
+ * form is always the full corporate name. Derived from the same reviewed
+ * `MANUFACTURER_ALIASES` table, never a second hand-maintained list, and
+ * never invents a full name for a manufacturer with no reviewed long-form
+ * alias (e.g. "Mirai", which only ever had one alias) — that manufacturer's
+ * short name doubles as its full name rather than fabricating one.
+ */
+const MANUFACTURER_CODE_TO_FULL_NAME: Record<string, string> = (() => {
+  const byCode: Record<string, string> = {}
+  for (const [alias, code] of Object.entries(MANUFACTURER_ALIASES)) {
+    const existing = byCode[code]
+    if (!existing || alias.length > existing.length) {
+      byCode[code] = alias
+    }
+  }
+  return Object.fromEntries(Object.entries(byCode).map(([code, alias]) => [code, titleCase(alias)]))
+})()
+
+/** Resolves a manufacturer code to its full corporate display name (e.g.
+ * "DRAK" -> "Drake Interplanetary"), or `undefined` for a code with no
+ * reviewed entry. */
+export function manufacturerFullNameForCode(code: string): string | undefined {
+  return MANUFACTURER_CODE_TO_FULL_NAME[code.trim().toUpperCase()]
+}
+
+/** Resolves a manufacturer name or code (short or long form — both are
+ * reviewed alias-table keys) to its own alias code, or `undefined` if it
+ * isn't a reviewed manufacturer at all. */
+export function manufacturerCodeFor(manufacturerNameOrCode: string): string | undefined {
+  return MANUFACTURER_ALIASES[manufacturerNameOrCode.trim().toLowerCase()]
+}
+
 /** Resolves a manufacturer name or code to display info. Unknown
  * manufacturers fall back to the first four letters of whatever string
  * was given, uppercased — never blocks rendering, never throws. */
