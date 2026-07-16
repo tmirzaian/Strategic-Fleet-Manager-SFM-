@@ -445,3 +445,350 @@ This GF-002A section, appended to the existing `docs/OPERATION_GOLDEN_FLEET.md` 
 ```
 docs(golden-fleet): add GF-002A source acquisition feasibility recon
 ```
+
+---
+
+# GF-002B — Canonical Fleet Batch Source Acquisition
+
+**Status:** Complete. Every one of the 258 canonical selectable hulls now has a validated, staged StarBreaker export. Nothing was promoted into `raw-data/`, nothing in `generated-data/` changed, no Commander data touched.
+**Acquisition date:** 2026-07-15 → 2026-07-16 (per-hull timestamps captured in the report; batch completed 2026-07-16T00:10:15.186Z)
+**HEAD at mission time:** `e028962` (unchanged throughout — nothing committed by this mission)
+
+## Objective
+
+Turn GF-002A's proven feasibility into a deterministic, resumable, auditable tool that acquires and validates a real StarBreaker mechanical export for all 258 canonical selectable hulls — never writing into `raw-data/` or `generated-data/`. Promotion is reserved for GF-002C.
+
+## Permanent tooling created
+
+All under `scripts/goldenFleet/`, run via `vite-node` (not plain `tsx` — `selectableShipDefinitions` transitively imports `src/generated/shipCatalog.ts`, which uses Vite-only `import.meta.glob`; `vite-node` is already a transitive dependency of this project's `vitest` devDependency, formalized as a direct devDependency by this mission, not a new install):
+
+- `types.ts` — shared types (`ManifestEntry`, `AcquisitionStatus`, `AcquisitionReport`, etc.)
+- `manifest.ts` — builds the deterministic 258-row manifest from `selectableShipDefinitions` + `generated-data/ship-catalog.json`, including a lenient-but-ambiguity-honest seed-hull name resolver (`resolveSeedEntityClass`)
+- `identityCheck.ts` — Task 4's exact-entity match protection, reusing the real importer's own `resolveShipEntity()` prefix-normalization rule
+- `validator.ts` — runs a staged file through the real `StarBreakerImporter` → `ShipNormalizer` → `validateNormalizedPackage` pipeline in memory only
+- `acquisitionRunner.ts` — orchestrates export → identity check → validation → classification, with resume/retry/timeout/overwrite-protection/quarantine, via an injectable `SpawnFn` for testability
+- `realSpawn.ts` — the one real `child_process.spawnSync` call site
+- `report.ts` — builds the machine-readable acquisition report
+- `acquire.ts` — CLI entry point (dry-run, staging path, StarBreaker/P4K path, timeout, retries, force, limit flags)
+- `__tests__/manifest.test.ts`, `__tests__/identityCheck.test.ts`, `__tests__/acquisitionRunner.test.ts` — 35 tests, all mocked process execution, zero real StarBreaker invocations in the normal suite
+
+## Package commands added
+
+```json
+"golden-fleet:acquire": "vite-node scripts/goldenFleet/acquire.ts",
+"golden-fleet:acquire:dry-run": "vite-node scripts/goldenFleet/acquire.ts -- --dry-run"
+```
+
+Plus `vite-node` promoted from an implicit transitive dependency to an explicit devDependency (`^2.1.2`, matching the already-installed version — no new package fetched).
+
+## Staging directory
+
+`staging-data/golden-fleet/` (project-local, newly gitignored this mission — see `.gitignore`). Contains one `<entityClass>.json` per exported hull, `acquisition-state.json` (resume bookkeeping), `acquisition-report.json` (the full machine-readable report), and an empty `quarantine/` subdirectory (nothing was ever quarantined this run).
+
+## Data.p4k / StarBreaker metadata
+
+| | |
+|---|---|
+| Data.p4k path | `C:\Program Files\Roberts Space Industries\StarCitizen\LIVE\Data.p4k` |
+| Size | 162,736,189,440 bytes (~151.6 GB) |
+| Modified | 2026-07-02T16:18:05.646Z |
+| Branch / Version / P4ChangeNum | `sc-alpha-4.8.0` / `4.8.184.64329` / `12122953` (identical to GF-001/GF-002A — no drift) |
+| StarBreaker path | `D:\StarBreaker-main\StarBreaker-main\target\release\starbreaker.exe` |
+| StarBreaker version | `0.3.2` |
+| StarBreaker SHA-256 | `7a6cba8a79a55ae0e247fdad08e35517158e3a877a2335355de6974c801eaa87` |
+
+## Batch export results — every canonical hull reconciled to 258
+
+| Status | Count |
+|---|---|
+| EXPORTED_VALID | 246 |
+| ALREADY_VALIDATED | 12 (6 already covered by the approved `raw-data/*.json` files + 6 carried over from this mission's own earlier incremental test runs, both correctly resumed rather than re-exported) |
+| NO_MECHANICAL_ENTITY | 0 |
+| AMBIGUOUS_MATCH | 0 |
+| EXPORT_FAILED | 0 |
+| MALFORMED_OUTPUT | 0 |
+| IDENTITY_MISMATCH | 0 |
+| IMPORTER_REJECTED | 0 |
+| OTHER | 0 |
+| **Total** | **258** |
+
+**Total runtime:** 2,064.3 seconds (~34.4 minutes) for the 246 freshly-exported hulls (~8.4s/hull average — real-world hulls vary more than GF-002A's 3-hull sample suggested). **Total staging size:** 79.62 MB.
+
+**This is a clean, unqualified result: zero hulls hit any failure classification.** Every canonical selectable hull — including all 242 previously catalog-only hulls and all 10 seed-backed hulls — has a real, validated, identity-confirmed mechanical export.
+
+## Port-count distribution (246 freshly-validated hulls)
+
+| Ports | Count |
+|---|---|
+| 1–10 | 37 |
+| 11–20 | 59 |
+| 21–30 | 50 |
+| 31–50 | 65 |
+| 51–100 | 28 |
+| 100+ | 7 |
+
+Min 3, max 107, average 29.9 ports per hull. Zero hulls had 0 ports (the "0" bucket is empty by construction — a hull that reached validation always had a real, non-trivial port tree).
+
+## Unknown Factory Item / normalization findings
+
+- **Hulls with any Unknown Factory Item count > 0: 0** — every single one of the 246 fresh exports resolved 100% of its non-structural factory item references to a real component.
+- **Duplicate slot labels: 0.**
+- **Normalization errors: 0.** Normalization warnings and compatibility warnings: 0 across the board.
+
+## Seed-backed hull comparison (Task 8)
+
+All 10 seed-backed hulls now have a validated authoritative export:
+
+| Hull | Entity class | Port count | Structural rows | Unknown Factory Item (fresh source) |
+|---|---|---|---|---|
+| 135c | `ORIG_135c` | 16 | 0 | 0 |
+| Cutlass Red | `DRAK_Cutlass_Red` | 18 | 0 | 0 |
+| F7C-S Hornet Ghost Mk II | `ANVL_Hornet_F7CS_Mk2` | 25 | 0 | 0 |
+| M80 | `ORIG_m80` | 42 | 4 | **0** |
+| MOLE | `ARGO_MOLE` | 16 | 2 | **0** |
+| Prospector | `MISC_Prospector` | 14 | 2 | 0 |
+| Railen | `GAMA_Railen` | 54 | 2 | 0 |
+| Starlite | `MISC_Starlite` | 25 | 5 | **0** |
+| UTV | `GRIN_UTV` | 4 | 0 | 0 |
+| Vulture | `DRAK_Vulture` | 16 | 2 | 0 |
+
+**M80 result:** 42 real ports (thrusters, cargo ramp, entrance ramp, fuel systems), **zero** Unknown Factory Item entries in the fresh source — SFM's current seed fixture's 10 Unknown Factory Item rows are entirely an SFM staleness artifact, not a CIG data gap.
+
+**MOLE result:** 16 real ports, zero Unknown Factory Item, zero Invalid Target in the fresh source — the current seed fixture's 1 Invalid Target case does not reproduce against real, current mechanical data.
+
+**Starlite result:** 25 real ports, **zero** Unknown Factory Item in the fresh source — the current seed fixture's 11 Unknown Factory Item rows are, like M80, entirely an SFM staleness artifact.
+
+**Is current seed factory data stale? Yes, unambiguously**, for all three (M80, MOLE, Starlite) — real, complete, clean mechanical data is now available and staged for every one of them. **Should GF-002C promote deep-import data above seed mechanical data for these hulls?** This audit recommends yes for mechanical/factory data specifically — see the Commander decision points below; this mission does not decide it. **Should presentation metadata remain seed-backed?** Yes — nothing about this finding touches identity/presentation (name, ownership, priority, nickname), which stay correctly seed-authoritative per ADR-008's existing ruling; only the *mechanical* factory template is stale.
+
+## Canonical and variant reconciliation (Task 7)
+
+- **Total ship-catalog records with a resolved display name:** 288 (of 294 raw candidates — 6 have no resolved localization string and are excluded from `shipCatalogRecords`, unrelated to this mission).
+- **Catalog records represented among the 258 selectable hulls' requested entity ids:** 256 unique entity ids (258 manifest rows resolve to 256 unique ids — see the duplicate finding below).
+- **Legitimate extra variants not currently selectable:** 32 (e.g. `AEGS_Hammerhead_GS`, `AEGS_Idris_P_FW_25`, `ANVL_Ballista_EA_Outlaw`, various Fleet Week/tutorial/collector-edition variants) — these are real, named catalog records that EWO-021's own canonical-selection logic correctly did not surface as separate Add Ship entries (each already has a canonical sibling selected instead). **Add Ship was not expanded from 258 to 294/288 — confirmed.**
+- **Multiple entities competing for one canonical hull:** none found.
+- **Canonical hulls with no valid mechanical entity:** none (0 of 258).
+- **A genuine, previously-undocumented finding — two canonical hulls independently resolve to the same entity class, never deduped by the existing canonical-selection logic:**
+  - `prospector` (seed-backed) and `MISC_Prospector` (catalog-only) both resolve to entity class `MISC_Prospector`.
+  - `starlite` (seed-backed) and `MISC_Starlite` (catalog-only) both resolve to entity class `MISC_Starlite`.
+
+  **Root cause:** `src/data/shipDefinitions.ts`'s own `bareHullName()` dedup requires the definition's `.manufacturer` field to corroborate a stripped displayName prefix before trusting it — but Mission M-012's catalog `manufacturer.name` for these two ("Musashi Industrial & Starflight Concern") and `.code` ("MIS") both disagree with the literal "MISC" prefix embedded in the catalog's own `displayName` ("MISC Prospector", "MISC Starlite"). This is a **real, pre-existing SFM canonical-identity gap** (both hulls are separately selectable in Add Ship today), not introduced or worsened by this mission, and **not fixed here** — `NOT AUTHORIZED` explicitly forbids changing canonical selection/alias rules and `shipDefinitions.ts`. Flagged as a Commander decision point below. Both entries exported cleanly to the identical underlying file with no conflict (the second one triggered ordinary overwrite protection and reused the already-valid export).
+
+## GF-002C readiness gate (Task 11)
+
+All required gate criteria are met:
+
+- ✅ Every canonical hull has a final classified status (258/258, zero `PENDING` remaining).
+- ✅ All successful files pass identity validation (0 `IDENTITY_MISMATCH`).
+- ✅ All successful files pass importer parsing (0 `IMPORTER_REJECTED`).
+- ✅ Ambiguous matches are isolated (0 `AMBIGUOUS_MATCH` — none occurred, so there is nothing to isolate).
+- ✅ No `raw-data/` or `generated-data/` file changed (confirmed via `git status` — both directories show only their pre-existing, unrelated dirty state).
+- ✅ The promotion candidate set is explicit: **250 unique staged files** (corrected by GF-002B-V1 — see that section below; the original 246 figure only counted `EXPORTED_VALID` rows and missed 6 additional validated files this mission's own earlier tool-development runs had already staged under `ALREADY_VALIDATED`).
+- ✅ Failures are reproducible and documented: there are zero failures to reproduce.
+- ✅ The Commander can review coverage totals before promotion: this document + `staging-data/golden-fleet/acquisition-report.json` together provide a full per-hull audit trail.
+
+## Exact GF-002C promotion candidate count
+
+**Corrected by GF-002B-V1 to 250 unique files** (see that section below for the full reconciliation) — the figure below is preserved as originally written for the historical record, but undercounted by not including 6 hulls this mission's own earlier tool-development test runs (before the final full batch) had already validated and staged under `ALREADY_VALIDATED` rather than `EXPORTED_VALID`.
+
+~~246 files~~ — every `EXPORTED_VALID` hull in `staging-data/golden-fleet/*.json`, excluding the 6 already covered by the approved `raw-data/*.json` files and excluding `acquisition-report.json`/`acquisition-state.json` themselves. The full per-hull list (name, entity class, port count) is in `acquisition-report.json`.
+
+## Commander decision points
+
+1. **Authorize GF-002C** (the actual promotion of the 250 unique staged, validated exports into `raw-data/`, followed by `npm run import:ships` regeneration) — this mission found zero blocking defects.
+2. **Should the `prospector`/`MISC_Prospector` and `starlite`/`MISC_Starlite` duplicate-canonical-hull pairs be resolved** (a `shipDefinitions.ts` fix, out of GF-002B's authorized scope) before or independently of GF-002C's promotion?
+3. **Should GF-002C promote the fresh M80/MOLE/Starlite mechanical data over the current stale seed fixtures**, given the clean, complete, zero-gap real data now staged for all three? (Recommended: yes, mechanically; presentation/identity stays seed-authoritative regardless per ADR-008.)
+4. **Given the exceptionally clean batch result (zero failures across 246 exports), is a full GF-002C promotion in one pass acceptable**, or does the Commander want a smaller reviewed batch first despite the clean result?
+
+## Recommended commit message (if this section and the tooling are approved)
+
+```
+feat(golden-fleet): add GF-002B batch source acquisition tooling and complete export
+```
+
+---
+
+# GF-002B-V1 — Promotion Set and Duplicate Identity Reconciliation
+
+**Status:** Verification and decision-support only, complete. No files promoted, no staged exports deleted, no `raw-data`/`generated-data`/canonical-identity/production-code changes made.
+**HEAD at verification time:** `e028962` (unchanged).
+
+## Reconciliation of all 258 acquisition records (Task 1)
+
+Every one of the 258 canonical selectable definitions was cross-referenced against the live manifest, `staging-data/golden-fleet/acquisition-report.json`, the staging directory, and `raw-data/` directly (by searching each raw-data file's own content for its exact `EntityClassDefinition.<class>` string — not by filename guessing).
+
+| Metric | Count |
+|---|---|
+| Validated files physically in `raw-data/` | 6 |
+| Validated files physically in `staging-data/` | 250 unique (252 manifest rows reference staging-data; 2 of those rows point to a file already counted, see below) |
+| Validated files elsewhere | 0 |
+| Canonical definitions with no physical validated file | 0 |
+| Unique validated physical files (total) | 256 |
+| Unique mechanical entity identities | 256 |
+| Duplicate canonical definitions sharing an entity | 2 pairs (4 canonical ids) |
+| Total canonical definitions represented | 258 |
+
+**All totals reconcile:** 258 canonical rows → 256 unique physical files (6 in `raw-data/`, 250 in `staging-data/`) → 256 unique entity identities, with exactly 2 entity identities each claimed by 2 canonical definitions (the Prospector and Starlite pairs below), accounting for the 258 − 256 = 2 "extra" rows.
+
+## ALREADY_VALIDATED — full list and explanation (Task 2)
+
+All 12 `ALREADY_VALIDATED` records, individually:
+
+| # | Hull name | Canonical id | File path | Location | Why ALREADY_VALIDATED | Origin |
+|---|---|---|---|---|---|---|
+| 1 | 135c | `135c` | `staging-data/golden-fleet/ORIG_135c.json` | staging-data | Resume logic found a prior, still-valid staged file (`acquisition-state.json`) from this mission's own earlier `--limit 3` tool-development test run | GF-002B tool testing (this mission, prior to the final full batch) |
+| 2 | Aegis Avenger Stalker | `AEGS_Avenger_Stalker` | `staging-data/golden-fleet/AEGS_Avenger_Stalker.json` | staging-data | Same — resumed from prior test run | GF-002B tool testing |
+| 3 | Aegis Avenger Titan Renegade | `AEGS_Avenger_Titan_Renegade` | `staging-data/golden-fleet/AEGS_Avenger_Titan_Renegade.json` | staging-data | Same | GF-002B tool testing |
+| 4 | Aegis Avenger Warlock | `AEGS_Avenger_Warlock` | `staging-data/golden-fleet/AEGS_Avenger_Warlock.json` | staging-data | Same | GF-002B tool testing |
+| 5 | Aegis Gladius Dunlevy | `AEGS_Gladius_Dunlevy` | `staging-data/golden-fleet/AEGS_Gladius_Dunlevy.json` | staging-data | Same | GF-002B tool testing |
+| 6 | Aegis Gladius Pirate | `AEGS_Gladius_PIR` | `staging-data/golden-fleet/AEGS_Gladius_PIR.json` | staging-data | Same | GF-002B tool testing |
+| 7 | Avenger Titan | `avenger-titan-imported` | `raw-data/AEGS Avenger Titan.json` | raw-data | Manifest marks every `DEEP-IMPORTED` hull `alreadyInRawData: true` — already an approved source, never re-exported | Pre-existing repository data |
+| 8 | Corsair | `corsair-imported` | `raw-data/DRAK Corsair.json` | raw-data | Same | Pre-existing repository data |
+| 9 | Cutlass Black | `cutlass-black-imported` | `raw-data/DRAK Cutlass Black.json` | raw-data | Same | Pre-existing repository data |
+| 10 | Eclipse | `eclipse-imported` | `raw-data/AEGS Eclipse.json` | raw-data | Same | Pre-existing repository data |
+| 11 | Gladius | `gladius-imported` | `raw-data/AEGS Gladius.json` | raw-data | Same | Pre-existing repository data |
+| 12 | Valkyrie | `valkyrie-imported` | `raw-data/ANVL Valkyrie.json` | raw-data | Same | Pre-existing repository data |
+
+**Two distinct sub-populations, not one:** 6 are genuinely "already an approved raw-data source, nothing to do" (rows 7–12). The other 6 (rows 1–6) are **not** in `raw-data/` at all — they are real, validated, staged exports that this mission's own incremental tool-development runs (before the final unattended full batch) already produced and correctly resumed rather than re-exporting. **These 6 must be copied during GF-002C exactly like the 246 `EXPORTED_VALID` files** — they were never redundant with the 6 raw-data files, only misfiled by status label.
+
+**Is the reported 246 promotion-candidate count correct? No.** Corrected count: **250** (246 `EXPORTED_VALID` + 6 `ALREADY_VALIDATED`-but-staged, minus 2 for the Prospector/Starlite duplicate pairs, which already share one physical file each rather than requiring two copies).
+
+## Complete GF-002C source set (Task 3)
+
+**A. Existing approved raw files to retain (6, unchanged):** `AEGS Avenger Titan.json`, `AEGS Eclipse.json`, `AEGS Gladius.json`, `ANVL Valkyrie.json`, `DRAK Corsair.json`, `DRAK Cutlass Black.json`.
+
+**B. Staged files to promote (250 unique files):** all `staging-data/golden-fleet/*.json` files except `acquisition-report.json` and `acquisition-state.json`, which is 252 files on disk, minus 2 because the Prospector and Starlite pairs each already share one physical file (no second copy exists to promote).
+
+**C. Staged files that duplicate an existing approved raw file:** **0** — the 6 raw-data files and the 250 staged files represent entirely disjoint entity classes; no overlap.
+
+**D. Canonical definitions sharing one authoritative entity export:** 2 pairs — `prospector`/`MISC_Prospector` (both → `MISC_Prospector.json`) and `starlite`/`MISC_Starlite` (both → `MISC_Starlite.json`). Promoting one physical file serves both canonical ids' `shipFactoryTemplates` lookups once GF-002C's regeneration wires the lookup (a `shipDefinitions.ts` concern, not a file-count concern).
+
+**E. Files that should not be promoted:** none identified — every staged file passed identity verification and importer validation with zero warnings.
+
+**F. Missing files:** none — 0 of 258 canonical definitions lack a physical validated file.
+
+| Metric | Value |
+|---|---|
+| Canonical-definition count represented | 258 |
+| Unique entity count represented | 256 |
+| Unique physical-file count | 256 |
+| Files to copy into `raw-data/` during GF-002C | 250 |
+| Expected final `raw-data/` file count after promotion | 256 (6 existing + 250 newly promoted) |
+
+## Prospector duplicate audit (Task 4)
+
+| Field | `prospector` (seed) | `MISC_Prospector` (catalog-only) |
+|---|---|---|
+| Display name | Prospector | MISC Prospector |
+| Manufacturer | MISC (correct) | Musashi Industrial & Starflight Concern |
+| Source category | SEED-BACKED | CATALOG-ONLY |
+| Entity class (now known) | `MISC_Prospector` | `MISC_Prospector` |
+| Stock role/focus | Solo Mining | Light Mining |
+| Image key / source | `prospector` — **real Commander registry image** (`7rfmcpg9qcpmm/slideshow.jpg`) | `MISC_Prospector` — **no registry entry, falls to universal fallback** |
+| Factory-template source (current, pre-GF-002C) | Seed-authored, 11 rows | Empty (`portIds: []`, Mission M-012 placeholder) |
+| Seed-fleet relationship | Yes — one of the 12 original seed ships, migrated via the generic `migrateSeedFleetToAssets()` (id `prospector-asset-seed`) | No |
+| Current Add Ship visibility | Visible | Visible (separately, as a second entry) |
+| Existing aliases | None recorded | None recorded |
+| Referenced in seed fleet / migration / image registry / tests / generated data / docs | seed fleet: yes; migration: yes (generic); image registry: yes (`SHIP_IMAGE_URLS.prospector`); tests: yes (existing seed-ship test coverage); generated data: no; docs: yes (seed ship lists) | seed fleet: no; migration: no; image registry: no; tests: no dedicated coverage found; generated data: yes (`ship-catalog.json` only); docs: only this Golden Fleet document |
+| Materializes independently | Yes | Yes |
+| Creates a distinct FleetAsset identity | Yes (`prospector-asset-seed` if seed-migrated, or a fresh `MANUAL` asset if separately added via Add Ship) | Yes (a separate `MANUAL` FleetAsset if a Commander ever added it via Add Ship) |
+
+**Recommended canonical winner: `prospector` (the seed-backed id).** This is not a new judgment call — it is the exact outcome `definitionCompletenessRank()` already produces for every other seed-vs-catalog duplicate in the app (seed rank 1 beats catalog-placeholder rank 2); the only reason it didn't happen here is `bareHullName()`'s manufacturer-prefix-verification failing to strip "MISC" (displayName prefix) because neither the catalog's `manufacturer.name` ("Musashi Industrial & Starflight Concern") nor `.code` ("MIS") textually matches it — a pure string-matching gap, not a genuine identity ambiguity.
+
+## Starlite duplicate audit (Task 5)
+
+| Field | `starlite` (seed) | `MISC_Starlite` (catalog-only) |
+|---|---|---|
+| Display name | Starlite | MISC Starlite |
+| Manufacturer | **Crusader (incorrect — see GF-002A's own finding)** | Musashi Industrial & Starflight Concern |
+| Source category | SEED-BACKED | CATALOG-ONLY |
+| Entity class (now known) | `MISC_Starlite` | `MISC_Starlite` |
+| Stock role/focus | Future Gameplay | Light Refueling |
+| Image key / source | `starlite` — **real Commander registry image** (`6cdv5u7nvigrn/slideshow.jpg`) | `MISC_Starlite` — **no registry entry, falls to universal fallback** |
+| Factory-template source (current, pre-GF-002C) | Seed-authored, 11 rows | Empty (`portIds: []`) |
+| Seed-fleet relationship | Yes — migrated via `migrateSeedFleetToAssets()` (id `starlite-asset-seed`) | No |
+| Current Add Ship visibility | Visible | Visible (separately) |
+| Existing aliases | None recorded | None recorded |
+| Referenced in seed fleet / migration / image registry / tests / generated data / docs | seed fleet: yes; migration: yes (generic); image registry: yes (`SHIP_IMAGE_URLS.starlite`); tests: yes; generated data: no; docs: yes | seed fleet: no; migration: no; image registry: no; tests: none found; generated data: yes (`ship-catalog.json`); docs: only this document |
+| Materializes independently | Yes | Yes |
+| Creates a distinct FleetAsset identity | Yes | Yes |
+
+**Recommended canonical winner: `starlite` (the seed-backed id)** — identical reasoning to Prospector. Note the seed's own `manufacturer: 'Crusader'` field is itself factually wrong (real manufacturer is MISC, per GF-002A) — a separate, pre-existing data-quality issue not fixed by this verification (no seed-data modification authorized).
+
+## MOLE confirmation (Task 6)
+
+**Confirmed: MOLE is not part of either duplicate-identity pair.** Direct search of `docs/OPERATION_GOLDEN_FLEET.md` shows every MOLE mention occurs only in the separate, correct context of the **M80/MOLE/Starlite mechanical-support-gap trio** (Task 4/8's Category B partial-mechanical-support finding — an entirely different issue: real port-tree gaps in the current seed fixture, not duplicate canonical identity). MOLE is never mentioned near the Prospector/Starlite duplicate-identity discussion anywhere in the document. **"Prospector/MOLE-Starlite pairs" was a writing typo in this mission's own prior chat-response prose** (not in the document itself) — no document correction was required, since the document never contained the incorrect phrase.
+
+## Persistence and Commander-data risks (Task 21 context)
+
+- Neither `prospector` nor `MISC_Prospector`, nor `starlite`/`MISC_Starlite`, currently has any special-cased persistence, migration, or test logic beyond the fully generic mechanisms every seed/catalog hull already goes through — confirmed via direct search (zero references to `MISC_Prospector`/`MISC_Starlite` anywhere in `src/` before this verification).
+- **Risk to existing Commander data if a canonical fix is later implemented:** low but non-zero. If a real Commander has ever added `MISC_Prospector` or `MISC_Starlite` via Add Ship (browsing the full catalog, not just the common picks), that FleetAsset's `shipDefinitionId` would need the same safe-supersession aliasing (`supersededByCanonical`) EWO-021 already built for exactly this scenario — self-healing on next rehydration, no data loss, no manual migration needed. This is the existing, proven mechanism, not a new risk.
+- No seed-ship FleetAsset (`prospector-asset-seed`, `starlite-asset-seed`) is at any risk — a seed-vs-catalog merge only ever aliases the *catalog* loser (per `supersededByCanonical`'s own established rule), never a seed winner's data.
+
+## GF-002C decision options (Task 7)
+
+**Option A — Resolve duplicate canonical identities before promotion.**
+- Benefits: `raw-data/`/`generated-data/` end up clean from the start; no dual-entity confusion ever reaches Add Ship.
+- Risks: requires a `shipDefinitions.ts` code change (fixing `bareHullName()`'s prefix-verification or adding a targeted alias) — out of this mission's authorization, needs its own reviewed mission.
+- Effect on raw-data: promotion would only add 250 files (not 252), since the loser's file is simply skipped from the start.
+- Effect on generated-data: `MISC_Prospector`/`MISC_Starlite` would never appear as separate `ships.json`/`ship-catalog.json`-sourced definitions once aliased.
+- Effect on Add Ship: shows one Prospector, one Starlite — matches every other hull's behavior.
+- Effect on persistence: none for existing data; the alias mechanism already handles a hypothetical existing `MISC_Prospector`/`MISC_Starlite` FleetAsset safely.
+- Effect on Commander FleetAssets: none negative; only improves consistency.
+- Test requirements: update/extend `shipDefinitions.test.ts`'s dedup coverage for this specific manufacturer-abbreviation case.
+- **Recommendation: preferred long-term, but requires a separate, explicitly authorized code-change mission — not doable inside GF-002C's own promotion-only scope.**
+
+**Option B — Promote all validated unique entities first, then resolve canonical duplicates before regeneration.**
+- Benefits: unblocks GF-002C's file-promotion work immediately without waiting on a code-review cycle; the duplicate-identity fix becomes a smaller, independent follow-up.
+- Risks: a short window where `raw-data/` contains a file serving two still-separate canonical ids — cosmetically odd but functionally harmless (both already materialize correctly today, just twice).
+- Effect on raw-data: 250 files added, exactly as documented above.
+- Effect on generated-data: unaffected until `import:ships` actually runs (GF-002C itself, separately gated).
+- Effect on Add Ship: unchanged in this mission (still shows both) until the follow-up fix lands.
+- Effect on persistence: none.
+- Effect on Commander FleetAssets: none.
+- Test requirements: none beyond GF-002C's own existing verification gate.
+- **Recommendation: pragmatic, lowest-friction path — matches this mission's own "verification only, no promotion yet" charter and lets GF-002C proceed without being gated on an unrelated identity-ruling mission.**
+
+**Option C — Preserve both canonical definitions while intentionally sharing one mechanical source.**
+- Benefits: zero code change required at all; both hulls simply both resolve to real, complete mechanical data once GF-002C promotes the one shared file.
+- Risks: perpetuates the confusing "same real ship listed twice" Add Ship experience indefinitely — the actual Commander-facing symptom that prompted this audit in the first place.
+- Effect on raw-data/generated-data: identical to Option B.
+- Effect on Add Ship: two entries remain, permanently, for the same real hull.
+- Effect on persistence/Commander FleetAssets: none.
+- Test requirements: none.
+- **Recommendation: not recommended as a permanent end-state** — acceptable only as the short-term shape Option B temporarily produces, not as a deliberate final decision.
+
+## Recommended sequencing
+
+**Option B**, immediately followed by a small, separately authorized Option-A fix mission — promote now (GF-002C, using the corrected 250-file set), regenerate, verify; then fix the `bareHullName()` manufacturer-abbreviation gap as its own small, independently reviewed change.
+
+---
+
+# EWO-038 — Commander RSI Ship Image Registry import: Prospector/Starlite handling
+
+EWO-038 (Commander RSI Ship Image Registry Import & Maintenance Pipeline)
+imported the Commander's own RSI image workbook and, per its own Task 5,
+was explicitly required to account for — but not resolve — the two known
+duplicate-canonical-hull pairs documented above, using the exact
+completeness-ranked winner already established here (`prospector`,
+`starlite`).
+
+- The workbook's "Prospector" and "Starlite" rows matched the seed-backed
+  winner ids directly (`prospector`, `starlite`) and now carry a real
+  Commander-supplied registry URL each — superseding the older registry
+  values referenced in the tables above (the "Image key / source" rows'
+  specific slideshow URLs are now historical; the resolution mechanism
+  and winner identity they describe are unchanged).
+- `MISC_Prospector` and `MISC_Starlite` (the catalog-only lesser siblings)
+  each received their own row in the new
+  `data-maintenance/ship-images/ship-image-master.csv` (one row per
+  canonical selectable hull, per that mission's Task 3), but with `
+  rsi_image_url` deliberately left blank and `match_method: EXISTING_ALIAS`
+  — no duplicate runtime registry entry was generated for either, exactly
+  as this document's Prospector/Starlite audits already established should
+  happen once a winner is chosen.
+- This does not implement GF-002D. The two lesser siblings remain
+  separately visible in Add Ship, as documented above — only their image
+  resolution was addressed, not their canonical-definition duplication.
+  See `scripts/shipImages/duplicateCanonicalPairs.ts` for the exact,
+  reviewed mapping and `docs/ASSET_PIPELINE.md`'s "EWO-038" section for
+  the full pipeline this ran through.

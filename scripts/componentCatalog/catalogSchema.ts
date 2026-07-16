@@ -6,9 +6,18 @@
  * normalization behavior (Mission M-007).
  */
 
-export const CATALOG_SCHEMA_VERSION = 1
+// Bumped 1 -> 2 for Mission M-012 (Universe Provisioning): discovery moved
+// from a per-entity, raw-data-fixture-scoped walk to full-universe bulk
+// DataCore field queries. `recordId` becomes optional as a result —
+// StarBreaker's bulk field-query mode extracts values from within
+// `_RecordValue_` only; a record's own `_RecordId_` GUID is wrapper
+// metadata, not reachable via that mechanism without a per-entity full
+// dump (which would defeat bulk querying's whole performance rationale).
+// `displayName` is now actually resolved (see
+// scripts/universeCatalog/localization.ts) rather than always null.
+export const CATALOG_SCHEMA_VERSION = 2
 export const GENERATOR_NAME = 'Strategic Fleet Manager Component Catalog Generator'
-export const GENERATOR_VERSION = '1.0.0'
+export const GENERATOR_VERSION = '2.0.0'
 
 export interface CatalogRecordProvenance {
   source: 'starbreaker-datacore'
@@ -21,7 +30,8 @@ export interface CatalogRecordProvenance {
 export interface CatalogRecord {
   entityClass: string
   recordName: string
-  recordId: string
+  /** Present only for records resolved via the narrow per-entity query path (M-007); omitted for full-universe bulk-discovered records (M-012) — see the schemaVersion 2 note above. */
+  recordId?: string
   category: string | null
   subtype: string | null
   size: number | null

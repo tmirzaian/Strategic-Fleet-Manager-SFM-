@@ -10,9 +10,27 @@ coverage/
 
 .vscode/settings.json
 
-# Component Catalog Generator output (Mission M-007) — locally-generated
-# from a licensed Star Citizen install via StarBreaker. Not committed
-# until the licensing/redistribution decision in ADR-003 is resolved.
-# Narrowly scoped to this one file so other generated-data/*.json fixtures
-# stay tracked as before.
+# Component Catalog Generator output (Mission M-007, widened to the full
+# universe by Mission M-012) — locally-generated from a licensed Star
+# Citizen install via StarBreaker. Not committed until the licensing/
+# redistribution decision in ADR-003/ADR-005 is resolved. Narrowly scoped
+# to these files so other generated-data/*.json fixtures stay tracked as
+# before.
 generated-data/component-metadata-catalog.json
+
+# Ship & Ground Vehicle Catalog Generator output (Mission M-012) — same
+# licensing posture as the component catalog above.
+generated-data/ship-catalog.json
+
+# Scratch directory for the one-time English localization table extracted
+# from the P4K (Mission M-012) — a build artifact of the generators above,
+# not source data; regenerated automatically on next run if missing.
+.localization-cache/
+
+# Operation Golden Fleet (GF-002B) staged StarBreaker exports and the
+# acquisition report/state — same licensing posture as the catalogs above
+# (locally generated from a licensed Star Citizen install, never
+# committed). Never promoted into raw-data/ automatically; see
+# docs/OPERATION_GOLDEN_FLEET.md's GF-002B section and the reserved
+# GF-002C promotion step.
+staging-data/
