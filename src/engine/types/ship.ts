@@ -56,6 +56,14 @@ export interface Ship {
   /** Model/family, when derivable from source data (e.g. "Gladius" vs. the
    * class name "AEGS_Gladius"). Left undefined when not derivable. */
   model?: string
+  /** Canonical raw entity class name (e.g. "AEGS_Gladius"), stripped of the
+   * `EntityClassDefinition.` prefix — the same identity the broad ship
+   * catalog (Mission M-012, `ship-catalog.json`) keys its records by. This
+   * is the join key the app layer uses to recognize that a deep-imported
+   * ship and a catalog-only entry describe the same real vessel, and to
+   * resolve a FleetAsset added before deep-import data existed once it
+   * does. Left undefined only if the source truly carried no class name. */
+  sourceEntityClass?: string
   classification: ShipClassification
 }
 

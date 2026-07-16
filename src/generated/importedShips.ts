@@ -79,3 +79,20 @@ function buildView(ship: Ship): ImportedShipView {
 export const importedShips: Record<string, ImportedShipView> = Object.fromEntries(ships.map((s) => [s.id, buildView(s)]))
 
 export const importedShipList: ImportedShipView[] = Object.values(importedShips)
+
+/**
+ * Global lookup from a resolved Component's own `displayName` back to the
+ * full Component record (internalName, grade, class, manufacturer), across
+ * every deep-imported ship. `factoryItemFor()`/`nameFor()` (src/data/shipDefinitions.ts,
+ * src/pages/ShipDetail.tsx) copy `Component.displayName` verbatim into
+ * `Hardpoint.factoryItem`/`installedItem`/`targetItem` — plain strings by
+ * the time they reach a render site — so this is an exact, non-guessed
+ * join key back to the record that produced that string (EWO-019A
+ * component-presentation contract), not a reverse-engineered/heuristic one.
+ * First entry for a given displayName wins, same determinism policy as
+ * src/generated/componentCatalog.ts's catalogComponentsByName.
+ */
+export const componentByDisplayName: Map<string, Component> = new Map()
+for (const c of components) {
+  if (!componentByDisplayName.has(c.displayName)) componentByDisplayName.set(c.displayName, c)
+}

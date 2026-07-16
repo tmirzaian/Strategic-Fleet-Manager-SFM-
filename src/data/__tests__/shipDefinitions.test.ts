@@ -4,6 +4,7 @@ import { importedShipList } from '../../generated/importedShips'
 import { shipCatalogRecords } from '../../generated/shipCatalog'
 import { materializeFleetAsset } from '../../utils/fleetAssetMaterializer'
 import { buildPortTree } from '../../utils/portTree'
+import { validateTargetCompatibility } from '../componentCatalog'
 
 const gladiusDefinition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Gladius')
 
@@ -36,11 +37,71 @@ describe('importedFactoryTemplate — Mission M-011 (full nested port tree, not 
   it('a weapon mount is a top-level row and its child gun is nested beneath it', () => {
     if (!gladiusDefinition) return
     const template = shipFactoryTemplates[gladiusDefinition.id]
-    const noseMount = template.find((t) => t.slotLabel === 'Nose Weapon')
+    // EWO-023 (Task 5): a mount's own slotLabel is now suffixed with its
+    // real AssemblyRole ("Gimbal Mount") so the hierarchy visibly
+    // distinguishes the mount from its child gun, rather than both
+    // reading as plain "Weapon"-shaped labels.
+    const noseMount = template.find((t) => t.slotLabel === 'Nose Weapon (Gimbal Mount)')
     expect(noseMount).toBeDefined()
     expect(noseMount!.parentSlotLabel).toBeUndefined()
-    const child = template.find((t) => t.parentSlotLabel === 'Nose Weapon')
+    const child = template.find((t) => t.parentSlotLabel === 'Nose Weapon (Gimbal Mount)')
     expect(child).toBeDefined()
+  })
+
+  it("EWO-023 (Task 5): a terminal (leaf) port never gets a mount-role suffix, even when its own AssemblyRole is GENERIC_MOUNT", () => {
+    // Avenger Titan's Power Plant/Cooler ports carry assemblyRole
+    // GENERIC_MOUNT too (deriveAssemblyRole's fallback for any entity
+    // class that isn't turret/mount-shaped by name) but have no children —
+    // they are ordinary equipment, not a structural mount, and must never
+    // render as "Power Plant (Mount)".
+    const avengerDefinition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Avenger Titan')
+    if (!avengerDefinition) return
+    const template = shipFactoryTemplates[avengerDefinition.id]
+    const powerPlant = template.find((t) => t.slotLabel === 'Power Plant')
+    expect(powerPlant).toBeDefined()
+    expect(powerPlant!.slotLabel).not.toContain('Mount')
+  })
+
+  it('EWO-023 (Task 5): a structural mount/turret with real children is suffixed with its friendly AssemblyRole label', () => {
+    const valkyrieDefinition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Valkyrie')
+    if (!valkyrieDefinition) return
+    const template = shipFactoryTemplates[valkyrieDefinition.id]
+    const mannedTurret = template.find((t) => t.assemblyRole === 'MANNED_TURRET' && !t.parentSlotLabel)
+    expect(mannedTurret).toBeDefined()
+    expect(mannedTurret!.slotLabel.toLowerCase()).toContain('manned turret')
+    const child = template.find((t) => t.parentSlotLabel === mannedTurret!.slotLabel)
+    expect(child).toBeDefined()
+  })
+
+  it("EWO-023 (Task 6 follow-on): every deep-imported ship's Factory Loadout is compatibility-valid — no false INCOMPATIBLE flags from equipmentGroup/category vocabulary mismatch", () => {
+    // Fixing Task 6's displayName bug made factory item names resolvable
+    // against catalogComponentsByName for the first time, which exposed a
+    // second, previously-silent bug: FactoryHardpointTemplate.type carried
+    // Port.equipmentGroup ("Power", "Weapons" — a plural UI bucket)
+    // directly, while validateTargetCompatibility and the catalog it
+    // checks against both expect the singular category vocabulary seed
+    // ships already use ("Power Plant", "Weapon"). Every ship below must
+    // produce zero false-incompatible rows on its own real factory data.
+    //
+    // "Revenant Gatling" and "MSD-313 Missile Rack" additionally needed a
+    // targeted override in src/data/componentCatalog.ts's hand-authored
+    // CATALOG table: neither display name is unique across the Mission
+    // M-012 bulk catalog (multiple real entity classes at different sizes
+    // resolve to the same name), and catalogComponentsByName's "first
+    // entry wins" dedup was picking a differently-sized variant than the
+    // one actually installed on the real ship that carries it — the same
+    // kind of bulk-catalog miscategorization the existing FR-86 override
+    // already corrects.
+    if (shipCatalogRecords.length === 0) return
+    for (const view of importedShipList) {
+      const definition = shipDefinitions.find((d) => d.id === view.ship.id)!
+      const template = shipFactoryTemplates[definition.id]
+      for (const row of template) {
+        if (row.isStructural || row.factoryItem === '—') continue
+        const result = validateTargetCompatibility(row.factoryItem, row.type, row.size)
+        expect(result.valid, `${view.ship.name} — ${row.slotLabel}: ${result.message ?? ''}`).toBe(true)
+      }
+    }
   })
 })
 

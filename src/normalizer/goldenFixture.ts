@@ -47,37 +47,43 @@ export interface GoldenComparisonResult {
  * ShipNormalizer/equipmentResolver/etc. references it.
  *
  * `itemDisplayName` values are the real, authoritative component
- * identities — rendered as their raw entity-class string (e.g.
- * "POWR AEGS S01 Regulus SCItem") because catalog-sourced components
- * don't yet have a prettified display name (`displayNameGenerator.ts`'s
- * heuristics were built for port internal names, not entity class names).
- * This is a documented display-only limitation (Mission M-009/M-010),
- * not a factual error — the underlying component identity is correct.
+ * identities. Through EWO-023 (Task 6), these were rendered as their raw
+ * entity-class string (e.g. "POWR AEGS S01 Regulus SCItem") because
+ * `componentMetadataEnrichment.ts`'s `enrichNode()` never copied the
+ * Component Metadata Catalog's own already-resolved `displayName` onto
+ * the enriched factory component — every StarBreaker-origin component
+ * fell through to `factoryLoadoutBuilder.ts`'s raw-token fallback
+ * (`generateDisplayName`), which just title-cases the internal name
+ * verbatim. That was a genuine display bug (Commander-facing internal
+ * IDs like "QDRV TARS S02 Odyssey SCItem" instead of "Odyssey"), not a
+ * documented limitation — fixed by copying `metadata.displayName`
+ * through like every other enriched field. These expectations were
+ * updated to the real, catalog-resolved friendly names EWO-023 restores.
  */
 export const goldenFixtures: Record<string, GoldenFixtureSpec> = {
   Gladius: {
     shipName: 'Gladius',
     expectations: [
-      { label: 'Nose Weapon', displayName: 'Nose Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'GATS BallisticGatling S3' },
-      { label: 'Left Wing Weapon', displayName: 'Left Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'KLWE LaserRepeater S3' },
-      { label: 'Right Wing Weapon', displayName: 'Right Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'KLWE LaserRepeater S3' },
-      { label: 'Power Plant', displayName: 'Power Plant', minSize: 1, maxSize: 1, itemDisplayName: 'POWR AEGS S01 Regulus SCItem' },
-      { label: 'Left Cooler', displayName: 'Left Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'COOL AEGS S01 Bracer SCItem' },
-      { label: 'Right Cooler', displayName: 'Right Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'COOL AEGS S01 Bracer SCItem' },
-      { label: 'Left Shield Generator', displayName: 'Left Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'SHLD GODI S01 AllStop SCItem' },
-      { label: 'Right Shield Generator', displayName: 'Right Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'SHLD GODI S01 AllStop SCItem' },
-      { label: 'Quantum Drive', displayName: 'Quantum Drive', minSize: 1, maxSize: 1, itemDisplayName: 'QDRV WETK S01 Beacon SCItem' },
+      { label: 'Nose Weapon', displayName: 'Nose Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'Mantis GT-220 Gatling' },
+      { label: 'Left Wing Weapon', displayName: 'Left Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'CF-337 Panther Repeater' },
+      { label: 'Right Wing Weapon', displayName: 'Right Wing Weapon', minSize: 3, maxSize: 3, itemDisplayName: 'CF-337 Panther Repeater' },
+      { label: 'Power Plant', displayName: 'Power Plant', minSize: 1, maxSize: 1, itemDisplayName: 'Regulus' },
+      { label: 'Left Cooler', displayName: 'Left Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'Bracer' },
+      { label: 'Right Cooler', displayName: 'Right Cooler', minSize: 1, maxSize: 1, itemDisplayName: 'Bracer' },
+      { label: 'Left Shield Generator', displayName: 'Left Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'AllStop' },
+      { label: 'Right Shield Generator', displayName: 'Right Shield Generator', minSize: 1, maxSize: 1, itemDisplayName: 'AllStop' },
+      { label: 'Quantum Drive', displayName: 'Quantum Drive', minSize: 1, maxSize: 1, itemDisplayName: 'Beacon' },
       {
         label: 'Jump Drive',
         displayName: 'Jump Drive',
         minSize: 1,
         maxSize: 1,
-        itemDisplayName: 'JDRV TARS S01 Explorer SCItem',
+        itemDisplayName: 'Explorer',
       },
-      { label: 'Left Inner Missile Rack', displayName: 'Left Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'MISL S03 CS FSKI Arrester' },
-      { label: 'Right Inner Missile Rack', displayName: 'Right Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'MISL S03 CS FSKI Arrester' },
-      { label: 'Left Outer Missile Rack', displayName: 'Left Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'MISL S02 IR FSKI Ignite' },
-      { label: 'Right Outer Missile Rack', displayName: 'Right Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'MISL S02 IR FSKI Ignite' },
+      { label: 'Left Inner Missile Rack', displayName: 'Left Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'Arrester III Missile' },
+      { label: 'Right Inner Missile Rack', displayName: 'Right Inner Wing Missile Rack', minSize: 3, maxSize: 3, itemDisplayName: 'Arrester III Missile' },
+      { label: 'Left Outer Missile Rack', displayName: 'Left Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'Ignite II Missile' },
+      { label: 'Right Outer Missile Rack', displayName: 'Right Outer Wing Missile Rack', minSize: 2, maxSize: 2, itemDisplayName: 'Ignite II Missile' },
     ],
   },
 }

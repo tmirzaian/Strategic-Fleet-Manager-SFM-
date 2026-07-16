@@ -33,6 +33,33 @@ describe('ShipNormalizer entity envelope compatibility', () => {
     expect(pkg.ship.name).toBe('Gladius')
   })
 
+  it("EWO-023 (Task 3): derives manufacturer from the root.entity envelope's class name, since this envelope never supplies one directly", () => {
+    const doc: RawShipExport = {
+      root: { entity: 'EntityClassDefinition.DRAK_Cutlass_Black' },
+      loadout: minimalLoadout,
+    }
+    const pkg = new ShipNormalizer().normalize(doc, 'envelope.json')
+    expect(pkg.ship.manufacturer).toBe('Drake')
+  })
+
+  it("EWO-023 (Task 3): an embedded manufacturer always wins over the derived one (field precedence)", () => {
+    const doc: RawShipExport = {
+      entity: { className: 'DRAK_Cutlass_Black', manufacturer: 'Explicit Corp' },
+      loadout: minimalLoadout,
+    }
+    const pkg = new ShipNormalizer().normalize(doc, 'legacy-with-manufacturer.json')
+    expect(pkg.ship.manufacturer).toBe('Explicit Corp')
+  })
+
+  it("EWO-023 (Task 3): an unrecognized manufacturer code derives no guess — falls through to empty string, never invented", () => {
+    const doc: RawShipExport = {
+      root: { entity: 'EntityClassDefinition.ZZZZ_UnknownHull' },
+      loadout: minimalLoadout,
+    }
+    const pkg = new ShipNormalizer().normalize(doc, 'unknown-code.json')
+    expect(pkg.ship.manufacturer).toBe('')
+  })
+
   it('normalizes the prefix consistently even when it shows up on a legacy top-level entity', () => {
     const doc: RawShipExport = {
       entity: { className: 'EntityClassDefinition.AEGS_Gladius' },
@@ -54,5 +81,11 @@ describe('ShipNormalizer entity envelope compatibility', () => {
     expect(raw.entity).toBeUndefined()
     expect(raw.root?.entity).toBe('EntityClassDefinition.AEGS_Gladius')
     expect(resolveShipEntity(raw)).toEqual({ className: 'AEGS_Gladius' })
+  })
+
+  it('EWO-023 (Task 3): the real Gladius fixture now normalizes to manufacturer "Aegis", not empty', () => {
+    const raw = JSON.parse(readFileSync(resolve(RAW_DATA_DIR, 'AEGS Gladius.json'), 'utf-8')) as RawShipExport
+    const pkg = new ShipNormalizer().normalize(raw, 'raw-data/AEGS Gladius.json')
+    expect(pkg.ship.manufacturer).toBe('Aegis')
   })
 })

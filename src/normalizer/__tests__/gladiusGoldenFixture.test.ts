@@ -39,12 +39,12 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     const nose = pkg.equipmentAssignments.find((a) => a.displayName === 'Nose Weapon')!
     const leftWing = pkg.equipmentAssignments.find((a) => a.displayName === 'Left Wing Weapon')!
     const rightWing = pkg.equipmentAssignments.find((a) => a.displayName === 'Right Wing Weapon')!
-    expect(componentNameFor(pkg, nose.resolvedItemId)).toBe('GATS BallisticGatling S3')
-    expect(componentNameFor(pkg, leftWing.resolvedItemId)).toBe('KLWE LaserRepeater S3')
-    expect(componentNameFor(pkg, rightWing.resolvedItemId)).toBe('KLWE LaserRepeater S3')
+    expect(componentNameFor(pkg, nose.resolvedItemId)).toBe('Mantis GT-220 Gatling')
+    expect(componentNameFor(pkg, leftWing.resolvedItemId)).toBe('CF-337 Panther Repeater')
+    expect(componentNameFor(pkg, rightWing.resolvedItemId)).toBe('CF-337 Panther Repeater')
     // Each weapon mount's own mount hardware is reported separately, not
     // as the resolved equipment — see equipmentRelationship.ts.
-    expect(componentNameFor(pkg, nose.mountItemId)).toBe('Mount Gimbal S3')
+    expect(componentNameFor(pkg, nose.mountItemId)).toBe('VariPuck S3 Gimbal Mount')
   })
 
   it('4. Power Plant resolves to the real catalog-derived Regulus power plant', () => {
@@ -52,7 +52,7 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     const powerPlant = pkg.equipmentAssignments.find((a) => a.displayName === 'Power Plant')!
     expect(powerPlant.minSize).toBe(1)
     expect(powerPlant.maxSize).toBe(1)
-    expect(componentNameFor(pkg, powerPlant.resolvedItemId)).toBe('POWR AEGS S01 Regulus SCItem')
+    expect(componentNameFor(pkg, powerPlant.resolvedItemId)).toBe('Regulus')
   })
 
   it('5. both coolers resolve to the real catalog-derived Bracer cooler', () => {
@@ -62,7 +62,7 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     for (const c of coolers) {
       expect(c.minSize).toBe(1)
       expect(c.maxSize).toBe(1)
-      expect(componentNameFor(pkg, c.resolvedItemId)).toBe('COOL AEGS S01 Bracer SCItem')
+      expect(componentNameFor(pkg, c.resolvedItemId)).toBe('Bracer')
     }
   })
 
@@ -73,7 +73,7 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     for (const s of shields) {
       expect(s.minSize).toBe(1)
       expect(s.maxSize).toBe(1)
-      expect(componentNameFor(pkg, s.resolvedItemId)).toBe('SHLD GODI S01 AllStop SCItem')
+      expect(componentNameFor(pkg, s.resolvedItemId)).toBe('AllStop')
     }
   })
 
@@ -82,7 +82,7 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     const qd = pkg.equipmentAssignments.find((a) => a.displayName === 'Quantum Drive')!
     expect(qd.minSize).toBe(1)
     expect(qd.maxSize).toBe(1)
-    expect(componentNameFor(pkg, qd.resolvedItemId)).toBe('QDRV WETK S01 Beacon SCItem')
+    expect(componentNameFor(pkg, qd.resolvedItemId)).toBe('Beacon')
     expect(qd.mountItemId).toBeNull() // QuantumDrive is independent equipment, not a mount/container
   })
 
@@ -92,7 +92,7 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     expect(jumpDrives).toHaveLength(1)
     const jd = jumpDrives[0]!
     expect(jd.equipmentGroup).toBe('QuantumDrive')
-    expect(componentNameFor(pkg, jd.resolvedItemId)).toBe('JDRV TARS S01 Explorer SCItem')
+    expect(componentNameFor(pkg, jd.resolvedItemId)).toBe('Explorer')
     expect(jd.mountItemId).toBeNull()
   })
 
@@ -114,11 +114,11 @@ describe('Gladius golden fixture — authoritative resolution (reconciled, Missi
     // verified structural facts from the raw export, not invented.
     for (const r of innerRacks) {
       expect(r.leafCount).toBe(1)
-      expect(componentNameFor(pkg, r.mountItemId)).toBe('MRCK S03 BEHR Single S03')
+      expect(componentNameFor(pkg, r.mountItemId)).toBe('MSD-313 Missile Rack')
     }
     for (const r of outerRacks) {
       expect(r.leafCount).toBe(2)
-      expect(componentNameFor(pkg, r.mountItemId)).toBe('MRCK S03 BEHR Dual S02')
+      expect(componentNameFor(pkg, r.mountItemId)).toBe('MSD-322 Missile Rack')
     }
     // None of the real racks in this fixture are mixed-type — the old
     // Sprint 1.3F fixture invented a mixed-loadout scenario that doesn't

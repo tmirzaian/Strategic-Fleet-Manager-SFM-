@@ -1,5 +1,6 @@
 import { isCompatible } from '../engine/compatibility'
 import type { Component, CompatibilityRule } from '../engine/types'
+import { catalogComponentsByName } from '../generated/componentCatalog'
 
 /**
  * Demo component catalog — category + size for the named items that
@@ -55,6 +56,18 @@ const CATALOG: Record<string, CatalogEntry> = {
   // Utility / Cargo / Salvage / Missiles
   'Tractor Beam': { category: 'Utility', size: 2 },
   'Salvage Head (RM Series)': { category: 'Salvage Module', size: 2 },
+
+  // EWO-023 (Task 6 follow-on) — these two display names are not unique
+  // across the Mission M-012 bulk catalog (generated-data/component-metadata-catalog.json):
+  // multiple real entity classes at different sizes share the same
+  // resolved name, and catalogComponentsByName's "first entry wins"
+  // dedup can pick a differently-sized variant than the one actually
+  // installed on a given ship. Overridden here with the category/size of
+  // the entity class genuinely installed on the real ship that carries
+  // it (confirmed against generated-data/components.json), the same
+  // pattern already established above for FR-86.
+  'Revenant Gatling': { category: 'Weapon', size: 4 }, // Avenger Titan's nose gun — APAR_BallisticGatling_S4
+  'MSD-313 Missile Rack': { category: 'Missile Rack', size: 3 }, // Gladius's inner wing racks — MRCK_S03_BEHR_Single_S03
 }
 
 /**
@@ -73,26 +86,27 @@ export interface TargetValidation {
 }
 
 /**
- * Validates a hardpoint's targetItem against its Port's type/size, via the
- * real compatibility engine (isCompatible). Only returns `valid: false`
- * when the item is in the catalog AND its category/size positively
- * conflicts with the port — an uncataloged item is always treated as
- * valid, since we can't disprove compatibility we have no data for.
+ * The one shared catalog lookup — hand-authored demo table first
+ * (preserves existing, already-tested behavior for the seed fleet's known
+ * items), then the full authoritative component catalog (Mission M-012 —
+ * see src/generated/componentCatalog.ts). Both `validateTargetCompatibility`
+ * (below) and the Loadout Manager's Target picker filtering
+ * (EWO-024, Task 2) resolve a component's category/size through this exact
+ * function, so "what's shown as selectable" and "what validates" can never
+ * silently disagree with each other.
  */
-export function validateTargetCompatibility(targetItem: string | null | undefined, portType: string, portSize: string): TargetValidation {
-  const item = (targetItem ?? '').trim()
-  if (!item || item === '—') return { valid: true }
+function resolveCatalogEntry(item: string): CatalogEntry | undefined {
+  return CATALOG[item] ?? catalogComponentsByName.get(item)
+}
 
-  const entry = CATALOG[item]
-  if (!entry) return { valid: true }
-
+function checkCompatibility(entry: CatalogEntry, portType: string, portSize: string): boolean {
   const size = parsePortSize(portSize)
-  if (Number.isNaN(size)) return { valid: true }
+  if (Number.isNaN(size)) return true
 
   const component: Component = {
-    id: item,
-    internalName: item,
-    displayName: item,
+    id: '',
+    internalName: '',
+    displayName: '',
     manufacturer: '',
     category: entry.category,
     subtype: '',
@@ -107,11 +121,44 @@ export function validateTargetCompatibility(targetItem: string | null | undefine
     minSize: size,
     maxSize: size,
   }
+  return isCompatible(component, rule)
+}
 
-  if (isCompatible(component, rule)) return { valid: true }
+/**
+ * Validates a hardpoint's targetItem against its Port's type/size, via the
+ * real compatibility engine (isCompatible). Only returns `valid: false`
+ * when the item is in the catalog AND its category/size positively
+ * conflicts with the port — an uncataloged item is always treated as
+ * valid, since we can't disprove compatibility we have no data for.
+ */
+export function validateTargetCompatibility(targetItem: string | null | undefined, portType: string, portSize: string): TargetValidation {
+  const item = (targetItem ?? '').trim()
+  if (!item || item === '—') return { valid: true }
+
+  const entry = resolveCatalogEntry(item)
+  if (!entry) return { valid: true }
+
+  if (checkCompatibility(entry, portType, portSize)) return { valid: true }
 
   return {
     valid: false,
     message: `${item} is not compatible with this ${portSize} ${portType} port.`,
   }
+}
+
+/**
+ * EWO-024 (Task 2) — "the Commander should not be able to choose obviously
+ * incompatible equipment through normal UI interaction." Used to filter
+ * the Target picker's suggestion list down to components that are not
+ * POSITIVELY known to be incompatible with a given port — an uncataloged
+ * component is still shown (same "never disprove compatibility we have no
+ * data for" philosophy `validateTargetCompatibility` already applies), so
+ * this never hides a legitimate but uncataloged choice. Free-text entry
+ * and full compatibility re-validation both remain unchanged — this only
+ * narrows what's SUGGESTED, never what CAN be typed or saved.
+ */
+export function isComponentSelectableForPort(item: string, portType: string, portSize: string): boolean {
+  const entry = resolveCatalogEntry(item)
+  if (!entry) return true
+  return checkCompatibility(entry, portType, portSize)
 }

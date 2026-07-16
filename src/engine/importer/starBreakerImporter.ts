@@ -1,5 +1,6 @@
 import type { Importer, RawRecord } from './interfaces'
 import type { RawFileReader } from './rawFileReader'
+import { stripTrailingCommas } from './trailingCommaJson'
 
 /**
  * `StarBreakerImporter` — the generalized replacement for the Gladius
@@ -24,8 +25,17 @@ export class StarBreakerImporter implements Importer {
     const text = await this.reader.readFile(sourcePath)
     try {
       return JSON.parse(text)
-    } catch (err) {
-      throw new Error(`StarBreakerImporter: "${sourcePath}" is not valid JSON (${(err as Error).message}).`)
+    } catch (strictErr) {
+      // Some StarBreaker `--dump-hierarchy` builds emit a trailing comma
+      // after the last element of every array/object — JSON5-legal, but
+      // not strict JSON. Retry once with those commas stripped before
+      // giving up, so a genuine export isn't rejected over a formatting
+      // quirk while a truly malformed file still fails loudly.
+      try {
+        return JSON.parse(stripTrailingCommas(text))
+      } catch {
+        throw new Error(`StarBreakerImporter: "${sourcePath}" is not valid JSON (${(strictErr as Error).message}).`)
+      }
     }
   }
 }

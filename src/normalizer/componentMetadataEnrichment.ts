@@ -60,6 +60,14 @@ function enrichNode(node: CanonicalLoadoutNode, resolver: ComponentMetadataResol
 
   const enrichedFactoryComponent = {
     ...existing,
+    // EWO-023 (Task 6) — the catalog's already-resolved, real display name
+    // (e.g. "Odyssey", "DayBreak") was never copied here, so every
+    // component fell through to factoryLoadoutBuilder.ts's raw-token
+    // fallback (generateDisplayName), which just title-cases the internal
+    // name verbatim (e.g. "QDRV TARS S02 Odyssey SCItem") — the "internal
+    // IDs instead of friendly names" defect. Same embedded-wins-over-catalog
+    // precedence as every other field below.
+    displayName: existing.displayName ?? metadata.displayName ?? undefined,
     category: existing.category ?? metadata.category ?? undefined,
     subtype: existing.subtype ?? metadata.subtype ?? undefined,
     size: existing.size ?? metadata.size ?? undefined,

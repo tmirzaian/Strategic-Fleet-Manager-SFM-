@@ -58,4 +58,28 @@ export interface Port {
 
   /** Optional debug metadata: where in the raw source this port came from. */
   sourcePath?: string
+
+  /** EWO-020 — the raw CIG/StarBreaker entity class mounted at this port
+   * (e.g. "Mount_Gimbal_S2", "ANVL_Valkyrie_Turret_Top"), when known.
+   * Diagnostic identity only, same spirit as `internalName` — never
+   * rendered as a primary UI label. Also the evidence
+   * `deriveAssemblyRole()` reasons from. */
+  sourceEntityClass?: string
+
+  /** EWO-020 — a conservative, source-evidenced physical-assembly role
+   * (see src/normalizer/assemblyRole.ts). Set on every port, included or
+   * structural, so downstream consumers (grouping, presentation) never
+   * need to re-derive it from a name. */
+  assemblyRole?: string
+
+  /** EWO-020 — true only for a mount/turret/assembly node that
+   * `classifyPort()` would normally exclude (no configurable component of
+   * its own — the assembly itself isn't something a Commander installs or
+   * replaces) but that was preserved anyway because it has a real,
+   * included descendant needing a parent to explain the physical
+   * hierarchy. A structural port never receives a factory/installed/
+   * target assignment, never counts toward readiness/procurement, and
+   * never renders an editable target selector — see
+   * src/utils/buildProgress.ts and src/utils/procurement.ts. */
+  isStructural?: boolean
 }

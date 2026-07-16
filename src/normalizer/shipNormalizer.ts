@@ -21,6 +21,8 @@ import { adaptLoadoutNodes } from './loadoutNodeAdapter'
 import { ComponentMetadataResolver } from './componentMetadataResolver'
 import { enrichCanonicalLoadout } from './componentMetadataEnrichment'
 import { enrichClassification } from './classificationEnrichment'
+import { deriveAssemblyRole, ROLE_EQUIPMENT_GROUP } from './assemblyRole'
+import { manufacturerNameForCode } from '../utils/manufacturerLogo'
 
 const IMPORTER_VERSION = '1.0.0'
 
@@ -74,6 +76,28 @@ function deriveShipName(className: string | undefined, model: string | undefined
   return tokens.join(' ')
 }
 
+/**
+ * EWO-023 (Task 3) — "AEGS_Eclipse" -> "Aegis", "DRAK_Cutlass_Black" ->
+ * "Drake". Every raw export this pipeline processes uses the newer
+ * `root.entity` envelope, which supplies only the class-name string (see
+ * `resolveShipEntity` above) — never a `manufacturer` field — so
+ * `Ship.manufacturer` was previously always the empty-string fallback for
+ * every deep-imported ship. The same leading manufacturer-code token
+ * `deriveShipName` already strips to build the ship's own name is reused
+ * here (never re-derived independently) and resolved to a display name
+ * through the existing, already-reviewed `manufacturerLogo.ts` alias
+ * table — not a new or invented manufacturer list. Returns `undefined`
+ * (never a guess) when the leading token isn't a recognized code.
+ */
+function deriveManufacturer(className: string | undefined): string | undefined {
+  if (!className) return undefined
+  const tokens = className.split(/[_\s]+/).filter(Boolean)
+  if (tokens.length > 1 && /^[A-Z0-9]{2,6}$/.test(tokens[0])) {
+    return manufacturerNameForCode(tokens[0])
+  }
+  return undefined
+}
+
 interface PortWithFactory {
   portId: string
   internalName: string
@@ -113,8 +137,24 @@ export class ShipNormalizer implements Normalizer {
     const enrichedLoadout = enrichCanonicalLoadout(canonicalLoadout, this.metadataResolver, normalizationWarnings)
     const classifiedLoadout = enrichClassification(enrichedLoadout, this.metadataResolver, normalizationWarnings)
 
+    // EWO-020: whether `node` has any descendant `classifyPort` would
+    // include, and if so, which EquipmentGroup the first one belongs to.
+    // Used only to decide whether an otherwise-excluded mount/turret/
+    // assembly node is worth preserving as a structural parent — never to
+    // include the node's own component (it still has none).
+    const firstIncludedDescendantGroup = (node: CanonicalLoadoutNode): EquipmentGroup | null => {
+      for (const child of node.children ?? []) {
+        const childClassification = classifyPort(child.itemPortName, child.portType, this.overrideMap)
+        if (childClassification.include && childClassification.equipmentGroup) return childClassification.equipmentGroup
+        const nested = firstIncludedDescendantGroup(child)
+        if (nested) return nested
+      }
+      return null
+    }
+
     const walk = (node: CanonicalLoadoutNode, nearestIncludedParentId: string | null, sourcePathPrefix: string) => {
       const classification = classifyPort(node.itemPortName, node.portType, this.overrideMap)
+      const entityClass = node.factoryComponent?.internalName
       let thisPortId: string | null = null
 
       if (classification.include && classification.equipmentGroup) {
@@ -149,6 +189,8 @@ export class ShipNormalizer implements Normalizer {
           targetItemId: undefined,
           childPortIds: [],
           sourcePath,
+          sourceEntityClass: entityClass,
+          assemblyRole: deriveAssemblyRole(entityClass, node.portType),
         }
         ports.push(port)
         portById.set(thisPortId, port)
@@ -158,13 +200,69 @@ export class ShipNormalizer implements Normalizer {
           portById.get(nearestIncludedParentId)?.childPortIds?.push(thisPortId)
         }
       } else {
-        excludedCount++
-        normalizationWarnings.push({
-          severity: 'warning',
-          code: 'excluded-node',
-          message: classification.reason,
-          path: node.itemPortName,
-        })
+        // EWO-020 (Task 4): a node classifyPort excludes (no configurable
+        // component of its own — a mount, a turret housing, a rack body)
+        // is still worth preserving as a structural parent when real,
+        // included equipment is nested beneath it. Without this, the
+        // child was previously re-parented straight to this node's own
+        // parent, silently discarding the mount/turret's identity and
+        // position (see docs/ImportPipeline.md's EWO-020 section for the
+        // Eclipse/Cutlass Black/Valkyrie evidence). A node with no
+        // included descendant at all (a door, a seat, a light) is still
+        // dropped exactly as before — nothing changes for the common case.
+        const descendantGroup = firstIncludedDescendantGroup(node)
+        if (descendantGroup) {
+          const sourcePath = `${sourcePathPrefix}/${node.itemPortName}`
+          thisPortId = `${shipId}-port-${sourcePath}`
+          const role = deriveAssemblyRole(entityClass, node.portType)
+
+          const port: Port = {
+            id: thisPortId,
+            shipId,
+            parentPortId: nearestIncludedParentId,
+            equipmentGroup: ROLE_EQUIPMENT_GROUP[role] ?? descendantGroup,
+            canonicalPortType: node.portType,
+            internalName: node.itemPortName,
+            displayName: classification.displayName,
+            positionLabel: classification.positionLabel,
+            allowedTypes: [],
+            allowedSubtypes: [],
+            minSize: null,
+            maxSize: null,
+            installedItemId: undefined,
+            factoryItemId: undefined,
+            targetItemId: undefined,
+            childPortIds: [],
+            sourcePath,
+            sourceEntityClass: entityClass,
+            assemblyRole: role,
+            isStructural: true,
+          }
+          ports.push(port)
+          portById.set(thisPortId, port)
+          // Deliberately never pushed to relevantForFactory — a structural
+          // assembly node has no configurable component of its own to
+          // assign, and must never receive a factory/installed/target item.
+
+          if (nearestIncludedParentId) {
+            portById.get(nearestIncludedParentId)?.childPortIds?.push(thisPortId)
+          }
+
+          normalizationWarnings.push({
+            severity: 'warning',
+            code: 'structural-node-preserved',
+            message: `"${node.itemPortName}" (${entityClass ?? 'unknown entity'}) has no configurable component of its own but was preserved as a structural assembly node (role: ${role}) to explain the physical hierarchy of the real equipment nested beneath it. Original classification: ${classification.reason}`,
+            path: node.itemPortName,
+          })
+        } else {
+          excludedCount++
+          normalizationWarnings.push({
+            severity: 'warning',
+            code: 'excluded-node',
+            message: classification.reason,
+            path: node.itemPortName,
+          })
+        }
       }
 
       const childParentId = thisPortId ?? nearestIncludedParentId
@@ -217,7 +315,7 @@ export class ShipNormalizer implements Normalizer {
 
     const ship: Ship = {
       id: shipId,
-      manufacturer: entity.manufacturer ?? '',
+      manufacturer: entity.manufacturer ?? deriveManufacturer(entity.className) ?? '',
       name: deriveShipName(entity.className, entity.model),
       career: entity.career ?? '',
       role: entity.role ?? '',
@@ -225,6 +323,7 @@ export class ShipNormalizer implements Normalizer {
       ownership: 'Owned',
       factoryLoadoutId,
       model: entity.model,
+      sourceEntityClass: entity.className,
       classification: emptyClassification(),
     }
 
