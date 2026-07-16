@@ -3,7 +3,7 @@ import { BRANDING_ASSETS, getBrandingAsset, resolveBrandingSrc } from '../brandi
 import type { BrandingAssetKey } from '../types'
 
 describe('Mission M-022: branding asset registry', () => {
-  const keys: BrandingAssetKey[] = ['primaryLogo', 'compactMark', 'sidebarCommissioningMark', 'monochromeMark', 'appIcon']
+  const keys: BrandingAssetKey[] = ['primaryLogo', 'compactMark', 'sidebarCommissioningMark', 'sidebarBrandLockup', 'monochromeMark', 'appIcon']
 
   it('11. every semantic branding key resolves deterministically to a definition', () => {
     for (const key of keys) {
@@ -39,5 +39,19 @@ describe('Mission M-022: branding asset registry', () => {
 
   it('EWO-014A: compactMark and sidebarCommissioningMark remain distinct keys resolving to different derivatives, so a future compact (16-64px) use case is unaffected', () => {
     expect(resolveBrandingSrc('compactMark')).not.toBe(resolveBrandingSrc('sidebarCommissioningMark'))
+  })
+
+  it('EWO-015: sidebarBrandLockup is enabled and resolves to the generated 512px portrait derivative — never the 1024px master', () => {
+    expect(BRANDING_ASSETS.sidebarBrandLockup.enabled).toBe(true)
+    const src = resolveBrandingSrc('sidebarBrandLockup')
+    expect(src).toBe('/assets/generated/branding/sidebar-branding-512.png')
+  })
+
+  it('EWO-015: sidebarBrandLockup remains distinct from compactMark and sidebarCommissioningMark, which stay valid and unrepurposed', () => {
+    expect(BRANDING_ASSETS.compactMark.enabled).toBe(true)
+    expect(BRANDING_ASSETS.sidebarCommissioningMark.enabled).toBe(true)
+    const lockup = resolveBrandingSrc('sidebarBrandLockup')
+    expect(lockup).not.toBe(resolveBrandingSrc('compactMark'))
+    expect(lockup).not.toBe(resolveBrandingSrc('sidebarCommissioningMark'))
   })
 })

@@ -9,20 +9,36 @@ import type { BrandingAssetDefinition, BrandingAssetKey } from './types'
  * describes a usage, not just a pixel size that happens to be enabled
  * today).
  *
- * `sidebarCommissioningMark` (EWO-014A) is the distinct key for the
- * Sidebar's enlarged (~72px display) brand-lockup mark — EWO-014
- * enlarged that mark's on-screen size, but it was still sourced from the
- * 64px derivative, which Commander visual inspection correctly flagged
- * as insufficient fidelity for an enlarged presentation. Resolves to the
- * 256px derivative instead, giving real headroom above the ~72px display
- * size (including for high-DPI displays), without repointing the
- * genuinely-compact `compactMark` key to a larger asset it was never
- * meant to carry.
+ * `sidebarCommissioningMark` (EWO-014A) resolved the Sidebar's enlarged
+ * (~72px display) mark-only presentation to the 256px square-logo
+ * derivative. EWO-015 superseded that presentation entirely — the
+ * Sidebar no longer renders a standalone mark plus JSX-reconstructed
+ * wordmark/title/motto; it renders one commissioned lockup image instead
+ * (`sidebarBrandLockup`, below). `sidebarCommissioningMark` is retained,
+ * unused today, exactly like `compactMark` — a semantic key describes a
+ * usage, and both remain valid for any future context that genuinely
+ * needs the square mark alone rather than the full portrait lockup.
  *
- * `compactMark` and `sidebarCommissioningMark` intentionally derive from
- * the same deterministic master (see scripts/generateBrandingAssets.ts)
- * at different, purpose-matched output sizes — never the same file used
- * at two different display scales.
+ * `sidebarBrandLockup` (EWO-015) is the Sidebar's brand-lockup hardpoint:
+ * one Design-Authority-owned, transparent, portrait production image
+ * containing the commissioning mark, "SFM" wordmark, "Strategic Fleet
+ * Manager" title, and motto already composed together — deliberately
+ * excluding the application version (which stays live JSX text rendered
+ * beneath the image; see src/components/Sidebar.tsx). Source master:
+ * public/assets/branding/sidebar/sidebar-branding-master-1024.png
+ * (1024x1536, portrait, RGBA, true alpha — verified by
+ * scripts/generateBrandingAssets.ts before any derivative is generated).
+ * Resolves to the 512px derivative: the Sidebar hardpoint targets a
+ * ~170px display width, and 512px gives roughly 3x headroom above that
+ * for HiDPI displays without the application ever loading the 1024px
+ * master directly.
+ *
+ * `compactMark`/`sidebarCommissioningMark` and `sidebarBrandLockup`
+ * intentionally derive from two entirely different masters (the square
+ * commissioning-mark master vs. the portrait brand-lockup master) at
+ * purpose-matched output sizes — never the same file reused at two
+ * display scales, and never one master's derivative repurposed for the
+ * other's role.
  *
  * The remaining keys have no approved artwork yet and stay
  * `enabled: false` — a future handoff flips each on with its own
@@ -36,6 +52,12 @@ export const BRANDING_ASSETS: Record<BrandingAssetKey, BrandingAssetDefinition> 
     label: 'Sidebar Commissioning Mark',
     enabled: true,
     src: assetPath('branding/logo/sfm-logo-256.png'),
+  },
+  sidebarBrandLockup: {
+    key: 'sidebarBrandLockup',
+    label: 'Sidebar Brand Lockup',
+    enabled: true,
+    src: assetPath('generated/branding/sidebar-branding-512.png'),
   },
   monochromeMark: { key: 'monochromeMark', label: 'Monochrome Mark', enabled: false },
   appIcon: { key: 'appIcon', label: 'App Icon', enabled: false },

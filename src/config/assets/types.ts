@@ -105,7 +105,7 @@ export interface FleetRegistryImageResult {
 }
 
 /** Semantic branding asset keys — never a raw path in application code. */
-export type BrandingAssetKey = 'primaryLogo' | 'compactMark' | 'sidebarCommissioningMark' | 'monochromeMark' | 'appIcon'
+export type BrandingAssetKey = 'primaryLogo' | 'compactMark' | 'sidebarCommissioningMark' | 'sidebarBrandLockup' | 'monochromeMark' | 'appIcon'
 
 export interface BrandingAssetDefinition {
   key: BrandingAssetKey
