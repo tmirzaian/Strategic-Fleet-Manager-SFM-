@@ -1,0 +1,8309 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.DRAK_Cutter_Rambler",
+    "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "body",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_armour_top",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0038
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0123
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_greeble_l",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0038
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0123
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "glass_rear",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ]
+    },
+    {
+      "node": "body_greeble_r",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0038
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0123
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_greeble_top",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.7982
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.1068
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_armour_top_rear",
+      "type": 0
+    },
+    {
+      "node": "debrisproxy_spoiler_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.8143
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -8.6749
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          1.9999
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "debrisproxy_spoiler_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.8143
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -8.6749
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          1.9999
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "nose",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_panels",
+      "type": 0
+    },
+    {
+      "node": "body_greeble",
+      "type": 0
+    },
+    {
+      "node": "vtol_l_rotor",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.3654
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0006
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0013
+        ]
+      ]
+    },
+    {
+      "node": "vtol_l_geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.9486
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2672
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1169
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "emblem_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.93
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.0667
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.0977
+        ]
+      ]
+    },
+    {
+      "node": "window_armour_l",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.193,
+          0.0,
+          0.9812,
+          -1.7893
+        ],
+        [
+          0.9812,
+          0.0,
+          -0.193,
+          -1.6159
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.8786
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "window_armour_r",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.193,
+          0.0,
+          -0.9812,
+          1.7888
+        ],
+        [
+          0.9812,
+          -0.0,
+          -0.193,
+          -1.6159
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.8786
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "glass_cockpit",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.156
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.0667
+        ]
+      ]
+    },
+    {
+      "node": "body_armour_top_front",
+      "type": 0
+    },
+    {
+      "node": "nose_greeble",
+      "type": 0
+    },
+    {
+      "node": "window_armour_flap_r",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9903,
+          0.1367,
+          0.0268,
+          0.2894
+        ],
+        [
+          0.0,
+          -0.1923,
+          0.9813,
+          -0.0596
+        ],
+        [
+          0.1393,
+          -0.9718,
+          -0.1904,
+          0.0847
+        ]
+      ],
+      "props": {
+        "mesh_visarea ": " interior"
+      }
+    },
+    {
+      "node": "window_armour_int_r",
+      "type": 0
+    },
+    {
+      "node": "window_armour_flap_l",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9903,
+          0.1367,
+          -0.0268,
+          0.2894
+        ],
+        [
+          -0.0,
+          0.1923,
+          0.9813,
+          0.0596
+        ],
+        [
+          0.1393,
+          -0.9718,
+          0.1904,
+          0.0846
+        ]
+      ],
+      "props": {
+        "mesh_visarea ": " interior"
+      }
+    },
+    {
+      "node": "window_armour_int_l",
+      "type": 0,
+      "props": {
+        "MapChannel:12 ": "",
+        "MapChannel:13 ": "",
+        "MapChannel:14 ": "",
+        "MapChannel:3 ": "",
+        "MapChannel:4 ": "",
+        "MapChannel:5 ": "",
+        "mesh_visarea ": " interior"
+      }
+    },
+    {
+      "node": "vtol_r_geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.9486
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          -0.2639
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.2017
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "vtol_r_rotor",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.3654
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0008
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0014
+        ]
+      ]
+    },
+    {
+      "node": "emblem_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -10.8272
+        ],
+        [
+          0.0,
+          0.998,
+          0.0629,
+          2.1269
+        ],
+        [
+          0.0,
+          -0.0629,
+          0.998,
+          1.0337
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_l_00",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.2945
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.2025
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.5736
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_door_l_bot",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0724
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          3.1771
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.833
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_door_l_side",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7395
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          3.2072
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.8651
+        ]
+      ]
+    },
+    {
+      "node": "door_l_bot_lockingpins",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -0.5581
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0296
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          -0.7737
+        ]
+      ]
+    },
+    {
+      "node": "door_l_bot_pistons",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.2817
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0085
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1219
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_l_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0023
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0004
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0333
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_l_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1651
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_r_00",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -0.236
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          -2.5698
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.0073
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_door_r_side",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -0.739
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -3.2072
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.8651
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_door_r_bot",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.072
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.1771
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.833
+        ]
+      ]
+    },
+    {
+      "node": "door_r_bot_lockingpins",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          0.5581
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.0296
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          -0.7733
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_r_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.061
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6323
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.4004
+        ]
+      ]
+    },
+    {
+      "node": "door_r_bot_pistons",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.236
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -3.0698
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.5073
+        ]
+      ]
+    },
+    {
+      "node": "missile_rack_r_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0001,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0001,
+          1.0,
+          0.1651
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_control_side",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0137,
+          0.6463,
+          -0.7629,
+          0.2026
+        ],
+        [
+          0.9998,
+          0.0184,
+          -0.0023,
+          0.4131
+        ],
+        [
+          0.0125,
+          -0.7628,
+          -0.6465,
+          0.2595
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0137,
+          -0.6463,
+          -0.7629,
+          0.6135
+        ],
+        [
+          -0.9998,
+          -0.0184,
+          -0.0024,
+          0.1147
+        ],
+        [
+          -0.0125,
+          0.7628,
+          -0.6465,
+          0.0266
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_hinge",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.5649
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0269
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0254
+        ]
+      ]
+    },
+    {
+      "node": "fuelnozzle_housing",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0889
+        ],
+        [
+          -0.6428,
+          -0.0,
+          -0.766,
+          0.0715
+        ],
+        [
+          -0.766,
+          0.0,
+          0.6428,
+          0.3513
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_extender",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0868
+        ],
+        [
+          -0.6428,
+          -0.0,
+          -0.766,
+          0.1942
+        ],
+        [
+          -0.766,
+          0.0,
+          0.6428,
+          0.5363
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_nozzle",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.3265
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.004
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.0218
+        ]
+      ]
+    },
+    {
+      "node": "button_fuelport",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0263
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0176
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0959
+        ]
+      ]
+    },
+    {
+      "node": "fuelport_control_frame",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0119
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0863
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0868
+        ]
+      ]
+    },
+    {
+      "node": "DRAK_Cutter",
+      "type": 1,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_top_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9511,
+          0.0,
+          0.309,
+          1.694
+        ],
+        [
+          -0.309,
+          0.0,
+          0.9511,
+          -7.1569
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          2.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_top_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9511,
+          -0.0,
+          -0.309,
+          -1.694
+        ],
+        [
+          0.309,
+          -0.0,
+          0.9511,
+          -7.1569
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          2.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_side_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.1945,
+          -0.9657,
+          -0.1722,
+          2.547
+        ],
+        [
+          0.9809,
+          0.1898,
+          0.0436,
+          -4.4899
+        ],
+        [
+          -0.0094,
+          -0.1773,
+          0.9841,
+          0.1173
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_side_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.1987,
+          0.9641,
+          0.1764,
+          -2.5466
+        ],
+        [
+          -0.98,
+          0.198,
+          0.022,
+          -4.4899
+        ],
+        [
+          -0.0137,
+          -0.1772,
+          0.9841,
+          0.1173
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_bottom_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.916
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.5232
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -1.7631
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_rear_bottom_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -1.9161
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -4.5232
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.7631
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_auxretro_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          3.239
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.8104
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.7747
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_auxretro_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -3.2393
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.8104
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.7747
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_aux_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0001,
+          -0.0,
+          3.5458
+        ],
+        [
+          -0.0001,
+          1.0,
+          0.0,
+          -3.83
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9947
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_aux_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0001,
+          -0.0,
+          -3.5451
+        ],
+        [
+          -0.0001,
+          1.0,
+          0.0,
+          -3.829
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9947
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          2.18
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -2.066
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          0.211
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_shieldgen",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -2.205
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -1.089
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.48
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.035
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -4.83
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.183
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          2.062
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.049
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.2
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_quantumdrive",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.205
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.089
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.286
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_powerplant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.308
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -2.821
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.931
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_gravitygenerator",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.02
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -4.819
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.866
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -2.311
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -4.83
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.425
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_battery",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.205
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.089
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.343
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          2.185
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -4.938
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.595
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ramp",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -5.75
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.625
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          2.185
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -4.938
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.154
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_tank",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.7401
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.1608
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_drive",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.231
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -3.575
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.279
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_power_plant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.208
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.053
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.278
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_storage",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_gravity_gen",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.185
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -4.938
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.286
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -3.1658
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6234
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          3.1658
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6234
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_exterior_seataccess",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7982
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.1068
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_right_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.5509,
+          0.4531,
+          -0.7009,
+          1.984
+        ],
+        [
+          -0.8028,
+          -0.5171,
+          0.2967,
+          -6.3391
+        ],
+        [
+          -0.228,
+          0.7262,
+          0.6486,
+          2.0404
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_left_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.5509,
+          -0.4531,
+          0.7009,
+          -1.9838
+        ],
+        [
+          0.8028,
+          -0.5171,
+          0.2967,
+          -6.3391
+        ],
+        [
+          0.228,
+          0.7262,
+          0.6486,
+          2.0404
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          2.231
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -3.564
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.105
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargo_2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -2.062
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargo_1",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -3.562
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_battery",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.208
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.053
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.602
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "animated_body",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cabinet_extinguisher",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -1.476
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          3.525
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.277
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_left_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.5509,
+          -0.4531,
+          0.7009,
+          -2.0948
+        ],
+        [
+          0.8028,
+          -0.5171,
+          0.2967,
+          -5.8395
+        ],
+        [
+          0.228,
+          0.7262,
+          0.6486,
+          2.0577
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_right_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.5509,
+          0.4531,
+          -0.7009,
+          2.095
+        ],
+        [
+          -0.8028,
+          -0.5171,
+          0.2967,
+          -5.8395
+        ],
+        [
+          -0.228,
+          0.7262,
+          0.6486,
+          2.0577
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "fuelport_side",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.6463,
+          0.0184,
+          -0.7628,
+          -2.7498
+        ],
+        [
+          0.0137,
+          -0.9998,
+          -0.0125,
+          -1.2567
+        ],
+        [
+          -0.7629,
+          -0.0023,
+          -0.6465,
+          -1.8408
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_r",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_l",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ]
+    },
+    {
+      "node": "thrusters_vtol_r",
+      "type": 1,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          3.0
+        ],
+        [
+          -0.0,
+          -0.998,
+          -0.0629,
+          0.527
+        ],
+        [
+          0.0,
+          -0.0629,
+          0.998,
+          0.2794
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_vehicle_destroyed",
+      "type": 2
+    },
+    {
+      "node": "hardpoint_lifesupport",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0124,
+          0.9999,
+          -1.471
+        ],
+        [
+          0.0,
+          -0.9999,
+          0.0124,
+          5.066
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.112
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_avionics",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -1.596
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          5.063
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.848
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_top_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.998
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          5.2636
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.0399
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_top_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.998
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          5.2993
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          2.04
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0047
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_lg_f",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          3.5171
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.3091
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_lg_l",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -2.0234
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.809
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -1.5068
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_lg_r",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          2.023
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -2.809
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5068
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cargo_3",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.9
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -2.85
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_console",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          1.875
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.75
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scout_console_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.875
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.75
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "thrusters_vtol_l",
+      "type": 1,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.5268
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2794
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cabinet_extinguisher_scout",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -1.201
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          3.729
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.441
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cabinet_extinguisher_expo",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.543
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          3.447
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.316
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_locker_expo",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.594
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.5491
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_storage_expo",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.25
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          0.531
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_suit_locker_expo",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.594
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.094
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_expo_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -2.23
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -5.0487
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          0.211
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_expo_battery",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.258
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -5.0487
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.592
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_expo_powerplant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.281
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -5.0487
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.278
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargo_4",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.05
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.56
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_wing_addon_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.8143
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -8.6749
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.9999
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_wing_addon_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.8143
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -8.6749
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          1.9999
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_relay",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          2.0504
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -4.9498
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.1486
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "anim_landing_gear_dummy",
+      "type": 3
+    },
+    {
+      "node": "hardpoint_thruster_main_vtol_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9925,
+          0.0,
+          -0.1219,
+          0.0691
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.303
+        ],
+        [
+          0.1219,
+          -0.0,
+          0.9925,
+          0.0374
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_retro_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.9925,
+          -0.0,
+          -0.1219,
+          -0.761
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          2.2921
+        ],
+        [
+          -0.1219,
+          0.0,
+          0.9925,
+          -0.0648
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_thruster_addon_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9925,
+          0.0,
+          -0.1219,
+          0.0691
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.303
+        ],
+        [
+          0.1219,
+          -0.0,
+          0.9925,
+          0.0374
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "radar_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.508
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.261
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.9187
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool_turrets",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.5084
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.261
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.9187
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_side_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.1959,
+          -0.9767,
+          -0.0872,
+          1.7964
+        ],
+        [
+          0.9805,
+          -0.1966,
+          0.0,
+          0.7746
+        ],
+        [
+          -0.0171,
+          -0.0855,
+          0.9962,
+          -0.5204
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_side_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.1966,
+          0.9761,
+          -0.0925,
+          -1.7964
+        ],
+        [
+          0.9805,
+          -0.1955,
+          0.0209,
+          0.7746
+        ],
+        [
+          0.0023,
+          -0.0949,
+          -0.9955,
+          -0.5204
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_bottom_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.65
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7441
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -1.5517
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_front_bottom_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.65
+        ],
+        [
+          0.0,
+          -0.0,
+          -1.0,
+          -0.7441
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.5517
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.4241,
+          0.9056,
+          2.8756
+        ],
+        [
+          -0.0,
+          -0.9056,
+          0.4241,
+          -1.0637
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_flair_hanging",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.342,
+          0.9397,
+          -0.0,
+          -0.784
+        ],
+        [
+          -0.9397,
+          -0.342,
+          0.0,
+          1.304
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.334
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_flair",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.068
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          1.571
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.716
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_missile",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_flight",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.5403
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.196
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_selfDestruct",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_armor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -6.5047
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0155
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "animated_cockpit",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_nose",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1981
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.009
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_locker",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.05
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.875
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.5403
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.196
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -1.5
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_spoiler_right",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_base_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.7655
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.9326
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6646
+        ]
+      ]
+    },
+    {
+      "node": "contrail_expo_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.5474
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.0856
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.519
+        ]
+      ]
+    },
+    {
+      "node": "contrail_scout_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.4911
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.8437
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0676
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_geo_spoiler_left",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_base_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.7477
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.9114
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6949
+        ]
+      ]
+    },
+    {
+      "node": "contrail_expo_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.557
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.1162
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5138
+        ]
+      ]
+    },
+    {
+      "node": "contrail_scout_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.4909
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.8436
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0682
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_thruster_retro_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9925,
+          0.0,
+          -0.1219,
+          0.7614
+        ],
+        [
+          -0.0077,
+          -0.998,
+          -0.0625,
+          2.2786
+        ],
+        [
+          -0.1216,
+          0.0629,
+          -0.9906,
+          -0.1407
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_main_vtol_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9925,
+          0.0,
+          0.1219,
+          -0.0691
+        ],
+        [
+          -0.0077,
+          0.998,
+          0.0625,
+          -1.3029
+        ],
+        [
+          -0.1216,
+          -0.0629,
+          0.9906,
+          0.1877
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_geo_thruster_addon_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9925,
+          -0.0,
+          0.1219,
+          -0.0691
+        ],
+        [
+          -0.0077,
+          0.998,
+          0.0625,
+          -1.3029
+        ],
+        [
+          -0.1216,
+          -0.0629,
+          0.9906,
+          0.1877
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_missile_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.003
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0979
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0451
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_missile_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.003
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0001,
+          -0.0979
+        ],
+        [
+          0.0,
+          0.0001,
+          1.0,
+          -0.0451
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "itemport_vehicle_attach",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          0.0081
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0013
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.0017
+        ]
+      ]
+    },
+    {
+      "node": "IP_button_fuelport",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0259
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0305
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0936
+        ]
+      ]
+    },
+    {
+      "node": "$IP_button_fuelport",
+      "type": 1,
+      "props": {
+        "MapChannel:3 ": " CIG Red",
+        "MapChannel:4 ": " CIG Green",
+        "MapChannel:5 ": " CIG Blue"
+      }
+    },
+    {
+      "node": "hardpoint_geo_roof",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.7462
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          2.2377
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_hfueltank_aux",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.7462
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          2.2377
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_qfueltank_aux",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.7462
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          2.2377
+        ]
+      ]
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "VHCL_SelfDestruct_30s",
+      "port": "hardpoint_cockpit_selfDestruct",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "ARMR_DRAK_Cutter",
+      "port": "hardpoint_armor",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Flight_DRAK_Cutter_Expo",
+      "port": "hardpoint_controller_flight",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/blades/s01/blad_mite_s01_pl01.cga"
+    },
+    {
+      "entity": "Controller_Shield_DRAK_Cutter",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Missile",
+      "port": "hardpoint_controller_missile",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+      "port": "hardpoint_dashboard_pilot",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Seats/DRAK/Cutter/DRAK_Cutter_Dashboard_Pilot.cga",
+      "children": [
+        {
+          "entity": "Radar_Display_Screen_Template",
+          "port": "radar",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "H_Dashboard_Projector_HUD_DRAK_Cutter",
+          "port": "Display_HUD",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_top_right",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_top_left",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_bottom_left",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_Physical",
+          "port": "Screen_Annunciator",
+          "parent": "DRAK_Cutter_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "DRAK_Cutter_SeatAccess_Pilot",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Seats/DRAK/Cutter/DRAK_Cutter_SeatAccess.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_SCItem_Seat_Pilot",
+      "port": "hardpoint_seat_pilot",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Seats/DRAK/Cutter/DRAK_Cutter_Cockpit_Seat.cga",
+      "nmc_properties": [
+        {
+          "node": "pedal_left_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.9848,
+              -0.1736,
+              2.657
+            ],
+            [
+              -0.0,
+              0.1736,
+              0.9848,
+              1.176
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "pedal_right_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.9848,
+              -0.1736,
+              2.657
+            ],
+            [
+              -0.0,
+              0.1736,
+              0.9848,
+              1.176
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "Joystick",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              2.2411
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              1.8237
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " UVChannel_1"
+          }
+        },
+        {
+          "node": "Seat",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0,
+              0.0697
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              -0.025
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " UVChannel_1",
+            "MapChannel:2 ": " UVChannel_2",
+            "MapChannel:3 ": " UVChannel_3",
+            "MapChannel:4 ": " UVChannel_4",
+            "MapChannel:5 ": " UVChannel_5",
+            "MapChannel:6 ": " UVChannel_6"
+          }
+        },
+        {
+          "node": "SeatFrame",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              -0.0,
+              -0.0473
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " UVChannel_1",
+            "MapChannel:2 ": " UVChannel_2",
+            "MapChannel:3 ": " UVChannel_3",
+            "MapChannel:4 ": " UVChannel_4",
+            "MapChannel:5 ": " UVChannel_5",
+            "MapChannel:6 ": " UVChannel_6"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "INTK_DRAK_Cutter",
+      "port": "hardpoint_fuel_intake",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "COOL_LPLT_S01_BlastChill_SCItem",
+      "port": "hardpoint_cooler",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Coolers/small_component/lplt/cool_lplt_s01_pl04.cga"
+    },
+    {
+      "entity": "HTNK_DRAK_Cutter",
+      "port": "hardpoint_fuel_tank",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "RADR_GRNP_S01_Ecouter",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Radar/small_component/grnp/radr_grnp_s01_pl01.cga"
+    },
+    {
+      "entity": "Door_RN_RoomConnector_Breachable_OpenReverse_Cutter_Ramp",
+      "port": "hardpoint_ramp",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Ramp.cga",
+      "nmc_properties": [
+        {
+          "node": "ramp_ext",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.6884,
+              -0.7254,
+              0.174
+            ],
+            [
+              -0.0,
+              0.7254,
+              0.6884,
+              0.128
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "piston_bot_01",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.001,
+              1.0,
+              0.0004,
+              -1.8784
+            ],
+            [
+              -0.9203,
+              0.0011,
+              -0.3912,
+              0.1751
+            ],
+            [
+              -0.3912,
+              -0.0,
+              0.9203,
+              0.8781
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_top_01",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.0015,
+              1.0,
+              0.0003,
+              -1.8784
+            ],
+            [
+              -0.9855,
+              0.0016,
+              -0.1699,
+              0.0015
+            ],
+            [
+              -0.1699,
+              0.0,
+              0.9855,
+              1.0638
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "stops_bot_pistons",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.5193
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.1869
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "stops_bot",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.7071,
+              0.7071,
+              0.2512
+            ],
+            [
+              0.0,
+              0.7071,
+              -0.7071,
+              -0.0536
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "piston_top_02",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              -0.0695
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0004
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_bot_02",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              0.1609
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0004
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "ramp_lip",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.0007
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0019
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.8094
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " auto"
+          }
+        },
+        {
+          "node": "ramp_latches_01",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.2225
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              4.5022
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " auto"
+          }
+        },
+        {
+          "node": "ramp_latches_02",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.0001
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.1982
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              4.5578
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " auto"
+          }
+        },
+        {
+          "node": "ramp_int",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0001
+            ],
+            [
+              0.0,
+              -0.0,
+              1.0,
+              2.4634
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_bot_03",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.0002,
+              -1.0,
+              -0.0002,
+              0.0
+            ],
+            [
+              -0.6183,
+              0.0003,
+              -0.7859,
+              -0.0
+            ],
+            [
+              0.7859,
+              -0.0001,
+              -0.6183,
+              -0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_top_03",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.0006,
+              -1.0,
+              -0.0002,
+              0.0
+            ],
+            [
+              -0.4218,
+              0.0004,
+              -0.9067,
+              0.0
+            ],
+            [
+              0.9067,
+              -0.0005,
+              -0.4218,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": "",
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_top_end",
+          "type": 2,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.001,
+              -1.8775
+            ],
+            [
+              0.0005,
+              -0.8802,
+              0.4746,
+              0.093
+            ],
+            [
+              -0.0009,
+              -0.4746,
+              -0.8802,
+              1.1176
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "piston_bot_end",
+          "type": 2,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.001,
+              -1.8779
+            ],
+            [
+              0.0005,
+              -0.8802,
+              0.4746,
+              0.094
+            ],
+            [
+              -0.0009,
+              -0.4746,
+              -0.8802,
+              0.7113
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "QDRV_ACAS_S01_FoxFire_SCItem",
+      "port": "hardpoint_quantum_drive",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "objects/spaceships/quantum_drives/small_component/acas/qdrv_acas_s01_pl02.cgf",
+      "children": [
+        {
+          "entity": "JDRV_TARS_S01_Explorer_SCItem",
+          "port": "hardpoint_jump_drive",
+          "parent": "QDRV_ACAS_S01_FoxFire_SCItem",
+          "geometry": "Objects/Spaceships/Jump_Modules/small_component/tars/jmod_tars_s01_pl02.cga",
+          "nmc_properties": [
+            {
+              "node": "mesh_jmod_tars_s01_pl02",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.3577
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            },
+            {
+              "node": "mesh_door_1_a",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": " CIG Red",
+                "MapChannel:3 ": " CIG Green",
+                "MapChannel:4 ": " CIG Blue"
+              }
+            },
+            {
+              "node": "mesh_door_1_b",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "QTNK_DRAK_Cutter",
+      "port": "hardpoint_quantum_tank",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "LFSP_TYDT_S01_ComfortAir",
+      "port": "hardpoint_lifesupport",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/life_support/small_component/tydt/life_tydt_s01.cga"
+    },
+    {
+      "entity": "COMP_BEHR_S01_CSR-RP",
+      "port": "hardpoint_avionics",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Avionics/small_component/behr/comp_behr_s01_pl03.cga"
+    },
+    {
+      "entity": "Weapon_Rack_DRAK_Cutter_4_Slot",
+      "port": "hardpoint_weapon_locker",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Cockpit/DRAK_Cutter_Wall_Locker_Weapons.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_SeatAccess_Exterior",
+      "port": "hardpoint_exterior_seataccess",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Exterior_SeatAccess.cga"
+    },
+    {
+      "entity": "Default_LandingSystem",
+      "port": "landingpad_helper",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Bottom",
+      "port": "hardpoint_thruster_front_bottom_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Bottom",
+      "port": "hardpoint_thruster_front_bottom_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed",
+      "port": "hardpoint_thruster_front_side_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed",
+      "port": "hardpoint_thruster_front_side_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Top",
+      "port": "hardpoint_thruster_front_top_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Top",
+      "port": "hardpoint_thruster_front_top_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Bottom",
+      "port": "hardpoint_thruster_rear_bottom_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Bottom",
+      "port": "hardpoint_thruster_rear_bottom_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed",
+      "port": "hardpoint_thruster_rear_side_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed",
+      "port": "hardpoint_thruster_rear_side_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Top",
+      "port": "hardpoint_thruster_rear_top_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Mav_Fixed_Top",
+      "port": "hardpoint_thruster_rear_top_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Mav.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_AuxRetro",
+      "port": "hardpoint_thruster_auxretro_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Retro.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_AuxRetro",
+      "port": "hardpoint_thruster_auxretro_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Retro.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Aux",
+      "port": "hardpoint_thruster_aux_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Aux.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Aux",
+      "port": "hardpoint_thruster_aux_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Aux.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Rambler_Thruster_Main_Left",
+      "port": "hardpoint_thruster_main_vtol_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Rambler_Main_Exp_L.cdf"
+    },
+    {
+      "entity": "DRAK_Cutter_Rambler_Thruster_Main_Right",
+      "port": "hardpoint_thruster_main_vtol_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Rambler_Main_Exp_R.cdf"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_MainRetro",
+      "port": "hardpoint_thruster_retro_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_VTOL_Retro.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_MainRetro",
+      "port": "hardpoint_thruster_retro_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_VTOL_Retro.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Winglets_Expo_Left",
+      "port": "hardpoint_geo_spoiler_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Spoiler_Exp_L.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Winglets_Expo_Right",
+      "port": "hardpoint_geo_spoiler_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Spoiler_Exp_R.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_Roof_Expo",
+      "port": "hardpoint_geo_roof",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Roof_Exp.cga",
+      "children": [
+        {
+          "entity": "HTNK_DRAK_Cutter_Expo",
+          "port": "hardpoint_roof_hfuel",
+          "parent": "DRAK_Cutter_Roof_Expo",
+          "geometry": ""
+        },
+        {
+          "entity": "QTNK_DRAK_Cutter_Expo",
+          "port": "hardpoint_roof_qfuel",
+          "parent": "DRAK_Cutter_Roof_Expo",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "DRAK_Cutter_Roof_Expo_Nose",
+      "port": "hardpoint_geo_nose",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Cockpit_Exp.cga"
+    },
+    {
+      "entity": "Mount_Gimbal_S2",
+      "port": "hardpoint_weapon_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s2.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2",
+          "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S2/KLWE_Las_Rep_S2_L1.cga",
+          "nmc_properties": [
+            {
+              "node": "root",
+              "type": 0,
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_03",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0652
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.4037
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_02",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0644
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.3922
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_01",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.3134
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "muzzle_out3",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  -0.0,
+                  -0.0216
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0,
+                  0.0031
+                ]
+              ],
+              "props": {
+                "MaxHandle": "465"
+              }
+            },
+            {
+              "node": "muzzle_out2",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  -0.0,
+                  -0.0216
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.0084
+                ]
+              ],
+              "props": {
+                "MaxHandle": "466"
+              }
+            },
+            {
+              "node": "muzzle_out1",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.0216
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0361
+                ]
+              ],
+              "props": {
+                "MaxHandle": "467"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S2",
+      "port": "hardpoint_weapon_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s2.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2",
+          "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S2/KLWE_Las_Rep_S2_L1.cga",
+          "nmc_properties": [
+            {
+              "node": "root",
+              "type": 0,
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_03",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0652
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.4037
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_02",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0644
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.3922
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "barrel_01",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  1.7973
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.3134
+                ]
+              ],
+              "props": {
+                "damping": "0",
+                "dampingX": "1",
+                "dampingY": "1",
+                "dampingZ": "1",
+                "drivenTension": "1",
+                "drivenTensionCol": "100",
+                "proxyParams": "",
+                "relPosition": "",
+                "relRotation": "",
+                "rotLimitMax": "0",
+                "rotLimitMaxX": "0",
+                "rotLimitMaxY": "0",
+                "rotLimitMaxZ": "0",
+                "rotLimitMin": "0",
+                "rotLimitMinX": "0",
+                "rotLimitMinY": "0",
+                "rotLimitMinZ": "0",
+                "springTension": "0",
+                "springTensionX": "1",
+                "springTensionY": "1",
+                "springTensionZ": "1"
+              }
+            },
+            {
+              "node": "muzzle_out3",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  -0.0,
+                  -0.0216
+                ],
+                [
+                  -0.0,
+                  0.0,
+                  1.0,
+                  0.0031
+                ]
+              ],
+              "props": {
+                "MaxHandle": "465"
+              }
+            },
+            {
+              "node": "muzzle_out2",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  -0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  -0.0,
+                  -0.0216
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.0084
+                ]
+              ],
+              "props": {
+                "MaxHandle": "466"
+              }
+            },
+            {
+              "node": "muzzle_out1",
+              "type": 3,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.0216
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0361
+                ]
+              ],
+              "props": {
+                "MaxHandle": "467"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Dual_S01",
+      "port": "hardpoint_missile_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_dual_s01.cga",
+      "children": [
+        {
+          "entity": "MISL_S01_CS_FSKI_Spark",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Dual_S01",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Spark_S1.cga"
+        },
+        {
+          "entity": "MISL_S01_CS_FSKI_Spark",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S02_BEHR_Dual_S01",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Spark_S1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Dual_S01",
+      "port": "hardpoint_missile_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_dual_s01.cga",
+      "children": [
+        {
+          "entity": "MISL_S01_CS_FSKI_Spark",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Dual_S01",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Spark_S1.cga"
+        },
+        {
+          "entity": "MISL_S01_CS_FSKI_Spark",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S02_BEHR_Dual_S01",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Spark_S1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "DRAK_Cutter_CML_Flare",
+      "port": "hardpoint_countermeasure_left_01",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_CML_Flare.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_CML_Chaff",
+      "port": "hardpoint_countermeasure_left_02",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_CML_Chaff.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_CML_Flare",
+      "port": "hardpoint_countermeasure_right_01",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_CML_Flare.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_CML_Chaff",
+      "port": "hardpoint_countermeasure_right_02",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_CML_Chaff.cga"
+    },
+    {
+      "entity": "Controller_Fuel",
+      "port": "hardpoint_controller_fuel",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": ""
+    },
+    {
+      "entity": "DockingTube_Fuel_Ports_DRAK_Cutter",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Exterior/DRAK_Cutter_Fuel_Port.cga"
+    },
+    {
+      "entity": "DRAK_Cutter_ShipATCDataManager",
+      "port": "hardpoint_air_traffic_controller",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": ""
+    },
+    {
+      "entity": "Gadget_Cabinet_kegr_fire_extinguisher_NG",
+      "port": "hardpoint_cabinet_extinguisher_expo",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/fire_extinguisher_cabinet_nozzle_only_metric.cgf",
+      "children": [
+        {
+          "entity": "kegr_fire_extinguisher_01",
+          "port": "cabinet_attach_loc",
+          "parent": "Gadget_Cabinet_kegr_fire_extinguisher_NG",
+          "geometry": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/gdgt_fps_kegr_fire_extinguisher.cdf"
+        }
+      ]
+    },
+    {
+      "entity": "Weapon_Rack_DRAK_Cutter_Rambler_9_Slot",
+      "port": "hardpoint_weapon_locker_expo",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Wall_Locker_Weapons_Rambler.cga",
+      "nmc_properties": [
+        {
+          "node": "Wall_150cm",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.2232
+            ],
+            [
+              0.0,
+              -0.0,
+              1.0,
+              1.3944
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Locker_Suit_DRAK_Cutter_Rambler",
+      "port": "hardpoint_suit_locker_expo",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Locker_Suit.cga"
+    },
+    {
+      "entity": "SHLD_SECO_S01_HEX_SCItem",
+      "port": "hardpoint_expo_shield",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Shields/small_component/seco/shld_seco_s01_pl02.cgf"
+    },
+    {
+      "entity": "POWR_SASU_S01_LightBlossom_SCItem",
+      "port": "hardpoint_expo_powerplant",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Power_Plants/small_component/sasu/powr_sasu_s01_pl03.cgf"
+    },
+    {
+      "entity": "DRAK_Cutter_CargoGrid_2Stack",
+      "port": "hardpoint_cargo_4",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Addon_Rambler_Left",
+      "port": "hardpoint_geo_thruster_addon_left",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Main_Rambler_Thrusters_Addons_Left.cga",
+      "nmc_properties": [
+        {
+          "node": "Main_Rambler_Thruster_Left",
+          "type": 0,
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "DRAK_Cutter_Thruster_Addon_Rambler_Right",
+      "port": "hardpoint_geo_thruster_addon_right",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/Thrusters/DRAK/DRAK_Cutter_Thrusters/DRAK_Cutter_Main_Rambler_Thrusters_Addons_Right.cga",
+      "nmc_properties": [
+        {
+          "node": "Rambler_Winglet_Right_bottom_glow_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.9758
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              2.9694
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              -1.2797
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        },
+        {
+          "node": "Rambler_Winglet_Right_top_glow_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.9322
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              2.9719
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              1.2945
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        },
+        {
+          "node": "Main_Rambler_Thruster_Right",
+          "type": 0,
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "RELAY_2slot_slim",
+      "port": "hardpoint_relay",
+      "parent": "EntityClassDefinition.DRAK_Cutter_Rambler",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse_s01.cga"
+    }
+  ],
+  "interiors": [
+    {
+      "container": "cutter_base_int_cockpit",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_door_frame_connector.cgf",
+          "pos": [
+            -0.009999999776482582,
+            -2.240000009536743,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_175cm.cgf",
+          "pos": [
+            0.0,
+            -2.0,
+            1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_thin.cgf",
+          "pos": [
+            1.0,
+            -1.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_avionics_01.cgf",
+          "pos": [
+            -1.1299999952316284,
+            -1.440000057220459,
+            -0.8899999856948853
+          ],
+          "scale": [
+            0.8510000109672546,
+            0.8510000109672546,
+            0.8510000109672546
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_lower.cgf",
+          "pos": [
+            0.0,
+            0.25,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            1.4199999570846558,
+            -1.2300000190734863,
+            0.12999999523162842
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_250cm.cgf",
+          "pos": [
+            0.0,
+            -2.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_175cm.cgf",
+          "pos": [
+            0.0,
+            -0.8799999952316284,
+            1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_wall_100cm.cgf",
+          "pos": [
+            -1.0,
+            -0.8799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_control_door_wall_mount_short.cgf",
+          "pos": [
+            -0.949999988079071,
+            -1.9900000095367432,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_thin.cgf",
+          "pos": [
+            -1.0,
+            -0.8799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/buildingsets/human/universal/prop/storage/bag/bag_holdall_4_a.cgf",
+          "pos": [
+            0.36000001430511475,
+            -1.659999966621399,
+            1.409999966621399
+          ],
+          "scale": [
+            0.6850000023841858,
+            0.6850000023841858,
+            0.6850000023841858
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            1.4199999570846558,
+            -1.2300000190734863,
+            0.46000000834465027
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            -0.8100000023841858,
+            1.309999942779541,
+            1.4299999475479126
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_wall_100cm_empty.cgf",
+          "pos": [
+            1.0,
+            -2.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_lifesupport_01.cgf",
+          "pos": [
+            -1.1299999952316284,
+            -1.440000057220459,
+            -0.33000001311302185
+          ],
+          "scale": [
+            0.8339999914169312,
+            0.8339999914169312,
+            0.8339999914169312
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_250cm.cgf",
+          "pos": [
+            0.0,
+            -1.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_cargonetting.cgf",
+          "pos": [
+            0.0,
+            -1.5,
+            0.05999999865889549
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            1.4199999570846558,
+            -1.5399999618530273,
+            0.7099999785423279
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_thin.cgf",
+          "pos": [
+            -1.0,
+            -1.8799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            0.8100000023841858,
+            1.309999942779541,
+            1.4299999475479126
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/buildingsets/human/universal/prop/storage/bag/bag_holdall_1_a.cgf",
+          "pos": [
+            -0.1899999976158142,
+            -1.6299999952316284,
+            1.2300000190734863
+          ],
+          "scale": [
+            0.7149999737739563,
+            0.7149999737739563,
+            0.7149999737739563
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_roof.cgf",
+          "pos": [
+            0.0,
+            0.0,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_light_small.cgf",
+          "pos": [
+            1.4199999570846558,
+            -1.2300000190734863,
+            -0.9300000071525574
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit.cgf",
+          "pos": [
+            0.0,
+            -1.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_hab_floor_c.cgf",
+          "pos": [
+            1.0,
+            -1.8799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_door_frame_front_a.cgf",
+          "pos": [
+            0.0,
+            -1.9600000381469727,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_100cm.cgf",
+          "pos": [
+            0.0,
+            -1.0,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_serverracks.cgf",
+          "pos": [
+            -1.25,
+            -0.5,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_thin.cgf",
+          "pos": [
+            1.0,
+            -2.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/cockpit/drak_cutter_cockpit_fan_blades.cga",
+          "pos": [
+            -1.0,
+            1.0,
+            -0.05000000074505806
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_small_c.cga",
+          "pos": [
+            -1.0,
+            -1.440000057220459,
+            -0.9399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Full.cga",
+          "pos": [
+            -0.949999988079071,
+            -1.9900000095367432,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -1.2300000190734863,
+            -1.1299999952316284,
+            -0.47999998927116394
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_small_b.cga",
+          "pos": [
+            -1.0,
+            -1.440000057220459,
+            -0.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Open.cga",
+          "pos": [
+            0.949999988079071,
+            -2.5,
+            -0.009999999776482582
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -1.2300000190734863,
+            -1.1299999952316284,
+            0.20999999344348907
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_door.cga",
+          "pos": [
+            -0.009999999776482582,
+            -2.180000066757202,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 45
+    },
+    {
+      "container": "cutter_expo_int",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            -0.5,
+            0.7799999713897705,
+            1.159999966621399
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_floor_bathroomouter_rambler.cgf",
+          "pos": [
+            -0.3400000035762787,
+            -2.25,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_450cm.cgf",
+          "pos": [
+            -0.6899999976158142,
+            -0.6899999976158142,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_glow_int_suitlocker.cgf",
+          "pos": [
+            1.5700000524520874,
+            -0.10000000149011612,
+            0.7200000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            -0.6600000262260437,
+            -0.8100000023841858,
+            1.159999966621399
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.3799999952316284,
+            -0.8100000023841858,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_locker_suit.cgf",
+          "pos": [
+            1.590000033378601,
+            -0.09000000357627869,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_locker_storage_rambler.cgf",
+          "pos": [
+            -2.25,
+            0.4699999988079071,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_rambler_door_frame_rear_b.cgf",
+          "pos": [
+            0.0,
+            3.9700000286102295,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.5,
+            -2.4100000858306885,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_glow_int_weapon_locker.cgf",
+          "pos": [
+            1.600000023841858,
+            -1.559999942779541,
+            -1.4900000095367432
+          ],
+          "scale": [
+            0.7950000166893005,
+            0.7950000166893005,
+            0.7950000166893005
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_glow_int_weapon_locker.cgf",
+          "pos": [
+            1.6399999856948853,
+            -1.8200000524520874,
+            0.5799999833106995
+          ],
+          "scale": [
+            0.37700000405311584,
+            0.37700000405311584,
+            0.37700000405311584
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_bathroom_outer_300cm_rambler.cgf",
+          "pos": [
+            -1.6299999952316284,
+            -0.3799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_glow_int_weapon_locker.cgf",
+          "pos": [
+            1.559999942779541,
+            -1.559999942779541,
+            0.7200000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            -0.3100000023841858,
+            -2.630000114440918,
+            1.309999942779541
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            0.0,
+            -0.9100000262260437,
+            1.190000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.75,
+            -2.630000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_bathroom_a_scout.cgf",
+          "pos": [
+            -1.6299999952316284,
+            -0.4399999976158142,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            -0.6299999952316284,
+            -2.380000114440918,
+            1.440000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            -0.1899999976158142,
+            -2.2799999713897705,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_rambler_door_frame_rear_b.cgf",
+          "pos": [
+            0.3799999952316284,
+            -2.4100000858306885,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_door_frame_front_a_rambler.cgf",
+          "pos": [
+            0.3799999952316284,
+            -2.880000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            0.0,
+            -5.880000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_300cm.cgf",
+          "pos": [
+            0.0,
+            -2.9100000858306885,
+            1.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_wall_comp_150cm.cgf",
+          "pos": [
+            1.75,
+            -4.28000020980835,
+            -1.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_wall_comp_150cm.cgf",
+          "pos": [
+            -1.690000057220459,
+            -4.380000114440918,
+            -1.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            0.0,
+            -7.380000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            0.0,
+            -4.380000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            0.0,
+            -4.380000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_cooler_01.cgf",
+          "pos": [
+            1.8899999856948853,
+            -3.5899999141693115,
+            -0.38999998569488525
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.75,
+            -2.9100000858306885,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            -1.75,
+            -2.7799999713897705,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_wall_150cm.cgf",
+          "pos": [
+            -1.75,
+            -2.880000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_300cm.cgf",
+          "pos": [
+            0.0,
+            -4.380000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_relay_01.cgf",
+          "pos": [
+            1.8899999856948853,
+            -4.940000057220459,
+            -0.20000000298023224
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ramp_floor_rambler.cgf",
+          "pos": [
+            -2.059999942779541,
+            -5.78000020980835,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ramp_frame.cgf",
+          "pos": [
+            0.0,
+            -13.59000015258789,
+            -3.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_300cm.cgf",
+          "pos": [
+            0.0,
+            -7.380000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.75,
+            -5.880000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            -1.75,
+            -4.25,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_150cm.cgf",
+          "pos": [
+            0.0,
+            -2.880000114440918,
+            1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_battery_01.cgf",
+          "pos": [
+            -1.9500000476837158,
+            -5.070000171661377,
+            -0.6399999856948853
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_radar_01.cgf",
+          "pos": [
+            1.8899999856948853,
+            -4.940000057220459,
+            -0.6399999856948853
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_shield_01.cgf",
+          "pos": [
+            -1.9500000476837158,
+            -5.079999923706055,
+            0.05000000074505806
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.75,
+            -4.380000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_wall_comp_150_b.cgf",
+          "pos": [
+            1.75,
+            -5.78000020980835,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_power_plant_01.cgf",
+          "pos": [
+            -1.9500000476837158,
+            -5.070000171661377,
+            -1.3300000429153442
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_gravitygen_01.cgf",
+          "pos": [
+            1.8899999856948853,
+            -4.940000057220459,
+            -1.3300000429153442
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_jumpdrive_01.cgf",
+          "pos": [
+            1.8899999856948853,
+            -3.640000104904175,
+            -1.3300000429153442
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_floor_050cm.cgf",
+          "pos": [
+            -0.3400000035762787,
+            3.799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_450cm.cgf",
+          "pos": [
+            -0.2199999988079071,
+            2.380000114440918,
+            -1.4700000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_ceilling_aircon_300cm.cgf",
+          "pos": [
+            -0.5,
+            0.8100000023841858,
+            1.409999966621399
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_400cm.cgf",
+          "pos": [
+            -0.25,
+            0.75,
+            1.190000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_fire_extinguisher_cabinet.cgf",
+          "pos": [
+            1.059999942779541,
+            3.0899999141693115,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_floor_150cm.cgf",
+          "pos": [
+            -0.3400000035762787,
+            2.4200000762939453,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            -1.690000057220459,
+            3.9700000286102295,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            -2.25,
+            0.8799999952316284,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_fire_ext_wall_rambler.cgf",
+          "pos": [
+            1.1299999952316284,
+            3.3399999141693115,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_kitchen_rambler.cgf",
+          "pos": [
+            -2.059999942779541,
+            3.0899999141693115,
+            -1.559999942779541
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_bed_wall_rambler.cgf",
+          "pos": [
+            1.0,
+            1.9600000381469727,
+            -1.6299999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_300cm.cgf",
+          "pos": [
+            -0.2800000011920929,
+            3.9700000286102295,
+            -1.4700000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_floor_150cm.cgf",
+          "pos": [
+            -0.3400000035762787,
+            0.9100000262260437,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_ceiling_100cm.cgf",
+          "pos": [
+            -0.5899999737739563,
+            4.090000152587891,
+            1.340000033378601
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            -2.25,
+            2.380000114440918,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_wall.cgf",
+          "pos": [
+            1.159999966621399,
+            3.8399999141693115,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_wall_table_rambler.cgf",
+          "pos": [
+            -2.25,
+            2.0,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_beam_floor_450cm.cgf",
+          "pos": [
+            -0.1899999976158142,
+            0.8700000047683716,
+            -1.4700000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_fan_bladessmall.cga",
+          "pos": [
+            -2.5399999618530273,
+            1.5700000524520874,
+            0.7300000190734863
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_toilet.cga",
+          "pos": [
+            -1.6100000143051147,
+            -2.25,
+            -1.0099999904632568
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Habitation_Chair_2.cga",
+          "pos": [
+            -1.2300000190734863,
+            3.690000057220459,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_bathroom_door.cga",
+          "pos": [
+            -1.6299999952316284,
+            -0.4699999988079071,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Habitation_Table.cga",
+          "pos": [
+            -2.5,
+            1.559999942779541,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Habitation_Chair_1.cga",
+          "pos": [
+            -1.6299999952316284,
+            1.559999942779541,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -1.940000057220459,
+            -2.190000057220459,
+            -0.6600000262260437
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Full.cga",
+          "pos": [
+            -2.3299999237060547,
+            -0.9300000071525574,
+            -0.019999999552965164
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/hab/drak_cutter_locker_storage_rambler.cga",
+          "pos": [
+            -2.25,
+            0.5299999713897705,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Bed.cga",
+          "pos": [
+            1.0,
+            1.940000057220459,
+            -1.4700000286102295
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Open.cga",
+          "pos": [
+            -0.8399999737739563,
+            -0.4399999976158142,
+            -0.03999999910593033
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Bed_LightSwitch.cga",
+          "pos": [
+            2.130000114440918,
+            2.200000047683716,
+            -0.5400000214576721
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_fan_bladeslarge.cga",
+          "pos": [
+            -0.8700000047683716,
+            -2.75,
+            0.30000001192092896
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_fan_bladeslarge.cga",
+          "pos": [
+            -0.8700000047683716,
+            -2.75,
+            0.8700000047683716
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            1.9700000286102295,
+            -5.25,
+            -0.800000011920929
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_small_b.cga",
+          "pos": [
+            1.75,
+            -4.940000057220459,
+            -1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_medium_b.cga",
+          "pos": [
+            -1.809999942779541,
+            -5.059999942779541,
+            -1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            1.9700000286102295,
+            -5.25,
+            0.09000000357627869
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_OpenLights.cga",
+          "pos": [
+            1.8600000143051147,
+            -5.590000152587891,
+            0.07999999821186066
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_small_a.cga",
+          "pos": [
+            1.75,
+            -4.940000057220459,
+            -0.6899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            1.9700000286102295,
+            -5.25,
+            -0.3499999940395355
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Ramp_Light.cga",
+          "pos": [
+            1.809999942779541,
+            -6.940000057220459,
+            0.5899999737739563
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_small_a.cga",
+          "pos": [
+            1.75,
+            -4.940000057220459,
+            -0.25
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_medium_b.cga",
+          "pos": [
+            1.75,
+            -3.5899999141693115,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            -0.10999999940395355
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            -0.800000011920929
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/common/drak_cutter_door.cga",
+          "pos": [
+            0.3799999952316284,
+            -2.5999999046325684,
+            -1.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_NoLock.cga",
+          "pos": [
+            -0.5699999928474426,
+            -2.430000066757202,
+            -0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            1.9700000286102295,
+            -4.03000020980835,
+            0.14000000059604645
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_NoLockLight.cga",
+          "pos": [
+            1.3200000524520874,
+            -2.8299999237060547,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            0.3400000035762787
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            1.9700000286102295,
+            -4.03000020980835,
+            -0.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_medium_b.cga",
+          "pos": [
+            -1.809999942779541,
+            -5.059999942779541,
+            -0.6899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_medium_c.cga",
+          "pos": [
+            1.75,
+            -3.5899999141693115,
+            -1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/interior/rear/drak_cutter_component_bay_medium_a.cga",
+          "pos": [
+            -1.809999942779541,
+            -5.059999942779541,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -1.940000057220459,
+            -2.190000057220459,
+            -0.6600000262260437
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Full.cga",
+          "pos": [
+            -2.3299999237060547,
+            -0.9300000071525574,
+            -0.019999999552965164
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_Open.cga",
+          "pos": [
+            -0.8399999737739563,
+            -0.4399999976158142,
+            -0.03999999910593033
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Hab/DRAK_Cutter_Bed_LightSwitch.cga",
+          "pos": [
+            2.130000114440918,
+            2.200000047683716,
+            -0.5400000214576721
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_OpenLights.cga",
+          "pos": [
+            1.8600000143051147,
+            -5.590000152587891,
+            0.07999999821186066
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            -0.10999999940395355
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            -0.800000011920929
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Common/DRAK_Cutter_Control_Door_Wall_NoLock.cga",
+          "pos": [
+            -0.5699999928474426,
+            -2.430000066757202,
+            -0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/DRAK/Cutter/Interior/Rear/DRAK_Cutter_Component_Bay_Button.cga",
+          "pos": [
+            -2.0299999713897705,
+            -4.630000114440918,
+            0.3400000035762787
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 47
+    },
+    {
+      "container": "cutter_ext_light_base",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/exterior/drak_cutter_glows.cgf",
+          "pos": [
+            0.0,
+            -6.5,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 99
+    },
+    {
+      "container": "cutter_ext_light_expo",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/exterior/drak_cutter_glow_rambler_cockpit_headlight_left.cgf",
+          "pos": [
+            -0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/exterior/drak_cutter_glow_rambler_cockpit_headlight_right.cgf",
+          "pos": [
+            -0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/exterior/drak_cutter_glow_rambler_winglet_left.cgf",
+          "pos": [
+            -1.809999942779541,
+            -15.1899995803833,
+            1.9900000095367432
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/drak/cutter/exterior/drak_cutter_glow_rambler_winglet_right.cgf",
+          "pos": [
+            1.809999942779541,
+            -15.180000305175781,
+            1.9900000095367432
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 10
+    }
+  ]
+}

@@ -1,0 +1,5007 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.ANVL_Hurricane",
+    "geometry": "Objects\\Spaceships\\Ships\\ANVL\\Hurricane\\ANVL_Hurricane.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "nose",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.225
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3051
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.3254
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2268
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "turret_door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.2847
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.6128
+        ]
+      ]
+    },
+    {
+      "node": "wing_bottom_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -5.9037
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.067
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.642
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stabilizer_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.3945
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -6.133
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.6383
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_top_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -6.3243
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.9501
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2728
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_bottom_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          5.9036
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.067
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.642
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_top_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          6.3243
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.951
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2728
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stabilizer_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          3.3945
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -6.133
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.6383
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_right_lg_door_hinge",
+      "type": 0
+    },
+    {
+      "node": "body_right_lg_door_rail",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9848,
+          0.0,
+          0.1736,
+          0.1548
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.6565
+        ],
+        [
+          -0.1736,
+          -0.0,
+          0.9848,
+          -0.0164
+        ]
+      ]
+    },
+    {
+      "node": "body_right_lg_door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3682
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.6864
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0261
+        ]
+      ]
+    },
+    {
+      "node": "stabilizer_right_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_top_right_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_bottom_right_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_left_lg_door_hinge",
+      "type": 0
+    },
+    {
+      "node": "body_left_lg_door_rail",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9848,
+          0.0,
+          0.1736,
+          -0.1548
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6565
+        ],
+        [
+          -0.1736,
+          -0.0,
+          0.9848,
+          0.0164
+        ]
+      ]
+    },
+    {
+      "node": "body_left_lg_door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.3766
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.6906
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0219
+        ]
+      ]
+    },
+    {
+      "node": "wing_top_left_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stabilizer_left_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wing_bottom_left_flap",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "nose_weapon_slider_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0103,
+          0.1816,
+          -0.9833,
+          0.877
+        ],
+        [
+          -0.0458,
+          -0.9824,
+          -0.181,
+          2.1238
+        ],
+        [
+          -0.9989,
+          0.0432,
+          0.0185,
+          -0.8106
+        ]
+      ]
+    },
+    {
+      "node": "nose_weapon_slider_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0103,
+          0.1816,
+          -0.9833,
+          -0.877
+        ],
+        [
+          0.0458,
+          0.9824,
+          0.181,
+          2.1238
+        ],
+        [
+          0.9989,
+          -0.0432,
+          -0.0185,
+          -0.8106
+        ]
+      ]
+    },
+    {
+      "node": "nose_weapon_rotator_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0001
+        ],
+        [
+          0.0,
+          0.9833,
+          -0.1822,
+          0.1183
+        ],
+        [
+          -0.0,
+          0.1822,
+          0.9833,
+          0.008
+        ]
+      ]
+    },
+    {
+      "node": "nose_weapon_mount_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.9989,
+          -0.0458,
+          0.0103,
+          0.0121
+        ],
+        [
+          0.0459,
+          -0.9989,
+          0.0006,
+          0.0007
+        ],
+        [
+          0.0103,
+          0.0011,
+          0.9999,
+          0.0942
+        ]
+      ]
+    },
+    {
+      "node": "nose_weapon_rotator_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0001
+        ],
+        [
+          0.0,
+          0.9833,
+          -0.1822,
+          -0.1183
+        ],
+        [
+          -0.0,
+          0.1822,
+          0.9833,
+          -0.008
+        ]
+      ]
+    },
+    {
+      "node": "nose_weapon_mount_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.9989,
+          -0.0458,
+          0.0103,
+          -0.0121
+        ],
+        [
+          0.0459,
+          -0.9989,
+          0.0006,
+          -0.0007
+        ],
+        [
+          0.0103,
+          0.0011,
+          0.9999,
+          -0.0942
+        ]
+      ]
+    },
+    {
+      "node": "canopy_exterior",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "cockpit_door_right_hinge",
+      "type": 0
+    },
+    {
+      "node": "cockpit_door_right_rail",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9659,
+          -0.0,
+          -0.2588,
+          -0.1422
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6565
+        ],
+        [
+          0.2588,
+          -0.0,
+          0.9659,
+          -0.0632
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1175
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.8024
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0095
+        ]
+      ]
+    },
+    {
+      "node": "nose_lg_door_right_hinge",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          1.2352
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0
+        ]
+      ]
+    },
+    {
+      "node": "nose_lg_door_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.3345
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0115
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_left_hinge",
+      "type": 0
+    },
+    {
+      "node": "cockpit_door_left_rail",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9659,
+          -0.0,
+          -0.2588,
+          0.1422
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6565
+        ],
+        [
+          0.2588,
+          -0.0,
+          0.9659,
+          0.0632
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.1175
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.8024
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0095
+        ]
+      ]
+    },
+    {
+      "node": "nose_lg_door_left_hinge",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.2352
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "nose_lg_door_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.3345
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0115
+        ]
+      ]
+    },
+    {
+      "node": "ANVL_Hurricane",
+      "type": 2,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -3.4234
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_rear_top_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0419,
+          -0.9991,
+          -3.4312
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.7444
+        ],
+        [
+          -0.0,
+          -0.9991,
+          0.0419,
+          1.0314
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_turret",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.3628
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          1.0783
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_rear_top_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.0419,
+          0.9991,
+          3.4312
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -0.7444
+        ],
+        [
+          0.0,
+          -0.9991,
+          -0.0419,
+          1.0314
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_rear_bot_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0419,
+          0.9991,
+          3.4312
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.7444
+        ],
+        [
+          0.0,
+          0.9991,
+          -0.0419,
+          -1.4757
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_rear_bot_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0419,
+          -0.9991,
+          -3.4312
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.7444
+        ],
+        [
+          0.0,
+          0.9991,
+          0.0419,
+          -1.4757
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_landing_gear_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.9243
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.0593
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.8784
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_landing_gear_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          2.9243
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.0593
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.8784
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_thruster_main_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.3391
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -5.1276
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2134
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_main_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.3391
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -5.1276
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2134
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_armor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_powerplant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.3329
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_launcher_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.6703
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          -4.5998
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          -0.0816
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.788
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.7699
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.7876
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.7699
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.73
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.8943
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.7301
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.8943
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cooler_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.9687
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.969
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_drive",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -2.584
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_fuel_tank",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -2.584
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.3254
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2268
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_turret_tunnel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.6176
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3049
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_missile_wing_left_01_s2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -4.8125
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.618
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0685
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_missile_wing_left_02_s2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -4.4338
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.618
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0685
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_missile_wing_right_01_s2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          4.8118
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.618
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0685
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_missile_wing_right_02_s2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          4.4342
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.618
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0685
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_left_lg_door_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9799,
+          0.1993,
+          0.0035,
+          -2.8611
+        ],
+        [
+          -0.1994,
+          0.9798,
+          0.0171,
+          -1.9995
+        ],
+        [
+          -0.0,
+          -0.0175,
+          0.9998,
+          -1.6128
+        ]
+      ]
+    },
+    {
+      "node": "body_right_lg_door_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9799,
+          0.1993,
+          0.0035,
+          2.8611
+        ],
+        [
+          0.1994,
+          -0.9798,
+          -0.0171,
+          -1.9995
+        ],
+        [
+          -0.0,
+          0.0175,
+          -0.9998,
+          -1.6128
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_countermeasure_launcher_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.67
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          -4.5998
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          -0.0816
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "engine_001",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.3391
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -5.8853
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2134
+        ]
+      ]
+    },
+    {
+      "node": "engine_002",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.3391
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -5.8853
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2134
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_ext_lights",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.5238
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.3799
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.3254
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2268
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_missile",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1112
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          12.9481
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.0953
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_access_gunner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.3254
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.2268
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_storage",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2168
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          6.8194
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.5952
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_storage_copilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2168
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          6.8194
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.5952
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stabilizer_right_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.8947,
+          0.29,
+          0.3397,
+          0.0066
+        ],
+        [
+          0.0016,
+          0.7625,
+          -0.6469,
+          -0.4369
+        ],
+        [
+          -0.4467,
+          -0.5783,
+          -0.6827,
+          0.2768
+        ]
+      ]
+    },
+    {
+      "node": "contrail_002",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.4256
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4561
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.1598
+        ]
+      ]
+    },
+    {
+      "node": "wing_top_right_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9762,
+          -0.0141,
+          -0.2166,
+          0.5307
+        ],
+        [
+          -0.0295,
+          -0.9972,
+          -0.0681,
+          -1.2092
+        ],
+        [
+          -0.215,
+          0.0729,
+          -0.9739,
+          0.7496
+        ]
+      ]
+    },
+    {
+      "node": "contrail_004",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.5825
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.4678
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1142
+        ]
+      ]
+    },
+    {
+      "node": "wing_bottom_right_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.9745,
+          0.1224,
+          -0.1883,
+          0.1254
+        ],
+        [
+          -0.1327,
+          -0.9902,
+          0.0436,
+          -0.9697
+        ],
+        [
+          -0.1811,
+          0.0674,
+          0.9812,
+          -0.3315
+        ]
+      ]
+    },
+    {
+      "node": "wing_top_left_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9762,
+          -0.0141,
+          -0.2166,
+          -0.5307
+        ],
+        [
+          0.0295,
+          0.9972,
+          0.0681,
+          -1.2092
+        ],
+        [
+          0.215,
+          -0.0729,
+          0.9739,
+          0.7496
+        ]
+      ]
+    },
+    {
+      "node": "contrail_003",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.5681
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.4678
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1142
+        ]
+      ]
+    },
+    {
+      "node": "stabilizer_left_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.8947,
+          0.29,
+          0.3397,
+          -0.0066
+        ],
+        [
+          -0.0016,
+          -0.7625,
+          0.6469,
+          -0.4369
+        ],
+        [
+          0.4467,
+          0.5783,
+          0.6827,
+          0.2768
+        ]
+      ]
+    },
+    {
+      "node": "contrail_001",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.4245
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4561
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.1598
+        ]
+      ]
+    },
+    {
+      "node": "wing_bottom_left_flap_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.9745,
+          0.1224,
+          -0.1883,
+          -0.1252
+        ],
+        [
+          0.1327,
+          0.9902,
+          -0.0436,
+          -0.9697
+        ],
+        [
+          0.1811,
+          -0.0674,
+          -0.9812,
+          -0.3315
+        ]
+      ]
+    },
+    {
+      "node": "nose_lg_door_left_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.866,
+          0.0,
+          -0.5,
+          -0.4087
+        ],
+        [
+          0.0279,
+          -0.9984,
+          0.0483,
+          -0.9203
+        ],
+        [
+          -0.4992,
+          -0.0558,
+          -0.8647,
+          -1.2001
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_left_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.4775
+        ],
+        [
+          0.0,
+          -0.9994,
+          0.0349,
+          2.2618
+        ],
+        [
+          0.0,
+          -0.0349,
+          -0.9994,
+          -1.1555
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_seat_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.6604
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0806
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "nose_lg_door_right_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.866,
+          0.0,
+          -0.5,
+          0.4087
+        ],
+        [
+          -0.0279,
+          0.9984,
+          -0.0483,
+          -0.9203
+        ],
+        [
+          0.4992,
+          0.0558,
+          0.8647,
+          -1.2001
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_right_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.4775
+        ],
+        [
+          0.0,
+          0.9994,
+          -0.0349,
+          2.2618
+        ],
+        [
+          0.0,
+          0.0349,
+          0.9994,
+          -1.1555
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_dashboard_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.069
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0309
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_heat_sink",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_flight",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_selfdestruct",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.069
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0309
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_retro_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.8555
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.4911
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6126
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_retro_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.856
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.4911
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6126
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_front_top_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0419,
+          0.9991,
+          1.61
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -3.2265
+        ],
+        [
+          0.0,
+          -0.9991,
+          -0.0419,
+          1.2512
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_front_top_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.0419,
+          -0.9991,
+          -1.6334
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -3.2265
+        ],
+        [
+          -0.0,
+          -0.9991,
+          0.0419,
+          1.2512
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_front_bot_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0419,
+          0.9991,
+          1.6334
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -3.2265
+        ],
+        [
+          0.0,
+          0.9991,
+          -0.0419,
+          -1.0581
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_mav_front_bot_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0419,
+          -0.9991,
+          -1.6334
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -3.2265
+        ],
+        [
+          0.0,
+          0.9991,
+          0.0419,
+          -1.0581
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_landing_gear_front",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.2999
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9133
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_int_cockpit",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.069
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0309
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Canopy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1377
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0316
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_radar_turret",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3679
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.24
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5679
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.401
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.6684
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool_turrets",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7859
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1417
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7859
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2478
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_flair_hang",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2818
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.5873
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4551
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_transponder",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_gun_nose_left_s4",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          0.0002
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_gun_nose_right_s4",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "canopy_trs_offset",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.6883
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0848
+        ]
+      ]
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "ANVL_Hurricane_SCItem_Seat_Pilot",
+      "port": "hardpoint_seat_pilot",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/ships/anvl/hurricane/anvl_hurricane_pilot_seat.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_SCItem_SeatAccess",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/ships/anvl/hurricane/anvl_hurricane_scitem_seataccess.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_SCItem_SeatAccess_Gunner",
+      "port": "hardpoint_seat_access_gunner",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Ships/ANVL/Hurricane/ANVL_Hurricane_SCItem_SeatAccess_Gunner.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Dashboard_Pilot",
+      "port": "hardpoint_dashboard_pilot",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Ships/ANVL/Hurricane/ANVL_Hurricane_SCItem_Dashboard_Pilot.cga",
+      "children": [
+        {
+          "entity": "Radar_Display_Hurricane",
+          "port": "hardpoint_cockpit_radar",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "H_Dashboard_Projector_HUD_ANVL_Hurricane",
+          "port": "Display_HUD",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_Physical",
+          "port": "Screen_Annunciator_Left",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Middle_Right",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Middle_Left",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Lower_Right",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Lower_Left",
+          "parent": "ANVL_Hurricane_Dashboard_Pilot",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "VHCL_SelfDestruct_10s",
+      "port": "hardpoint_selfdestruct",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "RADR_GRNP_S01_Ecouter",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Radar/small_component/grnp/radr_grnp_s01_pl01.cga"
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_AEGS_S01_Regulus_SCItem",
+      "port": "hardpoint_powerplant",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Power_Plants/small_component/aegs/powr_aegs_s01_pl03.cga"
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "COOL_AEGS_S01_Bracer_SCItem",
+      "port": "hardpoint_cooler_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/small_component/aegs/cool_aegs_s01_pl03.cga"
+    },
+    {
+      "entity": "COOL_AEGS_S01_Bracer_SCItem",
+      "port": "hardpoint_cooler_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/small_component/aegs/cool_aegs_s01_pl03.cga"
+    },
+    {
+      "entity": "HTNK_ANVL_Hurricane",
+      "port": "hardpoint_fuel_tank_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_ANVL_Hurricane",
+      "port": "hardpoint_fuel_tank_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_ANVL_Hurricane",
+      "port": "hardpoint_fuel_intake_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_ANVL_Hurricane",
+      "port": "hardpoint_fuel_intake_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "QDRV_TARS_S01_Expedition_SCItem",
+      "port": "hardpoint_quantum_drive",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Quantum_drives/small_component/tars/qdrv_tars_s01_pl03.cgf",
+      "children": [
+        {
+          "entity": "JDRV_TARS_S01_Explorer_SCItem",
+          "port": "hardpoint_jump_drive",
+          "parent": "QDRV_TARS_S01_Expedition_SCItem",
+          "geometry": "Objects/Spaceships/Jump_Modules/small_component/tars/jmod_tars_s01_pl02.cga",
+          "nmc_properties": [
+            {
+              "node": "mesh_jmod_tars_s01_pl02",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.3577
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            },
+            {
+              "node": "mesh_door_1_a",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": " CIG Red",
+                "MapChannel:3 ": " CIG Green",
+                "MapChannel:4 ": " CIG Blue"
+              }
+            },
+            {
+              "node": "mesh_door_1_b",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "QTNK_ANVL_Hurricane",
+      "port": "hardpoint_quantum_fuel_tank",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Shield_ANVL_Hurricane",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "SHLD_GODI_S02_FullStop_SCItem",
+      "port": "hardpoint_shield_generator_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Shields/medium_component/godi/shld_godi_s02_pl03.cga"
+    },
+    {
+      "entity": "ARMR_ANVL_Hurricane",
+      "port": "hardpoint_armor",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Flight_ANVL_Hurricane",
+      "port": "hardpoint_controller_flight",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/blades/s01/blad_mite_s01_pl01.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Main",
+      "port": "hardpoint_thruster_main_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_main_left.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Main",
+      "port": "hardpoint_thruster_main_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_main_right.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Retro",
+      "port": "hardpoint_thruster_retro_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_retro_left.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Retro",
+      "port": "hardpoint_thruster_retro_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_retro_right.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Bottom",
+      "port": "hardpoint_thruster_mav_front_bot_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Bottom",
+      "port": "hardpoint_thruster_mav_front_bot_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Top",
+      "port": "hardpoint_thruster_mav_front_top_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Top",
+      "port": "hardpoint_thruster_mav_front_top_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Top",
+      "port": "hardpoint_thruster_mav_rear_top_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Top",
+      "port": "hardpoint_thruster_mav_rear_top_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Bottom",
+      "port": "hardpoint_thruster_mav_rear_bot_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "ANVL_Hurricane_Thruster_Mav_Bottom",
+      "port": "hardpoint_thruster_mav_rear_bot_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/thrusters/anvl/anvl_hurricane_thrusters/anvl_hurricane_thruster_mav.cga"
+    },
+    {
+      "entity": "Default_LandingSystem",
+      "port": "landingpad_helper",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Mount_Gimbal_S4",
+      "port": "hardpoint_gun_nose_left_s4",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s4.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S4",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S4",
+          "geometry": "objects/spaceships/weapons/klwe/klwe_merged_weapons/klwe_las_rep_s4/klwe_las_rep_s4_l1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S4",
+      "port": "hardpoint_gun_nose_right_s4",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s4.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S4",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S4",
+          "geometry": "objects/spaceships/weapons/klwe/klwe_merged_weapons/klwe_las_rep_s4/klwe_las_rep_s4_l1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "ANVL_Hurricane_SCItem_Turret",
+      "port": "hardpoint_turret",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/ships/anvl/hurricane/anvl_hurricane_turret.cga",
+      "children": [
+        {
+          "entity": "Mount_Gimbal_S3",
+          "port": "hardpoint_weapon_left",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+          "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {
+                  "node": "root",
+                  "type": 0,
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_03",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0887
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5482
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_02",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0895
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5358
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_01",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.4123
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "muzzle_out3",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -0.0,
+                      -0.0216
+                    ],
+                    [
+                      -0.0,
+                      0.0,
+                      1.0,
+                      0.0031
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "465"
+                  }
+                },
+                {
+                  "node": "muzzle_out2",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.0084
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "466"
+                  }
+                },
+                {
+                  "node": "muzzle_out1",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      0.0361
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "467"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": "Mount_Gimbal_S3",
+          "port": "hardpoint_weapon_right",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+          "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {
+                  "node": "root",
+                  "type": 0,
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_03",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0887
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5482
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_02",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0895
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5358
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_01",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.4123
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "muzzle_out3",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -0.0,
+                      -0.0216
+                    ],
+                    [
+                      -0.0,
+                      0.0,
+                      1.0,
+                      0.0031
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "465"
+                  }
+                },
+                {
+                  "node": "muzzle_out2",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.0084
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "466"
+                  }
+                },
+                {
+                  "node": "muzzle_out1",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      0.0361
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "467"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": "Mount_Gimbal_S3",
+          "port": "hardpoint_weapon_top_left",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+          "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {
+                  "node": "root",
+                  "type": 0,
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_03",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0887
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5482
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_02",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0895
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5358
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_01",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.4123
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "muzzle_out3",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -0.0,
+                      -0.0216
+                    ],
+                    [
+                      -0.0,
+                      0.0,
+                      1.0,
+                      0.0031
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "465"
+                  }
+                },
+                {
+                  "node": "muzzle_out2",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.0084
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "466"
+                  }
+                },
+                {
+                  "node": "muzzle_out1",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      0.0361
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "467"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": "Mount_Gimbal_S3",
+          "port": "hardpoint_weapon_top_right",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s3.cga",
+          "children": [
+            {
+              "entity": "KLWE_LaserRepeater_S3",
+              "port": "hardpoint_class_2",
+              "parent": "Mount_Gimbal_S3",
+              "geometry": "Objects/Spaceships/Weapons/KLWE/KLWE_Merged_Weapons/KLWE_Las_Rep_S3/KLWE_Las_Rep_S3_L1.cga",
+              "nmc_properties": [
+                {
+                  "node": "root",
+                  "type": 0,
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_03",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0887
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5482
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_02",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0895
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.5358
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "barrel_01",
+                  "type": 0,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      2.435
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.4123
+                    ]
+                  ],
+                  "props": {
+                    "damping": "0",
+                    "dampingX": "1",
+                    "dampingY": "1",
+                    "dampingZ": "1",
+                    "drivenTension": "1",
+                    "drivenTensionCol": "100",
+                    "proxyParams": "",
+                    "relPosition": "",
+                    "relRotation": "",
+                    "rotLimitMax": "0",
+                    "rotLimitMaxX": "0",
+                    "rotLimitMaxY": "0",
+                    "rotLimitMaxZ": "0",
+                    "rotLimitMin": "0",
+                    "rotLimitMinX": "0",
+                    "rotLimitMinY": "0",
+                    "rotLimitMinZ": "0",
+                    "springTension": "0",
+                    "springTensionX": "1",
+                    "springTensionY": "1",
+                    "springTensionZ": "1"
+                  }
+                },
+                {
+                  "node": "muzzle_out3",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      -0.0,
+                      -0.0216
+                    ],
+                    [
+                      -0.0,
+                      0.0,
+                      1.0,
+                      0.0031
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "465"
+                  }
+                },
+                {
+                  "node": "muzzle_out2",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      -0.0084
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "466"
+                  }
+                },
+                {
+                  "node": "muzzle_out1",
+                  "type": 3,
+                  "bone_to_world": [
+                    [
+                      1.0,
+                      0.0,
+                      0.0,
+                      -0.0
+                    ],
+                    [
+                      0.0,
+                      1.0,
+                      0.0,
+                      -0.0216
+                    ],
+                    [
+                      0.0,
+                      0.0,
+                      1.0,
+                      0.0361
+                    ]
+                  ],
+                  "props": {
+                    "MaxHandle": "467"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "entity": "Radar_Display_Screen_Template",
+          "port": "Screen_Radar",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Inner_Right",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Inner_Left",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Outer_Right",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Outer_Left",
+          "parent": "ANVL_Hurricane_SCItem_Turret",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Single_S02",
+      "port": "hardpoint_missile_wing_left_01_s2",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_single_s02.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Single_S02",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Single_S02",
+      "port": "hardpoint_missile_wing_left_02_s2",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_single_s02.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Single_S02",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Single_S02",
+      "port": "hardpoint_missile_wing_right_01_s2",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_single_s02.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Single_S02",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S02_BEHR_Single_S02",
+      "port": "hardpoint_missile_wing_right_02_s2",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s02_behr_single_s02.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S02_BEHR_Single_S02",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "ANVL_Hurricane_CML_Flare",
+      "port": "hardpoint_countermeasure_launcher_left",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Weapons/Countermeasure_Launcher\\Anvil/ANVL_Hurricane_Countermeasure.cga",
+      "nmc_properties": [
+        {
+          "node": "Countermeasure",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "ANVL_Hurricane_Countermeasure",
+          "type": 2,
+          "bone_to_world": [
+            [
+              -1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              -1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "class": "ItemPort",
+            "detach": "False",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "ANVL_Hurricane_CML_Chaff",
+      "port": "hardpoint_countermeasure_launcher_right",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Weapons/Countermeasure_Launcher\\Anvil/ANVL_Hurricane_Countermeasure.cga",
+      "nmc_properties": [
+        {
+          "node": "Countermeasure",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "ANVL_Hurricane_Countermeasure",
+          "type": 2,
+          "bone_to_world": [
+            [
+              -1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              -1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "class": "ItemPort",
+            "detach": "False",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Controller_Missile",
+      "port": "hardpoint_controller_missile",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_AEGS_S01_Regulus_SCItem",
+      "port": "hardpoint_powerplant_02",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Power_Plants/small_component/aegs/powr_aegs_s01_pl03.cga"
+    },
+    {
+      "entity": "RELAY_3slot",
+      "port": "hardpoint_relay",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_3fuse.cga"
+    },
+    {
+      "entity": "LFSP_TYDT_S01_ComfortAir",
+      "port": "hardpoint_lifesupport",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/life_support/small_component/tydt/life_tydt_s01.cga"
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Fuel",
+      "port": "hardpoint_controller_fuel",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": ""
+    },
+    {
+      "entity": "DockingTube_Fuel_Ports_ANVL_Hurricane",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": ""
+    },
+    {
+      "entity": "ANVL_Hurricane_ShipATCDataManager",
+      "port": "hardpoint_air_traffic_controller",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": ""
+    },
+    {
+      "entity": "PersonalStorage_ANVL_Hurricane",
+      "port": "hardpoint_personal_storage",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Ships/ANVL/Hurricane/ANVL_Hurricane_Pilot_Personal_Storage.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_pilot_personal_right_door",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.9968,
+              -0.0795,
+              -0.0027,
+              0.8125
+            ],
+            [
+              0.0795,
+              0.9964,
+              0.029,
+              2.0076
+            ],
+            [
+              0.0004,
+              -0.0292,
+              0.9996,
+              1.1749
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        },
+        {
+          "node": "mesh_pilot_personal_left_door",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.8793,
+              -0.4763,
+              0.0042,
+              0.1343
+            ],
+            [
+              0.4757,
+              0.8777,
+              -0.0584,
+              -0.0518
+            ],
+            [
+              0.0241,
+              0.0533,
+              0.9983,
+              -0.0368
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "PersonalStorage_ANVL_Hurricane_copilot",
+      "port": "hardpoint_personal_storage_copilot",
+      "parent": "EntityClassDefinition.ANVL_Hurricane",
+      "geometry": "Objects/Spaceships/Ships/ANVL/Hurricane/ANVL_Hurricane_Copilot_Personal_Storage.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_copilot_personal_right_door",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.8793,
+              0.4763,
+              -0.0042,
+              -0.1343
+            ],
+            [
+              -0.4757,
+              0.8777,
+              -0.0584,
+              -0.0518
+            ],
+            [
+              -0.0241,
+              0.0533,
+              0.9983,
+              -0.0368
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        },
+        {
+          "node": "mesh_copilot_personal_left_door",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.9968,
+              0.0795,
+              0.0027,
+              -0.8125
+            ],
+            [
+              -0.0795,
+              0.9964,
+              0.029,
+              2.0076
+            ],
+            [
+              -0.0004,
+              -0.0292,
+              0.9996,
+              1.1749
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        }
+      ]
+    }
+  ],
+  "interiors": [
+    {
+      "container": "base_ext_lg",
+      "meshes": [],
+      "lights": 67
+    },
+    {
+      "container": "base_int_cockpit_main",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/anvl/hurricane/anvl_hurricane_cockpit.cgf",
+          "pos": [
+            0.0,
+            -0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 51
+    }
+  ]
+}

@@ -1,0 +1,4242 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.DRAK_Mule",
+    "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "Body",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0275
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Radar_Button",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.9268
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          -0.5328
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3227
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Button",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.9449
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.5573
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1484
+        ]
+      ]
+    },
+    {
+      "node": "Entry_Button",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.4917
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.9049
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1055
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_FL",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8857
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.4734
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6861
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_FR",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.8822
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.4718
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5932
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_ML",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8857
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7877
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6861
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_MR",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.8822
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.7894
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5932
+        ]
+      ]
+    },
+    {
+      "node": "Rear",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.8919
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4625
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Avionics_Button",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.9391
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.5224
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.214
+        ]
+      ]
+    },
+    {
+      "node": "Entry_Door_Lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.127
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0284
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Door_Arms",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2392
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2505
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.7922
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Seat_Hatch",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0782
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1229
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Entry_Door_Upper_node",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2392
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0649
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0531
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Entry_Door_Lower_Ramp",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0342
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.2817
+        ]
+      ]
+    },
+    {
+      "node": "RearComponents_Button",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.5635
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.7455
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0892
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_RR",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.8846
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.1595
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0557
+        ]
+      ]
+    },
+    {
+      "node": "shock_body_mesh_RL",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8833
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1579
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1486
+        ]
+      ]
+    },
+    {
+      "node": "sidetray_right",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "sidetray_left",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Rear_Mechanism_Lower",
+      "type": 0
+    },
+    {
+      "node": "Rear_Mechanism_latch",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.9881
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1475
+        ]
+      ]
+    },
+    {
+      "node": "Rear_Components_Door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.8348
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3568
+        ]
+      ]
+    },
+    {
+      "node": "Rear_Components_Interior",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6557
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1094
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "rear_cage",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1932
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0884
+        ]
+      ]
+    },
+    {
+      "node": "rear_cage_arms",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1454
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0248
+        ]
+      ]
+    },
+    {
+      "node": "rear_cage_base",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0694
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0008
+        ]
+      ]
+    },
+    {
+      "node": "Arm_Hinge",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2116
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2582
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Cargo_Arms_Elavation",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.2184
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4007
+        ]
+      ]
+    },
+    {
+      "node": "Base_Rotation",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.7858
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0631
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0221
+        ]
+      ]
+    },
+    {
+      "node": "Cargo_Forearm",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8765
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0164
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0562
+        ]
+      ]
+    },
+    {
+      "node": "Cargo_Grip_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.5485
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1908
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6544
+        ]
+      ]
+    },
+    {
+      "node": "Cargo_Grip_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.5485
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4077
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5839
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Tray",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0501
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0042
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0504
+        ]
+      ]
+    },
+    {
+      "node": "cooler_doors_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.146
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "cooler_doors_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.146
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Bracket",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1492
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0013
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0117
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Internals",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0737
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.27
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Internals_pad_lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "Cooler_Internals_pad_upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0062
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5307
+        ]
+      ]
+    },
+    {
+      "node": "radar_door_upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.4452
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0181
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0184
+        ]
+      ]
+    },
+    {
+      "node": "radar_door_lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.417
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0001
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1674
+        ]
+      ]
+    },
+    {
+      "node": "radar_bracket_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.4408
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0181
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4489
+        ]
+      ]
+    },
+    {
+      "node": "radar_interior",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0154
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0001
+        ]
+      ]
+    },
+    {
+      "node": "radar_door_lower_flap",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.4255
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0004
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1818
+        ]
+      ]
+    },
+    {
+      "node": "Avionics_Door",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.5024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0071
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0638
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_avionics",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          -0.3375
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0009
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1774
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Avionics_Bracket_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0028
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0284
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_brace",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.7664
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0353
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5255
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Exterior_Glass_sides",
+      "type": 0
+    },
+    {
+      "node": "Interior_Glass_sides",
+      "type": 0
+    },
+    {
+      "node": "skirting_rear",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.7864
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.4214
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6722
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "tail_lights",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0941
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.3539
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0012
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Rear_Mechanism_Upper_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.6564
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.5365
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3618
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "DRAK_Mule_rear_sideR_glows",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7273
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0585
+        ]
+      ]
+    },
+    {
+      "node": "DRAK_Mule_rear_sideL_glows",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7273
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0585
+        ]
+      ]
+    },
+    {
+      "node": "entrydoor_glows",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0469
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.3716
+        ]
+      ]
+    },
+    {
+      "node": "Entry_Door_Upper_node_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0396
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0008
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "interior_glass_middle",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.7639
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.2445
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1869
+        ]
+      ]
+    },
+    {
+      "node": "EXT_Glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0396
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0008
+        ]
+      ]
+    },
+    {
+      "node": "DRAK_Mule",
+      "type": 2,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_transponder",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_selfdestruct",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_driver",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.5991
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0075
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1916
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.482
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_int_main",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_driver",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.4281
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_wheel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_armor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7366
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3001
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.4749
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_ML",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3001
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2933
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.4749
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_MR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2933
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_inventory",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.0677
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.044
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "massBox",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "MassBox",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Components_Avionics",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.4295
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7621
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2454
+        ]
+      ]
+    },
+    {
+      "node": "Components_Panels",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.652
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7616
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.05
+        ]
+      ]
+    },
+    {
+      "node": "Components_Cooler",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.739
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.2983
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4181
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_shield_generator",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0065
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.35
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.8683
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.2933
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.0339
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3001
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.0339
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.9633
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Front_Cargo_Arms",
+      "type": 1,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6281
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Entry_Door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8542
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_vehicle_destroyed",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.7719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_fuel_port",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.0976
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1719
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0275
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weaponrack",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2703
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0015
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.684
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Components_Rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1083
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1294
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Rear_Mechanism",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2888
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4315
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cargogrid_left_front",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.0909
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.5457
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargogrid_left_middle",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.0909
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.0058
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargogrid_left_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.0909
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.5516
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargogrid_right_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          1.0895
+        ],
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.5516
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargogrid_right_middle",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          1.0895
+        ],
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0058
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cargogrid_right_front",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          0.0,
+          1.0895
+        ],
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.5457
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4231
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Rear_Mechanism_Upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.1039
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cargogrid_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.3858
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1137
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_batteries",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.2658
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.0359
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0228
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_power_plant",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.2654
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.0359
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0228
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Cargo_Arms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.4351
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4981
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Elbow_Rotation",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.9145
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.3378
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1347
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cargogrid_front",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.7478
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1544
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3968
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "SHIELD_SDF_01_FT",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.7478
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1544
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3968
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RL_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3939
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.1483
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RL_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2615
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RR_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.3927
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.1512
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_RR_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.2603
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "cooler_doors",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.1272
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0042
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.033
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.07
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0013
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.0114
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Components_Radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.1642
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0003
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2501
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.3173
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0026
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.1387
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Avionics_Bracket",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.504
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0189
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4035
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_wheel_MR_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.3927
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.1512
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_MR_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.2603
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FR_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.3927
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.1512
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FR_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.2603
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_ML_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3939
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1483
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_ML_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2615
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FL_hub",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2615
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_wheel_FL_assembly",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3939
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.1483
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "DRAK_Mule_Seat_Driver",
+      "port": "hardpoint_seat_driver",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Spaceships/Seats/DRAK/Mule/DRAK_Mule_Seat.cga"
+    },
+    {
+      "entity": "DRAK_Mule_Dashboard_Driver",
+      "port": "hardpoint_dashboard_driver",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Spaceships/Seats/DRAK/Mule/DRAK_Mule_Pilot_DashBoard.cga",
+      "nmc_properties": [
+        {
+          "node": "screen_upper_armbase_left_mesh",
+          "type": 0,
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "screen_upper_hinge_left_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              0.0299
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0071
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.0875
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "screen_upper_left_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              0.0099
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0193
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0239
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "screen_upper_armbase_right_mesh",
+          "type": 0,
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "screen_upper_hinge_right_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -0.0299
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.0071
+            ],
+            [
+              0.0,
+              -0.0,
+              1.0,
+              -0.0875
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "screen_upper_right_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              -0.0099
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.0193
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              -0.0239
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "radar_screen_bracket_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              0.0,
+              0.0945
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0075
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0686
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        },
+        {
+          "node": "radar_screen_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0165
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0235
+            ]
+          ],
+          "props": {
+            "MapChannel:1 ": " map1"
+          }
+        }
+      ],
+      "children": [
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_MFD_Right",
+          "parent": "DRAK_Mule_Dashboard_Driver",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_MFD_Left",
+          "parent": "DRAK_Mule_Dashboard_Driver",
+          "geometry": ""
+        },
+        {
+          "entity": "Radar_Display_Screen_GroundVehicle",
+          "port": "Screen_Radar",
+          "parent": "DRAK_Mule_Dashboard_Driver",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "DRAK_Mule_SCItem_SeatAccess",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_SeatAccess_Driver.cga"
+    },
+    {
+      "entity": "Controller_Wheel_DRAK_Mule",
+      "port": "hardpoint_controller_wheel",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "RADR_WLOP_S00_Denning",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Spaceships/Radar/vehicle_component/grnp/radr_grnp_v01_pl01.cga"
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_JUST_S00_SteadFast_SCItem",
+      "port": "hardpoint_power_plant",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "objects/spaceships/power_plants/vehicle_component/just/powr_just_v01_pl03.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_powr_just_v01_pl03",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "VHCL_SelfDestruct_30s",
+      "port": "hardpoint_selfdestruct",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "COOL_JSPN_S00_WinterStarSL_SCItem",
+      "port": "hardpoint_cooler",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "objects/spaceships/coolers/vehicle_component/jspn/cool_jspn_v01_pl04.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_cool_jspn_v01_pl04",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Controller_Shield_DRAK_Mule",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "ARMR_DRAK_Mule",
+      "port": "hardpoint_armor",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon_Vehicle",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "DRAK_Mule_CargoGrid_Rear",
+      "port": "hardpoint_cargogrid_rear",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": ""
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_left_front",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_left_middle",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_left_rear",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_right_front",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_right_middle",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "Cargo_Slot_DRAK_Mule_1Slot",
+      "port": "hardpoint_cargogrid_right_rear",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_CargoSlot.cgf"
+    },
+    {
+      "entity": "PersonalStorage_MULE",
+      "port": "hardpoint_personal_inventory",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_Personal_Inventory.cga"
+    },
+    {
+      "entity": "Weapon_Rack_Mule_Single",
+      "port": "hardpoint_weaponrack",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_Weaponrack.cga"
+    },
+    {
+      "entity": "POWR_JUST_S00_SteadFast_SCItem",
+      "port": "hardpoint_batteries",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "objects/spaceships/power_plants/vehicle_component/just/powr_just_v01_pl03.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_powr_just_v01_pl03",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Fuel_Port_PLACEHOLDER_Mule",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Vehicles/DRAK/Mule/DRAK_Mule_fuelport.cga"
+    },
+    {
+      "entity": "COMP_WLOP_S00_Adze",
+      "port": "hardpoint_avionics",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Spaceships/Avionics/vehicle_component/wlop/comp_wlop_v01_pl01.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_comp_wlop_v01_pl01",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_button_4_a",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.1001
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_button_3_a",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.1001
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_button_2_a",
+          "type": 0,
+          "props": {
+            "MapChannel:1 ": " UVChannel_1",
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_button_1_a",
+          "type": 0,
+          "props": {
+            "MapChannel:1 ": " UVChannel_1",
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_blade_2_a",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.1
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_blade_1_a",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "RELAY_2slot",
+      "port": "hardpoint_relay_cockpit",
+      "parent": "EntityClassDefinition.DRAK_Mule",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse.cga"
+    }
+  ],
+  "interiors": [
+    {
+      "container": "base_ext_lg",
+      "meshes": [
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_front_sidel_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_front_sider_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_front_top_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_front_workinglight_glows.cga",
+          "pos": [
+            0.47999998927116394,
+            1.0399999618530273,
+            1.0099999904632568
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_rear_top_glows.cga",
+          "pos": [
+            0.0,
+            -0.4000000059604645,
+            0.9300000071525574
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_rear_sidelbottom_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_rear_siderbottom_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_rear_sidetray_glows.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_headlight_glow.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 23
+    },
+    {
+      "container": "base_int_body",
+      "meshes": [
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_interior.cgf",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_int_front_glows.cgf",
+          "pos": [
+            0.0,
+            1.7000000476837158,
+            0.7900000214576721
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_fan_bladessmall.cga",
+          "pos": [
+            -0.4099999964237213,
+            1.6399999856948853,
+            0.7300000190734863
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_int_l_sidelights.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/drak/mule/drak_mule_int_r_sidelights.cga",
+          "pos": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 8
+    }
+  ]
+}

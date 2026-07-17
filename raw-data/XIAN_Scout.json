@@ -1,0 +1,5079 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.XIAN_Scout",
+    "geometry": "Objects\\Spaceships\\Ships\\XIAN\\Scout\\XIAN_Scout.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "body",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0422
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landinggear_trapdoor",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          -4.072
+        ],
+        [
+          0.0,
+          -0.9397,
+          0.342,
+          -2.8393
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Body_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0057
+        ]
+      ]
+    },
+    {
+      "node": "base_lg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          -3.1314
+        ],
+        [
+          0.0,
+          -0.9397,
+          0.342,
+          -2.8848
+        ]
+      ]
+    },
+    {
+      "node": "body_nose",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.6973
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -8.0151
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "lg_door_right_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.157
+        ],
+        [
+          -0.0,
+          -0.9659,
+          0.2588,
+          -4.8584
+        ],
+        [
+          -0.0,
+          -0.2588,
+          -0.9659,
+          -2.4869
+        ]
+      ]
+    },
+    {
+      "node": "lg_door_left_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.157
+        ],
+        [
+          -0.0,
+          0.9659,
+          -0.2588,
+          -4.8584
+        ],
+        [
+          -0.0,
+          0.2588,
+          0.9659,
+          -2.4861
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_rim",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.9962,
+          -0.0872,
+          -0.7834
+        ],
+        [
+          -0.0,
+          0.0872,
+          0.9962,
+          -4.4698
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "sub_frame",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0479
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -4.3432
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0821
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_Parts",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0014,
+          0.0002
+        ],
+        [
+          0.0,
+          -0.0014,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "small_wing_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.9259
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0002,
+          0.3605
+        ],
+        [
+          0.0,
+          0.0002,
+          1.0,
+          0.8611
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "small_wing_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.0217
+        ],
+        [
+          0.0,
+          -0.9999,
+          0.0122,
+          0.3605
+        ],
+        [
+          0.0,
+          -0.0122,
+          -0.9999,
+          0.8611
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "sub_frame_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0479
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.3432
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.0399
+        ]
+      ]
+    },
+    {
+      "node": "sub_frame_left",
+      "type": 0
+    },
+    {
+      "node": "sub_frame_right",
+      "type": 0
+    },
+    {
+      "node": "sub_frame_top",
+      "type": 0
+    },
+    {
+      "node": "Wing_Left_Lower_Thruster_Shoulder",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.3708,
+          0.4073,
+          -0.8347,
+          -0.0
+        ],
+        [
+          -0.6887,
+          0.7235,
+          0.0471,
+          0.0
+        ],
+        [
+          0.6231,
+          0.5573,
+          0.5487,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Lower_Thruster_Elbow",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.1962,
+          -0.8804,
+          0.4318,
+          -1.4236
+        ],
+        [
+          -0.6609,
+          -0.2066,
+          -0.7215,
+          -1.0323
+        ],
+        [
+          0.7244,
+          -0.427,
+          -0.5413,
+          0.1252
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Lower_Thruster_Housing",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.8952
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -2.6496
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          1.9972
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Lower_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2158
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          5.6977
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -6.9851
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Lower_Thruster_Housing_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2158
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          5.6977
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -6.9851
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_Thruster_Shoulder",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0023,
+          -0.0067,
+          0.0
+        ],
+        [
+          0.0024,
+          0.9999,
+          0.01,
+          0.0
+        ],
+        [
+          0.0067,
+          -0.01,
+          0.9999,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Upper_Thruster_Elbow",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.999,
+          -0.0442,
+          0.0015,
+          -1.1093
+        ],
+        [
+          0.0442,
+          0.9986,
+          0.0278,
+          1.3703
+        ],
+        [
+          -0.0028,
+          -0.0277,
+          0.9996,
+          0.0123
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Upper_Thruster_Housing",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9986,
+          0.0494,
+          0.0179,
+          0.0
+        ],
+        [
+          -0.0491,
+          0.9987,
+          -0.0159,
+          -0.0
+        ],
+        [
+          -0.0186,
+          0.015,
+          0.9997,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9061,
+          0.0001,
+          0.423,
+          -0.4079
+        ],
+        [
+          0.0002,
+          1.0,
+          -0.0006,
+          -2.1468
+        ],
+        [
+          -0.423,
+          0.0006,
+          0.9061,
+          2.7257
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Upper_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          5.5934
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.636
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -4.084
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_Thruster_Housing_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          5.5934
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.636
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -4.084
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_Thruster_Shoulder",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.3769,
+          -0.397,
+          0.8369,
+          0.0
+        ],
+        [
+          0.6892,
+          0.7238,
+          0.0331,
+          -0.0
+        ],
+        [
+          -0.6189,
+          0.5643,
+          0.5464,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Lower_Thruster_Elbow",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9441,
+          0.2219,
+          -0.2439,
+          1.4155
+        ],
+        [
+          -0.1745,
+          0.9638,
+          0.2015,
+          -1.0437
+        ],
+        [
+          0.2798,
+          -0.1476,
+          0.9486,
+          0.1246
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Lower_Thruster_Housing",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.8142
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.6651
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          1.9709
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Lower_Thruster_Housing_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.0513
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          5.7574
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -6.9379
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.0517
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          5.7571
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -6.9375
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Upper_Thruster_Shoulder",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9999,
+          0.0144,
+          0.0056,
+          0.0
+        ],
+        [
+          -0.0145,
+          0.9998,
+          0.0131,
+          -0.0
+        ],
+        [
+          -0.0054,
+          -0.0132,
+          0.9999,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Upper_Thruster_Elbow",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9995,
+          -0.0326,
+          -0.0001,
+          1.1325
+        ],
+        [
+          0.0326,
+          0.9995,
+          -0.0001,
+          1.3512
+        ],
+        [
+          0.0001,
+          0.0001,
+          1.0,
+          0.0023
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Upper_Thruster_Housing",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9999,
+          -0.0085,
+          -0.0146,
+          0.0
+        ],
+        [
+          0.0084,
+          0.9999,
+          -0.0057,
+          -0.0
+        ],
+        [
+          0.0147,
+          0.0056,
+          0.9999,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.7805
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -2.1496
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.3918
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Upper_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9063,
+          -0.0001,
+          -0.4226,
+          -3.7166
+        ],
+        [
+          -0.0001,
+          1.0,
+          -0.0004,
+          5.6411
+        ],
+        [
+          0.4226,
+          0.0004,
+          0.9063,
+          -5.7293
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Upper_Thruster_Housing_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9063,
+          -0.0001,
+          -0.4226,
+          -3.7172
+        ],
+        [
+          -0.0001,
+          1.0,
+          -0.0004,
+          5.6411
+        ],
+        [
+          0.4226,
+          0.0004,
+          0.9063,
+          -5.7296
+        ]
+      ]
+    },
+    {
+      "node": "small_wing_right_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.9738
+        ],
+        [
+          0.0,
+          1.0,
+          0.0002,
+          -3.9825
+        ],
+        [
+          -0.0,
+          -0.0002,
+          1.0,
+          0.9017
+        ]
+      ]
+    },
+    {
+      "node": "small_wing_left_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.9738
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0002,
+          3.9825
+        ],
+        [
+          0.0,
+          -0.0002,
+          1.0,
+          -0.9017
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_interior",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.1131
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0014,
+          0.0333
+        ],
+        [
+          0.0,
+          0.0014,
+          1.0,
+          0.0563
+        ]
+      ]
+    },
+    {
+      "node": "main_light_cockpit",
+      "type": 0
+    },
+    {
+      "node": "cockpit_glass_ext",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "3DVisArea_Cockpit",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0
+        ],
+        [
+          -0.9659,
+          0.2588,
+          0.0,
+          0.0588
+        ],
+        [
+          -0.2588,
+          -0.9659,
+          0.0,
+          0.0661
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_glass_int",
+      "type": 0,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "cockpit_door_section1_base005",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0425
+        ],
+        [
+          0.0,
+          -0.4582,
+          -0.8888,
+          -1.1432
+        ],
+        [
+          -0.0,
+          0.8888,
+          -0.4582,
+          -0.5884
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1_base004",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0425
+        ],
+        [
+          0.0,
+          -0.456,
+          0.89,
+          1.1437
+        ],
+        [
+          -0.0,
+          -0.89,
+          -0.456,
+          -0.5851
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1_base",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0425
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0022
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          1.2848
+        ]
+      ]
+    },
+    {
+      "node": "mag_hinge",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0043
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0047
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0324
+        ]
+      ]
+    },
+    {
+      "node": "mag_strip_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.1643
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0305
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          -0.2424
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0946
+        ],
+        [
+          -0.0014,
+          -1.0,
+          0.0,
+          0.0266
+        ],
+        [
+          1.0,
+          -0.0014,
+          -0.0,
+          -0.2071
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.842
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0012
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2945
+        ]
+      ]
+    },
+    {
+      "node": "mag_hinge003",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0043
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0047
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0324
+        ]
+      ]
+    },
+    {
+      "node": "mag_strip_a003",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.1643
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0305
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          -0.2424
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_a008",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0946
+        ],
+        [
+          -0.0014,
+          -1.0,
+          0.0,
+          0.0266
+        ],
+        [
+          1.0,
+          -0.0014,
+          -0.0,
+          -0.2071
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_b008",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.842
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0012
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.2945
+        ]
+      ]
+    },
+    {
+      "node": "mag_hinge004",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0043
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0047
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.0324
+        ]
+      ]
+    },
+    {
+      "node": "mag_strip_a004",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.1643
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0305
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          -0.2424
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_a009",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0946
+        ],
+        [
+          -0.0013,
+          -1.0,
+          0.0,
+          0.0266
+        ],
+        [
+          1.0,
+          -0.0013,
+          -0.0,
+          -0.2071
+        ]
+      ]
+    },
+    {
+      "node": "cockpit_door_section1part_b009",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0001,
+          0.0,
+          0.842
+        ],
+        [
+          -0.0001,
+          1.0,
+          -0.0,
+          -0.0012
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.2945
+        ]
+      ]
+    },
+    {
+      "node": "lg_door_left_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.2861
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7301
+        ]
+      ]
+    },
+    {
+      "node": "lg_door_right_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.2861
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.7284
+        ]
+      ]
+    },
+    {
+      "node": "Body_Nose_dmg",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0032
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6973
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          8.0094
+        ]
+      ]
+    },
+    {
+      "node": "arm_left_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.3206
+        ],
+        [
+          -0.0,
+          0.8314,
+          0.5556,
+          0.0368
+        ],
+        [
+          0.0,
+          -0.5556,
+          0.8314,
+          -0.7516
+        ]
+      ]
+    },
+    {
+      "node": "backarm_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.16
+        ],
+        [
+          0.0,
+          0.0872,
+          -0.9962,
+          -0.0688
+        ],
+        [
+          -0.0,
+          0.9962,
+          0.0872,
+          -0.9888
+        ]
+      ]
+    },
+    {
+      "node": "arm_right_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.3206
+        ],
+        [
+          0.0,
+          -0.8314,
+          -0.5556,
+          0.0368
+        ],
+        [
+          -0.0,
+          0.5556,
+          -0.8314,
+          -0.7516
+        ]
+      ]
+    },
+    {
+      "node": "arm_right_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0272
+        ],
+        [
+          0.0,
+          0.9063,
+          0.4226,
+          -0.9589
+        ],
+        [
+          0.0,
+          -0.4226,
+          0.9063,
+          0.0009
+        ]
+      ]
+    },
+    {
+      "node": "base_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0873
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "arm_right_c",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0002,
+          -0.0007,
+          0.0433
+        ],
+        [
+          -0.0003,
+          0.9798,
+          -0.2002,
+          1.0353
+        ],
+        [
+          0.0006,
+          0.2002,
+          0.9798,
+          0.0092
+        ]
+      ]
+    },
+    {
+      "node": "backarm_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0872,
+          0.9962,
+          -0.0223
+        ],
+        [
+          -0.0,
+          -0.9962,
+          0.0872,
+          -0.8727
+        ]
+      ]
+    },
+    {
+      "node": "arm_left_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.0272
+        ],
+        [
+          0.0,
+          0.9063,
+          0.4226,
+          0.9589
+        ],
+        [
+          -0.0,
+          -0.4226,
+          0.9063,
+          -0.0009
+        ]
+      ]
+    },
+    {
+      "node": "base_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0006,
+          -0.0018,
+          -0.0
+        ],
+        [
+          -0.0006,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0018,
+          -0.0,
+          1.0,
+          -0.0
+        ]
+      ]
+    },
+    {
+      "node": "arm_left_c",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0432
+        ],
+        [
+          -0.0,
+          0.9828,
+          -0.1846,
+          -1.0353
+        ],
+        [
+          -0.0,
+          0.1846,
+          0.9828,
+          -0.0615
+        ]
+      ]
+    },
+    {
+      "node": "stair_step_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.3723,
+          0.148,
+          -0.9162,
+          0.0316
+        ],
+        [
+          0.059,
+          0.989,
+          0.1358,
+          0.0067
+        ],
+        [
+          0.9262,
+          -0.0035,
+          -0.3769,
+          0.6633
+        ]
+      ]
+    },
+    {
+      "node": "stair_door_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.047
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.1993
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0847
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stair_door_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0106
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0578
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1087
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "stair_step_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.0277
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0089
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0085
+        ]
+      ]
+    },
+    {
+      "node": "stair_step_d",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.3334
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.1043
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0665
+        ]
+      ]
+    },
+    {
+      "node": "stair_step_c",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0039
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0298
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0036
+        ]
+      ]
+    },
+    {
+      "node": "stair_step_e",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.9409
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0342
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4606
+        ]
+      ]
+    },
+    {
+      "node": "XIAN_Scout",
+      "type": 3,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -5.75
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 3,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 3,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_flight",
+      "type": 3,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 3,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 3,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_heatsink",
+      "type": 3
+    },
+    {
+      "node": "hardpoint_lights_ext",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_targetselector",
+      "type": 3
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0326
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_missile",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0686
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0686
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landing_gear_left_spring_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -1.746
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4523
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.4826
+        ]
+      ]
+    },
+    {
+      "node": "landing_gear_rear_spring_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          9.3092
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.4822
+        ]
+      ]
+    },
+    {
+      "node": "landing_gear_right_spring_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.746
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4523
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -4.4826
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_quantum_fuel_tank",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.224,
+          -0.0,
+          0.9746,
+          -1.1983
+        ],
+        [
+          -0.9746,
+          0.0,
+          -0.224,
+          1.1914
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_radar",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.342,
+          -0.0,
+          0.9397,
+          0.6436
+        ],
+        [
+          -0.9397,
+          -0.0,
+          0.342,
+          -10.7563
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_drive",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.224,
+          -0.0,
+          0.9746,
+          -1.0387
+        ],
+        [
+          -0.9746,
+          0.0,
+          -0.224,
+          0.0412
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_power_plant_04",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.9063,
+          -0.0,
+          0.4226,
+          -4.9527
+        ],
+        [
+          -0.4226,
+          -0.0,
+          0.9063,
+          4.4731
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.342,
+          -0.0,
+          0.9397,
+          -0.3237
+        ],
+        [
+          -0.9397,
+          -0.0,
+          0.342,
+          -7.7562
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.4305,
+          -0.0,
+          0.9026,
+          -1.1321
+        ],
+        [
+          -0.9026,
+          -0.0,
+          0.4305,
+          1.724
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_power_plant_03",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.9063,
+          -0.0,
+          0.4226,
+          -4.0876
+        ],
+        [
+          -0.4226,
+          -0.0,
+          0.9063,
+          4.0696
+        ]
+      ]
+    },
+    {
+      "node": "landing_gear_left_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          1.3006
+        ],
+        [
+          -0.0,
+          -0.9397,
+          0.342,
+          -1.0106
+        ]
+      ]
+    },
+    {
+      "node": "landing_gear_rear_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          1.3006
+        ],
+        [
+          0.0,
+          -0.9397,
+          0.342,
+          -1.0106
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_power_plant_02",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.224,
+          -0.0,
+          0.9746,
+          -2.407
+        ],
+        [
+          -0.9746,
+          0.0,
+          -0.224,
+          1.6822
+        ]
+      ]
+    },
+    {
+      "node": "landing_gear_right_attach",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          -2.1767
+        ],
+        [
+          -0.0,
+          -0.9397,
+          0.342,
+          -2.2762
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_power_plant_01",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.224,
+          -0.0,
+          0.9746,
+          -2.6289
+        ],
+        [
+          -0.9746,
+          0.0,
+          -0.224,
+          0.7314
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.342,
+          -0.0,
+          0.9397,
+          -0.0672
+        ],
+        [
+          -0.9397,
+          -0.0,
+          0.342,
+          -8.461
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_avionics",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.342,
+          -0.0,
+          0.9397,
+          -2.0183
+        ],
+        [
+          -0.9397,
+          -0.0,
+          0.342,
+          -8.1963
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -8.2379
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          16.5317
+        ]
+      ]
+    },
+    {
+      "node": "stairs_base",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.6855
+        ],
+        [
+          0.0,
+          0.342,
+          0.9397,
+          -2.9428
+        ],
+        [
+          0.0,
+          -0.9397,
+          0.342,
+          -5.1877
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_power_plant",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_armor",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_transponder",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_left",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_right",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "pivot_gun_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.825
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.915
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -1.615
+        ]
+      ]
+    },
+    {
+      "node": "pivot_gun_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          0.0,
+          -1.0,
+          0.825
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.915
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.615
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_gun_right",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_gun_left",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_right_rear_lower",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          0.4226,
+          0.9063,
+          0.9624
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -1.4648
+        ],
+        [
+          0.0,
+          -0.9063,
+          0.4226,
+          -0.2499
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_right_front_lower",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          0.4226,
+          0.9063,
+          1.2239
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.3232
+        ],
+        [
+          0.0,
+          -0.9063,
+          0.4226,
+          -1.0399
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_left_rear_lower",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.4226,
+          -0.9063,
+          -0.8671
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -1.4645
+        ],
+        [
+          0.0,
+          -0.9063,
+          0.4226,
+          -0.2499
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_left_front_lower",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.4226,
+          -0.9063,
+          -1.1286
+        ],
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.3232
+        ],
+        [
+          -0.0,
+          -0.9063,
+          0.4226,
+          -1.0399
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasures_right",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          1.0219
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.9178
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.7761
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Right_Upper_Root",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9413,
+          0.0019,
+          -0.3377,
+          1.4562
+        ],
+        [
+          0.0007,
+          1.0,
+          0.0073,
+          0.0739
+        ],
+        [
+          0.3377,
+          -0.0071,
+          0.9412,
+          0.6311
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_Root",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0039,
+          -0.0055,
+          1.5249
+        ],
+        [
+          -0.0033,
+          0.4283,
+          -0.9036,
+          -0.4829
+        ],
+        [
+          0.0059,
+          0.9036,
+          0.4283,
+          -0.0538
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_Root",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9427,
+          -0.0235,
+          0.3328,
+          -1.3601
+        ],
+        [
+          0.0213,
+          0.9997,
+          0.0104,
+          0.0739
+        ],
+        [
+          -0.333,
+          -0.0027,
+          0.9429,
+          0.6311
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Lower_Root",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0011,
+          0.0055,
+          -1.4291
+        ],
+        [
+          0.0055,
+          0.4284,
+          -0.9036,
+          -0.4829
+        ],
+        [
+          -0.0013,
+          0.9036,
+          0.4284,
+          -0.0538
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_countermeasures_left",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -0.9261
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.9178
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.7761
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Left_Lower_IK_End",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.4982,
+          -0.6971,
+          0.5156,
+          0.5949
+        ],
+        [
+          -0.752,
+          0.0514,
+          -0.6572,
+          -0.8629
+        ],
+        [
+          0.4316,
+          -0.7151,
+          -0.5498,
+          -0.031
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Lower_FK_Rotate",
+      "type": 3
+    },
+    {
+      "node": "hardpoint_fuel_tank_02",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.5106,
+          -0.8584,
+          0.0504,
+          -0.0407
+        ],
+        [
+          0.5828,
+          -0.3024,
+          0.7543,
+          -3.4724
+        ],
+        [
+          -0.6322,
+          0.4145,
+          0.6546,
+          0.7451
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Lower_Wing",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8298
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.9114
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.2131
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_02",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.5106,
+          -0.8584,
+          0.0504,
+          -0.2692
+        ],
+        [
+          0.5828,
+          -0.3024,
+          0.7543,
+          -3.7552
+        ],
+        [
+          -0.6322,
+          0.4145,
+          0.6546,
+          2.0969
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_left_lower",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.1165,
+          -0.7022,
+          -0.7024,
+          -0.8466
+        ],
+        [
+          0.9668,
+          0.2422,
+          -0.0818,
+          -0.9121
+        ],
+        [
+          0.2276,
+          -0.6696,
+          0.707,
+          0.1962
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler_left",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.8839,
+          0.464,
+          -0.0582,
+          -0.1148
+        ],
+        [
+          0.2401,
+          -0.5572,
+          -0.7949,
+          -2.9542
+        ],
+        [
+          -0.4013,
+          0.6886,
+          -0.604,
+          0.8429
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_04",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.6686,
+          -0.6982,
+          -0.2558,
+          0.7251
+        ],
+        [
+          0.422,
+          0.073,
+          0.9037,
+          -4.1906
+        ],
+        [
+          -0.6123,
+          -0.7122,
+          0.3434,
+          3.2138
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_IK_END",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9395,
+          0.0673,
+          -0.3359,
+          -0.6019
+        ],
+        [
+          -0.0744,
+          0.9972,
+          -0.0085,
+          -0.8644
+        ],
+        [
+          0.3344,
+          0.033,
+          0.9418,
+          -0.0306
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_FK_Rotate",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9408,
+          -0.0479,
+          0.3357,
+          -0.0
+        ],
+        [
+          0.0431,
+          0.9988,
+          0.0216,
+          -0.0
+        ],
+        [
+          -0.3363,
+          -0.0059,
+          0.9417,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Upper_Wing",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.7083,
+          0.0417,
+          -0.7047,
+          -1.1768
+        ],
+        [
+          -0.0391,
+          0.999,
+          0.0198,
+          0.3913
+        ],
+        [
+          0.7049,
+          0.0135,
+          0.7092,
+          0.1474
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_01",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.5151,
+          -0.8025,
+          -0.301,
+          -2.7572
+        ],
+        [
+          0.82,
+          0.359,
+          0.4459,
+          -0.8121
+        ],
+        [
+          -0.2497,
+          -0.4765,
+          0.843,
+          1.5137
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_fuel_intake_01",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.5151,
+          -0.8025,
+          -0.301,
+          -3.7704
+        ],
+        [
+          0.82,
+          0.359,
+          0.4459,
+          -1.3756
+        ],
+        [
+          -0.2497,
+          -0.4765,
+          0.843,
+          1.3068
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_left_upper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.633,
+          0.1116,
+          -0.766,
+          -1.1761
+        ],
+        [
+          0.1737,
+          0.9848,
+          -0.0,
+          0.3952
+        ],
+        [
+          0.7544,
+          -0.133,
+          -0.6428,
+          0.1475
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler_left_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.8491,
+          0.4558,
+          -0.267,
+          -2.5701
+        ],
+        [
+          -0.3299,
+          0.8524,
+          0.4057,
+          -0.6154
+        ],
+        [
+          0.4125,
+          -0.2564,
+          0.8741,
+          1.7488
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_fuel_tank_left",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_right",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_left",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_right",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -3.4531
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -3.0766
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          2.4543
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_IK_End",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.336
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4462
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.8935
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_FK_Rotate",
+      "type": 3
+    },
+    {
+      "node": "hardpoint_cooler_right",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.8524,
+          0.521,
+          0.0448,
+          0.1257
+        ],
+        [
+          0.2932,
+          0.5471,
+          -0.784,
+          -2.9588
+        ],
+        [
+          -0.4329,
+          -0.6551,
+          -0.6192,
+          0.8085
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_04",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.4942,
+          0.8664,
+          -0.0717,
+          0.0678
+        ],
+        [
+          -0.5604,
+          -0.2544,
+          0.7882,
+          -3.4778
+        ],
+        [
+          0.6646,
+          0.4297,
+          0.6113,
+          0.6918
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Lower_Wing",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.8332
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.9115
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.1859
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_04",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.4942,
+          0.8664,
+          -0.0717,
+          0.3013
+        ],
+        [
+          -0.5604,
+          -0.2544,
+          0.7882,
+          -3.772
+        ],
+        [
+          0.6646,
+          0.4297,
+          0.6113,
+          2.0517
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_right_lower",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.1059,
+          0.6973,
+          0.7089,
+          0.8397
+        ],
+        [
+          -0.9655,
+          0.2427,
+          -0.0945,
+          -0.912
+        ],
+        [
+          -0.238,
+          -0.6744,
+          0.699,
+          0.1794
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_05",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.6788,
+          0.6854,
+          0.2635,
+          -0.6288
+        ],
+        [
+          -0.4289,
+          0.0787,
+          0.8999,
+          -4.2416
+        ],
+        [
+          0.5961,
+          -0.7239,
+          0.3474,
+          3.1799
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Upper_IK_END",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9393,
+          0.0263,
+          0.3421,
+          0.5185
+        ],
+        [
+          -0.0245,
+          0.9997,
+          -0.0096,
+          -0.9173
+        ],
+        [
+          -0.3423,
+          0.0006,
+          0.9396,
+          -0.0044
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Upper_FK_Rotate",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9406,
+          0.0044,
+          -0.3396,
+          0.0
+        ],
+        [
+          -0.0018,
+          1.0,
+          0.0079,
+          0.0
+        ],
+        [
+          0.3396,
+          -0.0069,
+          0.9406,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cooler_right_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.8518,
+          0.4496,
+          0.2689,
+          2.5503
+        ],
+        [
+          -0.2988,
+          -0.8385,
+          0.4557,
+          -0.5685
+        ],
+        [
+          0.4304,
+          0.3078,
+          0.8485,
+          1.6666
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_right_upper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.633,
+          -0.1116,
+          0.766,
+          1.1934
+        ],
+        [
+          -0.1736,
+          0.9848,
+          -0.0,
+          0.3361
+        ],
+        [
+          -0.7544,
+          -0.133,
+          -0.6428,
+          0.1402
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_03",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.4877,
+          0.8301,
+          0.2704,
+          3.7141
+        ],
+        [
+          -0.8386,
+          0.3593,
+          0.4094,
+          -1.5129
+        ],
+        [
+          0.2426,
+          -0.4264,
+          0.8714,
+          1.3149
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_fuel_tank_03",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.4877,
+          0.8301,
+          0.2704,
+          2.7475
+        ],
+        [
+          -0.8386,
+          0.3593,
+          0.4094,
+          -0.9045
+        ],
+        [
+          0.2426,
+          -0.4264,
+          0.8714,
+          1.5009
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Upper_Wing",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.7071,
+          0.0,
+          0.7071,
+          1.1925
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.3445
+        ],
+        [
+          -0.7071,
+          0.0,
+          0.7071,
+          0.1386
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_03",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.7388
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -3.0586
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          4.018
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_thruster_right_rear_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0165,
+          0.342,
+          0.9395,
+          0.5518
+        ],
+        [
+          -0.9998,
+          0.005,
+          -0.0193,
+          1.3486
+        ],
+        [
+          -0.0113,
+          -0.9397,
+          0.3419,
+          -1.5519
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_right_front_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0165,
+          0.342,
+          0.9395,
+          0.7395
+        ],
+        [
+          -0.9998,
+          0.005,
+          -0.0193,
+          -1.1052
+        ],
+        [
+          -0.0113,
+          -0.9397,
+          0.3419,
+          -1.4148
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_left_front_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.342,
+          -0.9397,
+          -0.7395
+        ],
+        [
+          -1.0,
+          0.0002,
+          -0.0001,
+          1.1128
+        ],
+        [
+          0.0002,
+          0.9397,
+          -0.342,
+          1.4088
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_left_rear_upper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.342,
+          -0.9397,
+          -0.5518
+        ],
+        [
+          -1.0,
+          0.0002,
+          -0.0001,
+          -1.34
+        ],
+        [
+          0.0002,
+          0.9397,
+          -0.342,
+          1.5592
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "door_base",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.9342
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          0.0527
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0691
+        ]
+      ]
+    },
+    {
+      "node": "Entrance_Helper_Ground",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.8986
+        ],
+        [
+          0.0,
+          0.2588,
+          0.9659,
+          -0.9043
+        ],
+        [
+          0.0,
+          -0.9659,
+          0.2588,
+          -0.1566
+        ]
+      ]
+    },
+    {
+      "node": "Entrance_Helper_ZeroG",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.4399
+        ],
+        [
+          0.0,
+          0.2588,
+          0.9659,
+          0.0638
+        ],
+        [
+          0.0,
+          -0.9659,
+          0.2588,
+          0.0227
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_Int_All",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.2588,
+          0.9659,
+          0.0476
+        ],
+        [
+          -0.0,
+          -0.9659,
+          0.2588,
+          0.1582
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "helper_action_pilot_enter",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.0
+        ],
+        [
+          -0.0,
+          0.2588,
+          0.9659,
+          -3.4194
+        ],
+        [
+          -0.0,
+          -0.9659,
+          0.2588,
+          -0.8679
+        ]
+      ]
+    },
+    {
+      "node": "helper_action_pilot_enterzerog",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.367
+        ],
+        [
+          -0.0,
+          0.9962,
+          0.0872,
+          0.0668
+        ],
+        [
+          -0.0,
+          -0.0872,
+          0.9962,
+          0.0664
+        ]
+      ]
+    },
+    {
+      "node": "helper_pos_enter_pilot",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0045,
+          1.0,
+          -0.0,
+          -4.32
+        ],
+        [
+          -0.2588,
+          -0.0012,
+          0.9659,
+          -3.1758
+        ],
+        [
+          0.9659,
+          0.0044,
+          0.2588,
+          -0.867
+        ]
+      ]
+    },
+    {
+      "node": "helper_pos_enter_zerog",
+      "type": 3,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -2.0
+        ],
+        [
+          -0.9962,
+          -0.0,
+          0.0872,
+          0.0337
+        ],
+        [
+          0.0872,
+          0.0,
+          0.9962,
+          -1.0449
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_self_destruct_pilot",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.9962,
+          0.0872,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0872,
+          0.9962,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_audio",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.1131
+        ],
+        [
+          -0.0,
+          0.3519,
+          0.936,
+          0.2518
+        ],
+        [
+          -0.0,
+          -0.936,
+          0.3519,
+          -1.0549
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cockpit_selfdestruct",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.1131
+        ],
+        [
+          -0.0,
+          0.3519,
+          0.936,
+          0.1515
+        ],
+        [
+          -0.0,
+          -0.936,
+          0.3519,
+          -0.7881
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_dashboard_pilot",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.1131
+        ],
+        [
+          0.0,
+          0.9966,
+          0.083,
+          0.4699
+        ],
+        [
+          -0.0,
+          -0.083,
+          0.9966,
+          -0.3786
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.9966,
+          0.083,
+          0.0
+        ],
+        [
+          0.0,
+          -0.083,
+          0.9966,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "UI_Helper",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.1131
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.026
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.2713
+        ]
+      ]
+    },
+    {
+      "node": "contrail_06",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          3.0573
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.9127
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.8986
+        ],
+        [
+          -0.0,
+          0.342,
+          0.9397,
+          -0.9733
+        ],
+        [
+          0.0,
+          -0.9397,
+          0.342,
+          3.3105
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "XIAN_Scout_SCItem_SeatAccess",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/ships/xian/scout/xian_scout_seataccess.cga"
+    },
+    {
+      "entity": "XIAN_Scout_SCItem_Seat_Pilot",
+      "port": "hardpoint_seat_pilot",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/ships/xian/scout/xian_scout_seat_pilot.cga"
+    },
+    {
+      "entity": "XIAN_Scout_SCItem_Dashboard_Pilot",
+      "port": "hardpoint_dashboard_pilot",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/ships/xian/scout/xian_scout_dashboard.cga",
+      "children": [
+        {
+          "entity": "Radar_Display_XNAA_Scout",
+          "port": "hardpoint_cockpit_radar",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "H_Dashboard_Projector_HUD_XIAN_Scout",
+          "port": "Display_HUD",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD_Holographic_Scout_L",
+          "port": "Screen_Right_RTT",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD_Holographic_Scout_R",
+          "port": "Screen_Left_RTT",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Center_RTT",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_Physical_Holo",
+          "port": "Screen_Annunciator_Left",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_Physical_Holo",
+          "port": "Screen_Annunciator_Right",
+          "parent": "XIAN_Scout_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "VHCL_SelfDestruct_10s",
+      "port": "hardpoint_self_destruct_pilot",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_AMRS_S01_DynaFlux_SCItem",
+      "port": "hardpoint_power_plant",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Power_Plants/small_component/amrs/powr_amrs_s01_pl02.cgf"
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "COOL_AEGS_S01_Polar_SCItem",
+      "port": "hardpoint_cooler_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/small_component/aegs/cool_aegs_s01_pl02.cga"
+    },
+    {
+      "entity": "COOL_AEGS_S01_Polar_SCItem",
+      "port": "hardpoint_cooler_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Coolers/small_component/aegs/cool_aegs_s01_pl02.cga"
+    },
+    {
+      "entity": "Controller_Shield_XIAN_Scout",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "SHLD_GODI_S01_ForceWall_SCItem",
+      "port": "hardpoint_shield_generator_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Shields/small_component/godi/shld_godi_s01_pl02.cgf"
+    },
+    {
+      "entity": "SHLD_GODI_S01_ForceWall_SCItem",
+      "port": "hardpoint_shield_generator_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Shields/small_component/godi/shld_godi_s01_pl02.cgf"
+    },
+    {
+      "entity": "ARMR_XIAN_Scout",
+      "port": "hardpoint_armor",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Flight_XIAN_Scout",
+      "port": "hardpoint_controller_flight",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/blades/s01/blad_mite_s01_pl01.cga"
+    },
+    {
+      "entity": "RADR_WLOP_S01_Capstan",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Radar/small_component/grnp/radr_grnp_s01_pl01.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Main",
+      "port": "hardpoint_engine_left_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_main_left_lower.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_Thruster_Main_Left_Lower",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "pitch_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "yaw_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "exhaust",
+          "type": 2,
+          "bone_to_world": [
+            [
+              0.0089,
+              0.9997,
+              -0.0249,
+              -0.1241
+            ],
+            [
+              -0.0071,
+              0.025,
+              0.9997,
+              0.0029
+            ],
+            [
+              0.9999,
+              -0.0087,
+              0.0073,
+              -0.0002
+            ]
+          ],
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Main",
+      "port": "hardpoint_engine_left_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_main_right_upper.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_Thruster_Main_Right_Upper",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "pitch_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "yaw_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "exhaust",
+          "type": 2,
+          "bone_to_world": [
+            [
+              0.0089,
+              0.9997,
+              -0.0249,
+              -0.1241
+            ],
+            [
+              -0.0071,
+              0.025,
+              0.9997,
+              0.0029
+            ],
+            [
+              0.9999,
+              -0.0087,
+              0.0073,
+              -0.0002
+            ]
+          ],
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Main",
+      "port": "hardpoint_engine_right_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_main_right_lower.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_Thruster_Main_Right_Lower",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "pitch_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "yaw_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "exhaust",
+          "type": 2,
+          "bone_to_world": [
+            [
+              0.0089,
+              0.9997,
+              -0.0249,
+              -0.1241
+            ],
+            [
+              -0.0071,
+              0.025,
+              0.9997,
+              0.0029
+            ],
+            [
+              0.9999,
+              -0.0087,
+              0.0073,
+              -0.0002
+            ]
+          ],
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Main",
+      "port": "hardpoint_engine_right_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_main_left_upper.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_Thruster_Main_Left_Upper",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "pitch_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "yaw_joint",
+          "type": 2,
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        },
+        {
+          "node": "exhaust",
+          "type": 2,
+          "bone_to_world": [
+            [
+              0.0089,
+              0.9997,
+              -0.0249,
+              -0.1241
+            ],
+            [
+              -0.0071,
+              0.025,
+              0.9997,
+              0.0029
+            ],
+            [
+              0.9999,
+              -0.0087,
+              0.0073,
+              -0.0002
+            ]
+          ],
+          "props": {
+            "bReparentTwistBones ": " true"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_left_front_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_left_front_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_left_rear_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_left_rear_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_right_front_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_right_front_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_right_rear_upper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "XIAN_Scout_Thruster_Aux_Joint",
+      "port": "hardpoint_thruster_right_rear_lower",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "objects/spaceships/thrusters/xian/xian_scout_thrusters/xian_scout_thruster_aux_joint.cga"
+    },
+    {
+      "entity": "INTK_XIAN_Scout",
+      "port": "hardpoint_fuel_intake_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_XIAN_Scout",
+      "port": "hardpoint_fuel_intake_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_XIAN_Scout",
+      "port": "hardpoint_fuel_tank_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_XIAN_Scout",
+      "port": "hardpoint_fuel_tank_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "QDRV_RSI_S01_Eos_SCItem",
+      "port": "hardpoint_quantum_drive",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Quantum_drives/small_component/rsi/qdrv_rsi_s01_pl03.cgf",
+      "children": [
+        {
+          "entity": "JDRV_TARS_S01_Explorer_SCItem",
+          "port": "hardpoint_jump_drive",
+          "parent": "QDRV_RSI_S01_Eos_SCItem",
+          "geometry": "Objects/Spaceships/Jump_Modules/small_component/tars/jmod_tars_s01_pl02.cga",
+          "nmc_properties": [
+            {
+              "node": "mesh_jmod_tars_s01_pl02",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.3577
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            },
+            {
+              "node": "mesh_door_1_a",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": " CIG Red",
+                "MapChannel:3 ": " CIG Green",
+                "MapChannel:4 ": " CIG Blue"
+              }
+            },
+            {
+              "node": "mesh_door_1_b",
+              "type": 0,
+              "props": {
+                "MapChannel:2 ": "",
+                "MapChannel:3 ": "",
+                "MapChannel:4 ": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "QTNK_XIAN_Scout",
+      "port": "hardpoint_quantum_fuel_tank",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Default_LandingSystem",
+      "port": "landingpad_helper",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Mount_Gimbal_S4",
+      "port": "hardpoint_gun_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s4.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S4",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S4",
+          "geometry": "objects/spaceships/weapons/klwe/klwe_merged_weapons/klwe_las_rep_s4/klwe_las_rep_s4_l1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S4",
+      "port": "hardpoint_gun_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s4.cga",
+      "children": [
+        {
+          "entity": "KLWE_LaserRepeater_S4",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S4",
+          "geometry": "objects/spaceships/weapons/klwe/klwe_merged_weapons/klwe_las_rep_s4/klwe_las_rep_s4_l1.cga"
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_CML_Flare",
+      "port": "hardpoint_countermeasures_left",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects\\Spaceships\\Weapons\\Countermeasure_Launcher\\XIAN\\XIAN_Scout_CM_Left.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_CM_Left_geo",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "False",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "XIAN_Scout_CML_Chaff",
+      "port": "hardpoint_countermeasures_right",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects\\Spaceships\\Weapons\\Countermeasure_Launcher\\XIAN\\XIAN_Scout_CM_Right.cga",
+      "nmc_properties": [
+        {
+          "node": "XIAN_Scout_CM_Right_geo",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              -1.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "False",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Fuel",
+      "port": "hardpoint_controller_fuel",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": ""
+    },
+    {
+      "entity": "DockingTube_Fuel_Ports_XIAN_Scout",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": ""
+    },
+    {
+      "entity": "XIAN_Scout_ShipATCDataManager",
+      "port": "hardpoint_air_traffic_controller",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": ""
+    },
+    {
+      "entity": "RELAY_3slot",
+      "port": "hardpoint_relay_cockpit",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_3fuse.cga"
+    },
+    {
+      "entity": "LFSP_TYDT_S01_ComfortAir",
+      "port": "hardpoint_lifesupport",
+      "parent": "EntityClassDefinition.XIAN_Scout",
+      "geometry": "Objects/Spaceships/life_support/small_component/tydt/life_tydt_s01.cga"
+    }
+  ],
+  "interiors": [
+    {
+      "container": "base_ext_lg",
+      "meshes": [],
+      "lights": 40
+    },
+    {
+      "container": "base_int_all_main",
+      "meshes": [],
+      "lights": 9
+    }
+  ]
+}

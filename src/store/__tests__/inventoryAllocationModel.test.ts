@@ -311,11 +311,28 @@ describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
   })
 
   it('48. the unreserved-match signal survives rehydration', async () => {
-    addStock('Snowblind', 'Cooler', 'S1', 1)
+    // MWO-001 (Task 2): 'ghost'/'ghost-stealth' now resolves through the
+    // real deep-imported Ghost Mk II structure — its old hand-typed
+    // "Cooler 1" slot (which used to want "Snowblind") has no equivalent
+    // real port and is safely quarantined (EWO-043 reconciliation), rather
+    // than silently kept. A manually-added Fleet Asset's own real Factory
+    // structure is what actually exercises "the signal survives
+    // rehydration" now — its "Left Cooler" port (S2) is real and stable.
+    addStock('Blizzard', 'Cooler', 'S2', 1)
+    const added = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Cooler Upgrade Test Ship')
+    const save = useFleetStore.getState().saveMissionConfiguration({
+      shipId: added.assetId!,
+      name: 'Cooler Upgrade Test',
+      startingState: 'FACTORY',
+      targetOverrides: { 'Left Cooler': 'Blizzard' },
+      setActive: true,
+    })
+    expect(save.success).toBe(true)
+
     vi.resetModules()
     const { useFleetStore: reloaded } = await import('../useFleetStore')
     const s = reloaded.getState()
-    const missionPackage = calculateMissionPackage('ghost-stealth', s.hardpoints, s.installedLoadouts, s.reservations, s.hangarItems, false)
+    const missionPackage = calculateMissionPackage(save.buildId!, s.hardpoints, s.installedLoadouts, s.reservations, s.hangarItems, false)
     expect(missionPackage.availableUnreservedMatches).toBeGreaterThan(0)
   })
 

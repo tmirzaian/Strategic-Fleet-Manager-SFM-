@@ -42,6 +42,370 @@
     }
   },
   {
+    "id": "avenger-stalker-imported",
+    "manufacturer": "Aegis",
+    "name": "Avenger Stalker",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "avenger-stalker-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Avenger_Stalker",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "avenger-titan-renegade-imported",
+    "manufacturer": "Aegis",
+    "name": "Avenger Titan Renegade",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "avenger-titan-renegade-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Avenger_Titan_Renegade",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "avenger-warlock-imported",
+    "manufacturer": "Aegis",
+    "name": "Avenger Warlock",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "avenger-warlock-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Avenger_Warlock",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "gladius-dunlevy-imported",
+    "manufacturer": "Aegis",
+    "name": "Gladius Dunlevy",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "gladius-dunlevy-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Gladius_Dunlevy",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "gladius-pir-imported",
+    "manufacturer": "Aegis",
+    "name": "Gladius PIR",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "gladius-pir-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Gladius_PIR",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "gladius-valiant-imported",
+    "manufacturer": "Aegis",
+    "name": "Gladius Valiant",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "gladius-valiant-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Gladius_Valiant",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hammerhead-imported",
+    "manufacturer": "Aegis",
+    "name": "Hammerhead",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hammerhead-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Hammerhead",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hammerhead-showdown-imported",
+    "manufacturer": "Aegis",
+    "name": "Hammerhead Showdown",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hammerhead-showdown-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Hammerhead_Showdown",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "idris-m-imported",
+    "manufacturer": "Aegis",
+    "name": "Idris M",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "idris-m-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Idris_M",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "idris-p-imported",
+    "manufacturer": "Aegis",
+    "name": "Idris P",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "idris-p-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Idris_P",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "idris-p-collector-military-imported",
+    "manufacturer": "Aegis",
+    "name": "Idris P Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "idris-p-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Idris_P_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "javelin-imported",
+    "manufacturer": "Aegis",
+    "name": "Javelin",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "javelin-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Javelin",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reclaimer-imported",
+    "manufacturer": "Aegis",
+    "name": "Reclaimer",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reclaimer-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Reclaimer",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reclaimer-showdown-imported",
+    "manufacturer": "Aegis",
+    "name": "Reclaimer Showdown",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reclaimer-showdown-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Reclaimer_Showdown",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "redeemer-imported",
+    "manufacturer": "Aegis",
+    "name": "Redeemer",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "redeemer-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Redeemer",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "retaliator-imported",
+    "manufacturer": "Aegis",
+    "name": "Retaliator",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "retaliator-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Retaliator",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "sabre-imported",
+    "manufacturer": "Aegis",
+    "name": "Sabre",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "sabre-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Sabre",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "sabre-comet-imported",
+    "manufacturer": "Aegis",
+    "name": "Sabre Comet",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "sabre-comet-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Sabre_Comet",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "sabre-firebird-imported",
+    "manufacturer": "Aegis",
+    "name": "Sabre Firebird",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "sabre-firebird-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Sabre_Firebird",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "sabre-peregrine-imported",
+    "manufacturer": "Aegis",
+    "name": "Sabre Peregrine",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "sabre-peregrine-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Sabre_Peregrine",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "sabre-raven-imported",
+    "manufacturer": "Aegis",
+    "name": "Sabre Raven",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "sabre-raven-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Sabre_Raven",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "tiburon-imported",
+    "manufacturer": "Aegis",
+    "name": "Tiburon",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "tiburon-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Tiburon",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "vanguard-imported",
+    "manufacturer": "Aegis",
+    "name": "Vanguard",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "vanguard-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Vanguard",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "vanguard-harbinger-imported",
+    "manufacturer": "Aegis",
+    "name": "Vanguard Harbinger",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "vanguard-harbinger-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Vanguard_Harbinger",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "vanguard-hoplite-imported",
+    "manufacturer": "Aegis",
+    "name": "Vanguard Hoplite",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "vanguard-hoplite-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Vanguard_Hoplite",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "vanguard-sentinel-imported",
+    "manufacturer": "Aegis",
+    "name": "Vanguard Sentinel",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "vanguard-sentinel-imported-factory-loadout",
+    "sourceEntityClass": "AEGS_Vanguard_Sentinel",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
     "id": "valkyrie-imported",
     "manufacturer": "Anvil",
     "name": "Valkyrie",
@@ -50,6 +414,1000 @@
     "ownership": "Owned",
     "factoryLoadoutId": "valkyrie-imported-factory-loadout",
     "sourceEntityClass": "ANVL_Valkyrie",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "arrow-imported",
+    "manufacturer": "Anvil",
+    "name": "Arrow",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "arrow-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Arrow",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "asgard-imported",
+    "manufacturer": "Anvil",
+    "name": "Asgard",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "asgard-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Asgard",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "asgard-collector-military-imported",
+    "manufacturer": "Anvil",
+    "name": "Asgard Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "asgard-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Asgard_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ballista-imported",
+    "manufacturer": "Anvil",
+    "name": "Ballista",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ballista-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Ballista",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ballista-dunestalker-imported",
+    "manufacturer": "Anvil",
+    "name": "Ballista Dunestalker",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ballista-dunestalker-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Ballista_Dunestalker",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ballista-snowblind-imported",
+    "manufacturer": "Anvil",
+    "name": "Ballista Snowblind",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ballista-snowblind-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Ballista_Snowblind",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "c8r-pisces-imported",
+    "manufacturer": "Anvil",
+    "name": "C8R Pisces",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "c8r-pisces-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_C8R_Pisces",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "c8x-pisces-expedition-imported",
+    "manufacturer": "Anvil",
+    "name": "C8X Pisces Expedition",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "c8x-pisces-expedition-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_C8X_Pisces_Expedition",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "c8-pisces-imported",
+    "manufacturer": "Anvil",
+    "name": "C8 Pisces",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "c8-pisces-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_C8_Pisces",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "carrack-imported",
+    "manufacturer": "Anvil",
+    "name": "Carrack",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "carrack-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Carrack",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "carrack-expedition-imported",
+    "manufacturer": "Anvil",
+    "name": "Carrack Expedition",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "carrack-expedition-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Carrack_Expedition",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "centurion-imported",
+    "manufacturer": "Anvil",
+    "name": "Centurion",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "centurion-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Centurion",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "gladiator-imported",
+    "manufacturer": "Anvil",
+    "name": "Gladiator",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "gladiator-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Gladiator",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hawk-imported",
+    "manufacturer": "Anvil",
+    "name": "Hawk",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hawk-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hawk",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7a-mk1-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7A Mk1",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7a-mk1-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7A_Mk1",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7a-mk2-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7A Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7a-mk2-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7A_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7c-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7C",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7c-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7C",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cm-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CM",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cm-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CM",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cm-heartseeker-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CM Heartseeker",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cm-heartseeker-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CM_Heartseeker",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cm-mk2-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CM Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cm-mk2-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CM_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cm-mk2-heartseeker-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CM Mk2 Heartseeker",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cm-mk2-heartseeker-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CM_Mk2_Heartseeker",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cr-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CR",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cr-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CR",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cr-mk2-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CR Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cr-mk2-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CR_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cs-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CS",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cs-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CS",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7cs-mk2-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7CS Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7cs-mk2-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7CS_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7c-mk2-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7C Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7c-mk2-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7C_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7c-wildfire-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7C Wildfire",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7c-wildfire-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7C_Wildfire",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hornet-f7-mk2-collector-mod-imported",
+    "manufacturer": "Anvil",
+    "name": "Hornet F7 Mk2 Collector Mod",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hornet-f7-mk2-collector-mod-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hornet_F7_Mk2_Collector_Mod",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hurricane-imported",
+    "manufacturer": "Anvil",
+    "name": "Hurricane",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hurricane-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Hurricane",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lightning-f8-imported",
+    "manufacturer": "Anvil",
+    "name": "Lightning F8",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lightning-f8-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Lightning_F8",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lightning-f8c-imported",
+    "manufacturer": "Anvil",
+    "name": "Lightning F8C",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lightning-f8c-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Lightning_F8C",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lightning-f8c-collector-military-imported",
+    "manufacturer": "Anvil",
+    "name": "Lightning F8C Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lightning-f8c-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Lightning_F8C_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lightning-f8c-collector-stealth-imported",
+    "manufacturer": "Anvil",
+    "name": "Lightning F8C Collector Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lightning-f8c-collector-stealth-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Lightning_F8C_Collector_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lightning-f8c-exec-imported",
+    "manufacturer": "Anvil",
+    "name": "Lightning F8C Exec",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lightning-f8c-exec-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Lightning_F8C_Exec",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "paladin-imported",
+    "manufacturer": "Anvil",
+    "name": "Paladin",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "paladin-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Paladin",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "spartan-imported",
+    "manufacturer": "Anvil",
+    "name": "Spartan",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "spartan-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Spartan",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "terrapin-imported",
+    "manufacturer": "Anvil",
+    "name": "Terrapin",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "terrapin-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Terrapin",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "terrapin-medic-imported",
+    "manufacturer": "Anvil",
+    "name": "Terrapin Medic",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "terrapin-medic-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Terrapin_Medic",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "terrapin-medic-collector-medic-imported",
+    "manufacturer": "Anvil",
+    "name": "Terrapin Medic Collector Medic",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "terrapin-medic-collector-medic-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Terrapin_Medic_Collector_Medic",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "valkyrie-citizencon-imported",
+    "manufacturer": "Anvil",
+    "name": "Valkyrie CitizenCon",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "valkyrie-citizencon-imported-factory-loadout",
+    "sourceEntityClass": "ANVL_Valkyrie_CitizenCon",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "csv-cargo-imported",
+    "manufacturer": "Argo",
+    "name": "CSV Cargo",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "csv-cargo-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_CSV_Cargo",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mole-imported",
+    "manufacturer": "Argo",
+    "name": "MOLE",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mole-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_MOLE",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "moth-imported",
+    "manufacturer": "Argo",
+    "name": "MOTH",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "moth-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_MOTH",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mpuv-imported",
+    "manufacturer": "Argo",
+    "name": "MPUV",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mpuv-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_MPUV",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mpuv-1t-imported",
+    "manufacturer": "Argo",
+    "name": "MPUV 1T",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mpuv-1t-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_MPUV_1T",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mpuv-transport-imported",
+    "manufacturer": "Argo",
+    "name": "MPUV Transport",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mpuv-transport-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_MPUV_Transport",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "raft-imported",
+    "manufacturer": "Argo",
+    "name": "RAFT",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "raft-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_RAFT",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "raft-collector-indust-imported",
+    "manufacturer": "Argo",
+    "name": "RAFT Collector Indust",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "raft-collector-indust-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_RAFT_Collector_Indust",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "srv-imported",
+    "manufacturer": "Argo",
+    "name": "SRV",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "srv-imported-factory-loadout",
+    "sourceEntityClass": "ARGO_SRV",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "defender-imported",
+    "manufacturer": "",
+    "name": "Defender",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "defender-imported-factory-loadout",
+    "sourceEntityClass": "BANU_Defender",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hoverquad-imported",
+    "manufacturer": "",
+    "name": "HoverQuad",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hoverquad-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_HoverQuad",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-alpha-imported",
+    "manufacturer": "",
+    "name": "Mustang Alpha",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-alpha-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Alpha",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-alpha-citizencon2018-imported",
+    "manufacturer": "",
+    "name": "Mustang Alpha CitizenCon2018",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-alpha-citizencon2018-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Alpha_CitizenCon2018",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-beta-imported",
+    "manufacturer": "",
+    "name": "Mustang Beta",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-beta-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Beta",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-delta-imported",
+    "manufacturer": "",
+    "name": "Mustang Delta",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-delta-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Delta",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-gamma-imported",
+    "manufacturer": "",
+    "name": "Mustang Gamma",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-gamma-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Gamma",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mustang-omega-imported",
+    "manufacturer": "",
+    "name": "Mustang Omega",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mustang-omega-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Mustang_Omega",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "nomad-imported",
+    "manufacturer": "",
+    "name": "Nomad",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "nomad-imported-factory-loadout",
+    "sourceEntityClass": "CNOU_Nomad",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "intrepid-imported",
+    "manufacturer": "Crusader",
+    "name": "Intrepid",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "intrepid-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Intrepid",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "spirit-a1-imported",
+    "manufacturer": "Crusader",
+    "name": "Spirit A1",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "spirit-a1-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Spirit_A1",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "spirit-c1-imported",
+    "manufacturer": "Crusader",
+    "name": "Spirit C1",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "spirit-c1-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Spirit_C1",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "spirit-c1-civilian-imported",
+    "manufacturer": "Crusader",
+    "name": "Spirit C1 Civilian",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "spirit-c1-civilian-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Spirit_C1_Civilian",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfighter-inferno-imported",
+    "manufacturer": "Crusader",
+    "name": "Starfighter Inferno",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfighter-inferno-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starfighter_Inferno",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfighter-inferno-collector-military-imported",
+    "manufacturer": "Crusader",
+    "name": "Starfighter Inferno Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfighter-inferno-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starfighter_Inferno_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfighter-ion-imported",
+    "manufacturer": "Crusader",
+    "name": "Starfighter Ion",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfighter-ion-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starfighter_Ion",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfighter-ion-collector-stealth-imported",
+    "manufacturer": "Crusader",
+    "name": "Starfighter Ion Collector Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfighter-ion-collector-stealth-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starfighter_Ion_Collector_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlifter-a2-imported",
+    "manufacturer": "Crusader",
+    "name": "Starlifter A2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlifter-a2-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starlifter_A2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlifter-a2-collector-military-imported",
+    "manufacturer": "Crusader",
+    "name": "Starlifter A2 Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlifter-a2-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starlifter_A2_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlifter-c2-imported",
+    "manufacturer": "Crusader",
+    "name": "Starlifter C2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlifter-c2-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starlifter_C2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlifter-m2-imported",
+    "manufacturer": "Crusader",
+    "name": "Starlifter M2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlifter-m2-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Starlifter_M2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "star-runner-imported",
+    "manufacturer": "Crusader",
+    "name": "Star Runner",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "star-runner-imported-factory-loadout",
+    "sourceEntityClass": "CRUS_Star_Runner",
     "classification": {
       "rsiRoles": [],
       "focusTags": []
@@ -78,6 +1436,2148 @@
     "ownership": "Owned",
     "factoryLoadoutId": "cutlass-black-imported-factory-loadout",
     "sourceEntityClass": "DRAK_Cutlass_Black",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "buccaneer-imported",
+    "manufacturer": "Drake",
+    "name": "Buccaneer",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "buccaneer-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Buccaneer",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "caterpillar-imported",
+    "manufacturer": "Drake",
+    "name": "Caterpillar",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "caterpillar-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Caterpillar",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "caterpillar-pirate-imported",
+    "manufacturer": "Drake",
+    "name": "Caterpillar Pirate",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "caterpillar-pirate-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Caterpillar_Pirate",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "clipper-imported",
+    "manufacturer": "Drake",
+    "name": "Clipper",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "clipper-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Clipper",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "command-module-imported",
+    "manufacturer": "Drake",
+    "name": "Command Module",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "command-module-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Command_Module",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutlass-blue-imported",
+    "manufacturer": "Drake",
+    "name": "Cutlass Blue",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutlass-blue-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutlass_Blue",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutlass-red-imported",
+    "manufacturer": "Drake",
+    "name": "Cutlass Red",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutlass-red-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutlass_Red",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutlass-steel-imported",
+    "manufacturer": "Drake",
+    "name": "Cutlass Steel",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutlass-steel-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutlass_Steel",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutter-imported",
+    "manufacturer": "Drake",
+    "name": "Cutter",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutter-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutter",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutter-rambler-imported",
+    "manufacturer": "Drake",
+    "name": "Cutter Rambler",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutter-rambler-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutter_Rambler",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cutter-scout-imported",
+    "manufacturer": "Drake",
+    "name": "Cutter Scout",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cutter-scout-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Cutter_Scout",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "dragonfly-imported",
+    "manufacturer": "Drake",
+    "name": "Dragonfly",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "dragonfly-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Dragonfly",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "dragonfly-pink-imported",
+    "manufacturer": "Drake",
+    "name": "Dragonfly Pink",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "dragonfly-pink-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Dragonfly_Pink",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "dragonfly-yellow-imported",
+    "manufacturer": "Drake",
+    "name": "Dragonfly Yellow",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "dragonfly-yellow-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Dragonfly_Yellow",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "golem-imported",
+    "manufacturer": "Drake",
+    "name": "Golem",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "golem-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Golem",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "golem-collector-indust-imported",
+    "manufacturer": "Drake",
+    "name": "Golem Collector Indust",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "golem-collector-indust-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Golem_Collector_Indust",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "golem-ox-imported",
+    "manufacturer": "Drake",
+    "name": "Golem OX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "golem-ox-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Golem_OX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "herald-imported",
+    "manufacturer": "Drake",
+    "name": "Herald",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "herald-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Herald",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ironclad-imported",
+    "manufacturer": "Drake",
+    "name": "Ironclad",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ironclad-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Ironclad",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ironclad-assault-imported",
+    "manufacturer": "Drake",
+    "name": "Ironclad Assault",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ironclad-assault-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Ironclad_Assault",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mule-imported",
+    "manufacturer": "Drake",
+    "name": "Mule",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mule-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Mule",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "vulture-imported",
+    "manufacturer": "Drake",
+    "name": "Vulture",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "vulture-imported-factory-loadout",
+    "sourceEntityClass": "DRAK_Vulture",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "prowler-imported",
+    "manufacturer": "",
+    "name": "Prowler",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "prowler-imported-factory-loadout",
+    "sourceEntityClass": "ESPR_Prowler",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "prowler-utility-imported",
+    "manufacturer": "",
+    "name": "Prowler Utility",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "prowler-utility-imported-factory-loadout",
+    "sourceEntityClass": "ESPR_Prowler_Utility",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "prowler-utility-collector-indust-imported",
+    "manufacturer": "",
+    "name": "Prowler Utility Collector Indust",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "prowler-utility-collector-indust-imported-factory-loadout",
+    "sourceEntityClass": "ESPR_Prowler_Utility_Collector_Indust",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "talon-imported",
+    "manufacturer": "",
+    "name": "Talon",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "talon-imported-factory-loadout",
+    "sourceEntityClass": "ESPR_Talon",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "talon-shrike-imported",
+    "manufacturer": "",
+    "name": "Talon Shrike",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "talon-shrike-imported-factory-loadout",
+    "sourceEntityClass": "ESPR_Talon_Shrike",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "railen-imported",
+    "manufacturer": "",
+    "name": "Railen",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "railen-imported-factory-loadout",
+    "sourceEntityClass": "GAMA_Railen",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "syulen-imported",
+    "manufacturer": "",
+    "name": "Syulen",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "syulen-imported-factory-loadout",
+    "sourceEntityClass": "GAMA_Syulen",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "tyilui-imported",
+    "manufacturer": "",
+    "name": "Tyilui",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "tyilui-imported-factory-loadout",
+    "sourceEntityClass": "GAMA_Tyilui",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "shiv-imported",
+    "manufacturer": "",
+    "name": "Shiv",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "shiv-imported-factory-loadout",
+    "sourceEntityClass": "GLSN_Shiv",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mdc-imported",
+    "manufacturer": "",
+    "name": "MDC",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mdc-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_MDC",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mtc-imported",
+    "manufacturer": "",
+    "name": "MTC",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mtc-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_MTC",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ptv-imported",
+    "manufacturer": "",
+    "name": "PTV",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ptv-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_PTV",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "roc-imported",
+    "manufacturer": "",
+    "name": "ROC",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "roc-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_ROC",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "roc-ds-imported",
+    "manufacturer": "",
+    "name": "ROC DS",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "roc-ds-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_ROC_DS",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "stv-imported",
+    "manufacturer": "",
+    "name": "STV",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "stv-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_STV",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "utv-imported",
+    "manufacturer": "",
+    "name": "UTV",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "utv-imported-factory-loadout",
+    "sourceEntityClass": "GRIN_UTV",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "l21-wolf-imported",
+    "manufacturer": "",
+    "name": "L21 Wolf",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "l21-wolf-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_L21_Wolf",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "l21-wolf-collector-military-imported",
+    "manufacturer": "",
+    "name": "L21 Wolf Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "l21-wolf-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_L21_Wolf_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "l21-wolf-collector-stealth-imported",
+    "manufacturer": "",
+    "name": "L21 Wolf Collector Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "l21-wolf-collector-stealth-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_L21_Wolf_Collector_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "l22-alphawolf-imported",
+    "manufacturer": "",
+    "name": "L22 AlphaWolf",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "l22-alphawolf-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_L22_AlphaWolf",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "l22-alphawolf-collector-military-imported",
+    "manufacturer": "",
+    "name": "L22 AlphaWolf Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "l22-alphawolf-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_L22_AlphaWolf_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "p52-merlin-imported",
+    "manufacturer": "",
+    "name": "P52 Merlin",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "p52-merlin-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_P52_Merlin",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "p72-archimedes-imported",
+    "manufacturer": "",
+    "name": "P72 Archimedes",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "p72-archimedes-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_P72_Archimedes",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "p72-archimedes-emerald-imported",
+    "manufacturer": "",
+    "name": "P72 Archimedes Emerald",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "p72-archimedes-emerald-imported-factory-loadout",
+    "sourceEntityClass": "KRIG_P72_Archimedes_Emerald",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "fortune-imported",
+    "manufacturer": "Misc",
+    "name": "Fortune",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "fortune-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Fortune",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "fortune-collector-industrial-imported",
+    "manufacturer": "Misc",
+    "name": "Fortune Collector Industrial",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "fortune-collector-industrial-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Fortune_Collector_Industrial",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "freelancer-imported",
+    "manufacturer": "Misc",
+    "name": "Freelancer",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "freelancer-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Freelancer",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "freelancer-dur-imported",
+    "manufacturer": "Misc",
+    "name": "Freelancer DUR",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "freelancer-dur-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Freelancer_DUR",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "freelancer-max-imported",
+    "manufacturer": "Misc",
+    "name": "Freelancer MAX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "freelancer-max-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Freelancer_MAX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "freelancer-mis-imported",
+    "manufacturer": "Misc",
+    "name": "Freelancer MIS",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "freelancer-mis-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Freelancer_MIS",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "fury-imported",
+    "manufacturer": "Misc",
+    "name": "Fury",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "fury-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Fury",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "fury-lx-imported",
+    "manufacturer": "Misc",
+    "name": "Fury LX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "fury-lx-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Fury_LX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "fury-miru-imported",
+    "manufacturer": "Misc",
+    "name": "Fury Miru",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "fury-miru-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Fury_Miru",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hull-a-imported",
+    "manufacturer": "Misc",
+    "name": "Hull A",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hull-a-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Hull_A",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hull-b-imported",
+    "manufacturer": "Misc",
+    "name": "Hull B",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hull-b-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Hull_B",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hull-c-imported",
+    "manufacturer": "Misc",
+    "name": "Hull C",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hull-c-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Hull_C",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "prospector-imported",
+    "manufacturer": "Misc",
+    "name": "Prospector",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "prospector-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Prospector",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "prospector-collector-indust-imported",
+    "manufacturer": "Misc",
+    "name": "Prospector Collector Indust",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "prospector-collector-indust-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Prospector_Collector_Indust",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "razor-imported",
+    "manufacturer": "Misc",
+    "name": "Razor",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "razor-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Razor",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "razor-ex-imported",
+    "manufacturer": "Misc",
+    "name": "Razor EX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "razor-ex-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Razor_EX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "razor-lx-imported",
+    "manufacturer": "Misc",
+    "name": "Razor LX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "razor-lx-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Razor_LX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reliant-imported",
+    "manufacturer": "Misc",
+    "name": "Reliant",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reliant-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Reliant",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reliant-mako-imported",
+    "manufacturer": "Misc",
+    "name": "Reliant Mako",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reliant-mako-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Reliant_Mako",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reliant-sen-imported",
+    "manufacturer": "Misc",
+    "name": "Reliant Sen",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reliant-sen-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Reliant_Sen",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "reliant-tana-imported",
+    "manufacturer": "Misc",
+    "name": "Reliant Tana",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "reliant-tana-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Reliant_Tana",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfarer-imported",
+    "manufacturer": "Misc",
+    "name": "Starfarer",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfarer-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starfarer",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starfarer-gemini-imported",
+    "manufacturer": "Misc",
+    "name": "Starfarer Gemini",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starfarer-gemini-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starfarer_Gemini",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlancer-max-imported",
+    "manufacturer": "Misc",
+    "name": "Starlancer Max",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlancer-max-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starlancer_Max",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlancer-tac-imported",
+    "manufacturer": "Misc",
+    "name": "Starlancer TAC",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlancer-tac-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starlancer_TAC",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlancer-tac-collector-military-imported",
+    "manufacturer": "Misc",
+    "name": "Starlancer TAC Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlancer-tac-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starlancer_TAC_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "starlite-imported",
+    "manufacturer": "Misc",
+    "name": "Starlite",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "starlite-imported-factory-loadout",
+    "sourceEntityClass": "MISC_Starlite",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-military-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-military-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-mx-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian MX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-mx-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian_MX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-mx-collector-military-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian MX Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-mx-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian_MX_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-qi-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian QI",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-qi-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian_QI",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "guardian-qi-collector-indust-imported",
+    "manufacturer": "Mirai",
+    "name": "Guardian QI Collector Indust",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "guardian-qi-collector-indust-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Guardian_QI_Collector_Indust",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "pulse-imported",
+    "manufacturer": "Mirai",
+    "name": "Pulse",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "pulse-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Pulse",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "pulse-collector-civ-imported",
+    "manufacturer": "Mirai",
+    "name": "Pulse Collector Civ",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "pulse-collector-civ-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Pulse_Collector_Civ",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "pulse-lx-imported",
+    "manufacturer": "Mirai",
+    "name": "Pulse LX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "pulse-lx-imported-factory-loadout",
+    "sourceEntityClass": "MRAI_Pulse_LX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "100i-imported",
+    "manufacturer": "Origin",
+    "name": "100i",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "100i-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_100i",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "125a-imported",
+    "manufacturer": "Origin",
+    "name": "125a",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "125a-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_125a",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "135c-imported",
+    "manufacturer": "Origin",
+    "name": "135c",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "135c-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_135c",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "300i-imported",
+    "manufacturer": "Origin",
+    "name": "300i",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "300i-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_300i",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "315p-imported",
+    "manufacturer": "Origin",
+    "name": "315p",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "315p-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_315p",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "325a-imported",
+    "manufacturer": "Origin",
+    "name": "325a",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "325a-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_325a",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "350r-imported",
+    "manufacturer": "Origin",
+    "name": "350r",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "350r-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_350r",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "400i-imported",
+    "manufacturer": "Origin",
+    "name": "400i",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "400i-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_400i",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "600i-imported",
+    "manufacturer": "Origin",
+    "name": "600i",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "600i-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_600i",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "600i-executive-edition-imported",
+    "manufacturer": "Origin",
+    "name": "600i Executive Edition",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "600i-executive-edition-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_600i_Executive_Edition",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "600i-touring-imported",
+    "manufacturer": "Origin",
+    "name": "600i Touring",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "600i-touring-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_600i_Touring",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "85x-imported",
+    "manufacturer": "Origin",
+    "name": "85X",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "85x-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_85X",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "890jump-imported",
+    "manufacturer": "Origin",
+    "name": "890Jump",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "890jump-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_890Jump",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "m50-imported",
+    "manufacturer": "Origin",
+    "name": "m50",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "m50-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_m50",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "m80-imported",
+    "manufacturer": "Origin",
+    "name": "m80",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "m80-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_m80",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "x1-imported",
+    "manufacturer": "Origin",
+    "name": "X1",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "x1-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_X1",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "x1-force-imported",
+    "manufacturer": "Origin",
+    "name": "X1 Force",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "x1-force-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_X1_Force",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "x1-velocity-imported",
+    "manufacturer": "Origin",
+    "name": "X1 Velocity",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "x1-velocity-imported-factory-loadout",
+    "sourceEntityClass": "ORIG_X1_Velocity",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "apollo-medivac-imported",
+    "manufacturer": "Rsi",
+    "name": "Apollo Medivac",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "apollo-medivac-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Apollo_Medivac",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "apollo-triage-imported",
+    "manufacturer": "Rsi",
+    "name": "Apollo Triage",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "apollo-triage-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Apollo_Triage",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "apollo-triage-collector-stealth-imported",
+    "manufacturer": "Rsi",
+    "name": "Apollo Triage Collector Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "apollo-triage-collector-stealth-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Apollo_Triage_Collector_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-cl-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS CL",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-cl-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_CL",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-es-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS ES",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-es-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_ES",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-ln-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS LN",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-ln-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_LN",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-lx-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS LX",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-lx-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_LX",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-mr-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS MR",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-mr-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_MR",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-gs-se-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora GS SE",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-gs-se-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_GS_SE",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "aurora-mk2-imported",
+    "manufacturer": "Rsi",
+    "name": "Aurora Mk2",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "aurora-mk2-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Aurora_Mk2",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-andromeda-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Andromeda",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-andromeda-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Andromeda",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-aquila-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Aquila",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-aquila-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Aquila",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-phoenix-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Phoenix",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-phoenix-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Phoenix",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-phoenix-emerald-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Phoenix Emerald",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-phoenix-emerald-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Phoenix_Emerald",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-taurus-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Taurus",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-taurus-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Taurus",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "constellation-taurus-military-imported",
+    "manufacturer": "Rsi",
+    "name": "Constellation Taurus Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "constellation-taurus-military-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Constellation_Taurus_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "hermes-imported",
+    "manufacturer": "Rsi",
+    "name": "Hermes",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "hermes-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Hermes",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "lynx-imported",
+    "manufacturer": "Rsi",
+    "name": "Lynx",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "lynx-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Lynx",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mantis-imported",
+    "manufacturer": "Rsi",
+    "name": "Mantis",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mantis-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Mantis",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "meteor-imported",
+    "manufacturer": "Rsi",
+    "name": "Meteor",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "meteor-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Meteor",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "meteor-collector-military-imported",
+    "manufacturer": "Rsi",
+    "name": "Meteor Collector Military",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "meteor-collector-military-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Meteor_Collector_Military",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "meteor-collector-stealth-imported",
+    "manufacturer": "Rsi",
+    "name": "Meteor Collector Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "meteor-collector-stealth-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Meteor_Collector_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "perseus-imported",
+    "manufacturer": "Rsi",
+    "name": "Perseus",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "perseus-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Perseus",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "polaris-imported",
+    "manufacturer": "Rsi",
+    "name": "Polaris",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "polaris-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Polaris",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "salvation-imported",
+    "manufacturer": "Rsi",
+    "name": "Salvation",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "salvation-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Salvation",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "scorpius-imported",
+    "manufacturer": "Rsi",
+    "name": "Scorpius",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "scorpius-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Scorpius",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "scorpius-antares-imported",
+    "manufacturer": "Rsi",
+    "name": "Scorpius Antares",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "scorpius-antares-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Scorpius_Antares",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "scorpius-stealth-imported",
+    "manufacturer": "Rsi",
+    "name": "Scorpius Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "scorpius-stealth-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Scorpius_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ursa-medivac-imported",
+    "manufacturer": "Rsi",
+    "name": "Ursa Medivac",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ursa-medivac-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Ursa_Medivac",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ursa-medivac-stealth-imported",
+    "manufacturer": "Rsi",
+    "name": "Ursa Medivac Stealth",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ursa-medivac-stealth-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Ursa_Medivac_Stealth",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ursa-rover-imported",
+    "manufacturer": "Rsi",
+    "name": "Ursa Rover",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ursa-rover-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Ursa_Rover",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "ursa-rover-emerald-imported",
+    "manufacturer": "Rsi",
+    "name": "Ursa Rover Emerald",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "ursa-rover-emerald-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Ursa_Rover_Emerald",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "zeus-cl-imported",
+    "manufacturer": "Rsi",
+    "name": "Zeus CL",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "zeus-cl-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Zeus_CL",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "zeus-es-imported",
+    "manufacturer": "Rsi",
+    "name": "Zeus ES",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "zeus-es-imported-factory-loadout",
+    "sourceEntityClass": "RSI_Zeus_ES",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-aa-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone AA",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-aa-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone_AA",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-mt-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone MT",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-mt-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone_MT",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-rc-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone RC",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-rc-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone_RC",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-rn-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone RN",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-rn-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone_RN",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "cyclone-tr-imported",
+    "manufacturer": "Tumbril",
+    "name": "Cyclone TR",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "cyclone-tr-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Cyclone_TR",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "nova-imported",
+    "manufacturer": "Tumbril",
+    "name": "Nova",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "nova-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Nova",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "storm-imported",
+    "manufacturer": "Tumbril",
+    "name": "Storm",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "storm-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Storm",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "storm-aa-imported",
+    "manufacturer": "Tumbril",
+    "name": "Storm AA",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "storm-aa-imported-factory-loadout",
+    "sourceEntityClass": "TMBL_Storm_AA",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "blade-imported",
+    "manufacturer": "",
+    "name": "Blade",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "blade-imported-factory-loadout",
+    "sourceEntityClass": "VNCL_Blade",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "glaive-imported",
+    "manufacturer": "",
+    "name": "Glaive",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "glaive-imported-factory-loadout",
+    "sourceEntityClass": "VNCL_Glaive",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "mauler-imported",
+    "manufacturer": "",
+    "name": "Mauler",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "mauler-imported-factory-loadout",
+    "sourceEntityClass": "VNCL_Mauler",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "scythe-imported",
+    "manufacturer": "",
+    "name": "Scythe",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "scythe-imported-factory-loadout",
+    "sourceEntityClass": "VNCL_Scythe",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "stinger-imported",
+    "manufacturer": "",
+    "name": "Stinger",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "stinger-imported-factory-loadout",
+    "sourceEntityClass": "VNCL_Stinger",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "nox-imported",
+    "manufacturer": "",
+    "name": "Nox",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "nox-imported-factory-loadout",
+    "sourceEntityClass": "XIAN_Nox",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "nox-collector-mod-imported",
+    "manufacturer": "",
+    "name": "Nox Collector Mod",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "nox-collector-mod-imported-factory-loadout",
+    "sourceEntityClass": "XIAN_Nox_Collector_Mod",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "nox-kue-imported",
+    "manufacturer": "",
+    "name": "Nox Kue",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "nox-kue-imported-factory-loadout",
+    "sourceEntityClass": "XIAN_Nox_Kue",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "scout-imported",
+    "manufacturer": "",
+    "name": "Scout",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "scout-imported-factory-loadout",
+    "sourceEntityClass": "XIAN_Scout",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
+    "id": "santokyai-imported",
+    "manufacturer": "",
+    "name": "SanTokYai",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "santokyai-imported-factory-loadout",
+    "sourceEntityClass": "XNAA_SanTokYai",
     "classification": {
       "rsiRoles": [],
       "focusTags": []

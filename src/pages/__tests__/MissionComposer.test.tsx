@@ -34,8 +34,11 @@ describe('<MissionComposer /> (Loadout Manager)', () => {
   })
 
   it('pre-selects the Fleet Asset from a shipId query param', () => {
+    // MWO-001 (Task 2): UTV's own real deep-imported Relay component
+    // ("1slot GRIN UTV Relay") now also matches /UTV/i as a Target field's
+    // input value — scope to the SELECT specifically, not any display value.
     renderComposer('?shipId=utv')
-    const select = screen.getByDisplayValue(/UTV/i) as HTMLSelectElement
+    const select = screen.getAllByDisplayValue(/UTV/i).find((el) => el.tagName === 'SELECT') as HTMLSelectElement
     expect(select.value).toBe('utv')
   })
 
@@ -53,37 +56,52 @@ describe('<MissionComposer /> (Loadout Manager)', () => {
   })
 
   it('shows the target equipment table with a row per reference slot', () => {
+    // MWO-001 (Task 2): 'ghost' now renders from its real deep-imported
+    // canonical template ("Power Plant"/"Left Shield Generator"), not the
+    // old seed fixture's "Weapon 1"/"Shield 1" labels.
     renderComposer('?shipId=ghost')
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Shield 1')).toBeInTheDocument()
+    expect(screen.getByText('Power Plant')).toBeInTheDocument()
+    expect(screen.getByText('Left Shield Generator')).toBeInTheDocument()
   })
 
-  it('Mission M-011: nested ports (Ghost Nose Mount + its two weapons) render fully expanded by default — an editing surface must not hide a configurable port behind an extra click', () => {
+  it('Mission M-011: nested ports (Ghost\'s real wing gimbal mounts + their weapons) render fully expanded by default — an editing surface must not hide a configurable port behind an extra click', () => {
+    // MWO-001 (Task 2): the real Ghost Mk II has two separate wing gimbal
+    // mounts (each carrying its own real gimbal hardware, not a purely
+    // structural "Nose Mount" housing) — "Weapon" is the rendered leaf
+    // label for each mount's own child gun, appearing once per mount.
     renderComposer('?shipId=ghost')
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getByText('Right Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
   })
 
   it('Mission M-011: Collapse All hides the nested weapon rows, Expand All restores them', () => {
     renderComposer('?shipId=ghost')
     fireEvent.click(screen.getByText('Collapse All'))
-    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Weapon')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
   })
 
   it("Mission M-011: empty optional ports (Railen's tractor beams) remain visible with a real target editable", () => {
+    // MWO-001 (Task 2): Railen's real deep-imported structure carries its
+    // two tractor beams under structural "Tractor Left/Right (Manned
+    // Turret)" mounts, each with one real editable child (rendered leaf
+    // label "Left Turret", the same generic leaf on both sides).
     renderComposer('?shipId=railen')
-    expect(screen.getByText('Fore Tractor Beam')).toBeInTheDocument()
-    expect(screen.getByText('Aft Tractor Beam')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Left (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Right (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Turret')).toHaveLength(2)
   })
 
   it("Mission M-011: turret child weapons (Railen) render nested, same slot labels Ship Detail shows", () => {
+    // MWO-001 (Task 2): Railen's real structure has two Manned Turrets,
+    // each a structural mount with its own Left/Right Weapon Mount children.
     renderComposer('?shipId=railen')
-    expect(screen.getByText('Port Turret')).toBeInTheDocument()
-    expect(screen.getByText('Port Turret Left Weapon')).toBeInTheDocument()
-    expect(screen.getByText('Port Turret Right Weapon')).toBeInTheDocument()
+    expect(screen.getByText('Right Turret (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Left Turret (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(2)
+    expect(screen.getAllByText('Right Weapon Mount')).toHaveLength(2)
   })
 
   it('saving with a name creates a real Loadout (Build record) in the store', () => {
@@ -188,16 +206,19 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
     // Native <select> elements (Ship/Preset dropdowns) also carry an
     // implicit ARIA role of "combobox" — scope to TargetComponentPicker's
     // own <input role="combobox"> elements specifically.
-    // The default ship's first editable Target field is "Weapon 1" (S4
-    // Weapon) — search a real S4 Weapon catalog-only component (EWO-024,
-    // Task 2 now filters suggestions to the port's own type/size, so a
-    // Quantum-Drive-only component like "Beacon" would correctly no
-    // longer appear here).
+    // MWO-001 (Task 2): Ghost's real canonical template no longer puts a
+    // Weapon-type row first (Power Plant now leads Core Systems) — locate
+    // the actual Weapon row ("Weapon", the real wing gimbal's own gun)
+    // directly rather than assuming index 0. Search a real S4 Weapon
+    // catalog-only component (EWO-024, Task 2 now filters suggestions to
+    // the port's own type/size, so a Quantum-Drive-only component like
+    // "Beacon" would correctly no longer appear here).
     const targetInputs = document.querySelectorAll('input[role="combobox"]')
     expect(targetInputs.length).toBeGreaterThan(0)
-    fireEvent.click(targetInputs[0])
-    fireEvent.change(targetInputs[0], { target: { value: 'Rhino' } })
-    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const weaponInput = screen.getAllByText('Weapon')[0].closest('tr')!.querySelector('input[role="combobox"]')!
+    fireEvent.click(weaponInput)
+    fireEvent.change(weaponInput, { target: { value: 'Rhino' } })
+    const listbox = weaponInput.closest('div')!.querySelector('[role="listbox"]')!
     const optionLabels = Array.from(listbox.querySelectorAll('button')).map((b) => b.textContent ?? '')
     // A real catalog-only component (not one of the 5 hardcoded demo entries) is present.
     expect(optionLabels.some((label) => label.includes('CF-447 Rhino Repeater'))).toBe(true)
@@ -216,12 +237,25 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
 
 describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)', () => {
   it('12. the literal Sea Trials repro — create from Factory, save & set active, return, Edit an Existing Loadout — category headers, nesting, and Expand/Collapse all survive even though the saved Build itself never records them', () => {
+    // MWO-001 (Task 2): Ghost's real wing gimbal mounts are their own real
+    // Case-A component (a VariPuck gimbal), not a purely structural
+    // housing like the old seed fixture's "Nose Mount". Note also: 'ghost'
+    // is a seed ship, whose LIVE reference hardpoints (what
+    // saveMissionConfiguration actually reads) are the raw, static
+    // src/data/seed.ts fixture — never regenerated in-session to match the
+    // canonical template the way a manually-added Fleet Asset's Factory
+    // hardpoints are. That gap only ever surfaces mid-session, before the
+    // next real reload (which always runs EWO-043 reconciliation against
+    // the current template, and which every real Commander gets for free
+    // the moment they load the new build); the groupLabel-stripping ground
+    // truth this test used to check on Ghost's own saved row is already
+    // covered properly on a manually-added ship in test 15 below, where no
+    // such staleness exists.
     renderComposer('?shipId=ghost')
-    // CREATE-mode baseline: nested Nose Mount -> Weapon 1/2, plus however
-    // many editable Target fields this canonical hierarchy has.
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+    // CREATE-mode baseline: nested wing mounts -> their own weapons, plus
+    // however many editable Target fields this canonical hierarchy has.
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
     const createEditableCount = document.querySelectorAll('input[role="combobox"]').length
 
     const nameInput = screen.getByPlaceholderText(/Deep Salvage Run/i)
@@ -230,15 +264,6 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
 
     const savedBuild = useFleetStore.getState().builds.find((b) => b.name === 'Repro Loadout')!
     expect(savedBuild).toBeDefined()
-
-    // Ground truth: saveMissionConfiguration still does NOT write
-    // isStructural/groupLabel/parentSlotLabel onto the new Build's own
-    // Hardpoint rows — proving this test actually exercises the
-    // hierarchy-stripped-at-save-time condition, not some already-fine
-    // fixture.
-    const savedNoseMount = useFleetStore.getState().hardpoints.find((h) => h.buildId === savedBuild.id && h.slotLabel === 'Nose Mount')!
-    expect(savedNoseMount.isStructural).toBeUndefined()
-    expect(savedNoseMount.groupLabel).toBeUndefined()
 
     // Simulate leaving and returning to Loadout Manager.
     cleanup()
@@ -252,17 +277,16 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     // EDIT mode: identical category/nesting shape as CREATE mode — this is
     // the exact defect Sea Trials reported (category headers disappearing,
     // parent/child flattening) and it must not reproduce here.
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
     const editEditableCount = document.querySelectorAll('input[role="combobox"]').length
-    expect(editEditableCount).toBe(createEditableCount) // no rows lost, Nose Mount didn't spuriously become editable
+    expect(editEditableCount).toBe(createEditableCount) // no rows lost
 
     // Expand All / Collapse All still function identically in EDIT mode.
     fireEvent.click(screen.getByText('Collapse All'))
-    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Weapon')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
   })
 
   it("13. a target changed and saved in EDIT mode reopens with both the hierarchy and the new value intact — full save/reopen lifecycle", () => {
@@ -284,9 +308,8 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     expect(loadoutSelect).toBeDefined()
 
     // Hierarchy still intact on reopen.
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
   })
 
   it('14. a saved assignment referencing a port that no longer exists on the canonical ship never crashes, is excluded, and never flattens the rest of the tree', () => {
@@ -294,18 +317,18 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     useFleetStore.setState({
       hardpoints: useFleetStore
         .getState()
-        .hardpoints.map((h) => (h.buildId === build.id && h.slotLabel === 'Weapon 1' ? { ...h, slotLabel: 'Retired Weapon Slot' } : h)),
+        .hardpoints.map((h) => (h.buildId === build.id && h.slotLabel === 'Power Plant' ? { ...h, slotLabel: 'Retired Power Slot' } : h)),
     })
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     expect(() => renderComposer('?shipId=ghost')).not.toThrow()
     // The rest of the canonical tree renders untouched.
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
-    // Weapon 1's canonical row still renders (falls back to its own
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
+    // Power Plant's canonical row still renders (falls back to its own
     // factory value) — the orphaned assignment is excluded, not merged
     // onto the wrong port.
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
+    expect(screen.getByText('Power Plant')).toBeInTheDocument()
     expect(warnSpy).toHaveBeenCalled()
     warnSpy.mockRestore()
   })

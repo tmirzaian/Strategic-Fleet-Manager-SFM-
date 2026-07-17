@@ -1,0 +1,5430 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.ARGO_CSV_Cargo",
+    "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "body",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0723
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0895
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.877
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.7343
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0497
+        ]
+      ]
+    },
+    {
+      "node": "front",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.518
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.0701
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -3.1507
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.231
+        ]
+      ]
+    },
+    {
+      "node": "rear_panelbreak_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2581
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.7273
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0985
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_panelbreak_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.2559
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.727
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0984
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "body_pom_nonsym",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.6703
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.9824
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0651
+        ]
+      ]
+    },
+    {
+      "node": "body_pom",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.9589
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.9746
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7399
+        ]
+      ]
+    },
+    {
+      "node": "body_01_bars",
+      "type": 0
+    },
+    {
+      "node": "component_personalstorage_mesh",
+      "type": 0
+    },
+    {
+      "node": "button_personalstorage",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.2526
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0378
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0035
+        ]
+      ]
+    },
+    {
+      "node": "front_barbreakbottom_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.8346
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0985
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9578
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "front_panelbreak_bumper_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.9214
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.351
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9801
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "button_seataccess_driver",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          -0.5087
+        ],
+        [
+          -0.7195,
+          -0.0,
+          0.6945,
+          1.3511
+        ],
+        [
+          -0.6945,
+          0.0,
+          -0.7195,
+          -0.6742
+        ]
+      ]
+    },
+    {
+      "node": "front_panelbreak_bumper_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.9214
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.351
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9801
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "front_barbreakbottom_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.6939
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.5424
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1503
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "front_main",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1228
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3152
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3417
+        ]
+      ]
+    },
+    {
+      "node": "front_lights",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.5604
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9323
+        ]
+      ]
+    },
+    {
+      "node": "front_bottom",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.9492
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3983
+        ]
+      ]
+    },
+    {
+      "node": "front_panelbreak_roof",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.2295
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.7257
+        ]
+      ]
+    },
+    {
+      "node": "button_componentbay_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9063,
+          0.0,
+          0.4226,
+          -1.116
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.9036
+        ],
+        [
+          -0.4226,
+          0.0,
+          0.9063,
+          -0.3484
+        ]
+      ]
+    },
+    {
+      "node": "front_panelbreak_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8526
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2625
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3357
+        ]
+      ]
+    },
+    {
+      "node": "front_panelbreak_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.8526
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.2625
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.362
+        ]
+      ]
+    },
+    {
+      "node": "button_componentbay_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.9063,
+          0.0,
+          -0.4226,
+          1.1224
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.7622
+        ],
+        [
+          -0.4226,
+          0.0,
+          0.9063,
+          -0.3898
+        ]
+      ]
+    },
+    {
+      "node": "front_glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          0.2713
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.8586
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.7259
+        ]
+      ]
+    },
+    {
+      "node": "glass_body",
+      "type": 0
+    },
+    {
+      "node": "front_panelbreak_right_glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.2121
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3807
+        ]
+      ]
+    },
+    {
+      "node": "front_panelbreak_left_glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.4052
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.2121
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.407
+        ]
+      ]
+    },
+    {
+      "node": "front_bottom_glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.4616
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4257
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3665
+        ]
+      ]
+    },
+    {
+      "node": "front_lights_glass",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.7637
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0382
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_09_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0025
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_08_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0025
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0289
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_07_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0349
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_06_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0101
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_05_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_04_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_03_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_02_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_01_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0271
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0068
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0024
+        ]
+      ]
+    },
+    {
+      "node": "bracket_left_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0762
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0199
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.026
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_cooler",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1028
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1309
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_battery",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0003
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1436
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1262
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_sheildgen",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1436
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0353
+        ]
+      ]
+    },
+    {
+      "node": "front_main_glass",
+      "type": 0
+    },
+    {
+      "node": "serial_number_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.1228
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.3056
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3248
+        ]
+      ]
+    },
+    {
+      "node": "ship_name_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.1228
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.3228
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0514
+        ]
+      ]
+    },
+    {
+      "node": "emblem_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.1228
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.1555
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0223
+        ]
+      ]
+    },
+    {
+      "node": "ship_name_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.4914
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          1.6538
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2585
+        ]
+      ]
+    },
+    {
+      "node": "serial_number_02",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.3435
+        ],
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          1.3549
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.7507
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_09_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0025
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_08_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0025
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0289
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_07_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_06_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0101
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_05_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_04_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_03_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_02_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0099
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0287
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_01_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0271
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0068
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0024
+        ]
+      ]
+    },
+    {
+      "node": "bracket_right_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.1689
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0997
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1298
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_powerplant_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          0.1028
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0624
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1309
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_relay_mesh",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          0.1373
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.1236
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv",
+      "type": 2,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "massBox",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9749,
+          -0.0,
+          0.2225,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.2225,
+          -0.0,
+          0.9749,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "MassBox",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_port",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.8095
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.9276
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1009
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "component_personalstorage",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.9528
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.755
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5022
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_modular_slot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.6956
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5171
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_comp_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.1404
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.2183
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3183
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_comp_lifesupport",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.1381
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.2199
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3183
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_comp_computer",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.945
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.0562
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0443
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_upper_brace_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6379
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.395
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3652
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_shaft_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.9809,
+          0.1946,
+          0.6769
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.3945
+        ],
+        [
+          0.0,
+          -0.1946,
+          0.9809,
+          -0.5535
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_piston_lower_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.3062,
+          0.9487,
+          -0.0787,
+          1.2316
+        ],
+        [
+          -0.4368,
+          0.0666,
+          -0.8971,
+          -1.3793
+        ],
+        [
+          -0.8459,
+          0.3091,
+          0.4348,
+          -0.3605
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_lower_brace_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.7219
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.3885
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7356
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ADsus_piston_upper_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.4112,
+          0.9116,
+          0.0021,
+          1.0699
+        ],
+        [
+          -0.1288,
+          0.0604,
+          -0.9898,
+          -1.3184
+        ],
+        [
+          -0.9024,
+          0.4067,
+          0.1423,
+          -0.0014
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ACsus_hub_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.3739
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3875
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ABsus_spindle_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.3739
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3875
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AAsus_wheel_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.3739
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3875
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AAsus_wheel_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.3765
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ABsus_spindle_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.3765
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ACsus_hub_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.3765
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ADsus_piston_upper_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.4215,
+          0.0728,
+          -0.9039,
+          -1.0711
+        ],
+        [
+          -0.1719,
+          -0.9851,
+          0.0008,
+          -1.3171
+        ],
+        [
+          -0.8904,
+          0.1557,
+          0.4277,
+          0.0006
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_lower_brace_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.7241
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.7543
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_shaft_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.9689,
+          -0.2473,
+          -0.6781
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          -0.2473,
+          0.9689,
+          -0.5627
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_upper_brace_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          -0.6399
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3652
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wheel_rl_mudguard",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -1.3765
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3859
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wheel_rr_mudguard",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.3739
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3875
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AAsus_wheel_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.3601
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866,
+          1.0477
+        ],
+        [
+          0.0,
+          0.866,
+          0.5,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AAsus_wheel_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.3608
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SubPartWheel",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ABsus_spindle_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3601
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ABsus_spindle_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.3608
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ACsus_hub_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.3601
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ACsus_hub_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.3608
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ADsus_piston_upper_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9056,
+          -0.0525,
+          0.4208,
+          -0.9143
+        ],
+        [
+          -0.0065,
+          0.9905,
+          0.1376,
+          1.1574
+        ],
+        [
+          -0.4241,
+          -0.1274,
+          0.8966,
+          0.2736
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "ADsus_piston_upper_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9056,
+          0.0525,
+          -0.4208,
+          0.9148
+        ],
+        [
+          0.0065,
+          0.9905,
+          0.1376,
+          1.1577
+        ],
+        [
+          0.4241,
+          -0.1274,
+          0.8966,
+          0.2735
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_lower_brace_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.6104
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0467
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.7356
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_lower_brace_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6108
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          1.0467
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.7356
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_piston_lower_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9056,
+          -0.0525,
+          0.4208,
+          -1.216
+        ],
+        [
+          -0.0065,
+          0.9905,
+          0.1376,
+          1.0541
+        ],
+        [
+          -0.4241,
+          -0.1274,
+          0.8966,
+          -0.3657
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_piston_lower_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9056,
+          0.0525,
+          -0.4208,
+          1.2168
+        ],
+        [
+          0.0065,
+          0.9905,
+          0.1376,
+          1.0537
+        ],
+        [
+          0.4241,
+          -0.1274,
+          0.8966,
+          -0.3655
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_shaft_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.9783,
+          -0.2074,
+          -0.5434
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.0407
+        ],
+        [
+          -0.0,
+          0.2074,
+          0.9783,
+          -0.5665
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_shaft_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.9765,
+          0.2155,
+          0.5438
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          1.0407
+        ],
+        [
+          -0.0,
+          -0.2155,
+          0.9765,
+          -0.5665
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_upper_brace_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.9838,
+          -0.1794,
+          -0.63
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.0389
+        ],
+        [
+          0.0,
+          0.1794,
+          0.9838,
+          -0.3652
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEsus_upper_brace_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.6308
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.0387
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3652
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wheel_fl_mudguard",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.3601
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866,
+          1.0477
+        ],
+        [
+          0.0,
+          0.866,
+          0.5,
+          -0.7406
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "wheel_fr_mudguard",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          1.3608
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.0477
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -0.7402
+        ]
+      ],
+      "props": {
+        "class": "SuspensionPart",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_vehicle_destroyed",
+      "type": 3,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0438
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4771
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0895
+        ]
+      ]
+    },
+    {
+      "node": "AEsus_piston_lower_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.3188,
+          0.1293,
+          0.939,
+          -1.2415
+        ],
+        [
+          0.3251,
+          -0.9455,
+          0.0198,
+          -1.3869
+        ],
+        [
+          0.8903,
+          0.2989,
+          -0.3434,
+          -0.3596
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_modular_bed",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.6956
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.094
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "componentbay_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.6886
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.2902
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.0805
+        ]
+      ]
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.6324
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0915
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.408
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_ObjectContainer",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.2095
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6086
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_armor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_wheel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_driver",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.4509
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3925
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_personal_inventory",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.9762
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.8057
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8211
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.2095
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6086
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_driver",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.4111
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.4914
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_selfdestruct",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1389
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.518
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_storage_multitool",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.6089
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.1649
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.651
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "componentbay_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.909
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.2091
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3886
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_item_roof",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3371
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3211
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_entrancedoor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.7116
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6283
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "bracket_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.0024
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "node": "componentbay_shutters_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.0692
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.2149
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.345
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_01_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0278
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7782
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_02_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6956
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_03_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6028
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_04_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5094
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_05_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.404
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_06_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3106
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_07_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2113
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_08_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1252
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_09_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0288
+        ]
+      ]
+    },
+    {
+      "node": "bracket_inner_shieldgen",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0753
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.1502
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3075
+        ]
+      ]
+    },
+    {
+      "node": "bracket_inner_battery",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0753
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.102
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1389
+        ]
+      ]
+    },
+    {
+      "node": "bracket_inner_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.0753
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.1093
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1518
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -0.1297
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.1282
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_battery",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0855
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.0023
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.0,
+          -1.0,
+          -0.0809
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          0.0625
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "bracket_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0454
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0076
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.4173
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_ComponentShutters_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.4353
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0118
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.6531
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_01_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0278
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.7782
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_02_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6956
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_03_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.6028
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_04_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5094
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_05_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.404
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_06_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3106
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_07_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.2113
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_08_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1252
+        ]
+      ]
+    },
+    {
+      "node": "argo_csv_shutters_slat_09_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0288
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_relay",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0792
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0775
+        ]
+      ]
+    },
+    {
+      "node": "inner_frame_powerplant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.158
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.2917
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_power_plant",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          0.1066
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_relay_cockpit",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ]
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "ARGO_CSV_Seat_Driver",
+      "port": "hardpoint_seat_driver",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Spaceships/Seats/ARGO/csv/argo_csv_seat.cga",
+      "nmc_properties": [
+        {
+          "node": "front_barbreaktop_left",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.4089
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.5652
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.1273
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_top_brackets_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.4855
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0175
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.2582
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrance_door_piston01_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              -1.0,
+              -0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrance_door_piston02_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              -1.0,
+              -0.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              -0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_top_mesh_ext",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0038
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.5847
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.7728
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "front_barbreakdoor_left",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.533
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.2511
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.4116
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "front_barbreakdoor_right",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.5374
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.2669
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.4196
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "glass_front_ext",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.3014
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_top_mesh_int",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.3014
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "glass_front_int",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "front_barbreaktop_right",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.4324
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.6479
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.1874
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_bottom_mesh_int",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0468
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.5411
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.2617
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "glass_bottom_int",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0045
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.2773
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.0283
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_bottom_mesh_ext",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0033
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.5914
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.2698
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "glass_bottom_ext",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " exterior"
+          }
+        },
+        {
+          "node": "entrancedoor_top_brackets",
+          "type": 2,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0279
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " auto"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "ARGO_CSV_FM_Dashboard_Driver",
+      "port": "hardpoint_dashboard_driver",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Spaceships/Seats/ARGO/csv/argo_csv_fm_pilot_dashboard.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_cockpit_Console",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "mesh_mfd_screen",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "lt_glow_dash_orange",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_cargo_switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.0005
+            ],
+            [
+              -0.0,
+              0.9095,
+              -0.4158,
+              -0.0016
+            ],
+            [
+              0.0,
+              -0.4158,
+              -0.9095,
+              0.0029
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_DeployTurret_switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              -0.001
+            ],
+            [
+              -0.0,
+              0.9212,
+              0.389,
+              -0.0019
+            ],
+            [
+              -0.0,
+              -0.389,
+              0.9212,
+              -0.0002
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_EngineSystem_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.9998,
+              -0.0175,
+              0.0
+            ],
+            [
+              0.0,
+              -0.0175,
+              -0.9998,
+              0.0
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_Exit_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -0.0048
+            ],
+            [
+              -0.0,
+              0.248,
+              -0.9688,
+              0.0187
+            ],
+            [
+              -0.0,
+              0.9688,
+              0.248,
+              0.0011
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_Exterior_Lighting_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0005
+            ],
+            [
+              -0.0,
+              0.2588,
+              -0.9659,
+              -0.0045
+            ],
+            [
+              -0.0,
+              0.9659,
+              0.2588,
+              0.0047
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_MFD_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0003
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              0.0106
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.0007
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_PowerSystem_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0005
+            ],
+            [
+              0.0,
+              0.1736,
+              -0.9848,
+              -0.01
+            ],
+            [
+              -0.0,
+              0.9848,
+              0.1736,
+              0.0095
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_Radar_Switch",
+          "type": 0,
+          "bone_to_world": [
+            [
+              -0.9999,
+              -0.0031,
+              0.0169,
+              0.0024
+            ],
+            [
+              -0.0156,
+              -0.2408,
+              -0.9705,
+              0.008
+            ],
+            [
+              0.0071,
+              -0.9706,
+              0.2407,
+              0.0005
+            ]
+          ],
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        },
+        {
+          "node": "btn_Shields_Switch",
+          "type": 0,
+          "props": {
+            "mesh_visarea ": " interior"
+          }
+        }
+      ],
+      "children": [
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_MFD_Right",
+          "parent": "ARGO_CSV_FM_Dashboard_Driver",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_MFD_Left",
+          "parent": "ARGO_CSV_FM_Dashboard_Driver",
+          "geometry": ""
+        },
+        {
+          "entity": "Radar_Display_Screen_Template",
+          "port": "Screen_Radar",
+          "parent": "ARGO_CSV_FM_Dashboard_Driver",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "ARGO_CSV_SCItem_SeatAccess",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_seataccess_driver.cga"
+    },
+    {
+      "entity": "Controller_Wheel_ARGO_CSV",
+      "port": "hardpoint_controller_wheel",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Shield_ARGO_CSV",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon_Vehicle",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_LPLT_S00_Radix_SCItem",
+      "port": "hardpoint_power_plant",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "objects/spaceships/power_plants/vehicle_component/lplt/powr_lplt_v01_pl03.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_powr_lplt_v01_pl03",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.0104
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_components",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.005
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0255
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_door_2_a",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        },
+        {
+          "node": "mesh_door_1_a",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "COOL_JSPN_S00_FrostStarSL_SCItem",
+      "port": "hardpoint_cooler",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "objects/spaceships/coolers/vehicle_component/jspn/cool_jspn_v01_pl03.cga",
+      "nmc_properties": [
+        {
+          "node": "mesh_cool_jspn_v01_pl03",
+          "type": 0,
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "SHLD_SECO_S00_PIN_SCItem",
+      "port": "hardpoint_shield_generator",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "objects/spaceships/shields/vehicle_component/seco/shld_seco_v01_pl03.cga"
+    },
+    {
+      "entity": "Door_NoRoomConnector_CSV_ComponentBay_Radar",
+      "port": "hardpoint_comp_radar",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_componentbay_radar.cga",
+      "nmc_properties": [
+        {
+          "node": "lightlink_radar",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.9016,
+              -0.0095,
+              -0.4325,
+              0.0684
+            ],
+            [
+              -0.4325,
+              0.0046,
+              -0.9016,
+              -0.3512
+            ],
+            [
+              0.0105,
+              0.9999,
+              -0.0,
+              0.0835
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "VHCL_SelfDestruct_10s",
+      "port": "hardpoint_selfdestruct",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "ARMR_ARGO_CSV",
+      "port": "hardpoint_armor",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Door_NoRoomConnector_CSV_ComponentBay_Lifesupport",
+      "port": "hardpoint_comp_lifesupport",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_componentbay_lifesupport.cga",
+      "nmc_properties": [
+        {
+          "node": "argo_csv_lightlink_rearlights_left",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              -0.0696
+            ],
+            [
+              0.0,
+              1.0,
+              -0.0,
+              -0.0234
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -0.1861
+            ]
+          ],
+          "props": {
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": "",
+            "MapChannel:5 ": ""
+          }
+        },
+        {
+          "node": "lightlink_lifesupport",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.0105,
+              0.9999,
+              -0.0,
+              -0.1544
+            ],
+            [
+              -0.4325,
+              0.0046,
+              -0.9016,
+              -0.1911
+            ],
+            [
+              -0.9016,
+              0.0095,
+              0.4325,
+              -0.0683
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Door_NoRoomConnector_CSV_ComponentBay_Avionics",
+      "port": "hardpoint_comp_computer",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_componentbay_avionics.cga",
+      "nmc_properties": [
+        {
+          "node": "lightlink_avionics",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.0105,
+              0.9999,
+              -0.0,
+              -0.0192
+            ],
+            [
+              -0.4325,
+              0.0046,
+              -0.9016,
+              -0.4275
+            ],
+            [
+              -0.9016,
+              0.0095,
+              0.4325,
+              -0.0777
+            ]
+          ],
+          "props": {
+            "MapChannel:2 ": "",
+            "MapChannel:3 ": "",
+            "MapChannel:4 ": ""
+          }
+        }
+      ]
+    },
+    {
+      "entity": "RELAY_2slot",
+      "port": "hardpoint_relay_cockpit",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse.cga"
+    },
+    {
+      "entity": "Weapon_Rack_ARGO_CSV",
+      "port": "hardpoint_weapon_storage_multitool",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_storage_multitool.cga"
+    },
+    {
+      "entity": "ARGO_CSV_Cargo_Rack_Top",
+      "port": "hardpoint_modular_bed",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_cargo_bed.cga"
+    },
+    {
+      "entity": "ARGO_CSV_Roof_Cap",
+      "port": "hardpoint_item_roof",
+      "parent": "EntityClassDefinition.ARGO_CSV_Cargo",
+      "geometry": "Objects/Vehicles/ARGO/argo_csv/argo_csv_cargo_roof.cga"
+    }
+  ],
+  "interiors": [
+    {
+      "container": "base_ext_lighting",
+      "meshes": [
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_componentbayleft.cga",
+          "pos": [
+            -1.149999976158142,
+            -0.07999999821186066,
+            0.6800000071525574
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_emblem.cga",
+          "pos": [
+            0.0,
+            -0.05999999865889549,
+            1.2400000095367432
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_componentbayright.cga",
+          "pos": [
+            1.149999976158142,
+            0.019999999552965164,
+            0.6899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_bumperbottomright.cga",
+          "pos": [
+            0.46000000834465027,
+            2.690000057220459,
+            -0.4099999964237213
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_frontcargo.cga",
+          "pos": [
+            0.0,
+            -0.3499999940395355,
+            0.9900000095367432
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_backcargo.cga",
+          "pos": [
+            0.0,
+            -0.41999998688697815,
+            0.6899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_bumperbottomleft.cga",
+          "pos": [
+            -0.46000000834465027,
+            2.690000057220459,
+            -0.4099999964237213
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/argo/argo_csv/argo_csv_lightlink_headlights_top.cga",
+          "pos": [
+            0.0,
+            2.0799999237060547,
+            1.3300000429153442
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_headlights_right.cga",
+          "pos": [
+            0.7599999904632568,
+            2.7899999618530273,
+            -0.3199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_lightlink_headlights_left.cga",
+          "pos": [
+            -0.7599999904632568,
+            2.7899999618530273,
+            -0.3199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/argo/argo_csv/argo_csv_lightlink_panelrearleft.cga",
+          "pos": [
+            -1.409999966621399,
+            -2.9100000858306885,
+            0.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/vehicles/argo/argo_csv/argo_csv_lightlink_panelrearright.cga",
+          "pos": [
+            1.409999966621399,
+            -2.9100000858306885,
+            0.5299999713897705
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 23
+    },
+    {
+      "container": "base_int_body",
+      "meshes": [
+        {
+          "cgf": "data/objects/vehicles/argo/argo_csv/argo_csv_interior.cgf",
+          "pos": [
+            0.0,
+            0.800000011920929,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 17
+    }
+  ]
+}

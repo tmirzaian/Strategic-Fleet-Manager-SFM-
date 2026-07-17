@@ -1,0 +1,7444 @@
+{
+  "root": {
+    "entity": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+    "geometry": "Objects/Spaceships/Ships/AEGS/Vanguard/AEGS_Vanguard.cga"
+  },
+  "root_nmc": [
+    {
+      "node": "Nose",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          12.4279
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          0.1065
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Body",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3539
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Arm_Right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.8349
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -4.4987
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3044
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Arm_Left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.835
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -4.4987
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3044
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Engine_R",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          5.119
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6017
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5497
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Engine_L",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -4.7259
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.6017
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5497
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_hull_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3539
+        ]
+      ]
+    },
+    {
+      "node": "Light_Geo_Flap",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          11.1157
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.6662
+        ]
+      ]
+    },
+    {
+      "node": "Light_Geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          10.5646
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.7692
+        ]
+      ]
+    },
+    {
+      "node": "Tail_Fin_Left_Upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -4.3239
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -15.4937
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.6073
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Tail_Fin_Left_Lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.04
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -13.8798
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.8443
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_engine_left_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          4.7259
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.9419
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1958
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_mount_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.1736,
+          -0.0,
+          -0.9848,
+          0.0993
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.9848,
+          0.0,
+          0.1736,
+          -0.0138
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.1736,
+          -0.0,
+          -0.9848,
+          -0.1984
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.1554
+        ],
+        [
+          0.9848,
+          0.0,
+          -0.1736,
+          -0.3045
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_mount_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.1736,
+          -0.0,
+          0.9848,
+          -0.0949
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.1121
+        ],
+        [
+          -0.9848,
+          0.0,
+          0.1736,
+          -0.0169
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.1736,
+          0.0,
+          0.9848,
+          0.1911
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -3.027
+        ],
+        [
+          -0.9848,
+          0.0,
+          -0.1736,
+          -0.3015
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9848,
+          -0.0,
+          0.1736,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.1736,
+          -0.0,
+          0.9848,
+          -0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_wing_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          8.4245
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -2.5231
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.2001
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Flaps_Geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9346,
+          0.3151,
+          0.1648,
+          0.0
+        ],
+        [
+          -0.3122,
+          0.949,
+          -0.0439,
+          -0.0
+        ],
+        [
+          -0.1702,
+          -0.0104,
+          0.9853,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_wing_small_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          10.4513
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.2074
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.343
+        ]
+      ]
+    },
+    {
+      "node": "dmg_mesh_tail_rudder_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          7.7659
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          15.8217
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          2.0401
+        ]
+      ]
+    },
+    {
+      "node": "dmg_mesh_wing_rear_tip_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          9.0498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          17.4356
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.4114
+        ]
+      ]
+    },
+    {
+      "node": "Tail_Fin_Right_Upper",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          3.9307
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -14.453
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.6073
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Tail_Fin_Right_Lower",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.6469
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -13.8798
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.8442
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_engine_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -5.1191
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.9419
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1958
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_mount_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.1736,
+          -0.0,
+          -0.9848,
+          0.0993
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.9848,
+          0.0,
+          0.1736,
+          -0.0138
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_a",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.1736,
+          -0.0,
+          -0.9848,
+          -0.1984
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.1554
+        ],
+        [
+          0.9848,
+          0.0,
+          -0.1736,
+          -0.3045
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_mount_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.1736,
+          -0.0,
+          0.9848,
+          -0.0949
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.1121
+        ],
+        [
+          -0.9848,
+          0.0,
+          0.1736,
+          -0.0169
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_b",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.1736,
+          0.0,
+          0.9848,
+          0.1911
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -3.027
+        ],
+        [
+          -0.9848,
+          0.0,
+          -0.1736,
+          -0.3015
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9848,
+          -0.0,
+          -0.1736,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          0.1736,
+          -0.0,
+          0.9848,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_wing_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -8.4364
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -2.5741
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.2676
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Flaps_Geo",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.8386,
+          -0.5193,
+          -0.1648,
+          0.0161
+        ],
+        [
+          0.5215,
+          0.8526,
+          -0.033,
+          -0.0483
+        ],
+        [
+          0.1576,
+          -0.0583,
+          0.9858,
+          -0.0686
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "dmg_mesh_wing_small_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.973,
+          0.2307,
+          -0.0115,
+          -10.2205
+        ],
+        [
+          -0.2309,
+          0.9728,
+          -0.0184,
+          2.2052
+        ],
+        [
+          0.0069,
+          0.0206,
+          0.9998,
+          0.2661
+        ]
+      ]
+    },
+    {
+      "node": "dmg_mesh_tail_rudder_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -7.7659
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          15.8217
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          2.0401
+        ]
+      ]
+    },
+    {
+      "node": "dmg_mesh_wing_rear_tip_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -9.0498
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          16.395
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.4114
+        ]
+      ]
+    },
+    {
+      "node": "missile_flapper_l",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          0.0453
+        ],
+        [
+          0.0,
+          0.0336,
+          -0.9994,
+          -1.5986
+        ],
+        [
+          -0.0,
+          -0.9994,
+          -0.0336,
+          -0.627
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_cover_animA_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -0.7115
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2001
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0673
+        ]
+      ]
+    },
+    {
+      "node": "missile_arm_left_l",
+      "type": 0
+    },
+    {
+      "node": "missile_bay_cover_animB_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.4363
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -0.0286
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.0142
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_cover_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          1.335
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.25
+        ],
+        [
+          1.0,
+          0.0,
+          -0.0,
+          0.6419
+        ]
+      ]
+    },
+    {
+      "node": "missile_flapper_r",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -0.0453
+        ],
+        [
+          -0.0,
+          0.0328,
+          -0.9995,
+          -1.5986
+        ],
+        [
+          -0.0,
+          -0.9995,
+          -0.0328,
+          -0.627
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_cover_animA_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.7115
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -1.2001
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.0673
+        ]
+      ]
+    },
+    {
+      "node": "missile_arm_right_l",
+      "type": 0
+    },
+    {
+      "node": "missile_arm_right_r",
+      "type": 0
+    },
+    {
+      "node": "missile_bay_cover_animB_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          -0.4363
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0286
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0142
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_cover_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -1.335
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          0.25
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.6419
+        ]
+      ]
+    },
+    {
+      "node": "dmg_arm_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.1957
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.8962
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0021
+        ]
+      ]
+    },
+    {
+      "node": "dmg_mesh_arm_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.1957
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.8962
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.0021
+        ]
+      ]
+    },
+    {
+      "node": "canopy_glass",
+      "type": 0
+    },
+    {
+      "node": "dmg_mesh_cockpit_01",
+      "type": 0,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -12.428
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ]
+    },
+    {
+      "node": "front_door_right_mount",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.5178,
+          -0.0,
+          0.8555,
+          1.4347
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.8555,
+          -0.0,
+          0.5178,
+          0.8726
+        ]
+      ]
+    },
+    {
+      "node": "front_door_right",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.9998,
+          0.0205,
+          -0.0011,
+          0.891
+        ],
+        [
+          0.0013,
+          0.0115,
+          -0.9999,
+          0.2427
+        ],
+        [
+          -0.0205,
+          -0.9997,
+          -0.0115,
+          0.0193
+        ]
+      ]
+    },
+    {
+      "node": "front_door_left_mount",
+      "type": 0,
+      "bone_to_world": [
+        [
+          -0.5178,
+          0.0,
+          -0.8555,
+          0.0838
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.8555,
+          -0.0,
+          -0.5178,
+          0.0549
+        ]
+      ]
+    },
+    {
+      "node": "front_door_left",
+      "type": 0,
+      "bone_to_world": [
+        [
+          0.9998,
+          0.0209,
+          0.0016,
+          -0.0
+        ],
+        [
+          -0.0013,
+          -0.0115,
+          0.9999,
+          -0.243
+        ],
+        [
+          0.0209,
+          -0.9997,
+          -0.0114,
+          0.0008
+        ]
+      ]
+    },
+    {
+      "node": "AEGS_Vanguard",
+      "type": 2,
+      "props": {
+        "class": "Animated",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_container_gameplay",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_vehicle_destroyed",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.0896
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "interior_middle",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_turret",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.1781
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9386
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "landingpad_helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6099
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -4.7839
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_powerplant_middle",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.45
+        ],
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          9.8403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1789
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_powerplant_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          2.45
+        ],
+        [
+          1.0,
+          -0.0,
+          0.0,
+          9.8403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.1789
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_drive",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -5.1097
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_quantum_fuel_tank",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.6264
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.6326
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.8623
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          10.1219
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.47
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_intake_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.862
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          10.1219
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.47
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -2.8623
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          7.5194
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6761
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_fuel_tank_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.862
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          7.5194
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6761
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.4
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          11.9653
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -0.1039
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cooler_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          -1.0,
+          1.525
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          11.9653
+        ],
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.1039
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_001",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -2.5
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          9.8403
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.3961
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_shield_generator_002",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -0.0,
+          -1.0,
+          2.5
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          9.8403
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.3961
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_launcher_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -0.8058
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -5.1411
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          -1.6141
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_countermeasure_launcher_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.8058
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -5.1411
+        ],
+        [
+          -0.0,
+          0.0,
+          -1.0,
+          -1.6141
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_selfdestruct",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          9.1827
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.4928
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_armour",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_energy",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          9.1827
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.4928
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_heat_sink",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -5.532
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          8.0548
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6936
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_turret_seataccess",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.1781
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9386
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_radar_turret",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.1781
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9386
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_comms",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.1781
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.9386
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_door_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.009,
+          0.8846
+        ],
+        [
+          0.0,
+          0.009,
+          1.0,
+          -2.8709
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_esc_pod_upper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.625
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.2153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_esc_pod_lower",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.625
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.2153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seataccess_escpods",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          6.2449
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5032
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_esc_pod_upper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          6.245
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5032
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_esc_pod_lower",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          6.2449
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.5029
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_QIG",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -2.6264
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.6326
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_01",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -11.3
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -18.1097
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          3.5761
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_r_attach",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          3.578
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          8.2802
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5002
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_l_attach",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.578
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          8.2802
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5002
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Back_Right",
+      "type": 2,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Wing_Back_Left",
+      "type": 2,
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "True",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_esc_pod_lower_sentinel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          1.625
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          6.0153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_esc_pod_upper_sentinel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          1.625
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          6.0153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_test_missle",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.375
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.5903
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          11.6077
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_paint",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          0.0,
+          1.0,
+          -1.4
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          11.9653
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -0.1039
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_baydoor",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.0903
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.7289
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_missilelauncher",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.375
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.5903
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8539
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_shield",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -6.302
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          5.6363
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6936
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_cooler",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -5.532
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          8.0548
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6936
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_emp",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.9962,
+          -0.0872,
+          3.2409
+        ],
+        [
+          0.0,
+          0.0872,
+          0.9962,
+          2.3005
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_locker_sentinel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.7153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3539
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_locker_hoplite",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.875
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          3.4653
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9789
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_locker_harbinger",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          1.5
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          2.7153
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3539
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_locker_warden",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -1.5
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          4.0903
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3539
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_controller_missile",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.054
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          6.3071
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -3.6285
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          9.1827
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.4928
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_regen_pool_turrets",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          9.735
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.4928
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_capacitor_assignment",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          9.3958
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          2.4928
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_relay",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3539
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_relay_2",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.3403
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.3539
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9848,
+          -0.0,
+          -0.1736,
+          -3.6986
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4651
+        ],
+        [
+          0.1736,
+          0.0,
+          0.9848,
+          0.3959
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Landing_Gear_Left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.7892
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.4199
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5542
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9397,
+          0.0,
+          -0.342,
+          -0.9929
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -12.6233
+        ],
+        [
+          0.342,
+          -0.0,
+          0.9397,
+          0.3644
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_side_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          1.0,
+          0.0,
+          -2.3421
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -9.4
+        ],
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.6568
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_bottom_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          -3.1683
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          4.3401
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.5926
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_top_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.2581
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -9.4
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          1.2658
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_top_FL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -3.8971
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          3.66
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.7268
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_bottom_RL",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9398,
+          -0.3319,
+          -0.0813,
+          -0.3429
+        ],
+        [
+          0.0,
+          0.2379,
+          -0.9713,
+          -7.9444
+        ],
+        [
+          0.3417,
+          0.9128,
+          0.2236,
+          -1.4229
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engine_middle_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.6761
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8774
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3168
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_missilerack_left_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.0131
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.5249
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.5542
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_retro_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          -0.8059
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          11.3674
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1379
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEGS_VNG_LandingGears_Rear_Left_Doors",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.2935
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.803
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_mount_b_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.047
+        ],
+        [
+          0.0,
+          -0.9936,
+          0.1129,
+          2.3352
+        ],
+        [
+          0.0,
+          0.1129,
+          0.9936,
+          -0.6462
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_left_mount_a_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.0497
+        ],
+        [
+          0.0,
+          -0.9936,
+          0.1129,
+          2.4051
+        ],
+        [
+          0.0,
+          0.1129,
+          0.9936,
+          -0.6542
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Left_Flaps",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9346,
+          -0.3122,
+          -0.1702,
+          -2.0269
+        ],
+        [
+          0.3151,
+          0.949,
+          -0.0104,
+          -2.3157
+        ],
+        [
+          0.1648,
+          -0.0439,
+          0.9853,
+          -0.543
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_05",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -10.3436
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          -5.2941
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.1176
+        ]
+      ]
+    },
+    {
+      "node": "contrail_04",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.873
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1091
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9157
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9848,
+          0.0,
+          0.1736,
+          3.3173
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          4.516
+        ],
+        [
+          -0.1736,
+          -0.0,
+          0.9848,
+          0.4635
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Landing_Gear_Right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.396
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          1.4199
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.5542
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_engine_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9397,
+          0.0,
+          0.342,
+          0.5997
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -12.6233
+        ],
+        [
+          -0.342,
+          0.0,
+          0.9397,
+          0.3644
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_missilerack_right_rear",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.6199
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          4.5249
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.5542
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_top_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          3.5039
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          3.66
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          0.7268
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_bottom_FR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          2.7745
+        ],
+        [
+          -0.0,
+          0.0,
+          1.0,
+          4.34
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.5937
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_bottom_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9398,
+          0.3319,
+          0.0813,
+          -0.0502
+        ],
+        [
+          -0.0,
+          0.2379,
+          -0.9713,
+          -7.9444
+        ],
+        [
+          -0.3417,
+          0.9128,
+          0.2236,
+          -1.4228
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_top_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.8649
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -9.4
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          1.2658
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_side_RR",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          1.9489
+        ],
+        [
+          0.0,
+          -0.0,
+          1.0,
+          -9.4
+        ],
+        [
+          -1.0,
+          -0.0,
+          -0.0,
+          0.6568
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engine_middle_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -1.0691
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.8774
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3168
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_thruster_retro_right",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.4128
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.0,
+          11.3674
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1379
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEGS_VNG_LandingGears_Rear_Right_Doors",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.0011
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.2935
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.8028
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_mount_b_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          -1.0459
+        ],
+        [
+          0.0,
+          -0.9936,
+          0.1129,
+          2.3352
+        ],
+        [
+          0.0,
+          0.1129,
+          0.9936,
+          -0.6464
+        ]
+      ]
+    },
+    {
+      "node": "rear_door_right_mount_a_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0,
+          0.0,
+          1.0509
+        ],
+        [
+          0.0,
+          -0.9936,
+          0.1129,
+          2.4051
+        ],
+        [
+          0.0,
+          0.1129,
+          0.9936,
+          -0.6544
+        ]
+      ]
+    },
+    {
+      "node": "Wing_Right_Flaps",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9346,
+          0.3103,
+          0.1736,
+          2.0268
+        ],
+        [
+          -0.3151,
+          0.9491,
+          -0.0,
+          -2.3157
+        ],
+        [
+          -0.1648,
+          -0.0547,
+          0.9848,
+          -0.543
+        ]
+      ],
+      "props": {
+        "class": "AnimatedJoint",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "contrail_06",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          -0.0,
+          10.3436
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -5.2941
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.1176
+        ]
+      ]
+    },
+    {
+      "node": "contrail_03",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.8706
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -1.1351
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.9115
+        ]
+      ]
+    },
+    {
+      "node": "contrail_02",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          2.2502
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -3.055
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5186
+        ]
+      ]
+    },
+    {
+      "node": "missile_bay_l",
+      "type": 2
+    },
+    {
+      "node": "node_straight_left",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.9665,
+          0.0,
+          -0.2568,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.2568,
+          -0.0,
+          0.9665,
+          -0.0
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_missilerack_left_inner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          0.0005
+        ],
+        [
+          -0.0,
+          -0.006,
+          -1.0,
+          -0.0005
+        ],
+        [
+          -0.0,
+          -1.0,
+          0.006,
+          0.0006
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "missile_bay_r",
+      "type": 2
+    },
+    {
+      "node": "node_straight_right02",
+      "type": 3,
+      "bone_to_world": [
+        [
+          0.9665,
+          0.0,
+          0.2568,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0
+        ],
+        [
+          -0.2568,
+          0.0,
+          0.9665,
+          -0.0
+        ]
+      ]
+    },
+    {
+      "node": "missilar_arm_right_l_animA",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          -0.8022
+        ],
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -0.5111
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          0.0673
+        ]
+      ]
+    },
+    {
+      "node": "missilar_arm_right_l_animB",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          -0.0,
+          -0.4363
+        ],
+        [
+          -0.0,
+          1.0,
+          -0.0,
+          0.0286
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0142
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_missilerack_right_inner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          -0.0003,
+          -0.002,
+          -0.0008
+        ],
+        [
+          0.0021,
+          -0.0096,
+          -1.0,
+          -0.0005
+        ],
+        [
+          0.0003,
+          -1.0,
+          0.0096,
+          0.0002
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "interior_cockpit",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.2565
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.3347
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_gun_nose",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.9992,
+          -0.0408,
+          2.8623
+        ],
+        [
+          0.0,
+          0.0408,
+          0.9992,
+          -2.1927
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_audio",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -1.0,
+          0.0,
+          -0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          -0.0,
+          2.5721
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          0.2935
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_radar",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          0.9903,
+          -0.1392,
+          -4.428
+        ],
+        [
+          0.0,
+          0.1392,
+          0.9903,
+          -2.3565
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Radar_Helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          1.9371
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.5699
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_avionics_motherboard",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.0158
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3593
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "UI_Helper",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.0158
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0097
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_weapon_gun_nose_fixed_001",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.3032
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4869
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0591
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_gun_nose_fixed_002",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.3037
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4869
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.0591
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_gun_nose_fixed_003",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          0.3032
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4869
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3948
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_weapon_gun_nose_fixed_004",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.3037
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          4.4869
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.3948
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "Landing_Gear_Front",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -2.7483
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.7849
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_lights_ext",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_seat_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_dashboard_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_flight",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_weapon",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          2.1676
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.1687
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_target_selector_pilot",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ]
+    },
+    {
+      "node": "hardpoint_controller_door",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -0.4279
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_scanner",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.7018
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.4603
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_ping",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.9018
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -1.4603
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_01",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_02",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_03",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_04",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_05",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_jump_seat_06",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_controller_light",
+      "type": 2,
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engineer_console",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.625
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -7.428
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engineer_console_access",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          1.625
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -7.428
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engineer_console_sentinel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -2.125
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -7.803
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.6065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_engineer_console_access_sentinel",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -1.625
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          -7.428
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -2.1065
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "hardpoint_cockpit_flair_hang",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.3211
+        ],
+        [
+          -0.0,
+          1.0,
+          0.0,
+          1.3238
+        ],
+        [
+          -0.0,
+          -0.0,
+          1.0,
+          1.0425
+        ]
+      ],
+      "props": {
+        "class": "ItemPort",
+        "detach": "False",
+        "node": "Part"
+      }
+    },
+    {
+      "node": "AEGS_VNG_LandingGears_Front_Doors",
+      "type": 2,
+      "bone_to_world": [
+        [
+          1.0,
+          -0.0,
+          0.0,
+          -0.0
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.5047
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.1256
+        ]
+      ]
+    },
+    {
+      "node": "front_door_left_mount_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          0.8555,
+          -0.0,
+          0.5178,
+          -0.8897
+        ],
+        [
+          0.0793,
+          0.9882,
+          -0.1309,
+          -0.9435
+        ],
+        [
+          -0.5117,
+          0.1531,
+          0.8454,
+          -1.0155
+        ]
+      ]
+    },
+    {
+      "node": "front_door_right_mount_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.8555,
+          0.0,
+          -0.5178,
+          0.8897
+        ],
+        [
+          0.0792,
+          -0.9882,
+          -0.1309,
+          -0.9435
+        ],
+        [
+          -0.5117,
+          -0.1531,
+          0.8454,
+          -1.0155
+        ]
+      ]
+    },
+    {
+      "node": "front_door_right_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0207,
+          -0.0,
+          0.9998,
+          -0.0495
+        ],
+        [
+          -0.0,
+          -1.0,
+          -0.0,
+          -0.0002
+        ],
+        [
+          0.9998,
+          -0.0,
+          0.0207,
+          -1.2351
+        ]
+      ]
+    },
+    {
+      "node": "front_door_left_controller",
+      "type": 2,
+      "bone_to_world": [
+        [
+          -0.0207,
+          0.0,
+          0.9998,
+          -0.0495
+        ],
+        [
+          0.0,
+          1.0,
+          -0.0,
+          0.0002
+        ],
+        [
+          -0.9998,
+          0.0,
+          -0.0207,
+          -0.3439
+        ]
+      ]
+    }
+  ],
+  "loadout": [
+    {
+      "entity": "Door_RN_RoomConnector_Breachable_OpenReverse_IP_Vanguard_Ramp",
+      "port": "hardpoint_door_rear",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/aegs_vanguard_rear_door.cga"
+    },
+    {
+      "entity": "Controller_Flight_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_controller_flight",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/blades/s01/blad_mite_s01_pl01.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_Seat_Pilot",
+      "port": "hardpoint_seat_pilot",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Seats/AEGS/Vanguard/AEGS_Vanguard_SCItem_Cockpit_Seat.cga",
+      "nmc_properties": [
+        {
+          "node": "pilot_chair_mesh",
+          "type": 0,
+          "bone_to_world": [
+            [
+              0.0,
+              1.0,
+              -0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              -0.0,
+              -0.0,
+              0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " copied from VC"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_SeatAccess",
+      "port": "hardpoint_seat_access",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/seats/aegs/vanguard/aegs_vanguard_scitem_seat_access.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+      "port": "hardpoint_dashboard_pilot",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/seats/aegs/vanguard/aegs_vanguard_scitem_dashboard.cga",
+      "children": [
+        {
+          "entity": "Radar_Display_Vanguard",
+          "port": "Radar_Helper",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "H_Dashboard_Projector_HUD_AEGS_Vanguard",
+          "port": "Display_HUD",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_Physical",
+          "port": "screen_centre_screen",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_upper_right",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_bottom_right",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_top_left",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "screen_bottom_left",
+          "parent": "AEGS_Vanguard_SCItem_Dashboard_Pilot",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "Controller_Light",
+      "port": "hardpoint_controller_light",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Door",
+      "port": "hardpoint_controller_door",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_Seat_Bed_Upper",
+      "port": "hardpoint_esc_pod_upper",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_beds_geometry_top.cga",
+      "nmc_properties": [
+        {
+          "node": "mod_room_beds_geometry_upper",
+          "type": 0,
+          "props": {
+            "MapChannel:-2 ": " copied from VC"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_Seat_Bed_Lower",
+      "port": "hardpoint_esc_pod_lower",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_beds_geometry_bottom.cga",
+      "nmc_properties": [
+        {
+          "node": "mod_room_beds_geometry_lower",
+          "type": 0,
+          "props": {
+            "MapChannel:-2 ": " copied from VC"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "VHCL_SelfDestruct_30s",
+      "port": "hardpoint_selfdestruct",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Comms",
+      "port": "hardpoint_controller_comms",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "RADR_WLOP_S02_Chernykh",
+      "port": "hardpoint_radar",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": "Objects/Spaceships/Radar/medium_component/grnp/radr_grnp_s02_pl01.cga"
+    },
+    {
+      "entity": "Controller_Energy",
+      "port": "hardpoint_controller_energy",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "POWR_AMRS_S02_TurboDrive_SCItem",
+      "port": "hardpoint_powerplant_middle",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Power_Plants/medium_component/amrs/powr_amrs_s02_pl03.cga"
+    },
+    {
+      "entity": "HTNK_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_fuel_tank_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "HTNK_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_fuel_tank_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_fuel_intake_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "INTK_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_fuel_intake_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Cooler",
+      "port": "hardpoint_controller_cooler",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "COOL_AEGS_S02_Permafrost_SCItem",
+      "port": "hardpoint_cooler_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Coolers/medium_component/aegs/cool_aegs_s02_pl02.cga"
+    },
+    {
+      "entity": "COOL_AEGS_S02_Permafrost_SCItem",
+      "port": "hardpoint_cooler_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Coolers/medium_component/aegs/cool_aegs_s02_pl02.cga"
+    },
+    {
+      "entity": "QDRV_WETK_S02_Yeager_SCItem",
+      "port": "hardpoint_quantum_drive",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Quantum_drives/medium_component/wetk/qdrv_wetk_s02_pl02.cga",
+      "children": [
+        {
+          "entity": "JDRV_TARS_S02_Excelsior_SCItem",
+          "port": "hardpoint_jump_drive",
+          "parent": "QDRV_WETK_S02_Yeager_SCItem",
+          "geometry": "Objects/Spaceships/Jump_Modules/medium_component/tars/jmod_tars_s02_pl02.cga"
+        }
+      ]
+    },
+    {
+      "entity": "QTNK_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_quantum_fuel_tank",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Shield_AEGS_Vanguard",
+      "port": "hardpoint_controller_shield",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "SHLD_GODI_S02_SecureShield_SCItem",
+      "port": "hardpoint_shield_generator_001",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Shields/medium_component/godi/shld_godi_s02_pl04.cga"
+    },
+    {
+      "entity": "SHLD_GODI_S02_SecureShield_SCItem",
+      "port": "hardpoint_shield_generator_002",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Shields/medium_component/godi/shld_godi_s02_pl04.cga"
+    },
+    {
+      "entity": "ARMR_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_armour",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Main_01",
+      "port": "hardpoint_engine_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Thrusters/AEGS/AEGS_Vanguard_Thrusters/AEGS_Vanguard_Thruster_Main_01.cga",
+      "nmc_properties": [
+        {
+          "node": "flap_lower",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.6285
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        },
+        {
+          "node": "flap_upper",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.6212
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Main_01",
+      "port": "hardpoint_engine_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Thrusters/AEGS/AEGS_Vanguard_Thrusters/AEGS_Vanguard_Thruster_Main_01.cga",
+      "nmc_properties": [
+        {
+          "node": "flap_lower",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.6285
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        },
+        {
+          "node": "flap_upper",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.6212
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Main_02",
+      "port": "hardpoint_engine_middle_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Thrusters/AEGS/AEGS_Vanguard_Thrusters/AEGS_Vanguard_Thruster_Main_01.cga",
+      "nmc_properties": [
+        {
+          "node": "flap_lower",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.6285
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        },
+        {
+          "node": "flap_upper",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.6212
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Main_02",
+      "port": "hardpoint_engine_middle_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Thrusters/AEGS/AEGS_Vanguard_Thrusters/AEGS_Vanguard_Thruster_Main_01.cga",
+      "nmc_properties": [
+        {
+          "node": "flap_lower",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.6285
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        },
+        {
+          "node": "flap_upper",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.7368
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              0.6212
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-",
+            "MapChannel:1 ": " Texture"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Retro",
+      "port": "hardpoint_thruster_retro_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/thrusters/aegs/aegs_vanguard_thrusters/aegs_vanguard_thruster_retro.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Retro",
+      "port": "hardpoint_thruster_retro_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/thrusters/aegs/aegs_vanguard_thrusters/aegs_vanguard_thruster_retro.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_top_FL",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_top_FR",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_bottom_FL",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_bottom_FR",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_top_RL",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_top_RR",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_side_RL",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_side_RR",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_bottom_RL",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Thruster_Mav_Joint",
+      "port": "hardpoint_thruster_bottom_RR",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects\\Spaceships\\Thrusters\\AEGS\\AEGS_Retaliator_Thrusters\\AEGS_Retaliator_Thruster_Mav_Fixed.cga"
+    },
+    {
+      "entity": "Default_LandingSystem",
+      "port": "landingpad_helper",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Weapon",
+      "port": "hardpoint_controller_weapon",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Mount_Gimbal_S5",
+      "port": "hardpoint_weapon_gun_nose",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/generic/mount_gimbal_s5.cga",
+      "children": [
+        {
+          "entity": "ESPR_BallisticCannon_S5",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S5",
+          "geometry": "Objects/Spaceships/Weapons/ESPR/espr_bal_can_s4-6_bas/espr_bal_can_s5_bas.cgf",
+          "nmc_properties": [
+            {
+              "node": "espr_bal_can_s4-6_bas\\espr_bal_can_s5_bas",
+              "type": 2,
+              "props": {
+                "disableHelperLabel ": " True"
+              }
+            }
+          ],
+          "children": [
+            {
+              "entity": "ESPR_BallisticCannon_Barrel_S5",
+              "port": "BAR1",
+              "parent": "ESPR_BallisticCannon_S5",
+              "geometry": "Objects/Spaceships/Weapons/ESPR/espr_bal_can_s4-6_bar/espr_bal_can_s5_bar_1.cga",
+              "nmc_properties": [
+                {
+                  "node": "espr_bal_can_s4-6_bar\\espr_bal_can_s5_bar_1",
+                  "type": 2,
+                  "props": {
+                    "AnimName ": " recoil",
+                    "AnimRange ": " 0-10",
+                    "AnimRoot ": " 0"
+                  }
+                }
+              ]
+            },
+            {
+              "entity": "ESPR_BallisticCannon_FiringMechanism_S5",
+              "port": "MEC",
+              "parent": "ESPR_BallisticCannon_S5",
+              "geometry": "Objects/Spaceships/Weapons/ESPR/espr_bal_can_s4-6_mec/espr_bal_can_s5_mec_1.cga",
+              "nmc_properties": [
+                {
+                  "node": "espr_bal_can_s4-6_mec\\espr_bal_can_s5_mec_1",
+                  "type": 2,
+                  "props": {
+                    "AnimName ": " recoil",
+                    "AnimRange ": " 0-10",
+                    "AnimRoot ": " 0"
+                  }
+                }
+              ]
+            },
+            {
+              "entity": "ESPR_BallisticCannon_PowerArray_S5",
+              "port": "POW",
+              "parent": "ESPR_BallisticCannon_S5",
+              "geometry": "Objects/Spaceships/Weapons/ESPR/espr_bal_can_s4-6_pow/espr_bal_can_s5_pow_1.cgf",
+              "nmc_properties": [
+                {
+                  "node": "espr_bal_can_s4-6_pow\\espr_bal_can_s5_pow_1",
+                  "type": 2,
+                  "props": {
+                    "disableHelperLabel ": " True"
+                  }
+                }
+              ]
+            },
+            {
+              "entity": "ESPR_BallisticCannon_Ventilation_S5",
+              "port": "VEN",
+              "parent": "ESPR_BallisticCannon_S5",
+              "geometry": "Objects/Spaceships/Weapons/ESPR/espr_bal_can_s4-6_bas/espr_bal_can_s5_ven_1.cgf",
+              "nmc_properties": [
+                {
+                  "node": "espr_bal_can_s4-6_bas\\espr_bal_can_s5_ven_1",
+                  "type": 2,
+                  "props": {
+                    "disableHelperLabel ": " True"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S2_VNG_S2",
+      "port": "hardpoint_weapon_gun_nose_fixed_001",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/Universal/Universal_Gimbal_Mount_0_offset_hp.cga",
+      "children": [
+        {
+          "entity": "BEHR_BallisticCannon_VNG_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2_VNG_S2",
+          "geometry": "objects/spaceships/weapons_bespoke/vanguard/behr_bal_can_s2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S2_VNG_S2",
+      "port": "hardpoint_weapon_gun_nose_fixed_002",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/Universal/Universal_Gimbal_Mount_0_offset_hp.cga",
+      "children": [
+        {
+          "entity": "BEHR_BallisticCannon_VNG_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2_VNG_S2",
+          "geometry": "objects/spaceships/weapons_bespoke/vanguard/behr_bal_can_s2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S2_VNG_S2",
+      "port": "hardpoint_weapon_gun_nose_fixed_003",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/Universal/Universal_Gimbal_Mount_0_offset_hp.cga",
+      "children": [
+        {
+          "entity": "BEHR_BallisticCannon_VNG_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2_VNG_S2",
+          "geometry": "objects/spaceships/weapons_bespoke/vanguard/behr_bal_can_s2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "Mount_Gimbal_S2_VNG_S2",
+      "port": "hardpoint_weapon_gun_nose_fixed_004",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/Weapon_Mounts/Gimbal/Universal/Universal_Gimbal_Mount_0_offset_hp.cga",
+      "children": [
+        {
+          "entity": "BEHR_BallisticCannon_VNG_S2",
+          "port": "hardpoint_class_2",
+          "parent": "Mount_Gimbal_S2_VNG_S2",
+          "geometry": "objects/spaceships/weapons_bespoke/vanguard/behr_bal_can_s2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_SCItem_SeatAccess_Turret",
+      "port": "hardpoint_turret_seataccess",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/seats/aegs/vanguard/aegs_vanguard_scitem_turret_seataccess.cga"
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+      "port": "hardpoint_turret",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/seats/aegs/vanguard/aegs_vanguard_scitem_turret.cga",
+      "nmc_properties": [
+        {
+          "node": "turret_right_arm",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              0.9763,
+              0.2163,
+              -0.0
+            ],
+            [
+              0.0,
+              -0.2163,
+              0.9763,
+              -0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "arm_comp_right",
+          "type": 0,
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "handle_right",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              -0.0,
+              0.0,
+              -0.0115
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.1131
+            ],
+            [
+              -0.0,
+              -0.0,
+              1.0,
+              -0.0269
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "turret_left_arm",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -0.0
+            ],
+            [
+              -0.0,
+              0.9763,
+              0.2163,
+              0.0
+            ],
+            [
+              -0.0,
+              -0.2163,
+              0.9763,
+              -0.0
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "arem_comp_left",
+          "type": 0,
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "handle_left",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0115
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.1131
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              -0.0269
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "aegs_turret_seat",
+          "type": 0,
+          "bone_to_world": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              0.0
+            ],
+            [
+              -0.0,
+              1.0,
+              0.0,
+              -0.0154
+            ],
+            [
+              0.0,
+              -0.0,
+              1.0,
+              0.0011
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        },
+        {
+          "node": "aegs_vngr_turret_arm2",
+          "type": 2,
+          "bone_to_world": [
+            [
+              -1.0,
+              -0.0,
+              -0.0,
+              0.1264
+            ],
+            [
+              -0.0,
+              0.0,
+              1.0,
+              0.1703
+            ],
+            [
+              -0.0,
+              1.0,
+              -0.0,
+              -0.0478
+            ]
+          ],
+          "props": {
+            "MapChannel:-2 ": " -none-"
+          }
+        }
+      ],
+      "children": [
+        {
+          "entity": "RPOD_S3_FSKI_9x_S3",
+          "port": "turret_left",
+          "parent": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Rocket_Pods/FSKI/RPOD_S3_FSKI_9x_S3.cga"
+        },
+        {
+          "entity": "RPOD_S3_FSKI_9x_S3",
+          "port": "turret_right",
+          "parent": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+          "geometry": "Objects/Spaceships/Rocket_Pods/FSKI/RPOD_S3_FSKI_9x_S3.cga"
+        },
+        {
+          "entity": "Radar_Display_Screen_Template",
+          "port": "Screen_Radar",
+          "parent": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Right_Top",
+          "parent": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+          "geometry": ""
+        },
+        {
+          "entity": "Vehicle_Screen_MFD",
+          "port": "Screen_Left_Top",
+          "parent": "AEGS_Vanguard_Harbinger_SCItem_Turret",
+          "geometry": ""
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_Baydoor",
+      "port": "hardpoint_baydoor",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/vanguard_bottom_baydoor.cga",
+      "nmc_properties": [
+        {
+          "node": "vanguard_bottom_baydoor",
+          "type": 0,
+          "props": {
+            "class": "AnimatedJoint",
+            "detach": "True",
+            "node": "Part"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S04_AEGS_Vanguard",
+      "port": "hardpoint_weapon_missilerack_left_inner",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/aegs_vanguard_missile_mount_left.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_03_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_IR_FSKI_Ignite",
+          "port": "missile_04_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Ignite_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_weapon_missilerack_left_rear",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+        {
+          "entity": "MISL_S03_CS_FSKI_Arrester",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S04_BEHR_Dual_S03",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+        },
+        {
+          "entity": "MISL_S03_CS_FSKI_Arrester",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S04_BEHR_Dual_S03",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S04_AEGS_Vanguard",
+      "port": "hardpoint_weapon_missilerack_right_inner",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/aegs_vanguard_missile_mount_right.cga",
+      "children": [
+        {
+          "entity": "MISL_S02_EM_TALN_Dominator",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/TALN_Dominator_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_EM_TALN_Dominator",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/TALN_Dominator_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_EM_TALN_Dominator",
+          "port": "missile_03_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/TALN_Dominator_S2.cga"
+        },
+        {
+          "entity": "MISL_S02_EM_TALN_Dominator",
+          "port": "missile_04_attach",
+          "parent": "MRCK_S04_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/TALN_Dominator_S2.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S04_BEHR_Dual_S03",
+      "port": "hardpoint_weapon_missilerack_right_rear",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/missile_racks/behr/mrck_s04_behr_dual_s03.cga",
+      "children": [
+        {
+          "entity": "MISL_S03_CS_FSKI_Arrester",
+          "port": "missile_01_attach",
+          "parent": "MRCK_S04_BEHR_Dual_S03",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+        },
+        {
+          "entity": "MISL_S03_CS_FSKI_Arrester",
+          "port": "missile_02_attach",
+          "parent": "MRCK_S04_BEHR_Dual_S03",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/FSKI/FSKI_Arrester_S3.cga"
+        }
+      ]
+    },
+    {
+      "entity": "MRCK_S05_AEGS_Vanguard",
+      "port": "hardpoint_weapon_missilelauncher",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_harbinger_torpedo_room.cga",
+      "children": [
+        {
+          "entity": "MISL_S05_CS_TALN_Stalker",
+          "port": "torpedo_tray_01_attach_node",
+          "parent": "MRCK_S05_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/Stalker/TALN_Stalker_V.cgf",
+          "nmc_properties": [
+            {
+              "node": "TALN_Stalker_V_Body",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0025
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.0333
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:1 ": " map1"
+              }
+            }
+          ]
+        },
+        {
+          "entity": "MISL_S05_CS_TALN_Stalker",
+          "port": "torpedo_tray_02_attach_node",
+          "parent": "MRCK_S05_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/Stalker/TALN_Stalker_V.cgf",
+          "nmc_properties": [
+            {
+              "node": "TALN_Stalker_V_Body",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0025
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.0333
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:1 ": " map1"
+              }
+            }
+          ]
+        },
+        {
+          "entity": "MISL_S05_CS_TALN_Stalker",
+          "port": "torpedo_tray_03_attach_node",
+          "parent": "MRCK_S05_AEGS_Vanguard",
+          "geometry": "Objects/Spaceships/Ammo/Missiles/TALN/Stalker/TALN_Stalker_V.cgf",
+          "nmc_properties": [
+            {
+              "node": "TALN_Stalker_V_Body",
+              "type": 0,
+              "bone_to_world": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  -0.0025
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.0333
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.0
+                ]
+              ],
+              "props": {
+                "MapChannel:1 ": " map1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "entity": "AEGS_Eclipse_CML_Flare",
+      "port": "hardpoint_countermeasure_launcher_left",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/weapons/countermeasure_launcher/aegs/eclipse/eclipse_default_cml.cgf"
+    },
+    {
+      "entity": "AEGS_Eclipse_CML_Chaff",
+      "port": "hardpoint_countermeasure_launcher_right",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/weapons/countermeasure_launcher/aegs/eclipse/eclipse_default_cml.cgf"
+    },
+    {
+      "entity": "Weapon_Rack_AEGS_Vanguard",
+      "port": "hardpoint_weapon_locker_harbinger",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_locker_guns.cga",
+      "nmc_properties": [
+        {
+          "node": "locker_door_gun",
+          "type": 0,
+          "props": {
+            "MapChannel:-2 ": " copied from VC"
+          }
+        }
+      ]
+    },
+    {
+      "entity": "Controller_Missile",
+      "port": "hardpoint_controller_missile",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_CapacitorAssignment",
+      "port": "hardpoint_controller_capacitor_assignment",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "invisible": true,
+      "geometry": ""
+    },
+    {
+      "entity": "Controller_Fuel",
+      "port": "hardpoint_controller_fuel",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": ""
+    },
+    {
+      "entity": "DockingTube_Fuel_Ports_AEGS_Vanguard_Harbinger",
+      "port": "hardpoint_fuel_port",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": ""
+    },
+    {
+      "entity": "AEGS_Vanguard_Harbinger_ShipATCDataManager",
+      "port": "hardpoint_air_traffic_controller",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": ""
+    },
+    {
+      "entity": "RELAY_2slot_slim",
+      "port": "hardpoint_relay",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse_s01.cga"
+    },
+    {
+      "entity": "RELAY_2slot_slim",
+      "port": "hardpoint_relay_2",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/relay/demo/relay_demo_2fuse_s01.cga"
+    },
+    {
+      "entity": "LFSP_TYDT_S01_ComfortAir",
+      "port": "hardpoint_lifesupport",
+      "parent": "EntityClassDefinition.AEGS_Vanguard_Harbinger",
+      "geometry": "Objects/Spaceships/life_support/small_component/tydt/life_tydt_s01.cga"
+    }
+  ],
+  "interiors": [
+    {
+      "container": "base_ext_lg",
+      "meshes": [],
+      "lights": 51
+    },
+    {
+      "container": "interior",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_turret_shaft.cgf",
+          "pos": [
+            0.0,
+            -8.930000305175781,
+            0.18000000715255737
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_bar_long.cgf",
+          "pos": [
+            0.0,
+            -9.699999809265137,
+            2.549999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_bar_long.cgf",
+          "pos": [
+            0.0,
+            -8.050000190734863,
+            2.549999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_ramp_surround.cgf",
+          "pos": [
+            0.0,
+            -15.680000305175781,
+            -2.2300000190734863
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bulkhead_coolers.cgf",
+          "pos": [
+            0.0,
+            -3.059999942779541,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_ceiling_duct.cgf",
+          "pos": [
+            0.0,
+            -4.559999942779541,
+            1.1799999475479126
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_floor_stairs.cgf",
+          "pos": [
+            0.0,
+            -5.179999828338623,
+            -1.3200000524520874
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_wall_powershield.cgf",
+          "pos": [
+            -1.75,
+            -5.179999828338623,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_ceiling.cgf",
+          "pos": [
+            0.0,
+            -5.179999828338623,
+            1.1799999475479126
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_floor_small.cgf",
+          "pos": [
+            0.0,
+            -3.059999942779541,
+            -1.190000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_wall_adjoining.cgf",
+          "pos": [
+            0.0,
+            -6.179999828338623,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bulkhead_mid.cgf",
+          "pos": [
+            0.0,
+            -4.059999942779541,
+            -1.190000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_wall_powershield.cgf",
+          "pos": [
+            1.75,
+            -5.179999828338623,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_2.cgf",
+          "pos": [
+            0.0,
+            -6.329999923706055,
+            0.30000001192092896
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bulkhead_large_a.cgf",
+          "pos": [
+            0.0,
+            -6.179999828338623,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bulkhead_large_b.cgf",
+          "pos": [
+            0.0,
+            -4.179999828338623,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_2.cgf",
+          "pos": [
+            0.0,
+            -2.069999933242798,
+            1.0700000524520874
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_hoplite_monitor.cgf",
+          "pos": [
+            -1.0700000524520874,
+            -18.979999542236328,
+            0.3499999940395355
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_bulkhead.cgf",
+          "pos": [
+            0.0,
+            -2.059999942779541,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_emissives.cgf",
+          "pos": [
+            0.0,
+            -0.6800000071525574,
+            -0.8199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_dashboard.cgf",
+          "pos": [
+            0.0,
+            0.9399999976158142,
+            -0.3199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_basin.cgf",
+          "pos": [
+            0.0,
+            -0.5600000023841858,
+            -0.9399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_canopy.cgf",
+          "pos": [
+            0.0,
+            -0.18000000715255737,
+            0.4300000071525574
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_wall_right.cgf",
+          "pos": [
+            0.5,
+            -0.6800000071525574,
+            -0.3199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_wall_left.cgf",
+          "pos": [
+            -0.5,
+            -0.6800000071525574,
+            -0.3199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/cockpit/cockpit_floor.cgf",
+          "pos": [
+            0.0,
+            -0.6800000071525574,
+            -0.8199999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_ceiling.cgf",
+          "pos": [
+            0.0,
+            -16.559999465942383,
+            0.5600000023841858
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_bulkheads.cgf",
+          "pos": [
+            0.0,
+            -16.559999465942383,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_wall_left.cgf",
+          "pos": [
+            -1.6299999952316284,
+            -15.680000305175781,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_adjoining_wall.cgf",
+          "pos": [
+            0.0,
+            -13.8100004196167,
+            -1.0700000524520874
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_2.cgf",
+          "pos": [
+            0.0,
+            -13.770000457763672,
+            0.3400000035762787
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_wall_right.cgf",
+          "pos": [
+            1.6299999952316284,
+            -15.680000305175781,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_component_wall.cgf",
+          "pos": [
+            0.0,
+            -19.18000030517578,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/kegr_fire_extinguisher_cabinet_flush_1_c.cgf",
+          "pos": [
+            -1.2699999809265137,
+            -6.389999866485596,
+            -0.20999999344348907
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_shield.cga",
+          "pos": [
+            1.6299999952316284,
+            -5.179999828338623,
+            0.3100000023841858
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_power.cga",
+          "pos": [
+            -1.6299999952316284,
+            -5.179999828338623,
+            -0.5699999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_power.cga",
+          "pos": [
+            1.6299999952316284,
+            -5.179999828338623,
+            -0.5699999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_cooler.cga",
+          "pos": [
+            0.5,
+            -3.059999942779541,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_cooler.cga",
+          "pos": [
+            -0.5,
+            -3.059999942779541,
+            -0.07000000029802322
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_stairs.cga",
+          "pos": [
+            0.0,
+            -5.679999828338623,
+            -1.690000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_power.cga",
+          "pos": [
+            -1.75,
+            -5.179999828338623,
+            -0.5699999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "objects/spaceships/ships/aegs/vanguard/Vanguard_Interior_Warden"
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_lifesupport.cga",
+          "pos": [
+            -1.399999976158142,
+            -3.9700000286102295,
+            0.05999999865889549
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_door_quantum.cga",
+          "pos": [
+            0.0,
+            -19.309999465942383,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/rear_room/rear_room_bay_quantum.cga",
+          "pos": [
+            0.0,
+            -20.18000030517578,
+            -0.4399999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects\\Spaceships\\Ships\\AEGS\\hammerhead\\interior\\ui\\ui_screen_16x9_a.cgf",
+          "pos": [
+            -1.0,
+            -18.889999389648438,
+            0.3100000023841858
+          ],
+          "scale": [
+            0.3140000104904175,
+            0.3140000104904175,
+            0.3140000104904175
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_power.cga",
+          "pos": [
+            1.75,
+            -5.179999828338623,
+            -0.5699999928474426
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "objects/spaceships/ships/aegs/vanguard/Vanguard_Interior_Warden"
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_shield.cga",
+          "pos": [
+            1.75,
+            -5.179999828338623,
+            0.3100000023841858
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "objects/spaceships/ships/aegs/vanguard/Vanguard_Interior_Warden"
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_cooler.cga",
+          "pos": [
+            -0.8799999952316284,
+            -3.059999942779541,
+            -0.1899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_shield.cga",
+          "pos": [
+            -1.75,
+            -5.179999828338623,
+            0.3100000023841858
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "objects/spaceships/ships/aegs/vanguard/Vanguard_Interior_Warden"
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_cooler.cga",
+          "pos": [
+            0.8799999952316284,
+            -3.059999942779541,
+            -0.1899999976158142
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_bay_radar.cga",
+          "pos": [
+            0.0,
+            -5.679999828338623,
+            -2.690000057220459
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/component_room/comp_room_door_shield.cga",
+          "pos": [
+            -1.6299999952316284,
+            -5.179999828338623,
+            0.3100000023841858
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects/fps_weapons/gadgets/kegr/fire_extinguisher/fire_extinguisher_cabinet_nozzle_only_metric.cgf",
+          "pos": [
+            -1.2699999809265137,
+            -6.389999866485596,
+            -0.20999999344348907
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 30
+    },
+    {
+      "container": "middle_harbinger",
+      "meshes": [
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_doorframe_double_internals.cgf",
+          "pos": [
+            0.0,
+            0.3799999952316284,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_doorframe_single_exterior.cgf",
+          "pos": [
+            0.0,
+            7.25,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_doorframe_double_exterior.cgf",
+          "pos": [
+            0.0,
+            0.0,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_ceiling_small.cgf",
+          "pos": [
+            0.0,
+            2.130000114440918,
+            0.6299999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_doorframe_double.cgf",
+          "pos": [
+            0.0,
+            0.8799999952316284,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_bulkhead_mid.cgf",
+          "pos": [
+            0.0,
+            3.380000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_harbinger_wall.cgf",
+          "pos": [
+            1.6299999952316284,
+            5.880000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_floor_large.cgf",
+          "pos": [
+            0.0,
+            5.0,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_galley_storage_container.cgf",
+          "pos": [
+            1.7400000095367432,
+            2.8399999141693115,
+            -0.28999999165534973
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_shower_cubicle.cgf",
+          "pos": [
+            -1.8799999952316284,
+            2.25,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_bulkhead_b.cgf",
+          "pos": [
+            1.5,
+            1.0,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            -1.2899999618530273,
+            4.989999771118164,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            0.0,
+            6.360000133514404,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_wall_kitchen.cgf",
+          "pos": [
+            1.5,
+            2.75,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_galley_food_dispenser.cgf",
+          "pos": [
+            1.7400000095367432,
+            2.0299999713897705,
+            -0.28999999165534973
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            1.2899999618530273,
+            4.989999771118164,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            0.800000011920929,
+            2.059999942779541,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_security_camera.cgf",
+          "pos": [
+            -0.8799999952316284,
+            1.090000033378601,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_bar_short.cgf",
+          "pos": [
+            1.7999999523162842,
+            2.380000114440918,
+            -0.33000001311302185
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_bulkhead_b.cgf",
+          "pos": [
+            -1.5,
+            3.130000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_wall_beds.cgf",
+          "pos": [
+            -1.6299999952316284,
+            5.880000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_doorframe_single.cgf",
+          "pos": [
+            0.0,
+            6.880000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_galley_storage_container.cgf",
+          "pos": [
+            1.7400000095367432,
+            2.4800000190734863,
+            -0.28999999165534973
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_hoplite_monitor.cgf",
+          "pos": [
+            1.600000023841858,
+            3.859999895095825,
+            0.3700000047683716
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_wall_bathroom.cgf",
+          "pos": [
+            -1.5,
+            1.3799999952316284,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            0.0,
+            1.340000033378601,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_floor_small.cgf",
+          "pos": [
+            0.0,
+            2.130000114440918,
+            -1.75
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_bulkhead_a.cgf",
+          "pos": [
+            -1.6299999952316284,
+            6.130000114440918,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_security_camera.cgf",
+          "pos": [
+            0.6200000047683716,
+            6.559999942779541,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_bulkhead_front.cgf",
+          "pos": [
+            0.0,
+            6.5,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_ceiling_large.cgf",
+          "pos": [
+            0.0,
+            5.0,
+            0.6299999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_ceiling_1.cgf",
+          "pos": [
+            -0.8299999833106995,
+            2.059999942779541,
+            0.699999988079071
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/hammerhead/interior/ui/ui_screen_16x9_a.cgf",
+          "pos": [
+            1.5099999904632568,
+            3.9000000953674316,
+            0.3400000035762787
+          ],
+          "scale": [
+            0.30000001192092896,
+            0.30000001192092896,
+            0.30000001192092896
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_light_bathroom.cgf",
+          "pos": [
+            -2.1700000762939453,
+            3.299999952316284,
+            0.4000000059604645
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_harbinger_torpedo_room_geometry.cgf",
+          "pos": [
+            2.380000114440918,
+            4.25,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/avionics/small_component/behr/comp_behr_s01_pl01.cga",
+          "pos": [
+            1.5800000429153442,
+            4.090000152587891,
+            -1.3600000143051147
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_door_single.cga",
+          "pos": [
+            0.0,
+            7.130000114440918,
+            -1.6299999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "Objects\\Spaceships\\Ships\\AEGS\\hammerhead\\interior\\ui\\ui_screen_16x9_a.cgf",
+          "pos": [
+            1.5,
+            3.9000000953674316,
+            0.3400000035762787
+          ],
+          "scale": [
+            0.3140000104904175,
+            0.3140000104904175,
+            0.3140000104904175
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_harbinger_avionics_door.cga",
+          "pos": [
+            1.1299999952316284,
+            4.130000114440918,
+            -1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_toilet.cga",
+          "pos": [
+            -2.25,
+            1.75,
+            -1.3799999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_door_shower.cga",
+          "pos": [
+            -1.5,
+            2.25,
+            -0.6299999952316284
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "Objects/Spaceships/Ships/AEGS/Vanguard/vanguard_interior_harbinger"
+        },
+        {
+          "cgf": "objects/spaceships/ships/aegs/vanguard/interior/modular_room/mod_room_door_double.cga",
+          "pos": [
+            0.0,
+            0.3799999952316284,
+            -0.5
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "material": "Objects/Spaceships/Ships/AEGS/Vanguard/vanguard_interior_harbinger"
+        },
+        {
+          "cgf": "Objects/Spaceships/Ships/AEGS/Vanguard/Interior/modular_room/mod_room_locker_clothes.cga",
+          "pos": [
+            -1.5,
+            1.3799999952316284,
+            -1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "lights": 25
+    }
+  ]
+}

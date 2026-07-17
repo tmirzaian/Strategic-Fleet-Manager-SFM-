@@ -34,14 +34,33 @@ describe('Logistics persistence (Alpha 2.3, schemaVersion 4)', () => {
   })
 
   it('installed loadout changes survive a genuine store reload', async () => {
+    // MWO-001 (Task 2): 'ghost' now resolves through the real deep-imported
+    // Ghost Mk II structure, whose Power Plant port is labeled "Power
+    // Plant" (S1), not the old seed fixture's "Power 1" — and, being a
+    // genuinely new port from reconciliation's perspective, it starts with
+    // no target set (status OK, nothing required) rather than the old seed
+    // fixture's baked-in "wants Slipstream" upgrade scenario. Establishing
+    // that same want explicitly first (editing ghost-stealth in place) is
+    // what lets installComponent's Quick Update fulfill it, exactly like
+    // the pre-promotion seed data used to provide for free.
     const { useFleetStore } = await import('../useFleetStore')
-    useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power 1', 'ghost-stealth')
+    const save = useFleetStore.getState().saveMissionConfiguration({
+      shipId: 'ghost',
+      name: 'Stealth Build',
+      startingState: 'EXISTING',
+      existingBuildId: 'ghost-stealth',
+      targetOverrides: { 'Power Plant': 'Slipstream' },
+      setActive: true,
+    })
+    expect(save.success).toBe(true)
+    const installResult = useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant', 'ghost-stealth')
+    expect(installResult.matched).toBe(true)
 
     const { vi } = await import('vitest')
     vi.resetModules()
     const { useFleetStore: reloadedStore } = await import('../useFleetStore')
 
-    const entry = reloadedStore.getState().installedLoadouts.find((e) => e.shipId === 'ghost' && e.slotLabel === 'Power 1')
+    const entry = reloadedStore.getState().installedLoadouts.find((e) => e.shipId === 'ghost' && e.slotLabel === 'Power Plant')
     expect(entry?.installedItem).toBe('Slipstream')
   })
 

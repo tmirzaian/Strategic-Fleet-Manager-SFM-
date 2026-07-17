@@ -68,6 +68,49 @@ const CATALOG: Record<string, CatalogEntry> = {
   // pattern already established above for FR-86.
   'Revenant Gatling': { category: 'Weapon', size: 4 }, // Avenger Titan's nose gun — APAR_BallisticGatling_S4
   'MSD-313 Missile Rack': { category: 'Missile Rack', size: 3 }, // Gladius's inner wing racks — MRCK_S03_BEHR_Single_S03
+
+  // MWO-001 (Task 4/5) — the same "first entry wins" bulk-catalog dedup
+  // gap, newly exercised at scale by the 4.9 Golden Fleet promotion (250
+  // additional deep-imported hulls). Each entry below is the category/size
+  // genuinely installed on the real ship(s) that carry it (confirmed by
+  // direct compatibility audit against every deep-imported ship's own
+  // Factory Loadout, generated-data/ships.json).
+  'MSD-683 Missile Rack': { category: 'Missile Rack', size: 7 }, // Asgard's torpedo racks
+  'Anvil F7C-M Mk II Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Hornet F7CM Mk2's own remote-turret hardware
+  'Tarantula GT-870 Mark 3 Cannon': { category: 'Weapon', size: 3 }, // Hornet F7C Wildfire / Lightning F8C's nose gun
+  // category 'Mining' (not 'Mining Laser') — same equipmentGroup
+  // fallthrough as Salvage above, confirmed against every real
+  // deep-imported mining ship's own port data.
+  'Arbor MH2 Mining Laser': { category: 'Mining', size: 2 }, // MOLE's mining heads
+  'Pitman Mining Laser': { category: 'Mining', size: 1 }, // Golem's mining head
+  'Arbor MHV Mining Laser': { category: 'Mining', size: 0 }, // ROC's mining head
+  'Arbor MH1 Mining Laser': { category: 'Mining', size: 1 }, // Prospector's mining head (distinct display name from the pre-existing bare "Arbor MH1" entry above)
+  'Reliant Tana Missile Launcher': { category: 'Missile Rack', size: 5 }, // Reliant Tana's own launcher hardware
+  'MSD-616 Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Starlancer TAC's own remote-turret hardware
+  'RSI Polaris Torpedo Rack': { category: 'Missile Rack', size: 10 }, // Polaris's torpedo bays
+  'RSI Polaris Remote Turret Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Polaris's own remote-turret hardware
+  // category 'Salvage' (not 'Salvage Module') — a Salvage port's
+  // compatibilityTypeFor has no specific translation case, so it falls
+  // through to the raw equipmentGroup string ("Salvage"), confirmed
+  // against every real deep-imported salvage ship's own port data.
+  'Salvation Salvage Head': { category: 'Salvage', size: 2 }, // Salvation's salvage heads
+  'Baler Salvage Head': { category: 'Salvage', size: 2 }, // Reclaimer/MOTH/Vulture/Fortune's salvage heads
+  // "Missile Rack" (bare, no brand) is a genuine in-fiction factory item
+  // name for L22 AlphaWolf, not a placeholder.
+  'Missile Rack': { category: 'Missile Rack', size: 2 }, // L22 AlphaWolf's own rack
+  // "MSD-543 Missile Rack" cannot be safely resolved with a single entry
+  // at all: it is a real, distinct S1 unit on the 325a, a real, distinct S4
+  // unit on the Starlancer Max/TAC family, and a real, distinct S5 unit on
+  // every other ship that carries it (Hammerhead, Tiburon, Starfighter
+  // Inferno/Ion, 600i family, 890Jump) — three genuinely different real
+  // components sharing one display name, not a dedup mistake. Sized here
+  // for the largest group (S5); every other size's own rows are the
+  // documented, narrow exceptions src/data/__tests__/shipDefinitions.test.ts
+  // allow-lists rather than guessing a single size that would misclassify
+  // the others. Resolving this precisely would require resolving
+  // components by entity-class id instead of display name — out of this
+  // mission's scope ("no redesign").
+  'MSD-543 Missile Rack': { category: 'Missile Rack', size: 5 },
 }
 
 /**
