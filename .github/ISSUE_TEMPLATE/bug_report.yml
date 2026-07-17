@@ -1,0 +1,111 @@
+name: Bug Report
+description: Report something that isn't working correctly in Strategic Fleet Manager
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out as much
+        of this form as you can — it helps us reproduce and fix the issue
+        faster.
+
+  - type: input
+    id: sfm-version
+    attributes:
+      label: SFM version
+      description: The Strategic Fleet Manager version or commit you're running (see the sidebar footer or Captain's Log).
+      placeholder: e.g. Beta 1.0
+    validations:
+      required: true
+
+  - type: input
+    id: sc-version
+    attributes:
+      label: Certified Star Citizen version
+      description: The Star Citizen version Captain's Log reports SFM is certified against.
+      placeholder: e.g. 4.9.186.42610
+    validations:
+      required: false
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      placeholder: e.g. Chrome 128
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do, in order?
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop images here if you have them.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: persists-after-refresh
+    attributes:
+      label: Does the issue persist after refreshing the page?
+      options:
+        - "Yes, it happens again after refresh"
+        - "No, refreshing fixed it"
+        - "Haven't tried refreshing"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ship-source
+    attributes:
+      label: Was the affected ship imported/Golden Fleet data, or manually added?
+      options:
+        - "A standard Golden Fleet ship (Add Ship)"
+        - "Manually added / edited"
+        - "Not applicable to this bug"
+        - "Not sure"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: privacy-confirmation
+    attributes:
+      label: Privacy check
+      description: Please double-check any screenshots or logs before submitting.
+      options:
+        - label: I have checked that this report does not unintentionally include private fleet, inventory, or other personal information I don't want public.
+          required: true

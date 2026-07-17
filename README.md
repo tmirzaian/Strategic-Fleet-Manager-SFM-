@@ -1,129 +1,121 @@
 # Strategic Fleet Manager
 
-A local-first prototype for Star Citizen fleet and loadout management.
-Sprint 1.2 polishes the working prototype from Founder QA and adds real ship
-imagery. Still not production software.
+**Status: Beta 1.0** — Certified for Star Citizen **LIVE 4.9.186.42610**.
+Strategic Fleet Manager is Beta software. Core fleet-management workflows are
+functional and certified against real Star Citizen data, but the project is
+still under active development and has not yet reached a stable 1.0 release.
 
-## Install
+Strategic Fleet Manager (SFM) is a local-first companion app for Star
+Citizen pilots who manage more than a couple of ships. It tracks your fleet,
+their loadouts, and your component inventory, and tells you what's missing,
+what's mismatched, and what to do next — instead of leaving you to maintain
+a spreadsheet by hand.
+
+<!-- README hero image placeholder — see docs/images/README.md for the
+     expected asset. Rendered once a hero banner is commissioned. -->
+<p align="center">
+  <img src="docs/images/hero.png" alt="Strategic Fleet Manager hero banner (placeholder — asset pending)" width="100%" />
+</p>
+
+## Current Capabilities
+
+- Fleet registry and prioritization
+- Factory and custom loadout management
+- Component inventory tracking
+- Installed, target, and missing-component comparison
+- Multiple ship roles and builds
+- Fleet readiness reporting
+- Quick Update workflow
+- Golden Fleet data generated from Star Citizen LIVE data
+- Commander-maintained ship imagery
+- Local-first browser persistence
+
+## Screenshots
+
+<!-- Screenshot gallery placeholders — see docs/images/screenshots/README.md
+     for the expected set. Populated once real captures are available. -->
+| Fleet Dashboard | Ship Detail | Mission Control |
+|---|---|---|
+| ![Fleet Dashboard (placeholder)](docs/images/screenshots/fleet-dashboard.png) | ![Ship Detail (placeholder)](docs/images/screenshots/ship-detail.png) | ![Mission Control (placeholder)](docs/images/screenshots/mission-control.png) |
+
+## Supported Star Citizen Version
+
+Strategic Fleet Manager's Golden Fleet ship and component data is certified
+against **Star Citizen LIVE 4.9.186.42610**. Data generated against other
+patches or channels (PTU/EPTU) is not currently supported.
+
+## Installation Requirements
+
+- **Node.js 18 or later** (LTS recommended) and npm
+- A modern desktop browser (Chrome, Firefox, or Edge)
+- No Star Citizen installation or account is required to run the app —
+  fleet and component data ship pre-generated with the repository
+
+## Running the Beta
 
 ```bash
+git clone https://github.com/tmirzaian/Strategic-Fleet-Manager-SFM-.git
+cd Strategic-Fleet-Manager-SFM-
 npm install
-```
-
-## Run
-
-```bash
 npm run dev
 ```
 
 Then open the printed local URL (typically `http://localhost:5173`).
 
-To type-check and build a static production bundle:
+To type-check and build a static production bundle instead:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Ship Import Pipeline (developer tooling)
+## Local Data & Privacy
 
-A generalized StarBreaker ship-import pipeline lives alongside the app —
-see `docs/DATA_ENGINE.md` for the full architecture. To (re)generate
-`generated-data/` from the raw-data fixtures:
+Strategic Fleet Manager is local-first: your fleet, loadouts, and inventory
+are stored entirely in your browser. Nothing is uploaded, no account is
+required, and SFM does not currently contain analytics or telemetry. See
+[PRIVACY.md](PRIVACY.md) for the full statement.
 
-```bash
-npm run import:ships                                   # every raw-data/*.json
-npm run import:ship -- "raw-data/AEGS Gladius.json"     # one file
-npm run test                                             # unit + integration tests
-```
+## Reporting Bugs & Requesting Features
 
-This runs entirely under Node — no dev server required — and is what
-powers the "(Imported)" developer-only ship options on Ship Detail.
+Please use [GitHub Issues](../../issues) — a bug report template and a
+feature request template are provided when you open a new issue. There is
+no public Discord or support email yet; Issues are the primary support
+channel during Beta.
 
-## Sprint 1.2 Scope
+## Known Limitations
 
-Ship Detail remains the P0 — every other workflow depends on it.
+- Browser-local persistence only — clearing browser data clears your fleet
+- No cloud synchronization
+- No RSI or CCUGame synchronization
+- No Windows installer yet — Node.js is required to launch the Beta
+- Some fleet-wide component-name ambiguities remain under investigation
+- No telemetry or automatic update service
+- Some ship images may use the SFM fallback artwork instead of real imagery
 
-- **Ship images** — every ship in seed data now has a real RSI `imageUrl`.
-  Fleet Dashboard cards show it with a dark gradient overlay so text stays
-  readable; Ship Detail has a wide hero banner using the same image. Any ship
-  without an `imageUrl` falls back to the existing placeholder icon.
-- **Mission Control** — Procurement List column renamed to "Component Name",
-  sorted A–Z by default; Size/Type is now a single combined column (e.g. "S1
-  Power Plant") instead of two; Needed By stays unsorted. "Overall Fleet
-  Readiness" and the Owned/Purchased/Loaner breakdown on Ships Active carry
-  over from Sprint 1.1.
-- **Fleet Dashboard** — Card/Table toggle retained; all existing
-  filters/sorts still apply to both views.
-- **Ship Detail (P0)** —
-  - Ship **location has been removed entirely**, everywhere. Ships are
-    claimable anywhere; only Components are location-bound (see Hangar
-    Inventory below).
-  - "Select Ship" is clearly labeled with an icon and now sorted
-    alphabetically A–Z.
-  - New hero image banner with a dark overlay, showing ship name,
-    manufacturer, ownership, active Build, and readiness at a glance.
-  - The hardpoint table always shows every relevant slot (Weapon 1/2, Power
-    1/2, Shield 1/2, Cooler 1/2, Quantum Drive, Radar, Life Support), not
-    just mismatches, and switching the Active Build selector recomputes
-    missing items, readiness, and every hardpoint's status live.
-  - Hardpoint status logic is unchanged from the corrected Sprint 1.1 rule
-    set: Installed Loadout is seeded from Factory Loadout when a ship/build
-    is created, and a part that's already been swapped away from factory
-    stock but isn't the Target item yet shows **Upgrade Available**, not
-    Missing.
-- **Build Manager** — added a **Build Library** table above Assigned Ship
-  Builds: reusable reference templates (Stealth, Military, Mining, Daily
-  Driver, Cargo, Salvage) with name/category/description. Add/Edit/
-  Duplicate/Delete-with-confirmation on Assigned Ship Builds are unchanged
-  from Sprint 1.1 and still backed by real local state.
-- **Hangar Inventory** — Vendor disposition remains removed (Install, Store,
-  Stockpile, Trade, Ignore only). Add New Item and Move to Ship remain wired
-  to local state. `HangarItem` now has an optional, unused `location` field
-  reserved for a later sprint — Components are location-bound, ships aren't.
-- **Quick Update** — "Vendor loot" and "Claimed ship" have both been removed.
-  "What changed?" is now: Add Component to Hangar, Install Component, Remove
-  Component, Move Component Between Ships, and Change Active Build. Each
-  updates real local state (hardpoints, readiness, hangar, or active build)
-  and appends a Captain's Log entry. Find Item search-preview behavior is
-  unchanged and now also recognizes FR-86.
-- **Decision Center** — replaced the exact-match input with a typeahead:
-  start typing and matching catalog items appear, narrowing as you type
-  ("M" → "Mi" → "Mirage"); clicking a suggestion fills the input and shows
-  the recommendation immediately. KEEP/IGNORE/CHECK BUILD logic is unchanged
-  (Mirage, Slipstream, Snowblind, FR-86 → KEEP; S4/Revenant → IGNORE;
-  anything else → CHECK BUILD).
-- **Captain's Log** — unchanged component; continues to receive entries from
-  every mutating action, including the new Change Active Build and Move
-  Component Between Ships flows. Vendor trash is still never logged, because
-  it's never tracked.
-- **Dropdown/input contrast fix** — every native `<select>`/`<option>` and
-  text input now gets a consistent dark theme (`color-scheme: dark` plus
-  explicit background/text colors matching the spec), fixing the light-gray-
-  background-with-blue-text rendering some dropdowns had.
+## Roadmap Summary
 
-## Intentionally Out of Scope
+Near-term work focuses on Beta stabilization, GitHub presentation, and
+launch experience polish. Longer-term, planned work includes a Windows
+installer, RSI/CCUGame fleet synchronization, richer search, and a
+dedicated support/about experience. See [docs/Roadmap.md](docs/Roadmap.md)
+for the full, current roadmap.
 
-- No backend, database, or auth — everything lives in local seed data and
-  in-memory Zustand state. Refreshing the page resets any changes.
-- No real item catalog or search beyond the seeded demo/decision catalogs.
-- No crafting simulator, economy simulation, organization sharing, player
-  marketplace, three-tier readiness score, GitHub version checker, splash
-  screen, or logo integration.
-- Hardpoint data beyond the Ghost Mk II and a handful of named-target ships
-  is otherwise a factory-OK placeholder set, not exhaustive ship-accurate
-  loadout data.
-- Build Library "Use Template" is a mock confirmation, not a real seeding
-  action yet.
+## Credits
 
-## Notes for Sprint 2
+Strategic Fleet Manager is developed by **Quantum Thread Studio**. Ship and
+component data is derived from Star Citizen's own game files using the
+open-source [StarBreaker](https://github.com/StarBreakerSC/StarBreaker)
+toolkit.
 
-- Wire Build Library "Use Template" to actually seed a new Assigned Ship
-  Build from the template's category defaults.
-- Add a real Location field/column to Hangar Inventory now that the type
-  supports it, once the UI need is clear.
-- Expand ship-accurate hardpoint data across the full fleet.
-- Expand the Decision Center / Quick Update catalogs beyond the seeded demo
-  items.
-- Consider persistence so updates survive a page refresh.
-- GitHub-based version checking remains explicitly deferred.
+## Fan Project Disclaimer
+
+Strategic Fleet Manager is an independent fan-created project and is not
+affiliated with, endorsed by, or sponsored by Cloud Imperium Games or
+Roberts Space Industries. Star Citizen, associated names, and related
+assets are property of their respective owners.
+
+## License
+
+License selection is pending prior to public Beta release. All rights are
+reserved until a license is published.

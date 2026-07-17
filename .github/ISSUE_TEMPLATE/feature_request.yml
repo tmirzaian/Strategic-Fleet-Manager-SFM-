@@ -1,0 +1,64 @@
+name: Feature Request
+description: Suggest an improvement or new capability for Strategic Fleet Manager
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. The more context you give us
+        about the real problem you're hitting, the easier it is to design
+        the right solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the underlying need, not just the feature — what are you currently unable to do, or what's currently annoying/slow?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-workflow
+    attributes:
+      label: Proposed workflow
+      description: How would you expect this to work, from your perspective as a player/Commander?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: Affected SFM area
+      options:
+        - Fleet Dashboard
+        - Mission Control
+        - Ship Detail / Loadout Manager
+        - Hangar Inventory
+        - Quick Update
+        - Decision Center
+        - Add Ship / ship data
+        - Ship imagery
+        - Captain's Log
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: sc-context
+    attributes:
+      label: Star Citizen gameplay context
+      description: What in-game activity or scenario motivates this request?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: How would you classify this?
+      options:
+        - Essential (blocks a core workflow)
+        - Enhancement (would meaningfully improve an existing workflow)
+        - Long-term concept (a bigger idea, not urgent)
+    validations:
+      required: true
