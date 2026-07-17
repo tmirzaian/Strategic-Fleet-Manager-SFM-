@@ -1,63 +1,158 @@
 {
-  "generatedAt": "2026-07-17T02:16:07.412Z",
-  "workbookRowCount": 221,
-  "canonicalSelectableHullCount": 256,
+  "generatedAt": "2026-07-17T15:19:34.266Z",
+  "workbookRowCount": 249,
+  "canonicalSelectableHullCount": 261,
   "matchCounts": {
-    "exactName": 196,
+    "exactName": 198,
     "normalizedName": 18,
     "existingAlias": 0,
     "manualReview": 0,
     "ambiguous": 0,
-    "unmatched": 7
+    "unmatched": 33
   },
   "ambiguousRows": [],
   "unmatchedRows": [
     {
-      "rowNumber": 21,
-      "name": "ATLS"
+      "rowNumber": 19,
+      "name": "Arrastra"
     },
     {
       "rowNumber": 22,
+      "name": "ATLS"
+    },
+    {
+      "rowNumber": 23,
       "name": "ATLS GEO"
     },
     {
-      "rowNumber": 37,
-      "name": "Basher"
+      "rowNumber": 57,
+      "name": "Crucible"
     },
     {
-      "rowNumber": 132,
-      "name": "MOLE Carbon Edition"
+      "rowNumber": 76,
+      "name": "Endeavor"
+    },
+    {
+      "rowNumber": 77,
+      "name": "Expanse"
+    },
+    {
+      "rowNumber": 100,
+      "name": "G12"
+    },
+    {
+      "rowNumber": 101,
+      "name": "G12a"
+    },
+    {
+      "rowNumber": 102,
+      "name": "G12r"
+    },
+    {
+      "rowNumber": 103,
+      "name": "Galaxy"
+    },
+    {
+      "rowNumber": 104,
+      "name": "Genesis"
+    },
+    {
+      "rowNumber": 123,
+      "name": "Hull D"
+    },
+    {
+      "rowNumber": 124,
+      "name": "Hull E"
     },
     {
       "rowNumber": 133,
+      "name": "Kraken"
+    },
+    {
+      "rowNumber": 134,
+      "name": "Kraken Privateer"
+    },
+    {
+      "rowNumber": 137,
+      "name": "Legionnaire"
+    },
+    {
+      "rowNumber": 138,
+      "name": "Liberator"
+    },
+    {
+      "rowNumber": 145,
+      "name": "Merchantman"
+    },
+    {
+      "rowNumber": 149,
+      "name": "MOLE Carbon Edition"
+    },
+    {
+      "rowNumber": 150,
       "name": "MOLE Talus Edition"
     },
     {
-      "rowNumber": 141,
+      "rowNumber": 158,
       "name": "Mustang Alpha Vindicator"
     },
     {
-      "rowNumber": 155,
+      "rowNumber": 163,
+      "name": "Nautilus"
+    },
+    {
+      "rowNumber": 164,
+      "name": "Nautilus Solstice Edition"
+    },
+    {
+      "rowNumber": 169,
+      "name": "Odin"
+    },
+    {
+      "rowNumber": 170,
+      "name": "Odyssey"
+    },
+    {
+      "rowNumber": 171,
+      "name": "Orion"
+    },
+    {
+      "rowNumber": 177,
+      "name": "Pioneer"
+    },
+    {
+      "rowNumber": 178,
       "name": "Pitbull"
+    },
+    {
+      "rowNumber": 188,
+      "name": "Ranger CV"
+    },
+    {
+      "rowNumber": 189,
+      "name": "Ranger RC"
+    },
+    {
+      "rowNumber": 190,
+      "name": "Ranger TR"
+    },
+    {
+      "rowNumber": 242,
+      "name": "Vulcan"
+    },
+    {
+      "rowNumber": 249,
+      "name": "Zeus Mk II MR"
     }
   ],
   "malformedUrlRows": [],
   "duplicateWorkbookNames": [],
   "duplicateWorkbookUrls": [],
-  "orphanCanonicalIdsInExistingCsv": [
-    "AEGS_Idris_P_FW_25",
-    "ANVL_C8R_Pisces_FW22NFZ",
-    "ANVL_Lightning_F8_Fleetweek",
-    "ANVL_Lightning_F8C_Plat",
-    "CRUS_Starlifter_A2_Bombless",
-    "ORIG_890Jump_Drug_01",
-    "RSI_Ursa_Rover_Prison",
-    "RSI_Zeus_CL_Collector_Indust"
-  ],
-  "generatedRegistryEntryCount": 214,
-  "canonicalHullsUsingRegistryImages": 214,
+  "orphanCanonicalIdsInExistingCsv": [],
+  "generatedRegistryEntryCount": 216,
+  "canonicalHullsUsingRegistryImages": 216,
   "canonicalHullsUsingImportedOfficialImages": 0,
-  "canonicalHullsUsingUniversalFallback": 42,
+  "canonicalHullsUsingUniversalFallback": 45,
   "canonicalHullsRemainingOnFallback": [
     {
       "canonicalId": "l21-wolf-collector-stealth-imported",
@@ -74,10 +169,6 @@
     {
       "canonicalId": "mauler-imported",
       "displayName": "Mauler Destroyer"
-    },
-    {
-      "canonicalId": "mustang-alpha-citizencon2018-imported",
-      "displayName": "Mustang CitizenCon 2948 Edition"
     },
     {
       "canonicalId": "nox-collector-mod-imported",
@@ -98,10 +189,6 @@
     {
       "canonicalId": "idris-p-collector-military-imported",
       "displayName": "Idris-P Wikelo War Special"
-    },
-    {
-      "canonicalId": "javelin-imported",
-      "displayName": "Javelin"
     },
     {
       "canonicalId": "reclaimer-showdown-imported",
@@ -140,6 +227,14 @@
       "displayName": "RAFT Wikelo Work Special"
     },
     {
+      "canonicalId": "ARGO_MOLE_BTALA",
+      "displayName": "ARGO MOLE Alliance"
+    },
+    {
+      "canonicalId": "mustang-alpha-citizencon2018-imported",
+      "displayName": "Mustang CitizenCon 2948 Edition"
+    },
+    {
       "canonicalId": "starlifter-a2-collector-military-imported",
       "displayName": "A2 Hercules Starlifter Wikelo War Special"
     },
@@ -172,6 +267,14 @@
       "displayName": "Golem Wikelo Work Special"
     },
     {
+      "canonicalId": "DRAK_Clipper_Collector_Military",
+      "displayName": "Drake Clipper Wikelo War Special"
+    },
+    {
+      "canonicalId": "DRAK_Golem_BTALA",
+      "displayName": "Drake Golem Alliance"
+    },
+    {
       "canonicalId": "guardian-mx-collector-military-imported",
       "displayName": "Guardian MX Wikelo War Special"
     },
@@ -198,6 +301,10 @@
     {
       "canonicalId": "starlancer-tac-collector-military-imported",
       "displayName": "Starlancer TAC Wikelo War Special"
+    },
+    {
+      "canonicalId": "MISC_Prospector_BTALA",
+      "displayName": "MISC Prospector Alliance"
     },
     {
       "canonicalId": "600i-executive-edition-imported",
@@ -228,250 +335,13 @@
       "displayName": "Ursa Medivac Wikelo Special"
     }
   ],
-  "existingRegistryEntryCount": 166,
-  "existingRegistryEntriesRemoved": [
-    {
-      "registryKey": "AEGS_Idris_P_FW_25",
-      "url": "https://robertsspaceindustries.com/i/6e168e351f1e7634bec6f35fb73dca2d8b4ca900/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqY6z7TSDPHadnqPCeZCNtvaR4zHv7pkE)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Lightning_F8C_Plat",
-      "url": "https://robertsspaceindustries.com/i/dbe4048cfde01b6851a2dc6b5a3403139c9aa3ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjTEWFCBvRCcApL8QwcPy9mPPcUhEbyN9c)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starlifter_A2_Bombless",
-      "url": "https://robertsspaceindustries.com/i/8f68e99ee76f7ab8ae8da725196f32d9a5d61a69/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResidY9GU2m2dhad9nWNxb18qK9ZrBf6PhFU)/source.webp"
-    },
-    {
-      "registryKey": "ORIG_890Jump_Drug_01",
-      "url": "https://robertsspaceindustries.com/i/285d258ad5d533e7e336aa939edf4d78ca5b2678/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskN2PtGhQ7i1JD7RWFivT3dm996DXRrinA)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Ursa_Rover_Prison",
-      "url": "https://robertsspaceindustries.com/i/1baa93c6a56786b022de6b46c1a8c33fa36da6b6/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseM3uUcugp2674rcRWSAagpPVa9SbEyUCE)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Zeus_CL_Collector_Indust",
-      "url": "https://robertsspaceindustries.com/i/9332b99fd192960b05497cecb4d67dc5dd88e124/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResik2cJboaCTxvZPtFzgLFGe7nq45MrKFVx)/source.webp"
-    }
-  ],
+  "existingRegistryEntryCount": 215,
+  "existingRegistryEntriesRemoved": [],
   "existingRegistryEntriesReplaced": [],
   "existingRegistryEntriesAdded": [
     {
-      "registryKey": "AEGS_Gladius_PIR",
-      "url": "https://robertsspaceindustries.com/i/b7e20a5d03590510387a8c49d09c7846c0265866/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResf15Krw6hXmbxWongmJxbMoKnJGMHJtPtz)/source.webp"
-    },
-    {
-      "registryKey": "AEGS_Idris_M",
-      "url": "https://robertsspaceindustries.com/i/e2ecd14ea7c53b404982a902d8fbca0e3020833c/resize(1820,1024,cover,hgjbks2vRxvijgZCkcudyey3yf2YnBqfanX6U636vzzNeeFdx43A2FpAZ49bpw6FiNoWgDAsBUvHcwx6yVRbszrCgE)/source.webp"
-    },
-    {
-      "registryKey": "AEGS_Idris_P",
-      "url": "https://robertsspaceindustries.com/i/6e168e351f1e7634bec6f35fb73dca2d8b4ca900/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqY6z7TSDPHadnqPCeZCNtvaR4zHv7pkE)/source.webp"
-    },
-    {
-      "registryKey": "AEGS_Vanguard",
-      "url": "https://robertsspaceindustries.com/i/9e22a6d48ab6e41700b03715bdff21f3944596f3/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkCoaQ3hcYZfVfuw4ru7sC7dzNvKsbGXG)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7A_Mk1",
-      "url": "https://robertsspaceindustries.com/i/f15e5590de4a42e91d0420c0fd35ac9c2ddd1284/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkAdsM4dYUGutPpApkPRWMrv52kvU1drn)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7A_Mk2",
-      "url": "https://robertsspaceindustries.com/i/ad0b2e0535e7eda9930c02e5e6338662bf417587/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj6zVVifHuf91B5XFQeSL3dKEdS5ru95An)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7C",
-      "url": "https://robertsspaceindustries.com/i/d7d165311c3e267b58c8e29713b0520de4708c0f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskP3AFfH3teR68rmh57wSBzmTxzMu3g72W)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7C_Mk2",
-      "url": "https://robertsspaceindustries.com/i/11898460f6c81a86b36767241e96326ebd7e300f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjHymPx8r84PH9pB8dHUfSKxtsuxz3EFJE)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7C_Wildfire",
-      "url": "https://robertsspaceindustries.com/i/9e720b90e0d17ff716543629745c48085120ccd9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseBrnAkkqry6NTco89YXxm7fiVePXmeG14)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CM",
-      "url": "https://robertsspaceindustries.com/i/2bbd77da2b242dd2cc680b8dc693077b59308cf7/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResk22sDRRcjwtCehpyXnJhVE7ySLtuC3NMk)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CM_Heartseeker",
-      "url": "https://robertsspaceindustries.com/i/1aae6c5e3cd205797eda041b6dd4085032b8753d/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResejFhFPaJXW9eWYg4EZ3DiiLfiG1H94aZC)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CM_Mk2",
-      "url": "https://robertsspaceindustries.com/i/aa2b3c767c2555caa89b0a0239aca9e63ef07a23/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResedtCVBuvj4aJo1EBhKirGcWN1xxtKGk8n)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CR",
-      "url": "https://robertsspaceindustries.com/i/394b0101f3512d3b7b6414a6cf0ed3949fc1586a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResijzE5e7KeCMw6zgFK6GYuS3kkyJqzYiNz)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CR_Mk2",
-      "url": "https://robertsspaceindustries.com/i/2198f6c499469932595835e2d8847d6196b4d891/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseoZyePfkFJQygvJqE4MocwJAuyLYM1rKG)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CS",
-      "url": "https://robertsspaceindustries.com/i/0dcd4d70d94dfe410df8936aa36b86c0dfcd26af/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjqHwXyzcPtQGAhaia7uvJdKpyzo2kq9x2)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Hornet_F7CS_Mk2",
-      "url": "https://robertsspaceindustries.com/i/5bd5643f5e6da6ee50f799fc5dcbe7e5e752a7cb/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskP9BJt5yvdnBYhrcDfrunYJdqg3dVC6yC)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Lightning_F8C",
-      "url": "https://robertsspaceindustries.com/i/dbe4048cfde01b6851a2dc6b5a3403139c9aa3ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjTEWFCBvRCcApL8QwcPy9mPPcUhEbyN9c)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Lightning_F8C_Exec",
-      "url": "https://robertsspaceindustries.com/i/8e770bb627baa3ab6dab4683473c7db2b769175c/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj1tdKsNBxg7ivkDmyZXdWKvjJ53ZZT9jt)/source.webp"
-    },
-    {
-      "registryKey": "ANVL_Valkyrie_CitizenCon",
-      "url": "https://robertsspaceindustries.com/i/35890a10d28f48ee48a3662fe44697fa08e17ec5/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResipDVsZUErD1PF6m8zJLeFU1yVUBqCgsRg)/source.webp"
-    },
-    {
-      "registryKey": "ARGO_CSV_Cargo",
-      "url": "https://robertsspaceindustries.com/i/52a671e5dc96ac85cb77b487f4c127b521903b6c/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkEEePB5J9J5injj6dDUcvVDLgXM3kADL)/source.webp"
-    },
-    {
-      "registryKey": "ARGO_MPUV",
-      "url": "https://robertsspaceindustries.com/i/81e713f8e644c1e857f81447c80c99adb34aeb68/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqS72thXJhruiyZdkAUXoWmCbfrFo9axn)/source.webp"
-    },
-    {
-      "registryKey": "ARGO_MPUV_1T",
-      "url": "https://robertsspaceindustries.com/i/3efa976ce798a11fe92d75c28eb6e22ed863d15a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqfGEtBqch5Ac8LmFbX21URShPfQgHAna)/source.webp"
-    },
-    {
-      "registryKey": "ARGO_MPUV_Transport",
-      "url": "https://robertsspaceindustries.com/i/a4531abec711e22d8da468f488c9f8cea63cbe42/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj1m9L4rmH61jLubjuLTYqftH8J2JTVpsQ)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Spirit_A1",
-      "url": "https://robertsspaceindustries.com/i/8dd23d865543540372922e592bd06196e0cc32ec/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjqeH5Syrkjvs1ARQzHr1K5xByXfMTgZrN)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Spirit_C1",
-      "url": "https://robertsspaceindustries.com/i/bac6648185eab3ca89a9b859d6092c81fe337587/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjfBqExzNdjFYFntDZSQvoviQmVRUrSXUz)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Star_Runner",
-      "url": "https://robertsspaceindustries.com/i/968944e4818ed482e8ca891152eec706ce5575ce/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseM2Qd3hg33nVNrZr93SXcfBLpXPPoyseW)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starfighter_Inferno",
-      "url": "https://robertsspaceindustries.com/i/8ba059daedf99e377a6b4773167364933ec37348/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskPUMphCZRXRAQLjVqV1sqM6EBTAiv9qKc)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starfighter_Ion",
-      "url": "https://robertsspaceindustries.com/i/38f0c5a9561f3f29798207b431326db3a998d0ce/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResidZaY5SRiicBUSgjL8oiDCWFUNRcX7Mnv)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starlifter_A2",
-      "url": "https://robertsspaceindustries.com/i/8f68e99ee76f7ab8ae8da725196f32d9a5d61a69/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResidY9GU2m2dhad9nWNxb18qK9ZrBf6PhFU)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starlifter_C2",
-      "url": "https://robertsspaceindustries.com/i/387f877bf5aae2c4dc6e32568d621473b5d4d79e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskpcDUyTPuKfT2cePUz4jof5hYcpd6LjZx)/source.webp"
-    },
-    {
-      "registryKey": "CRUS_Starlifter_M2",
-      "url": "https://robertsspaceindustries.com/i/ecbed3dfd956ca7abe163b3cda1e43784c9d5d53/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseTg8yHWoyFU5ctCYvWz382EoBq77xDmMY)/source.webp"
-    },
-    {
-      "registryKey": "DRAK_Dragonfly_Yellow",
-      "url": "https://robertsspaceindustries.com/i/b19e705177bd3abeaa5a857272d36de996e54b95/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjvnVqTQktakUX1aAFundh4rBxLFZ28g8n)/source.webp"
-    },
-    {
-      "registryKey": "GRIN_ROC_DS",
-      "url": "https://robertsspaceindustries.com/i/055eb7e8be37bbbe2762bdf80eed176f623245e1/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResf1KiRdFjoqLzFeGUNcHcx8G7544GVQBqg)/source.webp"
-    },
-    {
-      "registryKey": "KRIG_L21_Wolf",
-      "url": "https://robertsspaceindustries.com/i/037324cea60c33e19a6c05ebbf85b97a124596e8/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj21WaUxWbKR9SuaMi6kvW7goytjDLbo58)/source.webp"
-    },
-    {
-      "registryKey": "KRIG_L22_AlphaWolf",
-      "url": "https://robertsspaceindustries.com/i/deddca4440013e52e9db2df4806ad7ab9e7b4812/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivS471eTgnjhZtB5WJnDZYBgSEvw8UDCJ)/source.webp"
-    },
-    {
-      "registryKey": "KRIG_P52_Merlin",
-      "url": "https://robertsspaceindustries.com/i/8dececc4f3eb9aef6528e9787a901282df35efb9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivhwGVUftNgJ5wypSvobRWnKmXUmmce4E)/source.webp"
-    },
-    {
-      "registryKey": "KRIG_P72_Archimedes",
-      "url": "https://robertsspaceindustries.com/i/c4136eb7b9a090dbd6417e2c7cef5b449cb7da85/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResev3uj33ZcSyfFgcyVdQoGyjUZdtCF4h4a)/source.webp"
-    },
-    {
-      "registryKey": "KRIG_P72_Archimedes_Emerald",
-      "url": "https://robertsspaceindustries.com/i/78add1c57033761d2413a7c433cdb1960d24b24e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjk9YxDCQdAxLd5gPH21xRodqp28Sj8QMC)/source.webp"
-    },
-    {
-      "registryKey": "MISC_Fury_Miru",
-      "url": "https://robertsspaceindustries.com/i/8a355f968a9fb8a7a1561f09594de5a53bb520ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResiedrpVbiTc8HyRzgMr7wjGhHFaUNQBefx)/source.webp"
-    },
-    {
-      "registryKey": "MISC_Reliant",
-      "url": "https://robertsspaceindustries.com/i/ea8fae7b43c8a7bb81b4eb5f64276dffb7b95a2f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseBjYH9QwVxcVgKCkZxHJedxrQx8RoML7Y)/source.webp"
-    },
-    {
-      "registryKey": "ORIG_890Jump",
-      "url": "https://robertsspaceindustries.com/i/285d258ad5d533e7e336aa939edf4d78ca5b2678/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskN2PtGhQ7i1JD7RWFivT3dm996DXRrinA)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_CL",
-      "url": "https://robertsspaceindustries.com/i/0114f0fb9054675e89892c020aa657a4f3a4a641/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqUURXDz5coswxJaMxGf2h8orXrGu2nPG)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_ES",
-      "url": "https://robertsspaceindustries.com/i/e58de32282770d79c8b1fb29c7b552a199cc18a0/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResizh6NGvSRpmsGJPtnccvGjhWyiFtTQvuL)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_LN",
-      "url": "https://robertsspaceindustries.com/i/814e36cadcd3e7e033883e05dcdadc79d48193fe/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivY4o9xKVqqAGGCE6ubE9VzqjrDgYVkEz)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_LX",
-      "url": "https://robertsspaceindustries.com/i/eff39676d2ba25b9ffd1ce285628a47e80b2b09e/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseMB2HqJCrzVi7n4jWa6RKuX86vHhuoXYz)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_MR",
-      "url": "https://robertsspaceindustries.com/i/c7133ae8a8e3da0f6a81840978d7d55cac5429a2/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjZaFtjXh6njsETbS8KcP6T4B6ah7yTRUS)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_GS_SE",
-      "url": "https://robertsspaceindustries.com/i/d3d47e4ab428318e1d7d4957e50439fde975428e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskUYyKYXsaX9q5qr2tar2eJR6uDsauezUW)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Aurora_Mk2",
-      "url": "https://robertsspaceindustries.com/i/c46396ff5712653d2ba61f685a3a46ad82fe47cc/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskCZWkFFmT8GizYVjNCLrLANTnxxhrj9Qr)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Ursa_Rover",
-      "url": "https://robertsspaceindustries.com/i/1baa93c6a56786b022de6b46c1a8c33fa36da6b6/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseM3uUcugp2674rcRWSAagpPVa9SbEyUCE)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Ursa_Rover_Emerald",
-      "url": "https://robertsspaceindustries.com/i/f241eb36893fa3087a842300f67127f7a433280a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjBNBJ23W3mEG8ozoUYXBJqa5UXbB8Xogz)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Zeus_CL",
-      "url": "https://robertsspaceindustries.com/i/9332b99fd192960b05497cecb4d67dc5dd88e124/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResik2cJboaCTxvZPtFzgLFGe7nq45MrKFVx)/source.webp"
-    },
-    {
-      "registryKey": "RSI_Zeus_ES",
-      "url": "https://robertsspaceindustries.com/i/201b16305598b3f101d78f2cf0f3bbeea5c5fd5f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivuuXPahoRKgQLW5h1aBypfa8P8Hap7Zg)/source.webp"
-    },
-    {
-      "registryKey": "XIAN_Scout",
-      "url": "https://robertsspaceindustries.com/i/ae9dcbe03c30fbba78b1b90d9933894c54cd6986/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskvn8skBeKZhhvnJJ7SbDADp1YRPHK4jLS)/source.webp"
-    },
-    {
-      "registryKey": "XNAA_SanTokYai",
-      "url": "https://robertsspaceindustries.com/i/07f8b3fb66e8bf1fc56eed1e889c80510960b9ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseYxnLDbRvYcbdtzQnz5YTiGVWt6gxEs8r)/source.webp"
+      "registryKey": "GLSN_Basher",
+      "url": "https://robertsspaceindustries.com/i/0b9fe8e5f747566daf22edfd015122cb496ea3c0/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjGhFzCnTPqyCWJEeaDBNB3oWvoHiUuXfc)/source.webp"
     }
   ],
   "existingRegistryEntriesRetained": [
@@ -500,12 +370,28 @@
       "url": "https://robertsspaceindustries.com/i/60415cc9954828896ce4495b34885d7e3a6951d9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResieuRXVexPTjwdpMHEWo3saH7q2zcqCJWS)/source.webp"
     },
     {
+      "registryKey": "AEGS_Gladius_PIR",
+      "url": "https://robertsspaceindustries.com/i/b7e20a5d03590510387a8c49d09c7846c0265866/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResf15Krw6hXmbxWongmJxbMoKnJGMHJtPtz)/source.webp"
+    },
+    {
       "registryKey": "AEGS_Gladius_Valiant",
       "url": "https://robertsspaceindustries.com/i/536842fae187ad4bf028eb9f912db297e41c917a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjHxYqZhkCGAu3JFrXyZrgxc2yximhqvWa)/source.webp"
     },
     {
       "registryKey": "AEGS_Hammerhead",
       "url": "https://robertsspaceindustries.com/i/2d1133694e11b92d0b4d3bc89887c2ce3c5dc403/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskw8pF3smytMEoihUHnd7hNxebuVtB4znz)/source.webp"
+    },
+    {
+      "registryKey": "AEGS_Idris_M",
+      "url": "https://robertsspaceindustries.com/i/e2ecd14ea7c53b404982a902d8fbca0e3020833c/resize(1820,1024,cover,hgjbks2vRxvijgZCkcudyey3yf2YnBqfanX6U636vzzNeeFdx43A2FpAZ49bpw6FiNoWgDAsBUvHcwx6yVRbszrCgE)/source.webp"
+    },
+    {
+      "registryKey": "AEGS_Idris_P",
+      "url": "https://robertsspaceindustries.com/i/6e168e351f1e7634bec6f35fb73dca2d8b4ca900/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqY6z7TSDPHadnqPCeZCNtvaR4zHv7pkE)/source.webp"
+    },
+    {
+      "registryKey": "AEGS_Javelin",
+      "url": "https://robertsspaceindustries.com/i/d06d02ee0e01ad6dcb16561795ae4cd8f87186a3/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjvbX42c3rKWbDaqUyqNmKE6rWyf9aufLJ)/source.webp"
     },
     {
       "registryKey": "AEGS_Reclaimer",
@@ -542,6 +428,10 @@
     {
       "registryKey": "AEGS_Tiburon",
       "url": "https://robertsspaceindustries.com/i/5034074196874f129f3ff25d93d39d678b8de317/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqmGWrWP9M7s4Xy6L8YgJQs18r4iARWYW)/source.webp"
+    },
+    {
+      "registryKey": "AEGS_Vanguard",
+      "url": "https://robertsspaceindustries.com/i/9e22a6d48ab6e41700b03715bdff21f3944596f3/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkCoaQ3hcYZfVfuw4ru7sC7dzNvKsbGXG)/source.webp"
     },
     {
       "registryKey": "AEGS_Vanguard_Harbinger",
@@ -608,8 +498,64 @@
       "url": "https://robertsspaceindustries.com/i/5f4d482dbcafa31057856651b99bb9121bb2dc7b/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqofk6iAEkXWjQtqfG1dYTrB2yze2VMN6)/source.webp"
     },
     {
+      "registryKey": "ANVL_Hornet_F7A_Mk1",
+      "url": "https://robertsspaceindustries.com/i/f15e5590de4a42e91d0420c0fd35ac9c2ddd1284/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkAdsM4dYUGutPpApkPRWMrv52kvU1drn)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7A_Mk2",
+      "url": "https://robertsspaceindustries.com/i/ad0b2e0535e7eda9930c02e5e6338662bf417587/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj6zVVifHuf91B5XFQeSL3dKEdS5ru95An)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7C",
+      "url": "https://robertsspaceindustries.com/i/d7d165311c3e267b58c8e29713b0520de4708c0f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskP3AFfH3teR68rmh57wSBzmTxzMu3g72W)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7C_Mk2",
+      "url": "https://robertsspaceindustries.com/i/11898460f6c81a86b36767241e96326ebd7e300f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjHymPx8r84PH9pB8dHUfSKxtsuxz3EFJE)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7C_Wildfire",
+      "url": "https://robertsspaceindustries.com/i/9e720b90e0d17ff716543629745c48085120ccd9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseBrnAkkqry6NTco89YXxm7fiVePXmeG14)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CM",
+      "url": "https://robertsspaceindustries.com/i/2bbd77da2b242dd2cc680b8dc693077b59308cf7/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResk22sDRRcjwtCehpyXnJhVE7ySLtuC3NMk)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CM_Heartseeker",
+      "url": "https://robertsspaceindustries.com/i/1aae6c5e3cd205797eda041b6dd4085032b8753d/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResejFhFPaJXW9eWYg4EZ3DiiLfiG1H94aZC)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CM_Mk2",
+      "url": "https://robertsspaceindustries.com/i/aa2b3c767c2555caa89b0a0239aca9e63ef07a23/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResedtCVBuvj4aJo1EBhKirGcWN1xxtKGk8n)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CR",
+      "url": "https://robertsspaceindustries.com/i/394b0101f3512d3b7b6414a6cf0ed3949fc1586a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResijzE5e7KeCMw6zgFK6GYuS3kkyJqzYiNz)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CR_Mk2",
+      "url": "https://robertsspaceindustries.com/i/2198f6c499469932595835e2d8847d6196b4d891/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseoZyePfkFJQygvJqE4MocwJAuyLYM1rKG)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CS",
+      "url": "https://robertsspaceindustries.com/i/0dcd4d70d94dfe410df8936aa36b86c0dfcd26af/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjqHwXyzcPtQGAhaia7uvJdKpyzo2kq9x2)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Hornet_F7CS_Mk2",
+      "url": "https://robertsspaceindustries.com/i/5bd5643f5e6da6ee50f799fc5dcbe7e5e752a7cb/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskP9BJt5yvdnBYhrcDfrunYJdqg3dVC6yC)/source.webp"
+    },
+    {
       "registryKey": "ANVL_Hurricane",
       "url": "https://robertsspaceindustries.com/i/41d76881a5a0bb0ac3f6500a2ee18c661089f92d/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskGn8CGG5chJtVrZgvDP76ztQKVMaPHKiN)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Lightning_F8C",
+      "url": "https://robertsspaceindustries.com/i/dbe4048cfde01b6851a2dc6b5a3403139c9aa3ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjTEWFCBvRCcApL8QwcPy9mPPcUhEbyN9c)/source.webp"
+    },
+    {
+      "registryKey": "ANVL_Lightning_F8C_Exec",
+      "url": "https://robertsspaceindustries.com/i/8e770bb627baa3ab6dab4683473c7db2b769175c/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj1tdKsNBxg7ivkDmyZXdWKvjJ53ZZT9jt)/source.webp"
     },
     {
       "registryKey": "ANVL_Paladin",
@@ -632,12 +578,32 @@
       "url": "https://robertsspaceindustries.com/i/33c4ee2869dcf9490841df1d6968eed5d94ef5f9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqctMmTYuX6sFTZyNbv2gpmbPFTbA9Sna)/source.webp"
     },
     {
+      "registryKey": "ANVL_Valkyrie_CitizenCon",
+      "url": "https://robertsspaceindustries.com/i/35890a10d28f48ee48a3662fe44697fa08e17ec5/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResipDVsZUErD1PF6m8zJLeFU1yVUBqCgsRg)/source.webp"
+    },
+    {
+      "registryKey": "ARGO_CSV_Cargo",
+      "url": "https://robertsspaceindustries.com/i/52a671e5dc96ac85cb77b487f4c127b521903b6c/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskkEEePB5J9J5injj6dDUcvVDLgXM3kADL)/source.webp"
+    },
+    {
       "registryKey": "ARGO_MOLE",
       "url": "https://robertsspaceindustries.com/i/09d0d3d126a43e1747e391213f50f1da3c39684b/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskeyuh2th2hpj2ey5zJ3ucQ9vcbaskWmxA)/source.webp"
     },
     {
       "registryKey": "ARGO_MOTH",
       "url": "https://robertsspaceindustries.com/i/727f9141d6fb066fcecc44baafade227c430a57f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResizo7zmGtBQxP3GqDdxi4jhpFuvLzU2iqC)/source.webp"
+    },
+    {
+      "registryKey": "ARGO_MPUV",
+      "url": "https://robertsspaceindustries.com/i/81e713f8e644c1e857f81447c80c99adb34aeb68/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqS72thXJhruiyZdkAUXoWmCbfrFo9axn)/source.webp"
+    },
+    {
+      "registryKey": "ARGO_MPUV_1T",
+      "url": "https://robertsspaceindustries.com/i/3efa976ce798a11fe92d75c28eb6e22ed863d15a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqfGEtBqch5Ac8LmFbX21URShPfQgHAna)/source.webp"
+    },
+    {
+      "registryKey": "ARGO_MPUV_Transport",
+      "url": "https://robertsspaceindustries.com/i/a4531abec711e22d8da468f488c9f8cea63cbe42/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj1m9L4rmH61jLubjuLTYqftH8J2JTVpsQ)/source.webp"
     },
     {
       "registryKey": "ARGO_RAFT",
@@ -682,6 +648,38 @@
     {
       "registryKey": "CRUS_Intrepid",
       "url": "https://robertsspaceindustries.com/i/f40c300182f77dd980ab6afd98e60fd5392495c2/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseTjyXQamnTyUNx1E4Cd8m3Qux8Q6gA2mL)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Spirit_A1",
+      "url": "https://robertsspaceindustries.com/i/8dd23d865543540372922e592bd06196e0cc32ec/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjqeH5Syrkjvs1ARQzHr1K5xByXfMTgZrN)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Spirit_C1",
+      "url": "https://robertsspaceindustries.com/i/bac6648185eab3ca89a9b859d6092c81fe337587/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjfBqExzNdjFYFntDZSQvoviQmVRUrSXUz)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Star_Runner",
+      "url": "https://robertsspaceindustries.com/i/968944e4818ed482e8ca891152eec706ce5575ce/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseM2Qd3hg33nVNrZr93SXcfBLpXPPoyseW)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Starfighter_Inferno",
+      "url": "https://robertsspaceindustries.com/i/8ba059daedf99e377a6b4773167364933ec37348/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskPUMphCZRXRAQLjVqV1sqM6EBTAiv9qKc)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Starfighter_Ion",
+      "url": "https://robertsspaceindustries.com/i/38f0c5a9561f3f29798207b431326db3a998d0ce/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResidZaY5SRiicBUSgjL8oiDCWFUNRcX7Mnv)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Starlifter_A2",
+      "url": "https://robertsspaceindustries.com/i/8f68e99ee76f7ab8ae8da725196f32d9a5d61a69/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResidY9GU2m2dhad9nWNxb18qK9ZrBf6PhFU)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Starlifter_C2",
+      "url": "https://robertsspaceindustries.com/i/387f877bf5aae2c4dc6e32568d621473b5d4d79e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskpcDUyTPuKfT2cePUz4jof5hYcpd6LjZx)/source.webp"
+    },
+    {
+      "registryKey": "CRUS_Starlifter_M2",
+      "url": "https://robertsspaceindustries.com/i/ecbed3dfd956ca7abe163b3cda1e43784c9d5d53/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseTg8yHWoyFU5ctCYvWz382EoBq77xDmMY)/source.webp"
     },
     {
       "registryKey": "DRAK_Buccaneer",
@@ -730,6 +728,10 @@
     {
       "registryKey": "DRAK_Dragonfly",
       "url": "https://robertsspaceindustries.com/i/4edf9f73028b9bce027a2f99ef05334615b593e0/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskPN4yumMk5nt91UxccBVecfwddqkyqWeJ)/source.webp"
+    },
+    {
+      "registryKey": "DRAK_Dragonfly_Yellow",
+      "url": "https://robertsspaceindustries.com/i/b19e705177bd3abeaa5a857272d36de996e54b95/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjvnVqTQktakUX1aAFundh4rBxLFZ28g8n)/source.webp"
     },
     {
       "registryKey": "DRAK_Golem",
@@ -808,12 +810,36 @@
       "url": "https://robertsspaceindustries.com/i/d61d296bca87d8ee1ec5f320e0a181b635eac966/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjZpg3TvUXzoPPWHyznxuewoEwZYPpvQLe)/source.webp"
     },
     {
+      "registryKey": "GRIN_ROC_DS",
+      "url": "https://robertsspaceindustries.com/i/055eb7e8be37bbbe2762bdf80eed176f623245e1/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResf1KiRdFjoqLzFeGUNcHcx8G7544GVQBqg)/source.webp"
+    },
+    {
       "registryKey": "GRIN_STV",
       "url": "https://robertsspaceindustries.com/i/83719471984714efdde559b6f9e936bcf86845ba/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskCv7m8TiAMkonNjPhXV8R6Hb67RxWnqo4)/source.webp"
     },
     {
       "registryKey": "GRIN_UTV",
       "url": "https://robertsspaceindustries.com/i/6850056c708a832e12dcac0a609a80ff117b36d3/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskJE1T9BunBTYn6VhoGBSdx864i1EELch4)/source.webp"
+    },
+    {
+      "registryKey": "KRIG_L21_Wolf",
+      "url": "https://robertsspaceindustries.com/i/037324cea60c33e19a6c05ebbf85b97a124596e8/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResj21WaUxWbKR9SuaMi6kvW7goytjDLbo58)/source.webp"
+    },
+    {
+      "registryKey": "KRIG_L22_AlphaWolf",
+      "url": "https://robertsspaceindustries.com/i/deddca4440013e52e9db2df4806ad7ab9e7b4812/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivS471eTgnjhZtB5WJnDZYBgSEvw8UDCJ)/source.webp"
+    },
+    {
+      "registryKey": "KRIG_P52_Merlin",
+      "url": "https://robertsspaceindustries.com/i/8dececc4f3eb9aef6528e9787a901282df35efb9/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivhwGVUftNgJ5wypSvobRWnKmXUmmce4E)/source.webp"
+    },
+    {
+      "registryKey": "KRIG_P72_Archimedes",
+      "url": "https://robertsspaceindustries.com/i/c4136eb7b9a090dbd6417e2c7cef5b449cb7da85/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResev3uj33ZcSyfFgcyVdQoGyjUZdtCF4h4a)/source.webp"
+    },
+    {
+      "registryKey": "KRIG_P72_Archimedes_Emerald",
+      "url": "https://robertsspaceindustries.com/i/78add1c57033761d2413a7c433cdb1960d24b24e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjk9YxDCQdAxLd5gPH21xRodqp28Sj8QMC)/source.webp"
     },
     {
       "registryKey": "MISC_Fortune",
@@ -844,6 +870,10 @@
       "url": "https://robertsspaceindustries.com/i/a907809ebb4a81e050de8bc0cca43e28f2f04d09/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResipDUniadrxVqFV8Exc6F8gdxmNfxCBMqQ)/source.webp"
     },
     {
+      "registryKey": "MISC_Fury_Miru",
+      "url": "https://robertsspaceindustries.com/i/8a355f968a9fb8a7a1561f09594de5a53bb520ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResiedrpVbiTc8HyRzgMr7wjGhHFaUNQBefx)/source.webp"
+    },
+    {
       "registryKey": "MISC_Hull_A",
       "url": "https://robertsspaceindustries.com/i/a9ba88708475a069e74c3ebd44840f1568730111/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseTiWv14XfeGqkvh7qGGd8PsbT6CXSrQ9c)/source.webp"
     },
@@ -870,6 +900,10 @@
     {
       "registryKey": "MISC_Razor_LX",
       "url": "https://robertsspaceindustries.com/i/584ae93b7df23c90b8d1c8ac880b4c0acf7478c5/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjYZbU7YRbY39aKhXriPkhsMyLYc2GruWE)/source.webp"
+    },
+    {
+      "registryKey": "MISC_Reliant",
+      "url": "https://robertsspaceindustries.com/i/ea8fae7b43c8a7bb81b4eb5f64276dffb7b95a2f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseBjYH9QwVxcVgKCkZxHJedxrQx8RoML7Y)/source.webp"
     },
     {
       "registryKey": "MISC_Reliant_Mako",
@@ -968,6 +1002,10 @@
       "url": "https://robertsspaceindustries.com/i/2959cc931701412648c847748a5d97a8651aa952/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskHxChGNu1HG6cPCRZexaQfXYVmoySwLYv)/source.webp"
     },
     {
+      "registryKey": "ORIG_890Jump",
+      "url": "https://robertsspaceindustries.com/i/285d258ad5d533e7e336aa939edf4d78ca5b2678/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskN2PtGhQ7i1JD7RWFivT3dm996DXRrinA)/source.webp"
+    },
+    {
       "registryKey": "ORIG_m50",
       "url": "https://robertsspaceindustries.com/i/e0062c938a2ffa682add6487ae5fbc08bd3b825a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjdq3VgKwWzxooVmKzNtgdz9hjcfMTo7hp)/source.webp"
     },
@@ -994,6 +1032,34 @@
     {
       "registryKey": "RSI_Apollo_Triage",
       "url": "https://robertsspaceindustries.com/i/5be97c785801aad485101653aff20d587fa66725/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseGytXKJM7qV2ksMdJL29f5yVDK18S6uFt)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_CL",
+      "url": "https://robertsspaceindustries.com/i/0114f0fb9054675e89892c020aa657a4f3a4a641/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskqUURXDz5coswxJaMxGf2h8orXrGu2nPG)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_ES",
+      "url": "https://robertsspaceindustries.com/i/e58de32282770d79c8b1fb29c7b552a199cc18a0/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResizh6NGvSRpmsGJPtnccvGjhWyiFtTQvuL)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_LN",
+      "url": "https://robertsspaceindustries.com/i/814e36cadcd3e7e033883e05dcdadc79d48193fe/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivY4o9xKVqqAGGCE6ubE9VzqjrDgYVkEz)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_LX",
+      "url": "https://robertsspaceindustries.com/i/eff39676d2ba25b9ffd1ce285628a47e80b2b09e/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseMB2HqJCrzVi7n4jWa6RKuX86vHhuoXYz)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_MR",
+      "url": "https://robertsspaceindustries.com/i/c7133ae8a8e3da0f6a81840978d7d55cac5429a2/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjZaFtjXh6njsETbS8KcP6T4B6ah7yTRUS)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_GS_SE",
+      "url": "https://robertsspaceindustries.com/i/d3d47e4ab428318e1d7d4957e50439fde975428e/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskUYyKYXsaX9q5qr2tar2eJR6uDsauezUW)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Aurora_Mk2",
+      "url": "https://robertsspaceindustries.com/i/c46396ff5712653d2ba61f685a3a46ad82fe47cc/resize(910,512,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskCZWkFFmT8GizYVjNCLrLANTnxxhrj9Qr)/source.webp"
     },
     {
       "registryKey": "RSI_Constellation_Andromeda",
@@ -1056,6 +1122,22 @@
       "url": "https://robertsspaceindustries.com/i/7177fdf4329241bb2d8044b251fcd6dfc5d74471/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjvsLRSijAMMuZfA8ftRteoWX5YYcnQty4)/source.webp"
     },
     {
+      "registryKey": "RSI_Ursa_Rover",
+      "url": "https://robertsspaceindustries.com/i/1baa93c6a56786b022de6b46c1a8c33fa36da6b6/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseM3uUcugp2674rcRWSAagpPVa9SbEyUCE)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Ursa_Rover_Emerald",
+      "url": "https://robertsspaceindustries.com/i/f241eb36893fa3087a842300f67127f7a433280a/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResjBNBJ23W3mEG8ozoUYXBJqa5UXbB8Xogz)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Zeus_CL",
+      "url": "https://robertsspaceindustries.com/i/9332b99fd192960b05497cecb4d67dc5dd88e124/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResik2cJboaCTxvZPtFzgLFGe7nq45MrKFVx)/source.webp"
+    },
+    {
+      "registryKey": "RSI_Zeus_ES",
+      "url": "https://robertsspaceindustries.com/i/201b16305598b3f101d78f2cf0f3bbeea5c5fd5f/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjResivuuXPahoRKgQLW5h1aBypfa8P8Hap7Zg)/source.webp"
+    },
+    {
       "registryKey": "TMBL_Cyclone",
       "url": "https://robertsspaceindustries.com/i/90ee2ba95dfca0184aa3a1aa948db503dd2174f8/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskZg8zCsGLYa78po64VaYqfsbxjnkciD9p)/source.webp"
     },
@@ -1114,6 +1196,14 @@
     {
       "registryKey": "XIAN_Nox_Kue",
       "url": "https://robertsspaceindustries.com/i/cfedd456f47513a8d2e7229761a87a475edc2170/resize(1820,1024,cover,hgjbks2vRxvijgZCkcudyey3yf2YnBqfanX6U636vzzNeeFdx43A2FpB1h72y9eres7Js1etFpA6vxqALTAbHwWijx)/source.webp"
+    },
+    {
+      "registryKey": "XIAN_Scout",
+      "url": "https://robertsspaceindustries.com/i/ae9dcbe03c30fbba78b1b90d9933894c54cd6986/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReskvn8skBeKZhhvnJJ7SbDADp1YRPHK4jLS)/source.webp"
+    },
+    {
+      "registryKey": "XNAA_SanTokYai",
+      "url": "https://robertsspaceindustries.com/i/07f8b3fb66e8bf1fc56eed1e889c80510960b9ef/resize(1820,1024,cover,ADdPNihJzmPbNuTnFsH1DqUeqBRpXdSXVVtgJTyDDgscGKrzJuoFjReseYxnLDbRvYcbdtzQnz5YTiGVWt6gxEs8r)/source.webp"
     }
   ],
   "duplicateCanonicalPairs": [
@@ -1126,6 +1216,6 @@
       "winner": "starlite"
     }
   ],
-  "imageCoveragePercentage": 83.6,
+  "imageCoveragePercentage": 82.8,
   "note": "canonicalHullsRemainingOnFallback lists every canonical hull with no registry or imported/official image today. No \"flight ready\" field exists anywhere in current repository data, so this list is not filtered by CIG production status (per EWO-038 Task 10's own instruction not to infer that automatically)."
 }

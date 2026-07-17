@@ -37,6 +37,17 @@ const MANUFACTURER_ALIASES: Record<string, string> = {
   mirai: 'MRAI',
   tumbril: 'TMBL',
   'tumbril land systems': 'TMBL',
+  // EWO-050 — Grey's Market (code GLSN, confirmed via the real DataCore
+  // manufacturer record's own localization, @manufacturer_NameGREY). Only
+  // one reviewed alias, like Mirai/Tumbril above with no separate long
+  // form — the short name doubles as the full name.
+  "grey's market": 'GLSN',
+  // EWO-050 (Additional Validation) — found alongside the Grey's Market
+  // audit: Consolidated Outland (code CNOU) was never added either, so
+  // every CNOU ship's ShipDefinition.manufacturer field was silently
+  // empty (confirmed against all 8 deep-imported CNOU ships). Only one
+  // reviewed alias, same pattern as Mirai/Grey's Market above.
+  'consolidated outland': 'CNOU',
 }
 
 /**
@@ -51,8 +62,12 @@ const MANUFACTURER_ALIASES: Record<string, string> = {
  * full corporate name. Never invents a manufacturer that isn't already
  * a reviewed entry in `MANUFACTURER_ALIASES`.
  */
+/** EWO-050 — a bare `\b\w` word-boundary match treats an apostrophe as a
+ * non-word character, so it would incorrectly also capitalize the letter
+ * right after one ("grey's" -> "Grey'S"). The negative lookbehind keeps
+ * that letter lowercase while still capitalizing every real word start. */
 function titleCase(s: string): string {
-  return s.replace(/\b\w/g, (c) => c.toUpperCase())
+  return s.replace(/(?<!')\b\w/g, (c) => c.toUpperCase())
 }
 
 const MANUFACTURER_CODE_TO_NAME: Record<string, string> = (() => {

@@ -81,6 +81,27 @@ function sanitizeCatalogDisplayName(raw: string): string {
  */
 const DEEP_IMPORT_MANUFACTURER_PREFIX_ALIASES: Record<string, string> = { MIS: 'MISC', CNOU: 'C.O.' }
 
+/**
+ * EWO-050 — Grey's Market (code GLSN) ship names are conventionally
+ * styled "Grey's <Model>" ("Grey's Basher", "Grey's Shiv") — "Grey's"
+ * here is part of each ship's own product name, not a redundant repeat
+ * of the manufacturer's name the way "Aegis Gladius" repeats "Aegis".
+ * The corroboration check below can't tell the two apart (the
+ * manufacturer's own full name, "Grey's Market", genuinely does start
+ * with "Grey's"), so it would otherwise strip a real word out of the
+ * official name — confirmed against GLSN_Shiv, which incorrectly
+ * resolved to bare "Shiv" before this exception existed.
+ *
+ * Unlike the VNCL_Scythe/VNCL_Stinger corroboration-failure case below
+ * (where falling back to the raw derived name is correct, because that
+ * name already happened to be bare/correct), falling back would be wrong
+ * here — the raw derived name ("Shiv") is missing the real "Grey's"
+ * prefix entirely. `canonicalDeepImportDisplayName` checks this set
+ * itself and uses the sanitized catalog name verbatim, bypassing
+ * `stripCorroboratedManufacturerPrefix` (and its fallback) altogether.
+ */
+const NEVER_STRIP_MANUFACTURER_CODES = new Set(['GLSN'])
+
 /** Strips a manufacturer-name prefix from a real, official localized ship
  * name, only when the manufacturer info corroborates the prefix really is
  * one (full name, DataCore code, or a reviewed alias) — returns null
@@ -128,7 +149,9 @@ function canonicalDeepImportDisplayName(v: (typeof importedShipList)[number]): s
   const record = entityClass ? shipCatalogRecordByEntityClass.get(entityClass) : undefined
   if (!record?.displayName) return v.ship.name
   const sanitized = sanitizeCatalogDisplayName(record.displayName)
-  const stripped = stripCorroboratedManufacturerPrefix(sanitized, record.manufacturer?.name, record.manufacturer?.code)
+  const manufacturerCode = record.manufacturer?.code
+  if (manufacturerCode && NEVER_STRIP_MANUFACTURER_CODES.has(manufacturerCode)) return sanitized
+  const stripped = stripCorroboratedManufacturerPrefix(sanitized, record.manufacturer?.name, manufacturerCode)
   return stripped ?? v.ship.name
 }
 

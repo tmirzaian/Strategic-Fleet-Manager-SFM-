@@ -57,10 +57,11 @@ describe('EWO-021A (Task 9): single source of truth for ship image URLs', () => 
 
   it('partial coverage is valid — most canonical ids intentionally have no entry, and that must never throw at import time', () => {
     expect(() => Object.keys(SHIP_IMAGE_URLS)).not.toThrow()
-    // EWO-038: the Commander workbook covers 214 of 258 canonical hulls;
-    // AEGS_Javelin (a capital ship absent from that workbook) is a real,
-    // stable example still on fallback today.
-    expect(SHIP_IMAGE_URLS.AEGS_Javelin).toBeUndefined()
+    // EWO-038: the Commander workbook grows over time — AEGS_Javelin
+    // gained a real entry in a later workbook update, so this now uses
+    // ANVL_Lightning_F8 (F8A Lightning), confirmed still absent from the
+    // workbook/registry as of this update.
+    expect(SHIP_IMAGE_URLS.ANVL_Lightning_F8).toBeUndefined()
   })
 })
 
@@ -139,9 +140,9 @@ describe('EWO-033A (Task 10, item 6/7): live store resolution — seed and deep-
   })
 
   it('a manually-added ship with no registry entry resolves to no image (fallback territory), never throws', () => {
-    // EWO-038: AEGS_Javelin is absent from the Commander workbook and has
-    // no registry entry today (see the coverage test above).
-    const result = useFleetStore.getState().addFleetAsset('AEGS_Javelin', 'OWNED', undefined, 99)
+    // EWO-038: ANVL_Lightning_F8 is absent from the Commander workbook and
+    // has no registry entry today (see the coverage test above).
+    const result = useFleetStore.getState().addFleetAsset('ANVL_Lightning_F8', 'OWNED', undefined, 99)
     if (!result.success) return
     const asset = useFleetStore.getState().ships.find((s) => s.id === result.assetId)!
     expect(asset.imageUrl).toBeUndefined()

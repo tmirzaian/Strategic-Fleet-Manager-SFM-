@@ -86,11 +86,14 @@ describe('xlsxReader — EWO-038 (Task 2): the real Commander workbook', () => {
     expect(info.sheetNames).toEqual(['Sheet1'])
   })
 
-  it('contains exactly 221 populated rows, two columns, no header row', () => {
+  it('contains exactly 249 populated rows, two columns, no header row', () => {
     if (!existsSync(REAL_WORKBOOK_PATH)) return
     const buf = readFileSync(REAL_WORKBOOK_PATH)
     const { rows } = readXlsxFirstSheet(buf)
-    expect(rows).toHaveLength(221)
+    // Row count reflects the Commander's own live-edited workbook — grows
+    // over time as more ships get a real RSI URL pasted in, not a fixed
+    // constant. Update this number when it next legitimately changes.
+    expect(rows).toHaveLength(249)
     for (const row of rows) expect(row.length).toBeLessThanOrEqual(2)
     // No header row: row 1 is real ship data, not literal column labels.
     expect(rows[0][0]).not.toMatch(/^(ship|name|rsi)/i)

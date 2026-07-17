@@ -115,7 +115,7 @@ describe('EWO-033 (Task 9): metadata coverage across every canonical hull', () =
     expect(unresolved.map((d) => d.displayName)).toEqual([])
   })
 
-  it('coverage breaks down as expected: every selectable definition is now deep-imported (tier 2) — CWO-005 (Task 1) let the last seed/catalog-only (tier 1) entries correctly dedup into their deep-imported sibling', () => {
+  it('coverage breaks down as expected: nearly every selectable definition is deep-imported (tier 2), with a handful of catalog-only (tier 1) entries newly surfaced by RC-001', () => {
     if (shipCatalogRecords.length === 0) return
     let tier1 = 0
     let tier2 = 0
@@ -126,7 +126,13 @@ describe('EWO-033 (Task 9): metadata coverage across every canonical hull', () =
       if (isDeepImported) tier2++
       else tier1++
     }
-    expect(tier1).toBe(0)
+    // RC-001: fixing the .localization-cache staleness bug surfaced 5 real
+    // ships (Grey's Basher + 4 others) that a stale cache had previously
+    // hidden entirely — none are deep-imported yet, so they're tier 1
+    // (catalog-only) until a future Golden Fleet promotion picks them up.
+    // RC-001A: Grey's Basher itself was then promoted (deep-imported),
+    // leaving 4.
+    expect(tier1).toBe(4)
     expect(tier2).toBeGreaterThan(0)
     expect(tier1 + tier2).toBe(selectableShipDefinitions.length)
   })

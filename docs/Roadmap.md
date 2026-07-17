@@ -261,3 +261,33 @@
 - Organization logistics
 - Crafted-quality support when the game data is stable enough
 - Insurance/loadout-state evolution
+- **SUP-001 — Support & About Framework**: Captain's Log evolves from a
+  pure activity log into the app's support/about hub — About, Support,
+  Discord, GitHub, Release Notes, Roadmap, Known Issues, and
+  Documentation sections.
+- **UI-008 — Improved Search Experience**: when a search returns no
+  results, show a real, informative empty state instead of a blank list —
+  "No ships found. Catalog Certified: Star Citizen 4.9.186. Try another
+  search." Smarter matching and suggestions are a longer-term follow-up
+  (see RWO-005).
+- **RWO-003 — Progressive Release Strategy**: the intended distribution
+  path for SFM over time — Development (VS Code/npm) → Beta (GitHub ZIP
+  download + `Setup.bat`/`Start.bat`) → Release 1.0 (Windows installer,
+  desktop shortcut) → Mature Product (auto-updater, support portal,
+  optional Discord integration, optional update notifications, community
+  ecosystem).
+- **RWO-004 — Privacy & Telemetry Policy**: SFM remains local-first — no
+  telemetry, no fleet uploads, no analytics, no account required. If
+  optional anonymous analytics are ever introduced, they must be opt-in,
+  clearly documented, and must never include fleet or inventory data.
+- **RWO-005 — Search Experience Improvements**: better "no results"
+  messaging (see UI-008), fuzzy matching, search by manufacturer, search
+  by nickname, search by class, and highlighting newly added ships after
+  a catalog update.
+- **ARCH-007 — Dedicated Test Fixtures**: replace tests that depend on
+  real, live ship coverage (e.g. a test asserting a specific hull has no
+  registry image, which breaks the moment the Commander's own workbook
+  gains a real entry for it — observed in practice with AEGS_Javelin)
+  with stable synthetic fixtures, so expanding the Commander workbook or
+  promoting new Golden Fleet content never requires updating unrelated
+  tests.

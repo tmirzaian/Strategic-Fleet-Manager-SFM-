@@ -14,12 +14,19 @@ import type { RawShipExport } from '../rawTypes'
  * certified that a node resolving in the real catalog is expected to be
  * simultaneously installed equipment AND a structural parent (Case A —
  * see the "CASE A" tests below). `Some_Unrecognized_Housing_Assembly`,
- * `TEST_SCItem_Turret_Housing`, `Mount_Gimbal_S1` (confirmed: no real S1
- * variant exists), and `Door_Something` remain deliberately unresolvable
- * against the real catalog — used to certify the other valid
+ * `TEST_SCItem_Turret_Housing`, and `Door_Something` remain deliberately
+ * unresolvable against the real catalog — used to certify the other valid
  * architectural case, a genuinely structural-only parent (Case B), and
  * plain exclusion. Both cases are real, permanent, expected shapes of the
  * same recursive equipment graph, not a contradiction.
+ *
+ * RC-001 note: `Mount_Gimbal_S1` was previously used as a second Case B
+ * example (confirmed to have no real S1 variant at the time), but a LIVE
+ * patch has since added one ("VariPuck S1 Gimbal Mount") — surfaced when
+ * fixing the `.localization-cache` staleness bug regenerated the
+ * component catalog against current data. That test now uses a purely
+ * synthetic entity name instead of a real one liable to resolve again in
+ * a future patch (see ARCH-007 in docs/Roadmap.md).
  */
 function starBreakerFixture(overrides?: Partial<RawShipExport>): RawShipExport {
   return {
@@ -178,16 +185,20 @@ describe('ShipNormalizer — EWO-020 Task 9: generic future-assembly extensibili
   })
 
   it('CASE B — a structural-only parent generalizes to any assembly shape, not just weapons/quantum-drive (synthetic tractor-beam-shaped fixture)', () => {
-    // Mount_Gimbal_S1 is deliberately used here (not S2/S3) — confirmed it
-    // has no real S1 variant in the catalog, so this exercises the
-    // genuinely-unresolvable/structural-only path (Case B) at a
-    // differently-named, differently-shaped port, distinct from the
-    // CASE A tests above which deliberately use the real S2/S3 entities.
+    // A purely synthetic entity class name is deliberately used here (not
+    // a real S1/S2/S3 mount) — RC-001 found that a previously-used real
+    // entity (Mount_Gimbal_S1) gained a real catalog match in a later LIVE
+    // patch, which would silently flip this test's Case B assumption.
+    // A fabricated name can never accidentally resolve against the real
+    // catalog, so this exercises the genuinely-unresolvable/
+    // structural-only path (Case B) at a differently-named,
+    // differently-shaped port, distinct from the CASE A tests above which
+    // deliberately use the real S2/S3 entities.
     const raw: RawShipExport = {
       root: { entity: 'EntityClassDefinition.TEST_Salvage' },
       loadout: [
         {
-          entity: 'Mount_Gimbal_S1',
+          entity: 'Mount_Gimbal_ZZZ_Synthetic_Test_Fixture',
           port: 'hardpoint_tractor_mount',
           children: [{ entity: 'KLWE_LaserRepeater_S1', port: 'hardpoint_class_1' }],
         },

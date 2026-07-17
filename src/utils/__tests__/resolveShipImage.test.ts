@@ -66,8 +66,10 @@ describe('EWO-021A: resolveShipImage', () => {
     expect(byEntityClass).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
   })
 
-  it('12. partial registry coverage does not throw for a canonical hull with no entry (e.g. Javelin — absent from the Commander RSI workbook, EWO-038)', () => {
-    expect(() => resolveShipImage({ id: 'AEGS_Javelin' })).not.toThrow()
-    expect(resolveShipImage({ id: 'AEGS_Javelin' })).toBeUndefined()
+  it('12. partial registry coverage does not throw for a canonical hull with no entry (e.g. F8A Lightning — absent from the Commander RSI workbook, EWO-038)', () => {
+    // Javelin gained a real workbook entry in a later Commander update;
+    // ANVL_Lightning_F8 is confirmed still absent as of this update.
+    expect(() => resolveShipImage({ id: 'ANVL_Lightning_F8' })).not.toThrow()
+    expect(resolveShipImage({ id: 'ANVL_Lightning_F8' })).toBeUndefined()
   })
 })

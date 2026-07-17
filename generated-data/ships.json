@@ -1121,7 +1121,7 @@
   },
   {
     "id": "hoverquad-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "HoverQuad",
     "career": "",
     "role": "",
@@ -1135,7 +1135,7 @@
   },
   {
     "id": "mustang-alpha-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Alpha",
     "career": "",
     "role": "",
@@ -1149,7 +1149,7 @@
   },
   {
     "id": "mustang-alpha-citizencon2018-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Alpha CitizenCon2018",
     "career": "",
     "role": "",
@@ -1163,7 +1163,7 @@
   },
   {
     "id": "mustang-beta-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Beta",
     "career": "",
     "role": "",
@@ -1177,7 +1177,7 @@
   },
   {
     "id": "mustang-delta-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Delta",
     "career": "",
     "role": "",
@@ -1191,7 +1191,7 @@
   },
   {
     "id": "mustang-gamma-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Gamma",
     "career": "",
     "role": "",
@@ -1205,7 +1205,7 @@
   },
   {
     "id": "mustang-omega-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Mustang Omega",
     "career": "",
     "role": "",
@@ -1219,7 +1219,7 @@
   },
   {
     "id": "nomad-imported",
-    "manufacturer": "",
+    "manufacturer": "Consolidated Outland",
     "name": "Nomad",
     "career": "",
     "role": "",
@@ -1862,8 +1862,22 @@
     }
   },
   {
+    "id": "basher-imported",
+    "manufacturer": "Grey's Market",
+    "name": "Basher",
+    "career": "",
+    "role": "",
+    "ownership": "Owned",
+    "factoryLoadoutId": "basher-imported-factory-loadout",
+    "sourceEntityClass": "GLSN_Basher",
+    "classification": {
+      "rsiRoles": [],
+      "focusTags": []
+    }
+  },
+  {
     "id": "shiv-imported",
-    "manufacturer": "",
+    "manufacturer": "Grey's Market",
     "name": "Shiv",
     "career": "",
     "role": "",

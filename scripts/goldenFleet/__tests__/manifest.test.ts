@@ -19,7 +19,14 @@ describe('GF-002B: manifest generation', () => {
   it('produces exactly one row per canonical selectable hull, matching selectableShipDefinitions exactly', () => {
     const manifest = buildManifest()
     expect(manifest.length).toBe(selectableShipDefinitions.length)
-    expect(manifest.length).toBe(256)
+    // RC-001: fixing the .localization-cache staleness bug and
+    // regenerating the ship catalog against current LIVE surfaced 5 real
+    // ships a stale cache had previously hidden behind a null displayName
+    // (Grey's Basher plus 4 others — ARGO MOLE Alliance, Drake Clipper
+    // Wikelo War Special, Drake Golem Alliance, MISC Prospector Alliance).
+    // None of them are deep-imported yet, so they land as new
+    // catalog-only entries. 256 -> 261.
+    expect(manifest.length).toBe(261)
   })
 
   it('every canonical hull appears exactly once — no duplicates', () => {
@@ -48,7 +55,9 @@ describe('GF-002B: manifest generation', () => {
     // aliases each seed id to its real deep-imported definition, so
     // selectableShipDefinitions now reports them as DEEP-IMPORTED, not
     // SEED-BACKED (see the next test).
-    expect(deepImported.length).toBe(256)
+    // RC-001A: Grey's Basher promoted via the small-delta Golden Fleet
+    // workflow (real StarBreaker export, no hand-authored loadout) — 256 -> 257.
+    expect(deepImported.length).toBe(257)
     for (const e of deepImported) {
       expect(e.alreadyInRawData).toBe(true)
       expect(e.requestedEntityIdSource).toBe('sourceEntityClass')
@@ -59,13 +68,13 @@ describe('GF-002B: manifest generation', () => {
   it('every CATALOG-ONLY hull requests its own id as the entity class, and is not already in raw-data', () => {
     const manifest = buildManifest()
     const catalogOnly = manifest.filter((e) => e.sourceClass === 'CATALOG-ONLY')
-    // CWO-005 (Task 1): the last 8 variant/livery/tier SKU placeholders
-    // (Idris-P, F8A Lightning Fleetweek, F8C Lightning Plat, A2 Hercules
-    // Starlifter, C8R Pisces Rescue, 890 Jump Drug, Ursa Prison, Zeus Mk II
-    // CL Collector Indust) now correctly resolve as duplicates of their
-    // deep-imported sibling once that sibling's own canonical name was
-    // fixed to match the real RSI name — 0 remain as separate entries.
-    expect(catalogOnly.length).toBe(0)
+    // RC-001: 5 real ships (Grey's Basher + 4 others) a stale
+    // .localization-cache/ previously hid behind a null displayName are
+    // now correctly resolved and enumerated — none have been deep-imported
+    // yet, so all 5 land here as genuine catalog-only entries. 0 -> 5.
+    // RC-001A: Grey's Basher itself was then promoted (deep-imported),
+    // leaving the other 4. 5 -> 4.
+    expect(catalogOnly.length).toBe(4)
     for (const e of catalogOnly) {
       expect(e.requestedEntityId).toBe(e.canonicalId)
       expect(e.requestedEntityIdSource).toBe('catalogEntityClassId')

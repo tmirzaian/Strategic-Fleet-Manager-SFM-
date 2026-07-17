@@ -16,10 +16,23 @@ import { spawnSync } from 'node:child_process'
 
 export const GLOBAL_INI_P4K_PATH = 'Data/Localization/english/global.ini'
 
-/** Extracts Data/Localization/english/global.ini from the P4K via `p4k extract`, if not already present at `destDir`. */
+/**
+ * Extracts Data/Localization/english/global.ini from the P4K via
+ * `p4k extract`, always fresh against the P4K currently on disk.
+ *
+ * RC-001 — this used to skip extraction whenever a file already existed
+ * at `destDir`, treating it as a cache. That was a real, confirmed
+ * correctness bug: a LIVE hotfix can add new ships/components without
+ * changing the P4K's own reported version string (see CWO-006's Grey's
+ * Basher/Deathroll findings), so a stale cached extraction would silently
+ * keep resolving new entities' names to null indefinitely. The extraction
+ * itself is measured at ~0.1s for the full ~10MB file — there is no real
+ * performance cost to always re-running it, so the safest fix is to
+ * remove the caching behavior entirely rather than add staleness
+ * detection heuristics.
+ */
 export function extractGlobalIni(starbreakerExePath: string, dataP4kPath: string, destDir: string): string {
   const destPath = join(destDir, 'Data', 'Localization', 'english', 'global.ini')
-  if (existsSync(destPath)) return destPath
 
   mkdirSync(destDir, { recursive: true })
   const result = spawnSync(starbreakerExePath, ['p4k', 'extract', '--p4k', dataP4kPath, '-o', destDir, '--filter', GLOBAL_INI_P4K_PATH], {

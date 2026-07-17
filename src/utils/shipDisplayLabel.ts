@@ -25,6 +25,19 @@ import { manufacturerCodeFor, manufacturerNameForCode, manufacturerFullNameForCo
  * `manufacturerLogo.ts`'s alias table is shown exactly as given, with no
  * invented prefix or full name (Design Authority Ruling 6).
  */
+/**
+ * EWO-050 — Grey's Market ship names repeat only the brand's first word
+ * ("Grey's Basher", "Grey's Shiv" — not "Grey's Market Basher"), a
+ * nickname-style convention unlike the standard "Manufacturer Model"
+ * pattern every other reviewed manufacturer follows. Without this, the
+ * check below wouldn't recognize "Grey's Basher" as already carrying its
+ * manufacturer's identity and would prepend the full "Grey's Market",
+ * producing "Grey's Market Grey's Basher" — confirmed against GLSN_Basher
+ * before this exception existed. Only ever extended by hand review of a
+ * confirmed real case, never guessed.
+ */
+const NICKNAME_STYLE_MANUFACTURER_ROOT: Record<string, string> = { GLSN: "Grey's" }
+
 export function formatShipPickerLabel(displayName: string, manufacturer: string): string {
   const trimmedName = (displayName ?? '').trim()
   const trimmedManufacturer = (manufacturer ?? '').trim()
@@ -43,7 +56,9 @@ export function formatShipPickerLabel(displayName: string, manufacturer: string)
     return `${trimmedName} — ${trimmedManufacturer}`
   }
 
-  const alreadyPrefixed = startsWithWord(trimmedName, shortName) || startsWithWord(trimmedName, fullName)
+  const nicknameRoot = code ? NICKNAME_STYLE_MANUFACTURER_ROOT[code] : undefined
+  const alreadyPrefixed =
+    startsWithWord(trimmedName, shortName) || startsWithWord(trimmedName, fullName) || (nicknameRoot ? startsWithWord(trimmedName, nicknameRoot) : false)
   const normalizedModel = alreadyPrefixed ? trimmedName : `${shortName} ${trimmedName}`.trim()
   return `${normalizedModel} — ${fullName}`
 }
