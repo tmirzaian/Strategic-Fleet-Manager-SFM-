@@ -18,8 +18,11 @@
  * path's bulk-query mechanism cannot reach that field — see
  * catalogSchema.ts's schemaVersion 2 note).
  *
- * Writes exactly one file: generated-data/component-metadata-catalog.json.
- * This tool is intentionally isolated from src/normalizer (no coupling to
+ * Writes generated-data/component-metadata-catalog.json (full, gitignored,
+ * developer-only) and generated-data/component-metadata-catalog.runtime.json
+ * (RC-008: the small, committed subset the browser runtime actually reads
+ * — regenerated automatically here so the two never drift apart). This
+ * tool is intentionally isolated from src/normalizer (no coupling to
  * ShipNormalizer/loadoutNodeAdapter behavior) and never writes/reads any
  * other generated-data file.
  *
@@ -42,6 +45,7 @@ import { runDcbQuery, parseDcbQueryResult, extractItemDefinitionFields } from '.
 import { addRecordOrThrow, buildCatalogDocument } from './componentCatalog/buildCatalog'
 import { toPortableP4kLabel } from './componentCatalog/portablePath'
 import { writeCatalogFile } from './componentCatalog/catalogWriter'
+import { deriveRuntimeComponentCatalog, writeCatalogRuntimeFile } from './componentCatalog/catalogRuntimeWriter'
 import { collectBulkComponents, type ComponentFieldMaps } from './componentCatalog/bulkComponentCollector'
 import { runBulkFieldQuery } from './universeCatalog/dcbBulkQuery'
 import { extractGlobalIni, loadLocalizationTable } from './universeCatalog/localization'
@@ -207,6 +211,9 @@ async function main(): Promise<void> {
   const outputDir = join(REPO_ROOT, 'generated-data')
   const writtenPath = writeCatalogFile(outputDir, catalog)
 
+  const runtimeCatalog = deriveRuntimeComponentCatalog(catalog)
+  const runtimeWrittenPath = writeCatalogRuntimeFile(outputDir, runtimeCatalog)
+
   console.log(`\nWrote ${writtenPath}`)
   console.log(`  narrow-path resolved: ${narrowRecords.size}`)
   console.log(`  bulk-path resolved:   ${bulkResult.records.size}`)
@@ -215,6 +222,8 @@ async function main(): Promise<void> {
   if (unresolved.length > 0) {
     for (const u of unresolved) console.log(`    - ${u.entityClass}: ${u.reason}`)
   }
+  console.log(`\nWrote ${runtimeWrittenPath} (RC-008 committed runtime subset)`)
+  console.log(`  records: ${Object.keys(runtimeCatalog.records).length}`)
 }
 
 main().catch((err) => {

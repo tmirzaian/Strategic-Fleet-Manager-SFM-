@@ -1,46 +1,46 @@
 /// <reference types="vite/client" />
 /**
- * Browser-side loader for generated-data/ship-catalog.json (Mission M-012).
+ * Browser-side loader for generated-data/ship-catalog.runtime.json
+ * (Mission M-012, re-pointed by RC-008 — Portable Runtime Catalog
+ * Certification).
  *
- * This file is gitignored (see .gitignore's licensing-posture note,
- * ADR-005) — a fresh clone that hasn't run `npm run generate:ship-catalog`
- * locally simply doesn't have it. A plain static `import` would fail the
- * Vite build in that case; `import.meta.glob` instead resolves to an
- * empty match, which is treated the same way
- * `componentMetadataResolver.ts` already treats a missing catalog on the
- * Node side: a normal, expected "not generated yet" state, not an error.
- * Add Ship then simply falls back to the existing seed + imported roster.
+ * RC-007 (Fresh Clone Certification) found that the full catalog
+ * (`generated-data/ship-catalog.json`) is gitignored per ADR-005, so a
+ * real GitHub Beta user — with no StarBreaker, no licensed Star Citizen
+ * install — silently lost canonical ship naming and role classification
+ * for every ship outside the 12 hand-authored seed ships. RC-008's fix:
+ * `npm run generate:ship-catalog` now also derives and writes
+ * `ship-catalog.runtime.json` — a small subset containing only the fields
+ * this loader (and its consumers) actually read, stripped of dev-only
+ * provenance (`recordName`, `movementClass`, `crewSize`, `dimensions`,
+ * localization keys, etc. — confirmed unread anywhere in `src/` by direct
+ * audit). That file IS committed to git (see .gitignore's RC-008 note) —
+ * this is the whole fix. `import.meta.glob` is kept anyway (rather than a
+ * plain static import) purely as defense in depth: if the runtime file is
+ * ever missing for any reason, Add Ship degrades to the seed + imported
+ * roster instead of failing the build, exactly as it always has.
  */
-const modules = import.meta.glob<{ default: unknown }>('../../generated-data/ship-catalog.json', { eager: true })
+const modules = import.meta.glob<{ default: unknown }>('../../generated-data/ship-catalog.runtime.json', { eager: true })
 const rawCatalog = Object.values(modules)[0]?.default as ShipCatalogFile | undefined
 
 export interface ShipCatalogManufacturer {
   code: string
   name: string | null
-  localizationKey: string | null
 }
 
 export interface ShipCatalogRecord {
   entityClass: string
   category: 'ship' | 'ground_vehicle'
-  movementClass: string
   manufacturer: ShipCatalogManufacturer | null
   displayName: string | null
   careerKey: string | null
   roleKey: string | null
   careerName: string | null
   roleName: string | null
-  crewSize: number | null
-  dimensions: { x: number; y: number; z: number } | null
 }
 
 export interface ShipCatalogSource {
-  tool: string
-  toolVersion: string
-  gameBranch: string
   gameVersion: string
-  p4ChangeNum: string
-  dataP4kPath: string
   generatedAt: string
 }
 
@@ -57,7 +57,7 @@ export const hasShipCatalog = shipCatalogRecords.length > 0
 
 /** CWO-005 (Task 5) — the real Star Citizen build this catalog (and
  * therefore the currently-imported Golden Fleet) was generated against.
- * `undefined` on a fresh clone that hasn't generated the catalog locally —
- * the same honest "not generated yet" state `hasShipCatalog` already
- * documents, never a guessed or hardcoded version. */
+ * `undefined` when the runtime catalog is missing — the same honest "not
+ * generated yet" state `hasShipCatalog` already documents, never a
+ * guessed or hardcoded version. */
 export const shipCatalogSource: ShipCatalogSource | undefined = rawCatalog?.source

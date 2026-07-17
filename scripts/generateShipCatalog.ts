@@ -6,8 +6,11 @@
  * Discovers every player-ownable ship/ground vehicle in the frozen LIVE
  * P4K via bulk DataCore field queries (see scripts/universeCatalog/
  * dcbBulkQuery.ts) — no per-record StarBreaker spawns, no raw-data
- * fixture dependency, no hardcoded ship-name list. Writes exactly one
- * file: generated-data/ship-catalog.json.
+ * fixture dependency, no hardcoded ship-name list. Writes two files:
+ * generated-data/ship-catalog.json (full, gitignored, developer-only) and
+ * generated-data/ship-catalog.runtime.json (RC-008: the small, committed
+ * subset the browser runtime actually reads — regenerated automatically
+ * here so the two never drift apart).
  *
  * Usage:
  *   npm run generate:ship-catalog
@@ -27,6 +30,7 @@ import { runBulkFieldQuery } from './universeCatalog/dcbBulkQuery'
 import { extractGlobalIni, loadLocalizationTable } from './universeCatalog/localization'
 import { buildShipCatalog, type ShipCatalogFieldMaps } from './shipCatalog/shipCatalogBuilder'
 import { writeShipCatalogFile } from './shipCatalog/shipCatalogWriter'
+import { deriveRuntimeShipCatalog, writeShipCatalogRuntimeFile } from './shipCatalog/shipCatalogRuntimeWriter'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -98,6 +102,9 @@ async function main(): Promise<void> {
   const outputDir = join(REPO_ROOT, 'generated-data')
   const writtenPath = writeShipCatalogFile(outputDir, catalog)
 
+  const runtimeCatalog = deriveRuntimeShipCatalog(catalog)
+  const runtimeWrittenPath = writeShipCatalogRuntimeFile(outputDir, runtimeCatalog)
+
   const shipCount = Object.values(catalog.records).filter((r) => r.category === 'ship').length
   const groundVehicleCount = Object.values(catalog.records).filter((r) => r.category === 'ground_vehicle').length
 
@@ -108,6 +115,8 @@ async function main(): Promise<void> {
   console.log(`  included ships:            ${shipCount}`)
   console.log(`  included ground vehicles:  ${groundVehicleCount}`)
   console.log(`  total included:            ${Object.keys(catalog.records).length}`)
+  console.log(`\nWrote ${runtimeWrittenPath} (RC-008 committed runtime subset)`)
+  console.log(`  records: ${Object.keys(runtimeCatalog.records).length}`)
 }
 
 main().catch((err) => {

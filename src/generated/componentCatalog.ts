@@ -1,14 +1,21 @@
 /// <reference types="vite/client" />
 /**
- * Browser-side loader for generated-data/component-metadata-catalog.json
- * (Mission M-007, widened to the full player-usable universe by Mission
- * M-012).
+ * Browser-side loader for
+ * generated-data/component-metadata-catalog.runtime.json (Mission M-007,
+ * widened to the full player-usable universe by Mission M-012, re-pointed
+ * by RC-008 — Portable Runtime Catalog Certification).
  *
- * Gitignored — see .gitignore's licensing-posture note and ADR-005 — so
- * `import.meta.glob` is used instead of a static import, exactly like
- * src/generated/shipCatalog.ts: a fresh clone that hasn't run
- * `npm run generate:component-catalog` locally gets an empty catalog
- * here (a normal, expected state), not a build failure.
+ * RC-007 found the full catalog (gitignored per ADR-005) is a hard
+ * runtime dependency with no fallback data for a real GitHub clone.
+ * RC-008's fix: `npm run generate:component-catalog` now also derives and
+ * commits `component-metadata-catalog.runtime.json` — the small subset
+ * (`category`, `size`, `displayName`, `grade`, `manufacturerRef`) this
+ * loader actually reads, stripped of dev-only fields (`recordId`,
+ * `recordName`, `subtype`, `localizationKey`, `provenance` — confirmed
+ * unread here by direct audit). `import.meta.glob` stays in place as
+ * defense in depth, exactly like src/generated/shipCatalog.ts: if the
+ * runtime file is ever missing, this degrades to an empty catalog rather
+ * than failing the build.
  */
 
 /** DataCore's own `AttachDef.Type` -> SFM's existing port-type vocabulary
@@ -59,7 +66,7 @@ interface RawCatalogFile {
   records: Record<string, RawCatalogRecord>
 }
 
-const modules = import.meta.glob<{ default: unknown }>('../../generated-data/component-metadata-catalog.json', { eager: true })
+const modules = import.meta.glob<{ default: unknown }>('../../generated-data/component-metadata-catalog.runtime.json', { eager: true })
 const rawCatalog = Object.values(modules)[0]?.default as RawCatalogFile | undefined
 
 export interface CatalogComponentEntry {

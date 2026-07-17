@@ -12,15 +12,29 @@ coverage/
 
 # Component Catalog Generator output (Mission M-007, widened to the full
 # universe by Mission M-012) — locally-generated from a licensed Star
-# Citizen install via StarBreaker. Not committed until the licensing/
-# redistribution decision in ADR-003/ADR-005 is resolved. Narrowly scoped
-# to these files so other generated-data/*.json fixtures stay tracked as
+# Citizen install via StarBreaker. Full-fidelity, developer-only: carries
+# raw DataCore record IDs/paths/provenance never needed at runtime. Not
+# committed — see RC-008 below for what IS committed. Narrowly scoped to
+# these files so other generated-data/*.json fixtures stay tracked as
 # before.
 generated-data/component-metadata-catalog.json
 
 # Ship & Ground Vehicle Catalog Generator output (Mission M-012) — same
 # licensing posture as the component catalog above.
 generated-data/ship-catalog.json
+
+# RC-008 (Portable Runtime Catalog Certification) — deliberately NOT
+# gitignored: generated-data/ship-catalog.runtime.json and
+# generated-data/component-metadata-catalog.runtime.json are small,
+# derived subsets of the two full catalogs above, containing only
+# resolved ship/component names, manufacturer, career/role, and
+# size/grade — the same class of factual, publicly-published identity
+# data as RSI's own public ship listing, not a redistribution of raw
+# DataCore records or any extracted asset. These ARE committed so a fresh
+# GitHub clone gets certified naming/classification without StarBreaker
+# or a Star Citizen install. Regenerated automatically alongside the full
+# catalogs by `npm run generate:ship-catalog` / `generate:component-catalog`
+# — never hand-edited.
 
 # Scratch directory for the one-time English localization table extracted
 # from the P4K (Mission M-012) — a build artifact of the generators above,

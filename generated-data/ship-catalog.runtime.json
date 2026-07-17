@@ -1,0 +1,3818 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "gameVersion": "4.9.186.42610",
+    "generatedAt": "2026-07-17T05:35:32.590Z"
+  },
+  "records": {
+    "AEGS_Avenger_Stalker": {
+      "entityClass": "AEGS_Avenger_Stalker",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Avenger Stalker",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interceptor",
+      "careerName": "Combat",
+      "roleName": "Interceptor"
+    },
+    "AEGS_Avenger_Titan": {
+      "entityClass": "AEGS_Avenger_Titan",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Avenger Titan",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "AEGS_Avenger_Titan_Renegade": {
+      "entityClass": "AEGS_Avenger_Titan_Renegade",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Avenger Titan Renegade",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "AEGS_Avenger_Warlock": {
+      "entityClass": "AEGS_Avenger_Warlock",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Avenger Warlock",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "AEGS_Eclipse": {
+      "entityClass": "AEGS_Eclipse",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Eclipse",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthbomber",
+      "careerName": "Combat",
+      "roleName": "Stealth Bomber"
+    },
+    "AEGS_Gladius": {
+      "entityClass": "AEGS_Gladius",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Gladius",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "AEGS_Gladius_Dunlevy": {
+      "entityClass": "AEGS_Gladius_Dunlevy",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Gladius Dunlevy",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "AEGS_Gladius_PIR": {
+      "entityClass": "AEGS_Gladius_PIR",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Gladius Pirate",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "AEGS_Gladius_Valiant": {
+      "entityClass": "AEGS_Gladius_Valiant",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Gladius Valiant",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "AEGS_Hammerhead": {
+      "entityClass": "AEGS_Hammerhead",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Hammerhead",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@item_ShipFocus_HeavyGunship",
+      "careerName": "Combat",
+      "roleName": "Heavy Gunship"
+    },
+    "AEGS_Hammerhead_GS": {
+      "entityClass": "AEGS_Hammerhead_GS",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Hammerhead",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@item_ShipFocus_HeavyGunship",
+      "careerName": "Combat",
+      "roleName": "Heavy Gunship"
+    },
+    "AEGS_Hammerhead_Showdown": {
+      "entityClass": "AEGS_Hammerhead_Showdown",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Hammerhead 2949 Best In Show Edition",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@item_ShipFocus_HeavyGunship",
+      "careerName": "Combat",
+      "roleName": "Heavy Gunship"
+    },
+    "AEGS_Idris_M": {
+      "entityClass": "AEGS_Idris_M",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Idris-M",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_frigate",
+      "careerName": "Combat",
+      "roleName": "Frigate"
+    },
+    "AEGS_Idris_P": {
+      "entityClass": "AEGS_Idris_P",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Idris-P",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_frigate",
+      "careerName": "Combat",
+      "roleName": "Frigate"
+    },
+    "AEGS_Idris_P_Collector_Military": {
+      "entityClass": "AEGS_Idris_P_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Idris-P Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_frigate",
+      "careerName": "Combat",
+      "roleName": "Frigate"
+    },
+    "AEGS_Idris_P_FW_25": {
+      "entityClass": "AEGS_Idris_P_FW_25",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Idris-P",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_frigate",
+      "careerName": "Combat",
+      "roleName": "Frigate"
+    },
+    "AEGS_Idris_P_TSG": {
+      "entityClass": "AEGS_Idris_P_TSG",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Idris-P",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_frigate",
+      "careerName": "Combat",
+      "roleName": "Frigate"
+    },
+    "AEGS_Javelin": {
+      "entityClass": "AEGS_Javelin",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Javelin",
+      "careerKey": "@vehicle_class_destroyer",
+      "roleKey": "@vehicle_class_destroyer",
+      "careerName": "Destroyer",
+      "roleName": "Destroyer"
+    },
+    "AEGS_Reclaimer": {
+      "entityClass": "AEGS_Reclaimer",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Reclaimer",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_heavysalvage",
+      "careerName": "Industrial",
+      "roleName": "Heavy Salvage"
+    },
+    "AEGS_Reclaimer_Showdown": {
+      "entityClass": "AEGS_Reclaimer_Showdown",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Reclaimer 2949 Best In Show Edition",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_heavysalvage",
+      "careerName": "Industrial",
+      "roleName": "Heavy Salvage"
+    },
+    "AEGS_Redeemer": {
+      "entityClass": "AEGS_Redeemer",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Redeemer",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_gunship",
+      "careerName": "Combat",
+      "roleName": "Gunship"
+    },
+    "AEGS_Retaliator": {
+      "entityClass": "AEGS_Retaliator",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Retaliator",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_modular",
+      "careerName": "Combat",
+      "roleName": "Modular"
+    },
+    "AEGS_Sabre": {
+      "entityClass": "AEGS_Sabre",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Sabre",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "AEGS_Sabre_Comet": {
+      "entityClass": "AEGS_Sabre_Comet",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Sabre Comet",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "AEGS_Sabre_Firebird": {
+      "entityClass": "AEGS_Sabre_Firebird",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Sabre Firebird",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "AEGS_Sabre_Peregrine": {
+      "entityClass": "AEGS_Sabre_Peregrine",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Sabre Peregrine",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "AEGS_Sabre_Raven": {
+      "entityClass": "AEGS_Sabre_Raven",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Sabre Raven",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "AEGS_Tiburon": {
+      "entityClass": "AEGS_Tiburon",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Tiburon",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@item_ShipFocus_HeavyGunship",
+      "careerName": "Combat",
+      "roleName": "Heavy Gunship"
+    },
+    "AEGS_Vanguard": {
+      "entityClass": "AEGS_Vanguard",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Vanguard Warden",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "AEGS_Vanguard_Harbinger": {
+      "entityClass": "AEGS_Vanguard_Harbinger",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Vanguard Harbinger",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighterbomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter / Bomber"
+    },
+    "AEGS_Vanguard_Hoplite": {
+      "entityClass": "AEGS_Vanguard_Hoplite",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Vanguard Hoplite",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "AEGS_Vanguard_Sentinel": {
+      "entityClass": "AEGS_Vanguard_Sentinel",
+      "category": "ship",
+      "manufacturer": {
+        "code": "AEG",
+        "name": "Aegis Dynamics"
+      },
+      "displayName": "Aegis Vanguard Sentinel",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighterbomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter / Bomber"
+    },
+    "ANVL_Arrow": {
+      "entityClass": "ANVL_Arrow",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Arrow",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "ANVL_Asgard": {
+      "entityClass": "ANVL_Asgard",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Asgard",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ANVL_Asgard_Collector_Military": {
+      "entityClass": "ANVL_Asgard_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Asgard Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ANVL_Ballista": {
+      "entityClass": "ANVL_Ballista",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Ballista",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_Ballista_Dunestalker": {
+      "entityClass": "ANVL_Ballista_Dunestalker",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Ballista Dunestalker",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_Ballista_EA_Outlaw": {
+      "entityClass": "ANVL_Ballista_EA_Outlaw",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Ballista",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_Ballista_EA_UEE": {
+      "entityClass": "ANVL_Ballista_EA_UEE",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Ballista",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_Ballista_Snowblind": {
+      "entityClass": "ANVL_Ballista_Snowblind",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Ballista Snowblind",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_C8_Pisces": {
+      "entityClass": "ANVL_C8_Pisces",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil C8 Pisces",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_C8_Pisces_Tutorial": {
+      "entityClass": "ANVL_C8_Pisces_Tutorial",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil C8 Pisces",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_C8R_Pisces": {
+      "entityClass": "ANVL_C8R_Pisces",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil C8R Pisces Rescue",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "ANVL_C8R_Pisces_FW22NFZ": {
+      "entityClass": "ANVL_C8R_Pisces_FW22NFZ",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil C8R Pisces Rescue",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "ANVL_C8X_Pisces_Expedition": {
+      "entityClass": "ANVL_C8X_Pisces_Expedition",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil C8X Pisces Expedition",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_Carrack": {
+      "entityClass": "ANVL_Carrack",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Carrack",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "ANVL_Carrack_Expedition": {
+      "entityClass": "ANVL_Carrack_Expedition",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Carrack Expedition",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "ANVL_Centurion": {
+      "entityClass": "ANVL_Centurion",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Centurion",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "ANVL_Gladiator": {
+      "entityClass": "ANVL_Gladiator",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Gladiator",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_bomber",
+      "careerName": "Combat",
+      "roleName": "Bomber"
+    },
+    "ANVL_Hawk": {
+      "entityClass": "ANVL_Hawk",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Hawk",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "ANVL_Hornet_F7_Mk2_Collector_Mod": {
+      "entityClass": "ANVL_Hornet_F7_Mk2_Collector_Mod",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7 Hornet Mk Wikelo",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7A_Mk1": {
+      "entityClass": "ANVL_Hornet_F7A_Mk1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7A Hornet Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7A_Mk2": {
+      "entityClass": "ANVL_Hornet_F7A_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7A Hornet Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7C": {
+      "entityClass": "ANVL_Hornet_F7C",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C Hornet Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7C_Mk2": {
+      "entityClass": "ANVL_Hornet_F7C_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C Hornet Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7C_Wildfire": {
+      "entityClass": "ANVL_Hornet_F7C_Wildfire",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C Hornet Wildfire Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7CM": {
+      "entityClass": "ANVL_Hornet_F7CM",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-M Super Hornet Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7CM_Heartseeker": {
+      "entityClass": "ANVL_Hornet_F7CM_Heartseeker",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-M Hornet Heartseeker Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7CM_Mk2": {
+      "entityClass": "ANVL_Hornet_F7CM_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-M Super Hornet Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7CM_Mk2_Heartseeker": {
+      "entityClass": "ANVL_Hornet_F7CM_Mk2_Heartseeker",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-M Hornet Heartseeker Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "ANVL_Hornet_F7CR": {
+      "entityClass": "ANVL_Hornet_F7CR",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-R Hornet Tracker Mk I",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_Hornet_F7CR_Mk2": {
+      "entityClass": "ANVL_Hornet_F7CR_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-R Hornet Tracker Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Combat",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_Hornet_F7CS": {
+      "entityClass": "ANVL_Hornet_F7CS",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-S Hornet Ghost Mk I",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "ANVL_Hornet_F7CS_Mk2": {
+      "entityClass": "ANVL_Hornet_F7CS_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F7C-S Hornet Ghost Mk II",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "ANVL_Hurricane": {
+      "entityClass": "ANVL_Hurricane",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Hurricane",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8": {
+      "entityClass": "ANVL_Lightning_F8",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8_Fleetweek": {
+      "entityClass": "ANVL_Lightning_F8_Fleetweek",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8_Fleetweek_DarkBlue": {
+      "entityClass": "ANVL_Lightning_F8_Fleetweek_DarkBlue",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8_Fleetweek_Grey": {
+      "entityClass": "ANVL_Lightning_F8_Fleetweek_Grey",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8_Fleetweek_LightBlue": {
+      "entityClass": "ANVL_Lightning_F8_Fleetweek_LightBlue",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8_Fleetweek_White": {
+      "entityClass": "ANVL_Lightning_F8_Fleetweek_White",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8A Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8C": {
+      "entityClass": "ANVL_Lightning_F8C",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8C Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8C_Collector_Military": {
+      "entityClass": "ANVL_Lightning_F8C_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8C Lightning Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8C_Collector_Stealth": {
+      "entityClass": "ANVL_Lightning_F8C_Collector_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8C Lightning Wikelo Sneak Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8C_Exec": {
+      "entityClass": "ANVL_Lightning_F8C_Exec",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8C Lightning Executive Edition",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Lightning_F8C_Plat": {
+      "entityClass": "ANVL_Lightning_F8C_Plat",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil F8C Lightning",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ANVL_Paladin": {
+      "entityClass": "ANVL_Paladin",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Paladin",
+      "careerKey": "@item_ShipFocus_Gunship",
+      "roleKey": "@item_ShipFocus_Gunship",
+      "careerName": "Gunship",
+      "roleName": "Gunship"
+    },
+    "ANVL_Spartan": {
+      "entityClass": "ANVL_Spartan",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Spartan",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Combat",
+      "roleName": "Passenger"
+    },
+    "ANVL_Terrapin": {
+      "entityClass": "ANVL_Terrapin",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Terrapin",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Support",
+      "roleName": "Pathfinder"
+    },
+    "ANVL_Terrapin_Medic": {
+      "entityClass": "ANVL_Terrapin_Medic",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Terrapin Medic",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "ANVL_Terrapin_Medic_Collector_Medic": {
+      "entityClass": "ANVL_Terrapin_Medic_Collector_Medic",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Terrapin Medic Wikelo Savior Special",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "ANVL_Valkyrie": {
+      "entityClass": "ANVL_Valkyrie",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Valkyrie",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ANVL_Valkyrie_Advocacy": {
+      "entityClass": "ANVL_Valkyrie_Advocacy",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Valkyrie",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ANVL_Valkyrie_CitizenCon": {
+      "entityClass": "ANVL_Valkyrie_CitizenCon",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ANVL",
+        "name": "Anvil Aerospace"
+      },
+      "displayName": "Anvil Valkyrie Liberator",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ARGO_CSV_Cargo": {
+      "entityClass": "ARGO_CSV_Cargo",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo CSV-SM\\n",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ARGO_MOLE": {
+      "entityClass": "ARGO_MOLE",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo MOLE",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_mediummining",
+      "careerName": "Industrial",
+      "roleName": "Medium Mining"
+    },
+    "ARGO_MOLE_BTALA": {
+      "entityClass": "ARGO_MOLE_BTALA",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "ARGO MOLE Alliance",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_mediummining",
+      "careerName": "Industrial",
+      "roleName": "Medium Mining"
+    },
+    "ARGO_MOTH": {
+      "entityClass": "ARGO_MOTH",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo MOTH",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_mediumsalvage",
+      "careerName": "Industrial",
+      "roleName": "Medium Salvage"
+    },
+    "ARGO_MPUV": {
+      "entityClass": "ARGO_MPUV",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo MPUV Cargo",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ARGO_MPUV_1T": {
+      "entityClass": "ARGO_MPUV_1T",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo MPUV Tractor",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ARGO_MPUV_Transport": {
+      "entityClass": "ARGO_MPUV_Transport",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo MPUV Personnel",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Transporter",
+      "roleName": "Passenger"
+    },
+    "ARGO_RAFT": {
+      "entityClass": "ARGO_RAFT",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo RAFT",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "ARGO_RAFT_Collector_Indust": {
+      "entityClass": "ARGO_RAFT_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo RAFT Wikelo Work Special",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "ARGO_SRV": {
+      "entityClass": "ARGO_SRV",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ARGO",
+        "name": "Argo Astronautics"
+      },
+      "displayName": "Argo SRV",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_recovery",
+      "careerName": "Support",
+      "roleName": "Recovery"
+    },
+    "BANU_Defender": {
+      "entityClass": "BANU_Defender",
+      "category": "ship",
+      "manufacturer": {
+        "code": "BANU",
+        "name": "Banu"
+      },
+      "displayName": "Banu Defender",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "CNOU_HoverQuad": {
+      "entityClass": "CNOU_HoverQuad",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. HoverQuad",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Exploration",
+      "roleName": "Passenger"
+    },
+    "CNOU_Mustang_Alpha": {
+      "entityClass": "CNOU_Mustang_Alpha",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang Alpha",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_starterlightfreight",
+      "careerName": "Multi-Role",
+      "roleName": "Starter / Light Freight"
+    },
+    "CNOU_Mustang_Alpha_CitizenCon2018": {
+      "entityClass": "CNOU_Mustang_Alpha_CitizenCon2018",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang CitizenCon 2948 Edition",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_starterlightfreight",
+      "careerName": "Multi-Role",
+      "roleName": "Starter / Light Freight"
+    },
+    "CNOU_Mustang_Beta": {
+      "entityClass": "CNOU_Mustang_Beta",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang Beta",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "CNOU_Mustang_Delta": {
+      "entityClass": "CNOU_Mustang_Delta",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang Delta",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "CNOU_Mustang_Gamma": {
+      "entityClass": "CNOU_Mustang_Gamma",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang Gamma",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "CNOU_Mustang_Omega": {
+      "entityClass": "CNOU_Mustang_Omega",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Mustang Omega",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "CNOU_Nomad": {
+      "entityClass": "CNOU_Nomad",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CNOU",
+        "name": "Consolidated Outland"
+      },
+      "displayName": "C.O. Nomad",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_starterlightfreight",
+      "careerName": "Transporter",
+      "roleName": "Starter / Light Freight"
+    },
+    "CRUS_Intrepid": {
+      "entityClass": "CRUS_Intrepid",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Intrepid",
+      "careerKey": "@item_ShipFocus_Starter",
+      "roleKey": "@vehicle_class_starterlightfreight",
+      "careerName": "Starter",
+      "roleName": "Starter / Light Freight"
+    },
+    "CRUS_Spirit_A1": {
+      "entityClass": "CRUS_Spirit_A1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A1 Spirit",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_bomber",
+      "careerName": "Combat",
+      "roleName": "Bomber"
+    },
+    "CRUS_Spirit_C1": {
+      "entityClass": "CRUS_Spirit_C1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader C1 Spirit",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "CRUS_Spirit_C1_Civilian": {
+      "entityClass": "CRUS_Spirit_C1_Civilian",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader C1 Spirit Wikelo Special",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "CRUS_Star_Runner": {
+      "entityClass": "CRUS_Star_Runner",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Mercury Star Runner",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "CRUS_Starfighter_Inferno": {
+      "entityClass": "CRUS_Starfighter_Inferno",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Ares Star Fighter Inferno",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "CRUS_Starfighter_Inferno_Collector_Military": {
+      "entityClass": "CRUS_Starfighter_Inferno_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Ares Star Fighter Inferno Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "CRUS_Starfighter_Ion": {
+      "entityClass": "CRUS_Starfighter_Ion",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Ares Star Fighter Ion",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "CRUS_Starfighter_Ion_Collector_Stealth": {
+      "entityClass": "CRUS_Starfighter_Ion_Collector_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader Ares Star Fighter Ion Wikelo Sneak Special ",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "CRUS_Starlifter_A2": {
+      "entityClass": "CRUS_Starlifter_A2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavybomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Bomber"
+    },
+    "CRUS_Starlifter_A2_Bombless": {
+      "entityClass": "CRUS_Starlifter_A2_Bombless",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavybomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Bomber"
+    },
+    "CRUS_Starlifter_A2_Collector_Military": {
+      "entityClass": "CRUS_Starlifter_A2_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A2 Hercules Starlifter Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavybomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Bomber"
+    },
+    "CRUS_Starlifter_A2_EA_PIR": {
+      "entityClass": "CRUS_Starlifter_A2_EA_PIR",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavybomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Bomber"
+    },
+    "CRUS_Starlifter_A2_S3Bombs": {
+      "entityClass": "CRUS_Starlifter_A2_S3Bombs",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader A2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavybomber",
+      "careerName": "Combat",
+      "roleName": "Heavy Bomber"
+    },
+    "CRUS_Starlifter_C2": {
+      "entityClass": "CRUS_Starlifter_C2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader C2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "CRUS_Starlifter_M2": {
+      "entityClass": "CRUS_Starlifter_M2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "CRUS",
+        "name": "Crusader Industries"
+      },
+      "displayName": "Crusader M2 Hercules Starlifter",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "DRAK_Buccaneer": {
+      "entityClass": "DRAK_Buccaneer",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Buccaneer",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "DRAK_Buccaneer_EA_Outlaws": {
+      "entityClass": "DRAK_Buccaneer_EA_Outlaws",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Buccaneer",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "DRAK_Caterpillar": {
+      "entityClass": "DRAK_Caterpillar",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Caterpillar",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "DRAK_Caterpillar_Pirate": {
+      "entityClass": "DRAK_Caterpillar_Pirate",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Caterpillar Pirate",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "DRAK_Clipper": {
+      "entityClass": "DRAK_Clipper",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Clipper",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_generalist",
+      "careerName": "Exploration",
+      "roleName": "Generalist"
+    },
+    "DRAK_Clipper_Collector_Military": {
+      "entityClass": "DRAK_Clipper_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Clipper Wikelo War Special",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_generalist",
+      "careerName": "Exploration",
+      "roleName": "Generalist"
+    },
+    "DRAK_Command_Module": {
+      "entityClass": "DRAK_Command_Module",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Command Module",
+      "careerKey": "@item_ShipFocus_Transport",
+      "roleKey": "@item_ShipFocus_Transport",
+      "careerName": "Transport",
+      "roleName": "Transport"
+    },
+    "DRAK_Corsair": {
+      "entityClass": "DRAK_Corsair",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Corsair",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "DRAK_Cutlass_Black": {
+      "entityClass": "DRAK_Cutlass_Black",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutlass Black",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_lightfreight_mediumfighter",
+      "careerName": "Multi-Role",
+      "roleName": "Light Freight / Medium Fighter"
+    },
+    "DRAK_Cutlass_Blue": {
+      "entityClass": "DRAK_Cutlass_Blue",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutlass Blue",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "DRAK_Cutlass_Red": {
+      "entityClass": "DRAK_Cutlass_Red",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutlass Red",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "DRAK_Cutlass_Steel": {
+      "entityClass": "DRAK_Cutlass_Steel",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutlass Steel",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "DRAK_Cutter": {
+      "entityClass": "DRAK_Cutter",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutter",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_starterpathfinder",
+      "careerName": "Exploration",
+      "roleName": "Starter / Pathfinder"
+    },
+    "DRAK_Cutter_Rambler": {
+      "entityClass": "DRAK_Cutter_Rambler",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutter Rambler",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "DRAK_Cutter_Scout": {
+      "entityClass": "DRAK_Cutter_Scout",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Cutter Scout",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "DRAK_Dragonfly": {
+      "entityClass": "DRAK_Dragonfly",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Dragonfly",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "DRAK_Dragonfly_Pink": {
+      "entityClass": "DRAK_Dragonfly_Pink",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Dragonfly Star Kitten",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "DRAK_Dragonfly_Yellow": {
+      "entityClass": "DRAK_Dragonfly_Yellow",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Dragonfly Yellowjacket",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "DRAK_Golem": {
+      "entityClass": "DRAK_Golem",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Golem",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_startermining",
+      "careerName": "Industrial",
+      "roleName": "Starter / Light Mining"
+    },
+    "DRAK_Golem_BTALA": {
+      "entityClass": "DRAK_Golem_BTALA",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Golem Alliance",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_startermining",
+      "careerName": "Industrial",
+      "roleName": "Starter / Light Mining"
+    },
+    "DRAK_Golem_Collector_Indust": {
+      "entityClass": "DRAK_Golem_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Golem Wikelo Work Special",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_startermining",
+      "careerName": "Industrial",
+      "roleName": "Starter / Light Mining"
+    },
+    "DRAK_Golem_OX": {
+      "entityClass": "DRAK_Golem_OX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Golem OX",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Industrial",
+      "roleName": "Light Freight"
+    },
+    "DRAK_Herald": {
+      "entityClass": "DRAK_Herald",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Herald",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumdata",
+      "careerName": "Transporter",
+      "roleName": "Medium Data"
+    },
+    "DRAK_Ironclad": {
+      "entityClass": "DRAK_Ironclad",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Ironclad",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_heavyfreight",
+      "careerName": "Transporter",
+      "roleName": "Heavy Freight"
+    },
+    "DRAK_Ironclad_Assault": {
+      "entityClass": "DRAK_Ironclad_Assault",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Ironclad Assault",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavydropship",
+      "careerName": "Combat",
+      "roleName": "Heavy Dropship"
+    },
+    "DRAK_Mule": {
+      "entityClass": "DRAK_Mule",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Mule",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "DRAK_Vulture": {
+      "entityClass": "DRAK_Vulture",
+      "category": "ship",
+      "manufacturer": {
+        "code": "DRAK",
+        "name": "Drake Interplanetary"
+      },
+      "displayName": "Drake Vulture",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightsalvage",
+      "careerName": "Industrial",
+      "roleName": "Light Salvage"
+    },
+    "ESPR_Prowler": {
+      "entityClass": "ESPR_Prowler",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Prowler",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_dropship",
+      "careerName": "Combat",
+      "roleName": "Dropship"
+    },
+    "ESPR_Prowler_Utility": {
+      "entityClass": "ESPR_Prowler_Utility",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Prowler Utility",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ESPR_Prowler_Utility_Collector_Indust": {
+      "entityClass": "ESPR_Prowler_Utility_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Prowler Utility Wikelo Work Special",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ESPR_Talon": {
+      "entityClass": "ESPR_Talon",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Talon",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "ESPR_Talon_Shrike": {
+      "entityClass": "ESPR_Talon_Shrike",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Talon Shrike",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "GAMA_Railen": {
+      "entityClass": "GAMA_Railen",
+      "category": "ship",
+      "manufacturer": {
+        "code": "GAM",
+        "name": "Gatac Manufacture"
+      },
+      "displayName": "Gatac Railen",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "GAMA_Syulen": {
+      "entityClass": "GAMA_Syulen",
+      "category": "ship",
+      "manufacturer": {
+        "code": "GAM",
+        "name": "Gatac Manufacture"
+      },
+      "displayName": "Gatac Syulen",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_starterpathfinder",
+      "careerName": "Multi-Role",
+      "roleName": "Starter / Pathfinder"
+    },
+    "GAMA_Tyilui": {
+      "entityClass": "GAMA_Tyilui",
+      "category": "ship",
+      "manufacturer": {
+        "code": "GAM",
+        "name": "Gatac Manufacture"
+      },
+      "displayName": "Gatac Tyilui",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_snubcarrier",
+      "careerName": "Transporter",
+      "roleName": "Snub Carrier"
+    },
+    "GLSN_Basher": {
+      "entityClass": "GLSN_Basher",
+      "category": "ship",
+      "manufacturer": {
+        "code": "GLSN",
+        "name": "Grey's Market"
+      },
+      "displayName": "Grey's Basher",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "GLSN_Shiv": {
+      "entityClass": "GLSN_Shiv",
+      "category": "ship",
+      "manufacturer": {
+        "code": "GLSN",
+        "name": "Grey's Market"
+      },
+      "displayName": "Grey's Shiv",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "GRIN_MDC": {
+      "entityClass": "GRIN_MDC",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat MDC",
+      "careerKey": "@vehicle_focus_ground",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Ground",
+      "roleName": "Anti-Air"
+    },
+    "GRIN_MTC": {
+      "entityClass": "GRIN_MTC",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat MTC",
+      "careerKey": "@vehicle_focus_ground",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Ground",
+      "roleName": "Passenger"
+    },
+    "GRIN_PTV": {
+      "entityClass": "GRIN_PTV",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat PTV",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Transporter",
+      "roleName": "Passenger"
+    },
+    "GRIN_PTV_NoCrimesAgainst": {
+      "entityClass": "GRIN_PTV_NoCrimesAgainst",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat PTV",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Transporter",
+      "roleName": "Passenger"
+    },
+    "GRIN_ROC": {
+      "entityClass": "GRIN_ROC",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat ROC",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightmining",
+      "careerName": "Industrial",
+      "roleName": "Light Mining"
+    },
+    "GRIN_ROC_DS": {
+      "entityClass": "GRIN_ROC_DS",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat ROC-DS",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightmining",
+      "careerName": "Industrial",
+      "roleName": "Light Mining"
+    },
+    "GRIN_STV": {
+      "entityClass": "GRIN_STV",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat STV",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Transporter",
+      "roleName": "Passenger"
+    },
+    "GRIN_UTV": {
+      "entityClass": "GRIN_UTV",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "GRIN",
+        "name": "Greycat Industrial"
+      },
+      "displayName": "Greycat UTV",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Transporter",
+      "roleName": "Passenger"
+    },
+    "KRIG_L21_Wolf": {
+      "entityClass": "KRIG_L21_Wolf",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger L-21 Wolf",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "KRIG_L21_Wolf_Collector_Military": {
+      "entityClass": "KRIG_L21_Wolf_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger L-21 Wolf Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "KRIG_L21_Wolf_Collector_Stealth": {
+      "entityClass": "KRIG_L21_Wolf_Collector_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger L-21 Wolf Wikelo Sneak Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "KRIG_L22_AlphaWolf": {
+      "entityClass": "KRIG_L22_AlphaWolf",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger L-22 Alpha Wolf",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "KRIG_L22_AlphaWolf_Collector_Military": {
+      "entityClass": "KRIG_L22_AlphaWolf_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger L-22 Alpha Wolf Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "KRIG_P52_Merlin": {
+      "entityClass": "KRIG_P52_Merlin",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger P-52 Merlin",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_snubfighter",
+      "careerName": "Combat",
+      "roleName": "Snub Fighter"
+    },
+    "KRIG_P72_Archimedes": {
+      "entityClass": "KRIG_P72_Archimedes",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger P-72 Archimedes",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "KRIG_P72_Archimedes_Emerald": {
+      "entityClass": "KRIG_P72_Archimedes_Emerald",
+      "category": "ship",
+      "manufacturer": {
+        "code": "KRI",
+        "name": "Kruger Intergalactic"
+      },
+      "displayName": "Kruger P-72 Archimedes Emerald",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "MISC_Fortune": {
+      "entityClass": "MISC_Fortune",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Fortune",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightsalvage",
+      "careerName": "Industrial",
+      "roleName": "Light Salvage"
+    },
+    "MISC_Fortune_Collector_Industrial": {
+      "entityClass": "MISC_Fortune_Collector_Industrial",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Fortune Wikelo Special",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightsalvage",
+      "careerName": "Industrial",
+      "roleName": "Light Salvage"
+    },
+    "MISC_Freelancer": {
+      "entityClass": "MISC_Freelancer",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Freelancer",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "MISC_Freelancer_DUR": {
+      "entityClass": "MISC_Freelancer_DUR",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Freelancer DUR",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "MISC_Freelancer_MAX": {
+      "entityClass": "MISC_Freelancer_MAX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Freelancer MAX",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "MISC_Freelancer_MIS": {
+      "entityClass": "MISC_Freelancer_MIS",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Freelancer MIS",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_gunship",
+      "careerName": "Combat",
+      "roleName": "Gunship"
+    },
+    "MISC_Fury": {
+      "entityClass": "MISC_Fury",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Fury",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_snubfighter",
+      "careerName": "Combat",
+      "roleName": "Snub Fighter"
+    },
+    "MISC_Fury_LX": {
+      "entityClass": "MISC_Fury_LX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Fury LX",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "MISC_Fury_Miru": {
+      "entityClass": "MISC_Fury_Miru",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Fury MX",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_snubfighter",
+      "careerName": "Combat",
+      "roleName": "Snub Fighter"
+    },
+    "MISC_Hull_A": {
+      "entityClass": "MISC_Hull_A",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Hull A",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "MISC_Hull_B": {
+      "entityClass": "MISC_Hull_B",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Hull B",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "MISC_Hull_C": {
+      "entityClass": "MISC_Hull_C",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Hull C",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_heavyfreight",
+      "careerName": "Transporter",
+      "roleName": "Heavy Freight"
+    },
+    "MISC_Prospector": {
+      "entityClass": "MISC_Prospector",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Prospector",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightmining",
+      "careerName": "Industrial",
+      "roleName": "Light Mining"
+    },
+    "MISC_Prospector_BTALA": {
+      "entityClass": "MISC_Prospector_BTALA",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Prospector Alliance",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightmining",
+      "careerName": "Industrial",
+      "roleName": "Light Mining"
+    },
+    "MISC_Prospector_Collector_Indust": {
+      "entityClass": "MISC_Prospector_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Prospector Wikelo Work Special",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightmining",
+      "careerName": "Industrial",
+      "roleName": "Light Mining"
+    },
+    "MISC_Razor": {
+      "entityClass": "MISC_Razor",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Razor",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "MISC_Razor_EX": {
+      "entityClass": "MISC_Razor_EX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Razor EX",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_stealthfighter",
+      "careerName": "Combat",
+      "roleName": "Stealth Fighter"
+    },
+    "MISC_Razor_LX": {
+      "entityClass": "MISC_Razor_LX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Razor LX",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "MISC_Reliant": {
+      "entityClass": "MISC_Reliant",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Reliant Kore",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_starterlightfreight",
+      "careerName": "Transporter",
+      "roleName": "Starter / Light Freight"
+    },
+    "MISC_Reliant_Mako": {
+      "entityClass": "MISC_Reliant_Mako",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Reliant Mako",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_reporting",
+      "careerName": "Support",
+      "roleName": "Reporting"
+    },
+    "MISC_Reliant_Sen": {
+      "entityClass": "MISC_Reliant_Sen",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Reliant Sen",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_lightscience",
+      "careerName": "Industrial",
+      "roleName": "Light Science"
+    },
+    "MISC_Reliant_Tana": {
+      "entityClass": "MISC_Reliant_Tana",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Reliant Tana",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "MISC_Starfarer": {
+      "entityClass": "MISC_Starfarer",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starfarer",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_heavyrefuelling",
+      "careerName": "Support",
+      "roleName": "Heavy Refueling"
+    },
+    "MISC_Starfarer_Gemini": {
+      "entityClass": "MISC_Starfarer_Gemini",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starfarer Gemini",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_heavyrefuelling",
+      "careerName": "Support",
+      "roleName": "Heavy Refueling"
+    },
+    "MISC_Starfarer_NoInterior": {
+      "entityClass": "MISC_Starfarer_NoInterior",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starfarer",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_heavyrefuelling",
+      "careerName": "Support",
+      "roleName": "Heavy Refueling"
+    },
+    "MISC_Starlancer_Max": {
+      "entityClass": "MISC_Starlancer_Max",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starlancer MAX",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "MISC_Starlancer_TAC": {
+      "entityClass": "MISC_Starlancer_TAC",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starlancer TAC",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_gunship",
+      "careerName": "Combat",
+      "roleName": "Gunship"
+    },
+    "MISC_Starlancer_TAC_Collector_Military": {
+      "entityClass": "MISC_Starlancer_TAC_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starlancer TAC Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_gunship",
+      "careerName": "Combat",
+      "roleName": "Gunship"
+    },
+    "MISC_Starlite": {
+      "entityClass": "MISC_Starlite",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Musashi Industrial & Starflight Concern"
+      },
+      "displayName": "MISC Starlite",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_lightrefueling",
+      "careerName": "Support",
+      "roleName": "Light Refueling"
+    },
+    "MRAI_Guardian": {
+      "entityClass": "MRAI_Guardian",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "MRAI_Guardian_Military": {
+      "entityClass": "MRAI_Guardian_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "MRAI_Guardian_MX": {
+      "entityClass": "MRAI_Guardian_MX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian MX",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "MRAI_Guardian_MX_Collector_Military": {
+      "entityClass": "MRAI_Guardian_MX_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian MX Wikelo War Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "MRAI_Guardian_QI": {
+      "entityClass": "MRAI_Guardian_QI",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian QI",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "MRAI_Guardian_QI_Collector_Indust": {
+      "entityClass": "MRAI_Guardian_QI_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Guardian QI Wikelo Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "MRAI_Pulse": {
+      "entityClass": "MRAI_Pulse",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Pulse",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Combat",
+      "roleName": "Pathfinder"
+    },
+    "MRAI_Pulse_Collector_Civ": {
+      "entityClass": "MRAI_Pulse_Collector_Civ",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Pulse Wikelo Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Combat",
+      "roleName": "Pathfinder"
+    },
+    "MRAI_Pulse_LX": {
+      "entityClass": "MRAI_Pulse_LX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "MIS",
+        "name": "Mirai"
+      },
+      "displayName": "Mirai Pulse LX",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Combat",
+      "roleName": "Racing"
+    },
+    "ORIG_100i": {
+      "entityClass": "ORIG_100i",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 100i",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_starterpathfinder",
+      "careerName": "Exploration",
+      "roleName": "Starter / Pathfinder"
+    },
+    "ORIG_125a": {
+      "entityClass": "ORIG_125a",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 125a",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "ORIG_135c": {
+      "entityClass": "ORIG_135c",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 135c",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "ORIG_300i": {
+      "entityClass": "ORIG_300i",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 300i",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "ORIG_315p": {
+      "entityClass": "ORIG_315p",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 315p",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "ORIG_325a": {
+      "entityClass": "ORIG_325a",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 325a",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interceptor",
+      "careerName": "Combat",
+      "roleName": "Interceptor"
+    },
+    "ORIG_350r": {
+      "entityClass": "ORIG_350r",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 350r",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "ORIG_400i": {
+      "entityClass": "ORIG_400i",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 400i",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "ORIG_600i": {
+      "entityClass": "ORIG_600i",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 600i",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "ORIG_600i_Executive_Edition": {
+      "entityClass": "ORIG_600i_Executive_Edition",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 600i Executive Edition",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "ORIG_600i_Touring": {
+      "entityClass": "ORIG_600i_Touring",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 600i Touring",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "ORIG_85X": {
+      "entityClass": "ORIG_85X",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 85X Limited",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_Touring",
+      "careerName": "Exploration",
+      "roleName": "Touring"
+    },
+    "ORIG_890Jump": {
+      "entityClass": "ORIG_890Jump",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 890 Jump",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "ORIG_890Jump_Drug_01": {
+      "entityClass": "ORIG_890Jump_Drug_01",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin 890 Jump",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "ORIG_m50": {
+      "entityClass": "ORIG_m50",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin M50 Interceptor",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "ORIG_m80": {
+      "entityClass": "ORIG_m80",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin M80",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "ORIG_X1": {
+      "entityClass": "ORIG_X1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin X1",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Exploration",
+      "roleName": "Passenger"
+    },
+    "ORIG_X1_Force": {
+      "entityClass": "ORIG_X1_Force",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin X1 Force",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Combat",
+      "roleName": "Passenger"
+    },
+    "ORIG_X1_Velocity": {
+      "entityClass": "ORIG_X1_Velocity",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ORIG",
+        "name": "Origin Jumpworks"
+      },
+      "displayName": "Origin X1 Velocity",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@item_ShipFocus_Racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "RSI_Apollo_Medivac": {
+      "entityClass": "RSI_Apollo_Medivac",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Medivac",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Medivac_Tier_1": {
+      "entityClass": "RSI_Apollo_Medivac_Tier_1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Medivac",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Medivac_Tier_2": {
+      "entityClass": "RSI_Apollo_Medivac_Tier_2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Medivac",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Medivac_Tier_3": {
+      "entityClass": "RSI_Apollo_Medivac_Tier_3",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Medivac",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Triage": {
+      "entityClass": "RSI_Apollo_Triage",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Triage",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Triage_Collector_Stealth": {
+      "entityClass": "RSI_Apollo_Triage_Collector_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Triage Wikelo Sneak Special",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Triage_Tier_1": {
+      "entityClass": "RSI_Apollo_Triage_Tier_1",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Triage",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Triage_Tier_2": {
+      "entityClass": "RSI_Apollo_Triage_Tier_2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Triage",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Apollo_Triage_Tier_3": {
+      "entityClass": "RSI_Apollo_Triage_Tier_3",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Apollo Triage",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Aurora_GS_CL": {
+      "entityClass": "RSI_Aurora_GS_CL",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I CL",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_lightfreight",
+      "careerName": "Transporter",
+      "roleName": "Light Freight"
+    },
+    "RSI_Aurora_GS_ES": {
+      "entityClass": "RSI_Aurora_GS_ES",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I ES",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_starterpathfinder",
+      "careerName": "Multi-Role",
+      "roleName": "Starter / Pathfinder"
+    },
+    "RSI_Aurora_GS_LN": {
+      "entityClass": "RSI_Aurora_GS_LN",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I LN",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "RSI_Aurora_GS_LX": {
+      "entityClass": "RSI_Aurora_GS_LX",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I  LX",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "RSI_Aurora_GS_MR": {
+      "entityClass": "RSI_Aurora_GS_MR",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I MR",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "RSI_Aurora_GS_SE": {
+      "entityClass": "RSI_Aurora_GS_SE",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk I SE",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "RSI_Aurora_Mk2": {
+      "entityClass": "RSI_Aurora_Mk2",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Aurora Mk II",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_starterlightfighter",
+      "careerName": "Multi-Role",
+      "roleName": "Starter / Light Fighter"
+    },
+    "RSI_Constellation_Andromeda": {
+      "entityClass": "RSI_Constellation_Andromeda",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Andromeda",
+      "careerKey": "@vehicle_focus_multirole",
+      "roleKey": "@vehicle_class_mediumfreightgunshio",
+      "careerName": "Multi-Role",
+      "roleName": "Medium Freight / Gun Ship"
+    },
+    "RSI_Constellation_Aquila": {
+      "entityClass": "RSI_Constellation_Aquila",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Aquila",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "RSI_Constellation_Phoenix": {
+      "entityClass": "RSI_Constellation_Phoenix",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Phoenix",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "RSI_Constellation_Phoenix_Emerald": {
+      "entityClass": "RSI_Constellation_Phoenix_Emerald",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Phoenix Emerald",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "RSI_Constellation_Phoenix_Piano": {
+      "entityClass": "RSI_Constellation_Phoenix_Piano",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Phoenix",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Exploration",
+      "roleName": "Luxury Touring"
+    },
+    "RSI_Constellation_Taurus": {
+      "entityClass": "RSI_Constellation_Taurus",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Taurus",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "RSI_Constellation_Taurus_Military": {
+      "entityClass": "RSI_Constellation_Taurus_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Constellation Taurus Wikelo War Special",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "RSI_Hermes": {
+      "entityClass": "RSI_Hermes",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Hermes",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "RSI_Lynx": {
+      "entityClass": "RSI_Lynx",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Lynx",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@item_ShipFocus_LuxuryTouring",
+      "careerName": "Transporter",
+      "roleName": "Luxury Touring"
+    },
+    "RSI_Mantis": {
+      "entityClass": "RSI_Mantis",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Mantis",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_interdiction",
+      "careerName": "Combat",
+      "roleName": "Interdiction"
+    },
+    "RSI_Meteor": {
+      "entityClass": "RSI_Meteor",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Meteor",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "RSI_Meteor_Collector_Military": {
+      "entityClass": "RSI_Meteor_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Meteor PYAM Exec",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "RSI_Meteor_Collector_Stealth": {
+      "entityClass": "RSI_Meteor_Collector_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Meteor Wikelo Sneak Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "RSI_Perseus": {
+      "entityClass": "RSI_Perseus",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Perseus",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@item_ShipFocus_HeavyGunship",
+      "careerName": "Combat",
+      "roleName": "Heavy Gunship"
+    },
+    "RSI_Polaris": {
+      "entityClass": "RSI_Polaris",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Polaris",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_corvette",
+      "careerName": "Combat",
+      "roleName": "Corvette"
+    },
+    "RSI_Polaris_Collector_Military": {
+      "entityClass": "RSI_Polaris_Collector_Military",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Polaris",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_corvette",
+      "careerName": "Combat",
+      "roleName": "Corvette"
+    },
+    "RSI_Salvation": {
+      "entityClass": "RSI_Salvation",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Salvation",
+      "careerKey": "@vehicle_focus_resources",
+      "roleKey": "@vehicle_class_startersalvage",
+      "careerName": "Industrial",
+      "roleName": "Starter / Light Salvage"
+    },
+    "RSI_Scorpius": {
+      "entityClass": "RSI_Scorpius",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Scorpius",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "RSI_Scorpius_Antares": {
+      "entityClass": "RSI_Scorpius_Antares",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Scorpius Antares",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "RSI_Scorpius_Stealth": {
+      "entityClass": "RSI_Scorpius_Stealth",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Scorpius Wikelo Sneak Special",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "RSI_Ursa_Medivac": {
+      "entityClass": "RSI_Ursa_Medivac",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Ursa Medivac",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Ursa_Medivac_Stealth": {
+      "entityClass": "RSI_Ursa_Medivac_Stealth",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Ursa Medivac Wikelo Special",
+      "careerKey": "@vehicle_focus_support",
+      "roleKey": "@vehicle_class_medical",
+      "careerName": "Support",
+      "roleName": "Medical"
+    },
+    "RSI_Ursa_Rover": {
+      "entityClass": "RSI_Ursa_Rover",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Ursa",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "RSI_Ursa_Rover_Emerald": {
+      "entityClass": "RSI_Ursa_Rover_Emerald",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Ursa Fortuna",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "RSI_Ursa_Rover_Prison": {
+      "entityClass": "RSI_Ursa_Rover_Prison",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Ursa",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "RSI_Zeus_CL": {
+      "entityClass": "RSI_Zeus_CL",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Zeus Mk II CL",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "RSI_Zeus_CL_Collector_Indust": {
+      "entityClass": "RSI_Zeus_CL_Collector_Indust",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Zeus Mk II CL",
+      "careerKey": "@vehicle_focus_transporter",
+      "roleKey": "@vehicle_class_mediumfreight",
+      "careerName": "Transporter",
+      "roleName": "Medium Freight"
+    },
+    "RSI_Zeus_ES": {
+      "entityClass": "RSI_Zeus_ES",
+      "category": "ship",
+      "manufacturer": {
+        "code": "RSI",
+        "name": "Roberts Space Industries"
+      },
+      "displayName": "RSI Zeus Mk II ES",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_expedition",
+      "careerName": "Exploration",
+      "roleName": "Expedition"
+    },
+    "TMBL_Cyclone": {
+      "entityClass": "TMBL_Cyclone",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_passenger",
+      "careerName": "Combat",
+      "roleName": "Passenger"
+    },
+    "TMBL_Cyclone_AA": {
+      "entityClass": "TMBL_Cyclone_AA",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone AA",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "TMBL_Cyclone_MT": {
+      "entityClass": "TMBL_Cyclone_MT",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone MT",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antiair",
+      "careerName": "Combat",
+      "roleName": "Anti-Air"
+    },
+    "TMBL_Cyclone_RC": {
+      "entityClass": "TMBL_Cyclone_RC",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone RC",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "TMBL_Cyclone_RN": {
+      "entityClass": "TMBL_Cyclone_RN",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone RN",
+      "careerKey": "@vehicle_focus_exploration",
+      "roleKey": "@vehicle_class_pathfinder",
+      "careerName": "Exploration",
+      "roleName": "Pathfinder"
+    },
+    "TMBL_Cyclone_TR": {
+      "entityClass": "TMBL_Cyclone_TR",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Cyclone TR",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_antivehicle",
+      "careerName": "Combat",
+      "roleName": "Anti-Vehicle"
+    },
+    "TMBL_Nova": {
+      "entityClass": "TMBL_Nova",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Nova",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavytank",
+      "careerName": "Combat",
+      "roleName": "Heavy Tank"
+    },
+    "TMBL_Storm": {
+      "entityClass": "TMBL_Storm",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Storm",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lighttank",
+      "careerName": "Combat",
+      "roleName": "Light Tank"
+    },
+    "TMBL_Storm_AA": {
+      "entityClass": "TMBL_Storm_AA",
+      "category": "ground_vehicle",
+      "manufacturer": {
+        "code": "TMBL",
+        "name": "Tumbril Land Systems"
+      },
+      "displayName": "Tumbril Storm AA",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lighttank",
+      "careerName": "Combat",
+      "roleName": "Light Tank"
+    },
+    "VNCL_Blade": {
+      "entityClass": "VNCL_Blade",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Blade",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "VNCL_Blade_Swarm": {
+      "entityClass": "VNCL_Blade_Swarm",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Blade",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "VNCL_Glaive": {
+      "entityClass": "VNCL_Glaive",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Esperia Glaive",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "VNCL_Mauler": {
+      "entityClass": "VNCL_Mauler",
+      "category": "ship",
+      "manufacturer": {
+        "code": "VNC",
+        "name": "Vanduul"
+      },
+      "displayName": "Vanduul Mauler Destroyer",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_destroyer",
+      "careerName": "Combat",
+      "roleName": "Destroyer"
+    },
+    "VNCL_Scythe": {
+      "entityClass": "VNCL_Scythe",
+      "category": "ship",
+      "manufacturer": {
+        "code": "ESPR",
+        "name": "Esperia"
+      },
+      "displayName": "Vanduul Scythe",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    },
+    "VNCL_Stinger": {
+      "entityClass": "VNCL_Stinger",
+      "category": "ship",
+      "manufacturer": {
+        "code": "VNC",
+        "name": "Vanduul"
+      },
+      "displayName": "Esperia Stinger",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_heavyfighter",
+      "careerName": "Combat",
+      "roleName": "Heavy Fighter"
+    },
+    "XIAN_Nox": {
+      "entityClass": "XIAN_Nox",
+      "category": "ship",
+      "manufacturer": {
+        "code": "XNAA",
+        "name": "Aopoa"
+      },
+      "displayName": "Aopoa Nox",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "XIAN_Nox_Collector_Mod": {
+      "entityClass": "XIAN_Nox_Collector_Mod",
+      "category": "ship",
+      "manufacturer": {
+        "code": "XNAA",
+        "name": "Aopoa"
+      },
+      "displayName": "Aopoa Nox Wikelo Special",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "XIAN_Nox_Kue": {
+      "entityClass": "XIAN_Nox_Kue",
+      "category": "ship",
+      "manufacturer": {
+        "code": "XNAA",
+        "name": "Aopoa"
+      },
+      "displayName": "Aopoa Nox Kue",
+      "careerKey": "@vehicle_focus_competition",
+      "roleKey": "@vehicle_class_racing",
+      "careerName": "Competition",
+      "roleName": "Racing"
+    },
+    "XIAN_Scout": {
+      "entityClass": "XIAN_Scout",
+      "category": "ship",
+      "manufacturer": {
+        "code": "XNAA",
+        "name": "Aopoa"
+      },
+      "displayName": "Aopoa Khartu-al",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_lightfighter",
+      "careerName": "Combat",
+      "roleName": "Light Fighter"
+    },
+    "XNAA_SanTokYai": {
+      "entityClass": "XNAA_SanTokYai",
+      "category": "ship",
+      "manufacturer": {
+        "code": "XNAA",
+        "name": "Aopoa"
+      },
+      "displayName": "Aopoa San'tok.yāi",
+      "careerKey": "@vehicle_focus_combat",
+      "roleKey": "@vehicle_class_mediumfighter",
+      "careerName": "Combat",
+      "roleName": "Medium Fighter"
+    }
+  }
+}
