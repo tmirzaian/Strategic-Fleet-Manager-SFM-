@@ -14,7 +14,7 @@ a spreadsheet by hand.
 <!-- README hero image placeholder — see docs/images/README.md for the
      expected asset. Rendered once a hero banner is commissioned. -->
 <p align="center">
-  <img src="docs/images/hero.png" alt="Strategic Fleet Manager hero banner (placeholder — asset pending)" width="100%" />
+  <img src="docs/images/hero/mission-control-banner.png" width="100%">
 </p>
 
 ## Current Capabilities
