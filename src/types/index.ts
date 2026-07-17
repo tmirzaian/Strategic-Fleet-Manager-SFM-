@@ -322,6 +322,42 @@ export interface Hardpoint {
    * (src/utils/buildProgress.ts, src/engine/logistics/*), and never
    * renders an editable target selector (src/pages/MissionComposer.tsx). */
   isStructural?: boolean
+  /** EWO-043 — the originating authoritative Port's own stable canonical id
+   * (only ever set for a deep-imported row; a hand-authored seed row has no
+   * such id and leaves this undefined). This is the strongest identity
+   * signal the reconciliation engine uses to re-match a Commander's
+   * persisted row against a changed authoritative template — see
+   * src/utils/fleetAssetReconciliation.ts. Never used for display. */
+  sourcePortId?: string
+  /** EWO-043 — explicit Commander-intent semantics for this row's
+   * `targetItem`. FOLLOW_FACTORY means the Commander never deliberately
+   * chose this target — it should keep tracking whatever the authoritative
+   * Factory item is (set on every freshly materialized Factory row, and on
+   * any Mission row slot saveMissionConfiguration filled from FACTORY
+   * without an explicit override). EXPLICIT_TARGET (or absent, for any
+   * pre-EWO-043 persisted row) means the Commander's literal choice must
+   * never be silently replaced by a template change — see
+   * src/utils/fleetAssetReconciliation.ts. */
+  targetMode?: 'FOLLOW_FACTORY' | 'EXPLICIT_TARGET'
+}
+
+/**
+ * EWO-043 — a Commander assignment whose port no longer exists in the
+ * current authoritative template for its ship. Removed ports must never
+ * silently destroy Commander intent (Task 7): the assignment is pulled out
+ * of the active, rendered Hardpoint list but preserved here in full,
+ * recoverable until the Commander explicitly resolves it (no UI/workflow
+ * for that resolution exists yet — this is the durable record it would
+ * act on). Never auto-deleted, never auto-restored.
+ */
+export interface QuarantinedAssignment {
+  id: string
+  shipId: string
+  buildId: string
+  /** The full row as it existed the moment its port disappeared upstream. */
+  hardpoint: Hardpoint
+  reason: 'PORT_REMOVED'
+  quarantinedAt: string
 }
 
 // Allowed dispositions for Hangar items. "Vendor" is intentionally excluded —

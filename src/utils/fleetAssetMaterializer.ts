@@ -77,6 +77,7 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
         groupLabel: slot.groupLabel,
         assemblyRole: slot.assemblyRole,
         isStructural: true,
+        sourcePortId: slot.sourcePortId,
       }
     }
     const { status, invalidMessage } = computeHardpointStatusWithValidation(slot.factoryItem, slot.factoryItem, slot.factoryItem, slot.type, slot.size)
@@ -102,6 +103,11 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       // see FactoryHardpointTemplate.groupLabel / Hardpoint.groupLabel.
       groupLabel: slot.groupLabel,
       assemblyRole: slot.assemblyRole,
+      sourcePortId: slot.sourcePortId,
+      // EWO-043 — a freshly materialized Factory row's target is always
+      // the current factory item by construction (see above); it has no
+      // Commander-chosen intent to protect, so it always follows Factory.
+      targetMode: 'FOLLOW_FACTORY',
     }
   })
 

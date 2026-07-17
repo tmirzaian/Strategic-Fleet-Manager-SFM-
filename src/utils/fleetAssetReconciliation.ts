@@ -1,0 +1,218 @@
+import type { Hardpoint, QuarantinedAssignment } from '../types'
+import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
+import { computeHardpointStatusWithValidation } from './hardpointStatus'
+
+export interface ReconciliationResult {
+  /** The Build's full, current row set: matched old rows (Commander intent
+   * preserved) plus any genuinely new template rows, in that order. */
+  hardpoints: Hardpoint[]
+  /** Old rows whose port no longer exists anywhere in the new template —
+   * pulled out of the active/rendered set but never deleted (Task 7). */
+  quarantined: QuarantinedAssignment[]
+  /** Old slotLabel -> new slotLabel, for every matched row whose label
+   * changed (e.g. an upstream rename/hierarchy change, Scenario D). The
+   * caller uses this to migrate the ship's shared `installedLoadouts`
+   * entries, which are themselves keyed by slotLabel. */
+  slotLabelMigrations: Array<{ oldSlotLabel: string; newSlotLabel: string }>
+}
+
+/** The portion of a path-style slotLabel ("Parent — Child") after the last
+ * separator — used to compare a row's own local name independent of its
+ * parent's (possibly renamed) label. A label with no separator is its own
+ * local label (a top-level or hand-authored seed row). */
+function localLabel(slotLabel: string): string {
+  const idx = slotLabel.lastIndexOf(' — ')
+  return idx === -1 ? slotLabel : slotLabel.slice(idx + 3)
+}
+
+/**
+ * EWO-043 (Task 1/5) — reconciles one Build's previously-persisted
+ * Hardpoint rows against the CURRENT authoritative template for its ship.
+ *
+ * Match precedence, strongest first (Task 5) — a later tier is only ever
+ * consulted for a row the earlier tiers left unmatched, and every tier
+ * only accepts a candidate that is unambiguous, never a guess among
+ * several equally-plausible siblings:
+ *   1. `sourcePortId` — the stable canonical Port id, when both sides carry one.
+ *   2. Parent hierarchy — once a row's own parent has already been matched
+ *      (by any tier), look among that new parent's children for the same
+ *      local label (the part of the label after the parent segment) and type.
+ *      This is what lets a renamed parent (Scenario D) still resolve its
+ *      children correctly even though the child's own full path-style
+ *      label changed too.
+ *   3. Exact slotLabel — the full label is unchanged (covers unparented/
+ *      top-level rows whose own name didn't change).
+ *   4. Same scope (matched parent, or top-level) + same type + same size,
+ *      but only when exactly one unclaimed candidate exists in that scope.
+ * Anything left unmatched is quarantined (Task 7) — removed from the
+ * active row set, never deleted, fully recoverable.
+ *
+ * Factory data (factoryItem/type/size/slotLabel/sourcePortId/isStructural)
+ * always comes from the NEW template row (Task 2 — Factory data is never
+ * stale). `installedItem` is carried over from the matched old row as a
+ * default (Task 3) — the store overlays the ship's authoritative
+ * `installedLoadouts` record on top afterward, which is the true single
+ * source of truth for "what's installed." `targetItem` is carried over
+ * literally UNLESS the old row's `targetMode` is `FOLLOW_FACTORY`, in
+ * which case it tracks the new factory item exactly like a Factory-kind
+ * row would (Task 4 + Task 8) — an explicit Commander target is never
+ * silently replaced; status is always recomputed against the NEW port
+ * shape, so a target that's become incompatible is flagged, not left
+ * showing a stale 'OK' (Task 4).
+ *
+ * Every new template row nothing old claims is a genuinely new port
+ * (Task 6): materialized fresh, factory-current, Installed/Target empty.
+ */
+export function reconcileBuildHardpoints(
+  shipId: string,
+  buildId: string,
+  oldHardpoints: Hardpoint[],
+  newTemplate: FactoryHardpointTemplate[]
+): ReconciliationResult {
+  const oldByLabel = new Map<string, Hardpoint>(oldHardpoints.map((h) => [h.slotLabel, h]))
+  const newBySourcePortId = new Map<string, FactoryHardpointTemplate>()
+  const newBySlotLabel = new Map<string, FactoryHardpointTemplate>()
+  const newChildrenByParent = new Map<string | undefined, FactoryHardpointTemplate[]>()
+  for (const row of newTemplate) {
+    if (row.sourcePortId) newBySourcePortId.set(row.sourcePortId, row)
+    newBySlotLabel.set(row.slotLabel, row)
+    const key = row.parentSlotLabel
+    if (!newChildrenByParent.has(key)) newChildrenByParent.set(key, [])
+    newChildrenByParent.get(key)!.push(row)
+  }
+
+  const claimed = new Set<FactoryHardpointTemplate>()
+  const matchOf = new Map<string, FactoryHardpointTemplate>()
+
+  // Tier 1 — sourcePortId.
+  for (const old of oldHardpoints) {
+    if (old.sourcePortId) {
+      const m = newBySourcePortId.get(old.sourcePortId)
+      if (m && !claimed.has(m)) {
+        matchOf.set(old.id, m)
+        claimed.add(m)
+      }
+    }
+  }
+
+  // Tier 2 — parent hierarchy + local label + type. Iterated to a fixed
+  // point so a chain of tier-2-only matches (parent resolved via tier 2
+  // itself) still resolves top-down; real hierarchies are shallow (2-3
+  // levels), so this converges in a handful of passes at most.
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const old of oldHardpoints) {
+      if (matchOf.has(old.id) || !old.parentSlotLabel) continue
+      const oldParent = oldByLabel.get(old.parentSlotLabel)
+      const parentMatch = oldParent ? matchOf.get(oldParent.id) : undefined
+      if (!parentMatch) continue
+      const localOld = localLabel(old.slotLabel)
+      const siblings = newChildrenByParent.get(parentMatch.slotLabel) ?? []
+      const found = siblings.find((s) => !claimed.has(s) && localLabel(s.slotLabel) === localOld && s.type === old.type)
+      if (found) {
+        matchOf.set(old.id, found)
+        claimed.add(found)
+        changed = true
+      }
+    }
+  }
+
+  // Tier 3 — exact slotLabel (unparented/top-level rows whose name is unchanged).
+  for (const old of oldHardpoints) {
+    if (matchOf.has(old.id)) continue
+    const m = newBySlotLabel.get(old.slotLabel)
+    if (m && !claimed.has(m)) {
+      matchOf.set(old.id, m)
+      claimed.add(m)
+    }
+  }
+
+  // Tier 4 — same scope + type + size, only when unambiguous.
+  for (const old of oldHardpoints) {
+    if (matchOf.has(old.id)) continue
+    let scopeKey: string | undefined
+    if (old.parentSlotLabel) {
+      const oldParent = oldByLabel.get(old.parentSlotLabel)
+      const parentMatch = oldParent ? matchOf.get(oldParent.id) : undefined
+      if (!parentMatch) continue // parent itself unresolved — no safe scope to search
+      scopeKey = parentMatch.slotLabel
+    }
+    const pool = newChildrenByParent.get(scopeKey) ?? []
+    const candidates = pool.filter((s) => !claimed.has(s) && s.type === old.type && s.size === old.size)
+    if (candidates.length === 1) {
+      matchOf.set(old.id, candidates[0])
+      claimed.add(candidates[0])
+    }
+  }
+
+  const hardpoints: Hardpoint[] = []
+  const quarantined: QuarantinedAssignment[] = []
+  const slotLabelMigrations: Array<{ oldSlotLabel: string; newSlotLabel: string }> = []
+  const now = new Date().toISOString()
+
+  for (const old of oldHardpoints) {
+    const newRow = matchOf.get(old.id)
+    if (!newRow) {
+      quarantined.push({ id: `quarantine-${old.id}-${Date.now()}`, shipId, buildId, hardpoint: old, reason: 'PORT_REMOVED', quarantinedAt: now })
+      continue
+    }
+    if (newRow.slotLabel !== old.slotLabel) {
+      slotLabelMigrations.push({ oldSlotLabel: old.slotLabel, newSlotLabel: newRow.slotLabel })
+    }
+    const followsFactory = old.targetMode === 'FOLLOW_FACTORY'
+    const targetItem = newRow.isStructural ? '—' : followsFactory ? newRow.factoryItem : old.targetItem
+    const installedItem = newRow.isStructural ? '—' : old.installedItem
+    const { status, invalidMessage } = newRow.isStructural
+      ? { status: 'OK' as const, invalidMessage: undefined }
+      : computeHardpointStatusWithValidation(installedItem, targetItem, newRow.factoryItem, newRow.type, newRow.size)
+    hardpoints.push({
+      id: old.id,
+      shipId,
+      buildId,
+      slotLabel: newRow.slotLabel,
+      type: newRow.type,
+      size: newRow.size,
+      factoryItem: newRow.isStructural ? '—' : newRow.factoryItem,
+      installedItem,
+      targetItem,
+      status,
+      invalidMessage,
+      parentSlotLabel: newRow.parentSlotLabel,
+      groupLabel: newRow.groupLabel,
+      assemblyRole: newRow.assemblyRole,
+      isStructural: newRow.isStructural,
+      sourcePortId: newRow.sourcePortId,
+      targetMode: old.targetMode,
+    })
+  }
+
+  let freshIndex = 0
+  for (const newRow of newTemplate) {
+    if (claimed.has(newRow)) continue
+    const { status, invalidMessage } = newRow.isStructural
+      ? { status: 'OK' as const, invalidMessage: undefined }
+      : computeHardpointStatusWithValidation('—', '—', newRow.factoryItem, newRow.type, newRow.size)
+    hardpoints.push({
+      id: `${buildId}-hp-new-${freshIndex++}`,
+      shipId,
+      buildId,
+      slotLabel: newRow.slotLabel,
+      type: newRow.type,
+      size: newRow.size,
+      factoryItem: newRow.isStructural ? '—' : newRow.factoryItem,
+      installedItem: newRow.isStructural ? '—' : '—',
+      targetItem: newRow.isStructural ? '—' : '—',
+      status,
+      invalidMessage,
+      parentSlotLabel: newRow.parentSlotLabel,
+      groupLabel: newRow.groupLabel,
+      assemblyRole: newRow.assemblyRole,
+      isStructural: newRow.isStructural,
+      sourcePortId: newRow.sourcePortId,
+      targetMode: 'FOLLOW_FACTORY',
+    })
+  }
+
+  return { hardpoints, quarantined, slotLabelMigrations }
+}

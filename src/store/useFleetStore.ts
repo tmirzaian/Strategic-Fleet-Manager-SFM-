@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate, SeedAssetOverride } from '../types'
+import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate, SeedAssetOverride, QuarantinedAssignment } from '../types'
 import { ships as seedShips, builds as seedBuilds, hardpoints as seedHardpoints, hangarItems as seedHangarItems, initialLog } from '../data/seed'
 import { computeHardpointStatusWithValidation } from '../utils/hardpointStatus'
 import { shipDefinitions as allShipDefinitions, selectableShipDefinitions, shipDefinitionById, shipFactoryTemplates } from '../data/shipDefinitions'
 import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
 import { materializeFleetAsset } from '../utils/fleetAssetMaterializer'
+import { reconcileBuildHardpoints } from '../utils/fleetAssetReconciliation'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
@@ -19,7 +20,11 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // has none of these fields, which `migrate` below treats as "no custom
 // Loadouts recorded yet" (an honest, correct description of that save),
 // not an error.
-const PERSIST_VERSION = 6
+// EWO-043: bumped 6 -> 7 to add quarantinedAssignments — a pre-7 save
+// simply has none, which `migrate` below treats as "nothing has ever been
+// quarantined yet" (correct for a save written before reconciliation
+// existed), not an error.
+const PERSIST_VERSION = 7
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -95,6 +100,11 @@ interface FleetState {
   // localStorage entry exists yet" from "a save exists and the fleet is
   // intentionally empty" — both cases can legitimately show zero ships.
   hasPersistedState: boolean
+  // EWO-043 — Commander assignments whose port no longer exists in the
+  // current authoritative template (see src/utils/fleetAssetReconciliation.ts).
+  // Never auto-deleted, never auto-restored; preserved here until the
+  // Commander explicitly resolves them.
+  quarantinedAssignments: QuarantinedAssignment[]
   addFleetAsset: (
     shipDefinitionId: string,
     ownershipType: OwnershipType,
@@ -292,6 +302,23 @@ function isValidPersistedHardpoint(raw: unknown): raw is Hardpoint {
   )
 }
 
+/** EWO-043 — mirrors the other persisted-record validators' defensive
+ * pattern: a malformed quarantined record is dropped with a console
+ * warning, never crashes, never wipes the rest of the player's saved state. */
+function isValidPersistedQuarantinedAssignment(raw: unknown): raw is QuarantinedAssignment {
+  if (!raw || typeof raw !== 'object') return false
+  const r = raw as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    typeof r.shipId === 'string' &&
+    typeof r.buildId === 'string' &&
+    typeof r.quarantinedAt === 'string' &&
+    r.reason === 'PORT_REMOVED' &&
+    Boolean(r.hardpoint) &&
+    typeof r.hardpoint === 'object'
+  )
+}
+
 function recomputeBuildDerivedState(get: () => FleetState, set: (partial: Partial<FleetState>) => void, buildId: string) {
   const state = get()
   const buildHardpoints = state.hardpoints.filter((h) => h.buildId === buildId)
@@ -370,6 +397,7 @@ export const useFleetStore = create<FleetState>()(
       fleetAssets: migrateSeedFleetToAssets(),
       seedAssetOverrides: {},
       hasPersistedState: false,
+      quarantinedAssignments: [],
 
       addFleetAsset: (shipDefinitionId, ownershipType, nickname, priority) => {
         const definition = shipDefinitionById.get(shipDefinitionId)
@@ -647,16 +675,38 @@ export const useFleetStore = create<FleetState>()(
     const installedBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.installedItem]))
 
     const baseTargets = new Map<string, string>()
+    // EWO-043 (Task 8) — tracks whether the Commander ever deliberately
+    // chose this slot's target, independent of what value it resolves to.
+    // FOLLOW_FACTORY rows are the ones a future authoritative Factory
+    // change should keep tracking automatically (src/utils/
+    // fleetAssetReconciliation.ts); every other source is a genuine
+    // Commander decision and must never be silently replaced.
+    const baseTargetModes = new Map<string, 'FOLLOW_FACTORY' | 'EXPLICIT_TARGET'>()
     if (startingState === 'FACTORY') {
-      for (const row of referenceRows) baseTargets.set(row.slotLabel, row.factoryItem)
+      for (const row of referenceRows) {
+        baseTargets.set(row.slotLabel, row.factoryItem)
+        baseTargetModes.set(row.slotLabel, 'FOLLOW_FACTORY')
+      }
     } else if (startingState === 'INSTALLED') {
-      for (const row of referenceRows) baseTargets.set(row.slotLabel, installedBySlot.get(row.slotLabel) ?? row.factoryItem)
+      for (const row of referenceRows) {
+        baseTargets.set(row.slotLabel, installedBySlot.get(row.slotLabel) ?? row.factoryItem)
+        baseTargetModes.set(row.slotLabel, 'EXPLICIT_TARGET')
+      }
     } else if (startingState === 'EMPTY') {
-      for (const row of referenceRows) baseTargets.set(row.slotLabel, '—')
+      for (const row of referenceRows) {
+        baseTargets.set(row.slotLabel, '—')
+        baseTargetModes.set(row.slotLabel, 'EXPLICIT_TARGET')
+      }
     } else {
       const existingRows = get().hardpoints.filter((h) => h.shipId === shipId && h.buildId === existingBuildId)
       if (existingRows.length === 0) return { success: false, message: 'Existing Loadout not found for this Fleet Asset.' }
-      for (const row of existingRows) baseTargets.set(row.slotLabel, row.targetItem)
+      for (const row of existingRows) {
+        baseTargets.set(row.slotLabel, row.targetItem)
+        // A pre-EWO-043 persisted row has no targetMode at all — treated
+        // as EXPLICIT_TARGET, the safe default (never silently start
+        // auto-following Factory for a row the Commander never tagged).
+        baseTargetModes.set(row.slotLabel, row.targetMode ?? 'EXPLICIT_TARGET')
+      }
     }
 
     // A Quartermaster Template applies its intent on top of the starting
@@ -666,14 +716,20 @@ export const useFleetStore = create<FleetState>()(
       const template = get().quartermasterTemplates.find((t) => t.id === quartermasterTemplateId)
       if (template) {
         for (const assignment of template.targetAssignments) {
-          if (baseTargets.has(assignment.slotLabel)) baseTargets.set(assignment.slotLabel, assignment.targetItem)
+          if (baseTargets.has(assignment.slotLabel)) {
+            baseTargets.set(assignment.slotLabel, assignment.targetItem)
+            baseTargetModes.set(assignment.slotLabel, 'EXPLICIT_TARGET')
+          }
         }
       }
     }
 
     // Explicit per-slot edits from the Composer UI always win last.
     for (const [slotLabel, targetItem] of Object.entries(targetOverrides)) {
-      if (baseTargets.has(slotLabel)) baseTargets.set(slotLabel, targetItem)
+      if (baseTargets.has(slotLabel)) {
+        baseTargets.set(slotLabel, targetItem)
+        baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
+      }
     }
 
     const isEditingExisting = !saveAsNew && startingState === 'EXISTING' && Boolean(existingBuildId)
@@ -695,6 +751,17 @@ export const useFleetStore = create<FleetState>()(
         targetItem: target,
         status,
         invalidMessage,
+        // Mission-kind rows deliberately do NOT carry parentSlotLabel/
+        // groupLabel/assemblyRole/isStructural here (EWO-025/EWO-026) —
+        // presentation hierarchy for a saved Loadout is reconstructed at
+        // render time from the current canonical template (see
+        // src/pages/ShipDetail.tsx's overlayCanonicalHierarchy /
+        // src/pages/MissionComposer.tsx), never persisted redundantly.
+        // sourcePortId IS carried, since it costs nothing and lets
+        // src/utils/fleetAssetReconciliation.ts's strongest match tier
+        // work on a saved row exactly like a fresh Factory one.
+        sourcePortId: refRow.sourcePortId,
+        targetMode: baseTargetModes.get(refRow.slotLabel) ?? 'EXPLICIT_TARGET',
       }
     })
 
@@ -1089,6 +1156,7 @@ export const useFleetStore = create<FleetState>()(
               customBuilds?: unknown
               customBuildHardpoints?: unknown
               activeBuildByShipId?: unknown
+              quarantinedAssignments?: unknown
             }
           | null
           | undefined
@@ -1102,6 +1170,7 @@ export const useFleetStore = create<FleetState>()(
             customBuilds: [],
             customBuildHardpoints: [],
             activeBuildByShipId: {},
+            quarantinedAssignments: [],
           }
         }
 
@@ -1152,6 +1221,15 @@ export const useFleetStore = create<FleetState>()(
           }
         }
 
+        // EWO-043: a pre-7 save has no quarantinedAssignments field at all —
+        // an empty array is the honest, correct description of that save
+        // (nothing had ever been quarantined yet), not an error.
+        const validQuarantined: QuarantinedAssignment[] = []
+        for (const raw of Array.isArray(state.quarantinedAssignments) ? state.quarantinedAssignments : []) {
+          if (isValidPersistedQuarantinedAssignment(raw)) validQuarantined.push(raw)
+          else console.warn('[SFM] Skipping a persisted Quarantined Assignment record that failed migration validation:', raw)
+        }
+
         // Pre-Alpha-2.3 saves have no hangarItems/installedLoadouts field
         // at all — `undefined` here tells `merge` to keep the freshly
         // constructed defaults rather than overwriting them with nothing
@@ -1168,6 +1246,7 @@ export const useFleetStore = create<FleetState>()(
           customBuilds: validCustomBuilds,
           customBuildHardpoints: validCustomBuildHardpoints,
           activeBuildByShipId: validActiveBuildByShipId,
+          quarantinedAssignments: validQuarantined,
         }
       },
       // Fleet Assets added via "Add Ship" (or any future non-seed source)
@@ -1198,6 +1277,10 @@ export const useFleetStore = create<FleetState>()(
         // remember a Commander's setActiveBuild() choice — this single
         // small map covers both sources uniformly.
         activeBuildByShipId: Object.fromEntries(state.ships.map((s) => [s.id, s.activeBuildId])),
+        // EWO-043 — Commander assignments whose port has disappeared
+        // upstream; never rebuilt from anything else, so must round-trip
+        // verbatim like every other real player record.
+        quarantinedAssignments: state.quarantinedAssignments,
       }),
       // Replays every persisted manual Fleet Asset back into ships/builds/
       // hardpoints using the exact same materializeFleetAsset() the live
@@ -1219,6 +1302,7 @@ export const useFleetStore = create<FleetState>()(
               customBuilds?: Build[]
               customBuildHardpoints?: Hardpoint[]
               activeBuildByShipId?: Record<string, string>
+              quarantinedAssignments?: QuarantinedAssignment[]
             }
           | null
           | undefined
@@ -1334,12 +1418,89 @@ export const useFleetStore = create<FleetState>()(
         // a custom build, since `materializeFleetAsset` always labels
         // whatever it builds `kind: 'FACTORY'`) — the real, persisted
         // record always wins over that placeholder.
+        //
+        // EWO-043 — a custom Build's rows are no longer spliced back in
+        // verbatim. Each one is reconciled against the CURRENT
+        // authoritative template for its ship (see
+        // src/utils/fleetAssetReconciliation.ts): Factory data always
+        // comes from the current template (Task 2); Installed/Target are
+        // carried over from the Commander's saved row (Tasks 3/4); a row
+        // whose port no longer exists is pulled into `quarantinedAssignments`
+        // rather than silently disappearing (Task 7); a genuinely new port
+        // is appended fresh (Task 6). A ship whose current template is
+        // unavailable (e.g. its ShipDefinition no longer resolves at all)
+        // falls back to the old verbatim rows rather than losing them.
         const survivingShipIds = new Set(ships.map((s) => s.id))
         const customBuilds = (persisted?.customBuilds ?? []).filter((b) => survivingShipIds.has(b.shipId))
         const customBuildIds = new Set(customBuilds.map((b) => b.id))
+        const shipIdByAssetShipDefinitionId = new Map(fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+        const persistedCustomBuildHardpoints = (persisted?.customBuildHardpoints ?? []).filter((h) => customBuildIds.has(h.buildId))
+
+        const quarantinedAssignments: QuarantinedAssignment[] = [...(persisted?.quarantinedAssignments ?? [])]
+        const slotLabelMigrationsByShipId = new Map<string, Array<{ oldSlotLabel: string; newSlotLabel: string }>>()
+        const reconciledCustomHardpoints: Hardpoint[] = []
+        for (const build of customBuilds) {
+          const oldRowsForBuild = persistedCustomBuildHardpoints.filter((h) => h.buildId === build.id)
+          const template = shipFactoryTemplates[shipIdByAssetShipDefinitionId.get(build.shipId) ?? ''] ?? shipFactoryTemplates[build.shipId]
+          if (!template) {
+            // No current authoritative template resolves for this ship at
+            // all (as opposed to one that legitimately resolves to zero
+            // ports) — preserve the Commander's rows exactly as before
+            // rather than discarding them; there is nothing safe to
+            // reconcile against.
+            reconciledCustomHardpoints.push(...oldRowsForBuild)
+            continue
+          }
+          const { hardpoints: reconciled, quarantined, slotLabelMigrations } = reconcileBuildHardpoints(build.shipId, build.id, oldRowsForBuild, template)
+          reconciledCustomHardpoints.push(...reconciled)
+          quarantinedAssignments.push(...quarantined)
+          if (slotLabelMigrations.length > 0) {
+            const list = slotLabelMigrationsByShipId.get(build.shipId) ?? []
+            list.push(...slotLabelMigrations)
+            slotLabelMigrationsByShipId.set(build.shipId, list)
+          }
+        }
         builds = [...builds.filter((b) => !customBuildIds.has(b.id)), ...customBuilds]
-        const customBuildHardpoints = (persisted?.customBuildHardpoints ?? []).filter((h) => customBuildIds.has(h.buildId))
-        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...customBuildHardpoints]
+        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...reconciledCustomHardpoints]
+
+        // Migrate the shared, slotLabel-keyed installedLoadouts record for
+        // any port a reconciliation above renamed (Scenario D) — otherwise
+        // the Commander's real installed state would orphan under the old
+        // label the instant its port's name/hierarchy changes upstream.
+        for (const [shipId, migrations] of slotLabelMigrationsByShipId.entries()) {
+          for (const { oldSlotLabel, newSlotLabel } of migrations) {
+            installedLoadouts = installedLoadouts.map((e) => (e.shipId === shipId && e.slotLabel === oldSlotLabel ? { ...e, slotLabel: newSlotLabel } : e))
+          }
+        }
+
+        // EWO-043 (Task 3) — installedLoadouts is the single authoritative
+        // record of what's physically installed; every rendered Hardpoint
+        // row's own installedItem is kept in sync FROM it here, exactly
+        // once, for every ship (Factory rows included). Before this fix, a
+        // Factory-kind build's hardpoints were always fresh-materialized
+        // with installedItem reset to the current factory default, which
+        // silently discarded whatever the Commander had actually installed
+        // the moment that factory item wasn't already a plain factory-fresh
+        // match (CWO-003, Task 2 baseline finding).
+        const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, e.installedItem]))
+        hardpoints = hardpoints.map((h) => {
+          if (h.isStructural) return h
+          const authoritative = installedByShipAndSlot.get(`${h.shipId}::${h.slotLabel}`)
+          if (authoritative === undefined || authoritative === h.installedItem) return h
+          const { status, invalidMessage } = computeHardpointStatusWithValidation(authoritative, h.targetItem, h.factoryItem, h.type, h.size)
+          return { ...h, installedItem: authoritative, status, invalidMessage }
+        })
+
+        // Recompute every affected Build's readiness/missing — reconciled
+        // row counts/status can genuinely change (new ports, quarantined
+        // ports, re-validated targets, the installedLoadouts overlay above).
+        const affectedBuildIds = new Set([...customBuildIds, ...builds.filter((b) => survivingShipIds.has(b.shipId)).map((b) => b.id)])
+        builds = builds.map((b) => {
+          if (!affectedBuildIds.has(b.id)) return b
+          const progress = calculateBuildProgress(hardpoints.filter((h) => h.buildId === b.id))
+          const missing = hardpoints.filter((h) => h.buildId === b.id && (h.status === 'Missing' || h.status === 'Upgrade Available')).map((h) => h.targetItem)
+          return { ...b, missing, readiness: progress.percentage }
+        })
 
         // Restore each ship's actual selected Active Build. For a
         // replayed manually-added asset this is already correct (
@@ -1351,13 +1512,12 @@ export const useFleetStore = create<FleetState>()(
         const activeBuildByShipId = persisted?.activeBuildByShipId ?? {}
         ships = ships.map((s) => {
           const activeId = activeBuildByShipId[s.id]
-          if (!activeId) return s
-          const activeBuildRecord = builds.find((b) => b.id === activeId && b.shipId === s.id)
+          const activeBuildRecord = builds.find((b) => b.id === (activeId ?? s.activeBuildId) && b.shipId === s.id)
           if (!activeBuildRecord) return s
-          return { ...s, activeBuildId: activeId, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
+          return { ...s, activeBuildId: activeBuildRecord.id, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
         })
 
-        return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations, seedAssetOverrides, hasPersistedState: hadPersistedState }
+        return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations, seedAssetOverrides, hasPersistedState: hadPersistedState, quarantinedAssignments }
       },
     }
   )
