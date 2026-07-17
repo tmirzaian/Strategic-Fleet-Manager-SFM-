@@ -68,7 +68,13 @@ describe('Mission M-012: persistence incident — seed ship deletion must surviv
     expect(reloaded.getState().hasPersistedState).toBe(true)
   })
 
-  it('4. first-ever install behavior is deterministic — no localStorage entry means the full seed fleet loads and hasPersistedState is false', async () => {
+  it('4. first-ever install behavior in a developer environment is deterministic — no localStorage entry means the full seed fleet loads and hasPersistedState is false', async () => {
+    // CAT-001A: this test runs under vitest.setup.ts's global
+    // VITE_SFM_DEV_SEED_FLEET=true stub — i.e., it documents the
+    // opted-in developer/demo experience specifically, not what a real
+    // Beta Commander sees on a genuinely fresh install. See
+    // src/store/__tests__/newCommanderInitialization.test.ts for the
+    // real-Commander behavior (flag disabled), which is empty instead.
     expect(localStorage.getItem('sfm-fleet-store')).toBeNull()
 
     vi.resetModules()

@@ -24,7 +24,13 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // simply has none, which `migrate` below treats as "nothing has ever been
 // quarantined yet" (correct for a save written before reconciliation
 // existed), not an error.
-const PERSIST_VERSION = 7
+// CAT-001A: bumped 7 -> 8 — not to add a field to migrate, but to detect
+// one: `migrate` only ever runs when a save's own stored version differs
+// from PERSIST_VERSION, so this bump is what lets a save written under
+// any version <= 7 be recognized, exactly once, as a genuinely
+// pre-existing installation whose Commander legitimately already had the
+// demo fleet — see `seedFleetLegacyInstall` below.
+const PERSIST_VERSION = 8
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -63,6 +69,53 @@ function deriveInitialInstalledLoadouts(ships: Ship[], hardpoints: Hardpoint[]):
   return entries
 }
 
+/**
+ * CAT-001A (Beta release blocker) — src/data/seed.ts's 12-ship fleet,
+ * hangar, and Captain's Log entries are historical Alpha-era development/
+ * demo content. Commander Acceptance Testing confirmed a genuinely fresh
+ * browser origin (empty Local Storage, empty Session Storage) still
+ * displayed this fleet — because it was unconditionally baked into this
+ * store's own default state (below) AND into `merge`'s baseline, with no
+ * gate distinguishing "brand new Commander" from "developer running the
+ * app locally." IndexedDB was not involved at all — this store only ever
+ * uses `localStorage` (see `storage:` below).
+ *
+ * `VITE_SFM_DEV_SEED_FLEET` is read only from Vite's env system — set it
+ * to "true" in a local, gitignored `.env.local` (never committed, never
+ * present in a release package) to opt back into the demo fleet for local
+ * development. Deliberately NOT `import.meta.env.DEV`: the Beta batch
+ * launchers (Start Strategic Fleet Manager.bat) run `npm run dev`, so
+ * `import.meta.env.DEV` is true for real Commanders too and would not
+ * have fixed anything.
+ */
+const DEV_SEED_FLEET_ENABLED = import.meta.env.VITE_SFM_DEV_SEED_FLEET === 'true'
+
+interface SeedFleetBaseline {
+  ships: Ship[]
+  builds: Build[]
+  hardpoints: Hardpoint[]
+  hangarItems: HangarItem[]
+  log: LogEntry[]
+  installedLoadouts: InstalledLoadoutEntry[]
+  fleetAssets: FleetAsset[]
+}
+
+/** The full Alpha-era demo fleet, materialized fresh — used only when it should actually be shown (see DEV_SEED_FLEET_ENABLED and `merge`'s `includeSeedBaseline` below). */
+function buildSeedFleetBaseline(): SeedFleetBaseline {
+  return {
+    ships: withResolvedSeedImages(seedShips),
+    builds: [...seedBuilds],
+    hardpoints: [...seedHardpoints],
+    hangarItems: [...seedHangarItems],
+    log: [...initialLog],
+    installedLoadouts: deriveInitialInstalledLoadouts(seedShips, seedHardpoints),
+    fleetAssets: migrateSeedFleetToAssets(),
+  }
+}
+
+/** A genuinely new Commander's starting state — zero ships, zero inventory, zero log — per CAT-001A's required product behavior. */
+const EMPTY_FLEET_BASELINE: SeedFleetBaseline = { ships: [], builds: [], hardpoints: [], hangarItems: [], log: [], installedLoadouts: [], fleetAssets: [] }
+
 interface FleetState {
   ships: Ship[]
   builds: Build[]
@@ -100,6 +153,17 @@ interface FleetState {
   // localStorage entry exists yet" from "a save exists and the fleet is
   // intentionally empty" — both cases can legitimately show zero ships.
   hasPersistedState: boolean
+  // CAT-001A — true only for an installation that was already running
+  // BEFORE this fix shipped (detected once, during `migrate`, via the
+  // persisted save's own stored schema version predating
+  // SEED_FLEET_GATE_VERSION) — never for a save newly created afterward,
+  // no matter how many real sessions/reloads it then accumulates. This is
+  // deliberately NOT the same signal as `hasPersistedState`: a brand-new
+  // Commander's very first Add Ship action also makes `hasPersistedState`
+  // true on their next load, but must never bring the demo fleet back.
+  // Persisted forward via `partialize` once set, so it survives every
+  // future save/reload for that installation.
+  seedFleetLegacyInstall: boolean
   // EWO-043 — Commander assignments whose port no longer exists in the
   // current authoritative template (see src/utils/fleetAssetReconciliation.ts).
   // Never auto-deleted, never auto-restored; preserved here until the
@@ -384,19 +448,20 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
 export const useFleetStore = create<FleetState>()(
   persist(
     (set, get) => ({
-      ships: withResolvedSeedImages(seedShips),
-      builds: [...seedBuilds],
-      hardpoints: [...seedHardpoints],
-      hangarItems: seedHangarItems,
-      log: initialLog,
-      installedLoadouts: deriveInitialInstalledLoadouts(seedShips, seedHardpoints),
+      // CAT-001A — this is only the pre-hydration scaffold; `persist`
+      // rehydrates synchronously from localStorage before first render for
+      // every real session, and `merge` below (not this initializer) is
+      // what actually decides whether the demo fleet appears. Kept
+      // consistent with that same decision regardless, so no seed content
+      // is ever observable even in an edge case where hydration is skipped.
+      ...(DEV_SEED_FLEET_ENABLED ? buildSeedFleetBaseline() : EMPTY_FLEET_BASELINE),
       reservations: [],
       quartermasterTemplates: seedQuartermasterTemplates,
       shipDefinitions: allShipDefinitions,
       selectableShipDefinitions,
-      fleetAssets: migrateSeedFleetToAssets(),
       seedAssetOverrides: {},
       hasPersistedState: false,
+      seedFleetLegacyInstall: DEV_SEED_FLEET_ENABLED,
       quarantinedAssignments: [],
 
       addFleetAsset: (shipDefinitionId, ownershipType, nickname, priority) => {
@@ -1145,7 +1210,7 @@ export const useFleetStore = create<FleetState>()(
       // always recomputed fresh from the authoritative records above
       // (Part 24: "Do not persist derived... Derive those from
       // authoritative player state").
-      migrate: (persistedState) => {
+      migrate: (persistedState, version) => {
         const state = persistedState as
           | {
               fleetAssets?: unknown
@@ -1160,6 +1225,16 @@ export const useFleetStore = create<FleetState>()(
             }
           | null
           | undefined
+        // CAT-001A — `migrate` only ever runs for a save whose OWN stored
+        // version predates the current PERSIST_VERSION (8) — reaching this
+        // function at all is therefore itself proof this installation
+        // already existed before this fix shipped, and its Commander
+        // legitimately had the demo fleet as their real baseline. `version`
+        // is intentionally unused beyond this check — every prior field
+        // migration below already treats "field absent" as the correct
+        // description of an old save, not something to branch on by
+        // number.
+        const isLegacyInstall = version < PERSIST_VERSION
         if (!state) {
           return {
             fleetAssets: [],
@@ -1171,6 +1246,7 @@ export const useFleetStore = create<FleetState>()(
             customBuildHardpoints: [],
             activeBuildByShipId: {},
             quarantinedAssignments: [],
+            seedFleetLegacyInstall: isLegacyInstall,
           }
         }
 
@@ -1247,6 +1323,7 @@ export const useFleetStore = create<FleetState>()(
           customBuildHardpoints: validCustomBuildHardpoints,
           activeBuildByShipId: validActiveBuildByShipId,
           quarantinedAssignments: validQuarantined,
+          seedFleetLegacyInstall: isLegacyInstall,
         }
       },
       // Fleet Assets added via "Add Ship" (or any future non-seed source)
@@ -1281,6 +1358,13 @@ export const useFleetStore = create<FleetState>()(
         // upstream; never rebuilt from anything else, so must round-trip
         // verbatim like every other real player record.
         quarantinedAssignments: state.quarantinedAssignments,
+        // CAT-001A — once true (set only by `migrate`, for a save that
+        // already existed before this fix), this must keep round-tripping
+        // forever: after the very first post-fix save/reload, this
+        // installation's stored version already matches PERSIST_VERSION,
+        // so `migrate` never runs again — this field is the only place
+        // that fact survives.
+        seedFleetLegacyInstall: state.seedFleetLegacyInstall,
       }),
       // Replays every persisted manual Fleet Asset back into ships/builds/
       // hardpoints using the exact same materializeFleetAsset() the live
@@ -1303,6 +1387,7 @@ export const useFleetStore = create<FleetState>()(
               customBuildHardpoints?: Hardpoint[]
               activeBuildByShipId?: Record<string, string>
               quarantinedAssignments?: QuarantinedAssignment[]
+              seedFleetLegacyInstall?: boolean
             }
           | null
           | undefined
@@ -1315,6 +1400,23 @@ export const useFleetStore = create<FleetState>()(
         const persistedAssets = persisted?.fleetAssets ?? []
         const seedAssetOverrides = persisted?.seedAssetOverrides ?? {}
 
+        // CAT-001A — the demo fleet is only ever a valid baseline for an
+        // installation that already existed BEFORE this fix
+        // (`seedFleetLegacyInstall`, set once by `migrate` and carried
+        // forward by `partialize` from then on) or an opted-in developer
+        // (DEV_SEED_FLEET_ENABLED). Deliberately NOT `hadPersistedState`:
+        // a brand-new Commander's very first Add Ship action also makes
+        // `hadPersistedState` true on their NEXT load, but must never
+        // bring the demo fleet back for them — `hadPersistedState` only
+        // ever answers "is this a true first-ever load," not "did this
+        // installation predate the fix." Never falls back to
+        // `currentState`, which is empty-by-default in a real build (see
+        // the store initializer above) and would otherwise leave a
+        // legacy Commander's seed-ship overrides with nothing to apply
+        // against.
+        const includeSeedBaseline = Boolean(persisted?.seedFleetLegacyInstall) || DEV_SEED_FLEET_ENABLED
+        const seedBaseline = includeSeedBaseline ? buildSeedFleetBaseline() : EMPTY_FLEET_BASELINE
+
         // Mission M-012: apply the persisted seed-fleet diff on top of the
         // fresh seed bake-in BEFORE replaying manual assets. The seed
         // ships/builds/hardpoints themselves always come from
@@ -1323,10 +1425,10 @@ export const useFleetStore = create<FleetState>()(
         // overridden here, mirroring what removeFleetAsset/
         // updateFleetAssetNickname/updateFleetAssetOwnership/
         // updateFleetProfile already do live.
-        let ships = [...currentState.ships]
-        let builds = [...currentState.builds]
-        let hardpoints = [...currentState.hardpoints]
-        const fleetAssets = currentState.fleetAssets.map((a) => {
+        let ships = [...seedBaseline.ships]
+        let builds = [...seedBaseline.builds]
+        let hardpoints = [...seedBaseline.hardpoints]
+        const fleetAssets = seedBaseline.fleetAssets.map((a) => {
           const override = seedAssetOverrides[a.id]
           if (!override) return a
           return {
@@ -1346,7 +1448,7 @@ export const useFleetStore = create<FleetState>()(
         // resolved back to the ship id — via shipDefinitionId, which for
         // every seed-migrated asset equals the plain seed ship id — before
         // it can be used to filter ships/builds/hardpoints/installedLoadouts.
-        const seedShipIdByAssetId = new Map(currentState.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+        const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
         const removedSeedShipIds = new Set(
           Object.entries(seedAssetOverrides)
             .filter(([, override]) => override.status === 'removed')
@@ -1379,11 +1481,11 @@ export const useFleetStore = create<FleetState>()(
         // Persisted Hangar/Reservations/InstalledLoadout replace the fresh
         // defaults outright when present — they're the full authoritative
         // player record, not something to merge item-by-item.
-        let installedLoadouts = persisted?.installedLoadouts ?? [...currentState.installedLoadouts]
+        let installedLoadouts = persisted?.installedLoadouts ?? [...seedBaseline.installedLoadouts]
         if (removedSeedShipIds.size > 0) {
           installedLoadouts = installedLoadouts.filter((e) => !removedSeedShipIds.has(e.shipId))
         }
-        const hangarItems = persisted?.hangarItems ?? currentState.hangarItems
+        const hangarItems = persisted?.hangarItems ?? seedBaseline.hangarItems
         const reservations = persisted?.reservations ?? currentState.reservations
 
         for (const existingAsset of persistedAssets) {
@@ -1517,7 +1619,31 @@ export const useFleetStore = create<FleetState>()(
           return { ...s, activeBuildId: activeBuildRecord.id, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
         })
 
-        return { ...currentState, ships, builds, hardpoints, fleetAssets, installedLoadouts, hangarItems, reservations, seedAssetOverrides, hasPersistedState: hadPersistedState, quarantinedAssignments }
+        return {
+          ...currentState,
+          ships,
+          builds,
+          hardpoints,
+          fleetAssets,
+          installedLoadouts,
+          hangarItems,
+          reservations,
+          seedAssetOverrides,
+          hasPersistedState: hadPersistedState,
+          // CAT-001A — carries forward only the actual legacy-install fact
+          // (set once by `migrate`), never re-derived from
+          // DEV_SEED_FLEET_ENABLED — a developer's local opt-in must not
+          // permanently stick to a save the moment it's used once.
+          seedFleetLegacyInstall: Boolean(persisted?.seedFleetLegacyInstall),
+          quarantinedAssignments,
+          // CAT-001A — the demo Captain's Log narrates the demo fleet by
+          // name; it must never outlive the fleet it describes for a
+          // genuinely new Commander. Never persisted either way (see
+          // partialize below), so this only ever affects what's shown
+          // immediately after a reload, not anything a Commander wrote
+          // during the live session via addLogEntry.
+          log: seedBaseline.log,
+        }
       },
     }
   )
