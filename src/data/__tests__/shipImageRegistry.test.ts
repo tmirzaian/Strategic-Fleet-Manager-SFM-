@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { SHIP_IMAGE_URLS } from '../shipImageRegistry'
 import { shipImageOverrides } from '../shipImageOverrides'
-import { selectableShipDefinitions, presentationImageKeyById } from '../shipDefinitions'
+import { selectableShipDefinitions, presentationImageKeyById, shipDefinitionById } from '../shipDefinitions'
 import { resolveShipImage, validRegistryUrl } from '../../utils/resolveShipImage'
 import { useFleetStore } from '../../store/useFleetStore'
 
@@ -78,6 +78,13 @@ describe('EWO-033A (Task 9/10): registry integrity and image coverage audit', ()
     const knownIds = new Set([
       ...selectableShipDefinitions.map((d) => d.id),
       ...Array.from(presentationImageKeyById.values()),
+      // MWO-001 (Task 2) — every id shipDefinitionById resolves (canonical
+      // or aliased) is a legitimate registry key: a pre-promotion seed id
+      // like "ghost"/"mole" still resolves (now to the real deep-imported
+      // definition) and its own image registry entry is still consulted,
+      // even though it's no longer itself a *selectable* (Add Ship picker)
+      // id.
+      ...Array.from(shipDefinitionById.keys()),
     ])
     const orphanKeys = Object.keys(SHIP_IMAGE_URLS).filter((k) => !knownIds.has(k))
     expect(orphanKeys).toEqual([])
@@ -114,8 +121,14 @@ describe('EWO-033A (Task 9/10): registry integrity and image coverage audit', ()
 
 describe('EWO-033A (Task 10, item 6/7): live store resolution — seed and deep-import Fleet Assets', () => {
   it('6. a seed Fleet Asset resolves its imageUrl through the registry at store construction time', () => {
-    const ghost = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
-    expect(ghost.imageUrl).toBe(SHIP_IMAGE_URLS.ghost)
+    // MWO-001 (Task 2): Ghost's real deep-import-derived name ("Hornet
+    // F7CS Mk2") never matches the Commander workbook's entry for it (a
+    // known, documented naming-mismatch limitation — see CWO-003/MWO-001),
+    // so Ghost itself now genuinely has no registry coverage. MOLE (also a
+    // seed-backed hull aliased to its real deep-import counterpart) does,
+    // and exercises the exact same resolution path.
+    const mole = useFleetStore.getState().ships.find((s) => s.id === 'mole')!
+    expect(mole.imageUrl).toBe(SHIP_IMAGE_URLS.ARGO_MOLE)
   })
 
   it('7. a deep-import Fleet Asset (materialized via Add Ship) resolves through the registry via its entity-class alias', () => {

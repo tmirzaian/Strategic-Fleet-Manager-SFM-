@@ -15,7 +15,10 @@ describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canon
   it('1/2. a fresh seed initialization resolves Cutlass Red through shipImageRegistry.ts, not just src/data/seed.ts', async () => {
     const { useFleetStore } = await import('../useFleetStore')
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'cutlass-red')!
-    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS['cutlass-red'])
+    // MWO-001 (Task 2): Cutlass Red now aliases to its real deep-imported
+    // definition, so its registry key is the raw entity class
+    // (DRAK_Cutlass_Red), not the bare seed id.
+    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Red)
     // EWO-038: the registry is now authoritatively sourced from the
     // Commander RSI workbook, which supersedes the seed file's own
     // hand-baked legacy value — the two are no longer expected to match
@@ -23,15 +26,21 @@ describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canon
     // genuinely consulted rather than depending on this coincidence).
   })
 
-  it("3. a second seed hull (Ghost) proves the behavior is general, not special-cased to Cutlass Red", async () => {
+  it("3. a second seed hull (Railen) proves the behavior is general, not special-cased to Cutlass Red", async () => {
+    // MWO-001 (Task 2): Ghost's real deep-import-derived name ("Hornet
+    // F7CS Mk2") never matches the Commander workbook's entry for it (a
+    // known, documented naming-mismatch limitation — see CWO-003/MWO-001),
+    // so Ghost itself now genuinely has no registry coverage. Railen (also
+    // a seed-backed hull aliased to its real deep-import counterpart) does,
+    // and exercises the exact same resolution path.
     const { useFleetStore } = await import('../useFleetStore')
-    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
-    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.ghost)
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'railen')!
+    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.GAMA_Railen)
   })
 
   it('15. changing shipImageRegistry.ts alone changes a seed-backed FleetAsset\'s runtime image — proving the one-file editing contract, not a coincidence of identical values', async () => {
     vi.doMock('../../data/shipImageRegistry', () => ({
-      SHIP_IMAGE_URLS: { 'cutlass-red': 'https://media.robertsspaceindustries.com/DIFFERENT-TEST-VALUE/slideshow.jpg' },
+      SHIP_IMAGE_URLS: { DRAK_Cutlass_Red: 'https://media.robertsspaceindustries.com/DIFFERENT-TEST-VALUE/slideshow.jpg' },
     }))
     const { useFleetStore } = await import('../useFleetStore')
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'cutlass-red')!
@@ -68,7 +77,7 @@ describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canon
     const { useFleetStore: reloaded } = await import('../useFleetStore')
     const ship = reloaded.getState().ships.find((s) => s.id === 'cutlass-red')!
     expect(ship.name).toBe('Redline')
-    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS['cutlass-red'])
+    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Red)
   })
 
   it('8. two independent fresh store constructions (first-run / reset-equivalent) resolve the identical image URL — idempotent', async () => {
@@ -111,10 +120,10 @@ describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canon
 
   it('13. Fleet Dashboard/Mission Control/Ship Detail all read the same ships array, so they can never disagree on imageUrl for the same asset', async () => {
     const { useFleetStore } = await import('../useFleetStore')
-    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'railen')!
     // All three pages (ShipCard, ShipRecordCard/PriorityCard, ShipHeroFrame
     // via ShipDetail) consume this exact same store array/object — there is
     // no per-page image lookup to independently drift.
-    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.ghost)
+    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.GAMA_Railen)
   })
 })

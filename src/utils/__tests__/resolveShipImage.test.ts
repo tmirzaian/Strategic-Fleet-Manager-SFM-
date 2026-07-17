@@ -27,13 +27,18 @@ describe('resolveDisplayImageUrl', () => {
 })
 
 describe('EWO-021A: resolveShipImage', () => {
+  // MWO-001 (Task 2): Ghost's real deep-import-derived name never matches
+  // the Commander workbook's entry for it (a documented naming-mismatch
+  // limitation), so Ghost itself now genuinely has no registry coverage.
+  // Prospector (also a seed-backed hull aliased to its real deep-import
+  // counterpart) does, and exercises the exact same resolution path.
   it('1. resolves a registry URL for a canonical seed id', () => {
-    expect(resolveShipImage({ id: 'ghost' })).toBe(SHIP_IMAGE_URLS.ghost)
+    expect(resolveShipImage({ id: 'prospector' })).toBe(SHIP_IMAGE_URLS.MISC_Prospector)
   })
 
   it('2. a registry URL overrides the input\'s own existing definition/generated image', () => {
-    const url = resolveShipImage({ id: 'ghost', imageUrl: 'https://example.com/some-other-photo.jpg' })
-    expect(url).toBe(SHIP_IMAGE_URLS.ghost)
+    const url = resolveShipImage({ id: 'prospector', imageUrl: 'https://example.com/some-other-photo.jpg' })
+    expect(url).toBe(SHIP_IMAGE_URLS.MISC_Prospector)
     expect(url).not.toBe('https://example.com/some-other-photo.jpg')
   })
 

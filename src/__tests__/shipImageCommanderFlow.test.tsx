@@ -46,9 +46,12 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
     const cutlassBlackImg = within(cutlassBlackCard).getByRole('img', { name: 'Cutlass Black' }) as HTMLImageElement
     expect(cutlassBlackImg.src).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
 
+    // MWO-001 (Task 2): '135c' now aliases to its real deep-imported
+    // definition too — its registry key is the raw entity class
+    // (ORIG_135c), same pattern as Cutlass Black above.
     const c135Card = screen.getByText('135c').closest('.panel') as HTMLElement
     const c135Img = within(c135Card).getByRole('img', { name: '135c' }) as HTMLImageElement
-    expect(c135Img.src).toBe(SHIP_IMAGE_URLS['135c'])
+    expect(c135Img.src).toBe(SHIP_IMAGE_URLS.ORIG_135c)
 
     // 4. All cards retain equal dimensions (same shared structural regions).
     const allCards = document.querySelectorAll('.aspect-video')

@@ -139,13 +139,17 @@ describe('EWO-021A: materializeFleetAsset resolves ship.imageUrl through the sha
   })
 
   it('a definition whose id has a registry entry gets the registry image instead of its own', () => {
+    // MWO-001 (Task 2): 'ghost' itself no longer has a direct registry
+    // entry (a documented naming-mismatch limitation), so this uses
+    // 'DRAK_Cutlass_Black' — a real, confirmed-present registry key — to
+    // exercise the same "id has a direct entry" path.
     const { ship } = materializeFleetAsset({
-      definition: { ...definition, id: 'ghost', imageUrl: 'https://example.com/own-photo.jpg' },
+      definition: { ...definition, id: 'DRAK_Cutlass_Black', imageUrl: 'https://example.com/own-photo.jpg' },
       template,
       ownershipType: 'OWNED',
       priority: 1,
     })
-    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.ghost)
+    expect(ship.imageUrl).toBe(SHIP_IMAGE_URLS.DRAK_Cutlass_Black)
   })
 
   it('10. two FleetAssets materialized from the same canonical hull (Cutlass Black) resolve the same image source', () => {
