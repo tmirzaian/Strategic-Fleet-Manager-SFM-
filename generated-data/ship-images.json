@@ -90,7 +90,589 @@
     "status": "fallback"
   },
   {
+    "shipId": "avenger-stalker-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "avenger-titan-renegade-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "avenger-warlock-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "gladius-dunlevy-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "gladius-pir-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "gladius-valiant-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hammerhead-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hammerhead-showdown-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "idris-m-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "idris-p-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "idris-p-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "javelin-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reclaimer-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reclaimer-showdown-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "redeemer-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "retaliator-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "sabre-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "sabre-comet-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "sabre-firebird-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "sabre-peregrine-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "sabre-raven-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "tiburon-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "vanguard-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "vanguard-harbinger-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "vanguard-hoplite-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "vanguard-sentinel-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
     "shipId": "valkyrie-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "arrow-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "asgard-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "asgard-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ballista-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ballista-dunestalker-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ballista-snowblind-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "c8r-pisces-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "c8x-pisces-expedition-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "c8-pisces-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "carrack-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "carrack-expedition-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "centurion-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "gladiator-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hawk-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7a-mk1-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7a-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7c-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cm-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cm-heartseeker-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cm-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cm-mk2-heartseeker-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cr-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cr-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cs-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7cs-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7c-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7c-wildfire-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hornet-f7-mk2-collector-mod-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hurricane-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lightning-f8-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lightning-f8c-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lightning-f8c-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lightning-f8c-collector-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lightning-f8c-exec-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "paladin-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "spartan-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "terrapin-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "terrapin-medic-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "terrapin-medic-collector-medic-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "valkyrie-citizencon-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "csv-cargo-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mole-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "moth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mpuv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mpuv-1t-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mpuv-transport-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "raft-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "raft-collector-indust-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "srv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "defender-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hoverquad-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-alpha-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-alpha-citizencon2018-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-beta-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-delta-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-gamma-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mustang-omega-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "nomad-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "intrepid-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "spirit-a1-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "spirit-c1-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "spirit-c1-civilian-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfighter-inferno-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfighter-inferno-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfighter-ion-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfighter-ion-collector-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlifter-a2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlifter-a2-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlifter-c2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlifter-m2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "star-runner-imported",
     "primaryUrl": null,
     "source": "FALLBACK",
     "status": "fallback"
@@ -103,6 +685,924 @@
   },
   {
     "shipId": "cutlass-black-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "buccaneer-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "caterpillar-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "caterpillar-pirate-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "clipper-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "command-module-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutlass-blue-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutlass-red-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutlass-steel-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutter-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutter-rambler-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cutter-scout-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "dragonfly-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "dragonfly-pink-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "dragonfly-yellow-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "golem-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "golem-collector-indust-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "golem-ox-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "herald-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ironclad-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ironclad-assault-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mule-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "vulture-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "prowler-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "prowler-utility-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "prowler-utility-collector-indust-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "talon-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "talon-shrike-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "railen-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "syulen-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "tyilui-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "shiv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mdc-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mtc-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ptv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "roc-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "roc-ds-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "stv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "utv-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "l21-wolf-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "l21-wolf-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "l21-wolf-collector-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "l22-alphawolf-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "l22-alphawolf-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "p52-merlin-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "p72-archimedes-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "p72-archimedes-emerald-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "fortune-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "fortune-collector-industrial-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "freelancer-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "freelancer-dur-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "freelancer-max-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "freelancer-mis-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "fury-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "fury-lx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "fury-miru-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hull-a-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hull-b-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hull-c-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "prospector-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "prospector-collector-indust-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "razor-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "razor-ex-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "razor-lx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reliant-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reliant-mako-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reliant-sen-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "reliant-tana-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfarer-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starfarer-gemini-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlancer-max-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlancer-tac-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlancer-tac-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "starlite-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-mx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-mx-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-qi-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "guardian-qi-collector-indust-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "pulse-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "pulse-collector-civ-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "pulse-lx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "100i-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "125a-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "135c-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "300i-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "315p-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "325a-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "350r-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "400i-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "600i-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "600i-executive-edition-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "600i-touring-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "85x-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "890jump-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "m50-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "m80-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "x1-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "x1-force-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "x1-velocity-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "apollo-medivac-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "apollo-triage-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "apollo-triage-collector-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-cl-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-es-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-ln-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-lx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-mr-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-gs-se-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "aurora-mk2-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-andromeda-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-aquila-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-phoenix-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-phoenix-emerald-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-taurus-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "constellation-taurus-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "hermes-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "lynx-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mantis-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "meteor-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "meteor-collector-military-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "meteor-collector-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "perseus-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "polaris-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "salvation-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "scorpius-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "scorpius-antares-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "scorpius-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ursa-medivac-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ursa-medivac-stealth-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ursa-rover-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "ursa-rover-emerald-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "zeus-cl-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "zeus-es-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-aa-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-mt-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-rc-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-rn-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "cyclone-tr-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "nova-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "storm-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "storm-aa-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "blade-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "glaive-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "mauler-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "scythe-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "stinger-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "nox-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "nox-collector-mod-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "nox-kue-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "scout-imported",
+    "primaryUrl": null,
+    "source": "FALLBACK",
+    "status": "fallback"
+  },
+  {
+    "shipId": "santokyai-imported",
     "primaryUrl": null,
     "source": "FALLBACK",
     "status": "fallback"

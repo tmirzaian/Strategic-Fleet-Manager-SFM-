@@ -25,19 +25,19 @@ beforeEach(() => {
  * inspection of raw-data/*.json and generated-data/ships.json.
  */
 describe('resolveShipStockRoleFocus — EWO-033 (Task 7): source precedence', () => {
-  it('15/22. Cutlass Red (seed) retains "Rescue / Medical"', () => {
+  it('15/22. Cutlass Red now resolves via the aliased deep-import definition (MWO-001, Task 2) — "Medical", the authoritative role', () => {
     const { fleetAssets } = useFleetStore.getState()
-    expect(resolveShipStockRoleFocus('cutlass-red', fleetAssets)).toBe('Rescue / Medical')
+    expect(resolveShipStockRoleFocus('cutlass-red', fleetAssets)).toBe('Medical')
   })
 
-  it('16/23. 135c (seed) retains "Stealth Shuttle"', () => {
+  it('16/23. 135c now resolves via the aliased deep-import definition (MWO-001, Task 2) — "Light Freight", the authoritative role', () => {
     const { fleetAssets } = useFleetStore.getState()
-    expect(resolveShipStockRoleFocus('135c', fleetAssets)).toBe('Stealth Shuttle')
+    expect(resolveShipStockRoleFocus('135c', fleetAssets)).toBe('Light Freight')
   })
 
-  it('17. Cutlass Black (the original seed Fleet Asset) resolves via its own seed role — never blank', () => {
+  it('17. Cutlass Black (the original seed Fleet Asset) now resolves via the aliased deep-import definition (MWO-001, Task 2) — the same Mission M-012 catalog fallback a freshly Added one uses, never blank', () => {
     const { fleetAssets } = useFleetStore.getState()
-    expect(resolveShipStockRoleFocus('cutlass-black', fleetAssets)).toBe('Daily Driver')
+    expect(resolveShipStockRoleFocus('cutlass-black', fleetAssets)).toBe('Light Freight / Medium Fighter')
   })
 
   it('24. a newly Add-Ship\'d Cutlass Black resolves via the Mission M-012 catalog fallback (tier 2) — its own deep-imported definition role is empty', () => {
@@ -115,7 +115,7 @@ describe('EWO-033 (Task 9): metadata coverage across every canonical hull', () =
     expect(unresolved.map((d) => d.displayName)).toEqual([])
   })
 
-  it('coverage breaks down as expected: seed + catalog-only definitions resolve at tier 1, every deep-imported definition needs tier 2', () => {
+  it('coverage breaks down as expected: every selectable definition is now deep-imported (tier 2) — CWO-005 (Task 1) let the last seed/catalog-only (tier 1) entries correctly dedup into their deep-imported sibling', () => {
     if (shipCatalogRecords.length === 0) return
     let tier1 = 0
     let tier2 = 0
@@ -126,7 +126,7 @@ describe('EWO-033 (Task 9): metadata coverage across every canonical hull', () =
       if (isDeepImported) tier2++
       else tier1++
     }
-    expect(tier1).toBeGreaterThan(0)
+    expect(tier1).toBe(0)
     expect(tier2).toBeGreaterThan(0)
     expect(tier1 + tier2).toBe(selectableShipDefinitions.length)
   })

@@ -476,7 +476,15 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
 
   it('16. the operational footer renders exactly once', () => {
     renderMissionControl()
-    expect(screen.getAllByText(/Strategic Fleet Manager · Quartermaster Edition/)).toHaveLength(1)
+    expect(screen.getAllByText(/Update Budget/)).toHaveLength(1)
+  })
+
+  // CWO-005 (Task 5): version/build identity moved out of Mission Control
+  // entirely — it now lives only in the Sidebar (SFM build) and Captain's
+  // Log (SC certification), so the bridge screen never duplicates it.
+  it('CWO-005 (Task 5) — Mission Control no longer displays app version/build identity', () => {
+    renderMissionControl()
+    expect(screen.queryByText(/Quartermaster Edition/)).not.toBeInTheDocument()
   })
 })
 

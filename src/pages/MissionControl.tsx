@@ -11,7 +11,6 @@ import CriticalMetricTile from '../components/CriticalMetricTile'
 import WorkflowDestinationCard from '../components/WorkflowDestinationCard'
 import PageEnvironment from '../components/layout/PageEnvironment'
 import { colorFor } from '../components/ReadinessBar'
-import { APP_VERSION_LABEL } from '../config/appVersion'
 import { buildProcurementList, sortProcurementList, type ProcurementSortColumn, type SortDirection } from '../utils/procurement'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
@@ -335,11 +334,11 @@ export default function MissionControl() {
       </div>
 
       {/* Operational footer — pinned to the bottom edge of the viewport when content is
-          short; existing values only (Update Budget already shown above; app version
-          already shown in the sidebar identity block). */}
-      <div className="mt-8 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] uppercase tracking-widest text-muted/70">
+          short. CWO-005 (Task 5): version/build identity is no longer shown here —
+          it lives in the Sidebar (SFM build) and Captain's Log (SC certification)
+          only, so the bridge screen never duplicates or drifts from either. */}
+      <div className="mt-8 pt-6 border-t border-white/5 flex items-center text-[10px] uppercase tracking-widest text-muted/70">
         <div>Update Budget · 2 min</div>
-        <div>Strategic Fleet Manager · Quartermaster Edition · {APP_VERSION_LABEL}</div>
       </div>
     </div>
   )

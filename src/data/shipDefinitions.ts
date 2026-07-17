@@ -47,6 +47,89 @@ export interface FactoryHardpointTemplate {
   assemblyRole?: string
   /** EWO-020 — mirrors Port.isStructural; see Hardpoint.isStructural's doc comment. */
   isStructural?: boolean
+  /** EWO-043 — the originating authoritative Port's own stable canonical
+   * id (see src/normalizer's Port.id), when this row comes from the deep
+   * import pipeline. A hand-authored seed row has no such id and leaves
+   * this undefined. This is the strongest signal
+   * src/utils/fleetAssetReconciliation.ts uses to re-match a Commander's
+   * persisted Hardpoint row across an authoritative template change. */
+  sourcePortId?: string
+}
+
+const shipCatalogRecordByEntityClass = new Map(shipCatalogRecords.map((r) => [r.entityClass, r]))
+
+/**
+ * CWO-005 (Task 1) — a handful of raw catalog `displayName` strings carry
+ * source-data whitespace artifacts (a literal stray "\n" on Argo CSV-SM, a
+ * doubled space on the Aurora Mk I LX) that have nothing to do with name
+ * derivation — confirmed via direct audit to be the only two affected
+ * records in the entire 299-record catalog. Collapsed unconditionally so
+ * neither slips into a Commander-facing name.
+ */
+function sanitizeCatalogDisplayName(raw: string): string {
+  return raw.replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * CWO-005 (Task 1) — the universe ship catalog's own manufacturer.name is
+ * occasionally the full in-fiction company name ("Musashi Industrial &
+ * Starflight Concern" for MISC) or a differently-cased short form
+ * ("Consolidated Outland", abbreviated "C.O." in the localized name, not
+ * its "CNOU" DataCore code) rather than the literal prefix token the
+ * localized displayName actually uses — confirmed by direct audit to be
+ * the only two codes affected among all 256 deep-imported hulls.
+ */
+const DEEP_IMPORT_MANUFACTURER_PREFIX_ALIASES: Record<string, string> = { MIS: 'MISC', CNOU: 'C.O.' }
+
+/** Strips a manufacturer-name prefix from a real, official localized ship
+ * name, only when the manufacturer info corroborates the prefix really is
+ * one (full name, DataCore code, or a reviewed alias) — returns null
+ * (never a guess) when it doesn't, so the caller can fall back safely. */
+function stripCorroboratedManufacturerPrefix(displayName: string, manufacturerName: string | null | undefined, manufacturerCode: string | null | undefined): string | null {
+  const firstWord = displayName.split(' ')[0]
+  if (!firstWord) return displayName
+  const matchesFullName = manufacturerName?.toLowerCase().startsWith(firstWord.toLowerCase())
+  const matchesCode = manufacturerCode?.toLowerCase() === firstWord.toLowerCase()
+  const matchesKnownAlias = manufacturerCode ? DEEP_IMPORT_MANUFACTURER_PREFIX_ALIASES[manufacturerCode]?.toLowerCase() === firstWord.toLowerCase() : false
+  if (matchesFullName || matchesCode || matchesKnownAlias) return displayName.slice(firstWord.length).trim()
+  return null
+}
+
+/**
+ * CWO-005 (Task 1) — Commander-facing canonical name resolution for
+ * deep-imported ships. `deriveShipName` (src/normalizer/shipNormalizer.ts)
+ * only strips the manufacturer-code token from the raw entity class to
+ * build a stable internal id/slug ("ANVL_Hornet_F7CS_Mk2" -> "Hornet F7CS
+ * Mk2") — it was never meant to produce a presentation-quality name, and
+ * Commander Beta Certification confirmed it reads nothing like RSI's own
+ * naming ("F7C-S Hornet Ghost Mk II"). The bulk universe ship catalog
+ * (generated-data/ship-catalog.json, scripts/shipCatalog) independently
+ * resolves the SAME entity class's real in-game localized name for every
+ * ship in the game, including every one that's also been deep-imported —
+ * confirmed via direct audit that all 256 deep-imported hulls have a
+ * matching catalog record. This is a presentation-only substitution: only
+ * `ShipDefinition.displayName` changes here; `id`/`internalName`/
+ * `portIds`/`factoryLoadoutId` all still derive from `deriveShipName`
+ * exactly as before (unchanged), so no persisted FleetAsset reference,
+ * hardpoint, or reconciliation match is affected.
+ *
+ * Two hulls (VNCL_Scythe, VNCL_Stinger) are a confirmed, documented
+ * exception: their own catalog record's `manufacturer` field is
+ * cross-attributed (Scythe's says "Esperia" though its displayName reads
+ * "Vanduul Scythe"; Stinger's says "Vanduul" though its displayName reads
+ * "Esperia Stinger") — the same anomaly scripts/shipImages/
+ * reviewedNameAliases.ts already documented independently. The
+ * corroboration check below can't safely strip either prefix, so both
+ * fall back to their existing derived name ("Scythe"/"Stinger"), which
+ * was already the correct bare name.
+ */
+function canonicalDeepImportDisplayName(v: (typeof importedShipList)[number]): string {
+  const entityClass = v.ship.sourceEntityClass
+  const record = entityClass ? shipCatalogRecordByEntityClass.get(entityClass) : undefined
+  if (!record?.displayName) return v.ship.name
+  const sanitized = sanitizeCatalogDisplayName(record.displayName)
+  const stripped = stripCorroboratedManufacturerPrefix(sanitized, record.manufacturer?.name, record.manufacturer?.code)
+  return stripped ?? v.ship.name
 }
 
 const seedDefinitions: ShipDefinition[] = seedShips.map((s) => ({
@@ -67,9 +150,9 @@ const seedDefinitions: ShipDefinition[] = seedShips.map((s) => ({
 const importedDefinitions: ShipDefinition[] = importedShipList.map((v) => ({
   id: v.ship.id,
   internalName: v.ship.id,
-  displayName: v.ship.name,
+  displayName: canonicalDeepImportDisplayName(v),
   manufacturer: v.ship.manufacturer,
-  classification: classificationFor(v.ship.id),
+  classification: classificationFor(v.ship.id, v.ship.sourceEntityClass ? shipCatalogRecordByEntityClass.get(v.ship.sourceEntityClass) : undefined, v.ship.sourceEntityClass),
   career: v.ship.career,
   role: v.ship.role,
   imageUrl: v.ship.imageUrl,
@@ -99,7 +182,7 @@ const catalogDefinitions: ShipDefinition[] = shipCatalogRecords
     internalName: r.entityClass,
     displayName: r.displayName!,
     manufacturer: r.manufacturer?.name ?? r.manufacturer?.code ?? 'Unknown',
-    classification: classificationFor(r.entityClass),
+    classification: classificationFor(r.entityClass, r),
     career: r.careerName ?? r.careerKey ?? 'Unknown',
     role: r.roleName ?? r.roleKey ?? 'Unknown',
     equipmentGroups: [],
@@ -136,11 +219,43 @@ function definitionCompletenessRank(d: ShipDefinition): number {
  * strips when the definition's own `manufacturer` field corroborates the
  * first word really is a manufacturer name (never a guess against the
  * model name itself).
+ *
+ * MWO-001 (Task 2) — a catalog record's `manufacturer` field prioritizes
+ * the resolved full name ("Roberts Space Industries") over the stable
+ * DataCore code ("RSI") whenever the name is available (see
+ * `catalogDefinitions` above), which meant a displayName prefixed with
+ * the short code alone (e.g. "RSI Apollo Medivac", "MISC Starfarer")
+ * never stripped — confirmed to keep 6 real Golden Fleet promotion
+ * candidates (Apollo Medivac, Apollo Triage, Constellation Phoenix,
+ * Starfarer, Polaris, Ursa) from ever grouping with their own newly
+ * deep-imported counterpart. Checking the record's own code as a second,
+ * equally authoritative corroboration source (never a guess) closes this
+ * without touching the `ShipDefinition` type or any other consumer.
  */
+const manufacturerCodeByEntityClass = new Map(shipCatalogRecords.map((r) => [r.entityClass, r.manufacturer?.code]))
+
+/**
+ * MWO-001 (Task 2) — one further hand-reviewed, narrow exception: MISC's
+ * stable DataCore code is "MIS" (3 letters), but the game's own in-fiction
+ * ship-naming convention prefixes every MISC hull's display name with
+ * "MISC" (4 letters) — a genuine inconsistency in the source data itself,
+ * not something either the full-name or code check above can catch.
+ * Confirmed the only such case among all promoted hulls (Starfarer);
+ * Prospector/Starlite never needed this at all, since their deep-import
+ * displayName already strips the raw "MISC_" entity prefix independently
+ * (src/normalizer/displayNameGenerator.ts), unrelated to this catalog-side check.
+ */
+const KNOWN_DISPLAY_PREFIX_ALIASES: Record<string, string> = { MIS: 'MISC' }
+
 function bareHullName(d: ShipDefinition): string {
   if (d.sourceMetadata.sourceType === 'StarBreaker' && d.sourceMetadata.sourceFile === 'ship-catalog') {
     const firstWord = d.displayName.split(' ')[0]
-    if (firstWord && d.manufacturer.toLowerCase().startsWith(firstWord.toLowerCase())) {
+    if (!firstWord) return d.displayName
+    const code = manufacturerCodeByEntityClass.get(d.id)
+    const matchesFullName = d.manufacturer.toLowerCase().startsWith(firstWord.toLowerCase())
+    const matchesCode = code?.toLowerCase() === firstWord.toLowerCase()
+    const matchesKnownAlias = code && KNOWN_DISPLAY_PREFIX_ALIASES[code]?.toLowerCase() === firstWord.toLowerCase()
+    if (matchesFullName || matchesCode || matchesKnownAlias) {
       return d.displayName.slice(firstWord.length).trim()
     }
   }
@@ -164,27 +279,65 @@ function bareHullName(d: ShipDefinition): string {
  * already-persisted FleetAsset referencing a non-canonical id never loses
  * its data; it is simply never offered again as a *new* pick.
  */
+/**
+ * MWO-001 (Task 2) — a hand-reviewed override for the one Golden Fleet
+ * promotion candidate whose deep-import-derived name will never
+ * naturally bareHullName-match its seed counterpart: the Ghost Mk II's
+ * raw entity class ("ANVL_Hornet_F7CS_Mk2") derives to "Hornet F7CS
+ * Mk2" (deriveShipName strips only the manufacturer prefix, never
+ * invents the "Ghost" nickname the seed fixture was hand-typed with).
+ * Confirmed the ONLY such case among all 10 seed-backed promotion
+ * candidates by direct simulation against the staged 4.9 exports — the
+ * other 9 (135c, Cutlass Red, M80, MOLE, Prospector, Railen, Starlite,
+ * UTV, Vulture) already bareHullName-match their deep-import counterpart
+ * without any override. Maps a seed ShipDefinition's own id to the raw
+ * StarBreaker entity class its real deep-import counterpart resolves as.
+ */
+const SEED_HULL_GROUP_ALIASES: Record<string, string> = {
+  ghost: 'ANVL_Hornet_F7CS_Mk2',
+}
+
+function groupKeyFor(d: ShipDefinition): string {
+  const aliasTargetEntityClass = SEED_HULL_GROUP_ALIASES[d.id]
+  if (aliasTargetEntityClass) {
+    const aliasedDefinition = importedShipList.find((v) => v.ship.sourceEntityClass === aliasTargetEntityClass)
+    if (aliasedDefinition) {
+      const definition = importedDefinitions.find((imp) => imp.id === aliasedDefinition.ship.id)
+      if (definition) return bareHullName(definition).toLowerCase().trim()
+    }
+  }
+  return bareHullName(d).toLowerCase().trim()
+}
+
 const hullGroups = new Map<string, ShipDefinition[]>()
 for (const d of allDefinitions) {
-  const key = bareHullName(d).toLowerCase().trim()
+  const key = groupKeyFor(d)
   if (!hullGroups.has(key)) hullGroups.set(key, [])
   hullGroups.get(key)!.push(d)
 }
 
-/** Non-canonical id -> canonical id, populated only for the *safe* case:
- * the superseded definition is a bare Mission M-012 catalog placeholder
- * (rank 2) with no data of its own to lose — see the aliasing loops
- * below, which reuse this to let an existing FleetAsset on a delisted
- * catalog-only id self-heal to the canonical definition's real data on
- * its next rehydration replay, the same mechanism ADR-006 established for
- * deep-import identity aliasing. A seed definition superseded by a
- * deep-import (Corsair, Cutlass Black) is deliberately NOT aliased here —
- * a seed ship's hand-authored port/slot structure is fictionally its own,
- * and a Commander-added FleetAsset that happened to reference it could
- * carry a custom Loadout built against those exact slot labels; silently
- * remapping it onto the deep-import's differently-shaped real port tree
- * risks orphaning that customization, which no completeness gain
- * justifies. See docs/ADR/ADR-008-Canonical-Ship-Definition.md.
+/** Non-canonical id -> canonical id, populated for two safe cases:
+ * (1) the superseded definition is a bare Mission M-012 catalog
+ * placeholder (rank 2) with no data of its own to lose; (2) the
+ * superseded definition is a seed fixture (rank 1) whose real hull has
+ * since been deep-imported (rank 0) — see the aliasing loops below, which
+ * reuse this to let an existing FleetAsset on a delisted id self-heal to
+ * the canonical definition's real data on its next rehydration replay,
+ * the same mechanism ADR-006 established for deep-import identity
+ * aliasing. Case (2) (Corsair, Cutlass Black, and every seed-backed
+ * Golden Fleet promotion candidate — MOLE, Railen, Vulture, Ghost, etc.)
+ * was deliberately EXCLUDED prior to EWO-043/MWO-001: silently remapping
+ * a seed ship's hand-authored port/slot structure onto the deep-import's
+ * differently-shaped real tree risked orphaning a Commander's existing
+ * custom Loadout with no safety net. EWO-043's reconciliation engine
+ * (src/utils/fleetAssetReconciliation.ts) removed that risk — a template
+ * change (including this kind of supersession) now migrates Commander
+ * Installed/Target assignments forward, quarantining only what genuinely
+ * has no match — so aliasing case (2) is now safe and is what actually
+ * lets a Commander's EXISTING seed-migrated ship (not just a freshly
+ * Added one) pick up real mining/tractor/salvage/turret equipment after
+ * a Golden Fleet promotion. See docs/ADR/ADR-008-Canonical-Ship-Definition.md
+ * for the original rationale this supersedes.
  */
 const supersededByCanonical = new Map<string, string>()
 const canonicalIds = new Set<string>()
@@ -222,7 +375,13 @@ for (const group of hullGroups.values()) {
     presentationImageKeyById.set(member.id, canonicalImageKey)
   }
   for (const superseded of sorted.slice(1)) {
-    if (definitionCompletenessRank(superseded) === 2) {
+    const supersededRank = definitionCompletenessRank(superseded)
+    const canonicalRank = definitionCompletenessRank(canonical)
+    // MWO-001 (Task 2) — case (2) above: a seed definition (rank 1)
+    // superseded by a deep-import (rank 0) is now safe to alias, since
+    // EWO-043's reconciliation engine protects Commander intent across
+    // exactly this kind of template change.
+    if (supersededRank === 2 || (supersededRank === 1 && canonicalRank === 0)) {
       supersededByCanonical.set(superseded.id, canonical.id)
     }
   }
@@ -509,6 +668,7 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
       groupLabel,
       assemblyRole: port.assemblyRole,
       isStructural: port.isStructural,
+      sourcePortId: port.id,
     })
     for (const child of childrenByParentId.get(port.id) ?? []) {
       // A group applies only to the top-level row it was resolved for —

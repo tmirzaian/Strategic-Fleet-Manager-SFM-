@@ -1,15 +1,24 @@
 import { ScrollText, TrendingUp } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import DevValidationPanel from '../components/DevValidationPanel'
+import { APP_VERSION_LABEL } from '../config/appVersion'
+import { resolveCertifiedGameVersionLabel } from '../utils/scVersion'
 
 export default function CaptainsLog() {
   const log = useFleetStore((s) => s.log)
+  const certifiedGameVersion = resolveCertifiedGameVersionLabel()
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Captain's Log</p>
         <h1 className="text-2xl font-display font-bold text-white">What happened?</h1>
+      </div>
+
+      <div className="panel p-4 text-sm">
+        <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
+        <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified Against</p>
+        <p className="text-white">{certifiedGameVersion ? `Star Citizen Live ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
       </div>
 
       <DevValidationPanel />

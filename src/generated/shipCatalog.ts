@@ -34,8 +34,19 @@ export interface ShipCatalogRecord {
   dimensions: { x: number; y: number; z: number } | null
 }
 
+export interface ShipCatalogSource {
+  tool: string
+  toolVersion: string
+  gameBranch: string
+  gameVersion: string
+  p4ChangeNum: string
+  dataP4kPath: string
+  generatedAt: string
+}
+
 interface ShipCatalogFile {
   schemaVersion: number
+  source?: ShipCatalogSource
   records: Record<string, ShipCatalogRecord>
 }
 
@@ -43,3 +54,10 @@ interface ShipCatalogFile {
 export const shipCatalogRecords: ShipCatalogRecord[] = rawCatalog ? Object.values(rawCatalog.records).filter((r) => r.displayName) : []
 
 export const hasShipCatalog = shipCatalogRecords.length > 0
+
+/** CWO-005 (Task 5) — the real Star Citizen build this catalog (and
+ * therefore the currently-imported Golden Fleet) was generated against.
+ * `undefined` on a fresh clone that hasn't generated the catalog locally —
+ * the same honest "not generated yet" state `hasShipCatalog` already
+ * documents, never a guessed or hardcoded version. */
+export const shipCatalogSource: ShipCatalogSource | undefined = rawCatalog?.source
