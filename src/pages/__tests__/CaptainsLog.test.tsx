@@ -23,28 +23,29 @@ function renderCaptainsLog() {
 }
 
 /**
- * CWO-005 (Task 5) — Captain's Log is the one place SFM's own build and
- * the Star Citizen build its Golden Fleet data is certified against are
- * both shown together. The SC line is derived live from the real catalog
- * metadata (generated-data/ship-catalog.json's `source.gameVersion`), not
- * a hardcoded string — this test itself computes the expected label from
- * that same live source rather than hardcoding "4.9.x", so it fails
- * loudly if a future catalog regeneration ever changes the certified
- * build without this page picking it up.
+ * CWO-005 (Task 5) / BP-001 — Captain's Log is the one place SFM's own
+ * build and the Star Citizen build its Golden Fleet data is certified
+ * against are both shown together. The SC line is derived live from the
+ * real catalog metadata (generated-data/ship-catalog.json's
+ * `source.gameVersion`), not a hardcoded string — this test itself
+ * computes the expected label from that same live source rather than
+ * hardcoding a version, so it fails loudly if a future catalog
+ * regeneration ever changes the certified build without this page
+ * picking it up. BP-001 replaced the truncated "4.9.x" presentation with
+ * the full, precise certified build string.
  */
-describe("CWO-005 (Task 5): Captain's Log — version/certification presentation", () => {
+describe("CWO-005 (Task 5) / BP-001: Captain's Log — version/certification presentation", () => {
   it('shows the SFM build label', () => {
     renderCaptainsLog()
     expect(screen.getByText(`Strategic Fleet Manager ${APP_VERSION_LABEL}`)).toBeInTheDocument()
   })
 
-  it('shows "Certified Against" and the real, live-derived Star Citizen build — or an honest not-yet-certified message when no catalog is generated locally', () => {
+  it('shows "Certified for" and the real, live-derived, full Star Citizen build — or an honest not-yet-certified message when no catalog is generated locally', () => {
     renderCaptainsLog()
-    expect(screen.getByText('Certified Against')).toBeInTheDocument()
+    expect(screen.getByText('Certified for')).toBeInTheDocument()
     const gameVersion = shipCatalogSource?.gameVersion
     if (gameVersion) {
-      const [major, minor] = gameVersion.split('.')
-      expect(screen.getByText(`Star Citizen Live ${major}.${minor}.x`)).toBeInTheDocument()
+      expect(screen.getByText(`Star Citizen LIVE ${gameVersion}`)).toBeInTheDocument()
     } else {
       expect(screen.getByText(/Not yet certified/)).toBeInTheDocument()
     }

@@ -17,8 +17,8 @@ export default function CaptainsLog() {
 
       <div className="panel p-4 text-sm">
         <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
-        <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified Against</p>
-        <p className="text-white">{certifiedGameVersion ? `Star Citizen Live ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
+        <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified for</p>
+        <p className="text-white">{certifiedGameVersion ? `Star Citizen LIVE ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
       </div>
 
       <DevValidationPanel />
