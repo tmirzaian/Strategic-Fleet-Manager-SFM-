@@ -53,6 +53,22 @@ patches or channels (PTU/EPTU) is not currently supported.
 
 ## Running the Beta
 
+### First-time setup
+
+1. Install [Node.js](https://nodejs.org/) 18 or newer.
+2. Extract the SFM Beta ZIP.
+3. Double-click **`Setup Strategic Fleet Manager.bat`**.
+4. After setup completes, double-click **`Start Strategic Fleet Manager.bat`**.
+
+### Daily use
+
+- Double-click **`Start Strategic Fleet Manager.bat`**.
+- Keep the terminal window open — closing it stops SFM.
+- Open the displayed local URL (typically `http://localhost:5173`) if your
+  browser doesn't open automatically.
+
+### Developers / terminal use
+
 ```bash
 git clone https://github.com/tmirzaian/Strategic-Fleet-Manager-SFM-.git
 cd Strategic-Fleet-Manager-SFM-
