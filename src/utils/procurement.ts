@@ -1,5 +1,7 @@
 import type { Ship, Build, Hardpoint, InstalledLoadoutEntry, MissionReservation, HangarItem } from '../types'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
+import { findActiveSlotReservation } from '../engine/logistics/reservationLookup'
+import { identitiesMatch } from '../engine/installation/componentIdentityService'
 
 export interface ProcurementLine {
   itemName: string
@@ -54,18 +56,39 @@ export function buildProcurementList(
     itemName: string
     type: string
     size: string
+    /** EWO-STAB-003D — the entityClass of the row that FIRST created this
+     * group, passed through to calculateComponentAvailability below. */
+    entityClass?: string
     rowCount: number
     neededBy: string[]
-    /** EWO-STAB-003D (ADR-010) — the entityClass of the FIRST row that
-     * created this group, passed through to calculateComponentAvailability
-     * below. Grouping itself remains keyed by targetItem display name (a
-     * documented residual gap — see ADR-010 — since two differently
-     * cataloged components sharing a name are still merged into one
-     * procurement row); this only makes the availability lookup for an
-     * already-merged group identity-aware, it does not fix the merge itself. */
-    entityClass?: string
   }
-  const groups = new Map<string, UnresolvedGroup>()
+  // EWO-STAB-003E (ADR-010) — demand groups are an array, not a Map keyed
+  // by raw display name: two rows only ever join the SAME group when
+  // `demandMatchesGroup` (below) says they're the same canonical
+  // component, using the exact identity-first/name-fallback rule
+  // established in EWO-STAB-003D. A plain Map<string, ...> keyed by name
+  // OR by entityClass can't express this correctly on its own — a row
+  // with a resolved entityClass and a legacy row with none, sharing the
+  // same display name, must still merge (the identity rule's own
+  // "either side missing entityClass falls back to name" branch), while
+  // two rows with DIFFERENT resolved entityClass values must never merge
+  // even though their names match. A single string key can encode one of
+  // those outcomes, not both — the array+linear-scan form can.
+  const groups: UnresolvedGroup[] = []
+
+  /** EWO-STAB-003E — the same entityClass-first, exact-name-fallback rule
+   * used everywhere else in ADR-010's identity work (never
+   * identitiesMatch's own case-insensitive name fallback, to avoid
+   * silently loosening this file's pre-existing exact-name grouping). */
+  function demandMatchesGroup(group: UnresolvedGroup, itemName: string, entityClass: string | null | undefined): boolean {
+    if (group.entityClass && entityClass) {
+      return identitiesMatch(
+        { displayName: group.itemName, entityClass: group.entityClass, category: null, size: null },
+        { displayName: itemName, entityClass, category: null, size: null }
+      )
+    }
+    return group.itemName === itemName
+  }
 
   for (const hp of hardpoints) {
     if (hp.status === 'OK') continue
@@ -80,23 +103,26 @@ export function buildProcurementList(
     // An ACTIVE reservation already commits a specific owned unit to this
     // exact requirement — installing it is just execution, not something
     // still to acquire.
-    const activeReservation = reservations.find(
-      (r) => r.missionConfigurationId === hp.buildId && r.targetSlotLabel === hp.slotLabel && r.componentName === hp.targetItem && r.status === 'ACTIVE'
-    )
+    const activeReservation = findActiveSlotReservation(reservations, {
+      missionConfigurationId: hp.buildId,
+      targetSlotLabel: hp.slotLabel,
+      componentName: hp.targetItem,
+      componentEntityClass: hp.targetEntityClass,
+    })
     if (activeReservation) continue
 
     const label = `${ship.name} — ${build.name}`
-    const existing = groups.get(hp.targetItem)
+    const existing = groups.find((g) => demandMatchesGroup(g, hp.targetItem, hp.targetEntityClass))
     if (existing) {
       existing.rowCount += 1
       if (!existing.neededBy.includes(label)) existing.neededBy.push(label)
     } else {
-      groups.set(hp.targetItem, { itemName: hp.targetItem, type: hp.type, size: hp.size, rowCount: 1, neededBy: [label], entityClass: hp.targetEntityClass })
+      groups.push({ itemName: hp.targetItem, type: hp.type, size: hp.size, entityClass: hp.targetEntityClass, rowCount: 1, neededBy: [label] })
     }
   }
 
   const lines: ProcurementLine[] = []
-  for (const group of groups.values()) {
+  for (const group of groups) {
     const availability = calculateComponentAvailability(group.itemName, hangarItems, installedLoadouts, reservations, group.entityClass)
     const availableToReserve = Math.min(group.rowCount, availability.availableQuantity)
     const qtyNeeded = Math.max(0, group.rowCount - availability.availableQuantity)

@@ -1,5 +1,6 @@
 import type { Hardpoint, InstalledLoadoutEntry, MissionReservation, HangarItem, MissionPackageResult, MissionPackageState } from '../../types'
 import { calculateComponentAvailability } from './availability'
+import { findActiveSlotReservation } from './reservationLookup'
 
 /**
  * The Mission Package engine (Alpha 2.3, Part 6-8) — derived, never a
@@ -65,9 +66,12 @@ export function calculateMissionPackage(
       installedMatches += 1
       continue
     }
-    const activeReservation = reservations.find(
-      (r) => r.missionConfigurationId === buildId && r.targetSlotLabel === row.slotLabel && r.componentName === row.targetItem && r.status === 'ACTIVE'
-    )
+    const activeReservation = findActiveSlotReservation(reservations, {
+      missionConfigurationId: buildId,
+      targetSlotLabel: row.slotLabel,
+      componentName: row.targetItem,
+      componentEntityClass: row.targetEntityClass,
+    })
     if (activeReservation) {
       reservedMatches += 1
       continue

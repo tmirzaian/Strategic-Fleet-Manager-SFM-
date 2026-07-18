@@ -1,5 +1,6 @@
 import type { Hardpoint, MissionReservation, HangarItem, InstalledLoadoutEntry } from '../types'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
+import { findActiveSlotReservation } from '../engine/logistics/reservationLookup'
 
 export interface PortTreeNode<T = Hardpoint> {
   hardpoint: T
@@ -65,9 +66,12 @@ export function derivePortLogistics(
   if (!hp.targetItem || hp.targetItem === '—') return 'Not Required'
   if (hp.status === 'OK') return 'Installed'
 
-  const activeReservation = reservations.find(
-    (r) => r.missionConfigurationId === hp.buildId && r.targetSlotLabel === hp.slotLabel && r.componentName === hp.targetItem && r.status === 'ACTIVE'
-  )
+  const activeReservation = findActiveSlotReservation(reservations, {
+    missionConfigurationId: hp.buildId,
+    targetSlotLabel: hp.slotLabel,
+    componentName: hp.targetItem,
+    componentEntityClass: hp.targetEntityClass,
+  })
   if (activeReservation) return 'Reserved'
 
   const availability = calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations, hp.targetEntityClass)

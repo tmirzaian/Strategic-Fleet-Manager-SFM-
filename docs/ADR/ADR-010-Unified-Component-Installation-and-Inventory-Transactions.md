@@ -242,6 +242,68 @@ creating or mutating the relevant record (ship materialization, the
 installation engine's mutation step, reservation creation) — never by a
 bulk migration pass over existing data.
 
+### Reservation lookup and procurement demand identity (EWO-STAB-003E)
+
+EWO-STAB-003D's own Known Risks flagged a triplicated inline "find the
+active reservation for this slot" lookup in `procurement.ts`, `portTree.ts`,
+and `missionPackage.ts`, and a procurement demand-aggregation pass that
+grouped strictly by raw target display name. EWO-STAB-003E's audit
+(Assignment 2) confirmed the three reservation-lookup copies were
+byte-for-byte identical predicates (`missionConfigurationId` + slot +
+`status === 'ACTIVE'` + name-only component match) — three independent
+decisions that happened to agree, not one shared one.
+
+**Reservation lookup authority: `src/engine/logistics/reservationLookup.ts`
+— `findActiveSlotReservation(reservations, query)`.** `query` is
+`{ missionConfigurationId, targetSlotLabel, componentName, componentEntityClass? }`.
+Scope is unchanged from every original copy: `missionConfigurationId` +
+`targetSlotLabel` + `status === 'ACTIVE'`. `shipId` was never checked
+separately in any original copy — `missionConfigurationId` already
+uniquely identifies one Fleet Asset's Mission Configuration — and there is
+no "mission identifier" narrower than that in this codebase. Component
+matching follows the same rule as everywhere else in this ADR: both sides
+resolve entityClass → compare entityClass only; either side lacks one →
+fall back to the *exact* original case-sensitive `componentName === ...`
+comparison (never `identitiesMatch`'s own case-insensitive fallback, for
+the same reason noted in EWO-STAB-003D — these callers never had
+case-insensitive behavior and this mission does not introduce it).
+`procurement.ts`, `portTree.ts` (`derivePortLogistics`), and
+`missionPackage.ts` (`calculateMissionPackage`) all now call this one
+function; none contains its own comparison logic anymore.
+
+**Procurement demand-key policy.** `buildProcurementList`'s demand
+grouping (`src/utils/procurement.ts`) changed from a `Map` keyed by raw
+target display name to a linear scan against a small `UnresolvedGroup[]`,
+using a local `demandMatchesGroup` predicate with the same
+entityClass-first/name-fallback rule. This is deliberately **not** a
+`Map<entityClassOrName, Group>` — a single string key can't correctly
+express both required outcomes at once: two rows with the *same*
+entityClass must merge even if their display-name formatting differs, AND
+a row with a resolved entityClass must still merge with a legacy row of
+the same name that has none (the identity rule's own "either side missing
+entityClass falls back to name" branch) — while two rows with genuinely
+*different* entityClass values must never merge even though their names
+match. The array+predicate form reproduces the same pairwise
+`identitiesMatch`-style comparison used everywhere else in this ADR,
+rather than approximating it with a key scheme that can't represent it.
+Display names remain the only thing ever shown to the Commander; no
+internal key (entityClass or otherwise) is exposed in `ProcurementLine`.
+
+**Legacy fallback confirmed unchanged:** a fleet with no entityClass data
+anywhere groups and matches exactly as it did before this mission — proven
+by regression test 9 (procurement) and test 4 (reservation lookup).
+
+**Quantity semantics unchanged:** `qtyNeeded`/`availableToReserve`
+computation, `calculateComponentAvailability`'s own math, and
+`calculateMissionPackage`'s percentages are untouched — only which rows
+are grouped together, or which reservation counts as "the" active one, can
+now differ from before. Verified by the full existing test suite (no
+regressions) plus new tests 7/8/10/11.
+
+**`src/utils/inventoryDependencies.ts` remains untouched**, still governed
+by Design Authority Ruling 12, exactly as EWO-STAB-003D left it. No ruling
+was sought or granted to change that during this mission.
+
 ## Known Risks and Future Follow-Up
 
 - **Resolved by EWO-STAB-003D:** the two risks recorded here at the end of
@@ -262,26 +324,10 @@ bulk migration pass over existing data.
   than working around it: this file is genuinely outside both this ADR's
   and EWO-STAB-003D's authorization, and needs a fresh ruling superseding
   #12 before it can be touched — not a silent identity upgrade.
-- **A triplicated inline "find the active reservation for this slot"
-  lookup** — identical in shape, name-only (`r.componentName === ...` plus
-  a slot/build match) — exists independently in `procurement.ts`,
-  `portTree.ts`, and `missionPackage.ts`. This is a third, separate
-  component-matching pattern beyond the two functions EWO-STAB-003D was
-  scoped to (`computeHardpointStatusWithValidation` and
-  `calculateComponentAvailability` specifically, per this mission's own
-  stated Primary Objective). Left untouched deliberately, to keep this
-  mission bounded to its two named services; a real candidate for a
-  future, narrowly-scoped follow-up.
-- **`procurement.ts`'s demand aggregation is still grouped by raw
-  `targetItem` display name**, not entityClass. EWO-STAB-003D made the
-  resulting `calculateComponentAvailability` call for an already-formed
-  group identity-aware (passing that group's first-row entityClass), but
-  two differently-cataloged components sharing a target display name are
-  still merged into the same procurement line before that call ever runs.
-  Fixing this means changing the aggregation key itself — a larger,
-  distinct change from "pass through identity already in scope," and
-  deliberately deferred rather than folded into this consolidation
-  mission.
+- **Resolved by EWO-STAB-003E:** the triplicated inline reservation lookup
+  (`procurement.ts`/`portTree.ts`/`missionPackage.ts`) and procurement's
+  raw-display-name demand grouping, both recorded here at the end of
+  EWO-STAB-003D, are addressed above. Kept below for historical record.
 - **Two genuinely different real components that share both a display
   name and lack any entityClass in the catalog** (the residual class
   `componentCatalog.ts` already documents, e.g. certain Missile Rack
@@ -292,6 +338,19 @@ bulk migration pass over existing data.
   data, so there is no metadata defect to correct, only a class of bug to
   contain — consistent with EWO-STAB-003C's explicit instruction not to
   add such overrides without evidence.
+- **The entityClass-first/name-fallback comparison rule now has four
+  independent physical implementations** — `hardpointStatus.ts`'s
+  `componentsMatch`, `availability.ts`'s `componentRowMatches`,
+  `reservationLookup.ts`'s `reservationMatchesComponent`, and
+  `procurement.ts`'s `demandMatchesGroup` — each a thin, intentionally
+  separate wrapper around the one real underlying authority
+  (`identitiesMatch`), added at different times to avoid the same import
+  cycle each file would otherwise create through
+  `inventoryTransactionService.ts`. The *decision* is one (`identitiesMatch`
+  is the sole comparison authority everywhere); the *wrapper code* is not.
+  Not a bug — every regression test across EWO-STAB-003D/003E confirms
+  they agree — but a legitimate candidate for a future, narrowly-scoped
+  cleanup mission if that duplication is ever judged worth removing.
 
 ## Consequences
 
