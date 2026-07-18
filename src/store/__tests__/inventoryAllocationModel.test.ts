@@ -126,7 +126,7 @@ describe('EWO-029 (Task 15, Scenario E): install a reserved unit', () => {
     useFleetStore.getState().setActiveBuild('ghost', 'ghost-escort')
 
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
-    const move = useFleetStore.getState().moveToShip(item.id, 'ghost')
+    const move = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Shield 1')
     expect(move.success).toBe(true)
 
     // Started with 2; 1 was reserved+installed (fulfilled together) — the
@@ -146,7 +146,7 @@ describe('EWO-029 (Task 15, Scenario F): competing allocation', () => {
     expect(cutlass.success).toBe(true)
 
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
-    const move = useFleetStore.getState().moveToShip(item.id, 'cutlass-red')
+    const move = useFleetStore.getState().moveToShip(item.id, 'cutlass-red', 'Shield 1')
 
     expect(move.success).toBe(false)
     // Nothing was silently transferred — the original reservation is untouched.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Send, X, CheckCircle2, AlertCircle, AlertOctagon, PackageX, Pencil, Trash2, Lock, Sparkles } from 'lucide-react'
+import { Plus, Send, X, AlertOctagon, PackageX, Pencil, Trash2, Lock, Sparkles } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import SortableHeader from '../components/SortableHeader'
 import CatalogComponentSearch from '../components/CatalogComponentSearch'
@@ -27,7 +27,6 @@ export default function HangarInventory() {
   const addHangarItem = useFleetStore((s) => s.addHangarItem)
   const updateHangarItemQuantity = useFleetStore((s) => s.updateHangarItemQuantity)
   const deleteHangarItem = useFleetStore((s) => s.deleteHangarItem)
-  const moveToShip = useFleetStore((s) => s.moveToShip)
   const reserveComponent = useFleetStore((s) => s.reserveComponent)
   const releaseReservation = useFleetStore((s) => s.releaseReservation)
 
@@ -42,9 +41,6 @@ export default function HangarInventory() {
   const [selectedName, setSelectedName] = useState('')
   const [addQtyInput, setAddQtyInput] = useState('1')
   const [addResult, setAddResult] = useState<{ success: boolean; message: string } | null>(null)
-  const [moveItemId, setMoveItemId] = useState<string | null>(null)
-  const [moveShipId, setMoveShipId] = useState('')
-  const [moveResult, setMoveResult] = useState<{ success: boolean; message: string } | null>(null)
   const [sortColumn, setSortColumn] = useState<HangarSortColumn>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
@@ -189,12 +185,6 @@ export default function HangarInventory() {
     ? resolveInventoryDependencies(manageItem.name, ships, builds, fleetAssets, installedLoadouts, reservations).filter((d) => d.kind === 'RESERVED')
     : []
 
-  const openMove = (itemId: string) => {
-    setMoveItemId(itemId)
-    setMoveShipId(ships[0]?.id ?? '')
-    setMoveResult(null)
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -311,9 +301,20 @@ export default function HangarInventory() {
                           <Lock size={13} /> Reserve
                         </button>
                       )}
+                      {/* EWO-STAB-002 — Move to Ship disabled during Beta
+                          stabilization: its underlying store path
+                          (moveToShip -> installComponent with no explicit
+                          slot) let a component land in the first open slot
+                          on a ship regardless of type/size compatibility.
+                          Use Quick Update -> Install Component instead,
+                          which always requires an explicit, compatible
+                          slot. Kept visible (not removed) so this reads as
+                          a known, intentional, temporary restriction. */}
                       <button
-                        onClick={() => openMove(item.id)}
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan hover:underline"
+                        type="button"
+                        disabled
+                        title="Temporarily unavailable during Beta stabilization. Use Quick Update → Install Component."
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted/40 cursor-not-allowed"
                       >
                         <Send size={13} /> Move to Ship
                       </button>
@@ -526,48 +527,6 @@ export default function HangarInventory() {
                 {deleteDependencies.length === 0 ? 'Delete' : 'Delete Anyway'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Move to Ship modal */}
-      {moveItemId && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setMoveItemId(null)}>
-          <div className="panel p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="font-display font-semibold text-white">Move to Ship</h3>
-              <button onClick={() => setMoveItemId(null)} className="text-muted hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-            <label className="text-xs uppercase tracking-widest text-muted block mb-2">Ship</label>
-            <select
-              value={moveShipId}
-              onChange={(e) => setMoveShipId(e.target.value)}
-              className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan/50"
-            >
-              {ships.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            {moveResult && (
-              <div className={`mt-3 flex items-start gap-2 text-xs ${moveResult.success ? 'text-success' : 'text-warning'}`}>
-                {moveResult.success ? <CheckCircle2 size={14} className="mt-0.5 shrink-0" /> : <AlertCircle size={14} className="mt-0.5 shrink-0" />}
-                {moveResult.message}
-              </div>
-            )}
-            <button
-              onClick={() => {
-                const result = moveToShip(moveItemId, moveShipId)
-                setMoveResult(result)
-                if (result.success) setTimeout(() => setMoveItemId(null), 900)
-              }}
-              className="mt-4 w-full bg-cyan text-bg font-semibold text-sm py-2 rounded-lg hover:bg-cyan/90 transition-colors"
-            >
-              Confirm Move
-            </button>
           </div>
         </div>
       )}

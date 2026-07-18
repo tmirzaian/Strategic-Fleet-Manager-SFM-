@@ -47,9 +47,14 @@ describe('<HangarInventory /> — Mission M-011 column cleanup', () => {
     expect(table.textContent).toMatch(/\d/)
   })
 
-  it('Move to Ship action remains accessible', () => {
+  it('EWO-STAB-002: Move to Ship is visibly present but disabled during Beta stabilization, with a message pointing to Quick Update', () => {
     renderHangar()
-    expect(screen.getAllByText('Move to Ship').length).toBeGreaterThan(0)
+    const buttons = screen.getAllByText('Move to Ship').map((el) => el.closest('button')!)
+    expect(buttons.length).toBeGreaterThan(0)
+    for (const button of buttons) {
+      expect(button).toBeDisabled()
+      expect(button).toHaveAttribute('title', 'Temporarily unavailable during Beta stabilization. Use Quick Update → Install Component.')
+    }
   })
 })
 

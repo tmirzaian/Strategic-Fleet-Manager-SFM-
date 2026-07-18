@@ -12,6 +12,7 @@ import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
+import { isComponentSelectableForPort } from '../data/componentCatalog'
 import type { MissionReservation } from '../types'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
@@ -248,7 +249,12 @@ interface FleetState {
   // the deletion unconditionally once called — it never silently deletes
   // a reservation or installed-loadout record as a side effect (Ruling 9).
   deleteHangarItem: (itemId: string) => { success: boolean; message?: string }
-  moveToShip: (itemId: string, shipId: string) => { success: boolean; message: string }
+  // EWO-STAB-002 (containment) — `slotLabel` is now a required, explicit,
+  // validated destination. Its UI trigger (Hangar Inventory's Move to
+  // Ship) is disabled during Beta stabilization; this signature change is
+  // the store-level guard so the method itself cannot silently guess a
+  // slot even if called directly.
+  moveToShip: (itemId: string, shipId: string, slotLabel: string) => { success: boolean; message: string }
 
   // Quick Update
   installComponent: (
@@ -256,7 +262,7 @@ interface FleetState {
     itemName: string,
     slotLabel?: string,
     buildIdOverride?: string
-  ) => { matched: boolean; reservationFulfilled?: boolean; blocked?: 'reserved-elsewhere' }
+  ) => { matched: boolean; reservationFulfilled?: boolean; blocked?: 'reserved-elsewhere' | 'incompatible' }
   removeComponent: (shipId: string, slotLabel: string, returnToHangar?: boolean, buildIdOverride?: string) => { matched: boolean; itemName?: string }
   moveComponentBetweenShips: (
     fromShipId: string,
@@ -1034,15 +1040,30 @@ export const useFleetStore = create<FleetState>()(
     }
   },
 
-  moveToShip: (itemId, shipId) => {
+  moveToShip: (itemId, shipId, slotLabel) => {
     const item = get().hangarItems.find((i) => i.id === itemId)
     const ship = get().ships.find((s) => s.id === shipId)
     if (!item || !ship) return { success: false, message: 'Item or ship not found.' }
-    const result = get().installComponent(shipId, item.name)
+    // EWO-STAB-002 (containment) — refuse outright unless slotLabel names
+    // a real, currently-open hardpoint on this ship's active build. This
+    // is deliberately checked here too, not only inside installComponent,
+    // so this method never silently forwards a bad/empty slot and relies
+    // on the callee to catch it — no first-open-slot scan happens
+    // anywhere in this call chain any longer.
+    const validSlot = get().hardpoints.some((h) => h.buildId === ship.activeBuildId && h.slotLabel === slotLabel && h.status !== 'OK')
+    if (!slotLabel || !validSlot) {
+      return { success: false, message: 'A valid, open destination slot is required to move a component to a ship.' }
+    }
+    const result = get().installComponent(shipId, item.name, slotLabel)
     // EWO-029 (Task 7, Scenario F) — a unit already reserved for a
     // different Fleet Asset/Build is never silently installed here.
     if (result.blocked === 'reserved-elsewhere') {
       return { success: false, message: `${item.name} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.` }
+    }
+    // EWO-STAB-002 (containment) — the same defensive catalog check
+    // installComponent now performs for every caller.
+    if (result.blocked === 'incompatible') {
+      return { success: false, message: `${item.name} is not compatible with that slot.` }
     }
     if (!result.matched) {
       return { success: false, message: `${ship.name}'s active Loadout has no open slot for ${item.name}.` }
@@ -1063,6 +1084,15 @@ export const useFleetStore = create<FleetState>()(
   installComponent: (shipId, itemName, slotLabel, buildIdOverride) => {
     const ship = get().ships.find((s) => s.id === shipId)
     if (!ship) return { matched: false }
+    // EWO-STAB-002 (containment) — a slot is the Commander's (or the
+    // calling UI's) own explicit destination choice; this method must
+    // never guess one on its own. Previously, an absent/empty slotLabel
+    // fell back to "the first non-OK hardpoint anywhere in the build,"
+    // which is how Move To Ship could land a component in a completely
+    // unrelated slot with no type/size check at all. No open slot is ever
+    // scanned here now — a missing slot is an immediate, no-mutation
+    // failure.
+    if (!slotLabel) return { matched: false }
     // Mission Context (Alpha 2.1/2.2): install can target any Mission
     // Configuration assigned to this Fleet Asset, not only the currently
     // Active one — but Installed Loadout is shared physical state, so the
@@ -1070,9 +1100,22 @@ export const useFleetStore = create<FleetState>()(
     // updates every Mission's row for this slot together and only lets
     // the ship-facing cache change when the mutated Mission IS active.
     const buildId = buildIdOverride ?? ship.activeBuildId
-    const candidates = get().hardpoints.filter((h) => h.buildId === buildId && (slotLabel ? h.slotLabel === slotLabel : true))
-    const target = candidates.find((h) => h.targetItem.toLowerCase() === itemName.toLowerCase() && h.status !== 'OK') ?? candidates.find((h) => h.status !== 'OK')
+    const target = get().hardpoints.find((h) => h.buildId === buildId && h.slotLabel === slotLabel && h.status !== 'OK')
     if (!target) return { matched: false }
+
+    // EWO-STAB-002 (containment) — defense-in-depth re-validation of the
+    // exact same catalog-based check Quick Update's own UI already uses
+    // to filter its Slot dropdown (isComponentSelectableForPort). The UI
+    // filtering was never the actual enforcement point — nothing stopped
+    // a caller that skips the UI (Move To Ship's former no-slot path,
+    // direct store access) from installing a positively-known-incompatible
+    // component into an explicit slot too. Only rejects a POSITIVE,
+    // cataloged conflict (a real Shield into a real Power Plant slot,
+    // etc.) — an uncataloged item is still permitted, same as everywhere
+    // else this check is already used (EWO-024).
+    if (!isComponentSelectableForPort(itemName, target.type, target.size)) {
+      return { matched: false, blocked: 'incompatible' }
+    }
 
     // Installing a reserved component fulfills the reservation atomically
     // as part of this same operation (Alpha 2.3, Part 12 / Golden C) — the
