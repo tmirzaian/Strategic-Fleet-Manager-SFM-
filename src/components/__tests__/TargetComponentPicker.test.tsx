@@ -39,8 +39,19 @@ describe('EWO-023 (Task 1): TargetComponentPicker', () => {
     render(<TargetComponentPicker id="t1" value="Regulus" onChange={onChange} options={options} />)
     fireEvent.click(screen.getByRole('combobox'))
     fireEvent.click(screen.getByText('DayBreak'))
-    expect(onChange).toHaveBeenCalledWith('DayBreak')
+    // EWO-STAB-004B — onChange's second argument is the option's own
+    // entityClass, undefined here since this fixture's options carry none.
+    expect(onChange).toHaveBeenCalledWith('DayBreak', undefined)
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('19. clicking an option with a known entityClass passes it through to onChange', () => {
+    const onChange = vi.fn()
+    const optionsWithEntityClass = [...options, { path: 'Turret → M2C "Swarm"', item: 'M2C "Swarm"', entityClass: 'Turret_PDC_BEHR_A' }]
+    render(<TargetComponentPicker id="t1" value="" onChange={onChange} options={optionsWithEntityClass} />)
+    fireEvent.click(screen.getByRole('combobox'))
+    fireEvent.click(screen.getByText('M2C "Swarm"'))
+    expect(onChange).toHaveBeenCalledWith('M2C "Swarm"', 'Turret_PDC_BEHR_A')
   })
 
   it('5. no matching component shows a clear "no match" row rather than an empty list, and free text is still accepted', () => {

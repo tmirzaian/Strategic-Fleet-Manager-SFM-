@@ -304,6 +304,234 @@ regressions) plus new tests 7/8/10/11.
 by Design Authority Ruling 12, exactly as EWO-STAB-003D left it. No ruling
 was sought or granted to change that during this mission.
 
+### Canonical PDC compatibility and ambiguous identity resolution (EWO-STAB-004A)
+
+CAT-003 (Polaris Point Defense Cannon Compatibility Certification)
+investigated why SFM reported the Polaris's factory-installed PDC
+turrets (`Turret_PDC_BEHR_A`/`Turret_PDC_VNCL`, display name
+`M2C "Swarm"`) as incompatible with their own native S2 ports. Root
+cause: `M2C "Swarm"` is genuinely shared by three real, differently-shaped
+entityClasses — the two Turret/PDCTurret/S2 assemblies and a
+WeaponGun/Gun/S1 internal gun (`BEHR_LaserRepeater_PDC_S1`) — and the
+compatibility path resolved every target purely by display name, via a
+catalog table that additionally had no translation for raw category
+`"Turret"` at all, making the S2 assemblies unreachable by name and
+leaving only the S1 gun resolvable under that shared name. EWO-STAB-004A
+implements CAT-003's certified fix.
+
+**`subtype` restored to the runtime catalog.** `component-metadata-catalog.runtime.json`
+(`scripts/componentCatalog/catalogRuntimeSchema.ts`/`catalogRuntimeWriter.ts`)
+now carries DataCore's raw `subtype` alongside `category`/`size`/`displayName`/
+`grade`/`manufacturerRef` — RC-008 excluded it as "confirmed unread";
+CAT-003 found it is the one field that distinguishes `PDCTurret` from
+`GunTurret` at identical `category`/`size`. Runtime catalog record count:
+5,783 (unchanged); file size grew from 1,367,272 to 1,545,604 bytes
+(+13%, one new field per record) — no other field added or removed,
+confirmed by `catalogRuntimeWriter.test.ts`'s own exact-shape assertion.
+
+**EntityClass-first canonical resolution
+(`src/generated/componentCatalog.ts`).** New, additive exports —
+`componentsByEntityClass: Map<entityClass, CanonicalComponentRecord>` and
+`resolveComponentByEntityClass`/`resolveComponentByName`, both returning
+`{status: 'resolved' | 'ambiguous' | 'unresolved'}` — sit alongside the
+pre-existing `catalogComponentsByName`/`catalogComponentsByEntityClass`
+(left untouched, still used by Hangar Inventory's Add workflow,
+presentation, and `CatalogComponentSearch`/`DecisionCenter`). Unlike
+those legacy maps, the new ones are **not** restricted to the
+`CATEGORY_TO_PORT_TYPE` allowlist and carry raw, untranslated
+`category`/`subtype` — the exact facts the PDC rule and ambiguity
+detection need, kept separate from the translated port-type vocabulary
+ordinary compatibility already used.
+
+**Ambiguous-name detection, scoped to compatibility-relevant divergence.**
+`resolveComponentByName` groups every candidate sharing a display name by
+a `compatibilityShapeKey` — `PDCTurret` candidates key by size alone
+(their raw category is never itself compared); every other candidate
+keys by its `CATEGORY_TO_PORT_TYPE`-translated category + size (an
+untranslatable category collapses to one shared "untranslatable" key,
+since it always resolves the same permissive way regardless of which raw
+category it is). Candidates that agree on shape are compatibility-equivalent,
+not ambiguous — confirmed by direct catalog audit to be genuine
+cosmetic/gameplay SKU variants of one physical item (`"Ecouter"`'s
+`_Piercing` variant, `"AllStop"`'s `_ResistGasclouds` variant, `"MSD-322
+Missile Rack"`'s ground-vehicle/spaceship variants — all real,
+pre-existing collisions this ambiguity check would otherwise have newly
+and incorrectly blocked). Only a name whose candidates genuinely disagree
+in shape — `M2C "Swarm"`, a PDCTurret shape vs. an ordinary WeaponGun
+shape — resolves `ambiguous`. This is a deliberate refinement beyond
+CAT-003's literal wording ("multiple distinct entityClass matches");
+without it, the ambiguity check would have broken numerous unrelated,
+ordinary components across the fleet for a distinction (cosmetic SKU
+variant) that can never change a compatibility outcome.
+
+**Ambiguous vs. uncataloged, kept distinct throughout.** `TargetValidation`/
+`CandidateResolution` (`src/data/componentCatalog.ts`) and
+`ResolvedComponentIdentity` (`componentIdentityService.ts`, new
+`ambiguous?: boolean` flag) all distinguish the two: uncataloged still
+means "no data, assume compatible" (EWO-024, unchanged); ambiguous means
+"real data, but it doesn't safely identify one component" and blocks
+(`reason: 'ambiguous'` / installation `reason: 'identity-ambiguous'`) —
+never silently substitutes a guess, never falls back to permissive.
+
+**`subtype: "PDCTurret"` as the canonical PDC discriminator, and
+`PDC_TURRET` destination capability.** `deriveDestinationCapability(factoryEntityClass)`
+resolves the given entityClass and returns `'PDC_TURRET'` only when its
+raw `category === 'Turret'` and `subtype === 'PDCTurret'` — always derived
+fresh from the port's own permanent `factoryEntityClass`, never from what's
+currently installed/targeted, ship model, display name, port label,
+equipment-group label, or size alone (so it stays correct whether the
+factory PDC is installed, removed, swapped, or the Commander is viewing
+Factory Loadout or any other Build for that physical port). Compatibility
+rules (`checkCompatibility`, `src/data/componentCatalog.ts`): a
+`PDCTurret`-subtype candidate matches only a `PDC_TURRET` destination
+(exact size); a `PDC_TURRET` destination accepts only a `PDCTurret`
+candidate; neither side PDC-related falls through to the pre-existing,
+byte-for-byte-unchanged category/size check. This is what lets an
+internal PDC gun (`BEHR_LaserRepeater_PDC_S1`) validate normally against
+its own ordinary destination on an Idris-style hierarchy (a captured
+child weapon port) without being confused with the same-name S2 parent —
+both the monolithic Polaris-style leaf assembly and the Idris-style
+parent-with-captured-child shapes are supported by the same rule, since
+capability is derived from identity, not hierarchy shape.
+
+**Hardpoint canonical identity threading (Assignment 6).**
+`validateTargetCompatibility`/`isComponentSelectableForPort` gained an
+optional `CompatibilityIdentityHint` (`itemEntityClass`,
+`destinationFactoryEntityClass`), preferred over re-deriving everything
+from display-name text. `computeHardpointStatusWithValidation`
+(`src/utils/hardpointStatus.ts`) now threads its existing `identity`
+parameter (`targetEntityClass`/`factoryEntityClass` — already populated
+by every caller since EWO-STAB-003C/D) into this hint — the one
+integration point every existing caller (`fleetAssetMaterializer`,
+`fleetAssetReconciliation`, `applyInstalledChange`,
+`saveMissionConfiguration`, the persisted-state merge) already flows
+through, requiring no new caller wiring. `FactoryHardpointTemplate` gained
+a `factoryEntityClass?` field (`src/data/shipDefinitions.ts`), carried
+directly from the import pipeline's own already-resolved
+`Port.factoryItemId`/`componentById` — never re-derived from a display
+name, which for `M2C "Swarm"` would hit the same ambiguity. `fleetAssetMaterializer.ts`/
+`fleetAssetReconciliation.ts` now prefer this field over their prior
+fresh-resolution fallback (kept only for hand-authored seed rows, which
+carry no such field).
+
+**Installation engine (`identity-ambiguous`).** `InstallationFailureReason`
+gained `'identity-ambiguous'`. `resolveComponentIdentity`
+(`componentIdentityService.ts`) reports `ambiguous: true` (entityClass
+`null`, never guessed) for a display-name resolution that hits
+`resolveComponentByName`'s `ambiguous` status; the installation engine
+checks this immediately after resolving identity — before destination
+resolution, compatibility, or ownership checks — for both INSTALL and
+TRANSFER, so no ship mutation, inventory decrement, reservation
+fulfillment, or readiness mutation ever occurs for an ambiguous
+candidate. Legacy adapters reshape this result like any other failure;
+none convert it into success.
+
+**UI selection safety (Assignment 9), narrowly scoped.**
+`src/pages/MissionComposer.tsx`'s Target picker catalog is rebuilt from
+the new entityClass-first `componentsByEntityClass` (previously
+`catalogComponentsByName`, which excludes PDCTurret entries entirely): an
+unambiguous name still produces exactly one option; an ambiguous one
+produces one option per real, player-selectable entityClass, each with a
+disambiguating `label` (e.g. `M2C "Swarm" — PDC Turret, S2` /
+`M2C "Swarm" — WeaponGun, S1`) rendered in place of the plain name
+(`TargetComponentPicker`'s new optional `label` field) — the committed
+`item` value stays the real catalog display name, unchanged, so a saved
+Target string round-trips through `saveMissionConfiguration` exactly as
+before. `compatibleOptionsFor`/`isComponentSelectableForPort` calls
+(Mission Composer, Quick Update) now pass each candidate's own
+entityClass and the destination's `factoryEntityClass`, so an ordinary S2
+port's suggestions exclude PDC turret assemblies and a native PDC port's
+suggestions include them. No screen was redesigned; every change is an
+additive parameter or an additional option row.
+
+**Residual limitation at the end of EWO-STAB-004A, closed by EWO-STAB-004B
+below:** if a Commander picked a disambiguated option (e.g. the PDC
+Turret variant of `M2C "Swarm"`) and saved it, the persisted
+`Hardpoint.targetItem` was still just the plain display name —
+`targetOverrides` carried no entityClass channel at all.
+
+### Target override identity persistence (EWO-STAB-004B — correction to EWO-STAB-004A)
+
+EWO-STAB-004A made compatibility checking entityClass-aware end to end,
+but left exactly one gap: the Commander's actual picker *selection* never
+reached persistence. Root cause, traced end to end (picker option → UI
+state → action contract → store mutation → `Hardpoint.targetEntityClass`
+→ persistence → rehydration): `TargetComponentPicker`'s `onChange`
+carried only the committed string; Mission Composer's `overrides` state
+was `Record<string, string>`; `saveMissionConfiguration`'s
+`targetOverrides: Record<string, string>` parameter had nowhere to carry
+identity even if it had one. The override loop then re-resolved every
+target fresh by display name (`resolveComponentIdentity({ displayName })`)
+— correct and safe for an unambiguous name, but for `M2C "Swarm"` this
+always landed on `{ entityClass: null, ambiguous: true }` regardless of
+which real entityClass the Commander actually clicked. **The exact
+identity-loss point:** the entityClass-discarding boundary was the
+`targetOverrides` contract itself — a plain string is structurally
+incapable of carrying more than a name.
+
+**Extended contract, not a parallel system
+(`src/store/useFleetStore.ts`):**
+
+```ts
+export interface TargetOverrideValue {
+  targetItem: string
+  targetEntityClass?: string
+}
+export type TargetOverrideInput = string | TargetOverrideValue
+// saveMissionConfiguration: (params: { ...; targetOverrides: Record<string, TargetOverrideInput>; ... })
+```
+
+The same field, the same "explicit per-slot edits always win last"
+precedence — just a wider per-slot value. A legacy plain string still
+works unchanged. `TargetComponentPicker`'s `onChange` gained a second,
+optional `entityClass` parameter (the clicked/entered option's own
+`entityClass`, `undefined` for one with none) — Mission Composer's
+`overrides` state is now `Record<string, TargetOverrideValue>`, and every
+write **replaces** the whole per-slot value (never merges a new
+`targetItem` onto a stale `targetEntityClass`).
+
+**Resolution precedence in `saveMissionConfiguration`'s override loop:**
+a supplied `targetEntityClass` is verified EXACTLY via
+`resolveComponentIdentity({ entityClass })` (never blindly trusted — an
+unresolvable supplied entityClass is dropped, not silently re-resolved by
+name, which would be exactly the CAT-003 bug again); absent one, falls
+back to name resolution exactly as EWO-STAB-004A left it. `targetItem === '—'`
+always clears `targetEntityClass` regardless of what was supplied — a
+cleared target can never carry an orphaned identity.
+
+**Rehydration for an existing Build being edited:** `LoadoutAssignment`/
+`LoadoutEditorRow` (`src/utils/loadoutEditorModel.ts`) gained
+`targetEntityClass?`/`installedEntityClass?`, carried from the existing
+Build's own already-persisted Hardpoint rows — reopening an existing
+Mission Configuration for editing no longer loses the previously-selected
+identity the moment the preview recomputes. Mission Composer's preview
+(`previewRows`) now tracks a `targetEntityClass` value alongside the
+target string through every one of the same sources
+`saveMissionConfiguration` itself considers (factory/installed/existing/
+template/override), mirroring that function's own precedence exactly so
+the preview never disagrees with what will actually save.
+
+**Build duplication:** `duplicateBuild` already spread each source
+Hardpoint verbatim (`{ ...h, id, buildId }`), which already includes
+`targetEntityClass` — no change needed, confirmed by regression test 11.
+
+**Ambiguous reload proof (Assignment 5):** a Commander-selected
+`Turret_PDC_BEHR_A` (display name `M2C "Swarm"`) now survives a genuine
+save + `vi.resetModules()` + reimport cycle with its exact entityClass
+intact, validates successfully against a real Polaris PDC hardpoint,
+remains incompatible with an ordinary S2 weapon port, is never
+reclassified as `BEHR_LaserRepeater_PDC_S1`, and never returns
+`identity-ambiguous` — proven against a freshly-materialized real Polaris
+Fleet Asset (`addFleetAsset`), not a seed fixture (seed ship 'ghost' has
+its own unrelated, pre-existing legacy-slot-label characteristic — see
+regression test file's own doc comment — that would have made a save/
+reload test fragile for reasons unconnected to identity persistence).
+
+**Legacy compatibility, unchanged:** a plain-string override (or an
+object with no `targetEntityClass`) resolves by name exactly as before
+EWO-STAB-004B; a genuinely ambiguous legacy name-only override still
+correctly lands on `entityClass: undefined` — never invented.
+
 ## Known Risks and Future Follow-Up
 
 - **Resolved by EWO-STAB-003D:** the two risks recorded here at the end of
@@ -351,6 +579,59 @@ was sought or granted to change that during this mission.
   Not a bug — every regression test across EWO-STAB-003D/003E confirms
   they agree — but a legitimate candidate for a future, narrowly-scoped
   cleanup mission if that duplication is ever judged worth removing.
+- **Resolved by EWO-STAB-004A:** the Polaris (and every other real
+  PDC-carrying ship — Idris M/P, Reclaimer, 890Jump, Constellation
+  Phoenix, Perseus, Mauler) false `M2C "Swarm"` incompatibility CAT-003
+  investigated is fixed — see the EWO-STAB-004A section above. The 11
+  `"<ship>::M2C \"Swarm\""` entries in
+  `src/data/__tests__/shipDefinitions.test.ts`'s `KNOWN_EXCEPTIONS` list
+  were removed; all now validate genuinely, not via an accepted exception.
+- **Resolved by EWO-STAB-004B:** a disambiguated Target-picker selection
+  not surviving a save (recorded here at the end of EWO-STAB-004A) is
+  fixed — see the EWO-STAB-004B section above. `targetOverrides` now
+  carries the selected entityClass end to end. Kept here for historical
+  record.
+- **The ambiguity check's compatibility-shape refinement (EWO-STAB-004A)**
+  reads slightly more permissively than CAT-003's literal wording
+  ("multiple distinct entityClass matches" = ambiguous, no carve-out).
+  Deliberate and evidenced (see the EWO-STAB-004A section above: `"Ecouter"`,
+  `"AllStop"`, `"MSD-322 Missile Rack"` are all real, harmless SKU-variant
+  collisions the literal reading would have newly broken) — flagged here
+  for Chief Architect awareness as a documented interpretation, not an
+  unreviewed deviation.
+- **`src/normalizer/assemblyRole.ts`'s `MANNED_TURRET` mislabeling of an
+  autonomous PDC turret** (CAT-003's own secondary finding — a
+  name-token-matching heuristic tags any leaf `Turret`-categorized
+  entity class containing the token "Turret" as `MANNED_TURRET`, even
+  though a PDC assembly is explicitly AI-driven/unmanned) remains
+  unchanged — explicitly out of scope for EWO-STAB-004A ("Do not fix PDC
+  assemblyRole MANNED_TURRET labeling"). A real, separate, low-risk
+  presentation issue, not a compatibility one.
+- **`TargetComponentPicker` has no working path to commit genuinely
+  free-typed text that matches zero catalog options** (discovered, not
+  introduced, by EWO-STAB-004B's own audit — confirmed by that
+  component's own pre-existing test 5, whose comment already documents
+  "no matching option to commit via Enter... the free-text value stays in
+  the editable field"). `onChange` — and therefore every override this
+  mission's identity-clearing rules govern — only ever fires today from a
+  real, listed option. Assignment 4.B's "enter uncataloged free text
+  clears the old entityClass" behavior is implemented and defensively
+  correct (a plain-string/no-entityClass override always resolves by name
+  and never carries a stale identity), but the specific UI interaction of
+  typing a wholly novel name through this exact picker cannot currently
+  reach it. Out of scope here (a pre-existing UX gap, not an identity
+  regression) — flagged for a future, narrowly-scoped UX mission.
+- **Seed ship 'ghost' carries a real, pre-existing legacy-slot-label
+  characteristic** (MWO-001): its hand-authored CUSTOM build
+  ('ghost-stealth') uses simple slot labels ("Shield 1") that predate its
+  real deep-import template, which reconciliation correctly renames
+  ("Left Shield Generator") only once a genuine reload/rehydration cycle
+  runs. Discovered while writing EWO-STAB-004B's own save/reload
+  regression tests (test 4/9 use a freshly-materialized real Polaris
+  Fleet Asset instead, specifically to avoid this unrelated fixture
+  quirk). Not a bug introduced by this mission, and out of its scope —
+  flagged for awareness should a future mission test 'ghost' across a
+  genuine reload by slot label.
 
 ## Consequences
 

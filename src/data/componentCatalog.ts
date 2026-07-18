@@ -1,6 +1,11 @@
 import { isCompatible } from '../engine/compatibility'
 import type { Component, CompatibilityRule } from '../engine/types'
-import { catalogComponentsByName } from '../generated/componentCatalog'
+import {
+  CATEGORY_TO_PORT_TYPE,
+  resolveComponentByEntityClass,
+  resolveComponentByName,
+  type CanonicalComponentRecord,
+} from '../generated/componentCatalog'
 
 /**
  * Demo component catalog — category + size for the named items that
@@ -15,6 +20,12 @@ import { catalogComponentsByName } from '../generated/componentCatalog'
  * positively confirm a mismatch, not whenever data happens to be missing.
  */
 interface CatalogEntry {
+  /** Translated port-type vocabulary (e.g. "Weapon", "Shield") — the same
+   * meaning this field has always had. For a PDCTurret-subtype entry this
+   * is whatever CATEGORY_TO_PORT_TYPE happens to map raw category
+   * "Turret" to (currently nothing, so it falls back to the raw string) —
+   * irrelevant in practice, since a PDCTurret entry is never evaluated
+   * through the ordinary category/size path below (see `subtype`). */
   category: string
   size: number
   // EWO-STAB-003B — present only when resolution came from the generated
@@ -24,6 +35,14 @@ interface CatalogEntry {
   // already being returned here; this widens the type to expose it, it
   // does not change what resolveCatalogEntry returns.
   entityClass?: string
+  /** EWO-STAB-004A (ADR-010, CAT-003) — DataCore's raw, untranslated
+   * SubType (e.g. "Gun", "GunTurret", "PDCTurret"). Present only when
+   * resolution came from the generated catalog; undefined for a
+   * hand-authored CATALOG entry, which predates subtype tracking and has
+   * no PDC-relevant entries to begin with. This is the ONLY field the PDC
+   * rules below read — never `category`, which stays in the ordinary,
+   * unrelated port-type vocabulary. */
+  subtype?: string | null
 }
 
 const CATALOG: Record<string, CatalogEntry> = {
@@ -133,20 +152,97 @@ function parsePortSize(size: string): number {
 export interface TargetValidation {
   valid: boolean
   message?: string
+  /** EWO-STAB-004A — distinguishes a positively-confirmed mismatch from a
+   * genuinely ambiguous cataloged name (Assignment 3). Absent when `valid`
+   * is true. */
+  reason?: 'incompatible' | 'ambiguous'
 }
 
 /**
- * The one shared catalog lookup — hand-authored demo table first
- * (preserves existing, already-tested behavior for the seed fleet's known
- * items), then the full authoritative component catalog (Mission M-012 —
- * see src/generated/componentCatalog.ts). Both `validateTargetCompatibility`
- * (below) and the Loadout Manager's Target picker filtering
- * (EWO-024, Task 2) resolve a component's category/size through this exact
- * function, so "what's shown as selectable" and "what validates" can never
- * silently disagree with each other.
+ * EWO-STAB-004A — converts a raw canonical record into the ordinary
+ * category/size decision `checkCompatibility`'s Rule C/E path uses.
+ *
+ * A raw DataCore category with no `CATEGORY_TO_PORT_TYPE` translation
+ * (e.g. "Turret" — a mount/turret-housing row's own factory item, like
+ * `Mount_Gimbal_S4`'s "VariPuck S4 Gimbal Mount", which is a structural
+ * hardware label the ordinary category/size vocabulary was never meant to
+ * validate) resolves `unresolved` here — exactly the pre-existing
+ * "uncataloged, can't disprove compatibility" permissive behavior every
+ * such row already relied on before this mission, unchanged. The ONE
+ * exception is a `subtype: "PDCTurret"` record: it is always `resolved`
+ * regardless of translation, because it is never evaluated through this
+ * ordinary path at all — `checkCompatibility` diverts it to the
+ * PDC-specific rule using `subtype` directly, before `category` is ever
+ * consulted.
  */
-function resolveCatalogEntry(item: string): CatalogEntry | undefined {
-  return CATALOG[item] ?? catalogComponentsByName.get(item)
+function toCandidateResolution(record: CanonicalComponentRecord): CandidateResolution {
+  if (!isPlayerSelectableRecord(record)) return { status: 'unresolved' }
+  const translatedCategory = CATEGORY_TO_PORT_TYPE[record.category]
+  return {
+    status: 'resolved',
+    entry: { category: translatedCategory ?? record.category, size: record.size, entityClass: record.entityClass, subtype: record.subtype },
+  }
+}
+
+/**
+ * EWO-STAB-004A (ADR-010, Assignment 9) — whether a canonical record could
+ * ever be offered as a Target picker option or evaluated through the
+ * ordinary compatibility path: either its raw category translates to the
+ * existing port-type vocabulary, or it's a PDCTurret (evaluated by its own
+ * dedicated rule, never via translation). The same gate
+ * `toCandidateResolution` applies internally — exported so UI selection
+ * lists (e.g. src/pages/MissionComposer.tsx's Target picker) filter
+ * candidates with this one shared decision rather than a second copy.
+ */
+export function isPlayerSelectableRecord(record: { category: string; subtype: string | null }): boolean {
+  return Boolean(CATEGORY_TO_PORT_TYPE[record.category]) || record.subtype === 'PDCTurret'
+}
+
+export type CandidateResolution =
+  | { status: 'resolved'; entry: CatalogEntry }
+  /** Two or more distinct real entityClasses share this display name
+   * (e.g. `M2C "Swarm"`) — EWO-STAB-004A (ADR-010, Assignment 3). Never
+   * resolved by picking the first, by insertion order, or by size alone. */
+  | { status: 'ambiguous' }
+  | { status: 'unresolved' }
+
+/**
+ * The one shared candidate-resolution decision (EWO-STAB-004A, Assignments
+ * 2/3/6) — every compatibility- and identity-sensitive caller in this
+ * codebase resolves a component through this function, never by reading
+ * the generated catalog maps directly.
+ *
+ * Precedence:
+ *   1. The hand-authored CATALOG override table, by name, REGARDLESS of
+ *      whether an entityClass was also supplied. Every key here is a
+ *      specifically-reviewed correction for a known bulk-catalog problem
+ *      — not just a same-name collision, but in some cases (e.g. "Baler
+ *      Salvage Head") a deliberate match to this ship-import pipeline's
+ *      own quirky port-type string rather than the component's
+ *      "correctly" translated category. A real entityClass's generic
+ *      resolution must not silently override a human-reviewed fix.
+ *   2. Without an override, `entityClass` when supplied — resolved
+ *      EXACTLY via `resolveComponentByEntityClass`. Not found means
+ *      `unresolved` (uncataloged) — never silently re-resolved by name;
+ *      substituting a same-name component for a specific entityClass that
+ *      missed is exactly what CAT-003 found causing the Polaris PDC bug.
+ *   3. Without an entityClass either: the ambiguity-aware bulk catalog
+ *      (`resolveComponentByName`). A name shared by two or more distinct
+ *      entityClasses resolves `ambiguous`, never "first entry wins".
+ */
+function resolveCandidate(item: string, entityClass?: string | null): CandidateResolution {
+  const override = CATALOG[item]
+  if (override) return { status: 'resolved', entry: override }
+
+  if (entityClass) {
+    const resolution = resolveComponentByEntityClass(entityClass)
+    return resolution.status === 'resolved' ? toCandidateResolution(resolution.record) : { status: 'unresolved' }
+  }
+
+  const resolution = resolveComponentByName(item)
+  if (resolution.status === 'ambiguous') return { status: 'ambiguous' }
+  if (resolution.status === 'resolved') return toCandidateResolution(resolution.record)
+  return { status: 'unresolved' }
 }
 
 /**
@@ -156,14 +252,90 @@ function resolveCatalogEntry(item: string): CatalogEntry | undefined {
  * No new lookup, no new rule — this only exposes what was already being
  * computed here so the installation engine can resolve identity through
  * the one existing catalog, rather than re-deriving its own.
+ *
+ * EWO-STAB-004A — an ambiguous name now resolves `undefined` here (same
+ * "not found" signal as a genuinely uncataloged name) rather than
+ * silently returning the first candidate. A caller that must distinguish
+ * "ambiguous" from "uncataloged" (identity resolution, which needs to
+ * refuse ambiguity rather than treat it as permissively unknown) uses
+ * `resolveComponentCatalogEntryDetailed` instead.
  */
 export function resolveComponentCatalogEntry(item: string): CatalogEntry | undefined {
-  return resolveCatalogEntry(item)
+  const result = resolveCandidate(item)
+  return result.status === 'resolved' ? result.entry : undefined
 }
 
-function checkCompatibility(entry: CatalogEntry, portType: string, portSize: string): boolean {
+/** EWO-STAB-004A — the detailed form of the above, preserving the
+ * ambiguous/unresolved distinction `CatalogEntry | undefined` can't
+ * express. Used by componentIdentityService.ts's own name-based
+ * resolution branch. */
+export function resolveComponentCatalogEntryDetailed(item: string, entityClass?: string | null): CandidateResolution {
+  return resolveCandidate(item, entityClass)
+}
+
+export type DestinationCapability = 'PDC_TURRET' | null
+
+/**
+ * EWO-STAB-004A (ADR-010, Assignment 4) — a native PDC-capable port's
+ * destination capability, derived fresh from the hardpoint's own
+ * `factoryEntityClass` every time this is called — never from what's
+ * currently installed/targeted, never from ship model, display name,
+ * port label text, equipment-group label, or size alone. Because
+ * `factoryEntityClass` is the physical port's own permanent identity
+ * (set once at import/materialization and never mutated by
+ * install/remove/target-edit), this stays correct whether the factory
+ * PDC is installed, removed, swapped for something else, or the
+ * Commander is viewing Factory Loadout or any other Build for the same
+ * physical port.
+ */
+export function deriveDestinationCapability(factoryEntityClass: string | null | undefined): DestinationCapability {
+  if (!factoryEntityClass) return null
+  const resolution = resolveComponentByEntityClass(factoryEntityClass)
+  if (resolution.status === 'resolved' && resolution.record.category === 'Turret' && resolution.record.subtype === 'PDCTurret') {
+    return 'PDC_TURRET'
+  }
+  return null
+}
+
+/** Identity hints a compatibility caller passes through when already
+ * available on the hardpoint/component in question (EWO-STAB-004A,
+ * Assignment 6) — never re-resolved by display name when present. */
+export interface CompatibilityIdentityHint {
+  /** The candidate component's own entityClass, when already known
+   * (e.g. Hardpoint.targetEntityClass/factoryEntityClass). */
+  itemEntityClass?: string | null
+  /** The destination port's own factory-installed entityClass — the
+   * input to `deriveDestinationCapability`. */
+  destinationFactoryEntityClass?: string | null
+}
+
+/**
+ * EWO-STAB-004A (ADR-010, Assignment 5) — implements rules A-E:
+ *   A/B. A PDCTurret-subtype candidate fits ONLY a PDC_TURRET-capable
+ *        destination (subject to the existing exact-size requirement
+ *        every rule in this file already applies) — never an ordinary
+ *        weapon/gimbal/turret destination, regardless of matching size.
+ *   D.   The reverse: a monolithic PDC_TURRET destination never accepts
+ *        an ordinary (non-PDCTurret) component, regardless of its own
+ *        category/size.
+ *   C/E. Neither side is PDC-related — the pre-existing category/size
+ *        check, byte-for-byte unchanged. This is what lets an internal
+ *        PDC gun (e.g. BEHR_LaserRepeater_PDC_S1, subtype "Gun") validate
+ *        normally against its own ordinary weapon destination (an
+ *        Idris-style captured child port) rather than being confused
+ *        with the same-name S2 parent turret assembly.
+ */
+function checkCompatibility(entry: CatalogEntry, portType: string, portSize: string, destinationCapability: DestinationCapability): boolean {
   const size = parsePortSize(portSize)
   if (Number.isNaN(size)) return true
+
+  if (entry.subtype === 'PDCTurret') {
+    return destinationCapability === 'PDC_TURRET' && entry.size === size
+  }
+
+  if (destinationCapability === 'PDC_TURRET') {
+    return false
+  }
 
   const component: Component = {
     id: '',
@@ -171,7 +343,7 @@ function checkCompatibility(entry: CatalogEntry, portType: string, portSize: str
     displayName: '',
     manufacturer: '',
     category: entry.category,
-    subtype: '',
+    subtype: entry.subtype ?? '',
     size: entry.size,
     grade: '',
     class: '',
@@ -192,18 +364,39 @@ function checkCompatibility(entry: CatalogEntry, portType: string, portSize: str
  * when the item is in the catalog AND its category/size positively
  * conflicts with the port — an uncataloged item is always treated as
  * valid, since we can't disprove compatibility we have no data for.
+ *
+ * EWO-STAB-004A — `identity`, when supplied, is preferred over re-deriving
+ * everything from `targetItem`'s display-name text (Assignment 6): a
+ * known `itemEntityClass` resolves exactly; a genuinely ambiguous name
+ * (no entityClass known) returns `reason: 'ambiguous'` rather than
+ * guessing. `destinationFactoryEntityClass` drives the PDC-aware rules
+ * above — see `deriveDestinationCapability`.
  */
-export function validateTargetCompatibility(targetItem: string | null | undefined, portType: string, portSize: string): TargetValidation {
+export function validateTargetCompatibility(
+  targetItem: string | null | undefined,
+  portType: string,
+  portSize: string,
+  identity?: CompatibilityIdentityHint
+): TargetValidation {
   const item = (targetItem ?? '').trim()
   if (!item || item === '—') return { valid: true }
 
-  const entry = resolveCatalogEntry(item)
-  if (!entry) return { valid: true }
+  const resolution = resolveCandidate(item, identity?.itemEntityClass)
+  if (resolution.status === 'ambiguous') {
+    return {
+      valid: false,
+      reason: 'ambiguous',
+      message: `"${item}" matches more than one real component in the catalog and cannot be safely validated by name alone.`,
+    }
+  }
+  if (resolution.status === 'unresolved') return { valid: true }
 
-  if (checkCompatibility(entry, portType, portSize)) return { valid: true }
+  const destinationCapability = deriveDestinationCapability(identity?.destinationFactoryEntityClass)
+  if (checkCompatibility(resolution.entry, portType, portSize, destinationCapability)) return { valid: true }
 
   return {
     valid: false,
+    reason: 'incompatible',
     message: `${item} is not compatible with this ${portSize} ${portType} port.`,
   }
 }
@@ -218,9 +411,15 @@ export function validateTargetCompatibility(targetItem: string | null | undefine
  * this never hides a legitimate but uncataloged choice. Free-text entry
  * and full compatibility re-validation both remain unchanged — this only
  * narrows what's SUGGESTED, never what CAN be typed or saved.
+ *
+ * EWO-STAB-004A — an ambiguous name is never suggested (Assignment 9):
+ * offering it would mean picking one of several real components with no
+ * way to know which the Commander actually means.
  */
-export function isComponentSelectableForPort(item: string, portType: string, portSize: string): boolean {
-  const entry = resolveCatalogEntry(item)
-  if (!entry) return true
-  return checkCompatibility(entry, portType, portSize)
+export function isComponentSelectableForPort(item: string, portType: string, portSize: string, identity?: CompatibilityIdentityHint): boolean {
+  const resolution = resolveCandidate(item, identity?.itemEntityClass)
+  if (resolution.status === 'ambiguous') return false
+  if (resolution.status === 'unresolved') return true
+  const destinationCapability = deriveDestinationCapability(identity?.destinationFactoryEntityClass)
+  return checkCompatibility(resolution.entry, portType, portSize, destinationCapability)
 }

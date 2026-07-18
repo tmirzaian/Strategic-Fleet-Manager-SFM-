@@ -1,4 +1,4 @@
-import { resolveComponentCatalogEntry } from '../../data/componentCatalog'
+import { resolveComponentCatalogEntryDetailed } from '../../data/componentCatalog'
 import { catalogComponentsByEntityClass } from '../../generated/componentCatalog'
 import type { ComponentReference } from './types'
 
@@ -41,12 +41,23 @@ export interface ResolvedComponentIdentity {
    * succeeds; the em-dash "no item" sentinel resolves to a null identity
    * instead (see resolveComponentIdentity's guard below). */
   displayName: string
-  /** null when uncataloged, or when only reachable via the hand-authored
+  /** null when uncataloged, when only reachable via the hand-authored
    * override table (which carries no entityClass — see CatalogEntry in
-   * componentCatalog.ts). Never a guess. */
+   * componentCatalog.ts), or when `ambiguous` (below) is true. Never a
+   * guess. */
   entityClass: string | null
   category: string | null
   size: number | null
+  /** EWO-STAB-004A (ADR-010, CAT-003) — true when `displayName` matches
+   * two or more distinct real entityClasses in the bulk catalog (e.g.
+   * `M2C "Swarm"`) and no explicit entityClass was supplied to
+   * disambiguate. `entityClass` is `null` in this case — never guessed,
+   * never "first entry wins". Absent (not merely `false`) whenever
+   * resolution wasn't ambiguous, so existing `toEqual`-style assertions
+   * on an unambiguous identity are unaffected. Callers that must refuse
+   * an ambiguous identity (the installation engine) check this flag
+   * explicitly, before any other validation. */
+  ambiguous?: boolean
 }
 
 const NO_ITEM_SENTINEL = '—'
@@ -77,7 +88,14 @@ export function resolveComponentIdentity(reference: ComponentReference): Resolve
       // hand), so this resolves to nothing rather than guessing a name.
       return null
     }
-    const entry = resolveComponentCatalogEntry(presentation.displayName)
+    // EWO-STAB-004A — resolved EXACTLY via the known entityClass, never
+    // roundtripped back through a display name (which, for a component
+    // like `M2C "Swarm"`, would be genuinely ambiguous). An entityClass
+    // that has a presentation but no catalog category/size entry (rare)
+    // degrades to null category/size, same as before — never ambiguous,
+    // since an explicit entityClass is exact by construction.
+    const detailed = resolveComponentCatalogEntryDetailed(presentation.displayName, reference.entityClass)
+    const entry = detailed.status === 'resolved' ? detailed.entry : undefined
     return {
       displayName: presentation.displayName,
       entityClass: reference.entityClass,
@@ -89,7 +107,16 @@ export function resolveComponentIdentity(reference: ComponentReference): Resolve
   const trimmed = reference.displayName.trim()
   if (!trimmed || trimmed === NO_ITEM_SENTINEL) return null
 
-  const entry = resolveComponentCatalogEntry(trimmed)
+  // EWO-STAB-004A — a name matching two or more distinct real
+  // entityClasses is reported ambiguous here, not silently resolved to
+  // whichever one the bulk catalog happens to list first. `entityClass`
+  // stays null (never a guess); `ambiguous: true` lets a caller that must
+  // refuse ambiguity (the installation engine) do so explicitly.
+  const detailed = resolveComponentCatalogEntryDetailed(trimmed)
+  if (detailed.status === 'ambiguous') {
+    return { displayName: trimmed, entityClass: null, category: null, size: null, ambiguous: true }
+  }
+  const entry = detailed.status === 'resolved' ? detailed.entry : undefined
   return {
     displayName: trimmed,
     entityClass: entry?.entityClass ?? null,

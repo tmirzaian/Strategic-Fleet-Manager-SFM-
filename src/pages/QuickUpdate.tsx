@@ -70,10 +70,21 @@ export default function QuickUpdate() {
   // same isComponentSelectableForPort the Loadout Manager's Target picker
   // already uses (EWO-024, Task 2) — "what's offered" can never disagree
   // with "what installComponent will actually accept."
+  //
+  // EWO-STAB-004A (ADR-010, Assignment 9) — each candidate hardpoint's own
+  // factoryEntityClass drives its PDC_TURRET destination-capability check,
+  // so a PDC turret assembly typed here is never offered an ordinary S2
+  // weapon slot, and an ordinary component is never offered a native PDC
+  // slot. `selectedComponentName` itself stays name-based (this page's
+  // free-text entry is unchanged) — an ambiguous typed name simply isn't
+  // selectable anywhere, the same safe refusal every other caller applies.
   const compatibleSlotOptions = useMemo(() => {
     if (!selectedComponentName || !effectiveBuildContextId) return []
     return hardpoints.filter(
-      (h) => h.buildId === effectiveBuildContextId && h.status !== 'OK' && isComponentSelectableForPort(selectedComponentName, h.type, h.size)
+      (h) =>
+        h.buildId === effectiveBuildContextId &&
+        h.status !== 'OK' &&
+        isComponentSelectableForPort(selectedComponentName, h.type, h.size, { destinationFactoryEntityClass: h.factoryEntityClass })
     )
   }, [hardpoints, selectedComponentName, effectiveBuildContextId])
 

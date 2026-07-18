@@ -124,30 +124,20 @@ describe('importedFactoryTemplate — Mission M-011 (full nested port tree, not 
       'Starlancer Max::MSD-543 Missile Rack', // real S4 unit, an additional size beyond the S1 (325a) / S5 (majority) split above
       'Starlancer TAC::MSD-543 Missile Rack',
       'Starlancer TAC Collector Military::MSD-543 Missile Rack',
-      // RC-001A: surfaced when the .localization-cache staleness fix (RC-001)
-      // let the component catalog resolve names it previously couldn't —
-      // "M2C \"Swarm\"" is shared by three real, differently-shaped
-      // components (BEHR_LaserRepeater_PDC_S1, a real S1 WeaponGun;
-      // Turret_PDC_BEHR_A and Turret_PDC_VNCL, both a real S2 PDCTurret).
-      // Worse than the per-ship splits above: the SAME literal name is
-      // used for BOTH the PDC turret's structural shell (needs the S2
-      // Turret variant) and its internal gun (needs the S1 WeaponGun
-      // variant) on every affected ship's own loadout — no single catalog
-      // override can serve both roles, let alone all 11 real ships this
-      // pattern appears on. A real, systemic ambiguity (every capital
-      // ship with a PDC turret array), out of RC-001A's Basher-only scope
-      // — flagged to the Commander as its own follow-up candidate.
-      'Idris M::M2C "Swarm"',
-      'Idris P::M2C "Swarm"',
-      'Idris P Collector Military::M2C "Swarm"',
-      'Reclaimer::M2C "Swarm"',
-      'Reclaimer Showdown::M2C "Swarm"',
-      '890Jump::M2C "Swarm"',
-      'Constellation Phoenix::M2C "Swarm"',
-      'Constellation Phoenix Emerald::M2C "Swarm"',
-      'Perseus::M2C "Swarm"',
-      'Polaris::M2C "Swarm"',
-      'Mauler::M2C "Swarm"',
+      // RC-001A originally found "M2C \"Swarm\"" shared by three real,
+      // differently-shaped components (BEHR_LaserRepeater_PDC_S1, a real
+      // S1 WeaponGun; Turret_PDC_BEHR_A and Turret_PDC_VNCL, both a real
+      // S2 PDCTurret) — the SAME literal name used for both the PDC
+      // turret's structural shell and its internal gun on every affected
+      // ship. CAT-003/EWO-STAB-004A resolved this: `validateTargetCompatibility`
+      // now prefers each row's own already-resolved `factoryEntityClass`
+      // (see the call above) rather than re-deriving everything from
+      // "M2C \"Swarm\""'s ambiguous display-name text, and a dedicated
+      // PDC_TURRET destination-capability rule (ADR-010) lets the S2
+      // turret assembly validate against its own native port. No longer
+      // an exception on any of the 11 ships this pattern appears on
+      // (Idris M/P, Reclaimer, 890Jump, Constellation Phoenix, Perseus,
+      // Polaris, Mauler) — removed from this list.
       // RC-001A: a second, unrelated class of finding surfaced by the same
       // re-run — a handful of components' DataCore localization key
       // genuinely never resolves (the raw "<= PLACEHOLDER =>" sentinel
@@ -199,7 +189,18 @@ describe('importedFactoryTemplate — Mission M-011 (full nested port tree, not 
       for (const row of template) {
         if (row.isStructural || row.factoryItem === '—') continue
         if (KNOWN_EXCEPTIONS.has(`${view.ship.name}::${row.factoryItem}`)) continue
-        const result = validateTargetCompatibility(row.factoryItem, row.type, row.size)
+        // EWO-STAB-004A — prefers the template's own already-resolved
+        // factoryEntityClass (see FactoryHardpointTemplate's doc comment)
+        // over re-deriving everything from factoryItem's display-name
+        // text, exactly like every real compatibility caller now does.
+        // Several real display names (e.g. "M9A Cannon", "M2C \"Swarm\"")
+        // are genuinely ambiguous by name alone across different real,
+        // differently-sized/shaped entityClasses — this is the identity
+        // that resolves each row to the one actually installed there.
+        const result = validateTargetCompatibility(row.factoryItem, row.type, row.size, {
+          itemEntityClass: row.factoryEntityClass,
+          destinationFactoryEntityClass: row.factoryEntityClass,
+        })
         expect(result.valid, `${view.ship.name} — ${row.slotLabel}: ${result.message ?? ''}`).toBe(true)
       }
     }

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy } from 'lucide-react'
-import { useFleetStore } from '../store/useFleetStore'
-import { validateTargetCompatibility, isComponentSelectableForPort } from '../data/componentCatalog'
+import { useFleetStore, type TargetOverrideValue } from '../store/useFleetStore'
+import { validateTargetCompatibility, isComponentSelectableForPort, isPlayerSelectableRecord } from '../data/componentCatalog'
 import { findItemCatalog as demoFindItemCatalog } from '../data/seed'
-import { catalogComponentsByName } from '../generated/componentCatalog'
+import { catalogComponentsByName, componentsByEntityClass, resolveComponentByName, CATEGORY_TO_PORT_TYPE, type CanonicalComponentRecord } from '../generated/componentCatalog'
 import { shipFactoryTemplates } from '../data/shipDefinitions'
 import { buildLoadoutEditorModel, assignmentsBySlotLabel, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
+import type { TargetComponentOption } from '../components/TargetComponentPicker'
 
 /**
  * Mission M-012: the target-item autocomplete now draws from the full
@@ -14,12 +15,51 @@ import { buildLoadoutEditorModel, assignmentsBySlotLabel, resolveShipDefinitionI
  * "target-build selectors use the same component source as inventory and
  * current loadout workflows." The demo entries are kept first (existing,
  * already-tested behavior for the seed fleet) and never duplicated.
+ *
+ * EWO-STAB-004A (ADR-010, Assignment 9) — rebuilt from `componentsByEntityClass`
+ * (entityClass-first, includes PDCTurret components `catalogComponentsByName`
+ * still excludes) rather than that legacy, translated-category map. A
+ * display name shared by two or more genuinely different real components
+ * (`resolveComponentByName` returns `ambiguous` — e.g. `M2C "Swarm"`)
+ * produces one option PER real entityClass, each carrying that
+ * entityClass and a disambiguating `label`; an unambiguous name still
+ * produces exactly one option, `item` alone, unchanged from before. Every
+ * option's `item` stays the real catalog display name (never the
+ * decorated label) — what gets committed to a Hardpoint's `targetItem` on
+ * selection, and therefore what `saveMissionConfiguration` resolves
+ * afterward, is completely unaffected by this list's own presentation.
  */
-const catalogFindItemEntries = Array.from(catalogComponentsByName.entries())
-  .map(([item, entry]) => ({ path: `${entry.category} → ${item}`, item }))
-  .sort((a, b) => a.item.localeCompare(b.item))
+function categoryLabelFor(record: CanonicalComponentRecord): string {
+  if (record.subtype === 'PDCTurret') return 'PDC Turret'
+  return CATEGORY_TO_PORT_TYPE[record.category] ?? record.category
+}
+
+const catalogFindItemEntries: TargetComponentOption[] = []
+{
+  const displayNames = new Set(Array.from(componentsByEntityClass.values(), (r) => r.displayName))
+  for (const name of displayNames) {
+    const resolution = resolveComponentByName(name)
+    const candidates = resolution.status === 'ambiguous' ? resolution.candidates : resolution.status === 'resolved' ? [resolution.record] : []
+    const selectable = candidates.filter(isPlayerSelectableRecord)
+    if (selectable.length === 0) continue
+    if (selectable.length === 1) {
+      const record = selectable[0]
+      catalogFindItemEntries.push({ path: `${categoryLabelFor(record)} → ${name}`, item: name, entityClass: record.entityClass })
+    } else {
+      for (const record of selectable) {
+        catalogFindItemEntries.push({
+          path: `${categoryLabelFor(record)} → ${name}`,
+          item: name,
+          label: `${name} — ${categoryLabelFor(record)}, S${record.size}`,
+          entityClass: record.entityClass,
+        })
+      }
+    }
+  }
+  catalogFindItemEntries.sort((a, b) => (a.label ?? a.item).localeCompare(b.label ?? b.item))
+}
 const demoItemNames = new Set(demoFindItemCatalog.map((c) => c.item))
-const findItemCatalog = [...demoFindItemCatalog, ...catalogFindItemEntries.filter((c) => !demoItemNames.has(c.item))]
+const findItemCatalog: TargetComponentOption[] = [...demoFindItemCatalog, ...catalogFindItemEntries.filter((c) => !demoItemNames.has(c.item))]
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import TargetComponentPicker from '../components/TargetComponentPicker'
@@ -91,7 +131,12 @@ export default function MissionComposer() {
   const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('CREATE')
   const [startingState, setStartingState] = useState<StartingState>('FACTORY')
   const [existingBuildId, setExistingBuildId] = useState('')
-  const [overrides, setOverrides] = useState<Record<string, string>>({})
+  // EWO-STAB-004B (ADR-010) — each override now carries the Commander's
+  // actually-selected canonical entityClass alongside the display name,
+  // not just the name text. Every write REPLACES the whole per-slot
+  // value (never merges a new targetItem onto a stale targetEntityClass
+  // from a prior selection) — see the picker's onChange below.
+  const [overrides, setOverrides] = useState<Record<string, TargetOverrideValue>>({})
   const [expandedSlot, setExpandedSlot] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -182,17 +227,56 @@ export default function MissionComposer() {
 
     return editorModel.rows.map((row) => {
       let target = row.factoryItem
-      if (effectiveStartingState === 'INSTALLED') target = row.installedItem
-      else if (effectiveStartingState === 'EMPTY') target = '—'
-      else if (effectiveStartingState === 'EXISTING') target = existingAssignments?.get(row.slotLabel)?.targetItem ?? row.targetItem
+      // EWO-STAB-004B (ADR-010) — the target's own resolved entityClass,
+      // tracked alongside the string through every one of the same
+      // sources below, mirroring saveMissionConfiguration's own
+      // baseTargetEntityClasses precedence so the preview never disagrees
+      // with what will actually be saved.
+      let targetEntityClass: string | undefined = row.factoryEntityClass
+      if (effectiveStartingState === 'INSTALLED') {
+        target = row.installedItem
+        targetEntityClass = row.installedEntityClass
+      } else if (effectiveStartingState === 'EMPTY') {
+        target = '—'
+        targetEntityClass = undefined
+      } else if (effectiveStartingState === 'EXISTING') {
+        const existing = existingAssignments?.get(row.slotLabel)
+        target = existing?.targetItem ?? row.targetItem
+        targetEntityClass = existing ? existing.targetEntityClass : row.targetEntityClass
+      }
 
       const fromTemplate = template?.targetAssignments.find((a) => a.slotLabel === row.slotLabel)
-      if (fromTemplate) target = fromTemplate.targetItem
+      if (fromTemplate) {
+        target = fromTemplate.targetItem
+        // A Quartermaster Template assignment carries no entityClass of
+        // its own (same as saveMissionConfiguration's own treatment) —
+        // the preview's compatibility check falls back to name resolution
+        // for it, same as before.
+        targetEntityClass = undefined
+      }
 
-      if (row.slotLabel in overrides) target = overrides[row.slotLabel]
+      const override = overrides[row.slotLabel]
+      if (override) {
+        target = override.targetItem
+        targetEntityClass = override.targetEntityClass
+      }
 
-      const compatibility = target && target !== '—' ? validateTargetCompatibility(target, row.type, row.size) : { valid: true }
-      return { ...row, previewTarget: target, compatible: compatibility.valid, incompatibleMessage: 'message' in compatibility ? compatibility.message : undefined }
+      // EWO-STAB-004A/004B (ADR-010) — `itemEntityClass` is trusted
+      // whenever the current target string has a resolved entityClass
+      // tracked alongside it (the row's own factory/installed/existing
+      // value, or a picker override that supplied one) — never
+      // re-derived from display-name text once a real identity is known.
+      // `destinationFactoryEntityClass` is always this port's own factory
+      // identity regardless of which candidate is being checked — it
+      // drives PDC_TURRET capability.
+      const compatibility =
+        target && target !== '—'
+          ? validateTargetCompatibility(target, row.type, row.size, {
+              itemEntityClass: targetEntityClass,
+              destinationFactoryEntityClass: row.factoryEntityClass,
+            })
+          : { valid: true }
+      return { ...row, previewTarget: target, previewTargetEntityClass: targetEntityClass, compatible: compatibility.valid, incompatibleMessage: 'message' in compatibility ? compatibility.message : undefined }
     })
   }, [editorModel, effectiveStartingState, existingBuildId, templateId, overrides, quartermasterTemplates, hardpoints])
 
@@ -213,20 +297,31 @@ export default function MissionComposer() {
   // EWO-024 (Task 2) — the Target picker's suggestion list is narrowed to
   // components not positively known to be incompatible with each row's own
   // type/size (e.g. no S1 Coolers suggested inside an S2 Cooler port).
-  // Cached per (type, size) pair rather than per row, since dozens of rows
-  // on a real ship commonly share the same port type/size (many S2
-  // Coolers, several S4 Weapons) — filtering the ~900-entry catalog once
-  // per distinct pair, not once per row, keeps this cheap even for a
-  // fully-expanded Corsair. Free-text entry and full save-time
-  // compatibility validation are both unchanged — this only narrows what's
-  // suggested.
+  // Cached per (type, size, factoryEntityClass) rather than per row, since
+  // dozens of rows on a real ship commonly share the same port type/size
+  // (many S2 Coolers, several S4 Weapons) — filtering the ~900-entry
+  // catalog once per distinct combination, not once per row, keeps this
+  // cheap even for a fully-expanded Corsair. Free-text entry and full
+  // save-time compatibility validation are both unchanged — this only
+  // narrows what's suggested.
+  //
+  // EWO-STAB-004A (ADR-010, Assignment 9) — `factoryEntityClass` (the
+  // destination port's own PDC_TURRET-capability driver) is now part of
+  // the cache key and threaded into the filter, and each option's own
+  // `entityClass` (when known) is preferred over re-resolving `c.item` by
+  // name — the same entityClass-first rule every other compatibility path
+  // in this mission uses. This is what keeps a PDC turret assembly out of
+  // an ordinary S2 weapon port's suggestions while still offering it for
+  // a native PDC port.
   const compatibleOptionsFor = useMemo(() => {
     const cache = new Map<string, typeof findItemCatalog>()
-    return (type: string, size: string) => {
-      const key = `${type}|${size}`
+    return (type: string, size: string, factoryEntityClass?: string) => {
+      const key = `${type}|${size}|${factoryEntityClass ?? ''}`
       let options = cache.get(key)
       if (!options) {
-        options = findItemCatalog.filter((c) => isComponentSelectableForPort(c.item, type, size))
+        options = findItemCatalog.filter((c) =>
+          isComponentSelectableForPort(c.item, type, size, { itemEntityClass: c.entityClass, destinationFactoryEntityClass: factoryEntityClass })
+        )
         cache.set(key, options)
       }
       return options
@@ -360,8 +455,15 @@ export default function MissionComposer() {
                 <TargetComponentPicker
                   id={`catalog-${row.id}`}
                   value={row.previewTarget}
-                  onChange={(next) => setOverrides((prev) => ({ ...prev, [row.slotLabel]: next }))}
-                  options={compatibleOptionsFor(row.type, row.size)}
+                  // EWO-STAB-004B (ADR-010, Assignments 2-4) — the whole
+                  // per-slot override is REPLACED on every selection,
+                  // never merged onto the previous one: a fresh
+                  // entityClass (Rule A/D) or its absence (Rule B, free
+                  // text/an unresolved option) is stored exactly as this
+                  // one selection dictates — a stale entityClass from a
+                  // prior choice can never survive onto new text.
+                  onChange={(next, entityClass) => setOverrides((prev) => ({ ...prev, [row.slotLabel]: { targetItem: next, targetEntityClass: entityClass } }))}
+                  options={compatibleOptionsFor(row.type, row.size, row.factoryEntityClass)}
                 />
               )}
             </td>

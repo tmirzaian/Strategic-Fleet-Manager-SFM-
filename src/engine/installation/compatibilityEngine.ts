@@ -27,6 +27,14 @@ export interface CompatibilityCheckResult {
 export interface DestinationSlot {
   type: string
   size: string
+  /** EWO-STAB-004A (ADR-010) — the destination Hardpoint's own
+   * `factoryEntityClass`, when the caller has one (every real Hardpoint
+   * does). Drives PDC_TURRET destination-capability derivation
+   * (Assignment 4) — never read for any other purpose here. Structural
+   * typing means every existing caller passing a real `Hardpoint` already
+   * supplies this for free; only the shape gains a field, no call site
+   * needs to change. */
+  factoryEntityClass?: string | null
 }
 
 export function checkInstallationCompatibility(
@@ -43,6 +51,9 @@ export function checkInstallationCompatibility(
       : { compatible: false, message: `${identity.displayName} (${reference.size} ${reference.type}) is not compatible with a ${destinationSlot.size} ${destinationSlot.type} slot.` }
   }
 
-  const validation = validateTargetCompatibility(identity.displayName, destinationSlot.type, destinationSlot.size)
+  const validation = validateTargetCompatibility(identity.displayName, destinationSlot.type, destinationSlot.size, {
+    itemEntityClass: identity.entityClass,
+    destinationFactoryEntityClass: destinationSlot.factoryEntityClass,
+  })
   return { compatible: validation.valid, message: validation.message }
 }

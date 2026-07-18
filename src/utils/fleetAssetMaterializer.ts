@@ -87,7 +87,18 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     // factory/installed/target items are always identical by
     // construction (see above), so they share one resolved identity;
     // undefined for an uncataloged component, never a guess.
-    const factoryEntityClass = resolveComponentIdentity({ displayName: slot.factoryItem })?.entityClass ?? undefined
+    //
+    // EWO-STAB-004A (ADR-010, CAT-003) — `slot.factoryEntityClass`, when
+    // the template already carries it (every deep-imported ship — see
+    // `importedFactoryTemplate` in src/data/shipDefinitions.ts), is
+    // preferred over re-resolving `slot.factoryItem` by display name.
+    // Some real display names (e.g. `M2C "Swarm"`) are genuinely
+    // ambiguous across multiple real entityClasses; the template's own
+    // field is the exact, already-disambiguated identifier the import
+    // pipeline resolved once, from the real Port record, not a guess
+    // reconstructed from presentation text. Falls back to name resolution
+    // only for a hand-authored seed row, which carries no such field.
+    const factoryEntityClass = slot.factoryEntityClass ?? resolveComponentIdentity({ displayName: slot.factoryItem })?.entityClass ?? undefined
     // EWO-STAB-003D (ADR-010) — resolved before the status call (not just
     // after it) so the freshly materialized row's own identity feeds its
     // own status computation instead of only being attached afterward.

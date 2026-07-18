@@ -135,7 +135,18 @@ export function computeHardpointStatusWithValidation(
   portSize: string,
   identity?: HardpointStatusIdentity
 ): HardpointStatusResult {
-  const validation = validateTargetCompatibility(targetItem, portType, portSize)
+  // EWO-STAB-004A (ADR-010, Assignment 6) — the target's own resolved
+  // entityClass (when known) is preferred over re-deriving everything
+  // from `targetItem`'s display-name text, and the port's own
+  // factoryEntityClass drives PDC_TURRET destination-capability
+  // derivation. This is the one call site every computeHardpointStatusWithValidation
+  // caller already threads an identity object through (fleetAssetMaterializer,
+  // fleetAssetReconciliation, applyInstalledChange, saveMissionConfiguration,
+  // the persisted-state merge) — no new caller wiring needed.
+  const validation = validateTargetCompatibility(targetItem, portType, portSize, {
+    itemEntityClass: identity?.targetEntityClass,
+    destinationFactoryEntityClass: identity?.factoryEntityClass,
+  })
   if (!validation.valid) {
     return { status: 'Invalid Target', invalidMessage: validation.message }
   }

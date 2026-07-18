@@ -35,6 +35,7 @@ export function deriveRuntimeComponentCatalog(full: CatalogFile): ComponentCatal
 function toRuntimeRecord(record: CatalogRecord): ComponentCatalogRuntimeRecord {
   return {
     category: record.category!,
+    subtype: record.subtype,
     size: record.size!,
     grade: record.grade,
     displayName: record.displayName!,

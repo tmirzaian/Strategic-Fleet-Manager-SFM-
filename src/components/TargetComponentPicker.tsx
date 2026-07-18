@@ -3,8 +3,23 @@ import { Search } from 'lucide-react'
 import { resolveComponentLabel } from '../utils/componentPresentation'
 
 export interface TargetComponentOption {
+  /** The real catalog display name — always what's committed via
+   * `onChange` when this option is chosen, so a saved Target string
+   * still resolves against the catalog exactly as before. */
   item: string
   path: string
+  /** EWO-STAB-004A (ADR-010, Assignment 9) — an optional disambiguating
+   * label (e.g. `M2C "Swarm" — PDC Turret, S2`), shown in place of `item`
+   * only when this option's display name is genuinely ambiguous across
+   * more than one real, differently-shaped component. Absent for every
+   * ordinary, unambiguous option — never a raw entityClass shown as the
+   * primary label. */
+  label?: string
+  /** EWO-STAB-004A (ADR-010) — this option's own resolved entityClass,
+   * when known. Carried through to the compatibility filter that builds
+   * this list (never shown in the UI itself); not read by this component
+   * directly. */
+  entityClass?: string
 }
 
 const MAX_VISIBLE_OPTIONS = 40
@@ -36,7 +51,15 @@ export default function TargetComponentPicker({
   id,
 }: {
   value: string
-  onChange: (value: string) => void
+  /** EWO-STAB-004B (ADR-010) — `entityClass` is the chosen option's own
+   * resolved identity, passed alongside the display name whenever a real
+   * catalog option was selected (click or Enter-on-match) — `undefined`
+   * for an option with no known entityClass (an ordinary demo/unresolved
+   * entry), exactly as before. There is currently no path in this
+   * component that commits genuinely free-typed, non-matching text (see
+   * test 5's own documented behavior) — every `onChange` call here
+   * originates from a real `options` entry. */
+  onChange: (value: string, entityClass?: string) => void
   options: TargetComponentOption[]
   id: string
 }) {
@@ -60,7 +83,7 @@ export default function TargetComponentPicker({
 
   const filtered = useMemo(() => {
     const q = filterText.trim().toLowerCase()
-    const matches = q ? options.filter((o) => o.item.toLowerCase().includes(q)) : options
+    const matches = q ? options.filter((o) => o.item.toLowerCase().includes(q) || o.label?.toLowerCase().includes(q)) : options
     return matches.slice(0, MAX_VISIBLE_OPTIONS)
   }, [options, filterText])
 
@@ -69,8 +92,8 @@ export default function TargetComponentPicker({
     setOpen(true)
   }
 
-  function commit(next: string) {
-    onChange(next)
+  function commit(next: string, entityClass?: string) {
+    onChange(next, entityClass)
     setQuery(next)
     setOpen(false)
   }
@@ -113,7 +136,7 @@ export default function TargetComponentPicker({
             setQuery(value)
             setOpen(false)
           } else if (e.key === 'Enter' && filtered[0]) {
-            commit(filtered[0].item)
+            commit(filtered[0].item, filtered[0].entityClass)
           }
         }}
         className="w-full min-w-[9rem]"
@@ -141,10 +164,10 @@ export default function TargetComponentPicker({
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => commit(o.item)}
+                    onClick={() => commit(o.item, o.entityClass)}
                     className={`w-full text-left px-3 py-1.5 text-xs hover:bg-cyan/10 hover:text-cyan transition-colors ${o.item === value ? 'text-cyan' : 'text-white/85'}`}
                   >
-                    <span className="block truncate">{o.item}</span>
+                    <span className="block truncate">{o.label ?? o.item}</span>
                     {optionLabel.classificationLabel && <span className="block text-[10px] text-muted/60 truncate">{optionLabel.classificationLabel}</span>}
                   </button>
                 </li>

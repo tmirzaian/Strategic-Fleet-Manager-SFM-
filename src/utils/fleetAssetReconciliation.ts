@@ -168,12 +168,19 @@ export function reconcileBuildHardpoints(
     const followsFactory = old.targetMode === 'FOLLOW_FACTORY'
     const targetItem = newRow.isStructural ? '—' : followsFactory ? newRow.factoryItem : old.targetItem
     const installedItem = newRow.isStructural ? '—' : old.installedItem
-    // EWO-STAB-003D (ADR-010) — factory identity resolved fresh (the
-    // template itself carries none); installed/target identity preserved
+    // EWO-STAB-003D (ADR-010) — factory identity resolved fresh when the
+    // template itself carries none; installed/target identity preserved
     // from the OLD row (never re-derived from the new template), since
     // installedItem/targetItem above are themselves still old's own
     // values in the non-FOLLOW_FACTORY case.
-    const factoryEntityClass = newRow.isStructural ? undefined : resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined
+    // EWO-STAB-004A — `newRow.factoryEntityClass` (now populated for every
+    // deep-imported ship's template — see FactoryHardpointTemplate's own
+    // doc comment) is preferred: it is the exact entityClass the import
+    // pipeline already resolved, not a re-derivation from display-name
+    // text that can be genuinely ambiguous (e.g. `M2C "Swarm"`).
+    const factoryEntityClass = newRow.isStructural
+      ? undefined
+      : (newRow.factoryEntityClass ?? resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined)
     const installedEntityClass = newRow.isStructural ? undefined : old.installedEntityClass
     const targetEntityClass = newRow.isStructural ? undefined : followsFactory ? factoryEntityClass : old.targetEntityClass
     const { status, invalidMessage } = newRow.isStructural
@@ -210,7 +217,10 @@ export function reconcileBuildHardpoints(
   let freshIndex = 0
   for (const newRow of newTemplate) {
     if (claimed.has(newRow)) continue
-    const factoryEntityClass = newRow.isStructural ? undefined : resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined
+    // EWO-STAB-004A — same preference as the matched-row branch above.
+    const factoryEntityClass = newRow.isStructural
+      ? undefined
+      : (newRow.factoryEntityClass ?? resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined)
     const { status, invalidMessage } = newRow.isStructural
       ? { status: 'OK' as const, invalidMessage: undefined }
       : computeHardpointStatusWithValidation('—', '—', newRow.factoryItem, newRow.type, newRow.size, { factoryEntityClass })

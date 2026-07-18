@@ -54,6 +54,17 @@ export interface FactoryHardpointTemplate {
    * src/utils/fleetAssetReconciliation.ts uses to re-match a Commander's
    * persisted Hardpoint row across an authoritative template change. */
   sourcePortId?: string
+  /** EWO-STAB-004A (ADR-010, CAT-003) — the factory-installed component's
+   * real DataCore entityClass, carried straight from the import
+   * pipeline's own already-resolved `Port.factoryItemId`/`componentById`
+   * (see `importedFactoryTemplate` below) — never re-derived from
+   * `factoryItem`'s display-name string. This matters because some
+   * display names (e.g. `M2C "Swarm"`) are genuinely ambiguous across
+   * multiple real entityClasses; re-resolving by name would hit that
+   * ambiguity, while this field is the exact, disambiguated identifier
+   * already known at generation time. Undefined for a hand-authored seed
+   * row, which has no import pipeline behind it. */
+  factoryEntityClass?: string
 }
 
 const shipCatalogRecordByEntityClass = new Map(shipCatalogRecords.map((r) => [r.entityClass, r]))
@@ -676,6 +687,11 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   }
 
   const factoryItemFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId)?.displayName ?? 'Unknown Factory Item' : '—')
+  // EWO-STAB-004A — the same already-resolved component record
+  // factoryItemFor reads its displayName from also carries the exact
+  // entityClass (Component.internalName) — read here directly rather than
+  // ever re-deriving it from the display name later.
+  const factoryEntityClassFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId)?.internalName : undefined)
 
   const rows: FactoryHardpointTemplate[] = []
   function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined) {
@@ -687,6 +703,7 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
       type: compatibilityTypeFor(port),
       size: port.minSize !== null ? `S${port.minSize}` : 'S1',
       factoryItem: port.isStructural ? '—' : factoryItemFor(port),
+      factoryEntityClass: port.isStructural ? undefined : factoryEntityClassFor(port),
       parentSlotLabel: uniqueParentLabel,
       groupLabel,
       assemblyRole: port.assemblyRole,

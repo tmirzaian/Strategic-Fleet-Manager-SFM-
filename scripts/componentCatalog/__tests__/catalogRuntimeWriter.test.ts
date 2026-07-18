@@ -45,6 +45,7 @@ describe('RC-008: deriveRuntimeComponentCatalog', () => {
     const record = runtime.records.AEGS_Gladius_GunTurret
     expect(record).toEqual({
       category: 'WeaponGun',
+      subtype: 'Gun',
       size: 2,
       grade: 2,
       displayName: 'Bulldog Repeater',
@@ -52,9 +53,13 @@ describe('RC-008: deriveRuntimeComponentCatalog', () => {
     })
     expect(record).not.toHaveProperty('recordId')
     expect(record).not.toHaveProperty('recordName')
-    expect(record).not.toHaveProperty('subtype')
     expect(record).not.toHaveProperty('localizationKey')
     expect(record).not.toHaveProperty('provenance')
+  })
+
+  it('1b. preserves a null subtype rather than fabricating one', () => {
+    const runtime = deriveRuntimeComponentCatalog(fullCatalog({ AEGS_Gladius_GunTurret: fullRecord({ subtype: null }) }))
+    expect(runtime.records.AEGS_Gladius_GunTurret.subtype).toBeNull()
   })
 
   it('2. omits a record missing displayName, category, or size — the exact guard the browser loader already applies before either export map can see it', () => {

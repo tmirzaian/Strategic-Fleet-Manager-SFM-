@@ -58,7 +58,18 @@ export interface InstallationCommand {
   compatibilityMode?: 'catalog' | 'exact-slot-match'
 }
 
-export type InstallationFailureReason = 'ship-not-found' | 'destination-invalid' | 'source-invalid' | 'incompatible' | 'reserved-elsewhere'
+// EWO-STAB-004A (ADR-010, Assignment 7) — 'identity-ambiguous' covers a
+// candidate whose display name matches two or more distinct real
+// entityClasses with no supplied entityClass to disambiguate (e.g.
+// `M2C "Swarm"`). Checked before any other validation, before any
+// mutation — see installationEngine.ts.
+export type InstallationFailureReason =
+  | 'ship-not-found'
+  | 'destination-invalid'
+  | 'source-invalid'
+  | 'incompatible'
+  | 'reserved-elsewhere'
+  | 'identity-ambiguous'
 
 export type InstallationResult =
   | {

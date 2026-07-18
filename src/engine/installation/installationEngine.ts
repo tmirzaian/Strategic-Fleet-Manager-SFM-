@@ -100,6 +100,18 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
   const { identity, hangarItemId } = resolveIdentityFromCommand(command, state)
   if (!identity) return { ok: false, reason: 'destination-invalid', message: 'Unknown or empty component.' }
 
+  // EWO-STAB-004A (ADR-010, Assignment 7) — checked before any other
+  // validation and before any mutation: a component whose display name
+  // matches more than one distinct real entityClass (e.g. `M2C "Swarm"`)
+  // must never be installed by guessing which one the Commander means.
+  if (identity.ambiguous) {
+    return {
+      ok: false,
+      reason: 'identity-ambiguous',
+      message: `"${identity.displayName}" matches more than one real component and cannot be installed by name alone. Select it from Hangar Inventory or a resolved identity instead.`,
+    }
+  }
+
   const target = resolveDestinationHardpoint(state, ship, command.destination)
   if (!target) return { ok: false, reason: 'destination-invalid', message: 'No matching open slot.' }
 
@@ -177,7 +189,24 @@ function executeTransfer(command: InstallationCommand, state: InstallationStateS
     return { ok: false, reason: 'source-invalid', message: `${fromShip.name}'s ${source.slotLabel} has nothing installed to move.` }
   }
   const itemName = donorHardpoint.installedItem
-  const identity = resolveComponentIdentity({ displayName: itemName })!
+  // EWO-STAB-004A — prefers the donor's own already-stored
+  // installedEntityClass over re-resolving fresh by name (Assignment 6):
+  // an ambiguous display name (e.g. `M2C "Swarm"`) would otherwise be
+  // silently re-guessed at transfer time even when the donor row already
+  // has a specific, correct identity recorded. Falls back to name
+  // resolution (guaranteed non-null for a real, non-empty, non-'—' item
+  // name) if the stored entityClass no longer has a catalog presentation.
+  const identity =
+    (donorHardpoint.installedEntityClass ? resolveComponentIdentity({ entityClass: donorHardpoint.installedEntityClass }) : null) ??
+    resolveComponentIdentity({ displayName: itemName })!
+
+  if (identity.ambiguous) {
+    return {
+      ok: false,
+      reason: 'identity-ambiguous',
+      message: `"${identity.displayName}" matches more than one real component and cannot be transferred by name alone.`,
+    }
+  }
 
   // moveComponentBetweenShips' own pre-existing destination resolution,
   // preserved verbatim: same type/size as the donor hardpoint, an

@@ -48,6 +48,14 @@ export interface LoadoutAssignment {
   factoryItem: string
   installedItem: string
   targetItem: string
+  /** EWO-STAB-004B (ADR-010) — the existing Build row's own already-
+   * persisted canonical identity, carried through so editing an existing
+   * Mission Configuration doesn't lose the Commander's earlier selection
+   * (e.g. a specific PDC turret entityClass) the moment it's reopened for
+   * editing. Undefined for a legacy/name-only row or one with no resolved
+   * identity — never fabricated. */
+  targetEntityClass?: string
+  installedEntityClass?: string
 }
 
 /** One row of the canonical, editable loadout hierarchy — shaped enough
@@ -70,6 +78,18 @@ export interface LoadoutEditorRow {
   factoryItem: string
   installedItem: string
   targetItem: string
+  /** EWO-STAB-004A (ADR-010) — carried straight from the template's own
+   * already-resolved entityClass (see FactoryHardpointTemplate's doc
+   * comment); undefined for a hand-authored seed row or an uncataloged
+   * factory item. Used to derive this port's PDC_TURRET destination
+   * capability for the preview's own compatibility check — never
+   * re-resolved from factoryItem's display-name text. */
+  factoryEntityClass?: string
+  /** EWO-STAB-004B (ADR-010) — the existing Build's own already-persisted
+   * identity for this exact row (see LoadoutAssignment), when editing an
+   * existing Mission Configuration; undefined otherwise. */
+  targetEntityClass?: string
+  installedEntityClass?: string
 }
 
 export interface LoadoutEditorModel {
@@ -91,8 +111,15 @@ export interface LoadoutEditorModel {
  * reference build, EDIT/Clone's specific existing build) share the exact
  * same join logic.
  */
-export function assignmentsBySlotLabel(rows: Array<Pick<LoadoutAssignment, 'factoryItem' | 'installedItem' | 'targetItem'> & { slotLabel: string }>): Map<string, LoadoutAssignment> {
-  return new Map(rows.map((r) => [r.slotLabel, { factoryItem: r.factoryItem, installedItem: r.installedItem, targetItem: r.targetItem }]))
+export function assignmentsBySlotLabel(
+  rows: Array<Pick<LoadoutAssignment, 'factoryItem' | 'installedItem' | 'targetItem' | 'targetEntityClass' | 'installedEntityClass'> & { slotLabel: string }>
+): Map<string, LoadoutAssignment> {
+  return new Map(
+    rows.map((r) => [
+      r.slotLabel,
+      { factoryItem: r.factoryItem, installedItem: r.installedItem, targetItem: r.targetItem, targetEntityClass: r.targetEntityClass, installedEntityClass: r.installedEntityClass },
+    ])
+  )
 }
 
 /**
@@ -120,6 +147,13 @@ export function buildLoadoutEditorModel(template: FactoryHardpointTemplate[], as
       factoryItem: t.factoryItem,
       installedItem: a?.installedItem ?? t.factoryItem,
       targetItem: a?.targetItem ?? t.factoryItem,
+      factoryEntityClass: t.factoryEntityClass,
+      // EWO-STAB-004B — an existing assignment's own persisted identity
+      // wins; a row with no assignment falls back to the template's own
+      // factory identity, matching the factoryItem fallback immediately
+      // above it.
+      targetEntityClass: a ? a.targetEntityClass : t.factoryEntityClass,
+      installedEntityClass: a ? a.installedEntityClass : t.factoryEntityClass,
     }
   })
 

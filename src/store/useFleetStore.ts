@@ -118,6 +118,23 @@ function buildSeedFleetBaseline(): SeedFleetBaseline {
 /** A genuinely new Commander's starting state — zero ships, zero inventory, zero log — per CAT-001A's required product behavior. */
 const EMPTY_FLEET_BASELINE: SeedFleetBaseline = { ships: [], builds: [], hardpoints: [], hangarItems: [], log: [], installedLoadouts: [], fleetAssets: [] }
 
+/**
+ * EWO-STAB-004B (ADR-010) — a target override that carries the
+ * Commander's actually-selected canonical identity, not just the display
+ * name text. `targetEntityClass` is optional and only ever set when a
+ * catalog picker option with a known entityClass was chosen; an
+ * uncataloged/free-text selection omits it entirely (never a guess).
+ */
+export interface TargetOverrideValue {
+  targetItem: string
+  targetEntityClass?: string
+}
+
+/** A per-slot override accepted by `saveMissionConfiguration` — either the
+ * legacy bare display-name string (resolved by name, exactly as before
+ * EWO-STAB-004B) or the richer `TargetOverrideValue` shape. */
+export type TargetOverrideInput = string | TargetOverrideValue
+
 interface FleetState {
   ships: Ship[]
   builds: Build[]
@@ -213,7 +230,13 @@ interface FleetState {
     startingState: 'FACTORY' | 'INSTALLED' | 'EMPTY' | 'EXISTING'
     existingBuildId?: string
     quartermasterTemplateId?: string
-    targetOverrides: Record<string, string>
+    // EWO-STAB-004B (ADR-010) — a per-slot override may still be a plain
+    // display-name string (legacy shape, resolved by name exactly as
+    // before) or the richer { targetItem, targetEntityClass? } shape a
+    // catalog picker selection now supplies. Not a parallel system: the
+    // same field, the same precedence ("explicit per-slot edits always
+    // win last"), just a wider value type — see TargetOverrideValue.
+    targetOverrides: Record<string, TargetOverrideInput>
     setActive: boolean
     /** EWO-024 (Task 4) — decouples "use this Loadout as today's baseline"
      * (startingState/existingBuildId, unchanged) from "save into that same
@@ -875,15 +898,39 @@ export const useFleetStore = create<FleetState>()(
     }
 
     // Explicit per-slot edits from the Composer UI always win last.
-    // EWO-STAB-003D: same fresh-resolution treatment as the Quartermaster
-    // Template case above — targetOverrides are raw Commander-typed/
-    // selected display-name strings, never pre-resolved identity.
-    for (const [slotLabel, targetItem] of Object.entries(targetOverrides)) {
-      if (baseTargets.has(slotLabel)) {
-        baseTargets.set(slotLabel, targetItem)
-        baseTargetEntityClasses.set(slotLabel, resolveComponentIdentity({ displayName: targetItem })?.entityClass ?? undefined)
-        baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
+    // EWO-STAB-004B (ADR-010) — an override may now carry the Commander's
+    // actually-selected entityClass (TargetOverrideValue), not just
+    // display-name text. That supplied identity is preferred — verified
+    // through the same ComponentIdentityService exact-lookup every other
+    // entityClass reference uses, never trusted blindly — over re-deriving
+    // it from a name that can be genuinely ambiguous (`M2C "Swarm"`, the
+    // exact case CAT-003/EWO-STAB-004A certified). A legacy bare-string
+    // override (or one with no entityClass — an uncataloged/free-text
+    // selection) falls back to name resolution exactly as before
+    // EWO-STAB-004B. A cleared target ('—') never carries an entityClass
+    // regardless of what was supplied — defensive, not reachable through
+    // the current UI, but never trusted either way.
+    for (const [slotLabel, override] of Object.entries(targetOverrides)) {
+      if (!baseTargets.has(slotLabel)) continue
+      const targetItem = typeof override === 'string' ? override : override.targetItem
+      const suppliedEntityClass = typeof override === 'string' ? undefined : override.targetEntityClass
+
+      let resolvedEntityClass: string | undefined
+      if (targetItem === '—') {
+        resolvedEntityClass = undefined
+      } else if (suppliedEntityClass) {
+        // Verified exactly, never blindly trusted — an unresolvable
+        // supplied entityClass is dropped, not re-resolved by name (that
+        // would be exactly the "silently substitute a same-name
+        // component" CAT-003 found causing the Polaris PDC bug).
+        resolvedEntityClass = resolveComponentIdentity({ entityClass: suppliedEntityClass })?.entityClass ?? undefined
+      } else {
+        resolvedEntityClass = resolveComponentIdentity({ displayName: targetItem })?.entityClass ?? undefined
       }
+
+      baseTargets.set(slotLabel, targetItem)
+      baseTargetEntityClasses.set(slotLabel, resolvedEntityClass)
+      baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
     }
 
     const isEditingExisting = !saveAsNew && startingState === 'EXISTING' && Boolean(existingBuildId)
