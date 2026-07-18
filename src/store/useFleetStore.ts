@@ -12,7 +12,8 @@ import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
-import { isComponentSelectableForPort } from '../data/componentCatalog'
+import { executeInstallation } from '../engine/installation'
+import type { InstallationEffects, InstallationStateSnapshot } from '../engine/installation'
 import type { MissionReservation } from '../types'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
@@ -449,6 +450,37 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
     recomputeBuildDerivedState(get, set, buildId)
   }
   return Array.from(affectedBuildIds)
+}
+
+/**
+ * EWO-STAB-003B — wires src/engine/installation's state snapshot and
+ * injected effects for the current `get`/`set`. The engine itself never
+ * imports Zustand or FleetState (EWO-STAB-003A §1) — this is the one
+ * place that boundary is crossed, and it crosses in the direction the
+ * store depending on the engine, never the reverse. `applyShipMutation`
+ * and `returnToInventory` delegate to the exact same, unchanged
+ * `applyInstalledChange`/`addHangarItem` every pre-existing caller already
+ * used — nothing about those two is reimplemented here.
+ */
+function buildInstallationContext(get: () => FleetState, set: (partial: Partial<FleetState>) => void): { state: InstallationStateSnapshot; effects: InstallationEffects } {
+  return {
+    state: {
+      ships: get().ships,
+      builds: get().builds,
+      hardpoints: get().hardpoints,
+      hangarItems: get().hangarItems,
+      reservations: get().reservations,
+      installedLoadouts: get().installedLoadouts,
+    },
+    effects: {
+      applyShipMutation: (shipId, slotLabel, newInstalledItem) => applyInstalledChange(get, set, shipId, slotLabel, newInstalledItem),
+      commitHangarItems: (hangarItems) => set({ hangarItems }),
+      commitReservations: (reservations) => set({ reservations }),
+      returnToInventory: (item) => {
+        get().addHangarItem({ ...item, qty: 1, neededBy: 'None', disposition: 'Store' })
+      },
+    },
+  }
 }
 
 export const useFleetStore = create<FleetState>()(
@@ -1040,194 +1072,105 @@ export const useFleetStore = create<FleetState>()(
     }
   },
 
+  // EWO-STAB-003B — moveToShip is now a thin adapter over the shared
+  // installation engine (src/engine/installation), which owns identity
+  // resolution, compatibility validation, the reservation-ownership
+  // check, and inventory bookkeeping in one place. The EWO-STAB-002
+  // containment guard (no valid slotLabel -> no mutation) is preserved
+  // here as a fast, defensive pre-check as well as inside the engine
+  // itself — the method never forwards an unvalidated slot even one
+  // layer down.
   moveToShip: (itemId, shipId, slotLabel) => {
     const item = get().hangarItems.find((i) => i.id === itemId)
     const ship = get().ships.find((s) => s.id === shipId)
     if (!item || !ship) return { success: false, message: 'Item or ship not found.' }
-    // EWO-STAB-002 (containment) — refuse outright unless slotLabel names
-    // a real, currently-open hardpoint on this ship's active build. This
-    // is deliberately checked here too, not only inside installComponent,
-    // so this method never silently forwards a bad/empty slot and relies
-    // on the callee to catch it — no first-open-slot scan happens
-    // anywhere in this call chain any longer.
     const validSlot = get().hardpoints.some((h) => h.buildId === ship.activeBuildId && h.slotLabel === slotLabel && h.status !== 'OK')
     if (!slotLabel || !validSlot) {
       return { success: false, message: 'A valid, open destination slot is required to move a component to a ship.' }
     }
-    const result = get().installComponent(shipId, item.name, slotLabel)
-    // EWO-029 (Task 7, Scenario F) — a unit already reserved for a
-    // different Fleet Asset/Build is never silently installed here.
-    if (result.blocked === 'reserved-elsewhere') {
-      return { success: false, message: `${item.name} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.` }
-    }
-    // EWO-STAB-002 (containment) — the same defensive catalog check
-    // installComponent now performs for every caller.
-    if (result.blocked === 'incompatible') {
-      return { success: false, message: `${item.name} is not compatible with that slot.` }
-    }
-    if (!result.matched) {
+
+    const { state, effects } = buildInstallationContext(get, set)
+    const result = executeInstallation(
+      { operation: 'INSTALL', component: { hangarItemId: itemId }, destination: { shipId, slotLabel }, hangarItemId: itemId },
+      state,
+      effects
+    )
+
+    if (!result.ok) {
+      if (result.reason === 'reserved-elsewhere') {
+        return { success: false, message: `${item.name} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.` }
+      }
+      if (result.reason === 'incompatible') {
+        return { success: false, message: `${item.name} is not compatible with that slot.` }
+      }
       return { success: false, message: `${ship.name}'s active Loadout has no open slot for ${item.name}.` }
     }
-    // EWO-029 (Task 7, Scenario E) — when installComponent already
-    // fulfilled this exact slot's own reservation, it already deducted
-    // Hangar quantity itself; deducting again here would double-count
-    // the same physical unit.
-    if (!result.reservationFulfilled) {
-      set({
-        hangarItems: get().hangarItems.map((i) => (i.id === itemId ? { ...i, qty: Math.max(0, i.qty - 1) } : i)),
-      })
-    }
+
     get().addLogEntry({ action: 'Component moved to ship', shipName: ship.name, itemName: item.name, details: `Moved ${item.name} from Hangar to ${ship.name}` })
     return { success: true, message: `${item.name} installed on ${ship.name}.` }
   },
 
+  // EWO-STAB-003B — thin adapter. Identity resolution, the EWO-STAB-002
+  // no-slot / compatibility guards, reservation-ownership validation, and
+  // hangar bookkeeping all now live in src/engine/installation; this
+  // method only translates its existing args into an InstallationCommand
+  // and reshapes the result back to its pre-existing return shape, so
+  // Quick Update (its only reachable caller) needs zero changes.
   installComponent: (shipId, itemName, slotLabel, buildIdOverride) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return { matched: false }
-    // EWO-STAB-002 (containment) — a slot is the Commander's (or the
-    // calling UI's) own explicit destination choice; this method must
-    // never guess one on its own. Previously, an absent/empty slotLabel
-    // fell back to "the first non-OK hardpoint anywhere in the build,"
-    // which is how Move To Ship could land a component in a completely
-    // unrelated slot with no type/size check at all. No open slot is ever
-    // scanned here now — a missing slot is an immediate, no-mutation
-    // failure.
-    if (!slotLabel) return { matched: false }
-    // Mission Context (Alpha 2.1/2.2): install can target any Mission
-    // Configuration assigned to this Fleet Asset, not only the currently
-    // Active one — but Installed Loadout is shared physical state, so the
-    // actual mutation always goes through applyInstalledChange, which
-    // updates every Mission's row for this slot together and only lets
-    // the ship-facing cache change when the mutated Mission IS active.
-    const buildId = buildIdOverride ?? ship.activeBuildId
-    const target = get().hardpoints.find((h) => h.buildId === buildId && h.slotLabel === slotLabel && h.status !== 'OK')
-    if (!target) return { matched: false }
-
-    // EWO-STAB-002 (containment) — defense-in-depth re-validation of the
-    // exact same catalog-based check Quick Update's own UI already uses
-    // to filter its Slot dropdown (isComponentSelectableForPort). The UI
-    // filtering was never the actual enforcement point — nothing stopped
-    // a caller that skips the UI (Move To Ship's former no-slot path,
-    // direct store access) from installing a positively-known-incompatible
-    // component into an explicit slot too. Only rejects a POSITIVE,
-    // cataloged conflict (a real Shield into a real Power Plant slot,
-    // etc.) — an uncataloged item is still permitted, same as everywhere
-    // else this check is already used (EWO-024).
-    if (!isComponentSelectableForPort(itemName, target.type, target.size)) {
-      return { matched: false, blocked: 'incompatible' }
-    }
-
-    // Installing a reserved component fulfills the reservation atomically
-    // as part of this same operation (Alpha 2.3, Part 12 / Golden C) — the
-    // committed unit's Hangar quantity is consumed here too, since it was
-    // only ever "available" pending this exact install.
-    const reservation = get().reservations.find(
-      (r) => r.missionConfigurationId === buildId && r.targetSlotLabel === target.slotLabel && r.componentName === itemName && r.status === 'ACTIVE'
+    const { state, effects } = buildInstallationContext(get, set)
+    const result = executeInstallation(
+      { operation: 'INSTALL', component: { displayName: itemName }, destination: { shipId, buildId: buildIdOverride, slotLabel } },
+      state,
+      effects
     )
-
-    // EWO-029 (Task 7, Scenario F / Design Authority Ruling 8) — a
-    // physical unit already committed to a DIFFERENT Fleet Asset/Build's
-    // active reservation must never be silently consumed by installing
-    // here instead. Deliberately scoped to only fire when a genuine
-    // competing reservation exists for this component — installing
-    // without ever having tracked any Hangar stock or reservation for it
-    // at all (a long-supported, pre-existing Quick Update use: directly
-    // recording an install with no inventory bookkeeping involved) must
-    // keep working exactly as before; `availableQuantity <= 0` alone is
-    // not evidence of a steal, only a competing ACTIVE reservation is.
-    if (!reservation) {
-      const hasCompetingReservation = get().reservations.some((r) => r.componentName === itemName && r.status === 'ACTIVE')
-      if (hasCompetingReservation) {
-        const availability = calculateComponentAvailability(itemName, get().hangarItems, get().installedLoadouts, get().reservations)
-        if (availability.availableQuantity <= 0) {
-          return { matched: false, blocked: 'reserved-elsewhere' }
-        }
-      }
+    if (!result.ok) {
+      if (result.reason === 'reserved-elsewhere') return { matched: false, blocked: 'reserved-elsewhere' }
+      if (result.reason === 'incompatible') return { matched: false, blocked: 'incompatible' }
+      return { matched: false }
     }
-
-    applyInstalledChange(get, set, shipId, target.slotLabel, itemName)
-
-    if (reservation) {
-      set({
-        reservations: get().reservations.map((r) => (r.id === reservation.id ? { ...r, status: 'FULFILLED' as const, updatedAt: new Date().toISOString() } : r)),
-      })
-      let remaining = reservation.quantity
-      const hangarItems = get().hangarItems
-        .map((h) => {
-          if (h.name !== itemName || remaining <= 0) return h
-          const take = Math.min(remaining, h.qty)
-          remaining -= take
-          return { ...h, qty: h.qty - take }
-        })
-        .filter((h) => h.qty > 0)
-      set({ hangarItems })
-      return { matched: true, reservationFulfilled: true }
-    }
-
-    return { matched: true, reservationFulfilled: false }
+    return { matched: true, reservationFulfilled: result.reservationFulfilled }
   },
 
+  // EWO-STAB-003B — thin adapter over the shared engine's REMOVE
+  // operation. Return-to-Inventory still delegates to the store's own
+  // addHangarItem (unchanged, already the single correct implementation
+  // — see InstallationEffects.returnToInventory).
   removeComponent: (shipId, slotLabel, returnToHangar, buildIdOverride) => {
-    const ship = get().ships.find((s) => s.id === shipId)
-    if (!ship) return { matched: false }
-    const buildId = buildIdOverride ?? ship.activeBuildId
-    const target = get().hardpoints.find((h) => h.buildId === buildId && h.slotLabel === slotLabel)
-    if (!target || target.installedItem === '—' || !target.installedItem) return { matched: false }
-    const removedItem = target.installedItem
-
-    applyInstalledChange(get, set, shipId, slotLabel, '—')
-
-    if (returnToHangar) {
-      get().addHangarItem({ name: removedItem, type: target.type, size: target.size, qty: 1, neededBy: 'None', disposition: 'Store' })
-    }
-
-    return { matched: true, itemName: removedItem }
+    const { state, effects } = buildInstallationContext(get, set)
+    const result = executeInstallation({ operation: 'REMOVE', destination: { shipId, buildId: buildIdOverride, slotLabel }, returnToInventory: returnToHangar }, state, effects)
+    if (!result.ok) return { matched: false }
+    return { matched: true, itemName: result.resolvedDisplayName }
   },
 
+  // EWO-STAB-003B — thin adapter over the shared engine's TRANSFER
+  // operation. Its own, deliberately different compatibility rule (the
+  // destination must match the donor hardpoint's own type/size, not the
+  // catalog) is preserved verbatim via `compatibilityMode:
+  // 'exact-slot-match'` — see compatibilityEngine.ts. Unreachable from
+  // any UI today (EWO-030); converted for architectural consistency, not
+  // because any live caller needed it.
   moveComponentBetweenShips: (fromShipId, fromSlotLabel, toShipId, toSlotLabel) => {
-    const fromShip = get().ships.find((s) => s.id === fromShipId)
-    const toShip = get().ships.find((s) => s.id === toShipId)
-    if (!fromShip || !toShip) return { matched: false, message: 'Ship not found.' }
-
-    const donorHardpoint = get().hardpoints.find((h) => h.buildId === fromShip.activeBuildId && h.slotLabel === fromSlotLabel)
-    if (!donorHardpoint || donorHardpoint.installedItem === '—' || !donorHardpoint.installedItem) {
-      return { matched: false, message: `${fromShip.name}'s ${fromSlotLabel} has nothing installed to move.` }
-    }
-    const itemName = donorHardpoint.installedItem
-
-    // Validate compatibility BEFORE touching anything — a real transfer
-    // must never partially apply. Compatible here means the same slot
-    // type AND size as the donor's own hardpoint (the granularity the
-    // legacy Hardpoint model actually carries); an explicit toSlotLabel
-    // must still match on both axes, not just be requested by name.
-    const recipientCandidates = get().hardpoints.filter((h) => h.buildId === toShip.activeBuildId && (toSlotLabel ? h.slotLabel === toSlotLabel : true))
-    const compatible = recipientCandidates.filter((h) => h.type === donorHardpoint.type && h.size === donorHardpoint.size)
-    const destination = compatible.find((h) => h.status !== 'OK') ?? (toSlotLabel ? compatible[0] : undefined)
-
-    if (!destination) {
-      return {
-        matched: false,
-        message: toSlotLabel
-          ? `${toShip.name}'s ${toSlotLabel} is not compatible with ${itemName} (${donorHardpoint.size} ${donorHardpoint.type}).`
-          : `${toShip.name} has no open ${donorHardpoint.size} ${donorHardpoint.type} slot for ${itemName}.`,
-      }
-    }
-
-    // Atomic: donor removal and recipient installation applied via the
-    // same shared-InstalledLoadout mutation path, back to back with no
-    // intermediate state where the item exists on neither ship or both —
-    // both calls resolve synchronously before this function returns.
-    applyInstalledChange(get, set, fromShipId, fromSlotLabel, '—')
-    applyInstalledChange(get, set, toShipId, destination.slotLabel, itemName)
+    const { state, effects } = buildInstallationContext(get, set)
+    const result = executeInstallation(
+      {
+        operation: 'TRANSFER',
+        source: { shipId: fromShipId, slotLabel: fromSlotLabel },
+        destination: { shipId: toShipId, slotLabel: toSlotLabel },
+        compatibilityMode: 'exact-slot-match',
+      },
+      state,
+      effects
+    )
+    if (!result.ok) return { matched: false, message: result.message }
 
     get().addLogEntry({
       action: 'Component moved to ship',
-      shipName: toShip.name,
-      itemName,
-      details: `Moved ${itemName} from ${fromShip.name} (${fromSlotLabel}) to ${toShip.name} (${destination.slotLabel})`,
+      shipName: get().ships.find((s) => s.id === toShipId)?.name,
+      itemName: result.resolvedDisplayName,
+      details: `Moved ${result.resolvedDisplayName} from ${get().ships.find((s) => s.id === fromShipId)?.name ?? fromShipId} (${fromSlotLabel}) to ${get().ships.find((s) => s.id === toShipId)?.name ?? toShipId} (${result.slotLabel})`,
     })
 
-    return { matched: true, itemName }
+    return { matched: true, itemName: result.resolvedDisplayName }
   },
 
       addLogEntry: (entry) => {

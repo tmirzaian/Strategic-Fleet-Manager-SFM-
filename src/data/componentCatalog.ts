@@ -17,6 +17,13 @@ import { catalogComponentsByName } from '../generated/componentCatalog'
 interface CatalogEntry {
   category: string
   size: number
+  // EWO-STAB-003B — present only when resolution came from the generated
+  // catalog (src/generated/componentCatalog.ts), never from the
+  // hand-authored CATALOG table below, which predates entity-class
+  // tracking and was never retrofitted with one. Reflects data that was
+  // already being returned here; this widens the type to expose it, it
+  // does not change what resolveCatalogEntry returns.
+  entityClass?: string
 }
 
 const CATALOG: Record<string, CatalogEntry> = {
@@ -140,6 +147,18 @@ export interface TargetValidation {
  */
 function resolveCatalogEntry(item: string): CatalogEntry | undefined {
   return CATALOG[item] ?? catalogComponentsByName.get(item)
+}
+
+/**
+ * EWO-STAB-003B — a public entry point onto the exact same resolution
+ * chain `validateTargetCompatibility`/`isComponentSelectableForPort`
+ * already use, for src/engine/installation/componentIdentityService.ts.
+ * No new lookup, no new rule — this only exposes what was already being
+ * computed here so the installation engine can resolve identity through
+ * the one existing catalog, rather than re-deriving its own.
+ */
+export function resolveComponentCatalogEntry(item: string): CatalogEntry | undefined {
+  return resolveCatalogEntry(item)
 }
 
 function checkCompatibility(entry: CatalogEntry, portType: string, portSize: string): boolean {

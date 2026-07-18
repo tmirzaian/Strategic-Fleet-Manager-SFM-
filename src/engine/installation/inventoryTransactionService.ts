@@ -1,0 +1,111 @@
+import type { HangarItem, InstalledLoadoutEntry, MissionReservation } from '../../types'
+import { calculateComponentAvailability } from '../../engine/logistics/availability'
+
+/**
+ * EWO-STAB-003B — the single inventory-bookkeeping implementation
+ * (EWO-STAB-003A §4). EWO-STAB-001 found this duplicated three separate
+ * ways: `installComponent`'s reservation-quantity-spread decrement,
+ * `moveToShip`'s single-hangarItemId decrement (with its own
+ * double-decrement guard against the first), and `removeComponent`'s
+ * add-back-via-merge. This module consolidates the first two — the two
+ * that were genuinely reimplementing the same operation — into one pure
+ * function. `removeComponent`'s return-to-hangar path already had a
+ * single, correct implementation (`addHangarItem`'s merge-by-entityClass
+ * logic) before this mission; it is referenced via the injected
+ * `returnToInventory` effect (see types.ts), not duplicated here.
+ *
+ * Pure: takes the current arrays, returns new ones. Never touches the
+ * store directly — src/store/useFleetStore.ts commits the result.
+ */
+
+export interface HangarDecrementInput {
+  hangarItems: HangarItem[]
+  reservations: MissionReservation[]
+  installedLoadouts: InstalledLoadoutEntry[]
+  itemName: string
+  buildId: string
+  slotLabel: string
+  /** The specific record Move to Ship's UI selected, when known. Absent
+   * for Quick Update's install-by-typed-name flow. */
+  hangarItemId?: string
+  /** 'NONE' preserves the long-standing "record an install with no
+   * inventory bookkeeping involved" Quick Update case (EWO-029) — no
+   * hangar/reservation array is touched at all. */
+  inventorySource: 'HANGAR' | 'NONE'
+}
+
+export type OwnershipCheckResult = { ok: true } | { ok: false; message: string }
+
+/**
+ * EWO-029 (Task 7, Scenario F / Design Authority Ruling 8), relocated
+ * unchanged from installComponent — a physical unit already committed to
+ * a DIFFERENT Fleet Asset/Build's active reservation must never be
+ * silently consumed by installing here instead. Only fires when a
+ * genuine competing ACTIVE reservation exists; `availableQuantity <= 0`
+ * alone is not evidence of a steal.
+ */
+export function checkReservationOwnership(input: {
+  itemName: string
+  hasMatchingReservation: boolean
+  hangarItems: HangarItem[]
+  installedLoadouts: InstalledLoadoutEntry[]
+  reservations: MissionReservation[]
+}): OwnershipCheckResult {
+  if (input.hasMatchingReservation) return { ok: true }
+  const hasCompetingReservation = input.reservations.some((r) => r.componentName === input.itemName && r.status === 'ACTIVE')
+  if (!hasCompetingReservation) return { ok: true }
+  const availability = calculateComponentAvailability(input.itemName, input.hangarItems, input.installedLoadouts, input.reservations)
+  if (availability.availableQuantity > 0) return { ok: true }
+  return {
+    ok: false,
+    message: `${input.itemName} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.`,
+  }
+}
+
+export interface HangarDecrementPlan {
+  hangarItems: HangarItem[]
+  reservations: MissionReservation[]
+  reservationFulfilled: boolean
+}
+
+export function planHangarDecrement(input: HangarDecrementInput): HangarDecrementPlan {
+  if (input.inventorySource === 'NONE') {
+    return { hangarItems: input.hangarItems, reservations: input.reservations, reservationFulfilled: false }
+  }
+
+  const reservation = input.reservations.find(
+    (r) => r.missionConfigurationId === input.buildId && r.targetSlotLabel === input.slotLabel && r.componentName === input.itemName && r.status === 'ACTIVE'
+  )
+
+  if (reservation) {
+    // Alpha 2.3 (Part 12 / Golden C) — installing a reserved component
+    // fulfills the reservation atomically; the committed unit's Hangar
+    // quantity is consumed here too, since it was only ever "available"
+    // pending this exact install.
+    const reservations = input.reservations.map((r) => (r.id === reservation.id ? { ...r, status: 'FULFILLED' as const, updatedAt: new Date().toISOString() } : r))
+    let remaining = reservation.quantity
+    const hangarItems = input.hangarItems
+      .map((h) => {
+        if (h.name !== input.itemName || remaining <= 0) return h
+        const take = Math.min(remaining, h.qty)
+        remaining -= take
+        return { ...h, qty: h.qty - take }
+      })
+      .filter((h) => h.qty > 0)
+    return { hangarItems, reservations, reservationFulfilled: true }
+  }
+
+  if (input.hangarItemId) {
+    // Move to Ship's case — decrement the exact unit the Commander
+    // selected. Never runs when a reservation was already fulfilled above
+    // (this function's own single `if`/`if` structure already prevents
+    // double-decrementing the same physical unit — the two paths are
+    // mutually exclusive by construction, not by a caller-side flag).
+    const hangarItems = input.hangarItems.map((i) => (i.id === input.hangarItemId ? { ...i, qty: Math.max(0, i.qty - 1) } : i))
+    return { hangarItems, reservations: input.reservations, reservationFulfilled: false }
+  }
+
+  // Pre-existing Quick Update use case (EWO-029): installing without any
+  // reservation or hangar record at all — no inventory bookkeeping to do.
+  return { hangarItems: input.hangarItems, reservations: input.reservations, reservationFulfilled: false }
+}
