@@ -130,7 +130,7 @@ export default function HangarInventory() {
   // slot list Design Authority Ruling 11 requires ("compatible Build
   // requirements only").
   const reserveItem = reserveItemId ? hangarItems.find((i) => i.id === reserveItemId) ?? null : null
-  const reserveAvailability = reserveItem ? calculateComponentAvailability(reserveItem.name, hangarItems, installedLoadouts, reservations) : null
+  const reserveAvailability = reserveItem ? calculateComponentAvailability(reserveItem.name, hangarItems, installedLoadouts, reservations, reserveItem.entityClass) : null
   const reserveNeededBy: NeededByEntry[] = reserveItem ? resolveNeededByBuilds(reserveItem.name, ships, builds, fleetAssets, hardpoints, reservations) : []
   const reserveUnreservedNeededBy = reserveNeededBy.filter((e) => !e.reserved)
   const reserveShipOptions = useMemo(() => {
@@ -241,7 +241,7 @@ export default function HangarInventory() {
             </thead>
             <tbody>
               {sortedItems.map((item) => {
-                const availability = calculateComponentAvailability(item.name, hangarItems, installedLoadouts, reservations)
+                const availability = calculateComponentAvailability(item.name, hangarItems, installedLoadouts, reservations, item.entityClass)
                 const neededBy = resolveNeededByBuilds(item.name, ships, builds, fleetAssets, hardpoints, reservations)
                 const unreservedNeededBy = neededBy.filter((e) => !e.reserved)
                 // EWO-029 (Task 8/9/10) — an Available, unreserved match:

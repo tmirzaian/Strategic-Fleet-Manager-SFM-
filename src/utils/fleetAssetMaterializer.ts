@@ -81,7 +81,6 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
         sourcePortId: slot.sourcePortId,
       }
     }
-    const { status, invalidMessage } = computeHardpointStatusWithValidation(slot.factoryItem, slot.factoryItem, slot.factoryItem, slot.type, slot.size)
     // EWO-STAB-003C (ADR-010) — resolved once through
     // ComponentIdentityService, the sole identity authority (never
     // reimplemented here). A freshly materialized row's
@@ -89,6 +88,14 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     // construction (see above), so they share one resolved identity;
     // undefined for an uncataloged component, never a guess.
     const factoryEntityClass = resolveComponentIdentity({ displayName: slot.factoryItem })?.entityClass ?? undefined
+    // EWO-STAB-003D (ADR-010) — resolved before the status call (not just
+    // after it) so the freshly materialized row's own identity feeds its
+    // own status computation instead of only being attached afterward.
+    const { status, invalidMessage } = computeHardpointStatusWithValidation(slot.factoryItem, slot.factoryItem, slot.factoryItem, slot.type, slot.size, {
+      installedEntityClass: factoryEntityClass,
+      targetEntityClass: factoryEntityClass,
+      factoryEntityClass,
+    })
     return {
       id: `${buildId}-hp-${i}`,
       shipId: assetId,

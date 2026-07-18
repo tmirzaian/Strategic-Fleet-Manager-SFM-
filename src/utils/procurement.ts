@@ -56,6 +56,14 @@ export function buildProcurementList(
     size: string
     rowCount: number
     neededBy: string[]
+    /** EWO-STAB-003D (ADR-010) — the entityClass of the FIRST row that
+     * created this group, passed through to calculateComponentAvailability
+     * below. Grouping itself remains keyed by targetItem display name (a
+     * documented residual gap — see ADR-010 — since two differently
+     * cataloged components sharing a name are still merged into one
+     * procurement row); this only makes the availability lookup for an
+     * already-merged group identity-aware, it does not fix the merge itself. */
+    entityClass?: string
   }
   const groups = new Map<string, UnresolvedGroup>()
 
@@ -83,13 +91,13 @@ export function buildProcurementList(
       existing.rowCount += 1
       if (!existing.neededBy.includes(label)) existing.neededBy.push(label)
     } else {
-      groups.set(hp.targetItem, { itemName: hp.targetItem, type: hp.type, size: hp.size, rowCount: 1, neededBy: [label] })
+      groups.set(hp.targetItem, { itemName: hp.targetItem, type: hp.type, size: hp.size, rowCount: 1, neededBy: [label], entityClass: hp.targetEntityClass })
     }
   }
 
   const lines: ProcurementLine[] = []
   for (const group of groups.values()) {
-    const availability = calculateComponentAvailability(group.itemName, hangarItems, installedLoadouts, reservations)
+    const availability = calculateComponentAvailability(group.itemName, hangarItems, installedLoadouts, reservations, group.entityClass)
     const availableToReserve = Math.min(group.rowCount, availability.availableQuantity)
     const qtyNeeded = Math.max(0, group.rowCount - availability.availableQuantity)
     lines.push({ itemName: group.itemName, type: group.type, size: group.size, qtyNeeded, availableToReserve, neededBy: group.neededBy })

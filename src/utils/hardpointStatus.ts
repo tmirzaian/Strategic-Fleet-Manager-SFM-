@@ -1,5 +1,15 @@
 import type { HardpointStatus } from '../types'
 import { validateTargetCompatibility } from '../data/componentCatalog'
+// EWO-STAB-003D (ADR-010) — imported directly from componentIdentityService,
+// NOT from the installation engine's public barrel (src/engine/installation
+// index.ts). The barrel re-exports executeInstallation, which pulls in
+// inventoryTransactionService.ts, which itself imports
+// calculateComponentAvailability from src/engine/logistics/availability.ts —
+// going through the barrel here would close a real import cycle. This file
+// only ever needs identitiesMatch's pure comparison, never identity
+// resolution or the installation pipeline, so importing the one leaf module
+// that has no path back into this file is both sufficient and cycle-free.
+import { identitiesMatch } from '../engine/installation/componentIdentityService'
 
 /**
  * The one sanctioned placeholder string for factory data we genuinely
@@ -27,20 +37,54 @@ export const UNKNOWN_FACTORY_PLACEHOLDER = 'Unknown Factory Item'
  * - Installed differs from target but the player HAS already changed something
  *   away from factory → Upgrade Available (not Missing)
  */
+export interface HardpointStatusIdentity {
+  installedEntityClass?: string | null
+  targetEntityClass?: string | null
+  factoryEntityClass?: string | null
+}
+
+/**
+ * EWO-STAB-003D (ADR-010) — the one shared component-match rule this file
+ * uses for every installed/target/factory comparison below. When BOTH sides
+ * of a comparison carry a resolved entityClass, identity wins over display
+ * name (the Slipstream/Snowblind class of two differently-cataloged parts
+ * that happen to share a name must never read as a match). When either side
+ * lacks one — an uncataloged component, or a record persisted before
+ * EWO-STAB-003C — this falls through to the exact same case-sensitive `===`
+ * comparison this file has always used, never to identitiesMatch's own
+ * case-insensitive display-name fallback. That distinction matters here
+ * specifically: silently loosening every legacy name comparison to
+ * case-insensitive would be a real behavior change this consolidation
+ * mission is not authorized to make.
+ */
+function componentsMatch(nameA: string, entityClassA: string | null | undefined, nameB: string, entityClassB: string | null | undefined): boolean {
+  if (entityClassA && entityClassB) {
+    return identitiesMatch(
+      { displayName: nameA, entityClass: entityClassA, category: null, size: null },
+      { displayName: nameB, entityClass: entityClassB, category: null, size: null }
+    )
+  }
+  return nameA === nameB
+}
+
 export function computeHardpointStatus(
   installedItem: string | null | undefined,
   targetItem: string | null | undefined,
-  factoryItem: string | null | undefined
+  factoryItem: string | null | undefined,
+  identity?: HardpointStatusIdentity
 ): HardpointStatus {
   const installed = (installedItem ?? '').trim()
   const target = (targetItem ?? '').trim()
   const factory = (factoryItem ?? '').trim()
+  const installedEntityClass = identity?.installedEntityClass
+  const targetEntityClass = identity?.targetEntityClass
+  const factoryEntityClass = identity?.factoryEntityClass
 
   if (factory === UNKNOWN_FACTORY_PLACEHOLDER) return 'Unresolved'
   if (!target || target === '—') return 'OK'
-  if (installed && installed === target) return 'OK'
+  if (installed && componentsMatch(installed, installedEntityClass, target, targetEntityClass)) return 'OK'
   if (!installed || installed === '—') return 'Missing'
-  if (installed === factory && target !== factory) return 'Missing'
+  if (componentsMatch(installed, installedEntityClass, factory, factoryEntityClass) && !componentsMatch(target, targetEntityClass, factory, factoryEntityClass)) return 'Missing'
   return 'Upgrade Available'
 }
 
@@ -53,8 +97,15 @@ export function getHardpointStatus(hardpoint: {
   installedItem: string | null | undefined
   targetItem: string | null | undefined
   factoryItem: string | null | undefined
+  installedEntityClass?: string | null
+  targetEntityClass?: string | null
+  factoryEntityClass?: string | null
 }): HardpointStatus {
-  return computeHardpointStatus(hardpoint.installedItem, hardpoint.targetItem, hardpoint.factoryItem)
+  return computeHardpointStatus(hardpoint.installedItem, hardpoint.targetItem, hardpoint.factoryItem, {
+    installedEntityClass: hardpoint.installedEntityClass,
+    targetEntityClass: hardpoint.targetEntityClass,
+    factoryEntityClass: hardpoint.factoryEntityClass,
+  })
 }
 
 export interface HardpointStatusResult {
@@ -81,11 +132,12 @@ export function computeHardpointStatusWithValidation(
   targetItem: string | null | undefined,
   factoryItem: string | null | undefined,
   portType: string,
-  portSize: string
+  portSize: string,
+  identity?: HardpointStatusIdentity
 ): HardpointStatusResult {
   const validation = validateTargetCompatibility(targetItem, portType, portSize)
   if (!validation.valid) {
     return { status: 'Invalid Target', invalidMessage: validation.message }
   }
-  return { status: computeHardpointStatus(installedItem, targetItem, factoryItem) }
+  return { status: computeHardpointStatus(installedItem, targetItem, factoryItem, identity) }
 }

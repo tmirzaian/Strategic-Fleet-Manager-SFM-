@@ -61,17 +61,15 @@ export function checkReservationOwnership(input: {
   reservations: MissionReservation[]
 }): OwnershipCheckResult {
   if (input.hasMatchingReservation) return { ok: true }
-  // EWO-STAB-003C (ADR-010) — identity-aware: a competing reservation for
-  // a DIFFERENT real component that merely shares this one's display name
-  // must never block this install. `calculateComponentAvailability`
-  // below remains display-name-only (a deliberately deferred, documented
-  // limitation — see ADR-010's Known Risks — shared far outside this
-  // module's boundary), so a false positive there is still possible in
-  // the same narrow collision case; this check itself no longer
-  // contributes one.
+  // EWO-STAB-003C/003D (ADR-010) — identity-aware: a competing reservation
+  // for a DIFFERENT real component that merely shares this one's display
+  // name must never block this install. `calculateComponentAvailability`
+  // below is now also identity-aware (EWO-STAB-003D) — passed
+  // `input.identity.entityClass` — so this check and the availability
+  // figure it reads agree on what "the same component" means.
   const hasCompetingReservation = input.reservations.some((r) => r.status === 'ACTIVE' && identitiesMatch(input.identity, resolveReservationIdentity(r)))
   if (!hasCompetingReservation) return { ok: true }
-  const availability = calculateComponentAvailability(input.identity.displayName, input.hangarItems, input.installedLoadouts, input.reservations)
+  const availability = calculateComponentAvailability(input.identity.displayName, input.hangarItems, input.installedLoadouts, input.reservations, input.identity.entityClass)
   if (availability.availableQuantity > 0) return { ok: true }
   return {
     ok: false,

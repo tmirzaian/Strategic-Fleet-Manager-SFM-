@@ -70,7 +70,7 @@ export function derivePortLogistics(
   )
   if (activeReservation) return 'Reserved'
 
-  const availability = calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations)
+  const availability = calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations, hp.targetEntityClass)
   if (availability.availableQuantity > 0) return 'Unreserved'
 
   return 'Missing'

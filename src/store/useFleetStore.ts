@@ -65,7 +65,7 @@ function deriveInitialInstalledLoadouts(ships: Ship[], hardpoints: Hardpoint[]):
   for (const ship of ships) {
     const activeRows = hardpoints.filter((h) => h.buildId === ship.activeBuildId)
     for (const row of activeRows) {
-      entries.push({ shipId: ship.id, slotLabel: row.slotLabel, installedItem: row.installedItem })
+      entries.push({ shipId: ship.id, slotLabel: row.slotLabel, installedItem: row.installedItem, entityClass: row.installedEntityClass })
     }
   }
   return entries
@@ -437,9 +437,9 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
   const installedLoadouts = (() => {
     const existing = state.installedLoadouts.find((e) => e.shipId === shipId && e.slotLabel === slotLabel)
     if (existing) {
-      return state.installedLoadouts.map((e) => (e === existing ? { ...e, installedItem: newInstalledItem } : e))
+      return state.installedLoadouts.map((e) => (e === existing ? { ...e, installedItem: newInstalledItem, entityClass } : e))
     }
-    return [...state.installedLoadouts, { shipId, slotLabel, installedItem: newInstalledItem }]
+    return [...state.installedLoadouts, { shipId, slotLabel, installedItem: newInstalledItem, entityClass }]
   })()
   set({ installedLoadouts })
 
@@ -447,7 +447,17 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
   const hardpoints = state.hardpoints.map((h) => {
     if (h.shipId !== shipId || h.slotLabel !== slotLabel) return h
     affectedBuildIds.add(h.buildId)
-    const { status, invalidMessage } = computeHardpointStatusWithValidation(newInstalledItem, h.targetItem, h.factoryItem, h.type, h.size)
+    // EWO-STAB-003D (ADR-010) — identity now threaded into the status
+    // calculation itself, not just stored on the row: `entityClass` is the
+    // newly installed item's own resolved identity (undefined for a
+    // removal or an uncataloged component); h.targetEntityClass/
+    // factoryEntityClass are this row's own persisted identity for the
+    // other two sides of the comparison.
+    const { status, invalidMessage } = computeHardpointStatusWithValidation(newInstalledItem, h.targetItem, h.factoryItem, h.type, h.size, {
+      installedEntityClass: entityClass,
+      targetEntityClass: h.targetEntityClass,
+      factoryEntityClass: h.factoryEntityClass,
+    })
     return { ...h, installedItem: newInstalledItem, installedEntityClass: entityClass, status, invalidMessage }
   })
   set({ hardpoints })
@@ -531,7 +541,7 @@ export const useFleetStore = create<FleetState>()(
           ships: [...get().ships, ship],
           builds: [...get().builds, build],
           hardpoints: [...get().hardpoints, ...hardpoints],
-          installedLoadouts: [...get().installedLoadouts, ...hardpoints.map((h) => ({ shipId: ship.id, slotLabel: h.slotLabel, installedItem: h.installedItem }))],
+          installedLoadouts: [...get().installedLoadouts, ...hardpoints.map((h) => ({ shipId: ship.id, slotLabel: h.slotLabel, installedItem: h.installedItem, entityClass: h.installedEntityClass }))],
         })
 
         get().addLogEntry({
@@ -718,20 +728,23 @@ export const useFleetStore = create<FleetState>()(
     )
     if (existingForSlot) return { success: false, message: 'This target requirement already has an active reservation. Release it first.' }
 
-    // Never allow reserving more than is actually free — one physical
-    // unit can never satisfy two commitments (Part 4, rules 3-4).
-    const availability = calculateComponentAvailability(componentName, get().hangarItems, get().installedLoadouts, get().reservations)
-    if (availability.availableQuantity < quantity) {
-      return { success: false, message: `Only ${availability.availableQuantity} "${componentName}" available to reserve (requested ${quantity}).` }
-    }
-
     // EWO-STAB-003C (ADR-010) — canonical identity, resolved through
     // ComponentIdentityService (never reimplemented here). Prefers the
     // target row's own stored targetEntityClass (the most authoritative
     // source for this exact slot's requirement) and falls back to a
     // fresh resolution from componentName for a legacy row that predates
     // this mission. Absent (never a guess) for an uncataloged component.
+    // Resolved here, before the availability check (EWO-STAB-003D), so
+    // the same identity feeds both the availability lookup and the
+    // reservation record itself rather than being derived twice.
     const componentEntityClass = targetRow.targetEntityClass ?? resolveComponentIdentity({ displayName: componentName })?.entityClass ?? undefined
+
+    // Never allow reserving more than is actually free — one physical
+    // unit can never satisfy two commitments (Part 4, rules 3-4).
+    const availability = calculateComponentAvailability(componentName, get().hangarItems, get().installedLoadouts, get().reservations, componentEntityClass)
+    if (availability.availableQuantity < quantity) {
+      return { success: false, message: `Only ${availability.availableQuantity} "${componentName}" available to reserve (requested ${quantity}).` }
+    }
 
     const now = new Date().toISOString()
     const reservation: MissionReservation = {
@@ -792,8 +805,17 @@ export const useFleetStore = create<FleetState>()(
     if (referenceRows.length === 0) return { success: false, message: 'No reference equipment data exists for this Fleet Asset.' }
 
     const installedBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.installedItem]))
+    const installedEntityClassBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.entityClass]))
 
     const baseTargets = new Map<string, string>()
+    // EWO-STAB-003D (ADR-010) — the target's canonical identity, tracked
+    // alongside baseTargets through every one of the same sources below
+    // (starting state, Quartermaster Template, targetOverrides). Additive:
+    // undefined wherever the source itself has none to offer (a legacy
+    // name-only row, or a name that doesn't resolve in the catalog) —
+    // never a guess, and the resulting Hardpoint row's targetItem string
+    // is completely unaffected either way.
+    const baseTargetEntityClasses = new Map<string, string | undefined>()
     // EWO-043 (Task 8) — tracks whether the Commander ever deliberately
     // chose this slot's target, independent of what value it resolves to.
     // FOLLOW_FACTORY rows are the ones a future authoritative Factory
@@ -804,16 +826,20 @@ export const useFleetStore = create<FleetState>()(
     if (startingState === 'FACTORY') {
       for (const row of referenceRows) {
         baseTargets.set(row.slotLabel, row.factoryItem)
+        baseTargetEntityClasses.set(row.slotLabel, row.factoryEntityClass)
         baseTargetModes.set(row.slotLabel, 'FOLLOW_FACTORY')
       }
     } else if (startingState === 'INSTALLED') {
       for (const row of referenceRows) {
-        baseTargets.set(row.slotLabel, installedBySlot.get(row.slotLabel) ?? row.factoryItem)
+        const installed = installedBySlot.get(row.slotLabel)
+        baseTargets.set(row.slotLabel, installed ?? row.factoryItem)
+        baseTargetEntityClasses.set(row.slotLabel, installed !== undefined ? installedEntityClassBySlot.get(row.slotLabel) : row.factoryEntityClass)
         baseTargetModes.set(row.slotLabel, 'EXPLICIT_TARGET')
       }
     } else if (startingState === 'EMPTY') {
       for (const row of referenceRows) {
         baseTargets.set(row.slotLabel, '—')
+        baseTargetEntityClasses.set(row.slotLabel, undefined)
         baseTargetModes.set(row.slotLabel, 'EXPLICIT_TARGET')
       }
     } else {
@@ -821,6 +847,7 @@ export const useFleetStore = create<FleetState>()(
       if (existingRows.length === 0) return { success: false, message: 'Existing Loadout not found for this Fleet Asset.' }
       for (const row of existingRows) {
         baseTargets.set(row.slotLabel, row.targetItem)
+        baseTargetEntityClasses.set(row.slotLabel, row.targetEntityClass)
         // A pre-EWO-043 persisted row has no targetMode at all — treated
         // as EXPLICIT_TARGET, the safe default (never silently start
         // auto-following Factory for a row the Commander never tagged).
@@ -830,13 +857,17 @@ export const useFleetStore = create<FleetState>()(
 
     // A Quartermaster Template applies its intent on top of the starting
     // state, matched by slotLabel — it never invents a slot this ship
-    // doesn't actually have.
+    // doesn't actually have. EWO-STAB-003D: a template assignment is a raw
+    // typed/selected display name (QuartermasterTemplate carries no
+    // entityClass of its own), so its identity is resolved fresh through
+    // the one canonical ComponentIdentityService, never fabricated.
     if (quartermasterTemplateId) {
       const template = get().quartermasterTemplates.find((t) => t.id === quartermasterTemplateId)
       if (template) {
         for (const assignment of template.targetAssignments) {
           if (baseTargets.has(assignment.slotLabel)) {
             baseTargets.set(assignment.slotLabel, assignment.targetItem)
+            baseTargetEntityClasses.set(assignment.slotLabel, resolveComponentIdentity({ displayName: assignment.targetItem })?.entityClass ?? undefined)
             baseTargetModes.set(assignment.slotLabel, 'EXPLICIT_TARGET')
           }
         }
@@ -844,9 +875,13 @@ export const useFleetStore = create<FleetState>()(
     }
 
     // Explicit per-slot edits from the Composer UI always win last.
+    // EWO-STAB-003D: same fresh-resolution treatment as the Quartermaster
+    // Template case above — targetOverrides are raw Commander-typed/
+    // selected display-name strings, never pre-resolved identity.
     for (const [slotLabel, targetItem] of Object.entries(targetOverrides)) {
       if (baseTargets.has(slotLabel)) {
         baseTargets.set(slotLabel, targetItem)
+        baseTargetEntityClasses.set(slotLabel, resolveComponentIdentity({ displayName: targetItem })?.entityClass ?? undefined)
         baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
       }
     }
@@ -856,8 +891,14 @@ export const useFleetStore = create<FleetState>()(
 
     const newRows: Hardpoint[] = referenceRows.map((refRow, i) => {
       const target = baseTargets.get(refRow.slotLabel) ?? '—'
+      const targetEntityClass = baseTargetEntityClasses.get(refRow.slotLabel)
       const installed = installedBySlot.get(refRow.slotLabel) ?? refRow.factoryItem
-      const { status, invalidMessage } = computeHardpointStatusWithValidation(installed, target, refRow.factoryItem, refRow.type, refRow.size)
+      const installedEntityClass = installedBySlot.has(refRow.slotLabel) ? installedEntityClassBySlot.get(refRow.slotLabel) : refRow.factoryEntityClass
+      const { status, invalidMessage } = computeHardpointStatusWithValidation(installed, target, refRow.factoryItem, refRow.type, refRow.size, {
+        installedEntityClass,
+        targetEntityClass,
+        factoryEntityClass: refRow.factoryEntityClass,
+      })
       return {
         id: `${buildId}-hp-${i}`,
         shipId,
@@ -868,6 +909,9 @@ export const useFleetStore = create<FleetState>()(
         factoryItem: refRow.factoryItem,
         installedItem: installed,
         targetItem: target,
+        factoryEntityClass: refRow.factoryEntityClass,
+        installedEntityClass,
+        targetEntityClass,
         status,
         invalidMessage,
         // Mission-kind rows deliberately do NOT carry parentSlotLabel/
@@ -1586,13 +1630,21 @@ export const useFleetStore = create<FleetState>()(
         // silently discarded whatever the Commander had actually installed
         // the moment that factory item wasn't already a plain factory-fresh
         // match (CWO-003, Task 2 baseline finding).
-        const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, e.installedItem]))
+        const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, { installedItem: e.installedItem, entityClass: e.entityClass }]))
         hardpoints = hardpoints.map((h) => {
           if (h.isStructural) return h
           const authoritative = installedByShipAndSlot.get(`${h.shipId}::${h.slotLabel}`)
-          if (authoritative === undefined || authoritative === h.installedItem) return h
-          const { status, invalidMessage } = computeHardpointStatusWithValidation(authoritative, h.targetItem, h.factoryItem, h.type, h.size)
-          return { ...h, installedItem: authoritative, status, invalidMessage }
+          if (authoritative === undefined || authoritative.installedItem === h.installedItem) return h
+          // EWO-STAB-003D (ADR-010) — the overlay's own entityClass (when
+          // recorded) replaces the row's stale installedEntityClass, since
+          // the installedItem itself is changing here; target/factory
+          // identity are this row's own and unaffected by the overlay.
+          const { status, invalidMessage } = computeHardpointStatusWithValidation(authoritative.installedItem, h.targetItem, h.factoryItem, h.type, h.size, {
+            installedEntityClass: authoritative.entityClass,
+            targetEntityClass: h.targetEntityClass,
+            factoryEntityClass: h.factoryEntityClass,
+          })
+          return { ...h, installedItem: authoritative.installedItem, installedEntityClass: authoritative.entityClass, status, invalidMessage }
         })
 
         // Recompute every affected Build's readiness/missing — reconciled

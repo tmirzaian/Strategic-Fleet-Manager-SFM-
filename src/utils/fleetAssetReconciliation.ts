@@ -1,6 +1,11 @@
 import type { Hardpoint, QuarantinedAssignment } from '../types'
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 import { computeHardpointStatusWithValidation } from './hardpointStatus'
+// EWO-STAB-003D (ADR-010) — FactoryHardpointTemplate carries no
+// entityClass of its own (see its own doc comment), so a reconciled row's
+// factory identity must be resolved fresh here, exactly as
+// fleetAssetMaterializer.ts already does for a brand-new Fleet Asset.
+import { resolveComponentIdentity } from '../engine/installation'
 
 export interface ReconciliationResult {
   /** The Build's full, current row set: matched old rows (Commander intent
@@ -163,9 +168,21 @@ export function reconcileBuildHardpoints(
     const followsFactory = old.targetMode === 'FOLLOW_FACTORY'
     const targetItem = newRow.isStructural ? '—' : followsFactory ? newRow.factoryItem : old.targetItem
     const installedItem = newRow.isStructural ? '—' : old.installedItem
+    // EWO-STAB-003D (ADR-010) — factory identity resolved fresh (the
+    // template itself carries none); installed/target identity preserved
+    // from the OLD row (never re-derived from the new template), since
+    // installedItem/targetItem above are themselves still old's own
+    // values in the non-FOLLOW_FACTORY case.
+    const factoryEntityClass = newRow.isStructural ? undefined : resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined
+    const installedEntityClass = newRow.isStructural ? undefined : old.installedEntityClass
+    const targetEntityClass = newRow.isStructural ? undefined : followsFactory ? factoryEntityClass : old.targetEntityClass
     const { status, invalidMessage } = newRow.isStructural
       ? { status: 'OK' as const, invalidMessage: undefined }
-      : computeHardpointStatusWithValidation(installedItem, targetItem, newRow.factoryItem, newRow.type, newRow.size)
+      : computeHardpointStatusWithValidation(installedItem, targetItem, newRow.factoryItem, newRow.type, newRow.size, {
+          installedEntityClass,
+          targetEntityClass,
+          factoryEntityClass,
+        })
     hardpoints.push({
       id: old.id,
       shipId,
@@ -176,6 +193,9 @@ export function reconcileBuildHardpoints(
       factoryItem: newRow.isStructural ? '—' : newRow.factoryItem,
       installedItem,
       targetItem,
+      factoryEntityClass,
+      installedEntityClass,
+      targetEntityClass,
       status,
       invalidMessage,
       parentSlotLabel: newRow.parentSlotLabel,
@@ -190,9 +210,10 @@ export function reconcileBuildHardpoints(
   let freshIndex = 0
   for (const newRow of newTemplate) {
     if (claimed.has(newRow)) continue
+    const factoryEntityClass = newRow.isStructural ? undefined : resolveComponentIdentity({ displayName: newRow.factoryItem })?.entityClass ?? undefined
     const { status, invalidMessage } = newRow.isStructural
       ? { status: 'OK' as const, invalidMessage: undefined }
-      : computeHardpointStatusWithValidation('—', '—', newRow.factoryItem, newRow.type, newRow.size)
+      : computeHardpointStatusWithValidation('—', '—', newRow.factoryItem, newRow.type, newRow.size, { factoryEntityClass })
     hardpoints.push({
       id: `${buildId}-hp-new-${freshIndex++}`,
       shipId,
@@ -203,6 +224,7 @@ export function reconcileBuildHardpoints(
       factoryItem: newRow.isStructural ? '—' : newRow.factoryItem,
       installedItem: newRow.isStructural ? '—' : '—',
       targetItem: newRow.isStructural ? '—' : '—',
+      factoryEntityClass,
       status,
       invalidMessage,
       parentSlotLabel: newRow.parentSlotLabel,

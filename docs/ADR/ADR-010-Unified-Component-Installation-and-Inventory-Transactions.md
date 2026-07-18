@@ -130,15 +130,84 @@ active reservation for this exact slot and this exact component" during
 INSTALL) and to `checkReservationOwnership`'s competing-reservation
 check — both self-contained within `src/engine/installation/`.
 
-**Deliberately not touched, and why:** `computeHardpointStatusWithValidation`
+**Deliberately not touched in EWO-STAB-003B/003C, resolved in
+EWO-STAB-003D (below):** `computeHardpointStatusWithValidation`
 (hardpoint status: OK/Missing/Invalid Target) and
 `calculateComponentAvailability` (Hangar Inventory's Available/Reserved/
-Installed columns, procurement lists) remain display-name-based,
-unchanged. Both are widely-shared, heavily-tested foundations used far
-outside the installation engine's boundary; making them identity-aware
-is a larger, separate undertaking explicitly out of this mission's
-additive, "do not redesign installation behavior" scope. This is a
-documented, accepted residual risk — see below.
+Installed columns, procurement lists) were display-name-based at the end
+of EWO-STAB-003C. Both are widely-shared, heavily-tested foundations used
+far outside the installation engine's boundary, so making them
+identity-aware was scoped as a separate follow-up mission rather than
+folded into 003C.
+
+### Identity-aware status and availability (EWO-STAB-003D)
+
+EWO-STAB-003D closed the residual risk above. `computeHardpointStatus`
+(`src/utils/hardpointStatus.ts`) and `calculateComponentAvailability`
+(`src/engine/logistics/availability.ts`) both gained an **additional,
+optional** identity parameter and now apply the same rule everywhere a
+comparison happens: when both sides being compared carry a resolved
+`entityClass`, they're compared by `entityClass` alone; when either side
+lacks one, the exact original name-only comparison runs, byte for byte.
+Neither function calls `identitiesMatch()`'s own display-name fallback
+branch directly for this purpose — it is case-insensitive, and these two
+functions' pre-existing name comparisons were case-sensitive `===`;
+reusing it unconditionally would have silently loosened legacy behavior
+these two functions have always had. Instead each defines its own local
+`componentsMatch`/`componentRowMatches` helper that calls into
+`identitiesMatch` only for the entityClass-present branch (where its
+result is identical to a direct `===` on entityClass) and preserves the
+original `===` string comparison for every other branch.
+
+**Import boundary note:** both files import `identitiesMatch` directly
+from `src/engine/installation/componentIdentityService.ts`, not from the
+engine's public barrel (`index.ts`). `inventoryTransactionService.ts`
+(reached from the barrel via `installationEngine.ts`) itself calls
+`calculateComponentAvailability` — importing the barrel from
+`availability.ts` would close a real cycle. `componentIdentityService.ts`
+has no dependency back into either file, so it is the one safe, leaf-only
+import; this is a deliberate, narrow exception to "only import the
+barrel," not a precedent for reaching into other engine internals.
+
+**Callers updated to pass entityClass they already possessed** (no new
+catalog resolution added to any UI caller): `checkReservationOwnership`'s
+internal availability check, `HangarInventory.tsx` (both the table row and
+the Reserve panel), `missionPackage.ts`, `portTree.ts`, `reserveComponent`
+(reordered so the identity it already resolves for the reservation record
+is available for the availability check too), and `procurement.ts` (the
+per-group entityClass of the row that first created an aggregation
+group — see Known Risks for what this does and does not fix).
+
+**Schema addition:** `InstalledLoadoutEntry` gained an optional
+`entityClass?: string` field (`src/types/index.ts`) — it previously had no
+identity at all, which meant `calculateComponentAvailability`'s
+`installedQuantity` could never be identity-aware regardless of what the
+Hardpoint/HangarItem side offered. Populated at every one of its existing
+mutation sites (`applyInstalledChange`, seed derivation, ship
+materialization, the persisted-state merge's installedLoadouts overlay)
+from the corresponding Hardpoint's own `installedEntityClass`. Additive,
+no `PERSIST_VERSION` bump.
+
+**Mission Target Identity Gap closed:** `saveMissionConfiguration` now
+tracks a `targetEntityClass` alongside every `baseTargets` entry, through
+all four starting-state branches, the Quartermaster Template override,
+and `targetOverrides` — the last two resolve fresh through
+`resolveComponentIdentity` (a Quartermaster Template assignment and a
+Commander's typed/selected override are both raw display-name strings
+with no identity of their own to begin with). Resolution failure (an
+uncataloged or misspelled name) leaves `targetEntityClass` `undefined` —
+the target string itself is always preserved verbatim; nothing is ever
+rejected or silently altered because identity couldn't be resolved.
+
+**`fleetAssetReconciliation.ts` also updated:** a reconciled Hardpoint row
+previously dropped `installedEntityClass`/`targetEntityClass`/
+`factoryEntityClass` entirely, even though the old row (installed/target
+side) and a fresh catalog resolution (factory side, since
+`FactoryHardpointTemplate` itself carries no entityClass) could supply
+them. This was a genuine identity-loss gap surfaced during 003D's audit,
+not called out by name in the mission's own two named functions, but
+directly within "every shared component-matching path" — fixed alongside
+the two named functions rather than deferred.
 
 **The uncataloged-component fallback policy is unchanged and reaffirmed.**
 An item with no resolvable `entityClass` — because it isn't in the
@@ -175,19 +244,44 @@ bulk migration pass over existing data.
 
 ## Known Risks and Future Follow-Up
 
-- **`calculateComponentAvailability` and hardpoint status computation
-  remain display-name-only.** A component sharing a display name with a
-  different real component could still be miscounted in Hangar
-  Inventory's Available/Reserved columns or misjudged as
-  `Invalid Target`, even after this ADR. Recommended as its own follow-up
-  mission once the identity fields have accumulated real coverage across
-  a Commander's actual saved data.
-- **`targetEntityClass` is populated at ship materialization time only**
-  (factory-fresh rows). A target subsequently edited through Loadout
-  Manager's own target-override workflow does not yet gain a resolved
-  `targetEntityClass` — deliberately out of scope ("do not redesign
-  Loadout Manager"). A target row edited that way keeps working exactly
-  as before, via display-name matching.
+- **Resolved by EWO-STAB-003D:** the two risks recorded here at the end of
+  EWO-STAB-003C — `calculateComponentAvailability`/hardpoint status
+  remaining display-name-only, and `targetEntityClass` only being
+  populated at ship materialization time — are addressed above. Both
+  functions are now identity-aware wherever both sides of a comparison
+  have one, and `targetEntityClass` is now tracked through every source
+  `saveMissionConfiguration` can pull a target from, including Loadout
+  Manager's own target-override workflow. Kept below for historical
+  record rather than deleted.
+- **`src/utils/inventoryDependencies.ts` (`resolveInventoryDependencies`)
+  remains, and must remain, display-name-only.** Its own doc comment cites
+  a pre-existing **Design Authority Ruling 12**, which explicitly withholds
+  authorization to re-key `InstalledLoadoutEntry`/`MissionReservation`
+  matching in this specific helper off anything but display name.
+  EWO-STAB-003D's audit (Assignment 1) surfaced this explicitly rather
+  than working around it: this file is genuinely outside both this ADR's
+  and EWO-STAB-003D's authorization, and needs a fresh ruling superseding
+  #12 before it can be touched — not a silent identity upgrade.
+- **A triplicated inline "find the active reservation for this slot"
+  lookup** — identical in shape, name-only (`r.componentName === ...` plus
+  a slot/build match) — exists independently in `procurement.ts`,
+  `portTree.ts`, and `missionPackage.ts`. This is a third, separate
+  component-matching pattern beyond the two functions EWO-STAB-003D was
+  scoped to (`computeHardpointStatusWithValidation` and
+  `calculateComponentAvailability` specifically, per this mission's own
+  stated Primary Objective). Left untouched deliberately, to keep this
+  mission bounded to its two named services; a real candidate for a
+  future, narrowly-scoped follow-up.
+- **`procurement.ts`'s demand aggregation is still grouped by raw
+  `targetItem` display name**, not entityClass. EWO-STAB-003D made the
+  resulting `calculateComponentAvailability` call for an already-formed
+  group identity-aware (passing that group's first-row entityClass), but
+  two differently-cataloged components sharing a target display name are
+  still merged into the same procurement line before that call ever runs.
+  Fixing this means changing the aggregation key itself — a larger,
+  distinct change from "pass through identity already in scope," and
+  deliberately deferred rather than folded into this consolidation
+  mission.
 - **Two genuinely different real components that share both a display
   name and lack any entityClass in the catalog** (the residual class
   `componentCatalog.ts` already documents, e.g. certain Missile Rack

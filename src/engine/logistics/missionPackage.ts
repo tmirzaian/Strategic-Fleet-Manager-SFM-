@@ -72,7 +72,7 @@ export function calculateMissionPackage(
       reservedMatches += 1
       continue
     }
-    const availability = calculateComponentAvailability(row.targetItem, hangarItems, installedLoadouts, reservations)
+    const availability = calculateComponentAvailability(row.targetItem, hangarItems, installedLoadouts, reservations, row.targetEntityClass)
     if (availability.availableQuantity > 0) {
       // Owned, but not yet committed — shown to the player as an Action
       // Opportunity, but it never counts toward Package Readiness on its

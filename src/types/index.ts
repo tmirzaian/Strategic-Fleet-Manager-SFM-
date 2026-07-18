@@ -162,6 +162,12 @@ export interface InstalledLoadoutEntry {
   shipId: string
   slotLabel: string
   installedItem: string
+  /** EWO-STAB-003D (ADR-010) — the canonical identity of `installedItem`,
+   * when resolvable. Additive and optional: a pre-existing entry from
+   * before this mission simply has none, and every reader falls back to
+   * name-only matching exactly as before. Kept in sync with the owning
+   * Hardpoint row's own `installedEntityClass` at every mutation site. */
+  entityClass?: string
 }
 
 // ======================================================
@@ -397,10 +403,14 @@ export interface HangarItem {
    * records and on anything hand-typed outside the catalog — those keep
    * matching by name+type+size only, exactly as before; never
    * retroactively assigned without a Commander re-adding the item
-   * through the catalog. Reservations/Installed Loadout/availability
-   * matching remain name-based throughout, unchanged (see
-   * src/engine/logistics/availability.ts) — this field identifies an
-   * inventory RECORD, it does not re-key the wider logistics engine. */
+   * through the catalog. EWO-STAB-003D (ADR-010): calculateComponentAvailability
+   * (src/engine/logistics/availability.ts) now prefers this field when both
+   * this record AND the component it's being matched against resolve an
+   * entityClass; either side lacking one falls back to the original
+   * name-only comparison, unchanged. This field still identifies an
+   * inventory RECORD — it does not re-key InstalledLoadoutEntry/
+   * MissionReservation matching (src/utils/inventoryDependencies.ts),
+   * which remains name-only under Design Authority Ruling 12. */
   entityClass?: string
   // Future-ready: Components are location-bound (ships are not). Optional
   // and unused in the UI this sprint — reserved for a later Location column.
