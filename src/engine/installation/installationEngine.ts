@@ -1,5 +1,5 @@
-import type { Hardpoint, Ship } from '../../types'
-import { resolveComponentIdentity, type ResolvedComponentIdentity } from './componentIdentityService'
+import type { Hardpoint, MissionReservation, Ship } from '../../types'
+import { identitiesMatch, resolveComponentIdentity, type ResolvedComponentIdentity } from './componentIdentityService'
 import { checkInstallationCompatibility } from './compatibilityEngine'
 import { checkReservationOwnership, planHangarDecrement } from './inventoryTransactionService'
 import type { InstallationCommand, InstallationDestination, InstallationEffects, InstallationResult, InstallationStateSnapshot } from './types'
@@ -52,6 +52,14 @@ function resolveDestinationHardpoint(state: InstallationStateSnapshot, ship: Shi
   return state.hardpoints.find((h) => h.buildId === buildId && h.slotLabel === destination.slotLabel && h.status !== 'OK')
 }
 
+/** EWO-STAB-003C (ADR-010) — a reservation's own canonical identity: its
+ * stored `componentEntityClass` when present (set at creation time by
+ * reserveComponent), otherwise resolved fresh from its legacy
+ * `componentName` — the same fallback order applied everywhere else. */
+function reservationIdentity(reservation: MissionReservation): ResolvedComponentIdentity | null {
+  return resolveComponentIdentity(reservation.componentEntityClass ? { entityClass: reservation.componentEntityClass } : { displayName: reservation.componentName })
+}
+
 function executeInstallOrRemove(command: InstallationCommand, state: InstallationStateSnapshot, effects: InstallationEffects): InstallationResult {
   const ship = findShip(state.ships, command.destination.shipId)
   if (!ship) return { ok: false, reason: 'ship-not-found', message: 'Item or ship not found.' }
@@ -65,9 +73,17 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
       return { ok: false, reason: 'destination-invalid', message: 'That slot has nothing installed to remove.' }
     }
     const removedItem = target.installedItem
+    // EWO-STAB-003C (ADR-010) — the REMOVED component's own identity,
+    // never derived from the destination port: prefer the row's own
+    // stored installedEntityClass (set when it was installed under this
+    // mission's identity population); fall back to resolving fresh from
+    // its display name for a pre-existing/legacy row that predates it.
+    const removedIdentity = target.installedEntityClass ? { entityClass: target.installedEntityClass } : resolveComponentIdentity({ displayName: removedItem })
+    const removedEntityClass = target.installedEntityClass ?? removedIdentity?.entityClass ?? undefined
+
     effects.applyShipMutation(ship.id, command.destination.slotLabel, '—')
     if (command.returnToInventory) {
-      effects.returnToInventory({ name: removedItem, type: target.type, size: target.size })
+      effects.returnToInventory({ name: removedItem, type: target.type, size: target.size, entityClass: removedEntityClass })
     }
     return {
       ok: true,
@@ -75,7 +91,7 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
       buildId,
       slotLabel: command.destination.slotLabel,
       resolvedDisplayName: removedItem,
-      resolvedEntityClass: null,
+      resolvedEntityClass: removedEntityClass ?? null,
       reservationFulfilled: false,
     }
   }
@@ -92,15 +108,21 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
     return { ok: false, reason: 'incompatible', message: compatibility.message ?? `${identity.displayName} is not compatible with that slot.` }
   }
 
+  // EWO-STAB-003C (ADR-010) — identity-aware reservation matching:
+  // entityClass compared when both the installing component and the
+  // reservation resolve one; a shared display name is never sufficient
+  // once a stronger signal exists on both sides (the Slipstream/Snowblind
+  // collision class). Falls back to the pre-existing display-name
+  // comparison whenever either side lacks an entityClass.
   const matchingReservation = state.reservations.find(
     (r) =>
       r.missionConfigurationId === buildId &&
       r.targetSlotLabel === target.slotLabel &&
-      r.componentName === identity.displayName &&
-      r.status === 'ACTIVE'
+      r.status === 'ACTIVE' &&
+      identitiesMatch(identity, reservationIdentity(r))
   )
   const ownership = checkReservationOwnership({
-    itemName: identity.displayName,
+    identity,
     hasMatchingReservation: Boolean(matchingReservation),
     hangarItems: state.hangarItems,
     installedLoadouts: state.installedLoadouts,
@@ -108,7 +130,7 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
   })
   if (!ownership.ok) return { ok: false, reason: 'reserved-elsewhere', message: ownership.message }
 
-  effects.applyShipMutation(ship.id, target.slotLabel, identity.displayName)
+  effects.applyShipMutation(ship.id, target.slotLabel, identity.displayName, identity.entityClass ?? undefined)
 
   const decrementPlan = planHangarDecrement({
     hangarItems: state.hangarItems,
@@ -117,6 +139,7 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
     itemName: identity.displayName,
     buildId,
     slotLabel: target.slotLabel,
+    matchingReservationId: matchingReservation?.id,
     hangarItemId,
     inventorySource: command.inventorySource ?? 'HANGAR',
   })
@@ -182,8 +205,12 @@ function executeTransfer(command: InstallationCommand, state: InstallationStateS
   // Atomic: donor removal and recipient installation applied back to back
   // with no intermediate state where the item exists on neither ship or
   // both — both effects resolve synchronously before this returns.
+  // EWO-STAB-003C (ADR-010) — the donor's own stored installedEntityClass
+  // is preserved through the transfer (never re-derived from the
+  // recipient port), falling back to a fresh resolution for a legacy row.
+  const transferredEntityClass = donorHardpoint.installedEntityClass ?? identity.entityClass ?? undefined
   effects.applyShipMutation(fromShip.id, source.slotLabel, '—')
-  effects.applyShipMutation(toShip.id, destination.slotLabel, itemName)
+  effects.applyShipMutation(toShip.id, destination.slotLabel, itemName, transferredEntityClass)
 
   return {
     ok: true,
@@ -191,7 +218,7 @@ function executeTransfer(command: InstallationCommand, state: InstallationStateS
     buildId: toBuildId,
     slotLabel: destination.slotLabel,
     resolvedDisplayName: itemName,
-    resolvedEntityClass: identity.entityClass,
+    resolvedEntityClass: transferredEntityClass ?? null,
     reservationFulfilled: false,
     source: { shipId: fromShip.id, buildId: fromShip.activeBuildId, slotLabel: source.slotLabel },
   }

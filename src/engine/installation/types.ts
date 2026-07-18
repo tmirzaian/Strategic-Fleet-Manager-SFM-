@@ -95,12 +95,18 @@ export interface InstallationEffects {
   /** The shared, unchanged hardpoint/InstalledLoadout/build-readiness
    * mutation (src/store/useFleetStore.ts's applyInstalledChange). Already
    * centralized before this mission (EWO-STAB-001) and reused as-is,
-   * never reimplemented here. */
-  applyShipMutation: (shipId: string, slotLabel: string, newInstalledItem: string) => void
+   * never reimplemented here. `entityClass` (EWO-STAB-003C, ADR-010) is
+   * the resolved canonical identity for `newInstalledItem`, when one was
+   * found — undefined for an uncataloged component or a '—' removal,
+   * never a guess. */
+  applyShipMutation: (shipId: string, slotLabel: string, newInstalledItem: string, entityClass?: string) => void
   commitHangarItems: (items: HangarItem[]) => void
   commitReservations: (reservations: MissionReservation[]) => void
   /** REMOVE + returnToInventory only — the store's existing addHangarItem,
    * already the single correct merge-by-entityClass-then-name+type+size
-   * implementation (EWO-STAB-001 found no duplication here to consolidate). */
-  returnToInventory: (item: { name: string; type: string; size: string }) => void
+   * implementation (EWO-STAB-001 found no duplication here to consolidate).
+   * `entityClass` carries the REMOVED component's own resolved identity
+   * (never derived from the destination port) so a returned unit merges
+   * correctly against existing Hangar stock. */
+  returnToInventory: (item: { name: string; type: string; size: string; entityClass?: string }) => void
 }

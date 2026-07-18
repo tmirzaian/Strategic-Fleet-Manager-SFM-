@@ -1,5 +1,6 @@
 import type { HangarItem, InstalledLoadoutEntry, MissionReservation } from '../../types'
 import { calculateComponentAvailability } from '../../engine/logistics/availability'
+import { identitiesMatch, resolveComponentIdentity, type ResolvedComponentIdentity } from './componentIdentityService'
 
 /**
  * EWO-STAB-003B — the single inventory-bookkeeping implementation
@@ -25,6 +26,14 @@ export interface HangarDecrementInput {
   itemName: string
   buildId: string
   slotLabel: string
+  /** EWO-STAB-003C (ADR-010) — the reservation the ENGINE already
+   * identity-matched (via identitiesMatch), passed through rather than
+   * re-derived here by plain componentName equality. Re-deriving it
+   * independently would risk a real inconsistency: the engine could
+   * correctly refuse to treat a differing-entityClass, same-name
+   * reservation as a match, while this function's own separate lookup
+   * fulfilled it anyway. */
+  matchingReservationId?: string
   /** The specific record Move to Ship's UI selected, when known. Absent
    * for Quick Update's install-by-typed-name flow. */
   hangarItemId?: string
@@ -45,21 +54,33 @@ export type OwnershipCheckResult = { ok: true } | { ok: false; message: string }
  * alone is not evidence of a steal.
  */
 export function checkReservationOwnership(input: {
-  itemName: string
+  identity: ResolvedComponentIdentity
   hasMatchingReservation: boolean
   hangarItems: HangarItem[]
   installedLoadouts: InstalledLoadoutEntry[]
   reservations: MissionReservation[]
 }): OwnershipCheckResult {
   if (input.hasMatchingReservation) return { ok: true }
-  const hasCompetingReservation = input.reservations.some((r) => r.componentName === input.itemName && r.status === 'ACTIVE')
+  // EWO-STAB-003C (ADR-010) — identity-aware: a competing reservation for
+  // a DIFFERENT real component that merely shares this one's display name
+  // must never block this install. `calculateComponentAvailability`
+  // below remains display-name-only (a deliberately deferred, documented
+  // limitation — see ADR-010's Known Risks — shared far outside this
+  // module's boundary), so a false positive there is still possible in
+  // the same narrow collision case; this check itself no longer
+  // contributes one.
+  const hasCompetingReservation = input.reservations.some((r) => r.status === 'ACTIVE' && identitiesMatch(input.identity, resolveReservationIdentity(r)))
   if (!hasCompetingReservation) return { ok: true }
-  const availability = calculateComponentAvailability(input.itemName, input.hangarItems, input.installedLoadouts, input.reservations)
+  const availability = calculateComponentAvailability(input.identity.displayName, input.hangarItems, input.installedLoadouts, input.reservations)
   if (availability.availableQuantity > 0) return { ok: true }
   return {
     ok: false,
-    message: `${input.itemName} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.`,
+    message: `${input.identity.displayName} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build. Release that reservation first, or install using its own Fleet Asset and Loadout.`,
   }
+}
+
+function resolveReservationIdentity(reservation: MissionReservation): ResolvedComponentIdentity | null {
+  return resolveComponentIdentity(reservation.componentEntityClass ? { entityClass: reservation.componentEntityClass } : { displayName: reservation.componentName })
 }
 
 export interface HangarDecrementPlan {
@@ -73,9 +94,7 @@ export function planHangarDecrement(input: HangarDecrementInput): HangarDecremen
     return { hangarItems: input.hangarItems, reservations: input.reservations, reservationFulfilled: false }
   }
 
-  const reservation = input.reservations.find(
-    (r) => r.missionConfigurationId === input.buildId && r.targetSlotLabel === input.slotLabel && r.componentName === input.itemName && r.status === 'ACTIVE'
-  )
+  const reservation = input.matchingReservationId ? input.reservations.find((r) => r.id === input.matchingReservationId) : undefined
 
   if (reservation) {
     // Alpha 2.3 (Part 12 / Golden C) — installing a reserved component

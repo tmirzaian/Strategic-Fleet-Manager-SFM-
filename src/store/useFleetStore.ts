@@ -12,7 +12,7 @@ import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
-import { executeInstallation } from '../engine/installation'
+import { executeInstallation, resolveComponentIdentity } from '../engine/installation'
 import type { InstallationEffects, InstallationStateSnapshot } from '../engine/installation'
 import type { MissionReservation } from '../types'
 
@@ -425,7 +425,13 @@ function recomputeBuildDerivedState(get: () => FleetState, set: (partial: Partia
  * Returns the affected buildIds so callers can log/report against the
  * one the user actually asked about.
  */
-function applyInstalledChange(get: () => FleetState, set: (partial: Partial<FleetState>) => void, shipId: string, slotLabel: string, newInstalledItem: string): string[] {
+// EWO-STAB-003C (ADR-010) — `entityClass` carries the canonical identity
+// the installation engine already resolved for `newInstalledItem`
+// (undefined for an uncataloged component, or for a '—' removal — both
+// correctly clear any previously stored value rather than leaving it
+// stale). Additive: every existing caller/behavior is unchanged for a
+// row that never gains one.
+function applyInstalledChange(get: () => FleetState, set: (partial: Partial<FleetState>) => void, shipId: string, slotLabel: string, newInstalledItem: string, entityClass?: string): string[] {
   const state = get()
 
   const installedLoadouts = (() => {
@@ -442,7 +448,7 @@ function applyInstalledChange(get: () => FleetState, set: (partial: Partial<Flee
     if (h.shipId !== shipId || h.slotLabel !== slotLabel) return h
     affectedBuildIds.add(h.buildId)
     const { status, invalidMessage } = computeHardpointStatusWithValidation(newInstalledItem, h.targetItem, h.factoryItem, h.type, h.size)
-    return { ...h, installedItem: newInstalledItem, status, invalidMessage }
+    return { ...h, installedItem: newInstalledItem, installedEntityClass: entityClass, status, invalidMessage }
   })
   set({ hardpoints })
 
@@ -473,11 +479,12 @@ function buildInstallationContext(get: () => FleetState, set: (partial: Partial<
       installedLoadouts: get().installedLoadouts,
     },
     effects: {
-      applyShipMutation: (shipId, slotLabel, newInstalledItem) => applyInstalledChange(get, set, shipId, slotLabel, newInstalledItem),
+      applyShipMutation: (shipId, slotLabel, newInstalledItem, entityClass) => applyInstalledChange(get, set, shipId, slotLabel, newInstalledItem, entityClass),
       commitHangarItems: (hangarItems) => set({ hangarItems }),
       commitReservations: (reservations) => set({ reservations }),
       returnToInventory: (item) => {
-        get().addHangarItem({ ...item, qty: 1, neededBy: 'None', disposition: 'Store' })
+        const { entityClass, ...rest } = item
+        get().addHangarItem({ ...rest, entityClass, qty: 1, neededBy: 'None', disposition: 'Store' })
       },
     },
   }
@@ -718,6 +725,14 @@ export const useFleetStore = create<FleetState>()(
       return { success: false, message: `Only ${availability.availableQuantity} "${componentName}" available to reserve (requested ${quantity}).` }
     }
 
+    // EWO-STAB-003C (ADR-010) — canonical identity, resolved through
+    // ComponentIdentityService (never reimplemented here). Prefers the
+    // target row's own stored targetEntityClass (the most authoritative
+    // source for this exact slot's requirement) and falls back to a
+    // fresh resolution from componentName for a legacy row that predates
+    // this mission. Absent (never a guess) for an uncataloged component.
+    const componentEntityClass = targetRow.targetEntityClass ?? resolveComponentIdentity({ displayName: componentName })?.entityClass ?? undefined
+
     const now = new Date().toISOString()
     const reservation: MissionReservation = {
       id: `reservation-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -725,6 +740,7 @@ export const useFleetStore = create<FleetState>()(
       fleetAssetId,
       targetSlotLabel,
       componentName,
+      componentEntityClass,
       quantity,
       status: 'ACTIVE',
       createdAt: now,

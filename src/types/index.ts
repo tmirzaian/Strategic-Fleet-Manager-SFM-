@@ -237,6 +237,11 @@ export interface MissionReservation {
   status: ReservationStatus
   createdAt: string
   updatedAt: string
+  /** EWO-STAB-003C (ADR-010) — canonical identity alongside componentName,
+   * additive and optional; populated only when resolvable at reservation
+   * creation time. Absent for any reservation created before this
+   * mission, or for an uncataloged component — never a guess. */
+  componentEntityClass?: string
 }
 
 /** Per-target-row logistics state (Alpha 2.3, Part 9) — distinct from
@@ -339,6 +344,17 @@ export interface Hardpoint {
    * never be silently replaced by a template change — see
    * src/utils/fleetAssetReconciliation.ts. */
   targetMode?: 'FOLLOW_FACTORY' | 'EXPLICIT_TARGET'
+  /** EWO-STAB-003C (ADR-010) — canonical component identity, additive
+   * alongside the existing display-name fields above. Populated only
+   * when src/engine/installation/componentIdentityService.ts can
+   * resolve a real entityClass for the corresponding string field;
+   * absent (not a guess) for an uncataloged component or any row
+   * persisted before this mission. Never used for display — the
+   * existing installedItem/targetItem/factoryItem strings remain the
+   * presentation and legacy-compatibility layer. */
+  installedEntityClass?: string
+  targetEntityClass?: string
+  factoryEntityClass?: string
 }
 
 /**

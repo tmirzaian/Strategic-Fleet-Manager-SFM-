@@ -97,3 +97,21 @@ export function resolveComponentIdentity(reference: ComponentReference): Resolve
     size: entry?.size ?? null,
   }
 }
+
+/**
+ * EWO-STAB-003C (ADR-010) — the one shared identity-comparison rule,
+ * addressing the Slipstream/Snowblind/shared-name-missile-rack collision
+ * class directly: once BOTH sides carry a resolved entityClass, two
+ * components are the same component if and only if that entityClass
+ * matches — a shared display name is never sufficient on its own once a
+ * stronger signal exists on both sides. Falls back to case-insensitive
+ * display-name equality only when at least one side has no entityClass
+ * (an uncataloged component, or a record persisted before this mission)
+ * — the same legacy behavior every existing caller already relied on,
+ * never removed.
+ */
+export function identitiesMatch(a: ResolvedComponentIdentity | null, b: ResolvedComponentIdentity | null): boolean {
+  if (!a || !b) return false
+  if (a.entityClass && b.entityClass) return a.entityClass === b.entityClass
+  return a.displayName.toLowerCase() === b.displayName.toLowerCase()
+}

@@ -58,7 +58,7 @@ describe('EWO-STAB-003B: executeInstallation — INSTALL', () => {
     const effects = makeEffects()
     const result = executeInstallation({ operation: 'INSTALL', component: { displayName: 'Slipstream' }, destination: { shipId: 'ghost', slotLabel: 'Power 1' } }, state, effects)
     expect(result.ok).toBe(true)
-    expect(effects.applyShipMutation).toHaveBeenCalledWith('ghost', 'Power 1', 'Slipstream')
+    expect(effects.applyShipMutation).toHaveBeenCalledWith('ghost', 'Power 1', 'Slipstream', undefined)
     expect(effects.commitHangarItems).toHaveBeenCalledTimes(1)
     expect(effects.commitReservations).toHaveBeenCalledTimes(1)
   })
@@ -130,7 +130,7 @@ describe('EWO-STAB-003B: executeInstallation — INSTALL', () => {
       effects
     )
     expect(result.ok).toBe(true)
-    expect(effects.applyShipMutation).toHaveBeenCalledWith('ghost', 'Power 1', 'Slipstream')
+    expect(effects.applyShipMutation).toHaveBeenCalledWith('ghost', 'Power 1', 'Slipstream', undefined)
   })
 })
 
@@ -177,7 +177,7 @@ describe('EWO-STAB-003B: executeInstallation — TRANSFER (moveComponentBetweenS
     )
     expect(result.ok).toBe(true)
     expect(effects.applyShipMutation).toHaveBeenCalledWith('ghost', 'Power 1', '—')
-    expect(effects.applyShipMutation).toHaveBeenCalledWith('corsair', 'Power A', 'Slipstream')
+    expect(effects.applyShipMutation).toHaveBeenCalledWith('corsair', 'Power A', 'Slipstream', undefined)
   })
 
   it("12. a recipient slot of a different type/size is rejected — exact-slot-match never falls back to the catalog rule", () => {

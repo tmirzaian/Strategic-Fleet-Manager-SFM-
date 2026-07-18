@@ -3,6 +3,7 @@ import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 import { computeHardpointStatusWithValidation } from './hardpointStatus'
 import { ownershipTypeToLegacy } from './ownership'
 import { resolveShipImage } from './resolveShipImage'
+import { resolveComponentIdentity } from '../engine/installation'
 
 let counter = 0
 function uniqueSuffix(): string {
@@ -81,6 +82,13 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       }
     }
     const { status, invalidMessage } = computeHardpointStatusWithValidation(slot.factoryItem, slot.factoryItem, slot.factoryItem, slot.type, slot.size)
+    // EWO-STAB-003C (ADR-010) — resolved once through
+    // ComponentIdentityService, the sole identity authority (never
+    // reimplemented here). A freshly materialized row's
+    // factory/installed/target items are always identical by
+    // construction (see above), so they share one resolved identity;
+    // undefined for an uncataloged component, never a guess.
+    const factoryEntityClass = resolveComponentIdentity({ displayName: slot.factoryItem })?.entityClass ?? undefined
     return {
       id: `${buildId}-hp-${i}`,
       shipId: assetId,
@@ -91,6 +99,9 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       factoryItem: slot.factoryItem,
       installedItem: slot.factoryItem,
       targetItem: slot.factoryItem,
+      factoryEntityClass,
+      installedEntityClass: factoryEntityClass,
+      targetEntityClass: factoryEntityClass,
       status,
       invalidMessage,
       // Mission M-011: preserves nested mount/turret/rack structure from
