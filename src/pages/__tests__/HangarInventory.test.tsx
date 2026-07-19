@@ -345,6 +345,38 @@ describe('EWO-029 (Task 4/16): Reserve workflow', () => {
     expect(useFleetStore.getState().reservations.some((r) => r.status === 'ACTIVE' && r.componentName === 'FR-66')).toBe(true)
   })
 
+  // FTB-001C — root-cause regression: a successful Confirm Reservation
+  // schedules a bare `setTimeout(() => setReserveItemId(null), 900)` to
+  // auto-close the modal. If the component unmounts (a real navigation
+  // away, or a test finishing) before that 900ms elapses, the timer used
+  // to survive untouched — on the next full test-file teardown it could
+  // fire against an already torn-down environment, throwing
+  // "ReferenceError: window is not defined" from deep inside React's
+  // timer callback (exactly the FTB-001C incident report). The fix stores
+  // the handle in a ref and clears it in the component's unmount effect
+  // cleanup; this test proves that mechanism actually runs, and that
+  // advancing well past the delay after unmount never throws.
+  it('FTB-001C: the Reserve modal auto-close timeout is cancelled on unmount — no deferred state update survives teardown', () => {
+    vi.useFakeTimers()
+    try {
+      useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
+      const view = renderHangar()
+      const row = screen.getByText('FR-66').closest('tr')!
+      fireEvent.click(within(row).getByText('Reserve'))
+      fireEvent.click(screen.getByText('Confirm Reservation'))
+
+      const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+      view.unmount()
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+
+      // Well past the 900ms auto-close window, after unmount — must never
+      // throw or touch anything belonging to the torn-down component.
+      expect(() => vi.advanceTimersByTime(5000)).not.toThrow()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('15. reservation quantity validation rejects a value above what is Available', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
     renderHangar()

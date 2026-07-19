@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Send, X, AlertOctagon, PackageX, Pencil, Trash2, Lock, Sparkles } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import SortableHeader from '../components/SortableHeader'
@@ -69,6 +69,20 @@ export default function HangarInventory() {
   const [reserveSlotLabel, setReserveSlotLabel] = useState('')
   const [reserveQtyInput, setReserveQtyInput] = useState('1')
   const [reserveResult, setReserveResult] = useState<{ success: boolean; message: string } | null>(null)
+  // FTB-001C — holds the pending "auto-close the Reserve modal" timeout
+  // (see confirmReserve below) so it can be cancelled: on unmount (the
+  // effect cleanup), and before starting a new one (a second confirm
+  // while one is already pending must never leave two timers racing).
+  // Without this, a Commander who navigates away (or a test that unmounts)
+  // within the 900ms window left the timeout to fire against a torn-down
+  // component, calling setReserveItemId on an unmounted instance.
+  const reserveCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => {
+    return () => {
+      if (reserveCloseTimeoutRef.current !== undefined) clearTimeout(reserveCloseTimeoutRef.current)
+    }
+  }, [])
 
   // EWO-029 (Task 6) — Manage/Release Reservations for one component.
   const [manageItemId, setManageItemId] = useState<string | null>(null)
@@ -154,6 +168,10 @@ export default function HangarInventory() {
   }, [reserveSlotOptions])
 
   function openReserve(item: HangarItem) {
+    if (reserveCloseTimeoutRef.current !== undefined) {
+      clearTimeout(reserveCloseTimeoutRef.current)
+      reserveCloseTimeoutRef.current = undefined
+    }
     setReserveItemId(item.id)
     setReserveShipId('')
     setReserveBuildId('')
@@ -173,7 +191,11 @@ export default function HangarInventory() {
     })
     if (result.success) {
       setReserveResult({ success: true, message: `Reserved ${parsedReserveQty} ${reserveItem.name} for ${reserveBuildOptions.find((e) => e.buildId === reserveBuildId)?.buildName ?? 'the selected Loadout'}.` })
-      setTimeout(() => setReserveItemId(null), 900)
+      if (reserveCloseTimeoutRef.current !== undefined) clearTimeout(reserveCloseTimeoutRef.current)
+      reserveCloseTimeoutRef.current = setTimeout(() => {
+        reserveCloseTimeoutRef.current = undefined
+        setReserveItemId(null)
+      }, 900)
     } else {
       setReserveResult({ success: false, message: result.message ?? 'Could not reserve this component.' })
     }
