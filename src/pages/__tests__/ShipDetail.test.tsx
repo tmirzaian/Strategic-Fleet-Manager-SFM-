@@ -278,3 +278,61 @@ describe('<ShipDetail /> — EWO-033A (Task 5): hero standardization across real
     expect(within(screen.getByTestId('ship-hero-metadata-band')).getByText(ghost.name)).toBeInTheDocument()
   })
 })
+
+/** Renders Ship Detail at the bare "/ship" route (no explicit id in the
+ * URL) — the general-navigation entry point (Sidebar's "Ship Detail"
+ * link, matching src/App.tsx's own `<Route path="/ship" .../>`). */
+function renderShipDetailBlank() {
+  return render(
+    <MemoryRouter initialEntries={['/ship']}>
+      <Routes>
+        <Route path="/ship" element={<ShipDetail />} />
+        <Route path="/ship/:shipId" element={<ShipDetail />} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
+describe('<ShipDetail /> — FTB-001A (Workstream D): explicit ship selection', () => {
+  it('opening with no explicit navigation target renders the blank "Select a Ship" empty state, never an inferred first-ship default', () => {
+    renderShipDetailBlank()
+    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+    expect(screen.getByText('Choose a fleet vessel above to review or manage its loadout.')).toBeInTheDocument()
+    // No other ship's data is implied — the fleet's first real ship
+    // (alphabetically or in store order) must not be showing anywhere.
+    expect(screen.queryByText('Readiness')).not.toBeInTheDocument()
+    expect(screen.queryByText('Active Loadout')).not.toBeInTheDocument()
+  })
+
+  it('the Select Ship control itself defaults to the blank placeholder, never a specific ship id', () => {
+    renderShipDetailBlank()
+    const select = screen.getAllByRole('combobox')[0] as HTMLSelectElement
+    expect(select.value).toBe('')
+  })
+
+  it('no editing action (Quick Update, Change Disposition, Edit, Remove from Fleet) is available before a ship is selected', () => {
+    renderShipDetailBlank()
+    expect(screen.queryByText('Quick Update')).not.toBeInTheDocument()
+    expect(screen.queryByText('Change Disposition')).not.toBeInTheDocument()
+    expect(screen.queryByText('Remove from Fleet')).not.toBeInTheDocument()
+  })
+
+  it('explicit navigation from a specific ship (a real shipId in the URL) selects exactly that ship — the direct, intentional target the policy allows', () => {
+    renderShipDetail('ghost')
+    expect(screen.queryByText('Select a Ship')).not.toBeInTheDocument()
+    const select = screen.getAllByRole('combobox')[0] as HTMLSelectElement
+    expect(select.value).toBe('ghost')
+  })
+
+  it('a deleted/unavailable selected ship (a shipId that no longer resolves to any live Fleet Asset) renders the same blank empty state, never silently substituting another ship', () => {
+    render(
+      <MemoryRouter initialEntries={['/ship/this-ship-id-does-not-exist']}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+    expect(screen.queryByText('Readiness')).not.toBeInTheDocument()
+  })
+})

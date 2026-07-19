@@ -23,7 +23,11 @@ function renderComposer(search = '') {
 
 describe('<MissionComposer /> (Loadout Manager)', () => {
   it('renders the required starting-state options using Loadout terminology (Alpha 2.4)', () => {
-    renderComposer()
+    // FTB-001A (Workstream D) — Starting-state options only render once a
+    // ship is explicitly selected (no more implicit first-ship default);
+    // an explicit `?shipId=` is the "navigating from a specific ship
+    // action" case the Ship-Selection State Policy allows.
+    renderComposer('?shipId=ghost')
     expect(screen.getAllByText('Factory').length).toBeGreaterThan(0)
     expect(screen.getByText('Current Installed Loadout')).toBeInTheDocument()
     expect(screen.getByText('Blank / Empty')).toBeInTheDocument()
@@ -198,7 +202,9 @@ describe('<MissionComposer /> (Loadout Manager)', () => {
 describe('Mission M-012: target-build selector uses the same authoritative component catalog as inventory', () => {
   it("15. a Target picker's option list includes real catalog components beyond the 5-entry seed demo table", () => {
     if (catalogComponentsByName.size === 0) return // real generated-data/component-metadata-catalog.json not present on this machine
-    renderComposer()
+    // FTB-001A (Workstream D) — an explicit ship selection is required to
+    // render the Target Equipment table at all.
+    renderComposer('?shipId=ghost')
     // EWO-023 (Task 1): the native <datalist> was replaced with
     // TargetComponentPicker, a fully-controlled combobox whose option
     // list only renders in the DOM while open — open the first Target
@@ -226,7 +232,9 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
 
   it('EWO-024 (Task 2): the Target picker never suggests a component positively known to be incompatible with the port (no Quantum Drive in an S4 Weapon slot)', () => {
     if (catalogComponentsByName.size === 0) return
-    renderComposer()
+    // FTB-001A (Workstream D) — an explicit ship selection is required to
+    // render the Target Equipment table at all.
+    renderComposer('?shipId=ghost')
     const targetInputs = document.querySelectorAll('input[role="combobox"]')
     fireEvent.click(targetInputs[0])
     fireEvent.change(targetInputs[0], { target: { value: 'Beacon' } })
@@ -661,5 +669,53 @@ describe('EWO-027 (Scenario A): starting a New Loadout resets prior metadata —
     // (Factory by default) — never the override just committed while editing.
     expect(freshTargetInputs[0].value).not.toBe(committedOverride)
     expect(freshTargetInputs[0].value).toBe(factoryDefault)
+  })
+})
+
+describe('<MissionComposer /> (Loadout Manager) — FTB-001A (Workstream D): explicit ship selection', () => {
+  it('opening with no explicit "?shipId=" navigation target renders the blank "Select a Ship" empty state, never an inferred first-ship default', () => {
+    renderComposer()
+    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+    expect(screen.getByText('Choose a fleet vessel above to review or manage its loadout.')).toBeInTheDocument()
+    expect(screen.queryByText('Target Equipment')).not.toBeInTheDocument()
+  })
+
+  it('the Ship control itself defaults to the blank placeholder, never a specific ship id', () => {
+    renderComposer()
+    const select = screen.getAllByRole('combobox')[0] as HTMLSelectElement
+    expect(select.value).toBe('')
+  })
+
+  it('no editing control (What are you doing?, Start From, Target Equipment, Save actions) is available before a ship is selected', () => {
+    renderComposer()
+    expect(screen.queryByText('What are you doing?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Start From')).not.toBeInTheDocument()
+    expect(screen.queryByText('Create Loadout')).not.toBeInTheDocument()
+  })
+
+  it('explicit navigation via "?shipId=" selects exactly that ship — the direct, intentional target the policy allows', () => {
+    renderComposer('?shipId=ghost')
+    expect(screen.queryByText('Select a Ship')).not.toBeInTheDocument()
+    expect(screen.getByText('Target Equipment')).toBeInTheDocument()
+    const select = screen.getAllByRole('combobox')[0] as HTMLSelectElement
+    expect(select.value).toBe('ghost')
+  })
+
+  it('removing the currently selected ship from the fleet clears the selection and returns to the blank empty state', () => {
+    renderComposer('?shipId=ghost')
+    expect(screen.getByText('Target Equipment')).toBeInTheDocument()
+    // The real store action (matching Ship Detail's own "Remove from
+    // Fleet" button) — not a raw partial setState, since `ships` here is
+    // derived from `fleetAssets` and must be removed through the one
+    // real mutation path. Matches this codebase's established convention
+    // for "mutate the store, then observe the effect" (see
+    // shipDetailFleetBoundarySelector.test.tsx's own removal test):
+    // cleanup + a fresh render, rather than asserting a live in-place
+    // re-render outside any `act()` boundary.
+    useFleetStore.getState().removeFleetAsset('ghost')
+    cleanup()
+    renderComposer('?shipId=ghost')
+    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+    expect(screen.queryByText('Target Equipment')).not.toBeInTheDocument()
   })
 })

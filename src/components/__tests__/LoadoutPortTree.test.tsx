@@ -2,7 +2,9 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import LoadoutPortTree from '../LoadoutPortTree'
 import { buildPortTree } from '../../utils/portTree'
-import { hasComponentCatalog } from '../../generated/componentCatalog'
+import { hasComponentCatalog, resolveComponentByEntityClass } from '../../generated/componentCatalog'
+import { withComponentOwnedChildSlots } from '../../utils/componentOwnedSlots'
+import { getMiningModuleSlotCount } from '../../generated/miningModuleSlots'
 import type { Hardpoint } from '../../types'
 
 afterEach(cleanup)
@@ -13,6 +15,16 @@ function hp(overrides: Partial<Hardpoint> & Pick<Hardpoint, 'id' | 'slotLabel'>)
     factoryItem: 'Item', installedItem: 'Item', targetItem: 'Item', status: 'OK',
     ...overrides,
   }
+}
+
+/** A row/group header's expand/collapse chevron is its own <button>,
+ * sibling to (not wrapping) the label text — clicking the label text
+ * itself does not activate it. Finds the row by its visible label, then
+ * clicks the actual toggle button within that same row. */
+function clickToggle(labelText: string) {
+  const label = screen.getByText(labelText)
+  const button = label.closest('div')!.querySelector('button')!
+  fireEvent.click(button)
 }
 
 describe('LoadoutPortTree — EWO-020 Task 11/12', () => {
@@ -195,5 +207,124 @@ describe('LoadoutPortTree — EWO-036B (Task 8): Factory/Installed/Target share 
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
     const row = screen.getByText('Power Plant').closest('tr')!
     expect(within(row).getAllByText('Grade C')).toHaveLength(3)
+  })
+})
+
+const PDC_ENTITY_CLASS = 'Turret_PDC_BEHR_A'
+const hasCatalog = resolveComponentByEntityClass(PDC_ENTITY_CLASS).status === 'resolved'
+
+describe('LoadoutPortTree — FTB-001A (Workstream A): Point Defense Cannon subgrouping', () => {
+  it('PDC ports render nested under a "Point Defense Cannons" header, and conventional turret entries remain correctly grouped alongside it', () => {
+    if (!hasCatalog) return
+    const hardpoints = [
+      hp({ id: 'turret', slotLabel: 'Front Lower Turret', groupLabel: 'Manned Turrets', isStructural: true, factoryItem: '—', installedItem: '—', targetItem: '—' }),
+      hp({ id: 'weapon-mount', slotLabel: 'Left Weapon Mount', parentSlotLabel: 'Front Lower Turret' }),
+      hp({ id: 'pdc1', slotLabel: 'Pdc Top 01', parentSlotLabel: 'Front Lower Turret', factoryEntityClass: PDC_ENTITY_CLASS }),
+      hp({ id: 'pdc2', slotLabel: 'Pdc Top 02', parentSlotLabel: 'Front Lower Turret', factoryEntityClass: PDC_ENTITY_CLASS }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    // FTB-001A (Workstream B): recursive expansion means ONE click on the
+    // top-level category already reveals the complete descendant tree —
+    // "Front Lower Turret", "Left Weapon Mount", the "Point Defense
+    // Cannons" subgroup, AND the PDCs themselves — never requiring a
+    // separate click per level.
+    clickToggle('Manned Turrets')
+    expect(screen.getByText('Front Lower Turret')).toBeInTheDocument()
+    expect(screen.getByText('Left Weapon Mount')).toBeInTheDocument()
+    expect(screen.getByText('Point Defense Cannons')).toBeInTheDocument()
+    expect(screen.getByText('Pdc Top 01')).toBeInTheDocument()
+    expect(screen.getByText('Pdc Top 02')).toBeInTheDocument()
+  })
+
+  it('a ship with no PDC-capable ports never shows a "Point Defense Cannons" group', () => {
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Weapon 1', groupLabel: 'Weapons' })]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.queryByText('Point Defense Cannons')).not.toBeInTheDocument()
+  })
+})
+
+describe('LoadoutPortTree — FTB-001A (Workstream B): recursive expand/collapse', () => {
+  it('expanding a top-level category reveals its complete descendant tree in one click, across three real hierarchy depths (category -> turret -> mount -> weapon)', () => {
+    const hardpoints = [
+      hp({ id: 'turret', slotLabel: 'Turret', groupLabel: 'Manned Turrets', isStructural: true, factoryItem: '—', installedItem: '—', targetItem: '—' }),
+      hp({ id: 'mount', slotLabel: 'Mount', parentSlotLabel: 'Turret', isStructural: true, factoryItem: '—', installedItem: '—', targetItem: '—' }),
+      hp({ id: 'weapon', slotLabel: 'Weapon', parentSlotLabel: 'Mount' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    expect(screen.queryByText('Turret')).not.toBeInTheDocument()
+    clickToggle('Manned Turrets')
+    // One click on the top-level category reveals ALL three deeper levels
+    // at once — Turret, Mount, and Weapon — not just the immediate child.
+    expect(screen.getByText('Turret')).toBeInTheDocument()
+    expect(screen.getByText('Mount')).toBeInTheDocument()
+    expect(screen.getByText('Weapon')).toBeInTheDocument()
+  })
+
+  it('collapsing that same top-level category hides the complete descendant tree again in one click', () => {
+    const hardpoints = [
+      hp({ id: 'turret', slotLabel: 'Turret', groupLabel: 'Manned Turrets', isStructural: true, factoryItem: '—', installedItem: '—', targetItem: '—' }),
+      hp({ id: 'mount', slotLabel: 'Mount', parentSlotLabel: 'Turret', isStructural: true, factoryItem: '—', installedItem: '—', targetItem: '—' }),
+      hp({ id: 'weapon', slotLabel: 'Weapon', parentSlotLabel: 'Mount' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    clickToggle('Manned Turrets')
+    expect(screen.getByText('Weapon')).toBeInTheDocument()
+    clickToggle('Manned Turrets')
+    expect(screen.queryByText('Turret')).not.toBeInTheDocument()
+    expect(screen.queryByText('Mount')).not.toBeInTheDocument()
+    expect(screen.queryByText('Weapon')).not.toBeInTheDocument()
+  })
+
+  it('a nested row can still be independently expanded/collapsed on its own after its parent category was expanded', () => {
+    const hardpoints = [
+      hp({ id: 'mountA', slotLabel: 'Mount A', groupLabel: 'Weapons' }),
+      hp({ id: 'gunA', slotLabel: 'Gun A', parentSlotLabel: 'Mount A' }),
+      hp({ id: 'mountB', slotLabel: 'Mount B', groupLabel: 'Weapons' }),
+      hp({ id: 'gunB', slotLabel: 'Gun B', parentSlotLabel: 'Mount B' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    clickToggle('Weapons')
+    expect(screen.getByText('Gun A')).toBeInTheDocument()
+    expect(screen.getByText('Gun B')).toBeInTheDocument()
+    // Collapsing only Mount A must not affect Mount B's own independent state.
+    clickToggle('Mount A')
+    expect(screen.queryByText('Gun A')).not.toBeInTheDocument()
+    expect(screen.getByText('Gun B')).toBeInTheDocument()
+  })
+})
+
+describe('LoadoutPortTree — FTB-001A (Workstream C): mining module slots', () => {
+  it('a mining head with real, source-derived module slots renders the correct number of "Module Slot N" children when expanded', () => {
+    const arborMH2 = 'Mining_Laser_GRIN_Arbor_S2'
+    if (getMiningModuleSlotCount(arborMH2) === 0) return // generated-data/mining-module-slots.json not present on this machine
+    const hardpoints = withComponentOwnedChildSlots(
+      [hp({ id: 'laser', slotLabel: 'Mining Laser', installedEntityClass: arborMH2, factoryEntityClass: arborMH2, targetEntityClass: arborMH2 })],
+      (host, n) =>
+        hp({
+          id: `${host.id}-slot-${n}`,
+          slotLabel: `${host.slotLabel} — Module Slot ${n}`,
+          parentSlotLabel: host.slotLabel,
+          isStructural: true,
+          factoryItem: '—',
+          installedItem: '—',
+          targetItem: '—',
+        })
+    )
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    clickToggle('Mining Laser')
+    // formatHardpointLabel renders only a nested row's own leaf segment
+    // (ancestor context is already conveyed by indentation) — the
+    // canonical, fully-qualified slotLabel used for tree-linking stays
+    // "Mining Laser — Module Slot N" underneath.
+    expect(screen.getByText('Module Slot 1')).toBeInTheDocument()
+    expect(screen.getByText('Module Slot 2')).toBeInTheDocument()
+    expect(screen.queryByText('Module Slot 3')).not.toBeInTheDocument()
   })
 })

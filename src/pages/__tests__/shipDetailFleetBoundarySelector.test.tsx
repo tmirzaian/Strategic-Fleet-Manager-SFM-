@@ -64,7 +64,12 @@ describe('<ShipDetail /> — EWO-033A-V1 (Task 7): fleet-boundary selector regre
     renderShipDetail('ghost')
     const values = selectShipOptionValues()
     const liveShipIds = useFleetStore.getState().ships.map((s) => s.id).sort()
-    expect([...values].sort()).toEqual(liveShipIds)
+    // FTB-001A (Workstream D) — the dropdown now also carries a real blank
+    // placeholder option ("Select a ship…", value "") so a Commander can
+    // explicitly return to the unselected state; it is not itself a ship
+    // and is deliberately excluded from this "exactly the live fleet"
+    // check.
+    expect(values.filter((v) => v !== '').sort()).toEqual(liveShipIds)
   })
 
   it('a removed Fleet Asset disappears from the selector immediately', () => {

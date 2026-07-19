@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, Fragment, type ReactNode } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy } from 'lucide-react'
+import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy, ShipWheel } from 'lucide-react'
 import { useFleetStore, type TargetOverrideValue } from '../store/useFleetStore'
 import { validateTargetCompatibility, isComponentSelectableForPort, isPlayerSelectableRecord } from '../data/componentCatalog'
 import { findItemCatalog as demoFindItemCatalog } from '../data/seed'
@@ -63,8 +63,9 @@ const findItemCatalog: TargetComponentOption[] = [...demoFindItemCatalog, ...cat
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import TargetComponentPicker from '../components/TargetComponentPicker'
-import { buildPortTree, type PortTreeNode } from '../utils/portTree'
-import { groupPortTree, flattenDisplayTree, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
+import { buildPortTree } from '../utils/portTree'
+import { groupPortTree, flattenDisplayTree, displayNodeIds, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
+import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import type { Hardpoint } from '../types'
 
@@ -124,7 +125,14 @@ export default function MissionComposer() {
   const deleteBuild = useFleetStore((s) => s.deleteBuild)
   const setActiveBuild = useFleetStore((s) => s.setActiveBuild)
 
-  const [shipId, setShipId] = useState(searchParams.get('shipId') ?? ships[0]?.id ?? '')
+  // FTB-001A (Workstream D) — previously defaulted to `ships[0]?.id`
+  // whenever the page opened with no explicit `?shipId=` navigation
+  // target, silently editing whichever ship happened to be first in
+  // store order. Ship-Selection State Policy: entering with no explicit
+  // target is a blank selection; only an explicit `?shipId=` (a real
+  // navigation target, e.g. from a specific ship's own action) may
+  // preselect a ship.
+  const [shipId, setShipId] = useState(searchParams.get('shipId') ?? '')
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
   const [templateId, setTemplateId] = useState(searchParams.get('template') ?? '')
@@ -154,9 +162,16 @@ export default function MissionComposer() {
   // requirement this mission calls out. Mirrors the manual Ship dropdown's
   // own onChange reset below, so switching ships via URL and switching
   // ships by hand behave identically.
+  // FTB-001A (Workstream D) — only re-syncs from the URL when the target
+  // ship still genuinely exists. Without this guard, the URL's own
+  // `?shipId=` (unchanged after a Commander merely removes the currently
+  // selected ship — no navigation occurs) would immediately re-apply the
+  // now-deleted id right back onto `shipId` the instant the cleanup effect
+  // below clears it, fighting it in an update loop and leaving the
+  // deleted ship's stale editing state on screen.
   const shipIdParam = searchParams.get('shipId')
   useEffect(() => {
-    if (shipIdParam && shipIdParam !== shipId) {
+    if (shipIdParam && shipIdParam !== shipId && ships.some((s) => s.id === shipIdParam)) {
       setShipId(shipIdParam)
       setOverrides({})
       setExistingBuildId('')
@@ -167,7 +182,27 @@ export default function MissionComposer() {
       setExpandedSlot(null)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shipIdParam])
+  }, [shipIdParam, ships])
+
+  // FTB-001A (Workstream D) — "Deleted or unavailable selected ship: clear
+  // the selection and return to the empty state." A ship the Commander
+  // was actively configuring can disappear out from under this page (e.g.
+  // removed from the fleet in another tab) — silently continuing to show
+  // its now-stale editing state would let a save target a ship that no
+  // longer exists. Never applies while `shipId` is already blank.
+  useEffect(() => {
+    if (shipId && !ships.some((s) => s.id === shipId)) {
+      setShipId('')
+      setOverrides({})
+      setExistingBuildId('')
+      setWorkflowMode('CREATE')
+      setName('')
+      setResult(null)
+      setCollapsed(new Set())
+      setExpandedSlot(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shipId, ships])
 
   const ship = ships.find((s) => s.id === shipId)
   const shipBuilds = builds.filter((b) => b.shipId === shipId)
@@ -282,6 +317,34 @@ export default function MissionComposer() {
 
   type PreviewRow = (typeof previewRows)[number]
 
+  // FTB-001A (Workstream C) — a synthetic "Module Slot N" row for whichever
+  // component currently owns real child attachment ports (mining heads
+  // today — see src/utils/componentOwnedSlots.ts). isStructural: true,
+  // matching every other "physical structure with no component of its
+  // own" row already in this tree — this app has no Mining Module catalog/
+  // compatibility layer to target these slots against yet, so they are
+  // presented, not made editable, exactly like a turret/mount shell.
+  function makePreviewModuleSlotRow(host: PreviewRow, slotNumber: number): PreviewRow {
+    return {
+      ...host,
+      id: `${host.id}-module-slot-${slotNumber}`,
+      slotLabel: `${host.slotLabel} — Module Slot ${slotNumber}`,
+      parentSlotLabel: host.slotLabel,
+      isStructural: true,
+      type: 'Mining Module',
+      factoryItem: '—',
+      installedItem: '—',
+      targetItem: '—',
+      previewTarget: '—',
+      previewTargetEntityClass: undefined,
+      compatible: true,
+      incompatibleMessage: undefined,
+      factoryEntityClass: undefined,
+      installedEntityClass: undefined,
+      targetEntityClass: undefined,
+    }
+  }
+
   // Shared Port Tree (Mission M-011): the exact same buildPortTree()
   // utility Ship Detail's LoadoutPortTree uses, over the exact same
   // Hardpoint rows (previewRows spread the full Hardpoint shape plus
@@ -291,7 +354,7 @@ export default function MissionComposer() {
   // inspection view, collapsed by default), every row here starts
   // expanded — this is an editing surface, and every configurable port
   // must be reachable without an extra click before a target can be set.
-  const previewTree = useMemo(() => buildPortTree(previewRows), [previewRows])
+  const previewTree = useMemo(() => buildPortTree(withComponentOwnedChildSlots(previewRows, makePreviewModuleSlotRow)), [previewRows])
   const previewDisplayTree = useMemo(() => groupPortTree(previewTree), [previewTree])
 
   // EWO-024 (Task 2) — the Target picker's suggestion list is narrowed to
@@ -331,11 +394,23 @@ export default function MissionComposer() {
   function isCollapsed(id: string) {
     return collapsed.has(id)
   }
-  function toggleCollapsed(id: string) {
+  // FTB-001A (Workstream B) — collapsing/expanding a single row now
+  // toggles its ENTIRE descendant subtree at once (displayNodeIds), not
+  // just its immediate children, matching the same recursive rule
+  // Ship Detail's LoadoutPortTree now applies. `collapsed` here uses
+  // inverted semantics (membership means collapsed, not expanded) — every
+  // row starts expanded on this editing surface (Mission M-011) — so a
+  // currently-collapsed node toggling ON means removing its whole subtree
+  // from the set (uncollapsing all of it), and vice versa.
+  function toggleCollapsed(node: PortTreeDisplayNode<PreviewRow>) {
+    const ids = displayNodeIds(node)
     setCollapsed((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      const currentlyCollapsed = prev.has(node.id)
+      for (const id of ids) {
+        if (currentlyCollapsed) next.delete(id)
+        else next.add(id)
+      }
       return next
     })
   }
@@ -343,13 +418,7 @@ export default function MissionComposer() {
     setCollapsed(new Set())
   }
   function collapseAll() {
-    setCollapsed(
-      new Set(
-        flattenDisplayTree(previewDisplayTree)
-          .filter((n) => (n.kind === 'group' ? n.children.length > 0 : n.node.children.length > 0))
-          .map((n) => n.id)
-      )
-    )
+    setCollapsed(new Set(flattenDisplayTree(previewDisplayTree).filter((n) => n.children.length > 0).map((n) => n.id)))
   }
 
   // EWO-026 (Task 1/2) — saving never navigates away from Loadout Manager
@@ -422,19 +491,46 @@ export default function MissionComposer() {
   // followed by its children when not collapsed — parent selection never
   // hides or removes its child rows; a child mount/gimbal/rack always
   // stays visible and independently editable alongside its parent.
-  function renderPortTargetRow(node: PortTreeNode<PreviewRow>, depth: number): ReactNode[] {
-    {
-      const row = node.hardpoint
+  //
+  // FTB-001A: handles BOTH 'group' (e.g. "Weapons", "Point Defense
+  // Cannons") and 'port' display nodes uniformly at every depth, since
+  // `children` is now always a fully processed `PortTreeDisplayNode[]`
+  // (Workstream A's PDC subgrouping applies at any nesting level, not
+  // just top-level categories).
+  function renderDisplayRows(nodes: PortTreeDisplayNode<PreviewRow>[], depth: number): ReactNode[] {
+    return nodes.flatMap((node) => {
       const hasChildren = node.children.length > 0
-      const rowCollapsed = isCollapsed(row.id)
+      const rowCollapsed = isCollapsed(node.id)
 
+      if (node.kind === 'group') {
+        const headerEl = (
+          <tr key={node.id} className="border-b border-white/5 last:border-0 bg-white/[0.015] hover:bg-white/[0.03]">
+            <td className="px-5 py-3 text-cyan/80 font-semibold uppercase tracking-wide text-xs whitespace-nowrap">
+              <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1">
+                <button onClick={() => toggleCollapsed(node)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={rowCollapsed ? 'Expand group' : 'Collapse group'}>
+                  {rowCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
+                </button>
+                {node.label}
+              </div>
+            </td>
+            <td className="px-5 py-3" />
+            <td className="px-5 py-3" />
+            <td className="px-5 py-3" />
+            <td className="px-5 py-3" />
+            <td className="px-5 py-3" />
+          </tr>
+        )
+        return !rowCollapsed ? [headerEl, ...renderDisplayRows(node.children, depth + 1)] : [headerEl]
+      }
+
+      const row = node.node.hardpoint
       const rowEl = (
         <Fragment key={row.id}>
           <tr className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
             <td className="px-5 py-3 text-white font-medium whitespace-nowrap">
               <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1">
                 {hasChildren ? (
-                  <button onClick={() => toggleCollapsed(row.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={rowCollapsed ? 'Expand row' : 'Collapse row'}>
+                  <button onClick={() => toggleCollapsed(node)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={rowCollapsed ? 'Expand row' : 'Collapse row'}>
                     {rowCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
                   </button>
                 ) : (
@@ -496,45 +592,7 @@ export default function MissionComposer() {
         </Fragment>
       )
 
-      if (hasChildren && !rowCollapsed) {
-        return [rowEl, ...node.children.flatMap((child) => renderPortTargetRow(child, depth + 1))]
-      }
-      return [rowEl]
-    }
-  }
-
-  // EWO-019B: a "group" display node is a synthetic header (e.g. "Weapons",
-  // "Quantum Drive") wrapping otherwise-independent top-level ports — same
-  // editing surface, same expanded-by-default principle as every real
-  // port row here (Mission M-011), just no Factory/Installed/Target data
-  // of its own since it has no real assignment.
-  function renderDisplayRows(nodes: PortTreeDisplayNode<PreviewRow>[], depth: number): ReactNode[] {
-    return nodes.flatMap((node) => {
-      if (node.kind === 'port') return renderPortTargetRow(node.node, depth)
-
-      const groupCollapsed = isCollapsed(node.id)
-      const headerEl = (
-        <tr key={node.id} className="border-b border-white/5 last:border-0 bg-white/[0.015] hover:bg-white/[0.03]">
-          <td className="px-5 py-3 text-cyan/80 font-semibold uppercase tracking-wide text-xs whitespace-nowrap">
-            <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1">
-              <button onClick={() => toggleCollapsed(node.id)} className="text-muted hover:text-cyan transition-colors shrink-0" aria-label={groupCollapsed ? 'Expand group' : 'Collapse group'}>
-                {groupCollapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
-              </button>
-              {node.label}
-            </div>
-          </td>
-          <td className="px-5 py-3" />
-          <td className="px-5 py-3" />
-          <td className="px-5 py-3" />
-          <td className="px-5 py-3" />
-          <td className="px-5 py-3" />
-        </tr>
-      )
-
-      if (!groupCollapsed) {
-        return [headerEl, ...renderDisplayRows(node.children, depth + 1)]
-      }
-      return [headerEl]
+      return hasChildren && !rowCollapsed ? [rowEl, ...renderDisplayRows(node.children, depth + 1)] : [rowEl]
     })
   }
 
@@ -559,6 +617,10 @@ export default function MissionComposer() {
       <div className="panel p-5 space-y-4">
         <div>
           <label className="text-xs uppercase tracking-widest text-muted block mb-2">Ship</label>
+          {/* FTB-001A (Workstream D) — a real blank placeholder option
+              (never an implicit first-ship `value`), styled prominently
+              (border + focus ring) so this reads as the primary action on
+              an otherwise-empty page. */}
           <select
             value={shipId}
             onChange={(e) => {
@@ -576,8 +638,9 @@ export default function MissionComposer() {
               setCollapsed(new Set())
               setExpandedSlot(null)
             }}
-            className="w-full sm:w-1/2"
+            className="w-full sm:w-1/2 border-2 border-cyan/40 focus:border-cyan"
           >
+            <option value="">Select a ship…</option>
             {ships.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} [{s.ownership}]
@@ -586,6 +649,20 @@ export default function MissionComposer() {
           </select>
         </div>
 
+        {/* FTB-001A (Workstream D) — no ship selected yet: every
+            editing-related control below (workflow mode, starting state,
+            Target Equipment, Save actions) stays unavailable, and no
+            other ship's data is implied here. */}
+        {!ship && (
+          <div className="flex flex-col items-center justify-center text-center gap-2 py-6">
+            <ShipWheel size={26} className="text-cyan/50 mb-1" />
+            <h2 className="font-display font-bold text-white text-base uppercase tracking-widest">Select a Ship</h2>
+            <p className="text-sm text-muted max-w-sm">Choose a fleet vessel above to review or manage its loadout.</p>
+          </div>
+        )}
+
+        {ship && (
+          <>
         {/* EWO-024 (Task 4) — the primary, explicit choice: are we creating
             a new Loadout, or working on one specific existing one? Every
             downstream ambiguity Task 4 reported traced back to this
@@ -712,8 +789,12 @@ export default function MissionComposer() {
             <p className="text-[11px] text-muted mt-1">Used only as a starting template for this new Loadout — the original is never changed.</p>
           </div>
         )}
+          </>
+        )}
       </div>
 
+      {ship && (
+      <>
       <div className="panel overflow-hidden">
         <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-wrap gap-2">
           <div>
@@ -798,12 +879,12 @@ export default function MissionComposer() {
             distinct instance (Ruling 4/5) — the existing `/ship/:shipId`
             route already carries that per-instance identity; no second
             navigation/selection mechanism is introduced here (Ruling 8). */}
-        {ship && (
-          <Link to={`/ship/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
-            <Rocket size={15} /> View in Ship Detail
-          </Link>
-        )}
+        <Link to={`/ship/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
+          <Rocket size={15} /> View in Ship Detail
+        </Link>
       </div>
+      </>
+      )}
 
       <div className="scanline-divider" />
 

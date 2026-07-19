@@ -22,7 +22,12 @@ import {
 const navItems = [
   { to: '/', label: 'Mission Control', icon: Radar, end: true },
   { to: '/fleet', label: 'Fleet Dashboard', icon: LayoutGrid },
-  { to: '/ship/ghost', label: 'Ship Detail', icon: Rocket },
+  // FTB-001A (Workstream D) — previously hardcoded to '/ship/ghost',
+  // which silently opened a specific seed ship (whether or not it existed
+  // in the Commander's real fleet) any time this generic nav link was
+  // clicked. General navigation now lands on a blank ship selection
+  // instead of an inferred/hardcoded ship.
+  { to: '/ship', label: 'Ship Detail', icon: Rocket },
   { to: '/loadout-manager', label: 'Loadout Manager', icon: Sparkles },
   { to: '/hangar', label: 'Hangar Inventory', icon: Package },
   { to: '/quick-update', label: 'Quick Update', icon: Zap },

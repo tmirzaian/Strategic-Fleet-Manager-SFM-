@@ -18,6 +18,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<MissionControl />} />
           <Route path="/fleet" element={<FleetDashboard />} />
+          {/* FTB-001A (Workstream D) — a bare "/ship" (no explicit id) is
+              the general-navigation entry point (Sidebar's "Ship Detail"
+              link): ShipDetail renders its blank "Select a Ship" empty
+              state rather than ever inferring a first-ship default. */}
+          <Route path="/ship" element={<ShipDetail />} />
           <Route path="/ship/:shipId" element={<ShipDetail />} />
           <Route path="/loadout-manager" element={<MissionComposer />} />
           <Route path="/hangar" element={<HangarInventory />} />

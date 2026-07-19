@@ -97,7 +97,7 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
 
   it('9. every existing navigation route, label, and link count remains unchanged', () => {
     renderSidebar()
-    const expectedRoutes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+    const expectedRoutes = ['/', '/fleet', '/ship', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
     const links = screen.getAllByRole('link')
     const hrefs = links.map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
@@ -174,7 +174,7 @@ describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
     expect(nav.className).toContain('px-3')
     const navConsole = nav.querySelector('div.rounded-lg') as HTMLElement
     expect(navConsole.className).toContain('p-1.5')
-    const expectedRoutes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+    const expectedRoutes = ['/', '/fleet', '/ship', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
       expect(hrefs).toContain(route)

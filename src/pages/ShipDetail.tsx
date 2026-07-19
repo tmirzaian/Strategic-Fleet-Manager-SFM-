@@ -17,6 +17,34 @@ import { buildPortTree } from '../utils/portTree'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { shipFactoryTemplates } from '../data/shipDefinitions'
 import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
+import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
+import type { Hardpoint } from '../types'
+
+/** FTB-001A (Workstream C) — a synthetic "Module Slot N" row for whichever
+ * component currently owns real child attachment ports (mining heads
+ * today — see src/utils/componentOwnedSlots.ts). isStructural: true,
+ * matching every other "physical structure with no component of its own"
+ * row already in this tree — this app has no Mining Module catalog/
+ * compatibility layer to target these slots against yet, so they are
+ * presented, not made editable, exactly like a turret/mount shell. */
+function makeHardpointModuleSlotRow(host: Hardpoint, slotNumber: number): Hardpoint {
+  return {
+    ...host,
+    id: `${host.id}-module-slot-${slotNumber}`,
+    slotLabel: `${host.slotLabel} — Module Slot ${slotNumber}`,
+    parentSlotLabel: host.slotLabel,
+    isStructural: true,
+    type: 'Mining Module',
+    factoryItem: '—',
+    installedItem: '—',
+    targetItem: '—',
+    status: 'OK',
+    factoryEntityClass: undefined,
+    installedEntityClass: undefined,
+    targetEntityClass: undefined,
+    invalidMessage: undefined,
+  }
+}
 
 function SummaryTile({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string | number; accent?: string }) {
   return (
@@ -68,12 +96,22 @@ export default function ShipDetail() {
   // the fleet." That preview remains reachable directly by URL
   // (importedShipById / ImportedShipDetail below), just not from this
   // dropdown.
+  // FTB-001A (Workstream D) — the control itself must make "nothing is
+  // selected yet" visually unambiguous: a real blank placeholder option
+  // (never silently defaulting its `value` to the first fleet ship), and
+  // large/prominent styling (border + background) so it reads as the
+  // primary action on an otherwise-empty page, not an easy-to-miss detail.
   const selectShip = (
     <div>
       <label className="text-[11px] uppercase tracking-widest text-muted flex items-center gap-1.5 mb-1.5">
         <ShipWheel size={13} /> Select Ship
       </label>
-      <select value={shipId ?? sortedShips[0]?.id} onChange={(e) => navigate(`/ship/${e.target.value}`)} className="min-w-[240px]">
+      <select
+        value={shipId ?? ''}
+        onChange={(e) => (e.target.value ? navigate(`/ship/${e.target.value}`) : navigate('/ship'))}
+        className="min-w-[240px] border-2 border-cyan/40 focus:border-cyan"
+      >
+        <option value="">Select a ship…</option>
         {sortedShips.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
@@ -92,10 +130,34 @@ export default function ShipDetail() {
     return <ImportedShipDetail view={importedView} selectShip={selectShip} />
   }
 
-  // Ship Detail is the source of truth for selected ship + build; every
-  // derived value below (hero, summary, port tree) reads from these two
-  // lookups so they can never drift from one another.
-  const ship = ships.find((s) => s.id === shipId) ?? ships[0]
+  // FTB-001A (Workstream D) — the previous `?? ships[0]` fallback here
+  // meant opening Ship Detail with no explicit navigation target (or with
+  // a shipId that no longer exists — a deleted Fleet Asset, or a stale
+  // bookmark) silently displayed WHICHEVER ship happened to be first in
+  // store order. A Commander could edit or remove the wrong vessel without
+  // ever realizing a different ship was showing. Ship-Selection State
+  // Policy: entering with no explicit target is a blank selection, never
+  // an inferred first-ship default; a deleted/unavailable selected ship
+  // clears back to the same empty state rather than falling back.
+  const ship = ships.find((s) => s.id === shipId)
+  if (!ship) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Ship Detail</p>
+            <h1 className="text-2xl font-display font-bold text-white">Is this ship ready?</h1>
+          </div>
+          {selectShip}
+        </div>
+        <div className="panel p-10 flex flex-col items-center justify-center text-center gap-2">
+          <ShipWheel size={28} className="text-cyan/50 mb-2" />
+          <h2 className="font-display font-bold text-white text-lg uppercase tracking-widest">Select a Ship</h2>
+          <p className="text-sm text-muted max-w-sm">Choose a fleet vessel above to review or manage its loadout.</p>
+        </div>
+      </div>
+    )
+  }
   const shipBuilds = builds.filter((b) => b.shipId === ship.id)
   const activeBuild = builds.find((b) => b.id === ship.activeBuildId) ?? shipBuilds[0]
   const shipHardpoints = hardpoints.filter((h) => h.buildId === activeBuild?.id)
@@ -121,7 +183,7 @@ export default function ShipDetail() {
     const definitionId = resolveShipDefinitionId(ship.id, fleetAssets)
     return definitionId ? shipFactoryTemplates[definitionId] ?? [] : []
   })()
-  const portTree = buildPortTree(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate))
+  const portTree = buildPortTree(withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate), makeHardpointModuleSlotRow))
   const isMissionReady = buildState === 'MISSION_READY'
 
   return (

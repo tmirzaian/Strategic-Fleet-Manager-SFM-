@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18T23:07:29.940Z",
+  "source": "starbreaker-datacore (Components[].Ports[] tagged miningConsumable)",
+  "moduleSlotCountByEntityClass": {
+    "Mining_Laser_DRAK_Golem_S1": 2,
+    "Mining_Laser_GRIN_Arbor_S0": 2,
+    "Mining_Laser_GRIN_Arbor_S1": 1,
+    "Mining_Laser_GRIN_Arbor_S1_Test_Active_1": 1,
+    "Mining_Laser_GRIN_Arbor_S2": 2,
+    "Mining_Laser_GRIN_Lancet_S1": 1,
+    "Mining_Laser_GRIN_Lancet_S2": 2,
+    "Mining_Laser_MPUV_Arm": 1,
+    "Mining_Laser_S0_Template": 2,
+    "Mining_Laser_S1_Template": 2,
+    "Mining_Laser_SHIN_Hofstede_S0": 2,
+    "Mining_Laser_SHIN_Hofstede_S1": 1,
+    "Mining_Laser_SHIN_Hofstede_S2": 2,
+    "Mining_Laser_SHIN_Klein_S0": 2,
+    "Mining_Laser_SHIN_Klein_S1": 0,
+    "Mining_Laser_SHIN_Klein_S2": 1,
+    "Mining_Laser_TEST": 3,
+    "Mining_Laser_TEST_Best": 3,
+    "Mining_Laser_THCN_Helix_S0": 2,
+    "Mining_Laser_THCN_Helix_S1": 2,
+    "Mining_Laser_THCN_Helix_S2": 3,
+    "Mining_Laser_THCN_Impact_S1": 2,
+    "Mining_Laser_THCN_Impact_S2": 3
+  }
+}
