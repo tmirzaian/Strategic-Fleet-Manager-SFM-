@@ -548,3 +548,111 @@ describe('saveMissionConfiguration — FTB-001E: salvage scraper/tractor module 
     expect(rows.some((h) => h.parentSlotLabel === RECLAIMER_TRACTOR_SLOT)).toBe(false)
   })
 })
+
+describe('saveMissionConfiguration — FTB-001F: salvage socket semantics (no scraper/tractor over-specialization)', () => {
+  // FTB-001E's fix inferred socket capability from whichever modifier was
+  // factory-installed there (SubItem01 -> "tractor-only", SubItem02 ->
+  // "scraper-only"), which SPPV field validation proved wrong: the real
+  // game accepts any real salvage modifier in either socket on the same
+  // head. These tests exercise the ACTUAL save/persist/reload path (not
+  // just the compatibility-layer check componentCatalog.test.ts already
+  // covers) for the combinations the mission explicitly requires.
+  const ABRADE = 'Salvage_Modifier_Scraper_Medium'
+  const CINCH = 'Salvage_Modifier_Scraper_Small'
+  const READYGRIP = 'Salvage_Modifier_Tractor_Small'
+  // Reclaimer's own two real child sockets — SubItem01 factory-shipped
+  // with a tractor module, SubItem02 factory-shipped with a scraper
+  // module. Neither factory identity should constrain what can be
+  // targeted there now.
+  const SOCKET_1 = 'Left Remote Salvage Turret (Remote Turret) — Salvage Weapon (Mount) — SubItem01 Salvage Head'
+  const SOCKET_2 = 'Left Remote Salvage Turret (Remote Turret) — Salvage Weapon (Mount) — SubItem02 Salvage Head'
+
+  function addReclaimer() {
+    const reclaimer = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Reclaimer')
+    if (!reclaimer) return null
+    const added = useFleetStore.getState().addFleetAsset(reclaimer.id, 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Reclaimer')
+    const activeBuildId = useFleetStore.getState().ships.find((s) => s.id === added.assetId)!.activeBuildId
+    const slotsExist = useFleetStore.getState().hardpoints.some((h) => h.buildId === activeBuildId && h.slotLabel === SOCKET_1)
+    return slotsExist ? added.assetId : null
+  }
+
+  it('double Abrade — the same modifier in both sockets on one head persists and survives a genuine reload', () => {
+    const shipId = addReclaimer()
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001F Double Abrade',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [SOCKET_1]: { targetItem: 'Abrade Scraper Module', targetEntityClass: ABRADE },
+        [SOCKET_2]: { targetItem: 'Abrade Scraper Module', targetEntityClass: ABRADE },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+    useFleetStore.persist.rehydrate()
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const socket1 = rows.find((h) => h.slotLabel === SOCKET_1)!
+    const socket2 = rows.find((h) => h.slotLabel === SOCKET_2)!
+    expect(socket1.targetItem).toBe('Abrade Scraper Module')
+    expect(socket2.targetItem).toBe('Abrade Scraper Module')
+    // Genuinely exercises the compatibility fix, not just persistence:
+    // saveMissionConfiguration never blocks an incompatible save (it only
+    // flags status), so a bare targetItem-equality check alone would pass
+    // even with FTB-001E's over-specialized split still in place. Status
+    // must positively read OK/Upgrade-Available (compatible), never
+    // 'Invalid Target'.
+    expect(socket1.status).not.toBe('Invalid Target')
+    expect(socket2.status).not.toBe('Invalid Target')
+    expect(rows.some((h) => h.parentSlotLabel === SOCKET_1 || h.parentSlotLabel === SOCKET_2)).toBe(false)
+  })
+
+  it('double Cinch — the same modifier in both sockets on one head persists and survives a genuine reload', () => {
+    const shipId = addReclaimer()
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001F Double Cinch',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [SOCKET_1]: { targetItem: 'Cinch Scraper Module', targetEntityClass: CINCH },
+        [SOCKET_2]: { targetItem: 'Cinch Scraper Module', targetEntityClass: CINCH },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+    useFleetStore.persist.rehydrate()
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const socket1 = rows.find((h) => h.slotLabel === SOCKET_1)!
+    const socket2 = rows.find((h) => h.slotLabel === SOCKET_2)!
+    expect(socket1.targetItem).toBe('Cinch Scraper Module')
+    expect(socket2.targetItem).toBe('Cinch Scraper Module')
+    expect(socket1.status).not.toBe('Invalid Target')
+    expect(socket2.status).not.toBe('Invalid Target')
+  })
+
+  it('mixed configuration — a scraper module in the factory-tractor socket and a tractor module in the factory-scraper socket both persist as compatible (the reverse of factory assignment, proving no positional lock-in)', () => {
+    const shipId = addReclaimer()
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001F Mixed Reversed',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [SOCKET_1]: { targetItem: 'Abrade Scraper Module', targetEntityClass: ABRADE }, // SOCKET_1's factory item is the tractor module
+        [SOCKET_2]: { targetItem: 'ReadyGrip Tractor Module', targetEntityClass: READYGRIP }, // SOCKET_2's factory item is a scraper module
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+    useFleetStore.persist.rehydrate()
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const socket1 = rows.find((h) => h.slotLabel === SOCKET_1)!
+    const socket2 = rows.find((h) => h.slotLabel === SOCKET_2)!
+    expect(socket1.targetItem).toBe('Abrade Scraper Module')
+    expect(socket2.targetItem).toBe('ReadyGrip Tractor Module')
+    expect(socket1.status).not.toBe('Invalid Target')
+    expect(socket2.status).not.toBe('Invalid Target')
+  })
+})

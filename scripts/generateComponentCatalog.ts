@@ -1,22 +1,44 @@
 #!/usr/bin/env tsx
 /**
  * Component Catalog Generator (Mission M-007, widened to the full
- * player-usable universe by Mission M-012).
+ * player-usable universe by Mission M-012, narrow-path optimized by
+ * FTB-001F Part C).
  *
  * Two discovery paths feed one merged, deterministic catalog:
- *   1. Narrow, per-entity path (original M-007): every entity class SFM's
- *      raw-data ship exports actually mount, queried exactly by name.
- *      Preserved unchanged so the existing Gladius/Avenger Titan
- *      certification stays green — these records carry a `recordId`.
+ *   1. Narrow path (original M-007): every entity class SFM's raw-data
+ *      ship exports actually mount, resolved by exact entity-class name.
+ *      Preserved so the existing Gladius/Avenger Titan certification
+ *      stays green — but resolved from the SAME shared bulk field maps
+ *      Path 2 already fetches (see FTB-001F Part C note below), not from
+ *      5,642 individual `dcb query` process spawns.
  *   2. Full-universe bulk path (M-012): every entity class in the whole
  *      LIVE P4K with an `AttachDef.Type` in the reviewed player-usable
  *      category allowlist (scripts/componentCatalog/componentTaxonomy.ts),
  *      discovered via bulk DataCore field queries — no per-record spawns,
  *      no raw-data dependency. See scripts/universeCatalog/dcbBulkQuery.ts.
- * Where both paths resolve the same entity class, the narrow path's
- * individually-verified record wins (it carries a recordId; the bulk
- * path's bulk-query mechanism cannot reach that field — see
- * catalogSchema.ts's schemaVersion 2 note).
+ *
+ * FTB-001F Part C (Chief Architect directive): the narrow path originally
+ * called `runDcbQuery` once per raw-data-fixture entity class (5,642
+ * sequential StarBreaker process spawns, each re-opening/re-indexing the
+ * 151 GB Data.p4k archive from scratch — observed to take multiple hours
+ * end to end). Path 2's bulk field queries already resolve the exact same
+ * underlying DataCore fields (`AttachDef.Type`/`SubType`/`Size`/`Grade`/
+ * `Manufacturer.*`/`Localization.Name`) for the ENTIRE ~25,544-entity
+ * universe in ~7 process spawns total (a few seconds each, confirmed
+ * empirically). The narrow path now runs the bulk queries first, then
+ * resolves its own 5,642 known entity-class names via `Map.get` against
+ * those SAME in-memory results
+ * (`scripts/componentCatalog/bulkComponentCollector.ts`'s
+ * `buildRecordFromBulkFields`, shared with Path 2 so both paths always
+ * agree on one record for a given entity, never two independently
+ * maintained extraction rules) — zero additional StarBreaker spawns, no
+ * raw-data-fixture-specific query left at all. `recordId` (previously
+ * populated by the per-entity dump's own `_RecordId_` GUID) is no longer
+ * set for narrow-path entities, exactly like Path 2's bulk-discovered
+ * ones — schemaVersion 2 already documents `recordId` as optional for
+ * this reason, and no consumer reads it (componentMetadataResolver.ts
+ * defaults a missing value to `''`; `provenance.recordPath` was already
+ * documented as internal-to-the-catalog-file, unread by any consumer).
  *
  * Writes generated-data/component-metadata-catalog.json (full, gitignored,
  * developer-only) and generated-data/component-metadata-catalog.runtime.json
@@ -41,12 +63,11 @@ import { spawnSync } from 'node:child_process'
 import { collectEntityClasses } from './componentCatalog/rawEntityCollector'
 import { stripTrailingCommas } from '../src/engine/importer/trailingCommaJson'
 import { parseBuildManifest } from './componentCatalog/buildManifest'
-import { runDcbQuery, parseDcbQueryResult, extractItemDefinitionFields } from './componentCatalog/dcbQuery'
-import { addRecordOrThrow, buildCatalogDocument } from './componentCatalog/buildCatalog'
+import { buildCatalogDocument } from './componentCatalog/buildCatalog'
 import { toPortableP4kLabel } from './componentCatalog/portablePath'
 import { writeCatalogFile } from './componentCatalog/catalogWriter'
 import { deriveRuntimeComponentCatalog, writeCatalogRuntimeFile } from './componentCatalog/catalogRuntimeWriter'
-import { collectBulkComponents, type ComponentFieldMaps } from './componentCatalog/bulkComponentCollector'
+import { collectBulkComponents, buildRecordFromBulkFields, type ComponentFieldMaps } from './componentCatalog/bulkComponentCollector'
 import { runBulkFieldQuery } from './universeCatalog/dcbBulkQuery'
 import { extractGlobalIni, loadLocalizationTable } from './universeCatalog/localization'
 import type { CatalogRecord, UnresolvedEntry } from './componentCatalog/catalogSchema'
@@ -133,38 +154,11 @@ async function main(): Promise<void> {
   const localizationTable = await loadLocalizationTable(globalIniPath)
   console.log(`  loaded ${localizationTable.size} localization entries from ${globalIniPath}`)
 
-  // Path 1 (M-007): narrow, per-entity, raw-data-fixture-scoped resolution.
-  // Preserved unchanged so the existing Gladius/Avenger Titan
-  // certification stays green — these records carry a recordId.
-  const narrowRecords = new Map<string, CatalogRecord>()
-  const unresolved: UnresolvedEntry[] = []
-
-  const sortedEntities = Array.from(allEntities).sort((a, b) => a.localeCompare(b))
-  for (const entityClass of sortedEntities) {
-    const processResult = runDcbQuery(starbreakerExe, dataP4k, entityClass)
-    const outcome = parseDcbQueryResult(entityClass, processResult)
-
-    if (outcome.kind === 'not-found') {
-      unresolved.push({ entityClass, reason: outcome.reason })
-      continue
-    }
-
-    const fields = extractItemDefinitionFields(outcome.record)
-    addRecordOrThrow(narrowRecords, entityClass, {
-      entityClass,
-      recordName: outcome.record._RecordName_,
-      recordId: outcome.record._RecordId_,
-      ...fields,
-      displayName: fields.localizationKey ? (localizationTable.get(fields.localizationKey.replace(/^@/, '')) ?? null) : null,
-      provenance: {
-        source: 'starbreaker-datacore',
-        recordPath: typeof outcome.record._RecordTag_ === 'string' ? outcome.record._RecordTag_ : null,
-      },
-    })
-  }
-
-  // Path 2 (M-012): full-universe bulk discovery — see
-  // scripts/componentCatalog/bulkComponentCollector.ts and
+  // Path 2 (M-012) runs FIRST now (FTB-001F Part C): the narrow path below
+  // resolves its own entity classes from these SAME in-memory bulk field
+  // maps, so both paths must share one set of already-fetched results
+  // rather than each fetching (or, previously, spawning per-entity) their
+  // own. See scripts/componentCatalog/bulkComponentCollector.ts and
   // scripts/universeCatalog/dcbBulkQuery.ts.
   console.log('\nRunning bulk DataCore field queries for the full component universe...')
   const fieldPaths: { key: keyof ComponentFieldMaps; path: string }[] = [
@@ -186,9 +180,31 @@ async function main(): Promise<void> {
   const bulkResult = collectBulkComponents(bulkFields, localizationTable)
   console.log(`  ${bulkResult.records.size} player-usable component(s) discovered across the full universe.`)
 
-  // Merge: bulk-discovered records fill in the full universe; wherever the
-  // narrow path already resolved the same exact entity class, its record
-  // (individually verified, carries a recordId) wins.
+  // Path 1 (M-007, FTB-001F Part C): narrow, raw-data-fixture-scoped
+  // resolution — every entity class SFM's raw-data ship exports actually
+  // mount, looked up (never re-queried) against the bulk field maps just
+  // fetched above. No StarBreaker spawn per entity, no raw-data-specific
+  // query at all — `buildRecordFromBulkFields` is the exact same
+  // extraction function Path 2 uses, so a shared entity resolves
+  // identically either way.
+  const narrowRecords = new Map<string, CatalogRecord>()
+  const unresolved: UnresolvedEntry[] = []
+
+  const sortedEntities = Array.from(allEntities).sort((a, b) => a.localeCompare(b))
+  for (const entityClass of sortedEntities) {
+    const record = buildRecordFromBulkFields(entityClass, bulkFields, localizationTable)
+    if (!record) {
+      unresolved.push({ entityClass, reason: `No AttachDef.Type resolved via bulk DataCore field extraction for entity class "${entityClass}".` })
+      continue
+    }
+    narrowRecords.set(entityClass, record)
+  }
+
+  // Merge: bulk-discovered (player-usable-only) records fill in the full
+  // universe; wherever the narrow path also resolved the same exact
+  // entity class — including categories outside the player-usable
+  // allowlist, e.g. seats/thrusters a raw-data ship export mounts — its
+  // record wins, since it's the more specific, explicitly-requested set.
   const records = new Map<string, CatalogRecord>(bulkResult.records)
   for (const [entityClass, record] of narrowRecords) {
     records.set(entityClass, record)

@@ -20,6 +20,47 @@ export interface BulkComponentCollectionResult {
 }
 
 /**
+ * Builds one catalog record for a single entity class directly from the
+ * shared bulk field-query maps — no per-entity StarBreaker spawn. Returns
+ * `null` when `fields.type` has no entry for this entity class at all
+ * (StarBreaker never emitted a line for it — a field legitimately absent,
+ * per dcbBulkQuery.ts's own contract), the same "genuinely unresolved"
+ * signal the old per-entity `dcb query` path expressed via its
+ * `not-found` outcome.
+ *
+ * FTB-001F (Part C, generator optimization) — this is the one shared
+ * extraction path both the full-universe bulk walk (`collectBulkComponents`
+ * below) and `scripts/generateComponentCatalog.ts`'s narrow, raw-data-
+ * fixture-scoped resolution now both call, so a given entity class always
+ * resolves to the exact same record regardless of which of the two
+ * discovery walks reaches it first — never two independently-maintained
+ * extraction rules that could quietly drift apart.
+ */
+export function buildRecordFromBulkFields(entityClass: string, fields: ComponentFieldMaps, localizationTable: Map<string, string>): CatalogRecord | null {
+  const type = fields.type.get(entityClass)
+  if (type === undefined) return null
+
+  const subtype = fields.subType.get(entityClass) ?? null
+  const size = parseBulkNumber(fields.size.get(entityClass))
+  const grade = parseBulkNumber(fields.grade.get(entityClass))
+  const manufacturerRef = parseManufacturerReference(fields.manufacturerCode.get(entityClass), fields.manufacturerLocKey.get(entityClass))
+  const localizationKey = fields.localizationName.get(entityClass) ?? null
+
+  return {
+    entityClass,
+    recordName: `EntityClassDefinition.${entityClass}`,
+    category: type,
+    subtype: subtype && subtype !== 'UNDEFINED' ? subtype : null,
+    size,
+    grade,
+    manufacturerRef: manufacturerRef?.code ?? null,
+    localizationKey,
+    displayName: resolveLocalizedName(localizationKey, localizationTable),
+    provenance: { source: 'starbreaker-datacore', recordPath: null },
+  }
+}
+
+/**
  * Assembles full-universe component catalog records from bulk DataCore
  * field-query results. Discovery is driven entirely by `fields.type`
  * (every entity class with an `AttachDef.Type` value) filtered against
@@ -37,24 +78,8 @@ export function collectBulkComponents(fields: ComponentFieldMaps, localizationTa
     const type = fields.type.get(entityClass)!
     if (!isPlayerUsableComponentType(type)) continue // not in this mission's reviewed category allowlist — not an error, just out of scope
 
-    const subtype = fields.subType.get(entityClass) ?? null
-    const size = parseBulkNumber(fields.size.get(entityClass))
-    const grade = parseBulkNumber(fields.grade.get(entityClass))
-    const manufacturerRef = parseManufacturerReference(fields.manufacturerCode.get(entityClass), fields.manufacturerLocKey.get(entityClass))
-    const localizationKey = fields.localizationName.get(entityClass) ?? null
-
-    records.set(entityClass, {
-      entityClass,
-      recordName: `EntityClassDefinition.${entityClass}`,
-      category: type,
-      subtype: subtype && subtype !== 'UNDEFINED' ? subtype : null,
-      size,
-      grade,
-      manufacturerRef: manufacturerRef?.code ?? null,
-      localizationKey,
-      displayName: resolveLocalizedName(localizationKey, localizationTable),
-      provenance: { source: 'starbreaker-datacore', recordPath: null },
-    })
+    const record = buildRecordFromBulkFields(entityClass, fields, localizationTable)
+    if (record) records.set(entityClass, record)
   }
 
   return { records, unresolved }

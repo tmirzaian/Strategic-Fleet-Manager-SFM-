@@ -3,7 +3,6 @@ import { ships as seedShips, hardpoints as seedHardpoints } from './seed'
 import { importedShipList } from '../generated/importedShips'
 import { shipCatalogRecords } from '../generated/shipCatalog'
 import { classificationFor } from './shipClassification'
-import { compatibilityPortTypeFor } from '../generated/componentCatalog'
 
 /**
  * Entity classes already covered by the deep, per-ship normalized
@@ -645,31 +644,35 @@ function presentationLabelFor(port: { displayName: string; assemblyRole?: string
  * every real salvage head port (Reclaimer, Vulture, MOTH, Fortune) fell
  * through to the raw, untranslated "Salvage" string, patched only for the
  * salvage HEAD itself via hand-authored overrides ('Baler Salvage Head',
- * 'Salvation Salvage Head' — removed alongside this fix). The salvage
- * head's own scraper/tractor CHILD sub-items were never patched at all —
- * they share the identical raw "Salvage" equipmentGroup as the head and
- * as each other, so no equipmentGroup-only translation could ever tell
- * them apart; see the factoryComponent parameter below for how their
- * distinct compatibility types are actually derived.
+ * 'Salvation Salvage Head' — removed alongside this fix).
+ *
+ * FTB-001F — FTB-001E also tried to distinguish the salvage head's own
+ * scraper/tractor CHILD sub-items (which share the identical raw
+ * "Salvage" equipmentGroup as the head and as each other) by reading the
+ * port's FACTORY-INSTALLED component's own subtype — i.e., inferring
+ * socket capability from whatever happened to be installed there. SPPV
+ * field validation proved that wrong: the real game accepts ANY salvage
+ * modifier (Abrade, Cinch, Trawler, ReadyGrip) in EITHER child socket,
+ * and src/normalizer/classificationTranslator.ts's own already-reviewed
+ * EWO-041/CWO-001 rule had already explicitly found "no distinction
+ * meaningful to SFM's own model" between SalvageModifier subtypes.
+ * The genuinely correct signal — the one already-computed, structural,
+ * NEVER-derived-from-what's-currently-installed fact that DOES
+ * distinguish "this is the head port" from "this is a child modifier
+ * socket" — is the port's own `canonicalPortType` (src/engine/types/port.ts),
+ * set once at ship-import time by that same classification layer:
+ * "SalvageHead" for the head, "SalvageModule" for every child socket
+ * uniformly, regardless of which modifier is factory-installed there.
  */
-function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: string }, factoryComponent?: { category: string; subtype: string | null }): string {
-  // FTB-001E — a salvage head's own scraper/tractor sub-items share the
-  // identical raw equipmentGroup ("Salvage") as the head itself and as
-  // each other — nothing in the SHIP's own port data distinguishes a
-  // scraper-only port from a tractor-only one. What DOES distinguish them
-  // is the port's own FACTORY-installed component's real category/subtype
-  // (SalvageModifier, subtype "SalvageModifier_TractorBeam" for a tractor
-  // module, anything else for a scraper module) — the same shared
-  // resolver isPlayerSelectableRecord/toCandidateResolution already use
-  // for the CANDIDATE side of a compatibility check, applied here to the
-  // PORT side instead, so both sides of every comparison agree. Checked
-  // before the generic equipmentGroup switch below so it always wins for
-  // these specific sub-ports without affecting the salvage head port
-  // itself (whose own factory component is category "SalvageHead", not
-  // "SalvageModifier").
-  if (factoryComponent && factoryComponent.category === 'SalvageModifier') {
-    return compatibilityPortTypeFor(factoryComponent.category, factoryComponent.subtype)!
-  }
+function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: string; canonicalPortType?: string }): string {
+  // FTB-001F — see this function's own doc comment above: a child salvage
+  // modifier socket's canonicalPortType is "SalvageModule" regardless of
+  // which real modifier (scraper or tractor) is currently installed —
+  // checked before the generic equipmentGroup switch below so it always
+  // wins for these specific sub-ports without affecting the salvage head
+  // port itself (canonicalPortType "SalvageHead", handled by the ordinary
+  // 'Salvage' -> 'Salvage Module' case further down).
+  if (port.canonicalPortType === 'SalvageModule') return 'Salvage Modifier'
   switch (port.assemblyRole) {
     case 'WEAPON':
       return 'Weapon'
@@ -743,12 +746,6 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   // entityClass (Component.internalName) — read here directly rather than
   // ever re-deriving it from the display name later.
   const factoryEntityClassFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId)?.internalName : undefined)
-  // FTB-001E — the port's own factory-installed component's real
-  // category/subtype, passed into compatibilityTypeFor so it can derive a
-  // scraper/tractor sub-port's distinct type (see that function's own doc
-  // comment) — undefined for a structural row or one with no factory item,
-  // exactly like factoryItemFor/factoryEntityClassFor above.
-  const factoryComponentFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId) : undefined)
 
   const rows: FactoryHardpointTemplate[] = []
   function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined) {
@@ -757,7 +754,7 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
     const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${displayLabel}` : displayLabel
     rows.push({
       slotLabel: uniqueLabel,
-      type: compatibilityTypeFor(port, factoryComponentFor(port)),
+      type: compatibilityTypeFor(port),
       size: port.minSize !== null ? `S${port.minSize}` : 'S1',
       factoryItem: port.isStructural ? '—' : factoryItemFor(port),
       factoryEntityClass: port.isStructural ? undefined : factoryEntityClassFor(port),

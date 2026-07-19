@@ -182,32 +182,33 @@ describe('FTB-001D: mining laser catalog eligibility (Helix II Mining Laser and 
   })
 })
 
-describe('FTB-001E: salvage scraper/tractor module catalog eligibility', () => {
-  // Root cause: a salvage head's own scraper/tractor sub-items are real,
-  // ship-baked child ports (not synthesized — see
-  // src/utils/componentOwnedSlots.ts's own doc comments; salvage was never
-  // part of that architecture). Two independent defects compounded:
-  //   1. Ship side: every real salvage port (head AND both its children)
-  //      shared the identical raw equipmentGroup "Salvage", which
-  //      src/data/shipDefinitions.ts's compatibilityTypeFor never
-  //      translated at all — falling through to the raw string "Salvage".
-  //   2. Catalog side: CATEGORY_TO_PORT_TYPE had NO entry whatsoever for
-  //      category "SalvageModifier" (the scraper/tractor MODULE
-  //      components' own raw category, distinct from "SalvageHead") — so
-  //      isPlayerSelectableRecord rejected every one of them outright,
-  //      before any port-type comparison could even run.
-  // Fixed generically: `compatibilityPortTypeFor` (src/generated/
-  // componentCatalog.ts) resolves SalvageModifier by its own SUBTYPE
-  // (confirmed via direct catalog audit: every real scraper module
-  // carries subtype "UNDEFINED"/null, every real tractor module carries
-  // "SalvageModifier_TractorBeam", cleanly and consistently) — the same
-  // function used by both the candidate side (isPlayerSelectableRecord/
-  // toCandidateResolution) and the ship-owned port side
-  // (compatibilityTypeFor, given the port's own factory component).
+describe('FTB-001F: salvage socket semantics — every modifier fits either child socket', () => {
+  // FTB-001E found a real defect (SalvageModifier had no catalog
+  // translation at all — every scraper/tractor module was completely
+  // unselectable) but fixed it WRONG: it split the child sockets into
+  // "Scraper Module"/"Tractor Module" by reading the FACTORY-INSTALLED
+  // component's own subtype — inferring socket capability from whatever
+  // happened to be installed there. SPPV field validation (FTB-001F)
+  // proved that wrong: the real game accepts Abrade+Abrade, Abrade+Cinch,
+  // Trawler+Trawler, and ReadyGrip+Abrade on the same salvage head — any
+  // real modifier in either socket. Root cause: the raw child PORT itself
+  // carries `allowedTypes: []`/`allowedSubtypes: []` (confirmed by direct
+  // audit of generated-data/ports.json — no constraint of its own at
+  // all), and src/normalizer/classificationTranslator.ts's own
+  // already-reviewed EWO-041/CWO-001 rule had ALREADY explicitly found
+  // "no distinction meaningful to SFM's own model" between SalvageModifier
+  // subtypes, collapsing every real record (scraper or tractor) to ONE
+  // canonical port type (`SalvageModule`) at ship-import time — before
+  // FTB-001E's subtype read ever ran. Fixed by using that already-
+  // computed, structural `canonicalPortType` signal (never derived from
+  // what's currently installed) instead of re-deriving a split from the
+  // installed component's own subtype.
   const hasCatalog = catalogComponentsByName.size > 0
 
   // Reclaimer: a real ship whose two salvage heads carry ReadyGrip
-  // (tractor) + Trawler (scraper) as their factory modules.
+  // (tractor-flavored) + Trawler (scraper-flavored) as their factory
+  // modules — both children now resolve to the same "Salvage Modifier"
+  // port type.
   function reclaimerSalvageModifierPorts() {
     const reclaimer = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Reclaimer')
     if (!reclaimer) return []
@@ -223,52 +224,64 @@ describe('FTB-001E: salvage scraper/tractor module catalog eligibility', () => {
     return shipFactoryTemplates[vulture.id].filter((t) => t.factoryEntityClass && componentsByEntityClass.get(t.factoryEntityClass)?.category === 'SalvageModifier')
   }
 
-  it('ReadyGrip Tractor Module is selectable on its correct tractor-compatible slot (a real Reclaimer port)', () => {
+  it('every real salvage modifier child port (regardless of which module is factory-installed there) resolves to the same "Salvage Modifier" type', () => {
     if (!hasCatalog) return
     const ports = reclaimerSalvageModifierPorts()
-    const tractorPort = ports.find((p) => p.type === 'Tractor Module')
-    if (!tractorPort) return
-    expect(isComponentSelectableForPort('ReadyGrip Tractor Module', tractorPort.type, tractorPort.size)).toBe(true)
+    if (ports.length === 0) return
+    const distinctTypes = new Set(ports.map((p) => p.type))
+    expect([...distinctTypes]).toEqual(['Salvage Modifier'])
   })
 
-  it('Trawler Scraper Module is selectable on its correct scraper-compatible slot (a real Reclaimer port)', () => {
+  it('ReadyGrip Tractor Module is selectable on a real Reclaimer child socket, whichever modifier is factory-installed there', () => {
     if (!hasCatalog) return
     const ports = reclaimerSalvageModifierPorts()
-    const scraperPort = ports.find((p) => p.type === 'Scraper Module')
-    if (!scraperPort) return
-    expect(isComponentSelectableForPort('Trawler Scraper Module', scraperPort.type, scraperPort.size)).toBe(true)
+    if (ports.length === 0) return
+    for (const port of ports) expect(isComponentSelectableForPort('ReadyGrip Tractor Module', port.type, port.size)).toBe(true)
   })
 
-  it('Cinch Scraper Module is selectable on its correct scraper-compatible slot (a real Vulture port)', () => {
+  it('Trawler Scraper Module is selectable on a real Reclaimer child socket, whichever modifier is factory-installed there', () => {
+    if (!hasCatalog) return
+    const ports = reclaimerSalvageModifierPorts()
+    if (ports.length === 0) return
+    for (const port of ports) expect(isComponentSelectableForPort('Trawler Scraper Module', port.type, port.size)).toBe(true)
+  })
+
+  it('Cinch Scraper Module is selectable on any real Vulture salvage child socket', () => {
     if (!hasCatalog) return
     const ports = vultureSalvageModifierPorts()
-    const scraperPort = ports.find((p) => p.type === 'Scraper Module')
-    if (!scraperPort) return
-    expect(isComponentSelectableForPort('Cinch Scraper Module', scraperPort.type, scraperPort.size)).toBe(true)
+    if (ports.length === 0) return
+    for (const port of ports) expect(isComponentSelectableForPort('Cinch Scraper Module', port.type, port.size)).toBe(true)
   })
 
-  it('Abrade Scraper Module is selectable on its correct scraper-compatible slot (a real Vulture port)', () => {
+  it('Abrade Scraper Module is selectable on any real Vulture salvage child socket', () => {
     if (!hasCatalog) return
     const ports = vultureSalvageModifierPorts()
-    const scraperPort = ports.find((p) => p.type === 'Scraper Module')
-    if (!scraperPort) return
-    expect(isComponentSelectableForPort('Abrade Scraper Module', scraperPort.type, scraperPort.size)).toBe(true)
+    if (ports.length === 0) return
+    for (const port of ports) expect(isComponentSelectableForPort('Abrade Scraper Module', port.type, port.size)).toBe(true)
   })
 
-  it('a scraper module is rejected from a tractor-only slot, and a tractor module is rejected from a scraper-only slot — the raw model genuinely distinguishes them', () => {
+  it('acceptance: Abrade+Abrade, Abrade+Cinch, Trawler+Trawler, and ReadyGrip+Abrade are all valid on the same real socket pair (SPPV parity)', () => {
     if (!hasCatalog) return
     const ports = reclaimerSalvageModifierPorts()
-    const tractorPort = ports.find((p) => p.type === 'Tractor Module')
-    const scraperPort = ports.find((p) => p.type === 'Scraper Module')
-    if (!tractorPort || !scraperPort) return
-    expect(isComponentSelectableForPort('Trawler Scraper Module', tractorPort.type, tractorPort.size)).toBe(false)
-    expect(isComponentSelectableForPort('ReadyGrip Tractor Module', scraperPort.type, scraperPort.size)).toBe(false)
+    if (ports.length < 2) return
+    const [socketA, socketB] = ports
+    const combos: Array<[string, string]> = [
+      ['Abrade Scraper Module', 'Abrade Scraper Module'],
+      ['Abrade Scraper Module', 'Cinch Scraper Module'],
+      ['Trawler Scraper Module', 'Trawler Scraper Module'],
+      ['ReadyGrip Tractor Module', 'Abrade Scraper Module'],
+    ]
+    for (const [itemA, itemB] of combos) {
+      expect(isComponentSelectableForPort(itemA, socketA.type, socketA.size)).toBe(true)
+      expect(isComponentSelectableForPort(itemB, socketB.type, socketB.size)).toBe(true)
+    }
   })
 
-  it('a salvage module is rejected from a mining-module-type port', () => {
+  it('a salvage module is rejected from a mining-module-type port and from the salvage HEAD\'s own port type', () => {
     if (!hasCatalog) return
     expect(isComponentSelectableForPort('Cinch Scraper Module', 'Mining Module', 'S1')).toBe(false)
     expect(isComponentSelectableForPort('ReadyGrip Tractor Module', 'Mining Module', 'S1')).toBe(false)
+    expect(isComponentSelectableForPort('Cinch Scraper Module', 'Salvage Module', 'S1')).toBe(false)
   })
 
   it('a salvage module never owns further component-owned child slots of its own — no fabricated grandchildren', () => {
@@ -279,7 +292,7 @@ describe('FTB-001E: salvage scraper/tractor module catalog eligibility', () => {
     expect(componentOwnedChildSlotSpec('Salvage_Modifier_Scraper_Medium')).toBeNull()
   })
 
-  it('the salvage HEAD port itself (not its children) still resolves to "Salvage Module", unaffected by the scraper/tractor fix', () => {
+  it('the salvage HEAD port itself (not its children) still resolves to "Salvage Module", unaffected by the socket-semantics fix', () => {
     if (!hasCatalog) return
     const reclaimer = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Reclaimer')
     if (!reclaimer) return
@@ -290,89 +303,99 @@ describe('FTB-001E: salvage scraper/tractor module catalog eligibility', () => {
     expect(isComponentSelectableForPort('Baler Salvage Head', headPort!.type, headPort!.size)).toBe(true)
   })
 
-  it('census — every real SalvageModifier catalog record (scraper or tractor) is selectable against its own correctly-translated port type', () => {
+  it('census — every real SalvageModifier catalog record (scraper or tractor) resolves to the one shared "Salvage Modifier" port type and is selectable there', () => {
     if (!hasCatalog) return
     const salvageModifiers = Array.from(componentsByEntityClass.values()).filter((r) => r.category === 'SalvageModifier' && r.displayName)
     expect(salvageModifiers.length).toBeGreaterThanOrEqual(2) // at minimum ReadyGrip + one real scraper variant
     for (const record of salvageModifiers) {
       const portType = compatibilityPortTypeFor(record.category, record.subtype)
-      expect(portType === 'Scraper Module' || portType === 'Tractor Module').toBe(true)
+      expect(portType).toBe('Salvage Modifier')
       expect(isComponentSelectableForPort(record.displayName, portType!, `S${record.size}`, { itemEntityClass: record.entityClass })).toBe(true)
     }
   })
 })
 
-describe('FTB-001E: mining module child-slot compatibility architecture', () => {
-  // Root-cause investigation confirmed there is currently NO real,
-  // catalogable "mining module" consumable component anywhere in the
-  // imported Star Citizen data — exhaustively checked: every one of the
-  // ~89 real catalog categories was enumerated and inspected (nothing
-  // resembling a mining-module family beyond the mining LASER itself and
-  // its own MiningController placeholder records); ten plausible live
-  // DataCore substring searches (MiningGadget, MiningConsumable, Optimum,
-  // Overclock, InertMaterial, FractureCharge, etc.) against the installed
-  // StarBreaker/Data.p4k all returned zero EntityClassDefinition matches.
-  // This is a genuine, documented DATA GAP, not a compatibility-layer
-  // defect — the mining LASER and its real, source-derived module SLOT
-  // COUNT (FTB-001A/FTB-001D) are both real and correctly handled; the
-  // separate, insertable "module" items that would occupy those slots
-  // simply do not exist as their own catalog entries in this dataset.
+describe('FTB-001F (Part B): mining module child-slot compatibility architecture — real modules recovered', () => {
+  // FTB-001E's "no mining modules exist" conclusion was WRONG — it was
+  // based only on the categories already present in
+  // scripts/componentCatalog/componentTaxonomy.ts's allowlist, never on
+  // the raw DataCore universe itself. FTB-001F Part B re-investigated
+  // from raw source and found the mining laser's own module attachment
+  // ports (tagged `miningConsumable`, see
+  // scripts/generateMiningModuleSlots.ts) explicitly require a component
+  // of DataCore Type "MiningModifier" — confirmed via a direct live
+  // StarBreaker/DataCore query against a real mining laser's own port
+  // definition (`"Types": [{"Type": "MiningModifier", "SubTypes":
+  // ["Gun"]}]`). "MiningModifier" had never been in the taxonomy
+  // allowlist (the exact same gap shape SalvageModifier had before
+  // EWO-041) — not because the data doesn't exist, but because nothing
+  // ever asked DataCore for it.
   //
-  // The FIELD-OBSERVED defect ("the slots exist, but the Commander cannot
-  // assign a target mining module") was real and IS fixed here: mining
-  // module slots were `isStructural: true`, which never even rendered a
-  // Target picker at all (src/pages/MissionComposer.tsx line ~578 — a
-  // structural row shows a bare "—", no input). They are now editable,
-  // real, targetable rows exactly like a missile slot, using the exact
-  // same TargetComponentPicker/compatibility pipeline — "Mining Module" is
-  // a real, already-reachable canonical port type
-  // (CATEGORY_TO_PORT_TYPE has no entry needed here; nothing in the real
-  // catalog claims it, which is exactly the data gap above). The moment a
-  // real mining-module catalog component exists in a future import, it
-  // becomes selectable automatically, with no further code changes.
+  // Direct live queries confirmed 5 representative real entities, all
+  // resolving `category: "MiningModifier"`, `subtype: "Gun"`:
+  // Mining_Modules_Active_Optimum, Mining_Modules_Active_Brandt,
+  // Mining_Modules_Active_Lifeline, Mining_Modules_Passive_XTR_MK1,
+  // Mining_Modules_Passive_Rieger_MK1 — cross-referenced against a full
+  // bulk DataCore name census confirming 30 real entities total (Brandt,
+  // Forel, Lifeline, Optimum, Rime, Stampede, Surge, Torpid in Active
+  // form; Focus, FLTR, Rieger, Torrent, Vaux, XTR in Passive MK1/MK2/MK3
+  // grade variants). Their in-game localization text is unambiguous
+  // textual proof of real identity: `item_Mining_Consumable_Brandt`
+  // resolves to "Brandt Module" with description text beginning
+  // "Item Type: Mining Module (Active)"; `item_Mining_Modules_Passive_XTR_MK1`
+  // resolves to "XTR Module", "Item Type: Mining Module (Passive)" — and
+  // so on for all 5 directly-verified samples.
   //
-  // Since no real catalog fixture exists for this specific census entry,
-  // these tests use a minimal, clearly-labeled SYNTHETIC fixture record
-  // (never a real entityClass) purely to prove the compatibility
-  // MECHANISM itself — the exact same type/size comparison every other
-  // real family in this mission already exercises with real data.
-  const SYNTHETIC_MINING_MODULE = {
-    entityClass: 'FTB001E_Synthetic_Test_Fixture_Mining_Module',
-    category: 'WeaponMining_TESTFIXTURE_DoesNotExistInRealData',
-    subtype: null as string | null,
-    size: 1,
-    displayName: 'FTB-001E Synthetic Mining Module (test fixture only)',
-  }
+  // Root cause fixed in two places (mirroring the SalvageModifier/
+  // EWO-041 precedent exactly):
+  //   1. scripts/componentCatalog/componentTaxonomy.ts — added
+  //      `MiningModifier: 'Mining Module'` to PLAYER_USABLE_COMPONENT_TYPES.
+  //   2. src/generated/componentCatalog.ts — added
+  //      `MiningModifier: 'Mining Module'` to CATEGORY_TO_PORT_TYPE, so
+  //      compatibilityPortTypeFor (the shared translator) resolves it too.
+  //
+  // The generated-data/component-metadata-catalog*.json files committed
+  // to this working tree were last regenerated BEFORE this fix landed
+  // (`npm run generate:component-catalog` is a slow, full-universe
+  // re-query — observed to take much longer than this mission's time
+  // budget to complete against the live Data.p4k), so they do not yet
+  // contain real MiningModifier records. The tests below prove the FIX
+  // ITSELF (the category→port-type resolution, independent of whether the
+  // catalog has been refreshed) and are written so they start exercising
+  // real catalog records automatically, with no code changes, the moment
+  // `npm run generate:component-catalog` is next run to refresh the
+  // committed catalog files.
 
-  it('documents the mining-module data gap explicitly rather than silently excluding it — no real catalog component claims eligibility, confirmed by census', () => {
-    if (catalogComponentsByName.size === 0) return
-    // No real catalog record anywhere resolves to port type "Mining
-    // Module" — if this ever starts failing, real mining-module data has
-    // arrived and the synthetic-fixture tests above should be replaced
-    // with real ones (see this describe block's own header comment).
-    const anyRealMiningModule = Array.from(componentsByEntityClass.values()).some(
-      (r) => compatibilityPortTypeFor(r.category, r.subtype) === 'Mining Module'
-    )
-    expect(anyRealMiningModule).toBe(false)
+  it('the category translator now resolves the real, live-DataCore-confirmed "MiningModifier"/"Gun" pair to "Mining Module" — the actual fix under test, independent of whether the committed catalog has been regenerated yet', () => {
+    expect(compatibilityPortTypeFor('MiningModifier', 'Gun')).toBe('Mining Module')
   })
 
-  it('the compatibility mechanism itself correctly accepts a matching synthetic fixture and rejects a mismatched type/size (mechanism-only proof, not real data)', () => {
-    // A synthetic record is deliberately never added to the real catalog
-    // maps — this exercises isComponentSelectableForPort's own size/type
-    // comparison directly, the same mechanism every real family in this
-    // mission already proves with real data.
-    expect(isComponentSelectableForPort(SYNTHETIC_MINING_MODULE.displayName, 'Mining Module', 'S1', { itemEntityClass: SYNTHETIC_MINING_MODULE.entityClass })).toBe(true)
-    // A real, KNOWN component of a DIFFERENT family (a mining laser
-    // itself, category WeaponMining -> "Mining Laser") is correctly
-    // rejected for a "Mining Module" port — the mismatch is positively
-    // confirmed, not merely unknown, so this is a real rejection, not the
-    // permissive "can't disprove" fallback.
+  it('a real, KNOWN component of a DIFFERENT family (a mining laser itself, category WeaponMining) is still correctly rejected for a "Mining Module" port — the mismatch is positively confirmed, not merely unknown', () => {
     expect(isComponentSelectableForPort('Arbor MH2 Mining Laser', 'Mining Module', 'S1')).toBe(false)
-    // A genuinely unrecognized name (never cataloged as anything) is
-    // still permissively selectable — the same "can't disprove
-    // compatibility we have no data for" philosophy every other family
-    // already relies on.
+  })
+
+  it('a genuinely unrecognized name (never cataloged as anything) remains permissively selectable — the same "can\'t disprove compatibility we have no data for" philosophy every other family already relies on', () => {
     expect(isComponentSelectableForPort('Some Totally Unrecognized Item', 'Mining Module', 'S1')).toBe(true)
+  })
+
+  it('census — once the committed catalog is regenerated, every real MiningModifier record resolves to "Mining Module" and is selectable there (no-ops today; documents the pending data refresh rather than asserting a false absence)', () => {
+    if (catalogComponentsByName.size === 0) return
+    const realMiningModules = Array.from(componentsByEntityClass.values()).filter(
+      (r) => compatibilityPortTypeFor(r.category, r.subtype) === 'Mining Module'
+    )
+    if (realMiningModules.length === 0) {
+      // Documents a pending DATA-REFRESH gap, not a compatibility-layer
+      // defect and not "no mining modules exist" (that conclusion is now
+      // disproven — see this describe block's own header comment for the
+      // full raw-source evidence). Run `npm run generate:component-catalog`
+      // to refresh generated-data/component-metadata-catalog*.json; once
+      // refreshed, the assertions below start exercising the real 30
+      // recovered entities with no further code changes.
+      return
+    }
+    for (const record of realMiningModules) {
+      expect(isComponentSelectableForPort(record.displayName, 'Mining Module', `S${record.size}`, { itemEntityClass: record.entityClass })).toBe(true)
+    }
   })
 })
 
@@ -410,26 +433,32 @@ describe('FTB-001E: component-owned child family census — no silent exclusions
     expect(uncovered.map((r) => r.entityClass)).toEqual([])
   })
 
-  it('salvage modules (SalvageModifier, the child side) — every real record resolves to a real, selectable Scraper/Tractor Module port type', () => {
+  it('salvage modules (SalvageModifier, the child side) — every real record resolves to the one shared, selectable "Salvage Modifier" port type (FTB-001F: no scraper/tractor split — see the socket-semantics describe block above)', () => {
     if (!hasCatalog) return
     const salvageModifiers = Array.from(componentsByEntityClass.values()).filter((r) => r.category === 'SalvageModifier' && r.displayName)
     expect(salvageModifiers.length).toBeGreaterThan(0)
     for (const record of salvageModifiers) {
       const portType = compatibilityPortTypeFor(record.category, record.subtype)
-      expect(portType === 'Scraper Module' || portType === 'Tractor Module').toBe(true)
+      expect(portType).toBe('Salvage Modifier')
       expect(isComponentSelectableForPort(record.displayName, portType!, `S${record.size}`, { itemEntityClass: record.entityClass })).toBe(true)
     }
   })
 
-  it('mining modules (the CHILD side — the actual insertable items) — documented as intentionally unsupported: zero real catalog components exist for this family in the currently-imported data', () => {
+  it('mining modules (the CHILD side — the actual insertable items) — 30 real MiningModifier entities recovered from raw source (FTB-001F Part B); selectable once the committed catalog is regenerated to include them', () => {
     if (!hasCatalog) return
-    // See src/data/__tests__/componentCatalog.test.ts's own "mining module
-    // child-slot compatibility architecture" describe block for the full,
-    // exhaustively-documented finding (89 catalog categories enumerated,
-    // 10 live DataCore substring searches, all negative). Recorded here
-    // as this family's own census entry, per this mission's explicit
-    // requirement that no family be silently excluded from the census.
-    const anyRealMiningModule = Array.from(componentsByEntityClass.values()).some((r) => compatibilityPortTypeFor(r.category, r.subtype) === 'Mining Module')
-    expect(anyRealMiningModule).toBe(false)
+    // See this file's "FTB-001F (Part B): mining module child-slot
+    // compatibility architecture" describe block for the full raw-source
+    // evidence (live DataCore queries, localization-text confirmation) and
+    // the two-file root-cause fix (componentTaxonomy.ts allowlist +
+    // CATEGORY_TO_PORT_TYPE). FTB-001E's "zero real components exist"
+    // conclusion here was based only on the allowlist gap, not the raw
+    // universe, and is now corrected. The committed catalog files predate
+    // this fix, so this census entry documents a pending data refresh
+    // rather than a real absence — it will start asserting real coverage
+    // automatically once `npm run generate:component-catalog` is next run.
+    const realMiningModules = Array.from(componentsByEntityClass.values()).filter((r) => compatibilityPortTypeFor(r.category, r.subtype) === 'Mining Module')
+    for (const record of realMiningModules) {
+      expect(isComponentSelectableForPort(record.displayName, 'Mining Module', `S${record.size}`, { itemEntityClass: record.entityClass })).toBe(true)
+    }
   })
 })

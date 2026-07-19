@@ -47,6 +47,20 @@ export const PLAYER_USABLE_COMPONENT_TYPES: Record<string, string> = {
    * absent from this allowlist, so no such record ever reached the
    * generated catalog even though the real data exists. */
   SalvageModifier: 'Salvage Module',
+  /** FTB-001F (Part B) — the mining laser's own module attachment ports
+   * (`Components[].Ports[].Types[].Type`, tagged `miningConsumable` — see
+   * scripts/generateMiningModuleSlots.ts) explicitly expect a component of
+   * DataCore Type "MiningModifier" — confirmed via a direct live DataCore
+   * query against a real mining laser's own record. This category was
+   * absent from this allowlist entirely (the exact same gap shape
+   * SalvageModifier had before EWO-041), so no such record had ever
+   * reached the generated catalog, even though 30 real entities exist
+   * (Brandt, Focus, Forel, Lifeline, Optimum, Rieger, Rime, Stampede,
+   * Surge, Torpid, Torrent, Vaux, XTR, FLTR — each in MK1/MK2/MK3 grade
+   * variants where applicable) — Engineering's prior "no mining modules
+   * exist" conclusion was based only on the categories already in THIS
+   * table, never on the raw universe itself. */
+  MiningModifier: 'Mining Module',
   Bomb: 'Bomb',
   BombLauncher: 'Bomb Launcher',
 }
