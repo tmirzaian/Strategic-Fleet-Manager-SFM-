@@ -380,3 +380,171 @@ describe('saveMissionConfiguration — FTB-001D: Helix II Mining Laser survives 
     expect(moduleSlots.length).toBe(3)
   })
 })
+
+describe('saveMissionConfiguration — FTB-001E: mining module target assignments now persist as real rows', () => {
+  // Root-cause fix: mining module slots were never editable at all
+  // (isStructural: true, no picker rendered — src/data/__tests__/
+  // componentCatalog.test.ts's own FTB-001E section documents the full
+  // finding), so a target assignment into one had nowhere to persist. No
+  // real, catalogable mining-module CATALOG component exists in the
+  // currently-imported data (also documented there) — these tests use a
+  // realistic but uncataloged fixture name for the assignment itself
+  // (the exact same "uncataloged item, permissively accepted" path every
+  // other free-text Target assignment in this app already relies on),
+  // while proving the REAL, generated slot-count/reconciliation
+  // machinery (Arbor MH2/Helix II/Klein-S1) with real entity classes.
+  const ARBOR_MH2 = 'Mining_Laser_GRIN_Arbor_S2' // MOLE's real factory laser, 2 module slots
+  const HELIX_II = 'Mining_Laser_THCN_Helix_S2' // 3 module slots
+  const KLEIN_S1_ZERO = 'Mining_Laser_SHIN_Klein_S1' // 0 module slots
+  const MOLE_MINING_SLOT = 'Front Cab Mining Laser (Manned Turret) — Mining Weapon'
+  const FIXTURE_MODULE_NAME = 'FTB-001E Test Fixture Module'
+
+  function effectiveHardpointsFor(shipId: string, buildId: string): Hardpoint[] {
+    const definitionId = resolveShipDefinitionId(shipId, useFleetStore.getState().fleetAssets)
+    const template = definitionId ? (shipFactoryTemplates[definitionId] ?? []) : []
+    const shipHardpoints = useFleetStore.getState().hardpoints.filter((h) => h.buildId === buildId)
+    return withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, template), (host, n) => ({
+      ...host,
+      id: `${host.id}-module-slot-${n}`,
+      slotLabel: `${host.slotLabel} — Module Slot ${n}`,
+      parentSlotLabel: host.slotLabel,
+      isStructural: false,
+    }))
+  }
+
+  function addMole() {
+    const mole = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'MOLE')
+    if (!mole) return null
+    const added = useFleetStore.getState().addFleetAsset(mole.id, 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add MOLE')
+    return added.assetId
+  }
+
+  it('a target assignment into Module Slot 1 (factory Arbor MH2, 2 slots) persists as a real row and survives a genuine reload', () => {
+    if (getMiningModuleSlotCount(ARBOR_MH2) === 0) return
+    const shipId = addMole()
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001E Mining Module Assignment',
+      startingState: 'FACTORY',
+      targetOverrides: { [`${MOLE_MINING_SLOT} — Module Slot 1`]: { targetItem: FIXTURE_MODULE_NAME, targetEntityClass: undefined } },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+
+    useFleetStore.persist.rehydrate()
+
+    const slot1 = useFleetStore.getState().hardpoints.find((h) => h.buildId === result.buildId && h.slotLabel === `${MOLE_MINING_SLOT} — Module Slot 1`)
+    expect(slot1).toBeDefined()
+    expect(slot1!.targetItem).toBe(FIXTURE_MODULE_NAME)
+    expect(slot1!.parentSlotLabel).toBe(MOLE_MINING_SLOT)
+
+    const effective = effectiveHardpointsFor(shipId, result.buildId!)
+    expect(effective.filter((h) => h.parentSlotLabel === MOLE_MINING_SLOT).length).toBe(2)
+  })
+
+  it('switching Arbor MH2 -> Helix II in the same save preserves the compatible existing Module Slot 1 assignment and produces exactly three rows', () => {
+    if (getMiningModuleSlotCount(ARBOR_MH2) === 0 || getMiningModuleSlotCount(HELIX_II) === 0) return
+    const shipId = addMole()
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001E MH2 to Helix Reconciliation',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [MOLE_MINING_SLOT]: { targetItem: 'Helix II Mining Laser', targetEntityClass: HELIX_II },
+        [`${MOLE_MINING_SLOT} — Module Slot 1`]: { targetItem: FIXTURE_MODULE_NAME, targetEntityClass: undefined },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const moduleSlots = rows.filter((h) => h.parentSlotLabel === MOLE_MINING_SLOT)
+    expect(moduleSlots.length).toBe(3) // Helix II's real count, not MH2's 2
+
+    // Slot 1's assignment — same slotLabel, same S2 port size on both
+    // lasers — is genuinely compatible with the new laser and survives
+    // the swap rather than being silently wiped.
+    const slot1 = moduleSlots.find((h) => h.slotLabel === `${MOLE_MINING_SLOT} — Module Slot 1`)!
+    expect(slot1.targetItem).toBe(FIXTURE_MODULE_NAME)
+    // Slot 3 is new (MH2 never had one) and starts empty.
+    const slot3 = moduleSlots.find((h) => h.slotLabel === `${MOLE_MINING_SLOT} — Module Slot 3`)!
+    expect(slot3.targetItem).toBe('—')
+  })
+
+  it('switching Helix II -> a real zero-slot laser (Klein-S1) removes every synthesized module row', () => {
+    if (getMiningModuleSlotCount(HELIX_II) === 0) return
+    expect(getMiningModuleSlotCount(KLEIN_S1_ZERO)).toBe(0)
+    const shipId = addMole()
+    if (!shipId) return
+    // First establish Helix II as the swapped-in laser with an assignment...
+    const first = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001E Helix Then Klein',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [MOLE_MINING_SLOT]: { targetItem: 'Helix II Mining Laser', targetEntityClass: HELIX_II },
+        [`${MOLE_MINING_SLOT} — Module Slot 1`]: { targetItem: FIXTURE_MODULE_NAME, targetEntityClass: undefined },
+      },
+      setActive: true,
+    })
+    expect(first.success).toBe(true)
+    expect(useFleetStore.getState().hardpoints.filter((h) => h.buildId === first.buildId && h.parentSlotLabel === MOLE_MINING_SLOT).length).toBe(3)
+
+    // ...then edit that same Loadout again, swapping to Klein-S1 (0 slots).
+    const second = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001E Helix Then Klein',
+      startingState: 'EXISTING',
+      existingBuildId: first.buildId,
+      targetOverrides: { [MOLE_MINING_SLOT]: { targetItem: 'Klein-S1 Mining Laser', targetEntityClass: KLEIN_S1_ZERO } },
+      setActive: true,
+    })
+    expect(second.success).toBe(true)
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === second.buildId)
+    expect(rows.some((h) => h.parentSlotLabel === MOLE_MINING_SLOT)).toBe(false)
+  })
+})
+
+describe('saveMissionConfiguration — FTB-001E: salvage scraper/tractor module target assignments persist and rehydrate', () => {
+  // Unlike mining module slots, a salvage head's scraper/tractor
+  // sub-items are REAL, ship-baked ports that always exist in the
+  // canonical template (never synthesized) — so no special
+  // materialization is needed here at all; this proves the ORDINARY
+  // targetOverrides path (already exercised by every other ordinary port
+  // in this test file) correctly carries a real catalog salvage module
+  // through save + a genuine reload, now that it's actually selectable
+  // (src/data/__tests__/componentCatalog.test.ts's own FTB-001E section
+  // proves the compatibility fix itself).
+  const READYGRIP = 'Salvage_Modifier_Tractor_Small'
+  const RECLAIMER_TRACTOR_SLOT = 'Left Remote Salvage Turret (Remote Turret) — Salvage Weapon (Mount) — SubItem01 Salvage Head'
+
+  it("a ReadyGrip Tractor Module target assignment on a real Reclaimer tractor slot persists and survives a genuine reload, with no fabricated grandchild rows", () => {
+    const reclaimer = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Reclaimer')
+    if (!reclaimer) return
+    const added = useFleetStore.getState().addFleetAsset(reclaimer.id, 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Reclaimer')
+    const slotExists = useFleetStore.getState().hardpoints.some((h) => h.buildId === useFleetStore.getState().ships.find((s) => s.id === added.assetId)!.activeBuildId && h.slotLabel === RECLAIMER_TRACTOR_SLOT)
+    if (!slotExists) return // real generated ship data not present on this machine
+
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId: added.assetId,
+      name: 'FTB-001E Salvage Assignment',
+      startingState: 'FACTORY',
+      targetOverrides: { [RECLAIMER_TRACTOR_SLOT]: { targetItem: 'ReadyGrip Tractor Module', targetEntityClass: READYGRIP } },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+
+    useFleetStore.persist.rehydrate()
+
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const tractorRow = rows.find((h) => h.slotLabel === RECLAIMER_TRACTOR_SLOT)!
+    expect(tractorRow.targetItem).toBe('ReadyGrip Tractor Module')
+    expect(tractorRow.targetEntityClass).toBe(READYGRIP)
+    // No grandchildren synthesized beneath the module itself.
+    expect(rows.some((h) => h.parentSlotLabel === RECLAIMER_TRACTOR_SLOT)).toBe(false)
+  })
+})

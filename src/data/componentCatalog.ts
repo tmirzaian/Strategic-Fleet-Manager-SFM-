@@ -1,7 +1,7 @@
 import { isCompatible } from '../engine/compatibility'
 import type { Component, CompatibilityRule } from '../engine/types'
 import {
-  CATEGORY_TO_PORT_TYPE,
+  compatibilityPortTypeFor,
   resolveComponentByEntityClass,
   resolveComponentByName,
   type CanonicalComponentRecord,
@@ -122,12 +122,15 @@ const CATALOG: Record<string, CatalogEntry> = {
   'MSD-616 Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Starlancer TAC's own remote-turret hardware
   'RSI Polaris Torpedo Rack': { category: 'Missile Rack', size: 10 }, // Polaris's torpedo bays
   'RSI Polaris Remote Turret Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Polaris's own remote-turret hardware
-  // category 'Salvage' (not 'Salvage Module') — a Salvage port's
-  // compatibilityTypeFor has no specific translation case, so it falls
-  // through to the raw equipmentGroup string ("Salvage"), confirmed
-  // against every real deep-imported salvage ship's own port data.
-  'Salvation Salvage Head': { category: 'Salvage', size: 2 }, // Salvation's salvage heads
-  'Baler Salvage Head': { category: 'Salvage', size: 2 }, // Reclaimer/MOTH/Vulture/Fortune's salvage heads
+  // FTB-001E — the two salvage-head overrides formerly here ('Salvation
+  // Salvage Head', 'Baler Salvage Head', each forced to category
+  // 'Salvage') are gone: they existed only to compensate for the exact
+  // same latent defect FTB-001D found and fixed for mining — every real
+  // salvage head port's own type field was the untranslated raw
+  // equipmentGroup string "Salvage" instead of the catalog's actual
+  // "Salvage Module" vocabulary. Fixed at the true source
+  // (src/data/shipDefinitions.ts's compatibilityTypeFor, "Salvage" ->
+  // "Salvage Module") rather than patched per display name here.
   // "Missile Rack" (bare, no brand) is a genuine in-fiction factory item
   // name for L22 AlphaWolf, not a placeholder.
   'Missile Rack': { category: 'Missile Rack', size: 2 }, // L22 AlphaWolf's own rack
@@ -184,7 +187,7 @@ export interface TargetValidation {
  */
 function toCandidateResolution(record: CanonicalComponentRecord): CandidateResolution {
   if (!isPlayerSelectableRecord(record)) return { status: 'unresolved' }
-  const translatedCategory = CATEGORY_TO_PORT_TYPE[record.category]
+  const translatedCategory = compatibilityPortTypeFor(record.category, record.subtype)
   return {
     status: 'resolved',
     entry: { category: translatedCategory ?? record.category, size: record.size, entityClass: record.entityClass, subtype: record.subtype },
@@ -202,7 +205,7 @@ function toCandidateResolution(record: CanonicalComponentRecord): CandidateResol
  * candidates with this one shared decision rather than a second copy.
  */
 export function isPlayerSelectableRecord(record: { category: string; subtype: string | null }): boolean {
-  return Boolean(CATEGORY_TO_PORT_TYPE[record.category]) || record.subtype === 'PDCTurret'
+  return Boolean(compatibilityPortTypeFor(record.category, record.subtype)) || record.subtype === 'PDCTurret'
 }
 
 export type CandidateResolution =

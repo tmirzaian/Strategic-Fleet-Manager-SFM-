@@ -329,40 +329,33 @@ export default function MissionComposer() {
 
   type PreviewRow = (typeof previewRows)[number]
 
-  // FTB-001A/FTB-001B — a synthetic "<label> Slot N" row for whichever
-  // component currently owns real child attachment ports (mining heads,
-  // missile racks — see src/utils/componentOwnedSlots.ts). Branches only
-  // on `spec.label`:
-  //   - A mining module slot stays `isStructural: true` (FTB-001A,
-  //     unchanged) — no Mining Module catalog/compatibility layer exists
-  //     yet, so it is presented, not editable.
-  //   - A missile slot is a REAL, non-structural, targetable row — a
-  //     Commander must be able to assign missiles into a swapped rack's
-  //     new slots via the same TargetComponentPicker every other row
-  //     uses (FTB-001B). It starts empty (`previewTarget: '—'`,
-  //     trivially `compatible: true`) — a swap must never silently carry
-  //     forward a previous, possibly now-incompatible assignment.
+  // FTB-001A/FTB-001B/FTB-001E — a synthetic "<label> Slot N" row for
+  // whichever component currently owns real child attachment ports
+  // (mining heads, missile racks — see src/utils/componentOwnedSlots.ts).
+  // Every component-owned child slot is a REAL, non-structural, targetable
+  // row — a Commander must be able to assign a real component into it via
+  // the same TargetComponentPicker every other row uses. It starts empty
+  // (`previewTarget: '—'`, trivially `compatible: true`) — a swap must
+  // never silently carry forward a previous, possibly now-incompatible
+  // assignment, and always resolves any Target the Commander has already
+  // picked for it the same way every other row does — without this, a
+  // picker selection would update `overrides` but this freshly synthesized
+  // row would keep re-rendering its hardcoded '—' default, silently
+  // discarding the assignment (the exact bug FTB-001B found and fixed for
+  // missile slots; FTB-001E extends the same fix to mining module slots,
+  // previously left presentation-only with no picker rendered at all).
   function makePreviewChildSlotRow(host: PreviewRow, slotNumber: number, spec: ComponentOwnedSlotSpec): PreviewRow {
     const isMissileSlot = spec.label === 'Missile'
     const slotLabel = `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`
     const type = isMissileSlot ? 'Missile' : 'Mining Module'
     const size = spec.size ? `S${spec.size}` : host.size
-    // A mining module slot stays presentation-only (FTB-001A) — no picker
-    // renders for it, so it never needs an override lookup. A missile slot
-    // is editable, and must resolve any Target the Commander has already
-    // picked for it the same way every other row does (FTB-001B) — without
-    // this, a picker selection would update `overrides` but this freshly
-    // synthesized row would keep re-rendering its hardcoded '—' default,
-    // silently discarding the assignment.
-    const resolved = isMissileSlot
-      ? resolvePreviewTarget(slotLabel, type, size, undefined, '—', undefined)
-      : { previewTarget: '—', previewTargetEntityClass: undefined, compatible: true, incompatibleMessage: undefined }
+    const resolved = resolvePreviewTarget(slotLabel, type, size, undefined, '—', undefined)
     return {
       ...host,
       id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
       slotLabel,
       parentSlotLabel: host.slotLabel,
-      isStructural: !isMissileSlot,
+      isStructural: false,
       type,
       size,
       factoryItem: '—',

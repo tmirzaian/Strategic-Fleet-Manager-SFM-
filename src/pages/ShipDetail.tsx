@@ -21,21 +21,19 @@ import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from '../ut
 import type { Hardpoint } from '../types'
 
 /**
- * FTB-001A/FTB-001B — a synthetic "<label> Slot N" row for whichever
- * component currently owns real child attachment ports (mining heads,
- * missile racks — see src/utils/componentOwnedSlots.ts). Branches only on
- * `spec.label`, never on ship or rack identity:
- *   - A mining module slot (`label: 'Module'`) stays `isStructural: true`
- *     — this app has no Mining Module catalog/compatibility layer to
- *     target these against yet, so they are presented, not editable,
- *     exactly like a turret/mount shell (FTB-001A, unchanged).
- *   - A missile slot (`label: 'Missile'`) is a REAL, non-structural,
- *     targetable port (`type: 'Missile'`, sized to the rack's own
- *     source-derived missile size) — a Commander must be able to assign
- *     missiles into a swapped rack's new slots exactly as they could for
- *     the original factory ones (FTB-001B). It always starts empty
- *     (factory/installed/target all '—') — a swap must never silently
- *     retain a previous, possibly now-incompatible missile assignment.
+ * FTB-001A/FTB-001B/FTB-001E — a synthetic "<label> Slot N" row for
+ * whichever component currently owns real child attachment ports (mining
+ * heads, missile racks — see src/utils/componentOwnedSlots.ts). Every
+ * component-owned child slot is a REAL, non-structural, targetable port,
+ * sized to its owner's own source-derived spec — a Commander must be able
+ * to assign a real component into it via Loadout Manager's Target picker
+ * (FTB-001B established this for missile slots; FTB-001E extends it to
+ * mining module slots, previously left presentation-only). It always
+ * starts empty (factory/installed/target all '—') here — this row is
+ * freshly re-synthesized on every render; the real persisted assignment
+ * (once one exists) is read from the actual saved Hardpoint, not
+ * hardcoded — a swap must never silently retain a previous, possibly
+ * now-incompatible assignment.
  */
 function makeHardpointChildSlotRow(host: Hardpoint, slotNumber: number, spec: ComponentOwnedSlotSpec): Hardpoint {
   const isMissileSlot = spec.label === 'Missile'
@@ -44,7 +42,7 @@ function makeHardpointChildSlotRow(host: Hardpoint, slotNumber: number, spec: Co
     id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
     slotLabel: `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`,
     parentSlotLabel: host.slotLabel,
-    isStructural: !isMissileSlot,
+    isStructural: false,
     type: isMissileSlot ? 'Missile' : 'Mining Module',
     size: spec.size ? `S${spec.size}` : host.size,
     factoryItem: '—',

@@ -804,3 +804,29 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     expect(slotTargetInput.value).toBe('TaskForce I Missile')
   })
 })
+
+describe('<MissionComposer /> (Loadout Manager) — FTB-001E: mining module slots are now editable, not presentation-only', () => {
+  // Root-cause fix: mining module child slots were `isStructural: true`,
+  // so the Target column rendered a bare "—" with no picker at all — the
+  // exact field-observed defect ("the slots exist, but the Commander
+  // cannot assign a target mining module"). They are now real, editable
+  // rows using the same TargetComponentPicker every other row uses. A
+  // real mining-module CATALOG component to actually select doesn't exist
+  // in the currently-imported data (see src/data/__tests__/
+  // componentCatalog.test.ts's own FTB-001E census for the full,
+  // documented finding) — this test proves the RENDERING/architecture
+  // fix itself: a picker now exists where there was none before.
+  it("a real MOLE's mining module slot now renders a real Target picker (combobox), not a bare dash", () => {
+    const added = useFleetStore.getState().addFleetAsset('mole-imported', 'OWNED')
+    if (!added.success || !added.assetId) return // real generated-data ships not present on this machine
+    renderComposer(`?shipId=${added.assetId}`)
+    const expandAll = screen.queryByText('Expand All')
+    if (!expandAll) return
+    fireEvent.click(expandAll)
+
+    const moduleSlotText = screen.queryAllByText(/Module Slot 1/)
+    if (moduleSlotText.length === 0) return // no real mining module slot data present on this machine
+    const slotRow = moduleSlotText[0].closest('tr')!
+    expect(within(slotRow).getByRole('combobox')).toBeInTheDocument()
+  })
+})

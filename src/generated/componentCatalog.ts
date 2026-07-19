@@ -288,8 +288,34 @@ export function resolveComponentByEntityClass(entityClass: string): ComponentRes
  */
 function compatibilityShapeKey(record: CanonicalComponentRecord): string {
   if (record.subtype === 'PDCTurret') return `pdc-turret:${record.size}`
-  const translated = CATEGORY_TO_PORT_TYPE[record.category]
+  const translated = compatibilityPortTypeFor(record.category, record.subtype)
   return translated ? `${translated}:${record.size}` : 'untranslatable'
+}
+
+/**
+ * FTB-001E — resolves a canonical category+subtype pair to SFM's
+ * port-type vocabulary. Almost always just `CATEGORY_TO_PORT_TYPE[category]`
+ * — the one family that needs its own `subtype` consulted (not just its
+ * shared `category`) is `SalvageModifier`: a scraper module and a tractor
+ * module share the identical raw category but are genuinely different,
+ * mutually-incompatible equipment families (confirmed by direct catalog
+ * audit of all 9 real SalvageModifier records — every scraper carries
+ * subtype "UNDEFINED"/null, every tractor carries subtype
+ * "SalvageModifier_TractorBeam", cleanly and consistently). This mirrors
+ * the same "subtype overrides category" precedent `PDCTurret` already
+ * established for `Turret`-category records — generalized into one
+ * shared function so a component's own eligibility
+ * (`isPlayerSelectableRecord`/`toCandidateResolution`, both in
+ * src/data/componentCatalog.ts) and a ship-owned port's own
+ * factory-derived type (src/data/shipDefinitions.ts's
+ * `compatibilityTypeFor`) always agree on the exact same answer, never
+ * two independently-guessed translations.
+ */
+export function compatibilityPortTypeFor(category: string, subtype: string | null | undefined): string | undefined {
+  if (category === 'SalvageModifier') {
+    return subtype === 'SalvageModifier_TractorBeam' ? 'Tractor Module' : 'Scraper Module'
+  }
+  return CATEGORY_TO_PORT_TYPE[category]
 }
 
 /** Ambiguity-aware display-name lookup (EWO-STAB-004A, Assignment 3).

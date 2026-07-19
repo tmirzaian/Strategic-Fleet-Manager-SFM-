@@ -75,30 +75,39 @@ export function reconcileBuildHardpoints(
   oldHardpoints: Hardpoint[],
   newTemplate: FactoryHardpointTemplate[]
 ): ReconciliationResult {
-  // FTB-001B — a missile rack port's own children are a dynamic,
-  // component-owned structure (see componentOwnedSlots.ts), never part of
-  // the static canonical template — the template only ever describes
-  // whichever rack shipped from the factory. Reconciling them the normal
-  // way would silently revert any Commander-chosen rack swap back to the
-  // ORIGINAL factory rack's shape on every rehydration: the template's own
-  // untouched rack-child entries would never get matched/`claimed` by the
-  // swapped-in children, so the "append genuinely new port" step below
-  // would resurrect the OLD factory children fresh, while the real,
-  // currently-saved children (a different count/size entirely) never
-  // match anything and get quarantined. A rack port (identified by the
-  // TEMPLATE's own factory identity for it, regardless of what it's
-  // currently swapped to) has its children excluded from matching
-  // entirely and carried straight through from the old rows, verbatim —
-  // the exact structure `saveMissionConfiguration` already computed
-  // correctly at save time — and the template's own rack-child entries
-  // for that same port are excluded from ever being appended fresh.
-  const rackParentSlotLabels = new Set(
-    newTemplate.filter((t) => !t.parentSlotLabel && componentOwnedChildSlotSpec(t.factoryEntityClass)?.label === 'Missile').map((t) => t.slotLabel)
+  // FTB-001B/FTB-001E — a component-owned port's own children are a
+  // dynamic structure (see componentOwnedSlots.ts), never part of the
+  // static canonical template — the template only ever describes
+  // whichever component shipped from the factory. Reconciling them the
+  // normal way would silently revert any Commander-chosen swap back to
+  // the ORIGINAL factory component's shape on every rehydration: the
+  // template's own untouched child entries would never get
+  // matched/`claimed` by the swapped-in children, so the "append
+  // genuinely new port" step below would resurrect the OLD factory
+  // children fresh, while the real, currently-saved children (a different
+  // count/size entirely) never match anything and get quarantined. A
+  // component-owned port (identified by the TEMPLATE's own factory
+  // identity for it, regardless of what it's currently swapped to) has
+  // its children excluded from matching entirely and carried straight
+  // through from the old rows, verbatim — the exact structure
+  // `saveMissionConfiguration` already computed correctly at save time —
+  // and the template's own child entries for that same port are excluded
+  // from ever being appended fresh. Generic over every family
+  // `componentOwnedChildSlotSpec` recognizes (missile racks, mining
+  // heads) — never gated to one label, so a future family gets this for
+  // free. Deliberately NOT restricted to top-level (unparented) ports: a
+  // missile rack always happens to be top-level, but a mining laser is
+  // routinely nested under its own turret/mount housing (e.g. MOLE's
+  // "Front Cab Mining Laser (Manned Turret) — Mining Weapon") — what
+  // matters is the PORT's OWN factory identity, never its position in the
+  // hierarchy.
+  const componentOwnedParentSlotLabels = new Set(
+    newTemplate.filter((t) => componentOwnedChildSlotSpec(t.factoryEntityClass) !== null).map((t) => t.slotLabel)
   )
-  const isRackChild = (parentSlotLabel: string | undefined) => parentSlotLabel !== undefined && rackParentSlotLabels.has(parentSlotLabel)
-  const oldRackChildren = oldHardpoints.filter((h) => isRackChild(h.parentSlotLabel))
-  const oldHardpointsToReconcile = oldHardpoints.filter((h) => !isRackChild(h.parentSlotLabel))
-  const templateToReconcile = newTemplate.filter((t) => !isRackChild(t.parentSlotLabel))
+  const isComponentOwnedChild = (parentSlotLabel: string | undefined) => parentSlotLabel !== undefined && componentOwnedParentSlotLabels.has(parentSlotLabel)
+  const oldRackChildren = oldHardpoints.filter((h) => isComponentOwnedChild(h.parentSlotLabel))
+  const oldHardpointsToReconcile = oldHardpoints.filter((h) => !isComponentOwnedChild(h.parentSlotLabel))
+  const templateToReconcile = newTemplate.filter((t) => !isComponentOwnedChild(t.parentSlotLabel))
 
   const oldByLabel = new Map<string, Hardpoint>(oldHardpointsToReconcile.map((h) => [h.slotLabel, h]))
   const newBySourcePortId = new Map<string, FactoryHardpointTemplate>()

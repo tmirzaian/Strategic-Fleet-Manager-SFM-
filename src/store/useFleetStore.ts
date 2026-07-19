@@ -934,39 +934,55 @@ export const useFleetStore = create<FleetState>()(
       baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
     }
 
-    // FTB-001B — a missile rack's real child slots (unlike a mining head's
-    // — see componentOwnedSlots.ts) may already exist as real, saved rows
-    // baked in at ship-generation time for whichever rack was originally
-    // factory-installed. Once this Loadout's own final target for the
-    // rack's own port genuinely diverges from Factory, those old real
-    // children describe a rack that's no longer there (wrong count, wrong
-    // missile size) and must never be carried into the saved Build — and
-    // the newly-targeted rack's own real children must exist as REAL rows
-    // of their own, so a Commander's target choice for one of ITS slots
-    // (an override keyed by the exact same "<port> — Missile Slot N"
-    // scheme the live preview already uses) has somewhere to persist.
-    // Mining module slots are deliberately left untouched here — they stay
-    // purely display-time-synthesized exactly as FTB-001A established
-    // (never real rows, never independently assignable), so a mining-head
-    // swap is a no-op in this step.
+    // FTB-001B/FTB-001E — a component-owned port's real child slots
+    // (missile rack missiles, mining module slots — see
+    // componentOwnedSlots.ts) may already exist as real, saved rows baked
+    // in at ship-generation time for whichever component was originally
+    // factory-installed (true for missile racks; mining heads never have
+    // real ship-baked children at all, per FTB-001A). Mirrors
+    // `withComponentOwnedChildSlots`'s own three-way branch exactly, so
+    // save-time persistence and display-time synthesis never disagree:
+    //   - real existing children + unswapped -> leave completely alone
+    //     (an untouched missile rack keeps its real ship-baked rows).
+    //   - real existing children + swapped -> mark stale (they describe a
+    //     component that's no longer there) and materialize the newly-
+    //     targeted component's own real children fresh.
+    //   - NO existing children at all (always true for a mining head,
+    //     swapped or not) -> materialize fresh whenever a real spec is
+    //     known, REGARDLESS of swap status — there is nothing to "leave
+    //     alone" for a family that never has real ship-baked children to
+    //     begin with, so an unswapped mining laser's module slots still
+    //     need real rows for a Commander's assignment to persist into.
+    // Every materialized slotLabel is keyed by the exact same "<port> —
+    // <Label> Slot N" scheme the live preview already uses, so a
+    // Commander's target choice for one of ITS slots has somewhere to
+    // land. Generic over every component-owned family
+    // `componentOwnedChildSlotSpec` recognizes — never gated to one
+    // label, so a future family gets this for free. Gated first on
+    // `oldSpec || newSpec` so an ordinary (non-component-owned) port's
+    // real children (e.g. a gimbal mount's own "— Weapon" child) are never
+    // touched, swapped or not.
     const staleChildSlotLabels = new Set<string>()
     const materializedChildStubs: { slotLabel: string; type: string; size: string; parentSlotLabel: string }[] = []
     for (const row of referenceRows) {
       if (row.isStructural || !row.factoryEntityClass) continue
       const finalTargetEntityClass = baseTargetEntityClasses.get(row.slotLabel)
       const swapped = Boolean(finalTargetEntityClass && finalTargetEntityClass !== row.factoryEntityClass)
-      if (!swapped) continue
+      const currentEntityClass = finalTargetEntityClass ?? row.factoryEntityClass
       const oldSpec = componentOwnedChildSlotSpec(row.factoryEntityClass)
-      const newSpec = componentOwnedChildSlotSpec(finalTargetEntityClass)
-      if (oldSpec?.label !== 'Missile' && newSpec?.label !== 'Missile') continue
+      const newSpec = componentOwnedChildSlotSpec(currentEntityClass)
+      if (!oldSpec && !newSpec) continue // an ordinary component (e.g. a gimbal-mounted weapon) — nothing component-owned about this port, never touch its real children
       const childPrefix = `${row.slotLabel} — `
-      for (const candidate of referenceRows) {
-        if (candidate.slotLabel.startsWith(childPrefix)) staleChildSlotLabels.add(candidate.slotLabel)
+      const existingChildren = referenceRows.filter((candidate) => candidate.slotLabel.startsWith(childPrefix))
+      if (existingChildren.length > 0 && !swapped) continue // real, untouched children (an unswapped rack) — leave completely alone
+      if (existingChildren.length > 0 && swapped) {
+        for (const candidate of existingChildren) staleChildSlotLabels.add(candidate.slotLabel)
       }
-      if (newSpec?.label !== 'Missile') continue // swapped away from a rack (or to an uncataloged component) — old real children removed, nothing fabricated: an honest "unknown structure" state
+      if (!newSpec) continue // swapped away to an uncataloged component — old real children removed, nothing fabricated: an honest "unknown structure" state
+      const childType = newSpec.label === 'Missile' ? 'Missile' : 'Mining Module'
       for (let n = 1; n <= newSpec.count; n++) {
-        const slotLabel = `${childPrefix}Missile Slot ${n}`
-        materializedChildStubs.push({ slotLabel, type: 'Missile', size: newSpec.size ? `S${newSpec.size}` : row.size, parentSlotLabel: row.slotLabel })
+        const slotLabel = `${childPrefix}${newSpec.label} Slot ${n}`
+        materializedChildStubs.push({ slotLabel, type: childType, size: newSpec.size ? `S${newSpec.size}` : row.size, parentSlotLabel: row.slotLabel })
         if (!baseTargets.has(slotLabel)) {
           baseTargets.set(slotLabel, '—')
           baseTargetEntityClasses.set(slotLabel, undefined)
@@ -1038,16 +1054,17 @@ export const useFleetStore = create<FleetState>()(
         }
       })
 
-    // FTB-001B — a freshly-materialized missile-rack child slot is the one
-    // exception to "hierarchy is reconstructed at render time from the
-    // canonical template" immediately above: the canonical template only
-    // ever describes the ship's ORIGINAL factory rack's own children, so a
-    // swapped-to rack's new slots have no template entry to be
-    // reconstructed from. parentSlotLabel/isStructural must be set
-    // directly on these specific rows, or the Loadout & Port Tree/Loadout
-    // Manager would never recognize them as this rack's children on the
-    // next load and would synthesize a second, colliding set on top of
-    // them (see componentOwnedSlots.ts's `withComponentOwnedChildSlots`).
+    // FTB-001B/FTB-001E — a freshly-materialized component-owned child
+    // slot is the one exception to "hierarchy is reconstructed at render
+    // time from the canonical template" immediately above: the canonical
+    // template only ever describes the ship's ORIGINAL factory
+    // component's own children, so a swapped-to component's new slots
+    // have no template entry to be reconstructed from. parentSlotLabel/
+    // isStructural must be set directly on these specific rows, or the
+    // Loadout & Port Tree/Loadout Manager would never recognize them as
+    // this port's children on the next load and would synthesize a
+    // second, colliding set on top of them (see componentOwnedSlots.ts's
+    // `withComponentOwnedChildSlots`).
     const materializedRows: Hardpoint[] = materializedChildStubs.map((stub, i) => {
       const target = baseTargets.get(stub.slotLabel) ?? '—'
       const targetEntityClass = baseTargetEntityClasses.get(stub.slotLabel)
@@ -1057,7 +1074,7 @@ export const useFleetStore = create<FleetState>()(
         factoryEntityClass: undefined,
       })
       return {
-        id: `${buildId}-hp-rack-child-${i}`,
+        id: `${buildId}-hp-owned-child-${i}`,
         shipId,
         buildId,
         slotLabel: stub.slotLabel,
