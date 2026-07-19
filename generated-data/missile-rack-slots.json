@@ -1,0 +1,589 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T01:09:55.989Z",
+  "source": "starbreaker-datacore (Components[].Ports[] MinSize/MaxSize on the rack's own record)",
+  "rackSlotSpecByEntityClass": {
+    "GMRCK_S02_BEHR_Single_S02": {
+      "slotCount": 1,
+      "missileSize": 2
+    },
+    "MRCK_ANVL_Ballista_Quad_S05": {
+      "slotCount": 4,
+      "missileSize": 5
+    },
+    "MRCK_S01_BEHR_Single_S01": {
+      "slotCount": 1,
+      "missileSize": 1
+    },
+    "MRCK_S01_Krig_quad": {
+      "slotCount": 4,
+      "missileSize": 1
+    },
+    "MRCK_S01_Krig_quad_right": {
+      "slotCount": 4,
+      "missileSize": 1
+    },
+    "MRCK_S01_MISC_Starlite_Single_S01_Left": {
+      "slotCount": 1,
+      "missileSize": 1
+    },
+    "MRCK_S01_MISC_Starlite_Single_S01_Right": {
+      "slotCount": 1,
+      "missileSize": 1
+    },
+    "MRCK_S01_RSI_Aurora_Mk2_Combat_Module_Rack": {
+      "slotCount": 1,
+      "missileSize": 2
+    },
+    "MRCK_S01_TMBL_Storm_AA_Custom": {
+      "slotCount": 32,
+      "missileSize": 1
+    },
+    "MRCK_S02_BEHR_Dual_S01": {
+      "slotCount": 2,
+      "missileSize": 1
+    },
+    "MRCK_S02_BEHR_Single_S02": {
+      "slotCount": 1,
+      "missileSize": 2
+    },
+    "MRCK_S02_BEHR_Single_S02_Cyclone_AA": {
+      "slotCount": 1,
+      "missileSize": 2
+    },
+    "MRCK_S02_Krig_Triple": {
+      "slotCount": 3,
+      "missileSize": 2
+    },
+    "MRCK_S02_Krig_Triple_Right": {
+      "slotCount": 3,
+      "missileSize": 2
+    },
+    "MRCK_S02_MISC_Fury": {
+      "slotCount": 1,
+      "missileSize": 2
+    },
+    "MRCK_S02_MISC_Fury_Dual": {
+      "slotCount": 2,
+      "missileSize": 1
+    },
+    "MRCK_S02_MRAI_Guardian_MX_Custom": {
+      "slotCount": 12,
+      "missileSize": 2
+    },
+    "MRCK_S02_ORIG_100i_Dual_S02": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S02_ORIG_125a_Quad_S02": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S02_ORIG_400i_Octo_S01": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S02_ORIG_400i_Octo_S01_L": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S02_RSI_Apollo_Medivac": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S02_RSI_Apollo_Triage": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S02_RSI_Hermes": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S02_TMBL_Storm_AA_Custom": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S03_AEGS_Sabre_Firebird": {
+      "slotCount": 24,
+      "missileSize": 3
+    },
+    "MRCK_S03_BEHR_Dual_S02": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_BEHR_Dual_S02_RSI_Meteor": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_BEHR_Quad_S01": {
+      "slotCount": 4,
+      "missileSize": 1
+    },
+    "MRCK_S03_BEHR_Single_S03": {
+      "slotCount": 1,
+      "missileSize": 3
+    },
+    "MRCK_S03_GAMA_Railen_Dual_S02": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_GAMA_Railen_Dual_S02_Right": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_MISC_Fury_Dual": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_TMBL_Dual_S02_Cyclone_MT_Left": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_TMBL_Dual_S02_Cyclone_MT_Right": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S03_VNCL_Quad_S01": {
+      "slotCount": 4,
+      "missileSize": 1
+    },
+    "MRCK_S03_VNCL_Quad_S01_Blade": {
+      "slotCount": 4,
+      "missileSize": 1
+    },
+    "MRCK_S03_XNAA_SanTokYai": {
+      "slotCount": 2,
+      "missileSize": 2
+    },
+    "MRCK_S04_AEGS_Redeemer": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S04_AEGS_Vanguard": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_ANVL_Hornet_F7CM_Mk2_Turret": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_ANVL_Lightning_F8_Quad": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_ARGO_MOTH_16_S02": {
+      "slotCount": 16,
+      "missileSize": 2
+    },
+    "MRCK_S04_BEHR_Dual_S03": {
+      "slotCount": 2,
+      "missileSize": 3
+    },
+    "MRCK_S04_BEHR_Octo_S01": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_BEHR_Quad_S02": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_BEHR_Single_S04": {
+      "slotCount": 1,
+      "missileSize": 4
+    },
+    "MRCK_S04_CNOU_Quad_S02_Left": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_CNOU_Quad_S02_Right": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_ESPR_Talon": {
+      "slotCount": 12,
+      "missileSize": 3
+    },
+    "MRCK_S04_GAMA_Quad_S02": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_GAMA_Railen_Octo_S01": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_GAMA_Railen_Octo_S01_Right": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_KRIG_S65_Stingray": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_KRIG_S65_Stingray_Left": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_KRIG_S65_Stingray_Right": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_MISC_Starlancer": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S04_MISC_Starlancer_TAC_Turret": {
+      "slotCount": 6,
+      "missileSize": 2
+    },
+    "MRCK_S04_ORIG_400i_Octo_S02": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S04_ORIG_400i_Octo_S02_L": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S04_ORIG_Octo_S01": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S04_Octo_S01_orig_m80_left": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_Octo_S01_orig_m80_right": {
+      "slotCount": 8,
+      "missileSize": 1
+    },
+    "MRCK_S04_RSI_Constellation": {
+      "slotCount": 7,
+      "missileSize": 1
+    },
+    "MRCK_S04_RSI_Scorpius": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_RSI_Scorpius_bottom_right": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_RSI_Scorpius_top_left": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_RSI_Scorpius_top_right": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_RSI_Zeus_Left": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_RSI_Zeus_Right": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_VNCL_Quad_S02": {
+      "slotCount": 4,
+      "missileSize": 2
+    },
+    "MRCK_S04_duel_S02_orig_m80": {
+      "slotCount": 2,
+      "missileSize": 3
+    },
+    "MRCK_S05_AEGS_Idris_Left": {
+      "slotCount": 16,
+      "missileSize": 3
+    },
+    "MRCK_S05_AEGS_Idris_Right": {
+      "slotCount": 16,
+      "missileSize": 3
+    },
+    "MRCK_S05_AEGS_Vanguard": {
+      "slotCount": 3,
+      "missileSize": 5
+    },
+    "MRCK_S05_ANVL_Gladiator_Quad_S05": {
+      "slotCount": 4,
+      "missileSize": 5
+    },
+    "MRCK_S05_BEHR_Dual_S04": {
+      "slotCount": 2,
+      "missileSize": 4
+    },
+    "MRCK_S05_BEHR_Octo_S02": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_BEHR_PDC_Missile_16_S1": {
+      "slotCount": 16,
+      "missileSize": 1
+    },
+    "MRCK_S05_BEHR_Quad_S03": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_BEHR_Quad_S03_a": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_BEHR_Single_S05": {
+      "slotCount": 1,
+      "missileSize": 5
+    },
+    "MRCK_S05_CRUS_Starfighter_Left": {
+      "slotCount": 1,
+      "missileSize": 5
+    },
+    "MRCK_S05_CRUS_Starfighter_Right": {
+      "slotCount": 1,
+      "missileSize": 5
+    },
+    "MRCK_S05_DRAK_Herald_Nine_S02": {
+      "slotCount": 9,
+      "missileSize": 2
+    },
+    "MRCK_S05_DRAK_Ironclad_Torpedo_Silo_L": {
+      "slotCount": 5,
+      "missileSize": 5
+    },
+    "MRCK_S05_DRAK_Ironclad_Torpedo_Silo_R": {
+      "slotCount": 5,
+      "missileSize": 5
+    },
+    "MRCK_S05_MISC_Freelancer_MIS_Left": {
+      "slotCount": 10,
+      "missileSize": 3
+    },
+    "MRCK_S05_MISC_Freelancer_MIS_Right": {
+      "slotCount": 10,
+      "missileSize": 3
+    },
+    "MRCK_S05_MISC_Reliant_Left": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_MISC_Reliant_Right": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_ORIG_325a_Quad_S03": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_600i_Quad_S03": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_600i_Quad_S03_Lower_Left": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_600i_Quad_S03_Lower_Right": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_600i_Quad_S03_Upper_Right": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_890J_Quad_S03": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_ORIG_890J_Quad_S03_R": {
+      "slotCount": 4,
+      "missileSize": 3
+    },
+    "MRCK_S05_RSI_Constellation": {
+      "slotCount": 6,
+      "missileSize": 2
+    },
+    "MRCK_S05_RSI_Perseus_Torpedo_Holder": {
+      "slotCount": 1,
+      "missileSize": 5
+    },
+    "MRCK_S05_RSI_Perseus_Torpedo_L": {
+      "slotCount": 10,
+      "missileSize": 5
+    },
+    "MRCK_S05_RSI_Perseus_Torpedo_R": {
+      "slotCount": 10,
+      "missileSize": 5
+    },
+    "MRCK_S05_RSI_Scorpius_Turret_Octo_S2_Left": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_RSI_Scorpius_Turret_Octo_S2_Right": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_VNCL_Stinger_S02": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S05_VNCL_Stinger_S02_Right": {
+      "slotCount": 8,
+      "missileSize": 2
+    },
+    "MRCK_S06_ANVL_Gladiator": {
+      "slotCount": 2,
+      "missileSize": 5
+    },
+    "MRCK_S06_BEHR_Beehive_S02": {
+      "slotCount": 18,
+      "missileSize": 2
+    },
+    "MRCK_S06_BEHR_Dual_S05": {
+      "slotCount": 2,
+      "missileSize": 5
+    },
+    "MRCK_S06_BEHR_Octo_S03": {
+      "slotCount": 8,
+      "missileSize": 3
+    },
+    "MRCK_S06_BEHR_Quad_S04": {
+      "slotCount": 4,
+      "missileSize": 4
+    },
+    "MRCK_S06_BEHR_Single_S06": {
+      "slotCount": 1,
+      "missileSize": 6
+    },
+    "MRCK_S06_MISC_Gemini": {
+      "slotCount": 9,
+      "missileSize": 3
+    },
+    "MRCK_S06_MISC_Gemini_Derelict": {
+      "slotCount": 9,
+      "missileSize": 3
+    },
+    "MRCK_S06_MISC_Hull_B": {
+      "slotCount": 8,
+      "missileSize": 3
+    },
+    "MRCK_S06_TMBL_Nova_Custom": {
+      "slotCount": 12,
+      "missileSize": 2
+    },
+    "MRCK_S07_ANVL_Asgard_16_S03": {
+      "slotCount": 16,
+      "missileSize": 3
+    },
+    "MRCK_S07_ANVL_Ballista_Duel": {
+      "slotCount": 1,
+      "missileSize": 7
+    },
+    "MRCK_S07_CRUS_Starfighter": {
+      "slotCount": 12,
+      "missileSize": 3
+    },
+    "MRCK_S08_AEGS_Idris": {
+      "slotCount": 10,
+      "missileSize": 5
+    },
+    "MRCK_S08_BEHR_Non_S05_PUDefenseTurret": {
+      "slotCount": 9,
+      "missileSize": 5
+    },
+    "MRCK_S08_BEHR_Non_S05_PUDefenseTurret_Crusader": {
+      "slotCount": 9,
+      "missileSize": 5
+    },
+    "MRCK_S09_AEGS_Eclipse": {
+      "slotCount": 3,
+      "missileSize": 9
+    },
+    "MRCK_S09_AEGS_Retaliator_Fore": {
+      "slotCount": 4,
+      "missileSize": 9
+    },
+    "MRCK_S09_AEGS_Retaliator_Rear": {
+      "slotCount": 2,
+      "missileSize": 9
+    },
+    "MRCK_S10_AEGS_Idris_Nose_S12_Torpedo": {
+      "slotCount": 20,
+      "missileSize": 12
+    },
+    "MRCK_S10_RSI_Polaris_Left": {
+      "slotCount": 8,
+      "missileSize": 3
+    },
+    "MRCK_S10_RSI_Polaris_Right": {
+      "slotCount": 8,
+      "missileSize": 3
+    },
+    "MRCK_S10_RSI_Polaris_Torpedo": {
+      "slotCount": 7,
+      "missileSize": 10
+    },
+    "MRCK_S10_RSI_Polaris_Torpedo_Cylinder_Right_Inner": {
+      "slotCount": 7,
+      "missileSize": 10
+    },
+    "MRCK_S10_RSI_Polaris_Torpedo_Left": {
+      "slotCount": 7,
+      "missileSize": 10
+    },
+    "MRCK_S4_RSI_Polaris_Turret": {
+      "slotCount": 12,
+      "missileSize": 2
+    },
+    "MRCK_TALN_Colonial_S3x8": {
+      "slotCount": 8,
+      "missileSize": 1
+    }
+  },
+  "skipped": [
+    {
+      "entityClass": "MISC_Reliant_Missile_Cap_Left",
+      "reason": "no Components[].Ports[] found"
+    },
+    {
+      "entityClass": "MISC_Reliant_Missile_Cap_Right",
+      "reason": "no Components[].Ports[] found"
+    },
+    {
+      "entityClass": "MRCK_S04_ESPR_Talon_CAP",
+      "reason": "no Components[].Ports[] found"
+    },
+    {
+      "entityClass": "MRCK_S04_ESPR_Talon_CAP_R",
+      "reason": "no Components[].Ports[] found"
+    },
+    {
+      "entityClass": "MRCK_S08_BEHR_Non_S05_PUDefenseTurret_NoAnim",
+      "reason": "no Components[].Ports[] found"
+    },
+    {
+      "entityClass": "MRCK_S10_RSI_Polaris_Torpedo_lb",
+      "reason": "MRCK_S10_RSI_Polaris_Torpedo_lb: rack ports carry non-uniform MinSize/MaxSize (10:10, 1:1) — stopping rather than guessing one. Investigate before adding a fallback."
+    },
+    {
+      "entityClass": "MRCK_S10_RSI_Polaris_Torpedo_lt",
+      "reason": "MRCK_S10_RSI_Polaris_Torpedo_lt: rack ports carry non-uniform MinSize/MaxSize (10:10, 1:1) — stopping rather than guessing one. Investigate before adding a fallback."
+    },
+    {
+      "entityClass": "MRCK_S10_RSI_Polaris_Torpedo_rb",
+      "reason": "MRCK_S10_RSI_Polaris_Torpedo_rb: rack ports carry non-uniform MinSize/MaxSize (10:10, 1:1) — stopping rather than guessing one. Investigate before adding a fallback."
+    },
+    {
+      "entityClass": "MRCK_S10_RSI_Polaris_Torpedo_rt",
+      "reason": "MRCK_S10_RSI_Polaris_Torpedo_rt: rack ports carry non-uniform MinSize/MaxSize (10:10, 1:1) — stopping rather than guessing one. Investigate before adding a fallback."
+    },
+    {
+      "entityClass": "MRCK_S12_AEGS_Javelin",
+      "reason": "MRCK_S12_AEGS_Javelin: rack ports have no usable uniform size (Min=9, Max=12) — stopping rather than guessing one."
+    },
+    {
+      "entityClass": "MRCK_TALN_Colonial_S3x8_Orison",
+      "reason": "MRCK_TALN_Colonial_S3x8_Orison: rack ports have no usable uniform size (Min=1, Max=3) — stopping rather than guessing one."
+    },
+    {
+      "entityClass": "VNCL_MissileRack_Blade",
+      "reason": "no Components[].Ports[] found"
+    }
+  ]
+}

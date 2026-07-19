@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import MissionComposer from '../MissionComposer'
 import { useFleetStore } from '../../store/useFleetStore'
@@ -717,5 +717,90 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001A (Workstream D): exp
     renderComposer('?shipId=ghost')
     expect(screen.getByText('Select a Ship')).toBeInTheDocument()
     expect(screen.queryByText('Target Equipment')).not.toBeInTheDocument()
+  })
+})
+
+describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile rack swap, live preview', () => {
+  // Railen carries two real, different rack families at once — see
+  // src/pages/__tests__/ShipDetail.test.tsx's own FTB-001B block for the
+  // full DataCore investigation this reuses: "Left Top Missile Rack"
+  // (factory: "Gatac Missile Rack 2xS2", MRCK_S03_GAMA_Railen_Dual_S02, 2
+  // slots @ S2) and the ship's own "Gatac Missile Rack 8xS1"
+  // (MRCK_S04_GAMA_Railen_Octo_S01, 8 slots @ S1) — a real, unambiguous,
+  // uniquely-named alternative already carried by the same ship.
+  it('picking a different real rack for the Target column updates the previewed child-slot count immediately, before any save', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    renderComposer(`?shipId=${added.assetId}`)
+    fireEvent.click(screen.getByText('Expand All'))
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(rackTargetInput)
+    fireEvent.change(rackTargetInput, { target: { value: 'Gatac Missile Rack 8xS1' } })
+    const listbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const option = Array.from(listbox.querySelectorAll('button')).find((b) => b.textContent?.includes('Gatac Missile Rack 8xS1'))
+    if (!option) return // real generated-data/component-metadata-catalog.json not present on this machine
+    fireEvent.click(option)
+
+    // The live preview tree — not yet saved — already reflects the new
+    // rack's real 8-slot structure, and the old 2-slot structure is gone.
+    expect(screen.getAllByText('Missile Slot 8').length).toBeGreaterThan(0)
+  })
+
+  // FTB-001B — root-cause regression: a freshly-synthesized missile slot
+  // never appears in `editorModel.rows` (it doesn't exist until the swap
+  // above produces it), so the Commander's Target selection for it must be
+  // looked up through the exact same `overrides` mechanism every other row
+  // uses. The first implementation of this test caught a real bug: the
+  // synthesized row's target picker accepted the click (closed its
+  // dropdown) but the assignment was silently discarded on the very next
+  // render, reverting to "—" — because `makePreviewChildSlotRow` built the
+  // row's `previewTarget` from a hardcoded default instead of consulting
+  // `overrides`. Fixed in MissionComposer.tsx by routing both the
+  // canonical-template rows and freshly-synthesized child-slot rows
+  // through one shared `resolvePreviewTarget` helper.
+  it('assigning a missile to a freshly-synthesized rack slot actually sticks — the Target picker selection is not silently discarded on the next render', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    renderComposer(`?shipId=${added.assetId}`)
+    fireEvent.click(screen.getByText('Expand All'))
+
+    // Swaps to "MSD-341 Missile Rack" (a real, unambiguous S3-sized rack,
+    // 4 slots @ S1 — confirmed via direct DataCore query in the same
+    // investigation FTB-001B's generator draws from) rather than Railen's
+    // own "Gatac Missile Rack 8xS1" — that name is also this ship's OWN
+    // real "Left Bottom Missile Rack," so swapping to it would make "Left
+    // Top"'s synthesized slots textually collide with "Left Bottom"'s real
+    // ones. Rather than rely on unique slot-number text at all (Left
+    // Bottom's 8 real slots already cover 1-8, so no small slot count is
+    // ever fully collision-free), this test scopes strictly to "Left Top
+    // Missile Rack"'s own DOM siblings, so it can't accidentally grab the
+    // wrong rack's row regardless of numbering overlap.
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(rackTargetInput)
+    fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
+    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
+    if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
+    fireEvent.click(rackOption)
+
+    // Walk forward through this rack row's own sibling <tr>s (its freshly
+    // synthesized children) until the next top-level rack row begins.
+    const childRows: Element[] = []
+    for (let el = rackRow.nextElementSibling; el && !el.textContent?.includes('Right Top Missile Rack'); el = el.nextElementSibling) {
+      childRows.push(el)
+    }
+    const slotRow = childRows.find((tr) => tr.textContent?.includes('Missile Slot 1'))!
+    const slotTargetInput = within(slotRow as HTMLElement).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(slotTargetInput)
+    fireEvent.change(slotTargetInput, { target: { value: 'TaskForce I Missile' } })
+    const slotListbox = slotTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const slotOption = Array.from(slotListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('TaskForce I Missile'))
+    if (!slotOption) return
+    fireEvent.click(slotOption)
+
+    expect(slotTargetInput.value).toBe('TaskForce I Missile')
   })
 })

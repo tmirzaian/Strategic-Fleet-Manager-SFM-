@@ -5,6 +5,7 @@ import { buildPortTree } from '../../utils/portTree'
 import { hasComponentCatalog, resolveComponentByEntityClass } from '../../generated/componentCatalog'
 import { withComponentOwnedChildSlots } from '../../utils/componentOwnedSlots'
 import { getMiningModuleSlotCount } from '../../generated/miningModuleSlots'
+import { getMissileRackSlotSpec } from '../../generated/missileRackSlots'
 import type { Hardpoint } from '../../types'
 
 afterEach(cleanup)
@@ -326,5 +327,36 @@ describe('LoadoutPortTree — FTB-001A (Workstream C): mining module slots', () 
     expect(screen.getByText('Module Slot 1')).toBeInTheDocument()
     expect(screen.getByText('Module Slot 2')).toBeInTheDocument()
     expect(screen.queryByText('Module Slot 3')).not.toBeInTheDocument()
+  })
+})
+
+describe('LoadoutPortTree — FTB-001B: dynamic missile rack rendering', () => {
+  const POLARIS_RACK = 'MRCK_S10_RSI_Polaris_Right' // 8 slots @ S3
+  const TALON_RACK = 'MRCK_S04_ESPR_Talon' // 12 slots @ S3 — a real, different rack
+
+  it('a factory rack whose Target is changed to a different real rack shows the NEW rack\'s own source-derived child count, not the old factory count', () => {
+    if (getMissileRackSlotSpec(POLARIS_RACK) === null) return // generated-data/missile-rack-slots.json not present on this machine
+    const staleFactoryChildren = Array.from({ length: 8 }, (_, i) =>
+      hp({ id: `stale-${i + 1}`, slotLabel: `Right Missile Rack — Missile Slot ${i + 1}`, parentSlotLabel: 'Right Missile Rack', type: 'Missile', size: 'S3' })
+    )
+    const hardpoints = withComponentOwnedChildSlots(
+      [
+        // Deliberately no `installedEntityClass` — only Target has
+        // changed (a Commander previewing the swap before installing).
+        hp({ id: 'rack', slotLabel: 'Right Missile Rack', type: 'Missile Rack', size: 'S10', factoryEntityClass: POLARIS_RACK, targetEntityClass: TALON_RACK }),
+        ...staleFactoryChildren,
+      ],
+      (host, n, spec) =>
+        hp({ id: `${host.id}-slot-${n}`, slotLabel: `${host.slotLabel} — ${spec.label} Slot ${n}`, parentSlotLabel: host.slotLabel, type: 'Missile', size: spec.size ? `S${spec.size}` : host.size })
+    )
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    clickToggle('Right Missile Rack')
+    // Only the new rack's real 12 slots render...
+    expect(screen.getByText('Missile Slot 1')).toBeInTheDocument()
+    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
+    // ...never a 13th (Talon's real count, not one more), and never any
+    // stale content bleeding through from the old 8-slot Polaris shape.
+    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
   })
 })

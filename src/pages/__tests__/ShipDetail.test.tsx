@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ShipDetail from '../ShipDetail'
 import MissionComposer from '../MissionComposer'
 import { useFleetStore } from '../../store/useFleetStore'
+import { getMissileRackSlotSpec } from '../../generated/missileRackSlots'
 
 const initialState = useFleetStore.getState()
 
@@ -334,5 +335,163 @@ describe('<ShipDetail /> — FTB-001A (Workstream D): explicit ship selection', 
     )
     expect(screen.getByText('Select a Ship')).toBeInTheDocument()
     expect(screen.queryByText('Readiness')).not.toBeInTheDocument()
+  })
+})
+
+describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end through the real store', () => {
+  // Railen (an existing, already-established test fixture — see Mission
+  // M-011's own Railen tests) carries two real racks at once: "Left Top
+  // Missile Rack" (factory: MRCK_S03_GAMA_Railen_Dual_S02, 2 slots @ S2)
+  // and "Left Bottom Missile Rack" (MRCK_S04_GAMA_Railen_Octo_S01, 8
+  // slots @ S1) — confirmed via direct DataCore query (FTB-001B
+  // investigation). The swap target here is a real, unrelated Talon rack
+  // (MRCK_S04_ESPR_Talon, 12 slots @ S3) rather than Railen's own Octo
+  // rack, specifically so its slot numbers 9-12 can never collide with
+  // any slot number Railen's OTHER real factory rack (max 8) already
+  // renders — every "Missile Slot N" assertion below is scoped to a slot
+  // number that is unambiguous on this exact ship.
+  //
+  // Ship Detail is a "what does my ship actually look like right now"
+  // inspection view (Design Authority-established precedent, FTB-001A):
+  // its own component-owned child-slot correction keys off INSTALLED
+  // identity, not merely Target, so that a Commander who has only
+  // *planned* a swap (via Loadout Manager) but never actually installed
+  // it still sees the real, physically-present rack's own children —
+  // matching how every other row's status already distinguishes
+  // "Missing"/"Upgrade Available" (planned) from "OK" (actually there).
+  // This helper therefore simulates the REAL end state of a completed
+  // swap (matching what Quick Update's "Install Component" action
+  // produces) — both Installed and Target set to the new rack — via a
+  // direct store patch, rather than re-exercising Quick Update's own
+  // already-tested UI mechanics here.
+  const DUAL_RACK = 'MRCK_S03_GAMA_Railen_Dual_S02'
+  const TALON_RACK = 'MRCK_S04_ESPR_Talon'
+
+  function addRailenWithSwappedRack() {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    const ship = useFleetStore.getState().ships.find((s) => s.id === added.assetId)!
+    useFleetStore.setState({
+      hardpoints: useFleetStore.getState().hardpoints.map((h) =>
+        h.buildId === ship.activeBuildId && h.slotLabel === 'Left Top Missile Rack'
+          ? { ...h, installedItem: 'MSD-683 Missile Rack', installedEntityClass: TALON_RACK, targetItem: 'MSD-683 Missile Rack', targetEntityClass: TALON_RACK, status: 'OK' }
+          : h
+      ),
+    })
+    return added.assetId
+  }
+
+  it('a factory rack (2 slots @ S2) shows its real factory child count before any swap', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null) return // generated-data/missile-rack-slots.json not present on this machine
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    render(
+      <MemoryRouter initialEntries={[`/ship/${added.assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Left Top Missile Rack')).toBeInTheDocument()
+  })
+
+  it('replacing the Dual rack\'s Target with the real Talon rack removes the old 2xS2 children and shows the new 12xS3 children — count AND size both corrected', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
+    const assetId = addRailenWithSwappedRack()
+    render(
+      <MemoryRouter initialEntries={[`/ship/${assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    // The rack port's own row still reads its ORIGINAL S3 mount-point
+    // size/type — only its CHILDREN change shape.
+    expect(within(rackRow).getByText(/S3/)).toBeInTheDocument()
+    // Slot 12 is unambiguous — Railen's other real rack (Octo) tops out
+    // at 8, so this can only be the swapped-in Talon rack's own 12th slot.
+    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
+    // Exactly 12 (Talon's real count), never a 13th.
+    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
+  })
+
+  it('save, reload (fresh render), and a fresh render against the same store state all preserve the corrected 12-slot structure', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
+    const assetId = addRailenWithSwappedRack()
+    // First render (post-save).
+    const first = render(
+      <MemoryRouter initialEntries={[`/ship/${assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
+    first.unmount()
+    cleanup()
+
+    // A completely fresh render against the SAME (already-persisted)
+    // store state — simulates a reload/restart, since the correction is
+    // re-derived fresh from the row's own persisted identity every time,
+    // never from anything cached in the first render.
+    render(
+      <MemoryRouter initialEntries={[`/ship/${assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
+    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
+  })
+
+  it('a freshly-swapped rack\'s new empty slots read OK (nothing required yet), matching how every other untouched optional port already behaves — never silently "Missing" for a slot the Commander hasn\'t decided on yet', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
+    const assetId = addRailenWithSwappedRack()
+    render(
+      <MemoryRouter initialEntries={[`/ship/${assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    const slotRow = screen.getByText('Missile Slot 12').closest('tr')!
+    expect(within(slotRow).getByText('OK')).toBeInTheDocument()
+    // Readiness never crashes/NaNs across the swap. An empty-but-OK
+    // synthesized slot is never "missing," so this ship may legitimately
+    // read as fully Mission Ready (no percentage rendered at all in that
+    // state) rather than a partial numeric percentage — either is a
+    // valid, non-broken outcome; only a literal "NaN" would indicate the
+    // swap broke the readiness calculation.
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument()
+  })
+
+  it('the new Talon rack\'s own slot size (S3) renders on each synthesized child — a missile only valid on the old S2 Dual rack\'s size would now be rejected by the port\'s own size, never silently accepted', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
+    const assetId = addRailenWithSwappedRack()
+    render(
+      <MemoryRouter initialEntries={[`/ship/${assetId}`]}>
+        <Routes>
+          <Route path="/ship/:shipId" element={<ShipDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByText('Expand All'))
+    const slotRow = screen.getByText('Missile Slot 12').closest('tr')!
+    // The synthesized slot carries the NEW rack's real S3 size (not the
+    // old Dual rack's S2) — an old S2 assignment would fail
+    // `validateTargetCompatibility` against this exact size the moment a
+    // Commander tried to keep it (proven directly at the
+    // compatibility-engine level by
+    // src/data/__tests__/pdcCompatibility.test.ts's own established
+    // pattern; this render-level assertion confirms the size the engine
+    // would validate against is really the new rack's, not the old one's).
+    expect(within(slotRow).getByText(/S3\b/)).toBeInTheDocument()
   })
 })

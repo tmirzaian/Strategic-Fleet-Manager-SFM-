@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useFleetStore } from '../useFleetStore'
+import { getMissileRackSlotSpec } from '../../generated/missileRackSlots'
 
 const initialState = useFleetStore.getState()
 
@@ -188,5 +189,110 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
       setActive: false,
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('saveMissionConfiguration — FTB-001B: dynamic missile rack swap persists real rows', () => {
+  // Root-cause regression: the live Loadout Manager preview correctly
+  // shows a freshly-synthesized rack slot's Target selection (via
+  // MissionComposer's own `resolvePreviewTarget`), but that preview row
+  // never existed in `referenceRows` — the real Hardpoint set
+  // `saveMissionConfiguration` builds `newRows` from — so without this
+  // fix, a Commander's missile assignment into a swapped rack's new slots
+  // was silently discarded the instant the Loadout was actually saved,
+  // even though the on-screen preview looked correct right up until Save.
+  const DUAL_RACK = 'MRCK_S03_GAMA_Railen_Dual_S02' // Railen's real factory "Left Top Missile Rack", 2 slots @ S2
+  const MSD341_RACK = 'MRCK_S03_BEHR_Quad_S01' // a real, unrelated, unambiguous S3-sized rack, 4 slots @ S1
+
+  function addRailen() {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    return added.assetId
+  }
+
+  it('swapping the rack via Target override materializes real new child rows, removes the old ones, and the Commander\'s own missile assignment for a new slot actually persists', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(MSD341_RACK) === null) return // generated-data/missile-rack-slots.json not present on this machine
+    const shipId = addRailen()
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'Rack Swap Test',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        'Left Top Missile Rack': { targetItem: 'MSD-341 Missile Rack', targetEntityClass: MSD341_RACK },
+        'Left Top Missile Rack — Missile Slot 1': { targetItem: 'TaskForce I Missile', targetEntityClass: undefined },
+      },
+      setActive: false,
+    })
+    expect(result.success).toBe(true)
+    const rows = hardpointsFor(result.buildId!)
+
+    // The old 2xS2 real children are gone — never lingering alongside the
+    // new ones.
+    expect(rows.some((h) => h.slotLabel === 'Left Top Missile Rack — Missile Slot 2' && h.size === 'S2')).toBe(false)
+
+    // The new rack's real 4xS1 structure exists as real, addressable rows.
+    const newSlots = rows.filter((h) => h.parentSlotLabel === 'Left Top Missile Rack')
+    expect(newSlots.length).toBe(4)
+    expect(newSlots.every((h) => h.size === 'S1')).toBe(true)
+
+    // The Commander's own missile pick for slot 1 actually saved.
+    const slot1 = rows.find((h) => h.slotLabel === 'Left Top Missile Rack — Missile Slot 1')!
+    expect(slot1.targetItem).toBe('TaskForce I Missile')
+
+    // An unswapped rack on the same ship (Left Bottom) is completely
+    // unaffected — its real factory children survive untouched. Railen's
+    // own raw import data names these "01 Attach Missile" etc. (the real
+    // StarBreaker convention — formatHardpointLabel presents this as
+    // "Missile Slot 1" for display, but the underlying persisted
+    // slotLabel is the raw form), unlike a freshly-materialized slot's
+    // literal "Missile Slot N" slotLabel.
+    const untouchedSlot = rows.find((h) => h.slotLabel === 'Left Bottom Missile Rack — 01 Attach Missile')!
+    expect(untouchedSlot.targetItem).toBe('TaskForce I Missile')
+    expect(untouchedSlot.size).toBe('S1')
+  })
+
+  it('the swap and the missile assignment both survive a genuine reload', () => {
+    if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(MSD341_RACK) === null) return
+    const shipId = addRailen()
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'Rack Swap Reload Test',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        'Left Top Missile Rack': { targetItem: 'MSD-341 Missile Rack', targetEntityClass: MSD341_RACK },
+        'Left Top Missile Rack — Missile Slot 4': { targetItem: 'TaskForce I Missile', targetEntityClass: undefined },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+
+    // A genuine reload: rehydrate a brand-new store instance from whatever
+    // got written to localStorage, exactly like a real browser restart.
+    const persisted = localStorage.getItem('sfm-fleet-store')
+    expect(persisted).toBeTruthy()
+    useFleetStore.persist.rehydrate()
+
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === result.buildId)
+    const newSlots = rows.filter((h) => h.parentSlotLabel === 'Left Top Missile Rack')
+    expect(newSlots.length).toBe(4)
+    const slot4 = rows.find((h) => h.slotLabel === 'Left Top Missile Rack — Missile Slot 4')!
+    expect(slot4.targetItem).toBe('TaskForce I Missile')
+    expect(slot4.size).toBe('S1')
+  })
+
+  it('an ordinary (non-rack) target swap never touches unrelated child rows — a gimbal mount changing weapons still keeps its real Weapon child intact', () => {
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId: 'ghost',
+      name: 'Ordinary Weapon Swap',
+      startingState: 'FACTORY',
+      targetOverrides: { 'Power 1': 'Slipstream' },
+      setActive: false,
+    })
+    expect(result.success).toBe(true)
+    const rows = hardpointsFor(result.buildId!)
+    // Nothing was spuriously removed or materialized for an ordinary,
+    // non-component-owned port.
+    const before = useFleetStore.getState().hardpoints.filter((h) => h.buildId === useFleetStore.getState().ships.find((s) => s.id === 'ghost')!.activeBuildId)
+    expect(rows.length).toBe(before.length)
   })
 })

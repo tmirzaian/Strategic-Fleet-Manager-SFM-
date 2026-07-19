@@ -1,58 +1,159 @@
 import { getMiningModuleSlotCount } from '../generated/miningModuleSlots'
+import { getMissileRackSlotSpec } from '../generated/missileRackSlots'
 
 /**
- * FTB-001A (Workstream C) — the count of real, source-derived child
- * attachment ports a component (by entityClass) owns on its own DataCore
- * record, regardless of which physical ship port it happens to be
- * installed into. Generic over the data source: today only mining heads
- * populate this (see generated-data/mining-module-slots.json, derived by
- * scripts/generateMiningModuleSlots.ts); a future component-owned-slot
- * category (if one is ever found) only needs its own lookup merged in
- * here, never a change to the tree-construction step that consumes this.
+ * FTB-001A/FTB-001B — a component-owned child slot's presentation shape:
+ * how many, and (when the slot itself is size-constrained, e.g. a rack's
+ * own missile attach points) what size. `label` is the word used in
+ * "<label> Slot N" ("Module" for a mining head, "Missile" for a rack) —
+ * sourced from whichever generated table produced this spec, so the
+ * tree-construction step below never needs to know which kind of
+ * component it's looking at.
  */
+export interface ComponentOwnedSlotSpec {
+  count: number
+  /** The size a slot itself requires (a rack's own accepted missile
+   * size) — undefined when the slot has no size constraint of its own
+   * (a mining module slot). */
+  size?: number
+  label: string
+}
+
+/**
+ * FTB-001A/FTB-001B — the real, source-derived child-slot spec a
+ * component (by entityClass) owns on its own DataCore record, regardless
+ * of which physical ship port it happens to be installed into. Generic
+ * over the data source: mining heads (generated-data/mining-module-slots.json)
+ * and missile racks (generated-data/missile-rack-slots.json) both merge in
+ * here; a future component-owned-slot category only needs its own lookup
+ * added to this function, never a change to the tree-construction step
+ * that consumes it. `null` when the entityClass owns no known child slots
+ * at all (an ordinary component, or an uncataloged one) — never guessed.
+ */
+export function componentOwnedChildSlotSpec(entityClass: string | null | undefined): ComponentOwnedSlotSpec | null {
+  const miningCount = getMiningModuleSlotCount(entityClass)
+  if (miningCount > 0) return { count: miningCount, label: 'Module' }
+
+  const rackSpec = getMissileRackSlotSpec(entityClass)
+  if (rackSpec) return { count: rackSpec.slotCount, size: rackSpec.missileSize, label: 'Missile' }
+
+  return null
+}
+
+/** @deprecated kept only for the mining-specific unit tests that predate
+ * the unified spec — prefer `componentOwnedChildSlotSpec`. */
 export function componentOwnedChildSlotCount(entityClass: string | null | undefined): number {
-  return getMiningModuleSlotCount(entityClass)
+  return componentOwnedChildSlotSpec(entityClass)?.count ?? 0
 }
 
 export interface ComponentOwnedSlotHost {
   id: string
   slotLabel: string
+  parentSlotLabel?: string
   isStructural?: boolean
   installedEntityClass?: string
   targetEntityClass?: string
   factoryEntityClass?: string
+  /** FTB-001B — MissionComposer's own live, not-yet-saved Target picker
+   * selection (`PreviewRow.previewTargetEntityClass`) — absent entirely
+   * on a real persisted `Hardpoint` (Ship Detail), present only while a
+   * Commander is actively previewing a change in the Loadout Manager
+   * before saving. */
+  previewTargetEntityClass?: string
 }
 
 /**
- * FTB-001A (Workstream C) — appends one synthetic child row per real
- * component-owned slot beneath every hardpoint whose CURRENTLY RELEVANT
- * component (installed, falling back to target, falling back to factory —
- * the same "what's actually there right now" precedence
- * `computeHardpointStatusWithValidation`'s callers already use elsewhere)
- * owns any. The slot count is always derived fresh from that component's
- * own identity, never from the ship or the port itself — swap a
- * Commander's mining head for a different real model (via Quick Update or
- * the Loadout Manager) and the slot count updates to match on the next
- * render, with no per-ship template change needed.
- *
- * Purely additive and generic over the row shape `T` — the caller supplies
- * `makeSlotRow` because the exact Hardpoint-shaped row differs between
- * Ship Detail's real `Hardpoint[]` and the Loadout Manager's preview rows.
- * Appended rows are linked in via the same `parentSlotLabel` mechanism
- * `buildPortTree()` already understands — no change to tree construction
- * itself was needed. Never mining-specific here: the decision of WHICH
- * components own child slots, and how many, lives entirely in
- * `componentOwnedChildSlotCount` above.
+ * FTB-001B — this row's "current, most concrete state" identity, for
+ * deciding whether a component-owned child slot's owner has changed:
+ *   1. `previewTargetEntityClass` — a live, not-yet-saved Loadout Manager
+ *      picker selection, when present. This is the whole point of a
+ *      preview: showing the effect of the Commander's pending choice
+ *      immediately, before Save — "child-slot structure updates
+ *      immediately" (FTB-001B's own required behavior) means reacting to
+ *      this the moment it's picked, not only after it's installed.
+ *   2. `installedEntityClass` — what's physically there right now, for a
+ *      real persisted Hardpoint (Ship Detail) with no live preview in
+ *      progress. Matches `computeHardpointStatusWithValidation`'s own
+ *      "what's actually there right now" precedence (FTB-001A).
+ *   3. `targetEntityClass`, then `factoryEntityClass` — the same
+ *      permissive fallbacks FTB-001A already established for a port with
+ *      nothing installed yet.
  */
-export function withComponentOwnedChildSlots<T extends ComponentOwnedSlotHost>(rows: T[], makeSlotRow: (host: T, slotNumber: number, slotCount: number) => T): T[] {
-  const extra: T[] = []
+function currentEntityClassOf(row: ComponentOwnedSlotHost): string | undefined {
+  return row.previewTargetEntityClass ?? row.installedEntityClass ?? row.targetEntityClass ?? row.factoryEntityClass
+}
+
+/**
+ * FTB-001A/FTB-001B — the one shared tree-correction step for
+ * component-owned child slots, generic over BOTH:
+ *   - a component that never had real ship-baked children to begin with
+ *     (a mining head — FTB-001A) — always (re)synthesized fresh from the
+ *     current identity's spec.
+ *   - a component that DID have real ship-baked children reflecting
+ *     whichever factory item was installed at ship-generation time (a
+ *     missile rack — FTB-001B) — left completely untouched as long as
+ *     the row's current identity still matches its factory identity (this
+ *     is what preserves backward compatibility for every existing saved
+ *     fleet/Loadout: nothing changes for a rack nobody ever swapped).
+ *     Only once a Commander's Target/Installed selection genuinely
+ *     diverges from Factory are the old (now-stale, possibly wrong-size)
+ *     child rows removed and replaced with a fresh set derived from the
+ *     NEWLY selected rack's own real spec.
+ *
+ * A row whose current identity has no known spec at all (an ordinary
+ * component, or a swap to an uncataloged rack) never gains fabricated
+ * children — if it had real factory children and got swapped away with
+ * no known replacement spec, they are removed and nothing replaces them
+ * (an honest "unknown structure" state, never a stale wrong-size one).
+ *
+ * Purely a display/calculation-time correction — never mutates or
+ * persists anything; safe to call on every render, and therefore correct
+ * again automatically after save, reload, or a full restart, since it
+ * always re-derives from the row's own currently-persisted identity.
+ */
+export function withComponentOwnedChildSlots<T extends ComponentOwnedSlotHost>(rows: T[], makeSlotRow: (host: T, slotNumber: number, spec: ComponentOwnedSlotSpec) => T): T[] {
+  const existingChildrenByParent = new Map<string, T[]>()
   for (const row of rows) {
-    if (row.isStructural) continue
-    const entityClass = row.installedEntityClass ?? row.targetEntityClass ?? row.factoryEntityClass
-    const count = componentOwnedChildSlotCount(entityClass)
-    for (let slotNumber = 1; slotNumber <= count; slotNumber++) {
-      extra.push(makeSlotRow(row, slotNumber, count))
+    if (row.parentSlotLabel) {
+      if (!existingChildrenByParent.has(row.parentSlotLabel)) existingChildrenByParent.set(row.parentSlotLabel, [])
+      existingChildrenByParent.get(row.parentSlotLabel)!.push(row)
     }
   }
-  return extra.length > 0 ? [...rows, ...extra] : rows
+
+  const staleChildIds = new Set<string>()
+  const newChildren: T[] = []
+
+  for (const row of rows) {
+    if (row.isStructural) continue
+    const current = currentEntityClassOf(row)
+    const swapped = Boolean(row.factoryEntityClass && current && current !== row.factoryEntityClass)
+    const existingChildren = existingChildrenByParent.get(row.slotLabel) ?? []
+
+    // Real ship-baked children for a rack nobody swapped — untouched.
+    if (existingChildren.length > 0 && !swapped) continue
+
+    // Swapped away from factory: whatever real children existed for the
+    // OLD factory item are now stale (wrong count/size/identity) and must
+    // never be silently retained.
+    if (existingChildren.length > 0 && swapped) {
+      for (const child of existingChildren) staleChildIds.add(child.id)
+    }
+
+    // (Re)synthesize when there were no real children to begin with (the
+    // mining-head case, always), or when swapped away from factory (the
+    // rack case) — in both cases, only when the CURRENT identity has a
+    // known real spec. No spec known means no children at all, rather
+    // than a guess.
+    if (existingChildren.length === 0 || swapped) {
+      const spec = componentOwnedChildSlotSpec(current)
+      if (spec) {
+        for (let slotNumber = 1; slotNumber <= spec.count; slotNumber++) {
+          newChildren.push(makeSlotRow(row, slotNumber, spec))
+        }
+      }
+    }
+  }
+
+  const filtered = staleChildIds.size > 0 ? rows.filter((r) => !staleChildIds.has(r.id)) : rows
+  return newChildren.length > 0 ? [...filtered, ...newChildren] : filtered
 }

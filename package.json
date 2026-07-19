@@ -12,6 +12,7 @@
     "import:ship": "tsx scripts/importShips.ts",
     "generate:component-catalog": "tsx scripts/generateComponentCatalog.ts",
     "generate:mining-module-slots": "tsx scripts/generateMiningModuleSlots.ts",
+    "generate:missile-rack-slots": "tsx scripts/generateMissileRackSlots.ts",
     "generate:ship-catalog": "tsx scripts/generateShipCatalog.ts",
     "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",
     "golden-fleet:acquire": "vite-node scripts/goldenFleet/acquire.ts",

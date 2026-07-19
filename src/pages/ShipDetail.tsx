@@ -17,24 +17,36 @@ import { buildPortTree } from '../utils/portTree'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { shipFactoryTemplates } from '../data/shipDefinitions'
 import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
-import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
+import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
 import type { Hardpoint } from '../types'
 
-/** FTB-001A (Workstream C) — a synthetic "Module Slot N" row for whichever
- * component currently owns real child attachment ports (mining heads
- * today — see src/utils/componentOwnedSlots.ts). isStructural: true,
- * matching every other "physical structure with no component of its own"
- * row already in this tree — this app has no Mining Module catalog/
- * compatibility layer to target these slots against yet, so they are
- * presented, not made editable, exactly like a turret/mount shell. */
-function makeHardpointModuleSlotRow(host: Hardpoint, slotNumber: number): Hardpoint {
+/**
+ * FTB-001A/FTB-001B — a synthetic "<label> Slot N" row for whichever
+ * component currently owns real child attachment ports (mining heads,
+ * missile racks — see src/utils/componentOwnedSlots.ts). Branches only on
+ * `spec.label`, never on ship or rack identity:
+ *   - A mining module slot (`label: 'Module'`) stays `isStructural: true`
+ *     — this app has no Mining Module catalog/compatibility layer to
+ *     target these against yet, so they are presented, not editable,
+ *     exactly like a turret/mount shell (FTB-001A, unchanged).
+ *   - A missile slot (`label: 'Missile'`) is a REAL, non-structural,
+ *     targetable port (`type: 'Missile'`, sized to the rack's own
+ *     source-derived missile size) — a Commander must be able to assign
+ *     missiles into a swapped rack's new slots exactly as they could for
+ *     the original factory ones (FTB-001B). It always starts empty
+ *     (factory/installed/target all '—') — a swap must never silently
+ *     retain a previous, possibly now-incompatible missile assignment.
+ */
+function makeHardpointChildSlotRow(host: Hardpoint, slotNumber: number, spec: ComponentOwnedSlotSpec): Hardpoint {
+  const isMissileSlot = spec.label === 'Missile'
   return {
     ...host,
-    id: `${host.id}-module-slot-${slotNumber}`,
-    slotLabel: `${host.slotLabel} — Module Slot ${slotNumber}`,
+    id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
+    slotLabel: `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`,
     parentSlotLabel: host.slotLabel,
-    isStructural: true,
-    type: 'Mining Module',
+    isStructural: !isMissileSlot,
+    type: isMissileSlot ? 'Missile' : 'Mining Module',
+    size: spec.size ? `S${spec.size}` : host.size,
     factoryItem: '—',
     installedItem: '—',
     targetItem: '—',
@@ -162,28 +174,41 @@ export default function ShipDetail() {
   const activeBuild = builds.find((b) => b.id === ship.activeBuildId) ?? shipBuilds[0]
   const shipHardpoints = hardpoints.filter((h) => h.buildId === activeBuild?.id)
 
+  // EWO-026 (Task 1) — the canonical, authoritative port hierarchy for
+  // this exact ship (same source MissionComposer's Loadout Manager
+  // already uses via EWO-025), overlaid onto `shipHardpoints` by stable
+  // slotLabel.
+  const canonicalTemplate = (() => {
+    const definitionId = resolveShipDefinitionId(ship.id, fleetAssets)
+    return definitionId ? shipFactoryTemplates[definitionId] ?? [] : []
+  })()
+  // FTB-001B — previously, progress/readiness/missing-item math (below)
+  // read `shipHardpoints` unchanged, while only the RENDERED TREE ran
+  // through the component-owned child-slot correction (EWO-026's original
+  // "for DISPLAY ONLY" separation). That was safe while the correction was
+  // purely additive (FTB-001A's mining modules, which never had real
+  // ship-baked children to begin with). A swapped missile rack's STALE
+  // child rows are real, already-counted Hardpoint rows, though — leaving
+  // them out of the tree but still in the progress calculation would
+  // report readiness/missing-items against slots the Commander can no
+  // longer even see. Both now read the same corrected set.
+  const effectiveHardpoints = withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate), makeHardpointChildSlotRow)
+
   // Missing, Upgrade Available, and Invalid Target are kept fully distinct —
   // an interim upgrade is not the same situation as an empty slot, and an
   // incompatible target (bad data) is not a to-do item at all. All of it
   // comes from the single shared Build Progress engine — this page never
   // computes its own percentage/complete state.
-  const progress = calculateBuildProgress(shipHardpoints)
+  const progress = calculateBuildProgress(effectiveHardpoints)
   const buildState = deriveFleetBuildState(activeBuild, progress)
   // Package Readiness ("do I own/commit everything?") stays secondary
   // logistics context (Part 2) — it never competes with Readiness
-  // (Installed Match, "is it physically configured now?") for primary billing.
-  const missionPackage = calculateMissionPackage(activeBuild?.id ?? '', hardpoints, installedLoadouts, reservations, hangarItems, activeBuild?.kind === 'FACTORY')
-  // EWO-026 (Task 1) — the canonical, authoritative port hierarchy for
-  // this exact ship (same source MissionComposer's Loadout Manager
-  // already uses via EWO-025) overlaid onto `shipHardpoints` by stable
-  // slotLabel, for DISPLAY ONLY — `progress`/`buildState`/`missionPackage`
-  // above are computed from `shipHardpoints` unchanged, so this never
-  // touches readiness/logistics math, only the rendered tree shape.
-  const canonicalTemplate = (() => {
-    const definitionId = resolveShipDefinitionId(ship.id, fleetAssets)
-    return definitionId ? shipFactoryTemplates[definitionId] ?? [] : []
-  })()
-  const portTree = buildPortTree(withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate), makeHardpointModuleSlotRow))
+  // (Installed Match, "is it physically configured now?") for primary
+  // billing. FTB-001B: this build's own rows are substituted for the
+  // corrected set too — every other ship/build's rows are untouched.
+  const missionPackageHardpoints = activeBuild ? [...hardpoints.filter((h) => h.buildId !== activeBuild.id), ...effectiveHardpoints] : hardpoints
+  const missionPackage = calculateMissionPackage(activeBuild?.id ?? '', missionPackageHardpoints, installedLoadouts, reservations, hangarItems, activeBuild?.kind === 'FACTORY')
+  const portTree = buildPortTree(effectiveHardpoints)
   const isMissionReady = buildState === 'MISSION_READY'
 
   return (
@@ -303,7 +328,7 @@ export default function ShipDetail() {
                 <AlertOctagon size={13} /> Invalid Target Data for {activeBuild?.name}
               </p>
               <ul className="text-sm text-white space-y-0.5">
-                {shipHardpoints.filter((h) => h.status === 'Invalid Target').map((h) => (
+                {effectiveHardpoints.filter((h) => h.status === 'Invalid Target').map((h) => (
                   <li key={h.id}>{h.slotLabel}: {h.invalidMessage ?? `${h.targetItem} is not compatible with this port.`}</li>
                 ))}
               </ul>

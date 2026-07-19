@@ -15,6 +15,7 @@ import { calculateComponentAvailability } from '../engine/logistics/availability
 import { executeInstallation, resolveComponentIdentity } from '../engine/installation'
 import type { InstallationEffects, InstallationStateSnapshot } from '../engine/installation'
 import type { MissionReservation } from '../types'
+import { componentOwnedChildSlotSpec } from '../utils/componentOwnedSlots'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -933,47 +934,150 @@ export const useFleetStore = create<FleetState>()(
       baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
     }
 
+    // FTB-001B — a missile rack's real child slots (unlike a mining head's
+    // — see componentOwnedSlots.ts) may already exist as real, saved rows
+    // baked in at ship-generation time for whichever rack was originally
+    // factory-installed. Once this Loadout's own final target for the
+    // rack's own port genuinely diverges from Factory, those old real
+    // children describe a rack that's no longer there (wrong count, wrong
+    // missile size) and must never be carried into the saved Build — and
+    // the newly-targeted rack's own real children must exist as REAL rows
+    // of their own, so a Commander's target choice for one of ITS slots
+    // (an override keyed by the exact same "<port> — Missile Slot N"
+    // scheme the live preview already uses) has somewhere to persist.
+    // Mining module slots are deliberately left untouched here — they stay
+    // purely display-time-synthesized exactly as FTB-001A established
+    // (never real rows, never independently assignable), so a mining-head
+    // swap is a no-op in this step.
+    const staleChildSlotLabels = new Set<string>()
+    const materializedChildStubs: { slotLabel: string; type: string; size: string; parentSlotLabel: string }[] = []
+    for (const row of referenceRows) {
+      if (row.isStructural || !row.factoryEntityClass) continue
+      const finalTargetEntityClass = baseTargetEntityClasses.get(row.slotLabel)
+      const swapped = Boolean(finalTargetEntityClass && finalTargetEntityClass !== row.factoryEntityClass)
+      if (!swapped) continue
+      const oldSpec = componentOwnedChildSlotSpec(row.factoryEntityClass)
+      const newSpec = componentOwnedChildSlotSpec(finalTargetEntityClass)
+      if (oldSpec?.label !== 'Missile' && newSpec?.label !== 'Missile') continue
+      const childPrefix = `${row.slotLabel} — `
+      for (const candidate of referenceRows) {
+        if (candidate.slotLabel.startsWith(childPrefix)) staleChildSlotLabels.add(candidate.slotLabel)
+      }
+      if (newSpec?.label !== 'Missile') continue // swapped away from a rack (or to an uncataloged component) — old real children removed, nothing fabricated: an honest "unknown structure" state
+      for (let n = 1; n <= newSpec.count; n++) {
+        const slotLabel = `${childPrefix}Missile Slot ${n}`
+        materializedChildStubs.push({ slotLabel, type: 'Missile', size: newSpec.size ? `S${newSpec.size}` : row.size, parentSlotLabel: row.slotLabel })
+        if (!baseTargets.has(slotLabel)) {
+          baseTargets.set(slotLabel, '—')
+          baseTargetEntityClasses.set(slotLabel, undefined)
+          baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
+        }
+      }
+    }
+    // A Commander's own Target choice for one of these freshly-materialized
+    // slots, resolved the exact same way the main override loop above
+    // already resolves every other row's — only reachable now that
+    // baseTargets has a seeded default for each new slotLabel to overwrite.
+    for (const stub of materializedChildStubs) {
+      const override = targetOverrides[stub.slotLabel]
+      if (!override) continue
+      const targetItem = typeof override === 'string' ? override : override.targetItem
+      const suppliedEntityClass = typeof override === 'string' ? undefined : override.targetEntityClass
+      const resolvedEntityClass =
+        targetItem === '—'
+          ? undefined
+          : suppliedEntityClass
+            ? (resolveComponentIdentity({ entityClass: suppliedEntityClass })?.entityClass ?? undefined)
+            : (resolveComponentIdentity({ displayName: targetItem })?.entityClass ?? undefined)
+      baseTargets.set(stub.slotLabel, targetItem)
+      baseTargetEntityClasses.set(stub.slotLabel, resolvedEntityClass)
+      baseTargetModes.set(stub.slotLabel, 'EXPLICIT_TARGET')
+    }
+
     const isEditingExisting = !saveAsNew && startingState === 'EXISTING' && Boolean(existingBuildId)
     const buildId = isEditingExisting ? existingBuildId! : `${shipId}-mission-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-    const newRows: Hardpoint[] = referenceRows.map((refRow, i) => {
-      const target = baseTargets.get(refRow.slotLabel) ?? '—'
-      const targetEntityClass = baseTargetEntityClasses.get(refRow.slotLabel)
-      const installed = installedBySlot.get(refRow.slotLabel) ?? refRow.factoryItem
-      const installedEntityClass = installedBySlot.has(refRow.slotLabel) ? installedEntityClassBySlot.get(refRow.slotLabel) : refRow.factoryEntityClass
-      const { status, invalidMessage } = computeHardpointStatusWithValidation(installed, target, refRow.factoryItem, refRow.type, refRow.size, {
-        installedEntityClass,
+    const newRows: Hardpoint[] = referenceRows
+      .filter((r) => !staleChildSlotLabels.has(r.slotLabel))
+      .map((refRow, i) => {
+        const target = baseTargets.get(refRow.slotLabel) ?? '—'
+        const targetEntityClass = baseTargetEntityClasses.get(refRow.slotLabel)
+        const installed = installedBySlot.get(refRow.slotLabel) ?? refRow.factoryItem
+        const installedEntityClass = installedBySlot.has(refRow.slotLabel) ? installedEntityClassBySlot.get(refRow.slotLabel) : refRow.factoryEntityClass
+        const { status, invalidMessage } = computeHardpointStatusWithValidation(installed, target, refRow.factoryItem, refRow.type, refRow.size, {
+          installedEntityClass,
+          targetEntityClass,
+          factoryEntityClass: refRow.factoryEntityClass,
+        })
+        return {
+          id: `${buildId}-hp-${i}`,
+          shipId,
+          buildId,
+          slotLabel: refRow.slotLabel,
+          type: refRow.type,
+          size: refRow.size,
+          factoryItem: refRow.factoryItem,
+          installedItem: installed,
+          targetItem: target,
+          factoryEntityClass: refRow.factoryEntityClass,
+          installedEntityClass,
+          targetEntityClass,
+          status,
+          invalidMessage,
+          // Mission-kind rows deliberately do NOT carry parentSlotLabel/
+          // groupLabel/assemblyRole/isStructural here (EWO-025/EWO-026) —
+          // presentation hierarchy for a saved Loadout is reconstructed at
+          // render time from the current canonical template (see
+          // src/pages/ShipDetail.tsx's overlayCanonicalHierarchy /
+          // src/pages/MissionComposer.tsx), never persisted redundantly.
+          // sourcePortId IS carried, since it costs nothing and lets
+          // src/utils/fleetAssetReconciliation.ts's strongest match tier
+          // work on a saved row exactly like a fresh Factory one.
+          sourcePortId: refRow.sourcePortId,
+          targetMode: baseTargetModes.get(refRow.slotLabel) ?? 'EXPLICIT_TARGET',
+        }
+      })
+
+    // FTB-001B — a freshly-materialized missile-rack child slot is the one
+    // exception to "hierarchy is reconstructed at render time from the
+    // canonical template" immediately above: the canonical template only
+    // ever describes the ship's ORIGINAL factory rack's own children, so a
+    // swapped-to rack's new slots have no template entry to be
+    // reconstructed from. parentSlotLabel/isStructural must be set
+    // directly on these specific rows, or the Loadout & Port Tree/Loadout
+    // Manager would never recognize them as this rack's children on the
+    // next load and would synthesize a second, colliding set on top of
+    // them (see componentOwnedSlots.ts's `withComponentOwnedChildSlots`).
+    const materializedRows: Hardpoint[] = materializedChildStubs.map((stub, i) => {
+      const target = baseTargets.get(stub.slotLabel) ?? '—'
+      const targetEntityClass = baseTargetEntityClasses.get(stub.slotLabel)
+      const { status, invalidMessage } = computeHardpointStatusWithValidation('—', target, '—', stub.type, stub.size, {
+        installedEntityClass: undefined,
         targetEntityClass,
-        factoryEntityClass: refRow.factoryEntityClass,
+        factoryEntityClass: undefined,
       })
       return {
-        id: `${buildId}-hp-${i}`,
+        id: `${buildId}-hp-rack-child-${i}`,
         shipId,
         buildId,
-        slotLabel: refRow.slotLabel,
-        type: refRow.type,
-        size: refRow.size,
-        factoryItem: refRow.factoryItem,
-        installedItem: installed,
+        slotLabel: stub.slotLabel,
+        type: stub.type,
+        size: stub.size,
+        factoryItem: '—',
+        installedItem: '—',
         targetItem: target,
-        factoryEntityClass: refRow.factoryEntityClass,
-        installedEntityClass,
+        factoryEntityClass: undefined,
+        installedEntityClass: undefined,
         targetEntityClass,
         status,
         invalidMessage,
-        // Mission-kind rows deliberately do NOT carry parentSlotLabel/
-        // groupLabel/assemblyRole/isStructural here (EWO-025/EWO-026) —
-        // presentation hierarchy for a saved Loadout is reconstructed at
-        // render time from the current canonical template (see
-        // src/pages/ShipDetail.tsx's overlayCanonicalHierarchy /
-        // src/pages/MissionComposer.tsx), never persisted redundantly.
-        // sourcePortId IS carried, since it costs nothing and lets
-        // src/utils/fleetAssetReconciliation.ts's strongest match tier
-        // work on a saved row exactly like a fresh Factory one.
-        sourcePortId: refRow.sourcePortId,
-        targetMode: baseTargetModes.get(refRow.slotLabel) ?? 'EXPLICIT_TARGET',
+        parentSlotLabel: stub.parentSlotLabel,
+        isStructural: false,
+        sourcePortId: undefined,
+        targetMode: baseTargetModes.get(stub.slotLabel) ?? 'EXPLICIT_TARGET',
       }
     })
+    newRows.push(...materializedRows)
 
     const missing = newRows.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
     // Reuse the single shared Build Progress engine for readiness — never

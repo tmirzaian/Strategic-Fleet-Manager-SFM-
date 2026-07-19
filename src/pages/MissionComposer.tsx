@@ -65,7 +65,7 @@ import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import TargetComponentPicker from '../components/TargetComponentPicker'
 import { buildPortTree } from '../utils/portTree'
 import { groupPortTree, flattenDisplayTree, displayNodeIds, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
-import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
+import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import type { Hardpoint } from '../types'
 
@@ -253,6 +253,39 @@ export default function MissionComposer() {
     )
   }
 
+  // FTB-001B — the override-lookup + compatibility-check step every
+  // preview row goes through, factored out so a freshly-synthesized
+  // missile-slot row (which never appears in `editorModel.rows`, since it
+  // doesn't exist until a rack swap produces it — see
+  // `makePreviewChildSlotRow` below) can be run through the exact same
+  // logic as an ordinary canonical-template row. Without this, a
+  // Commander's Target selection for a synthesized slot would call
+  // `onChange` and update `overrides` correctly, but the slot itself would
+  // never look that override up — it would keep rendering whatever
+  // hardcoded default it was synthesized with, silently discarding the
+  // selection.
+  function resolvePreviewTarget(
+    slotLabel: string,
+    type: string,
+    size: string,
+    factoryEntityClass: string | undefined,
+    defaultTarget: string,
+    defaultTargetEntityClass: string | undefined
+  ) {
+    let target = defaultTarget
+    let targetEntityClass = defaultTargetEntityClass
+    const override = overrides[slotLabel]
+    if (override) {
+      target = override.targetItem
+      targetEntityClass = override.targetEntityClass
+    }
+    const compatibility =
+      target && target !== '—'
+        ? validateTargetCompatibility(target, type, size, { itemEntityClass: targetEntityClass, destinationFactoryEntityClass: factoryEntityClass })
+        : { valid: true }
+    return { previewTarget: target, previewTargetEntityClass: targetEntityClass, compatible: compatibility.valid, incompatibleMessage: 'message' in compatibility ? compatibility.message : undefined }
+  }
+
   // Preview: same precedence saveMissionConfiguration applies — starting
   // state, then Preset, then explicit per-slot overrides — computed here
   // purely for display so the table always shows what will actually save.
@@ -290,55 +323,52 @@ export default function MissionComposer() {
         targetEntityClass = undefined
       }
 
-      const override = overrides[row.slotLabel]
-      if (override) {
-        target = override.targetItem
-        targetEntityClass = override.targetEntityClass
-      }
-
-      // EWO-STAB-004A/004B (ADR-010) — `itemEntityClass` is trusted
-      // whenever the current target string has a resolved entityClass
-      // tracked alongside it (the row's own factory/installed/existing
-      // value, or a picker override that supplied one) — never
-      // re-derived from display-name text once a real identity is known.
-      // `destinationFactoryEntityClass` is always this port's own factory
-      // identity regardless of which candidate is being checked — it
-      // drives PDC_TURRET capability.
-      const compatibility =
-        target && target !== '—'
-          ? validateTargetCompatibility(target, row.type, row.size, {
-              itemEntityClass: targetEntityClass,
-              destinationFactoryEntityClass: row.factoryEntityClass,
-            })
-          : { valid: true }
-      return { ...row, previewTarget: target, previewTargetEntityClass: targetEntityClass, compatible: compatibility.valid, incompatibleMessage: 'message' in compatibility ? compatibility.message : undefined }
+      return { ...row, ...resolvePreviewTarget(row.slotLabel, row.type, row.size, row.factoryEntityClass, target, targetEntityClass) }
     })
   }, [editorModel, effectiveStartingState, existingBuildId, templateId, overrides, quartermasterTemplates, hardpoints])
 
   type PreviewRow = (typeof previewRows)[number]
 
-  // FTB-001A (Workstream C) — a synthetic "Module Slot N" row for whichever
-  // component currently owns real child attachment ports (mining heads
-  // today — see src/utils/componentOwnedSlots.ts). isStructural: true,
-  // matching every other "physical structure with no component of its
-  // own" row already in this tree — this app has no Mining Module catalog/
-  // compatibility layer to target these slots against yet, so they are
-  // presented, not made editable, exactly like a turret/mount shell.
-  function makePreviewModuleSlotRow(host: PreviewRow, slotNumber: number): PreviewRow {
+  // FTB-001A/FTB-001B — a synthetic "<label> Slot N" row for whichever
+  // component currently owns real child attachment ports (mining heads,
+  // missile racks — see src/utils/componentOwnedSlots.ts). Branches only
+  // on `spec.label`:
+  //   - A mining module slot stays `isStructural: true` (FTB-001A,
+  //     unchanged) — no Mining Module catalog/compatibility layer exists
+  //     yet, so it is presented, not editable.
+  //   - A missile slot is a REAL, non-structural, targetable row — a
+  //     Commander must be able to assign missiles into a swapped rack's
+  //     new slots via the same TargetComponentPicker every other row
+  //     uses (FTB-001B). It starts empty (`previewTarget: '—'`,
+  //     trivially `compatible: true`) — a swap must never silently carry
+  //     forward a previous, possibly now-incompatible assignment.
+  function makePreviewChildSlotRow(host: PreviewRow, slotNumber: number, spec: ComponentOwnedSlotSpec): PreviewRow {
+    const isMissileSlot = spec.label === 'Missile'
+    const slotLabel = `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`
+    const type = isMissileSlot ? 'Missile' : 'Mining Module'
+    const size = spec.size ? `S${spec.size}` : host.size
+    // A mining module slot stays presentation-only (FTB-001A) — no picker
+    // renders for it, so it never needs an override lookup. A missile slot
+    // is editable, and must resolve any Target the Commander has already
+    // picked for it the same way every other row does (FTB-001B) — without
+    // this, a picker selection would update `overrides` but this freshly
+    // synthesized row would keep re-rendering its hardcoded '—' default,
+    // silently discarding the assignment.
+    const resolved = isMissileSlot
+      ? resolvePreviewTarget(slotLabel, type, size, undefined, '—', undefined)
+      : { previewTarget: '—', previewTargetEntityClass: undefined, compatible: true, incompatibleMessage: undefined }
     return {
       ...host,
-      id: `${host.id}-module-slot-${slotNumber}`,
-      slotLabel: `${host.slotLabel} — Module Slot ${slotNumber}`,
+      id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
+      slotLabel,
       parentSlotLabel: host.slotLabel,
-      isStructural: true,
-      type: 'Mining Module',
+      isStructural: !isMissileSlot,
+      type,
+      size,
       factoryItem: '—',
       installedItem: '—',
       targetItem: '—',
-      previewTarget: '—',
-      previewTargetEntityClass: undefined,
-      compatible: true,
-      incompatibleMessage: undefined,
+      ...resolved,
       factoryEntityClass: undefined,
       installedEntityClass: undefined,
       targetEntityClass: undefined,
@@ -354,7 +384,7 @@ export default function MissionComposer() {
   // inspection view, collapsed by default), every row here starts
   // expanded — this is an editing surface, and every configurable port
   // must be reachable without an extra click before a target can be set.
-  const previewTree = useMemo(() => buildPortTree(withComponentOwnedChildSlots(previewRows, makePreviewModuleSlotRow)), [previewRows])
+  const previewTree = useMemo(() => buildPortTree(withComponentOwnedChildSlots(previewRows, makePreviewChildSlotRow)), [previewRows])
   const previewDisplayTree = useMemo(() => groupPortTree(previewTree), [previewTree])
 
   // EWO-024 (Task 2) — the Target picker's suggestion list is narrowed to

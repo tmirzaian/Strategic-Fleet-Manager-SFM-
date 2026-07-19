@@ -6,6 +6,7 @@ import { computeHardpointStatusWithValidation } from './hardpointStatus'
 // factory identity must be resolved fresh here, exactly as
 // fleetAssetMaterializer.ts already does for a brand-new Fleet Asset.
 import { resolveComponentIdentity } from '../engine/installation'
+import { componentOwnedChildSlotSpec } from './componentOwnedSlots'
 
 export interface ReconciliationResult {
   /** The Build's full, current row set: matched old rows (Commander intent
@@ -74,11 +75,36 @@ export function reconcileBuildHardpoints(
   oldHardpoints: Hardpoint[],
   newTemplate: FactoryHardpointTemplate[]
 ): ReconciliationResult {
-  const oldByLabel = new Map<string, Hardpoint>(oldHardpoints.map((h) => [h.slotLabel, h]))
+  // FTB-001B — a missile rack port's own children are a dynamic,
+  // component-owned structure (see componentOwnedSlots.ts), never part of
+  // the static canonical template — the template only ever describes
+  // whichever rack shipped from the factory. Reconciling them the normal
+  // way would silently revert any Commander-chosen rack swap back to the
+  // ORIGINAL factory rack's shape on every rehydration: the template's own
+  // untouched rack-child entries would never get matched/`claimed` by the
+  // swapped-in children, so the "append genuinely new port" step below
+  // would resurrect the OLD factory children fresh, while the real,
+  // currently-saved children (a different count/size entirely) never
+  // match anything and get quarantined. A rack port (identified by the
+  // TEMPLATE's own factory identity for it, regardless of what it's
+  // currently swapped to) has its children excluded from matching
+  // entirely and carried straight through from the old rows, verbatim —
+  // the exact structure `saveMissionConfiguration` already computed
+  // correctly at save time — and the template's own rack-child entries
+  // for that same port are excluded from ever being appended fresh.
+  const rackParentSlotLabels = new Set(
+    newTemplate.filter((t) => !t.parentSlotLabel && componentOwnedChildSlotSpec(t.factoryEntityClass)?.label === 'Missile').map((t) => t.slotLabel)
+  )
+  const isRackChild = (parentSlotLabel: string | undefined) => parentSlotLabel !== undefined && rackParentSlotLabels.has(parentSlotLabel)
+  const oldRackChildren = oldHardpoints.filter((h) => isRackChild(h.parentSlotLabel))
+  const oldHardpointsToReconcile = oldHardpoints.filter((h) => !isRackChild(h.parentSlotLabel))
+  const templateToReconcile = newTemplate.filter((t) => !isRackChild(t.parentSlotLabel))
+
+  const oldByLabel = new Map<string, Hardpoint>(oldHardpointsToReconcile.map((h) => [h.slotLabel, h]))
   const newBySourcePortId = new Map<string, FactoryHardpointTemplate>()
   const newBySlotLabel = new Map<string, FactoryHardpointTemplate>()
   const newChildrenByParent = new Map<string | undefined, FactoryHardpointTemplate[]>()
-  for (const row of newTemplate) {
+  for (const row of templateToReconcile) {
     if (row.sourcePortId) newBySourcePortId.set(row.sourcePortId, row)
     newBySlotLabel.set(row.slotLabel, row)
     const key = row.parentSlotLabel
@@ -90,7 +116,7 @@ export function reconcileBuildHardpoints(
   const matchOf = new Map<string, FactoryHardpointTemplate>()
 
   // Tier 1 — sourcePortId.
-  for (const old of oldHardpoints) {
+  for (const old of oldHardpointsToReconcile) {
     if (old.sourcePortId) {
       const m = newBySourcePortId.get(old.sourcePortId)
       if (m && !claimed.has(m)) {
@@ -107,7 +133,7 @@ export function reconcileBuildHardpoints(
   let changed = true
   while (changed) {
     changed = false
-    for (const old of oldHardpoints) {
+    for (const old of oldHardpointsToReconcile) {
       if (matchOf.has(old.id) || !old.parentSlotLabel) continue
       const oldParent = oldByLabel.get(old.parentSlotLabel)
       const parentMatch = oldParent ? matchOf.get(oldParent.id) : undefined
@@ -124,7 +150,7 @@ export function reconcileBuildHardpoints(
   }
 
   // Tier 3 — exact slotLabel (unparented/top-level rows whose name is unchanged).
-  for (const old of oldHardpoints) {
+  for (const old of oldHardpointsToReconcile) {
     if (matchOf.has(old.id)) continue
     const m = newBySlotLabel.get(old.slotLabel)
     if (m && !claimed.has(m)) {
@@ -134,7 +160,7 @@ export function reconcileBuildHardpoints(
   }
 
   // Tier 4 — same scope + type + size, only when unambiguous.
-  for (const old of oldHardpoints) {
+  for (const old of oldHardpointsToReconcile) {
     if (matchOf.has(old.id)) continue
     let scopeKey: string | undefined
     if (old.parentSlotLabel) {
@@ -156,7 +182,7 @@ export function reconcileBuildHardpoints(
   const slotLabelMigrations: Array<{ oldSlotLabel: string; newSlotLabel: string }> = []
   const now = new Date().toISOString()
 
-  for (const old of oldHardpoints) {
+  for (const old of oldHardpointsToReconcile) {
     const newRow = matchOf.get(old.id)
     if (!newRow) {
       quarantined.push({ id: `quarantine-${old.id}-${Date.now()}`, shipId, buildId, hardpoint: old, reason: 'PORT_REMOVED', quarantinedAt: now })
@@ -215,7 +241,7 @@ export function reconcileBuildHardpoints(
   }
 
   let freshIndex = 0
-  for (const newRow of newTemplate) {
+  for (const newRow of templateToReconcile) {
     if (claimed.has(newRow)) continue
     // EWO-STAB-004A — same preference as the matched-row branch above.
     const factoryEntityClass = newRow.isStructural
@@ -245,6 +271,12 @@ export function reconcileBuildHardpoints(
       targetMode: 'FOLLOW_FACTORY',
     })
   }
+
+  // A rack port's own children are carried straight through, completely
+  // unchanged — see this function's own doc comment above for why they're
+  // deliberately excluded from every tier of matching/quarantine/fresh-
+  // append above.
+  hardpoints.push(...oldRackChildren)
 
   return { hardpoints, quarantined, slotLabelMigrations }
 }
