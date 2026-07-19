@@ -619,8 +619,26 @@ function presentationLabelFor(port: { displayName: string; assemblyRole?: string
  * the same vocabulary seed ships already use closes that gap. Falls back
  * to the equipmentGroup string unchanged for any group with no
  * meaningful terminal-type translation (Avionics, Cargo, Customization,
- * Defense, Utility, Mining, Salvage — categories no currently-imported
- * ship uses) rather than guessing one.
+ * Defense, Salvage — categories no currently-imported ship uses) rather
+ * than guessing one.
+ *
+ * FTB-001D — "Mining" was on that fallback list too, believed unused; it
+ * is not. Every real mining weapon port across every currently-imported
+ * mining ship (MOLE, Prospector, ROC, Golem — 14 real ports, confirmed by
+ * direct audit of generated-data/ports.json) carries `equipmentGroup:
+ * "Mining"`, `assemblyRole: "GENERIC_MOUNT"` (not one of the branches
+ * above), so every one of them fell through to the raw, untranslated
+ * "Mining" string — permanently mismatched against
+ * `CATEGORY_TO_PORT_TYPE.WeaponMining` ("Mining Laser", the same
+ * vocabulary every mining laser's catalog record resolves to). A mining
+ * laser with no hand-authored src/data/componentCatalog.ts override
+ * forcing its category to the wrong-but-matching "Mining" could never be
+ * offered on any real mining port — confirmed for Helix I/II and, by the
+ * same root cause, every other real mining laser with no such override
+ * (Impact I/II, Lancet MH1/MH2, Klein-S1/S2, Hofstede-S1/S2). Translated
+ * here instead, the same way every other equipmentGroup already is — the
+ * generic, per-name overrides this previously required become unnecessary
+ * (removed alongside this fix, see componentCatalog.ts).
  */
 function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: string }): string {
   switch (port.assemblyRole) {
@@ -666,6 +684,8 @@ function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: str
       return 'Relay'
     case 'LifeSupport':
       return 'Life Support'
+    case 'Mining':
+      return 'Mining Laser'
     default:
       return port.equipmentGroup
   }

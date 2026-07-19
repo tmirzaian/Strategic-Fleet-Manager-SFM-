@@ -104,13 +104,20 @@ const CATALOG: Record<string, CatalogEntry> = {
   'MSD-683 Missile Rack': { category: 'Missile Rack', size: 7 }, // Asgard's torpedo racks
   'Anvil F7C-M Mk II Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Hornet F7CM Mk2's own remote-turret hardware
   'Tarantula GT-870 Mark 3 Cannon': { category: 'Weapon', size: 3 }, // Hornet F7C Wildfire / Lightning F8C's nose gun
-  // category 'Mining' (not 'Mining Laser') — same equipmentGroup
-  // fallthrough as Salvage above, confirmed against every real
-  // deep-imported mining ship's own port data.
-  'Arbor MH2 Mining Laser': { category: 'Mining', size: 2 }, // MOLE's mining heads
-  'Pitman Mining Laser': { category: 'Mining', size: 1 }, // Golem's mining head
-  'Arbor MHV Mining Laser': { category: 'Mining', size: 0 }, // ROC's mining head
-  'Arbor MH1 Mining Laser': { category: 'Mining', size: 1 }, // Prospector's mining head (distinct display name from the pre-existing bare "Arbor MH1" entry above)
+  // FTB-001D — the four mining-laser overrides formerly here ('Arbor MH2
+  // Mining Laser', 'Pitman Mining Laser', 'Arbor MHV Mining Laser', 'Arbor
+  // MH1 Mining Laser', each forced to category 'Mining') are gone: they
+  // existed only to compensate for every real mining weapon port's own
+  // type field being the untranslated raw string "Mining" instead of the
+  // catalog's actual "Mining Laser" vocabulary — fixed at the true source
+  // (src/data/shipDefinitions.ts's compatibilityTypeFor, Mining ->
+  // "Mining Laser") rather than patched per display name here. Leaving
+  // these entries in would now force the WRONG category against a port
+  // that correctly reads "Mining Laser", breaking the exact components
+  // they used to fix. Every real mining laser (Helix I/II, Impact I/II,
+  // Lancet MH1/MH2, Klein-S1/S2, Hofstede-S1/S2, Arbor MH1/MH2/MHV,
+  // Pitman, and any future one) now resolves generically, with no
+  // per-name override required.
   'Reliant Tana Missile Launcher': { category: 'Missile Rack', size: 5 }, // Reliant Tana's own launcher hardware
   'MSD-616 Missile Rack': { category: 'Gimbal Mount', size: 4 }, // Starlancer TAC's own remote-turret hardware
   'RSI Polaris Torpedo Rack': { category: 'Missile Rack', size: 10 }, // Polaris's torpedo bays

@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useFleetStore } from '../useFleetStore'
 import { getMissileRackSlotSpec } from '../../generated/missileRackSlots'
+import { getMiningModuleSlotCount } from '../../generated/miningModuleSlots'
+import { withComponentOwnedChildSlots } from '../../utils/componentOwnedSlots'
+import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../../utils/loadoutEditorModel'
+import { shipFactoryTemplates, shipDefinitions } from '../../data/shipDefinitions'
+import type { Hardpoint } from '../../types'
 
 const initialState = useFleetStore.getState()
 
@@ -294,5 +299,84 @@ describe('saveMissionConfiguration — FTB-001B: dynamic missile rack swap persi
     // non-component-owned port.
     const before = useFleetStore.getState().hardpoints.filter((h) => h.buildId === useFleetStore.getState().ships.find((s) => s.id === 'ghost')!.activeBuildId)
     expect(rows.length).toBe(before.length)
+  })
+})
+
+describe('saveMissionConfiguration — FTB-001D: Helix II Mining Laser survives a genuine reload with all three module slots', () => {
+  // Mining module slots (unlike a missile rack's — see FTB-001B) are
+  // NEVER real, persisted rows — purely display/calculation-time
+  // synthesis (componentOwnedSlots.ts), by FTB-001A's own established
+  // design, unchanged by this mission. "Rehydrates with all three child
+  // slots" therefore means: the SAVED Loadout's mining port target
+  // (Helix II) itself survives a genuine reload, and the same render-time
+  // synthesis every page already runs (here reproduced directly, the
+  // exact same two calls src/pages/ShipDetail.tsx makes) re-derives three
+  // module slots fresh from that persisted identity — never zero, never a
+  // stale two.
+  const HELIX_II_ENTITY_CLASS = 'Mining_Laser_THCN_Helix_S2'
+  const HELIX_II_NAME = 'Helix II Mining Laser'
+  const MOLE_MINING_SLOT = 'Front Cab Mining Laser (Manned Turret) — Mining Weapon'
+
+  function effectiveHardpointsFor(shipId: string, buildId: string): Hardpoint[] {
+    const definitionId = resolveShipDefinitionId(shipId, useFleetStore.getState().fleetAssets)
+    const template = definitionId ? (shipFactoryTemplates[definitionId] ?? []) : []
+    const shipHardpoints = useFleetStore.getState().hardpoints.filter((h) => h.buildId === buildId)
+    return withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, template), (host, n) => ({
+      ...host,
+      id: `${host.id}-module-slot-${n}`,
+      slotLabel: `${host.slotLabel} — Module Slot ${n}`,
+      parentSlotLabel: host.slotLabel,
+      isStructural: true,
+    }))
+  }
+
+  it("7. Helix II's Target assignment and its three synthesized module slots both survive a genuine reload", () => {
+    if (getMiningModuleSlotCount(HELIX_II_ENTITY_CLASS) === 0) return // generated-data/mining-module-slots.json not present on this machine
+    const mole = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'MOLE')
+    if (!mole) return
+    const added = useFleetStore.getState().addFleetAsset(mole.id, 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add MOLE')
+
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId: added.assetId,
+      name: 'FTB-001D Helix Test',
+      startingState: 'FACTORY',
+      targetOverrides: { [MOLE_MINING_SLOT]: { targetItem: HELIX_II_NAME, targetEntityClass: HELIX_II_ENTITY_CLASS } },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+
+    // Ship Detail's own effective render is INSTALLED-first (FTB-001B
+    // precedent: "what does my ship actually look like right now"), so
+    // simulate the completed physical swap — the real end-state a
+    // Commander's Quick Update "Install Component" action produces.
+    // `installedLoadouts` (not the Hardpoint row directly) is this
+    // store's single authoritative "what's installed" record — rehydrate
+    // re-overlays every row's installedItem FROM it, so both must agree,
+    // exactly the way FTB-001B's own persistence tests learned the hard
+    // way (a direct hardpoint-only patch gets silently reverted on
+    // rehydrate otherwise).
+    useFleetStore.setState({
+      hardpoints: useFleetStore.getState().hardpoints.map((h) =>
+        h.buildId === result.buildId && h.slotLabel === MOLE_MINING_SLOT
+          ? { ...h, installedItem: HELIX_II_NAME, installedEntityClass: HELIX_II_ENTITY_CLASS, status: 'OK' }
+          : h
+      ),
+      installedLoadouts: [
+        ...useFleetStore.getState().installedLoadouts.filter((e) => !(e.shipId === added.assetId && e.slotLabel === MOLE_MINING_SLOT)),
+        { shipId: added.assetId, slotLabel: MOLE_MINING_SLOT, installedItem: HELIX_II_NAME, entityClass: HELIX_II_ENTITY_CLASS },
+      ],
+    })
+
+    useFleetStore.persist.rehydrate()
+
+    const targetRow = useFleetStore.getState().hardpoints.find((h) => h.buildId === result.buildId && h.slotLabel === MOLE_MINING_SLOT)!
+    expect(targetRow.targetItem).toBe(HELIX_II_NAME)
+    expect(targetRow.targetEntityClass).toBe(HELIX_II_ENTITY_CLASS)
+    expect(targetRow.installedEntityClass).toBe(HELIX_II_ENTITY_CLASS)
+
+    const effective = effectiveHardpointsFor(added.assetId, result.buildId!)
+    const moduleSlots = effective.filter((h) => h.parentSlotLabel === MOLE_MINING_SLOT)
+    expect(moduleSlots.length).toBe(3)
   })
 })

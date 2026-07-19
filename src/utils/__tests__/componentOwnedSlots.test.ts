@@ -92,6 +92,70 @@ describe('withComponentOwnedChildSlots — FTB-001A (Workstream C)', () => {
 })
 
 /**
+ * FTB-001D — Helix II Mining Laser (Mining_Laser_THCN_Helix_S2, 3 real
+ * module slots per generated-data/mining-module-slots.json) was excluded
+ * from the Loadout Manager selector entirely (a compatibility-layer
+ * defect — see src/data/__tests__/componentCatalog.test.ts — never a
+ * component-owned-slot defect), so its own child-slot synthesis had never
+ * been exercisable end-to-end before this mission. These tests confirm
+ * the generic FTB-001A/FTB-001B machinery already handles it correctly,
+ * with no Helix-specific code anywhere in componentOwnedSlots.ts.
+ */
+describe('componentOwnedChildSlotSpec / withComponentOwnedChildSlots — FTB-001D (Helix II Mining Laser)', () => {
+  const HELIX_II = 'Mining_Laser_THCN_Helix_S2'
+  const KLEIN_S1_ZERO = 'Mining_Laser_SHIN_Klein_S1'
+  const hasHelixData = getMiningModuleSlotCount(HELIX_II) > 0
+
+  it('4. Helix II owns exactly three real module slots, derived from generated metadata', () => {
+    if (!hasHelixData) return
+    expect(componentOwnedChildSlotCount(HELIX_II)).toBe(3)
+    expect(componentOwnedChildSlotSpec(HELIX_II)).toEqual({ count: 3, label: 'Module' })
+  })
+
+  it('4. equipping Helix II synthesizes exactly three module child rows', () => {
+    if (!hasHelixData) return
+    const rows = [host({ id: 'mining-port', slotLabel: 'Mining Weapon', installedEntityClass: HELIX_II })]
+    const result = withComponentOwnedChildSlots(rows, (h, n) => host({ id: `${h.id}-slot-${n}`, slotLabel: `${h.slotLabel} — Module Slot ${n}`, isStructural: true }))
+    const slots = result.filter((r) => r.slotLabel.includes('Module Slot'))
+    expect(slots.map((s) => s.slotLabel)).toEqual(['Mining Weapon — Module Slot 1', 'Mining Weapon — Module Slot 2', 'Mining Weapon — Module Slot 3'])
+  })
+
+  it('5. switching a real Arbor MH2 head (2 real module children) to Helix II reconciles to three child rows, not two-plus-three', () => {
+    if (!hasHelixData) return
+    const existingChildren = [
+      host({ id: 'mole-mining-01', slotLabel: 'Mining Weapon — 01 Attach Mining Consumable', parentSlotLabel: 'Mining Weapon' }),
+      host({ id: 'mole-mining-02', slotLabel: 'Mining Weapon — 02 Attach Mining Consumable', parentSlotLabel: 'Mining Weapon' }),
+    ]
+    const rows = [
+      host({ id: 'mining-port', slotLabel: 'Mining Weapon', factoryEntityClass: ARBOR_MH2, targetEntityClass: HELIX_II }),
+      ...existingChildren,
+    ]
+    const result = withComponentOwnedChildSlots(rows, (h, n) => host({ id: `${h.id}-slot-${n}`, slotLabel: `${h.slotLabel} — Module Slot ${n}`, isStructural: true, parentSlotLabel: h.slotLabel }))
+    // The old real Arbor MH2 children are gone — never lingering alongside the new ones.
+    expect(result.some((r) => r.id === 'mole-mining-01' || r.id === 'mole-mining-02')).toBe(false)
+    const newChildren = result.filter((r) => r.parentSlotLabel === 'Mining Weapon')
+    expect(newChildren.length).toBe(3)
+  })
+
+  it('6. switching from Helix II to a real zero-slot mining head (Klein-S1) removes the synthesized children and fabricates nothing new', () => {
+    if (!hasHelixData) return
+    expect(componentOwnedChildSlotCount(KLEIN_S1_ZERO)).toBe(0)
+    const existingChildren = [
+      host({ id: 'helix-slot-1', slotLabel: 'Mining Weapon — Module Slot 1', parentSlotLabel: 'Mining Weapon' }),
+      host({ id: 'helix-slot-2', slotLabel: 'Mining Weapon — Module Slot 2', parentSlotLabel: 'Mining Weapon' }),
+      host({ id: 'helix-slot-3', slotLabel: 'Mining Weapon — Module Slot 3', parentSlotLabel: 'Mining Weapon' }),
+    ]
+    const rows = [
+      host({ id: 'mining-port', slotLabel: 'Mining Weapon', factoryEntityClass: HELIX_II, targetEntityClass: KLEIN_S1_ZERO }),
+      ...existingChildren,
+    ]
+    const result = withComponentOwnedChildSlots(rows, (h, n) => host({ id: `${h.id}-slot-${n}`, slotLabel: `${h.slotLabel} — Module Slot ${n}`, isStructural: true, parentSlotLabel: h.slotLabel }))
+    expect(result.some((r) => r.parentSlotLabel === 'Mining Weapon')).toBe(false)
+    expect(result.length).toBe(1) // only the parent port row remains
+  })
+})
+
+/**
  * FTB-001B — root-cause investigation confirmed real, source-derived
  * missile attach points exist on a missile rack's OWN DataCore record
  * (`Components[].Ports[]`, `MinSize`/`MaxSize` uniform across every port
