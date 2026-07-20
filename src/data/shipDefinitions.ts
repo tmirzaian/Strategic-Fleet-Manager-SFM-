@@ -3,6 +3,7 @@ import { ships as seedShips, hardpoints as seedHardpoints } from './seed'
 import { importedShipList } from '../generated/importedShips'
 import { shipCatalogRecords } from '../generated/shipCatalog'
 import { classificationFor } from './shipClassification'
+import { componentsByEntityClass } from '../generated/componentCatalog'
 
 /**
  * Entity classes already covered by the deep, per-ship normalized
@@ -663,8 +664,45 @@ function presentationLabelFor(port: { displayName: string; assemblyRole?: string
  * set once at ship-import time by that same classification layer:
  * "SalvageHead" for the head, "SalvageModule" for every child socket
  * uniformly, regardless of which modifier is factory-installed there.
+ *
+ * VRF-002 — the Greycat MTC's own manned turret port carries
+ * assemblyRole "MANNED_TURRET" (caught below), but the identical real
+ * turret-shell hardware (`ANVL_Fixed_Mount_Hornet_Ball_S4`, catalog
+ * category "Turret") is ALSO factory-installed on ports whose own
+ * assemblyRole is the generic "GENERIC_MOUNT" (e.g. the Hornet F7C
+ * Wildfire's "Class 4 Center" mount, the F7CM Heartseeker's "Center
+ * Weapon" mount) — 61 real ports fleet-wide share this exact shape
+ * (confirmed by direct audit: Freelancer, Starfarer, Starlancer Max/TAC,
+ * Reliant Mako/Sen/Tana, Mustang Gamma/Omega, Ironclad, Perseus, Ursa
+ * Rover/Medivac, Cyclone MT, Storm AA, San'tok.yāi, Pulse, and MTC itself
+ * all install a Turret/TurretBase-category component into a
+ * GENERIC_MOUNT-role port). Falling through the switch below with no
+ * further signal, these previously resolved to the raw, untranslated
+ * equipmentGroup string ("Weapons"/"Defense") — this went unnoticed only
+ * because CATEGORY_TO_PORT_TYPE had no "Turret" entry either (see
+ * src/generated/componentCatalog.ts), so the mismatch was silently
+ * masked by validateTargetCompatibility's permissive "unresolved"
+ * fallback rather than a genuine, verified match. Now that Turret
+ * candidates resolve for real, the port's own type must too — but ONLY
+ * via the factory component's own real catalog category, checked as a
+ * narrow fallback AFTER the assemblyRole switch fails to classify it,
+ * never by broadening the equipmentGroup switch itself (equipmentGroup
+ * "Weapons"/"Defense" is also shared by genuinely unrelated GENERIC_MOUNT
+ * ports — tractor beam arms, category "ToolArm" — that must never be
+ * relabeled "Gimbal Mount"). This is not "inferring socket capability
+ * from installed contents" in the sense FTB-001F rejected: unlike a
+ * salvage child socket (which genuinely accepts several interchangeable
+ * modifier families), a fixed turret-shell mount never has an
+ * alternative, differently-shaped part it could equally accept — the
+ * factory category here is a stable fact about the PORT, not a
+ * transient one about a swappable occupant.
  */
-function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: string; canonicalPortType?: string }): string {
+function compatibilityTypeFor(port: {
+  equipmentGroup: string
+  assemblyRole?: string
+  canonicalPortType?: string
+  factoryComponentCategory?: string | null
+}): string {
   // FTB-001F — see this function's own doc comment above: a child salvage
   // modifier socket's canonicalPortType is "SalvageModule" regardless of
   // which real modifier (scraper or tractor) is currently installed —
@@ -703,6 +741,13 @@ function compatibilityTypeFor(port: { equipmentGroup: string; assemblyRole?: str
     case 'REMOTE_TURRET':
       return 'Gimbal Mount'
   }
+  // VRF-002 — see this function's own doc comment above: a turret-shell
+  // hardware component (catalog category "Turret"/"TurretBase") factory-
+  // installed on a port whose assemblyRole didn't already resolve above
+  // (typically GENERIC_MOUNT) still fills a genuine Gimbal Mount-shaped
+  // port. Never triggers for any other category sharing the same
+  // equipmentGroup (e.g. a tractor beam arm's "ToolArm").
+  if (port.factoryComponentCategory === 'Turret' || port.factoryComponentCategory === 'TurretBase') return 'Gimbal Mount'
   switch (port.equipmentGroup) {
     case 'Power':
       return 'Power Plant'
@@ -746,6 +791,14 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   // entityClass (Component.internalName) — read here directly rather than
   // ever re-deriving it from the display name later.
   const factoryEntityClassFor = (p: PortT) => (p.factoryItemId ? componentById.get(p.factoryItemId)?.internalName : undefined)
+  // VRF-002 — the factory-installed component's own real catalog category
+  // (via the generated catalog, entityClass-keyed — never a display-name
+  // guess), used only as compatibilityTypeFor's narrow Turret/TurretBase
+  // fallback when assemblyRole alone doesn't already classify the port.
+  const factoryComponentCategoryFor = (p: PortT) => {
+    const entityClass = factoryEntityClassFor(p)
+    return entityClass ? (componentsByEntityClass.get(entityClass)?.category ?? undefined) : undefined
+  }
 
   const rows: FactoryHardpointTemplate[] = []
   function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined) {
@@ -754,7 +807,7 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
     const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${displayLabel}` : displayLabel
     rows.push({
       slotLabel: uniqueLabel,
-      type: compatibilityTypeFor(port),
+      type: compatibilityTypeFor(port.isStructural ? port : { ...port, factoryComponentCategory: factoryComponentCategoryFor(port) }),
       size: port.minSize !== null ? `S${port.minSize}` : 'S1',
       factoryItem: port.isStructural ? '—' : factoryItemFor(port),
       factoryEntityClass: port.isStructural ? undefined : factoryEntityClassFor(port),

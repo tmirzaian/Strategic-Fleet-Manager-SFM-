@@ -4,7 +4,8 @@ import { importedShipList } from '../../generated/importedShips'
 import { shipCatalogRecords } from '../../generated/shipCatalog'
 import { materializeFleetAsset } from '../../utils/fleetAssetMaterializer'
 import { buildPortTree } from '../../utils/portTree'
-import { validateTargetCompatibility } from '../componentCatalog'
+import { validateTargetCompatibility, isPlayerSelectableRecord } from '../componentCatalog'
+import { compatibilityPortTypeFor, resolveComponentByEntityClass } from '../../generated/componentCatalog'
 
 const gladiusDefinition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Gladius')
 
@@ -153,30 +154,34 @@ describe('importedFactoryTemplate — Mission M-011 (full nested port tree, not 
       'ROC DS::<= PLACEHOLDER =>',
       'Starlancer TAC::<= PLACEHOLDER =>',
       'Starlancer TAC Collector Military::<= PLACEHOLDER =>',
-      // RC-001A: a third class, same root cause as the M2C "Swarm" case —
-      // bare, generic factory-item names ("Turret", "Tractor Beam") are
-      // shared across dozens of real, differently-sized/categorized
-      // components fleet-wide (remote/manned turret shells at S1/S2/S4/S5,
-      // defense-vs-weapons port-type variants, tractor beam assemblies at
-      // multiple sizes). Confirmed real and Commander-visible (these ships'
-      // OWN stock factory hardpoints show "Invalid Target" out of the box,
-      // not just a test artifact) — the same already-accepted limitation
-      // class as the 13 original entries above, just far more widespread
-      // than previously visible. Out of RC-001A's Basher-only scope;
-      // recommend a dedicated fleet-wide bare-name disambiguation mission.
-      'Ballista::Turret',
-      'Ballista Dunestalker::Turret',
-      'Ballista Snowblind::Turret',
-      'Centurion::Turret',
-      'Spartan::Turret',
-      'MTC::Turret',
-      '890Jump::Turret',
-      'Lynx::Turret',
-      'Nova::Turret',
-      'Ursa Medivac::Turret',
-      'Ursa Medivac Stealth::Turret',
-      'Ursa Rover::Turret',
-      'Ursa Rover Emerald::Turret',
+      // RC-001A originally found a third class here, same root cause as
+      // the M2C "Swarm" case: bare, generic factory-item names ("Turret",
+      // "Tractor Beam") shared across dozens of real, differently-sized/
+      // categorized components fleet-wide — confirmed real and
+      // Commander-visible (these ships' own stock factory hardpoints
+      // showed "Invalid Target" out of the box), flagged as a candidate
+      // for "a dedicated fleet-wide bare-name disambiguation mission."
+      //
+      // VRF-002 is that mission, for the "Turret" half of the finding:
+      // root cause was DataCore category "Turret" (the turret-shell
+      // hardware itself — Grin_MXC_Turret, the VariPuck gimbal family,
+      // ANVL_Fixed_Mount_Hornet_Ball_S4, and every real ship/vehicle
+      // sharing this hardware family) having no entry at all in
+      // CATEGORY_TO_PORT_TYPE (src/generated/componentCatalog.ts) — so
+      // every one of these candidates was invisible to
+      // isPlayerSelectableRecord regardless of entityClass being supplied,
+      // never actually validated (only ever permissively unresolved,
+      // which happened to read as "OK" until name-only resolution ever
+      // kicked in instead — see the Greycat MTC's own field report). Fixed
+      // by adding `Turret: 'Gimbal Mount'` there, plus a narrow
+      // factory-component-category fallback in compatibilityTypeFor
+      // (src/data/shipDefinitions.ts) for the handful of ports whose own
+      // assemblyRole is GENERIC_MOUNT rather than a turret-specific role.
+      // All 13 "::Turret" entries below now validate for real — removed
+      // from this list rather than left stale, so this exact test proves
+      // the fix across every ship it names, not just the one reported.
+      // "::Tractor Beam" is a separate real category (ToolArm) this
+      // mission did not investigate — left as-is, still a real, open gap.
       'Caterpillar::Tractor Beam',
       'Caterpillar Pirate::Tractor Beam',
       'Command Module::Tractor Beam',
@@ -204,6 +209,89 @@ describe('importedFactoryTemplate — Mission M-011 (full nested port tree, not 
         expect(result.valid, `${view.ship.name} — ${row.slotLabel}: ${result.message ?? ''}`).toBe(true)
       }
     }
+  })
+})
+
+describe('VRF-002: Turret-category turret/gimbal-shell hardware is genuinely resolved, not permissively unresolved', () => {
+  // Root cause: DataCore category "Turret" (the manned/remote turret
+  // SHELL hardware itself — Grin_MXC_Turret on the Greycat MTC, the
+  // VariPuck gimbal family, ANVL_Fixed_Mount_Hornet_Ball_S4, and every
+  // real turret shell on Ballista/Centurion/Spirit/890 Jump/Ursa/Lynx/Nova)
+  // had NO entry in CATEGORY_TO_PORT_TYPE. isPlayerSelectableRecord/
+  // compatibilityPortTypeFor treated every one of these as entirely
+  // unresolved — not rejected, but invisible — so a factory loadout using
+  // one only ever "passed" via validateTargetCompatibility's permissive
+  // "can't disprove an unresolved item" fallback, never via a real,
+  // positively-verified type/size match. The fleet-wide sweep above
+  // (which always threads factoryEntityClass through) can't tell
+  // "genuinely verified" apart from "permissively unresolved" by its
+  // pass/fail boolean alone — both read `valid: true` — so these tests
+  // check the actual resolution mechanism directly instead.
+  it('a real Turret-category component (MTC\'s own Grin_MXC_Turret) is now player-selectable — previously invisible to isPlayerSelectableRecord regardless of entityClass', () => {
+    const resolution = resolveComponentByEntityClass('Grin_MXC_Turret')
+    if (resolution.status !== 'resolved') return
+    expect(resolution.record.category).toBe('Turret')
+    expect(isPlayerSelectableRecord(resolution.record)).toBe(true)
+  })
+
+  it('compatibilityPortTypeFor resolves every real Turret subtype (BallTurret, GunTurret, MissileTurret, NoseMounted, TopTurret) to "Gimbal Mount", not undefined', () => {
+    for (const subtype of ['BallTurret', 'GunTurret', 'MissileTurret', 'NoseMounted', 'TopTurret']) {
+      expect(compatibilityPortTypeFor('Turret', subtype), `subtype ${subtype}`).toBe('Gimbal Mount')
+    }
+  })
+
+  it('a PDCTurret-subtype record is unaffected — still evaluated only by its own dedicated PDC rule, never the ordinary Turret->Gimbal Mount path', () => {
+    // compatibilityPortTypeFor itself now translates PDCTurret's raw
+    // category too (harmless — checkCompatibility's `subtype ===
+    // 'PDCTurret'` branch runs first and never reads this translated
+    // value), so this only re-confirms the PDC-specific test suite
+    // (src/data/__tests__/pdcCompatibility.test.ts) stays green — see
+    // that file for the actual exclusivity proof.
+    expect(compatibilityPortTypeFor('Turret', 'PDCTurret')).toBe('Gimbal Mount')
+  })
+
+  it('the Hornet F7CM Heartseeker\'s fixed Center Weapon mount (assemblyRole GENERIC_MOUNT, not a turret-specific role) resolves its own port type to "Gimbal Mount" via the factory component\'s real category, not the raw "Defense" equipmentGroup string', () => {
+    const def = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'F7C-M Hornet Heartseeker Mk I')
+    if (!def) return
+    const template = shipFactoryTemplates[def.id]
+    const centerWeapon = template.find((t) => t.slotLabel.includes('Center Weapon') && !t.parentSlotLabel)
+    expect(centerWeapon).toBeDefined()
+    expect(centerWeapon!.type).toBe('Gimbal Mount')
+    expect(centerWeapon!.type).not.toBe('Defense')
+    const result = validateTargetCompatibility(centerWeapon!.factoryItem, centerWeapon!.type, centerWeapon!.size, {
+      itemEntityClass: centerWeapon!.factoryEntityClass,
+      destinationFactoryEntityClass: centerWeapon!.factoryEntityClass,
+    })
+    expect(result.valid, result.message).toBe(true)
+  })
+
+  it('the Hornet F7C Wildfire\'s equivalent fixed mount (equipmentGroup "Weapons" this time, same GENERIC_MOUNT/Turret-category shape) resolves the same way', () => {
+    const def = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'F7C Hornet Wildfire Mk I')
+    if (!def) return
+    const template = shipFactoryTemplates[def.id]
+    const centerWeapon = template.find((t) => t.slotLabel.includes('Class 4 Center') && !t.parentSlotLabel)
+    expect(centerWeapon).toBeDefined()
+    expect(centerWeapon!.type).toBe('Gimbal Mount')
+    const result = validateTargetCompatibility(centerWeapon!.factoryItem, centerWeapon!.type, centerWeapon!.size, {
+      itemEntityClass: centerWeapon!.factoryEntityClass,
+      destinationFactoryEntityClass: centerWeapon!.factoryEntityClass,
+    })
+    expect(result.valid, result.message).toBe(true)
+  })
+
+  it('a genuinely unrelated GENERIC_MOUNT port sharing the same equipmentGroup (Zeus CL\'s tractor beam ARM, RSI_Zeus_Tractor_Beam_Arm — category ToolArm, not Turret) is never relabeled "Gimbal Mount" by the new fallback', () => {
+    // Not every port whose factory item happens to be named "Tractor
+    // Beam" is this ToolArm shape — some (e.g. Caterpillar's own, a real
+    // DRAK_Command_Module_Remote_Turret_Tractor_Beam) are genuinely a
+    // Turret-category REMOTE_TURRET assembly that HOUSES a tractor beam
+    // weapon, correctly resolved by the assemblyRole switch already, not
+    // this fallback at all. Zeus CL's is the real, distinct ToolArm case.
+    const def = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Zeus CL')
+    if (!def) return
+    const template = shipFactoryTemplates[def.id]
+    const tractorArm = template.find((t) => t.factoryEntityClass === 'RSI_Zeus_Tractor_Beam_Arm')
+    if (!tractorArm) return
+    expect(tractorArm.type).not.toBe('Gimbal Mount')
   })
 })
 

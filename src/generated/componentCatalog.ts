@@ -81,6 +81,28 @@ export const CATEGORY_TO_PORT_TYPE: Record<string, string> = {
   // here even after scripts/componentCatalog/componentTaxonomy.ts's own
   // allowlist gap (the earlier, upstream exclusion point) was fixed.
   MiningModifier: 'Mining Module',
+  // VRF-002 — DataCore category "Turret" (subtypes BallTurret/GunTurret/
+  // MissileTurret confirmed) is the manned/remote turret SHELL hardware
+  // itself — e.g. Grin_MXC_Turret (Greycat MTC), the VariPuck gimbal
+  // family (Mount_Gimbal_S1/S2/S3), and the real turret shells on Ballista,
+  // Centurion, Spirit, Origin 890 Jump, RSI Lynx/Ursa, and Nova. This
+  // category had no entry here at all, so every one of these components
+  // was invisible to isPlayerSelectableRecord/compatibilityPortTypeFor —
+  // NOT rejected outright (validateTargetCompatibility's "unresolved"
+  // branch is permissive), so a factory loadout using one only ever
+  // "passed" by accident (nothing to positively disprove), never by a
+  // genuine, verified size/type match. The instant identity resolution
+  // ever falls back to matching by display name instead of entityClass —
+  // "Turret" alone is shared verbatim by 20+ real, differently-sized
+  // entities fleet-wide — that accidental pass flips to a hard, incorrect
+  // "ambiguous"/incompatible failure (the Greycat MTC's reported defect).
+  // Mirrors WeaponMount's own established 'Gimbal Mount' vocabulary
+  // (both categories fill the exact same real port type; DataCore's own
+  // category split between them carries no compatibility-relevant
+  // distinction SFM's model needs) — a real, positive resolution now
+  // exists for every ship/vehicle in this family, not just the one that
+  // happened to get field-reported.
+  Turret: 'Gimbal Mount',
   Bomb: 'Bomb',
   BombLauncher: 'Bomb Launcher',
 }

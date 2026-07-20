@@ -20,12 +20,12 @@ import {
  * positively confirm a mismatch, not whenever data happens to be missing.
  */
 interface CatalogEntry {
-  /** Translated port-type vocabulary (e.g. "Weapon", "Shield") — the same
-   * meaning this field has always had. For a PDCTurret-subtype entry this
-   * is whatever CATEGORY_TO_PORT_TYPE happens to map raw category
-   * "Turret" to (currently nothing, so it falls back to the raw string) —
-   * irrelevant in practice, since a PDCTurret entry is never evaluated
-   * through the ordinary category/size path below (see `subtype`). */
+  /** Translated port-type vocabulary (e.g. "Weapon", "Shield"). For a
+   * PDCTurret-subtype entry this is whatever CATEGORY_TO_PORT_TYPE maps
+   * raw category "Turret" to (VRF-002: now "Gimbal Mount", same as
+   * WeaponMount) — irrelevant in practice either way, since a PDCTurret
+   * entry is never evaluated through the ordinary category/size path
+   * below (see `subtype`), only through its own dedicated PDC rule. */
   category: string
   size: number
   // EWO-STAB-003B — present only when resolution came from the generated
