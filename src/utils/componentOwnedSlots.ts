@@ -12,15 +12,25 @@ import { getMissileRackSlotSpec } from '../generated/missileRackSlots'
  */
 export interface ComponentOwnedSlotSpec {
   count: number
-  /** The size a slot itself requires (a rack's own accepted missile
-   * size) — undefined when the slot has no size constraint of its own
-   * (a mining module slot). */
+  /** The size a slot itself requires — a rack's own accepted missile
+   * size, or (FTB-001H) a mining module slot's own fixed real size.
+   * Always set now; every family that owns component-owned child slots
+   * has a real, source-confirmed size of its own. */
   size?: number
   label: string
 }
 
+/** FTB-001H — every real Mining Module catalog record (all 28 currently
+ * in generated-data/component-metadata-catalog.runtime.json, confirmed by
+ * direct inspection) is size 1 — there is no such thing as an "S2 Mining
+ * Module" anywhere in the real game data; a mining module's physical form
+ * factor does not scale with the laser it's installed on (unlike a
+ * missile rack, where the rack's own accepted missile size genuinely
+ * varies — see `getMissileRackSlotSpec` below for that distinct case). */
+const MINING_MODULE_SIZE = 1
+
 /**
- * FTB-001A/FTB-001B — the real, source-derived child-slot spec a
+ * FTB-001A/FTB-001B/FTB-001H — the real, source-derived child-slot spec a
  * component (by entityClass) owns on its own DataCore record, regardless
  * of which physical ship port it happens to be installed into. Generic
  * over the data source: mining heads (generated-data/mining-module-slots.json)
@@ -29,10 +39,21 @@ export interface ComponentOwnedSlotSpec {
  * added to this function, never a change to the tree-construction step
  * that consumes it. `null` when the entityClass owns no known child slots
  * at all (an ordinary component, or an uncataloged one) — never guessed.
+ *
+ * FTB-001H root cause: a mining slot previously carried no `size` of its
+ * own, so every consumer's `spec.size ? ... : host.size` fallback (Loadout
+ * Manager preview, Ship Detail, save-time reconciliation) inherited the
+ * PARENT LASER's port size instead — correct only by coincidence for an
+ * S1 laser (Prospector), wrong for any other size (the MOLE's S2 lasers,
+ * confirmed the only currently-imported ship affected), silently
+ * producing a "S2 Mining Module" requirement no real component can ever
+ * satisfy. Mining slots now carry their own fixed, real size, exactly
+ * like a missile rack's slot already carries its own real missile size —
+ * neither family's slot size is ever again derived from its host port.
  */
 export function componentOwnedChildSlotSpec(entityClass: string | null | undefined): ComponentOwnedSlotSpec | null {
   const miningCount = getMiningModuleSlotCount(entityClass)
-  if (miningCount > 0) return { count: miningCount, label: 'Module' }
+  if (miningCount > 0) return { count: miningCount, size: MINING_MODULE_SIZE, label: 'Module' }
 
   const rackSpec = getMissileRackSlotSpec(entityClass)
   if (rackSpec) return { count: rackSpec.slotCount, size: rackSpec.missileSize, label: 'Missile' }

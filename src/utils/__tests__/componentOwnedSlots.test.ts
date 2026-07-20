@@ -109,7 +109,9 @@ describe('componentOwnedChildSlotSpec / withComponentOwnedChildSlots — FTB-001
   it('4. Helix II owns exactly three real module slots, derived from generated metadata', () => {
     if (!hasHelixData) return
     expect(componentOwnedChildSlotCount(HELIX_II)).toBe(3)
-    expect(componentOwnedChildSlotSpec(HELIX_II)).toEqual({ count: 3, label: 'Module' })
+    // FTB-001H — mining slots now carry their own fixed real size (1),
+    // never inherited from the host laser's own port size.
+    expect(componentOwnedChildSlotSpec(HELIX_II)).toEqual({ count: 3, size: 1, label: 'Module' })
   })
 
   it('4. equipping Helix II synthesizes exactly three module child rows', () => {
@@ -152,6 +154,56 @@ describe('componentOwnedChildSlotSpec / withComponentOwnedChildSlots — FTB-001
     const result = withComponentOwnedChildSlots(rows, (h, n) => host({ id: `${h.id}-slot-${n}`, slotLabel: `${h.slotLabel} — Module Slot ${n}`, isStructural: true, parentSlotLabel: h.slotLabel }))
     expect(result.some((r) => r.parentSlotLabel === 'Mining Weapon')).toBe(false)
     expect(result.length).toBe(1) // only the parent port row remains
+  })
+})
+
+/**
+ * FTB-001H — root cause: a mining module slot never carried its own
+ * `size`, so every consumer's `spec.size ? ... : host.size` fallback
+ * inherited the PARENT LASER's port size instead. Correct only by
+ * coincidence for an S1 laser (Prospector's `Mining_Laser_GRIN_Arbor_S1`);
+ * wrong for the MOLE's `Mining_Laser_GRIN_Arbor_S2` (S2) — every real
+ * Mining Module catalog record is size 1, so an "S2 Mining Module"
+ * requirement matched zero real components, leaving the MOLE's Module
+ * dropdown empty while the Prospector's worked. Fixed by giving the
+ * mining branch of `componentOwnedChildSlotSpec` its own fixed, real
+ * size (1) — never derived from the host port, exactly like a missile
+ * rack's slot size is already never derived from its host port.
+ */
+describe('componentOwnedChildSlotSpec — FTB-001H: mining module slot size is fixed, never inherited from the host laser', () => {
+  const ARBOR_MH1 = 'Mining_Laser_GRIN_Arbor_S1' // Prospector's real factory laser — S1 port
+  const ARBOR_MH2 = 'Mining_Laser_GRIN_Arbor_S2' // MOLE's real factory laser — S2 port
+  const hasData = getMiningModuleSlotCount(ARBOR_MH2) > 0
+
+  it('the MOLE\'s S2 laser and the Prospector\'s S1 laser both produce a fixed size-1 module slot — never S2, regardless of the host port size', () => {
+    if (!hasData) return
+    const moleSpec = componentOwnedChildSlotSpec(ARBOR_MH2)
+    const prospectorSpec = componentOwnedChildSlotSpec(ARBOR_MH1)
+    expect(moleSpec).toEqual({ count: 2, size: 1, label: 'Module' })
+    expect(prospectorSpec).toEqual({ count: 1, size: 1, label: 'Module' })
+    // The regression this fix closes: before FTB-001H, the MOLE's spec
+    // carried no `size` at all, and the host's own S2 port size leaked
+    // through at the tree-construction call sites instead — this
+    // assertion is what would have failed against the pre-fix code.
+    expect(moleSpec?.size).toBe(1)
+    expect(moleSpec?.size).not.toBe(2)
+  })
+
+  it('a synthesized MOLE module child row resolves to S1 (the real, fixed module size), not S2 (the host laser\'s own port size) — the exact fallback expression MissionComposer/ShipDetail/useFleetStore all share', () => {
+    if (!hasData) return
+    interface SizedHost extends ComponentOwnedSlotHost {
+      size?: string
+    }
+    const rows: SizedHost[] = [{ id: 'mole-mining', slotLabel: 'Front Cab Mining Laser (Manned Turret) — Mining Weapon', installedEntityClass: ARBOR_MH2, size: 'S2' }]
+    const result = withComponentOwnedChildSlots(rows, (h, n, spec): SizedHost => ({
+      id: `${h.id}-slot-${n}`,
+      slotLabel: `${h.slotLabel} — Module Slot ${n}`,
+      parentSlotLabel: h.slotLabel,
+      size: spec.size ? `S${spec.size}` : (h as SizedHost).size,
+    }))
+    const slot1 = result.find((r) => r.slotLabel.includes('Module Slot 1')) as SizedHost | undefined
+    expect(slot1).toBeDefined()
+    expect(slot1?.size).toBe('S1')
   })
 })
 
@@ -226,7 +278,7 @@ describe('componentOwnedChildSlotSpec — FTB-001B: missile racks', () => {
 
   it('a mining head and a missile rack are never confused with each other — disjoint label, independent of lookup order', () => {
     if (!hasRackData) return
-    expect(componentOwnedChildSlotSpec('Mining_Laser_GRIN_Arbor_S2')).toEqual({ count: 2, label: 'Module' })
+    expect(componentOwnedChildSlotSpec('Mining_Laser_GRIN_Arbor_S2')).toEqual({ count: 2, size: 1, label: 'Module' })
     expect(componentOwnedChildSlotSpec(POLARIS_RACK)?.label).toBe('Missile')
   })
 })

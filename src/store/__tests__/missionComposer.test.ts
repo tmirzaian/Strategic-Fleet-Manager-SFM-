@@ -5,6 +5,7 @@ import { getMiningModuleSlotCount } from '../../generated/miningModuleSlots'
 import { withComponentOwnedChildSlots } from '../../utils/componentOwnedSlots'
 import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../../utils/loadoutEditorModel'
 import { shipFactoryTemplates, shipDefinitions } from '../../data/shipDefinitions'
+import { componentsByEntityClass, compatibilityPortTypeFor } from '../../generated/componentCatalog'
 import type { Hardpoint } from '../../types'
 
 const initialState = useFleetStore.getState()
@@ -654,5 +655,74 @@ describe('saveMissionConfiguration — FTB-001F: salvage socket semantics (no sc
     expect(socket2.targetItem).toBe('ReadyGrip Tractor Module')
     expect(socket1.status).not.toBe('Invalid Target')
     expect(socket2.status).not.toBe('Invalid Target')
+  })
+})
+
+describe('saveMissionConfiguration — FTB-001H: MOLE mining module size correction', () => {
+  // Root cause: a mining module child slot inherited its host laser's own
+  // port size (MOLE's Arbor S2 laser -> "S2 Mining Module") instead of the
+  // real, fixed module size (every real Mining Module is size 1) — so no
+  // real component could ever satisfy the MOLE's slots, while the
+  // Prospector's S1 laser happened to match by coincidence. Fixed in
+  // src/utils/componentOwnedSlots.ts (componentOwnedChildSlotSpec's mining
+  // branch now sets size: 1 explicitly). These tests exercise the ACTUAL
+  // save/persist path with a REAL catalog mining module (catalog-gated —
+  // no-ops if the committed catalog hasn't been regenerated on this
+  // machine, matching this codebase's established convention).
+  const MOLE_MINING_SLOT = 'Front Cab Mining Laser (Manned Turret) — Mining Weapon'
+  const PROSPECTOR_MINING_SLOT = 'Arm Mining Laser (Mount) — Laser Mining Laser (Gimbal Mount) — Laser Mining Laser'
+
+  const realModule = Array.from(componentsByEntityClass.values()).find((r) => compatibilityPortTypeFor(r.category, r.subtype) === 'Mining Module' && r.displayName)
+
+  function addShip(displayName: string) {
+    const def = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === displayName)
+    if (!def) return null
+    const added = useFleetStore.getState().addFleetAsset(def.id, 'OWNED')
+    if (!added.success || !added.assetId) throw new Error(`failed to add ${displayName}`)
+    return added.assetId
+  }
+
+  it('a real Mining Module is now a valid, non-rejected target for the MOLE\'s Module Slot 1 (was unconditionally incompatible before this fix, regardless of which real module was tried)', () => {
+    if (!realModule) return
+    if (getMiningModuleSlotCount('Mining_Laser_GRIN_Arbor_S2') === 0) return
+    const shipId = addShip('MOLE')
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001H MOLE Real Module Assignment',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [`${MOLE_MINING_SLOT} — Module Slot 1`]: { targetItem: realModule.displayName, targetEntityClass: realModule.entityClass },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+    const slot1 = useFleetStore.getState().hardpoints.find((h) => h.buildId === result.buildId && h.slotLabel === `${MOLE_MINING_SLOT} — Module Slot 1`)
+    expect(slot1).toBeDefined()
+    expect(slot1!.targetItem).toBe(realModule.displayName)
+    expect(slot1!.size).toBe('S1') // fixed real module size, never the S2 host laser port size
+    expect(slot1!.status).not.toBe('Invalid Target')
+  })
+
+  it('the Prospector\'s own Mining Module slot is unaffected by this fix — still S1, still accepts the same real module', () => {
+    if (!realModule) return
+    if (getMiningModuleSlotCount('Mining_Laser_GRIN_Arbor_S1') === 0) return
+    const shipId = addShip('Prospector')
+    if (!shipId) return
+    const result = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'FTB-001H Prospector Unchanged',
+      startingState: 'FACTORY',
+      targetOverrides: {
+        [`${PROSPECTOR_MINING_SLOT} — Module Slot 1`]: { targetItem: realModule.displayName, targetEntityClass: realModule.entityClass },
+      },
+      setActive: true,
+    })
+    expect(result.success).toBe(true)
+    const slot1 = useFleetStore.getState().hardpoints.find((h) => h.buildId === result.buildId && h.slotLabel === `${PROSPECTOR_MINING_SLOT} — Module Slot 1`)
+    expect(slot1).toBeDefined()
+    expect(slot1!.targetItem).toBe(realModule.displayName)
+    expect(slot1!.size).toBe('S1')
+    expect(slot1!.status).not.toBe('Invalid Target')
   })
 })
