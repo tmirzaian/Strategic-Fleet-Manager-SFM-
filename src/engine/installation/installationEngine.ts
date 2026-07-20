@@ -1,7 +1,7 @@
 import type { Hardpoint, MissionReservation, Ship } from '../../types'
 import { identitiesMatch, resolveComponentIdentity, type ResolvedComponentIdentity } from './componentIdentityService'
 import { checkInstallationCompatibility } from './compatibilityEngine'
-import { checkReservationOwnership, planHangarDecrement } from './inventoryTransactionService'
+import { checkReservationOwnership, planHangarDecrement, planHangarReturn } from './inventoryTransactionService'
 import type { InstallationCommand, InstallationDestination, InstallationEffects, InstallationResult, InstallationStateSnapshot } from './types'
 
 /**
@@ -142,10 +142,48 @@ function executeInstallOrRemove(command: InstallationCommand, state: Installatio
   })
   if (!ownership.ok) return { ok: false, reason: 'reserved-elsewhere', message: ownership.message }
 
+  // EWO-052 (Inventory Transaction Integrity Initiative) — the destination
+  // hardpoint may already have a REAL, different component installed
+  // (e.g. a factory-original part the Commander never explicitly removed
+  // before choosing a new Target — status 'Missing'/'Upgrade Available'
+  // both permit this; only a fully-satisfied 'OK' slot is refused above,
+  // by resolveDestinationHardpoint). Before this fix, `applyShipMutation`
+  // below unconditionally overwrote `installedItem`, silently destroying
+  // whatever was previously there — never returned to Hangar Inventory,
+  // never logged, gone from every tracked ownership state at once
+  // (confirmed via direct reproduction: installing over such a slot left
+  // Hangar Inventory's count completely unchanged while the displaced
+  // component vanished). An install that displaces a real occupant is
+  // therefore now an atomic swap. Identity-aware (entityClass first) so a
+  // shared display name across two differently-cataloged components is
+  // never treated as "no change."
+  //
+  // Folded into `planHangarDecrement`'s own input (via `planHangarReturn`)
+  // rather than fired as a separate live `effects.returnToInventory` call:
+  // that effect writes straight to the live store via `get()`, but
+  // `planHangarDecrement` below is pure and only ever sees the STATE
+  // SNAPSHOT captured once at the top of `executeInstallation` — a live
+  // write followed by `commitHangarItems(decrementPlan.hangarItems)` would
+  // silently erase the just-returned item the instant that stale-
+  // snapshot-derived plan commits (confirmed by direct reproduction). One
+  // composed array, one final commit — never two independent writes.
+  let hangarItemsForDecrement = state.hangarItems
+  if (target.installedItem && target.installedItem !== '—') {
+    const displacedIdentity = target.installedEntityClass ? resolveComponentIdentity({ entityClass: target.installedEntityClass }) : resolveComponentIdentity({ displayName: target.installedItem })
+    if (!identitiesMatch(identity, displacedIdentity)) {
+      hangarItemsForDecrement = planHangarReturn(state.hangarItems, {
+        name: target.installedItem,
+        type: target.type,
+        size: target.size,
+        entityClass: target.installedEntityClass ?? displacedIdentity?.entityClass ?? undefined,
+      })
+    }
+  }
+
   effects.applyShipMutation(ship.id, target.slotLabel, identity.displayName, identity.entityClass ?? undefined)
 
   const decrementPlan = planHangarDecrement({
-    hangarItems: state.hangarItems,
+    hangarItems: hangarItemsForDecrement,
     reservations: state.reservations,
     installedLoadouts: state.installedLoadouts,
     itemName: identity.displayName,
@@ -228,6 +266,28 @@ function executeTransfer(command: InstallationCommand, state: InstallationStateS
       message: command.destination.slotLabel
         ? `${toShip.name}'s ${command.destination.slotLabel} is not compatible with ${itemName} (${donorHardpoint.size} ${donorHardpoint.type}).`
         : `${toShip.name} has no open ${donorHardpoint.size} ${donorHardpoint.type} slot for ${itemName}.`,
+    }
+  }
+
+  // EWO-052 (Inventory Transaction Integrity Initiative) — the same real
+  // gap as INSTALL's own destination: an explicit destination.slotLabel
+  // can resolve to a hardpoint that still has a REAL, different component
+  // installed (the `compatible[0]` fallback above doesn't require
+  // `status !== 'OK'` the way the no-slotLabel scan does). Safe to use the
+  // live `returnToInventory` effect directly here (unlike INSTALL) — this
+  // function never calls `commitHangarItems` from a separate stale
+  // snapshot afterward, so there is no later write to silently erase it.
+  if (destination.installedItem && destination.installedItem !== '—') {
+    const displacedIdentity = destination.installedEntityClass
+      ? resolveComponentIdentity({ entityClass: destination.installedEntityClass })
+      : resolveComponentIdentity({ displayName: destination.installedItem })
+    if (!identitiesMatch(identity, displacedIdentity)) {
+      effects.returnToInventory({
+        name: destination.installedItem,
+        type: destination.type,
+        size: destination.size,
+        entityClass: destination.installedEntityClass ?? displacedIdentity?.entityClass ?? undefined,
+      })
     }
   }
 

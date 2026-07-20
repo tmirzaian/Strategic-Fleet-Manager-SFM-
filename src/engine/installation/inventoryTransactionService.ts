@@ -87,6 +87,38 @@ export interface HangarDecrementPlan {
   reservationFulfilled: boolean
 }
 
+/**
+ * EWO-052 (Inventory Transaction Integrity Initiative) — the pure,
+ * snapshot-based twin of the store's own `addHangarItem` merge logic
+ * (src/store/useFleetStore.ts), so a component displaced by an INSTALL
+ * that overwrites an already-occupied slot can be folded into the SAME
+ * hangarItems array `planHangarDecrement` then consumes from — one
+ * commit, not two independent writes.
+ *
+ * This exists because the engine's injected `returnToInventory` effect
+ * (used standalone by REMOVE) calls the store's `addHangarItem` directly
+ * against LIVE state via `get()` — correct when it's the only hangar
+ * mutation in the transaction, but wrong for INSTALL: `planHangarDecrement`
+ * below is pure and only ever sees the STATE SNAPSHOT captured once at
+ * the top of `executeInstallation`, so a live `returnToInventory` call
+ * followed by `commitHangarItems(decrementPlan.hangarItems)` would
+ * silently erase the just-returned item the moment that stale-snapshot-
+ * derived plan is committed (confirmed by direct reproduction during this
+ * mission's investigation). Merging first, then decrementing from the
+ * merged result, keeps the whole operation one atomic array transform.
+ */
+export function planHangarReturn(hangarItems: HangarItem[], displaced: { name: string; type: string; size: string; entityClass?: string }): HangarItem[] {
+  const existing = hangarItems.find((h) => {
+    if (displaced.entityClass && h.entityClass) return h.entityClass === displaced.entityClass
+    if (displaced.entityClass || h.entityClass) return false
+    return h.name === displaced.name && h.type === displaced.type && h.size === displaced.size
+  })
+  if (existing) {
+    return hangarItems.map((h) => (h.id === existing.id ? { ...h, qty: h.qty + 1 } : h))
+  }
+  return [{ id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: displaced.name, type: displaced.type, size: displaced.size, entityClass: displaced.entityClass, qty: 1, neededBy: 'None', disposition: 'Store' }, ...hangarItems]
+}
+
 export function planHangarDecrement(input: HangarDecrementInput): HangarDecrementPlan {
   if (input.inventorySource === 'NONE') {
     return { hangarItems: input.hangarItems, reservations: input.reservations, reservationFulfilled: false }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { checkReservationOwnership, planHangarDecrement } from '../inventoryTransactionService'
+import { checkReservationOwnership, planHangarDecrement, planHangarReturn } from '../inventoryTransactionService'
 import { resolveComponentIdentity } from '../componentIdentityService'
 import type { HangarItem, MissionReservation } from '../../../types'
 
@@ -103,5 +103,40 @@ describe('EWO-STAB-003B: InventoryTransactionService — checkReservationOwnersh
     const reservations = [reservation({ missionConfigurationId: 'build-2', quantity: 1 })]
     const result = checkReservationOwnership({ identity: fr66Identity, hasMatchingReservation: false, hangarItems, installedLoadouts: [], reservations })
     expect(result.ok).toBe(true)
+  })
+})
+
+describe('EWO-052 (Inventory Transaction Integrity Initiative): planHangarReturn — a displaced component is never lost', () => {
+  it('12. a genuinely new entityClass with no existing matching record creates a fresh row (inventory creation)', () => {
+    const result = planHangarReturn([], { name: 'AllStop', type: 'Shield', size: 'S1', entityClass: 'SHLD_GODI_S01_AllStop_SCItem' })
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({ name: 'AllStop', type: 'Shield', size: 'S1', entityClass: 'SHLD_GODI_S01_AllStop_SCItem', qty: 1, disposition: 'Store' })
+  })
+
+  it('13. an existing record with the same entityClass merges (qty increments) rather than duplicating', () => {
+    const existing = [hangarItem({ id: 'a', name: 'AllStop', entityClass: 'SHLD_GODI_S01_AllStop_SCItem', qty: 2 })]
+    const result = planHangarReturn(existing, { name: 'AllStop', type: 'Shield', size: 'S1', entityClass: 'SHLD_GODI_S01_AllStop_SCItem' })
+    expect(result).toHaveLength(1)
+    expect(result[0].qty).toBe(3)
+  })
+
+  it('14. an uncataloged component (no entityClass on either side) merges by name+type+size, the same legacy fallback addHangarItem already used', () => {
+    const existing = [hangarItem({ id: 'a', name: 'Some Uncataloged Part', type: 'Utility', size: 'S1', entityClass: undefined, qty: 1 })]
+    const result = planHangarReturn(existing, { name: 'Some Uncataloged Part', type: 'Utility', size: 'S1' })
+    expect(result).toHaveLength(1)
+    expect(result[0].qty).toBe(2)
+  })
+
+  it('15. an entityClass on only one side never merges — a real component is never conflated with an uncataloged one sharing a name', () => {
+    const existing = [hangarItem({ id: 'a', name: 'AllStop', type: 'Shield', size: 'S1', entityClass: undefined, qty: 1 })]
+    const result = planHangarReturn(existing, { name: 'AllStop', type: 'Shield', size: 'S1', entityClass: 'SHLD_GODI_S01_AllStop_SCItem' })
+    expect(result).toHaveLength(2)
+  })
+
+  it('16. never mutates the input array — a pure function, safe to call against a live snapshot', () => {
+    const existing = [hangarItem({ id: 'a', qty: 1 })]
+    const before = JSON.stringify(existing)
+    planHangarReturn(existing, { name: 'Something Else', type: 'Cooler', size: 'S1' })
+    expect(JSON.stringify(existing)).toBe(before)
   })
 })

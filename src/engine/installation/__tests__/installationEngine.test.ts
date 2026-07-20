@@ -160,6 +160,119 @@ describe('EWO-STAB-003B: executeInstallation — REMOVE', () => {
   })
 })
 
+describe('EWO-052 (Inventory Transaction Integrity Initiative): INSTALL never silently destroys a real displaced occupant', () => {
+  // Root cause: a hardpoint whose status is 'Missing' or 'Upgrade
+  // Available' (NOT 'OK') can still have a real, different component
+  // physically installed (e.g. a factory-original part the Commander
+  // never explicitly removed before choosing a new Target). Before this
+  // fix, installing over such a slot silently overwrote `installedItem`
+  // with no accounting for the displaced component anywhere — not
+  // returned to Hangar Inventory, not logged, gone from every tracked
+  // ownership state at once (reproduced directly during this mission's
+  // investigation). This is the swap-without-a-first-class-swap-operation
+  // gap: "one component, one owner, one location, always."
+  it("15. installing over a hardpoint with a real, different installed item returns the displaced item to Hangar Inventory as part of the SAME commit", () => {
+    const state = baseState({
+      hardpoints: [hardpoint({ slotLabel: 'Shield 1', type: 'Shield', size: 'S1', factoryItem: 'AllStop', installedItem: 'AllStop', installedEntityClass: 'SHLD_GODI_S01_AllStop_SCItem', targetItem: 'FR-66', status: 'Missing' })],
+    })
+    const effects = makeEffects()
+    const result = executeInstallation({ operation: 'INSTALL', component: { displayName: 'FR-66' }, destination: { shipId: 'ghost', slotLabel: 'Shield 1' } }, state, effects)
+    expect(result.ok).toBe(true)
+    // One commit, not a separate live returnToInventory call — see
+    // installationEngine.ts's own doc comment for why a live call here
+    // would be silently erased by the later commitHangarItems overwrite.
+    expect(effects.returnToInventory).not.toHaveBeenCalled()
+    expect(effects.commitHangarItems).toHaveBeenCalledTimes(1)
+    const committed = effects.commitHangarItems.mock.calls[0][0] as { name: string; entityClass?: string; qty: number }[]
+    const displaced = committed.find((h) => h.entityClass === 'SHLD_GODI_S01_AllStop_SCItem')
+    expect(displaced).toBeDefined()
+    expect(displaced?.name).toBe('AllStop')
+    expect(displaced?.qty).toBe(1)
+  })
+
+  it('16. the displaced item merges into an existing matching Hangar Inventory record (qty increments) rather than creating a duplicate row', () => {
+    const state = baseState({
+      hardpoints: [hardpoint({ slotLabel: 'Shield 1', type: 'Shield', size: 'S1', factoryItem: 'AllStop', installedItem: 'AllStop', installedEntityClass: 'SHLD_GODI_S01_AllStop_SCItem', targetItem: 'FR-66', status: 'Missing' })],
+      hangarItems: [{ id: 'existing-1', name: 'AllStop', type: 'Shield', size: 'S1', entityClass: 'SHLD_GODI_S01_AllStop_SCItem', qty: 2, neededBy: 'None', disposition: 'Store' }],
+    })
+    const effects = makeEffects()
+    executeInstallation({ operation: 'INSTALL', component: { displayName: 'FR-66' }, destination: { shipId: 'ghost', slotLabel: 'Shield 1' } }, state, effects)
+    const committed = effects.commitHangarItems.mock.calls[0][0] as { id: string; qty: number }[]
+    expect(committed.filter((h) => h.id === 'existing-1')).toHaveLength(1)
+    expect(committed.find((h) => h.id === 'existing-1')?.qty).toBe(3)
+  })
+
+  it('17. installing the SAME component already occupying the slot never returns-then-reconsumes it (no phantom round-trip)', () => {
+    const state = baseState({
+      hardpoints: [hardpoint({ slotLabel: 'Shield 1', type: 'Shield', size: 'S1', factoryItem: 'FR-66', installedItem: 'FR-66', targetItem: 'FR-66', status: 'Missing' })],
+    })
+    const effects = makeEffects()
+    const result = executeInstallation({ operation: 'INSTALL', component: { displayName: 'FR-66' }, destination: { shipId: 'ghost', slotLabel: 'Shield 1' } }, state, effects)
+    expect(result.ok).toBe(true)
+    const committed = effects.commitHangarItems.mock.calls[0][0] as unknown[]
+    expect(committed).toHaveLength(0)
+  })
+
+  it('18. a failed install (incompatible destination) leaves the destination slot\'s existing occupant completely untouched — no partial transaction', () => {
+    const state = baseState({
+      hardpoints: [hardpoint({ slotLabel: 'Power 1', type: 'Power Plant', installedItem: 'Some Other Plant', status: 'Missing' })],
+    })
+    const effects = makeEffects()
+    // FR-66 is a Shield — incompatible with a Power Plant slot.
+    const result = executeInstallation({ operation: 'INSTALL', component: { displayName: 'FR-66' }, destination: { shipId: 'ghost', slotLabel: 'Power 1' } }, state, effects)
+    expect(result.ok).toBe(false)
+    expect(effects.applyShipMutation).not.toHaveBeenCalled()
+    expect(effects.commitHangarItems).not.toHaveBeenCalled()
+    expect(effects.returnToInventory).not.toHaveBeenCalled()
+  })
+})
+
+describe('EWO-052: TRANSFER never silently destroys a real occupant already on the recipient hardpoint', () => {
+  it('19. transferring into a recipient slot with a real, different installed item returns that item to Hangar Inventory', () => {
+    const state = baseState({
+      ships: [ship({ id: 'ghost' }), ship({ id: 'corsair', activeBuildId: 'build-2' })],
+      hardpoints: [
+        hardpoint({ slotLabel: 'Power 1', status: 'OK', installedItem: 'Slipstream' }),
+        hardpoint({
+          id: 'hp-2',
+          shipId: 'corsair',
+          buildId: 'build-2',
+          slotLabel: 'Power A',
+          status: 'Missing',
+          installedItem: 'Some Old Plant',
+          installedEntityClass: 'OLD_PLANT_ENTITY_CLASS',
+        }),
+      ],
+    })
+    const effects = makeEffects()
+    const result = executeInstallation(
+      { operation: 'TRANSFER', source: { shipId: 'ghost', slotLabel: 'Power 1' }, destination: { shipId: 'corsair', slotLabel: 'Power A' }, compatibilityMode: 'exact-slot-match' },
+      state,
+      effects
+    )
+    expect(result.ok).toBe(true)
+    expect(effects.returnToInventory).toHaveBeenCalledWith({ name: 'Some Old Plant', type: 'Power Plant', size: 'S1', entityClass: 'OLD_PLANT_ENTITY_CLASS' })
+    expect(effects.applyShipMutation).toHaveBeenCalledWith('corsair', 'Power A', 'Slipstream', undefined)
+  })
+
+  it("20. transferring into an empty recipient slot ('—') never calls returnToInventory — nothing to displace", () => {
+    const state = baseState({
+      ships: [ship({ id: 'ghost' }), ship({ id: 'corsair', activeBuildId: 'build-2' })],
+      hardpoints: [
+        hardpoint({ slotLabel: 'Power 1', status: 'OK', installedItem: 'Slipstream' }),
+        hardpoint({ id: 'hp-2', shipId: 'corsair', buildId: 'build-2', slotLabel: 'Power A', status: 'Missing', installedItem: '—' }),
+      ],
+    })
+    const effects = makeEffects()
+    executeInstallation(
+      { operation: 'TRANSFER', source: { shipId: 'ghost', slotLabel: 'Power 1' }, destination: { shipId: 'corsair', slotLabel: 'Power A' }, compatibilityMode: 'exact-slot-match' },
+      state,
+      effects
+    )
+    expect(effects.returnToInventory).not.toHaveBeenCalled()
+  })
+})
+
 describe('EWO-STAB-003B: executeInstallation — TRANSFER (moveComponentBetweenShips parity)', () => {
   it('11. a compatible transfer between two ships succeeds and mutates both sides', () => {
     const state = baseState({
