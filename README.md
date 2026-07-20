@@ -1,6 +1,6 @@
 # Strategic Fleet Manager
 
-**Status: Beta 1.0** — Certified for Star Citizen **LIVE 4.9.186.42610**.
+**Status: Beta 1.2** — Certified for Star Citizen **LIVE 4.9.186.42610**.
 Strategic Fleet Manager is Beta software. Core fleet-management workflows are
 functional and certified against real Star Citizen data, but the project is
 still under active development and has not yet reached a stable 1.0 release.

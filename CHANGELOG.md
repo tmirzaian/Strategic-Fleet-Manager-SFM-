@@ -2,6 +2,56 @@
 
 All notable changes to Strategic Fleet Manager are documented in this file.
 
+## Strategic Fleet Manager Beta 1.2 (Commander Test Candidate)
+
+Integration commit `d2a0824`. **Local Commander test build — not yet
+certified for public release.** Certified for Star Citizen LIVE
+4.9.186.42610.
+
+### Compatibility and Loadout Integrity
+
+- Fleet-wide turret and gimbal-mount compatibility fixed — a Ship or
+  ground vehicle whose factory loadout uses turret-shell hardware
+  (previously reported on the Greycat MTC, also affecting the Ballista,
+  Centurion, Spartan, 890 Jump, Lynx, Nova, and Ursa Rover/Medivac
+  families) now validates through a genuine, verified match rather than
+  an accidental pass.
+- Correct validation restored for the affected vehicle and ship factory
+  configurations fleet-wide, not just the one originally reported.
+- Obsolete compatibility exceptions for these ships removed now that they
+  validate for real.
+
+### Manufacturer Integrity
+
+- Canonical manufacturer naming throughout SFM — every ship now shows one
+  consistent manufacturer name, with no more blank or duplicate spellings
+  (e.g. "Rsi" vs. "Roberts Space Industries" vs. "RSI") anywhere in the
+  certified ship catalog.
+- Improved manufacturer search — searching by a manufacturer's common name
+  or alias reliably finds every ship it makes.
+- 34 previously-unlabeled ships (including the MTC, ROC, and Blade) now
+  correctly display their real manufacturer.
+
+### Inventory Transaction Integrity
+
+- Installing a replacement component into a slot that still holds a
+  different, real component now preserves that displaced component in
+  Hangar Inventory instead of silently losing it.
+- Transfers between ships correctly account for a real component already
+  occupying the destination slot.
+- A failed or incompatible installation attempt leaves both the ship and
+  Hangar Inventory completely unchanged — no partial updates.
+- Inventory mutations remain atomic and identity-aware throughout.
+
+### Known limitations carried into this test candidate
+
+- "::Tractor Beam" bare-name compatibility ambiguity (a separate,
+  ToolArm-category gap) remains open — not addressed by this build.
+- Hangar Inventory's Disposition tag (Install/Store/Stockpile/Trade/
+  Ignore) is not yet enforced against availability/install logic — a
+  component marked Trade or Ignore can still be consumed by an install.
+- No Windows installer yet; no RSI/CCUGame synchronization yet.
+
 ## Strategic Fleet Manager Beta 1.0
 
 Certified commit `e5d1708`. Certified for Star Citizen LIVE 4.9.186.42610.

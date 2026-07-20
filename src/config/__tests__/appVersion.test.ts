@@ -3,7 +3,7 @@ import { APP_VERSION, APP_VERSION_LABEL } from '../appVersion'
 
 describe('APP_VERSION (Part 1, test 1)', () => {
   it('1. exposes a single central version constant used by the header', () => {
-    expect(APP_VERSION.productVersion).toBe('Beta 1.0')
+    expect(APP_VERSION.productVersion).toBe('Beta 1.2')
     expect(APP_VERSION_LABEL).toBe(APP_VERSION.productVersion)
   })
 
