@@ -4,6 +4,7 @@ import { useFleetStore } from '../store/useFleetStore'
 import type { OwnershipType } from '../types'
 import { OWNERSHIP_TYPE_LABELS } from '../utils/ownership'
 import { formatShipPickerLabel } from '../utils/shipDisplayLabel'
+import { manufacturerMatchesQuery } from '../utils/manufacturerLogo'
 
 const OWNERSHIP_OPTIONS: OwnershipType[] = ['OWNED', 'PURCHASED', 'LOANER']
 
@@ -28,10 +29,18 @@ export default function AddShipModal({ onClose }: { onClose: () => void }) {
   // out of alphabetical position (Task 11's "sort position is incorrect
   // because the manufacturer prefix is absent" finding) nor show a raw
   // string different from what search/sort actually reasoned about.
+  // EWO-051 (Manufacturer Integrity Initiative) — manufacturer matching
+  // goes through the one shared `manufacturerMatchesQuery` resolver, not a
+  // raw substring check against `d.manufacturer` — so a natural query like
+  // "Roberts" or "Greycat" finds every RSI/Greycat Industrial ship even
+  // though neither string is a substring of the ship's own canonical
+  // manufacturer field.
   const filteredDefinitions = useMemo(() => {
     const q = query.trim().toLowerCase()
     const list = q
-      ? shipDefinitions.filter((d) => d.displayName.toLowerCase().includes(q) || d.manufacturer.toLowerCase().includes(q) || formatShipPickerLabel(d.displayName, d.manufacturer).toLowerCase().includes(q))
+      ? shipDefinitions.filter(
+          (d) => d.displayName.toLowerCase().includes(q) || manufacturerMatchesQuery(d.manufacturer, q) || formatShipPickerLabel(d.displayName, d.manufacturer).toLowerCase().includes(q)
+        )
       : shipDefinitions
     return [...list].sort((a, b) => formatShipPickerLabel(a.displayName, a.manufacturer).localeCompare(formatShipPickerLabel(b.displayName, b.manufacturer)))
   }, [shipDefinitions, query])

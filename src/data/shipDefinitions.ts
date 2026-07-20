@@ -1,9 +1,10 @@
 import type { ShipDefinition } from '../types'
 import { ships as seedShips, hardpoints as seedHardpoints } from './seed'
-import { importedShipList } from '../generated/importedShips'
+import { importedShipList, type ImportedShipView } from '../generated/importedShips'
 import { shipCatalogRecords } from '../generated/shipCatalog'
 import { classificationFor } from './shipClassification'
 import { componentsByEntityClass } from '../generated/componentCatalog'
+import { canonicalManufacturerName } from '../utils/manufacturerLogo'
 
 /**
  * Entity classes already covered by the deep, per-ship normalized
@@ -167,11 +168,33 @@ function canonicalDeepImportDisplayName(v: (typeof importedShipList)[number]): s
   return stripped ?? v.ship.name
 }
 
+/**
+ * EWO-051 (Manufacturer Integrity Initiative) — a deep-imported ship's own
+ * `v.ship.manufacturer` field is sometimes genuinely blank (34 real ships
+ * confirmed by direct audit: Blade, MTC, ROC, Prowler, Talon, the Wolf/
+ * Merlin/Archimedes family, Nox family, San'tok.yāi, and more) — not
+ * because the manufacturer is unknown, but because the deep-import
+ * pipeline never cross-referenced the SAME real DataCore manufacturer
+ * record Mission M-012's ship-catalog generator already resolved for the
+ * identical hull (by `sourceEntityClass`) — an importer omission, not a
+ * genuine data gap: every one of these 34 ships has a real, resolved
+ * manufacturer in `shipCatalogRecordByEntityClass` already. Falls back to
+ * that before canonicalizing; only a hull with no catalog record AND no
+ * raw manufacturer at all resolves to 'Unknown'.
+ */
+function importedManufacturerFor(v: ImportedShipView): string {
+  const raw = v.ship.manufacturer
+  if (raw && raw.trim()) return canonicalManufacturerName(raw)
+  const entityClass = v.ship.sourceEntityClass
+  const record = entityClass ? shipCatalogRecordByEntityClass.get(entityClass) : undefined
+  return canonicalManufacturerName(record?.manufacturer?.name ?? record?.manufacturer?.code)
+}
+
 const seedDefinitions: ShipDefinition[] = seedShips.map((s) => ({
   id: s.id,
   internalName: s.id,
   displayName: s.name,
-  manufacturer: s.manufacturer,
+  manufacturer: canonicalManufacturerName(s.manufacturer),
   classification: classificationFor(s.id),
   career: s.career,
   role: s.role,
@@ -186,7 +209,7 @@ const importedDefinitions: ShipDefinition[] = importedShipList.map((v) => ({
   id: v.ship.id,
   internalName: v.ship.id,
   displayName: canonicalDeepImportDisplayName(v),
-  manufacturer: v.ship.manufacturer,
+  manufacturer: importedManufacturerFor(v),
   classification: classificationFor(v.ship.id, v.ship.sourceEntityClass ? shipCatalogRecordByEntityClass.get(v.ship.sourceEntityClass) : undefined, v.ship.sourceEntityClass),
   career: v.ship.career,
   role: v.ship.role,
@@ -216,7 +239,7 @@ const catalogDefinitions: ShipDefinition[] = shipCatalogRecords
     id: r.entityClass,
     internalName: r.entityClass,
     displayName: r.displayName!,
-    manufacturer: r.manufacturer?.name ?? r.manufacturer?.code ?? 'Unknown',
+    manufacturer: canonicalManufacturerName(r.manufacturer?.name ?? r.manufacturer?.code),
     classification: classificationFor(r.entityClass, r),
     career: r.careerName ?? r.careerKey ?? 'Unknown',
     role: r.roleName ?? r.roleKey ?? 'Unknown',

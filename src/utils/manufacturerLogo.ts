@@ -27,13 +27,20 @@ const MANUFACTURER_ALIASES: Record<string, string> = {
   misc: 'MISC',
   'musashi industrial & starflight concern': 'MISC',
   rsi: 'RSI',
+  roberts: 'RSI',
   'roberts space industries': 'RSI',
   crusader: 'CRUS',
   'crusader industries': 'CRUS',
   argo: 'ARGO',
   'argo astronautics': 'ARGO',
-  gatac: 'GATC',
-  'gatac manufacture': 'GATC',
+  // EWO-051 — the real DataCore/ship-catalog code for Gatac is "GAM"
+  // (confirmed against generated-data/ship-catalog.json's own resolved
+  // manufacturer record for Railen/Syulen/Tyilui) — "GATC" here before
+  // this mission was never validated against real data and matched
+  // nothing any real ship actually carries, silently leaving every Gatac
+  // ship's manufacturer unresolved.
+  gatac: 'GAM',
+  'gatac manufacture': 'GAM',
   mirai: 'MRAI',
   tumbril: 'TMBL',
   'tumbril land systems': 'TMBL',
@@ -48,6 +55,68 @@ const MANUFACTURER_ALIASES: Record<string, string> = {
   // empty (confirmed against all 8 deep-imported CNOU ships). Only one
   // reviewed alias, same pattern as Mirai/Grey's Market above.
   'consolidated outland': 'CNOU',
+  // EWO-051 (Manufacturer Integrity Initiative) — the Manufacturer Audit
+  // found these real, confirmed manufacturers (all resolved against
+  // generated-data/ship-catalog.json's own real DataCore records) missing
+  // from this table entirely, the exact same gap shape as Grey's
+  // Market/Consolidated Outland before EWO-050 — every ship of theirs had
+  // a silently blank ShipDefinition.manufacturer field. "greycat" and
+  // "kruger" are the short, commonly-used forms Commanders actually search
+  // with (Objective 2's own worked example); the canonical stored form is
+  // still the full corporate name (see MANUFACTURER_CANONICAL_NAME below).
+  greycat: 'GRIN',
+  'greycat industrial': 'GRIN',
+  esperia: 'ESPR',
+  banu: 'BANU',
+  kruger: 'KRI',
+  'kruger intergalactic': 'KRI',
+  aopoa: 'XNAA',
+  // "Xi'an" is the in-fiction species/faction name, not the manufacturer
+  // brand itself (that's "Aopoa") — included as a search alias only,
+  // since Commanders commonly refer to these hulls that way.
+  "xi'an": 'XNAA',
+  vanduul: 'VNC',
+}
+
+/**
+ * EWO-051 (Manufacturer Integrity Initiative) — one canonical stored
+ * string per manufacturer, independent of `MANUFACTURER_ALIASES`' own
+ * shortest/longest-alias-derived short/full names below. Most real
+ * manufacturers here use their common short brand name (Aegis, Anvil,
+ * Drake, Origin, RSI, MISC, Crusader, Argo, Gatac, Mirai, Tumbril,
+ * Banu) — matching what this app has always displayed — but a few use
+ * their real full corporate name instead, because that IS the name
+ * Commanders and DataCore itself use for them (Greycat Industrial,
+ * Kruger Intergalactic, Consolidated Outland, Grey's Market) rather than
+ * an artificially-shortened form nobody actually calls them. Never
+ * derived from alias string length — that mechanism is what silently
+ * produced the wrong canonical form for Greycat/Kruger in the first
+ * place (the bare "Greycat"/"Kruger" search aliases are shorter than the
+ * real corporate names, so a length-based pick would wrongly canonicalize
+ * to the short form). Every code in `MANUFACTURER_ALIASES` MUST have an
+ * entry here — enforced by scripts/componentCatalog/__tests__ and
+ * src/utils/__tests__/manufacturerLogo.test.ts's own coverage test.
+ */
+const MANUFACTURER_CANONICAL_NAME: Record<string, string> = {
+  ANVL: 'Anvil',
+  AEGS: 'Aegis',
+  DRAK: 'Drake',
+  ORIG: 'Origin',
+  MISC: 'MISC',
+  RSI: 'RSI',
+  CRUS: 'Crusader',
+  ARGO: 'Argo',
+  GAM: 'Gatac',
+  MRAI: 'Mirai',
+  TMBL: 'Tumbril',
+  GLSN: "Grey's Market",
+  CNOU: 'Consolidated Outland',
+  GRIN: 'Greycat Industrial',
+  ESPR: 'Esperia',
+  BANU: 'Banu',
+  KRI: 'Kruger Intergalactic',
+  XNAA: 'Aopoa',
+  VNC: 'Vanduul',
 }
 
 /**
@@ -70,6 +139,23 @@ function titleCase(s: string): string {
   return s.replace(/(?<!')\b\w/g, (c) => c.toUpperCase())
 }
 
+/**
+ * EWO-051 — when a manufacturer's shortest alias IS its own code in
+ * every way except casing (RSI's shortest alias is literally "rsi";
+ * MISC's is "misc"), that alias is a real acronym brand name, not an
+ * ordinary word — `titleCase` would wrongly produce "Rsi"/"Misc" (only
+ * the first letter capitalized) instead of the correct all-caps "RSI"/
+ * "MISC". Confirmed a real, live defect: the Add Ship picker's label
+ * formatter (`formatShipPickerLabel`) rendered every RSI ship's
+ * manufacturer suffix as "— Rsi", never "— RSI", until this fix. Using
+ * the code's own casing in that one case, title-casing every other alias
+ * normally, fixes it without touching any manufacturer whose short form
+ * is a genuine word (Drake, Aegis, Anvil, ...).
+ */
+function shortNameFor(code: string, alias: string): string {
+  return alias.toLowerCase() === code.toLowerCase() ? code : titleCase(alias)
+}
+
 const MANUFACTURER_CODE_TO_NAME: Record<string, string> = (() => {
   const byCode: Record<string, string> = {}
   for (const [alias, code] of Object.entries(MANUFACTURER_ALIASES)) {
@@ -78,7 +164,7 @@ const MANUFACTURER_CODE_TO_NAME: Record<string, string> = (() => {
       byCode[code] = alias
     }
   }
-  return Object.fromEntries(Object.entries(byCode).map(([code, alias]) => [code, titleCase(alias)]))
+  return Object.fromEntries(Object.entries(byCode).map(([code, alias]) => [code, shortNameFor(code, alias)]))
 })()
 
 /** Resolves a manufacturer code (e.g. "DRAK", "AEGS") to its short
@@ -136,4 +222,58 @@ export function resolveManufacturerLogo(manufacturerNameOrCode: string): Manufac
   const code = MANUFACTURER_ALIASES[key] ?? fallback
 
   return { code, displayName: trimmed, logoPath: undefined }
+}
+
+/**
+ * EWO-051 (Manufacturer Integrity Initiative) — the ONE function that
+ * turns any raw manufacturer string (whatever casing/verbosity a given
+ * source happened to store — "Rsi", "RSI", "Roberts Space Industries")
+ * into the single canonical form every ShipDefinition stores from Beta
+ * onward (see src/data/shipDefinitions.ts). Deliberately never guesses:
+ * an unreviewed manufacturer (no entry in MANUFACTURER_ALIASES) is
+ * returned trimmed as-is rather than invented or blanked — a genuinely
+ * new/undocumented manufacturer stays visible and searchable by its own
+ * raw name instead of silently disappearing.
+ */
+export function canonicalManufacturerName(raw: string | null | undefined): string {
+  const trimmed = (raw ?? '').trim()
+  if (!trimmed || trimmed.toLowerCase() === 'unknown') return 'Unknown'
+  const code = manufacturerCodeFor(trimmed)
+  if (!code) return trimmed
+  return MANUFACTURER_CANONICAL_NAME[code] ?? trimmed
+}
+
+/**
+ * EWO-051 — the reverse of `MANUFACTURER_ALIASES`, grouped: every known
+ * alias string for a given code, so a free-text search token can match
+ * against ANY of them (e.g. "roberts" matching a ship whose canonical
+ * manufacturer is "RSI", via the "roberts space industries" alias), not
+ * just the one canonical string actually stored.
+ */
+const ALIASES_BY_CODE: Record<string, string[]> = (() => {
+  const byCode: Record<string, string[]> = {}
+  for (const [alias, code] of Object.entries(MANUFACTURER_ALIASES)) {
+    ;(byCode[code] ??= []).push(alias)
+  }
+  return byCode
+})()
+
+/**
+ * EWO-051 (Objective 2/6) — the one shared search-matching function every
+ * manufacturer search field (Add Ship, future filters) uses, so "RSI",
+ * "Roberts", and "Roberts Space Industries" all find the same ships
+ * without each caller re-implementing its own alias logic. `manufacturer`
+ * is expected to already be canonical (every ShipDefinition's own field
+ * is, post-EWO-051) — this only widens what a Commander's typed QUERY is
+ * allowed to match against, never what gets stored.
+ */
+export function manufacturerMatchesQuery(manufacturer: string, query: string): boolean {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  const name = (manufacturer ?? '').trim().toLowerCase()
+  if (name.includes(q)) return true
+  const code = manufacturerCodeFor(manufacturer)
+  if (!code) return false
+  if (code.toLowerCase().includes(q)) return true
+  return (ALIASES_BY_CODE[code] ?? []).some((alias) => alias.includes(q))
 }

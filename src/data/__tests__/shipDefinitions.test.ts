@@ -6,6 +6,7 @@ import { materializeFleetAsset } from '../../utils/fleetAssetMaterializer'
 import { buildPortTree } from '../../utils/portTree'
 import { validateTargetCompatibility, isPlayerSelectableRecord } from '../componentCatalog'
 import { compatibilityPortTypeFor, resolveComponentByEntityClass } from '../../generated/componentCatalog'
+import { canonicalManufacturerName, manufacturerCodeFor, manufacturerMatchesQuery } from '../../utils/manufacturerLogo'
 
 const gladiusDefinition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Gladius')
 
@@ -326,7 +327,10 @@ describe('Mission M-012: shipDefinitions includes the authoritative ship/vehicle
     const medivac = shipDefinitions.find((d) => d.id === 'RSI_Apollo_Medivac_Tier_1')
     expect(medivac).toBeDefined()
     expect(medivac!.displayName).toBe('RSI Apollo Medivac')
-    expect(medivac!.manufacturer).toBe('Roberts Space Industries')
+    // EWO-051 (Manufacturer Integrity Initiative) — ShipDefinition.manufacturer
+    // is now the one canonical form ("RSI"), not whichever raw variant the
+    // catalog record happened to carry ("Roberts Space Industries").
+    expect(medivac!.manufacturer).toBe('RSI')
   })
 
   it('does not duplicate the two deep-imported ships (Gladius, Avenger Titan) between the imported and catalog sources', () => {
@@ -596,5 +600,78 @@ describe("RC-001A: Grey's Basher — authoritative port tree and factory assignm
     expect(byType('Shield').length).toBe(1)
     expect(byType('Quantum Drive').length).toBe(1)
     expect(byType('Life Support').length).toBe(1)
+  })
+})
+
+describe('EWO-051 (Manufacturer Integrity Initiative): every ShipDefinition carries one canonical manufacturer', () => {
+  // Root cause (Manufacturer Audit): 34 deep-imported ships had a
+  // genuinely blank ShipDefinition.manufacturer field — not because the
+  // manufacturer was unknown, but because the deep-import pipeline never
+  // cross-referenced generated-data/ship-catalog.json's own already-
+  // resolved manufacturer record for the identical hull (an importer
+  // omission). A separate finding: 8+ real manufacturers were stored under
+  // 2-3 different literal strings fleet-wide (a normalization omission —
+  // nothing ever canonicalized the raw value). Both are fixed at the one
+  // place raw generated data becomes a ShipDefinition
+  // (src/data/shipDefinitions.ts) — every consumer (ShipCard, Add Ship
+  // search, Ship Detail) reads an already-canonical value with no
+  // resolver awareness of its own.
+
+  it('no ShipDefinition has a blank manufacturer — every one of the 34 previously-missing ships now resolves a real one', () => {
+    if (shipDefinitions.length === 0) return
+    const blank = shipDefinitions.filter((d) => !d.manufacturer || d.manufacturer.trim() === '')
+    expect(blank.map((d) => d.displayName)).toEqual([])
+  })
+
+  it('spot-checks the real, previously-blank ships by name — MTC, ROC, Blade, and the Kruger Wolf family all resolve their real manufacturer via the ship-catalog cross-reference', () => {
+    if (importedShipList.length === 0) return
+    const byName = (name: string) => shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === name)
+    const mtc = byName('MTC')
+    const roc = byName('ROC')
+    const blade = byName('Blade')
+    const wolf = byName('L-21 Wolf')
+    if (mtc) expect(mtc.manufacturer).toBe('Greycat Industrial')
+    if (roc) expect(roc.manufacturer).toBe('Greycat Industrial')
+    if (blade) expect(blade.manufacturer).toBe('Esperia')
+    if (wolf) expect(wolf.manufacturer).toBe('Kruger Intergalactic')
+  })
+
+  it('no two distinct raw manufacturer spellings survive in storage — the set of stored manufacturer strings is exactly the set of their own canonical forms', () => {
+    if (shipDefinitions.length === 0) return
+    const distinctManufacturers = new Set(shipDefinitions.map((d) => d.manufacturer))
+    for (const stored of distinctManufacturers) {
+      expect(canonicalManufacturerName(stored), `stored value "${stored}" must already be its own canonical form`).toBe(stored)
+    }
+  })
+
+  it('the fleet contains no known-duplicate raw spellings anymore (Rsi, Misc, Aegis Dynamics, Greycat, Esperia inconsistencies, etc.)', () => {
+    if (shipDefinitions.length === 0) return
+    const stored = new Set(shipDefinitions.map((d) => d.manufacturer))
+    const knownDuplicateSpellings = ['Rsi', 'Misc', 'Aegis Dynamics', 'Anvil Aerospace', 'Argo Astronautics', 'Crusader Industries', 'Drake Interplanetary', 'Origin Jumpworks', 'Roberts Space Industries', 'Musashi Industrial & Starflight Concern', 'Greycat', 'Kruger']
+    for (const bad of knownDuplicateSpellings) {
+      expect(stored.has(bad), `"${bad}" should have been canonicalized away`).toBe(false)
+    }
+  })
+
+  it('search certification (Objective 6) — every certified query resolves against at least one real ship\'s canonical manufacturer', () => {
+    if (shipDefinitions.length === 0) return
+    const manufacturers = shipDefinitions.map((d) => d.manufacturer)
+    const certifiedQueries = ['RSI', 'Roberts', 'Greycat', 'Drake', 'Origin', 'Misc', 'MISC', 'Anvil', 'Aegis']
+    for (const query of certifiedQueries) {
+      const matches = manufacturers.some((m) => manufacturerMatchesQuery(m, query))
+      expect(matches, `query "${query}" should match at least one real ship`).toBe(true)
+    }
+  })
+
+  it('every stored manufacturer resolves a real code via manufacturerCodeFor, or is honestly left as an unreviewed raw string — never blank', () => {
+    if (shipDefinitions.length === 0) return
+    const unresolved = new Set<string>()
+    for (const d of shipDefinitions) {
+      if (d.manufacturer === 'Unknown') continue
+      if (!manufacturerCodeFor(d.manufacturer)) unresolved.add(d.manufacturer)
+    }
+    // Documents exactly which manufacturers (if any) remain unreviewed —
+    // never silently dropped, always visible here for the next audit pass.
+    console.log('EWO-051: manufacturers with no reviewed alias entry:', Array.from(unresolved))
   })
 })

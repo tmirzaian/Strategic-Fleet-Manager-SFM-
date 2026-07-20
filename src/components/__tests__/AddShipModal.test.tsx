@@ -142,3 +142,25 @@ describe('EWO-026 (Task 9/10/11/12/13): ship picker label normalization', () => 
     expect(rawLooking).toEqual([])
   })
 })
+
+describe('EWO-051 (Manufacturer Integrity Initiative): Add Ship search certification (Objective 6)', () => {
+  function options() {
+    return Array.from(document.querySelectorAll('select[size="6"] option')).map((o) => o.textContent)
+  }
+
+  it('"Greycat" (the common shorthand, not the canonical "Greycat Industrial") finds real Greycat ships through the shared manufacturerMatchesQuery resolver, not a raw substring check', () => {
+    render(<AddShipModal onClose={() => {}} />)
+    fireEvent.change(screen.getByPlaceholderText(/search ship models/i), { target: { value: 'Greycat' } })
+    const results = options()
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.every((r) => r?.includes('Greycat'))).toBe(true)
+  })
+
+  it('"Roberts" finds real RSI ships even though no ship\'s own canonical manufacturer field is "Roberts Space Industries" anymore', () => {
+    render(<AddShipModal onClose={() => {}} />)
+    fireEvent.change(screen.getByPlaceholderText(/search ship models/i), { target: { value: 'Roberts' } })
+    const results = options()
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.some((r) => r?.includes('RSI'))).toBe(true)
+  })
+})
