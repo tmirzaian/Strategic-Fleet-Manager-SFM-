@@ -830,3 +830,57 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001E: mining module slot
     expect(within(slotRow).getByRole('combobox')).toBeInTheDocument()
   })
 })
+
+describe('EWO-053 (B12-RB-001): a previously-saved mining module target survives reopening Edit an Existing Loadout', () => {
+  // Root cause: buildLoadoutEditorModel (src/utils/loadoutEditorModel.ts)
+  // builds its rows strictly from the canonical FACTORY template, which
+  // never contains a mining module child slot at all (a mining head never
+  // has real ship-baked children — see componentOwnedSlots.ts). Those rows
+  // only ever come from withComponentOwnedChildSlots' synthesis step,
+  // applied to the preview AFTER editorModel is built. Before this fix,
+  // makePreviewChildSlotRow synthesized every such row with a hardcoded
+  // '—' default and consulted only the in-session `overrides` state - never
+  // the existing Build's own already-persisted assignment for that exact
+  // slotLabel. Combined with the Save handler clearing `overrides` back to
+  // `{}` immediately after a successful save, a genuinely-persisted
+  // selection visibly reverted to '—' the instant Save completed, on the
+  // very screen used to make and verify it - even though the underlying
+  // Hardpoint row was, and remained, correctly persisted throughout.
+  it("a MOLE's mining module target, saved once, still shows the same value the next time the build is reopened for editing", () => {
+    const added = useFleetStore.getState().addFleetAsset('mole-imported', 'OWNED')
+    if (!added.success || !added.assetId) return // real generated-data ships not present on this machine
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'EWO-053 Repro', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+    if (!first.success || !first.buildId) return
+    const miningRow = useFleetStore.getState().hardpoints.find((h) => h.buildId === first.buildId && h.type === 'Mining Module')
+    if (!miningRow) return // no real mining module slot data present on this machine
+
+    const second = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'EWO-053 Repro',
+      startingState: 'EXISTING',
+      existingBuildId: first.buildId,
+      targetOverrides: { [miningRow.slotLabel]: 'EWO-053 Repro Module' },
+      setActive: false,
+    })
+    expect(second.success).toBe(true)
+
+    // Confirms the SAVE layer itself is, and was, correct — the defect is
+    // purely in reconstructing the editing surface, not in persistence.
+    const persisted = useFleetStore.getState().hardpoints.find((h) => h.buildId === first.buildId && h.slotLabel === miningRow.slotLabel)
+    expect(persisted?.targetItem).toBe('EWO-053 Repro Module')
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const expandAll = screen.queryByText('Expand All')
+    if (expandAll) fireEvent.click(expandAll)
+
+    const slotNumberMatch = miningRow.slotLabel.match(/Slot (\d+)$/)
+    const slotText = screen.queryAllByText(new RegExp(`Module Slot ${slotNumberMatch ? slotNumberMatch[1] : '1'}`))
+    if (slotText.length === 0) return
+    const slotRow = slotText[0].closest('tr')!
+    const input = within(slotRow).getByRole('combobox') as HTMLInputElement
+    expect(input.value).toBe('EWO-053 Repro Module')
+  })
+})

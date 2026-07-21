@@ -1040,15 +1040,39 @@ export const useFleetStore = create<FleetState>()(
           targetEntityClass,
           status,
           invalidMessage,
-          // Mission-kind rows deliberately do NOT carry parentSlotLabel/
-          // groupLabel/assemblyRole/isStructural here (EWO-025/EWO-026) —
-          // presentation hierarchy for a saved Loadout is reconstructed at
-          // render time from the current canonical template (see
-          // src/pages/ShipDetail.tsx's overlayCanonicalHierarchy /
-          // src/pages/MissionComposer.tsx), never persisted redundantly.
+          // Mission-kind rows deliberately do NOT carry groupLabel/
+          // assemblyRole here (EWO-025/EWO-026) — presentation hierarchy
+          // for a saved Loadout is reconstructed at render time from the
+          // current canonical template (see src/pages/ShipDetail.tsx's
+          // overlayCanonicalHierarchy / src/pages/MissionComposer.tsx),
+          // never persisted redundantly.
           // sourcePortId IS carried, since it costs nothing and lets
           // src/utils/fleetAssetReconciliation.ts's strongest match tier
           // work on a saved row exactly like a fresh Factory one.
+          //
+          // EWO-053 (B12-RB-001) — parentSlotLabel/isStructural ARE
+          // carried through, UNLIKE groupLabel/assemblyRole above. Root
+          // cause: this map runs over EVERY row in `referenceRows`,
+          // including a component-owned child (a mining module or missile
+          // rack slot — see componentOwnedSlots.ts) that already exists
+          // from a prior save and was correctly left untouched by the
+          // materialization step above (existingChildren.length > 0 &&
+          // !swapped). Such a row's parentSlotLabel is NEVER reconstructable
+          // from the canonical template the way an ordinary row's is — the
+          // template has no entry for it at all (it isn't a real ship
+          // port). Previously this map silently dropped it anyway,
+          // stripping it down to `undefined` on every re-save of an
+          // EXISTING build — which made fleetAssetReconciliation.ts's own
+          // `isComponentOwnedChild` check (parentSlotLabel !== undefined)
+          // fail the very next reload, quarantining the row outright: a
+          // Commander's saved mining module selection would vanish
+          // entirely, not merely revert to unassigned. `refRow.parentSlotLabel`/
+          // `refRow.isStructural` are `undefined`/falsy for every ordinary
+          // row (EWO-025's own rule — never set on a Mission-kind row to
+          // begin with), so carrying them through here is a no-op for
+          // every row this concern doesn't apply to.
+          parentSlotLabel: refRow.parentSlotLabel,
+          isStructural: refRow.isStructural,
           sourcePortId: refRow.sourcePortId,
           targetMode: baseTargetModes.get(refRow.slotLabel) ?? 'EXPLICIT_TARGET',
         }

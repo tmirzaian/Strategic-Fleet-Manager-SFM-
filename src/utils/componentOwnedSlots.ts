@@ -131,8 +131,22 @@ function currentEntityClassOf(row: ComponentOwnedSlotHost): string | undefined {
  * persists anything; safe to call on every render, and therefore correct
  * again automatically after save, reload, or a full restart, since it
  * always re-derives from the row's own currently-persisted identity.
+ *
+ * EWO-053 (B12-RB-001) — `makeSlotRow` also receives `swapped`: whether
+ * this parent's CURRENT identity differs from its own factory identity.
+ * A caller building a row set that has no other source of previously-saved
+ * per-slot data (a live, not-yet-persisted preview — see
+ * src/pages/MissionComposer.tsx) needs this to decide whether an existing
+ * saved assignment for a freshly-synthesized child slotLabel is still
+ * valid to show as a default: valid when unswapped (the same real
+ * component this assignment was made against), never carried forward when
+ * swapped (a different component now occupies the parent slot, and its
+ * own child slots start genuinely empty, exactly as they always have).
+ * Every existing caller either ignores the extra argument (ShipDetail,
+ * which reads real persisted rows directly and has no such concept) or
+ * previously computed this exact boolean redundantly.
  */
-export function withComponentOwnedChildSlots<T extends ComponentOwnedSlotHost>(rows: T[], makeSlotRow: (host: T, slotNumber: number, spec: ComponentOwnedSlotSpec) => T): T[] {
+export function withComponentOwnedChildSlots<T extends ComponentOwnedSlotHost>(rows: T[], makeSlotRow: (host: T, slotNumber: number, spec: ComponentOwnedSlotSpec, swapped: boolean) => T): T[] {
   const existingChildrenByParent = new Map<string, T[]>()
   for (const row of rows) {
     if (row.parentSlotLabel) {
@@ -169,7 +183,7 @@ export function withComponentOwnedChildSlots<T extends ComponentOwnedSlotHost>(r
       const spec = componentOwnedChildSlotSpec(current)
       if (spec) {
         for (let slotNumber = 1; slotNumber <= spec.count; slotNumber++) {
-          newChildren.push(makeSlotRow(row, slotNumber, spec))
+          newChildren.push(makeSlotRow(row, slotNumber, spec, swapped))
         }
       }
     }

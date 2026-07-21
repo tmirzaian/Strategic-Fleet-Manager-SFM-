@@ -227,3 +227,45 @@ describe('EWO-027: custom Loadouts survive a genuine reload', () => {
     expect(useFleetStore.getState().builds.filter((b) => b.shipId === 'gladius-asset-old-save' && b.kind !== 'FACTORY')).toHaveLength(0)
   })
 })
+
+describe('EWO-053 (B12-RB-001): a component-owned child slot (mining module / missile rack) survives a genuine reload', () => {
+  // A mining module or missile rack slot is a real, persisted Hardpoint
+  // row exactly like any other (see src/utils/componentOwnedSlots.ts and
+  // src/store/useFleetStore.ts's own materialization step in
+  // saveMissionConfiguration) — it goes through the exact same
+  // `hardpoints` array `partialize`/`merge` already cover for every other
+  // row, so a genuine application restart was never actually at risk here;
+  // this test exists to prove that directly rather than leave it assumed,
+  // completing this mission's required Save/Reload/Navigate-away/
+  // Navigate-back/Restart lifecycle coverage (the Navigate-away/back leg
+  // is covered separately, at the UI reconstruction layer, by
+  // src/pages/__tests__/MissionComposer.test.tsx's own EWO-053 test — the
+  // actual root cause this mission found and fixed).
+  it("a MOLE's mining module target survives vi.resetModules() + reimport, the same genuine-reload simulation EWO-027 already established", async () => {
+    const { useFleetStore } = await import('../useFleetStore')
+    const added = useFleetStore.getState().addFleetAsset('mole-imported', 'OWNED', 'Restart Repro MOLE')
+    if (!added.success || !added.assetId) return // real generated-data ships not present on this machine
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'Restart Repro Build', startingState: 'FACTORY', targetOverrides: {}, setActive: true })
+    if (!first.success || !first.buildId) return
+    const miningRow = useFleetStore.getState().hardpoints.find((h) => h.buildId === first.buildId && h.type === 'Mining Module')
+    if (!miningRow) return // no real mining module slot data present on this machine
+
+    const second = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'Restart Repro Build',
+      startingState: 'EXISTING',
+      existingBuildId: first.buildId,
+      targetOverrides: { [miningRow.slotLabel]: 'EWO-053 Restart Module' },
+      setActive: true,
+    })
+    expect(second.success).toBe(true)
+
+    vi.resetModules()
+    const { useFleetStore: reloaded } = await import('../useFleetStore')
+
+    const persisted = reloaded.getState().hardpoints.find((h) => h.buildId === first.buildId && h.slotLabel === miningRow.slotLabel)
+    expect(persisted?.targetItem).toBe('EWO-053 Restart Module')
+  })
+})

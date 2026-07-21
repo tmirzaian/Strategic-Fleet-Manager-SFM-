@@ -286,12 +286,23 @@ export default function MissionComposer() {
     return { previewTarget: target, previewTargetEntityClass: targetEntityClass, compatible: compatibility.valid, incompatibleMessage: 'message' in compatibility ? compatibility.message : undefined }
   }
 
+  // EWO-053 (B12-RB-001) — lifted out of `previewRows` below so
+  // `makePreviewChildSlotRow` can also consult it: a component-owned child
+  // slot (a mining module, a missile rack slot) never appears in
+  // `editorModel.rows` at all — see componentOwnedSlots.ts — so without
+  // this, a Commander's already-saved assignment for one of those exact
+  // slots had no path back into the preview the next time this exact
+  // Build was reopened for editing.
+  const existingAssignments = useMemo(
+    () => (effectiveStartingState === 'EXISTING' ? assignmentsBySlotLabel(hardpoints.filter((h) => h.buildId === existingBuildId)) : null),
+    [effectiveStartingState, existingBuildId, hardpoints]
+  )
+
   // Preview: same precedence saveMissionConfiguration applies — starting
   // state, then Preset, then explicit per-slot overrides — computed here
   // purely for display so the table always shows what will actually save.
   const previewRows = useMemo(() => {
     const template = quartermasterTemplates.find((t) => t.id === templateId)
-    const existingAssignments = effectiveStartingState === 'EXISTING' ? assignmentsBySlotLabel(hardpoints.filter((h) => h.buildId === existingBuildId)) : null
 
     return editorModel.rows.map((row) => {
       let target = row.factoryItem
@@ -325,7 +336,7 @@ export default function MissionComposer() {
 
       return { ...row, ...resolvePreviewTarget(row.slotLabel, row.type, row.size, row.factoryEntityClass, target, targetEntityClass) }
     })
-  }, [editorModel, effectiveStartingState, existingBuildId, templateId, overrides, quartermasterTemplates, hardpoints])
+  }, [editorModel, effectiveStartingState, existingAssignments, templateId, overrides, quartermasterTemplates])
 
   type PreviewRow = (typeof previewRows)[number]
 
@@ -334,22 +345,38 @@ export default function MissionComposer() {
   // (mining heads, missile racks — see src/utils/componentOwnedSlots.ts).
   // Every component-owned child slot is a REAL, non-structural, targetable
   // row — a Commander must be able to assign a real component into it via
-  // the same TargetComponentPicker every other row uses. It starts empty
-  // (`previewTarget: '—'`, trivially `compatible: true`) — a swap must
+  // the same TargetComponentPicker every other row uses. A swap must
   // never silently carry forward a previous, possibly now-incompatible
   // assignment, and always resolves any Target the Commander has already
-  // picked for it the same way every other row does — without this, a
-  // picker selection would update `overrides` but this freshly synthesized
-  // row would keep re-rendering its hardcoded '—' default, silently
+  // picked for it THIS session the same way every other row does —
+  // without this, a picker selection would update `overrides` but this
+  // freshly synthesized row would keep re-rendering its default, silently
   // discarding the assignment (the exact bug FTB-001B found and fixed for
   // missile slots; FTB-001E extends the same fix to mining module slots,
   // previously left presentation-only with no picker rendered at all).
-  function makePreviewChildSlotRow(host: PreviewRow, slotNumber: number, spec: ComponentOwnedSlotSpec): PreviewRow {
+  //
+  // EWO-053 (B12-RB-001) — this row never appears in `editorModel.rows`
+  // (see componentOwnedSlots.ts's own doc comment: a mining head never has
+  // real ship-baked children, and a missile rack's real children live
+  // under the canonical template only for its ORIGINAL factory item), so
+  // the ordinary `existingAssignments` lookup every other row goes through
+  // (above, in `previewRows`) never had a chance to run for it. The
+  // default shown here — before any in-session `overrides` entry, which
+  // still always wins via `resolvePreviewTarget` — must therefore be
+  // resolved the same way: the existing Build's own already-persisted
+  // assignment for this exact slotLabel, WHEN this parent is unswapped
+  // (`swapped` — the same signal `withComponentOwnedChildSlots` already
+  // computes to decide whether to leave a rack's real children alone).
+  // Swapped still starts genuinely empty — an assignment made against the
+  // OLD component's module/missile slots is never a valid default for the
+  // NEW one's.
+  function makePreviewChildSlotRow(host: PreviewRow, slotNumber: number, spec: ComponentOwnedSlotSpec, swapped: boolean): PreviewRow {
     const isMissileSlot = spec.label === 'Missile'
     const slotLabel = `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`
     const type = isMissileSlot ? 'Missile' : 'Mining Module'
     const size = spec.size ? `S${spec.size}` : host.size
-    const resolved = resolvePreviewTarget(slotLabel, type, size, undefined, '—', undefined)
+    const existing = swapped ? undefined : existingAssignments?.get(slotLabel)
+    const resolved = resolvePreviewTarget(slotLabel, type, size, undefined, existing?.targetItem ?? '—', existing?.targetEntityClass)
     return {
       ...host,
       id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
