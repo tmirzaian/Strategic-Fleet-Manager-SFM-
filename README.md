@@ -114,8 +114,7 @@ channel during Beta.
 Near-term work focuses on Beta stabilization, GitHub presentation, and
 launch experience polish. Longer-term, planned work includes a Windows
 installer, RSI/CCUGame fleet synchronization, richer search, and a
-dedicated support/about experience. See [docs/Roadmap.md](docs/Roadmap.md)
-for the full, current roadmap.
+dedicated support/about experience.
 
 ## Credits
 
