@@ -2,10 +2,9 @@
 
 All notable changes to Strategic Fleet Manager are documented in this file.
 
-## Strategic Fleet Manager Beta 1.2 (Commander Test Candidate)
+## Strategic Fleet Manager Beta 1.2
 
-Integration commit `d2a0824`. **Local Commander test build — not yet
-certified for public release.** Certified for Star Citizen LIVE
+Certified commit `a6eddaf`. Certified for Star Citizen LIVE
 4.9.186.42610.
 
 ### Compatibility and Loadout Integrity
@@ -43,7 +42,27 @@ certified for public release.** Certified for Star Citizen LIVE
   Hangar Inventory completely unchanged — no partial updates.
 - Inventory mutations remain atomic and identity-aware throughout.
 
-### Known limitations carried into this test candidate
+### Loadout Persistence Integrity
+
+- Mining module and missile rack slot selections now reliably survive
+  saving, reopening a Loadout for editing, navigating away and back, and
+  a full application restart — previously, a saved selection could
+  appear to vanish the moment it was made, or be silently lost on a
+  later reload.
+
+### Fleet Navigation
+
+- Fleet Dashboard's filters — Ownership, Manufacturer, RSI Role, and
+  Readiness — now combine freely (e.g. "Industrial ships built by Argo
+  that are Ready"), instead of one filter replacing another.
+- New Manufacturer filter, using each ship's canonical manufacturer
+  identity.
+- Sorting now also supports Ship Name, Manufacturer, and RSI Role,
+  alongside the existing Priority and Readiness.
+- The Commander's active filter and sort selections now survive
+  navigating to Ship Detail and back.
+
+### Known limitations carried into this release
 
 - "::Tractor Beam" bare-name compatibility ambiguity (a separate,
   ToolArm-category gap) remains open — not addressed by this build.
