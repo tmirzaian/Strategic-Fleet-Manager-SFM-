@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
@@ -8,28 +8,56 @@ import Badge, { ownershipTone } from '../components/Badge'
 import ReadinessBar from '../components/ReadinessBar'
 import AddShipModal from '../components/AddShipModal'
 import { calculateBuildProgress, type BuildProgressResult } from '../utils/buildProgress'
-import { deriveFleetBuildState, compareByReadinessRank } from '../utils/fleetBuildState'
+import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { ALL_RSI_ROLES } from '../data/shipClassification'
 import { shipDefinitionById } from '../data/shipDefinitions'
 import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
+import {
+  applyFleetFilters,
+  isFleetFilterActive,
+  loadPersistedFleetView,
+  manufacturersInFleet,
+  savePersistedFleetView,
+  sortFleetEntries,
+  ALL_FLEET_SORT_MODES,
+  DEFAULT_FLEET_FILTERS,
+  type FleetNavigationEntry,
+  type FleetSortMode,
+  type FleetViewMode,
+  type OwnershipFilterValue,
+  type ReadinessFilterValue,
+} from '../utils/fleetNavigation'
 import type { FleetBuildState, RsiRole } from '../types'
 
-type OwnershipPill = 'All' | 'Owned' | 'Purchased' | 'Loaner'
-type FilterPill = OwnershipPill | RsiRole
-type SortMode = 'Priority' | 'Readiness'
-type ViewMode = 'Card' | 'Table'
-
-const ownershipPills: OwnershipPill[] = ['All', 'Owned', 'Purchased', 'Loaner']
+const ownershipPills: OwnershipFilterValue[] = ['All', 'Owned', 'Purchased', 'Loaner']
+const readinessPills: { value: ReadinessFilterValue; label: string }[] = [
+  { value: 'All', label: 'All' },
+  { value: 'MISSION_READY', label: 'Ready' },
+  { value: 'LOADOUTS_IN_PROGRESS', label: 'In Progress' },
+  { value: 'FACTORY_LOADOUT', label: 'Factory Only' },
+]
+const sortLabels: Record<FleetSortMode, string> = { Priority: 'Priority', Readiness: 'Readiness', Name: 'Ship Name', Manufacturer: 'Manufacturer', RsiRole: 'RSI Role' }
 
 export default function FleetDashboard() {
   const ships = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
-  const [activeFilter, setActiveFilter] = useState<FilterPill>('All')
-  const [sortMode, setSortMode] = useState<SortMode>('Priority')
-  const [viewMode, setViewMode] = useState<ViewMode>('Card')
+
+  // EWO-053 (Objective B) — Required Feature: Persistent View. Loaded once,
+  // synchronously, at first mount (not in an effect) so the Commander's
+  // filter/sort/view choice is already correct on the very first render
+  // after navigating back from Ship Detail — never a flash of the default
+  // state before session data catches up.
+  const [initialView] = useState(() => loadPersistedFleetView())
+  const [filters, setFilters] = useState(initialView.filters)
+  const [sortMode, setSortMode] = useState<FleetSortMode>(initialView.sortMode)
+  const [viewMode, setViewMode] = useState<FleetViewMode>(initialView.viewMode)
   const [addShipOpen, setAddShipOpen] = useState(false)
+
+  useEffect(() => {
+    savePersistedFleetView({ filters, sortMode, viewMode })
+  }, [filters, sortMode, viewMode])
 
   const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Loadout'
 
@@ -57,30 +85,29 @@ export default function FleetDashboard() {
     return map
   }, [ships, builds, progressByShipId])
 
-  // Role filters read ShipDefinition.classification.rsiRoles only — never
-  // Build name, custom Role text, or nickname (Part 5/6). A ship with
-  // multiple RSI roles can appear under more than one filter.
-  const filtered = useMemo(() => {
-    let result = ships
-    if (activeFilter !== 'All') {
-      if ((ownershipPills as string[]).includes(activeFilter)) {
-        result = result.filter((s) => s.ownership === activeFilter)
-      } else {
-        result = result.filter((s) => shipDefinitionById.get(s.id)?.classification.rsiRoles.includes(activeFilter as RsiRole))
-      }
-    }
-    if (sortMode === 'Priority') {
-      result = [...result].sort((a, b) => a.priority - b.priority)
-    } else {
-      result = [...result].sort((a, b) =>
-        compareByReadinessRank(
-          { ship: a, state: stateByShipId.get(a.id)!, progress: progressByShipId.get(a.id)! },
-          { ship: b, state: stateByShipId.get(b.id)!, progress: progressByShipId.get(b.id)! }
-        )
-      )
-    }
-    return result
-  }, [ships, activeFilter, sortMode, progressByShipId, stateByShipId])
+  // EWO-053 (Objective B) — the one shared assembly point feeding the
+  // dedicated fleet-navigation layer (src/utils/fleetNavigation.ts):
+  // every field here already comes from an existing, authoritative source
+  // (RSI role from the ship's own ShipDefinition classification — never
+  // Build name, custom Role text, or nickname; state/progress from the
+  // same engine every other Commander-facing screen reads). This module
+  // never recomputes any of it.
+  const entries = useMemo<FleetNavigationEntry[]>(
+    () =>
+      ships.map((ship) => ({
+        ship,
+        rsiRoles: shipDefinitionById.get(ship.id)?.classification.rsiRoles ?? [],
+        state: stateByShipId.get(ship.id)!,
+        progress: progressByShipId.get(ship.id)!,
+      })),
+    [ships, stateByShipId, progressByShipId]
+  )
+
+  const manufacturerOptions = useMemo(() => manufacturersInFleet(ships), [ships])
+
+  const navigatedEntries = useMemo(() => sortFleetEntries(applyFleetFilters(entries, filters), sortMode), [entries, filters, sortMode])
+  const filtered = navigatedEntries.map((e) => e.ship)
+  const filtersActive = isFleetFilterActive(filters)
 
   return (
     <div className="space-y-6">
@@ -133,16 +160,29 @@ export default function FleetDashboard() {
         </div>
       ) : (
       <>
-      {/* Filters — dedicated to filtering only (Alpha 2.4, Part 6). */}
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-muted/70 mb-1.5">Filters</p>
+      {/* Filters — dedicated to filtering only (Alpha 2.4, Part 6; EWO-053
+          Objective B: each row is now its own independent, composable
+          dimension — Ownership AND Manufacturer AND RSI Role AND
+          Readiness can all be active at once, e.g. "Industrial -> ARGO ->
+          Ready" — rather than one mutually-exclusive pill selector. */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-widest text-muted/70">Filters</p>
+          {filtersActive && (
+            <button onClick={() => setFilters(DEFAULT_FLEET_FILTERS)} className="text-[11px] text-cyan/80 hover:text-cyan font-medium">
+              Clear Filters
+            </button>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Ownership</span>
           {ownershipPills.map((pill) => (
             <button
               key={pill}
-              onClick={() => setActiveFilter(pill)}
+              onClick={() => setFilters((f) => ({ ...f, ownership: pill }))}
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                activeFilter === pill
+                filters.ownership === pill
                   ? 'bg-cyan/15 border-cyan/40 text-cyan'
                   : 'border-white/10 text-muted hover:text-white hover:border-white/25'
               }`}
@@ -150,18 +190,73 @@ export default function FleetDashboard() {
               {pill}
             </button>
           ))}
-          <span className="w-px h-5 bg-white/10 mx-1" />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">RSI Role</span>
+          <button
+            onClick={() => setFilters((f) => ({ ...f, rsiRole: 'All' }))}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              filters.rsiRole === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+            }`}
+          >
+            All
+          </button>
           {ALL_RSI_ROLES.map((role) => (
             <button
               key={role}
-              onClick={() => setActiveFilter(role)}
+              onClick={() => setFilters((f) => ({ ...f, rsiRole: role as RsiRole }))}
               className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                activeFilter === role
+                filters.rsiRole === role
                   ? 'bg-cyan/15 border-cyan/40 text-cyan'
                   : 'border-white/10 text-muted hover:text-white hover:border-white/25'
               }`}
             >
               {role}
+            </button>
+          ))}
+        </div>
+
+        {manufacturerOptions.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Manufacturer</span>
+            <button
+              onClick={() => setFilters((f) => ({ ...f, manufacturer: 'All' }))}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                filters.manufacturer === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+              }`}
+            >
+              All
+            </button>
+            {manufacturerOptions.map((name) => (
+              <button
+                key={name}
+                onClick={() => setFilters((f) => ({ ...f, manufacturer: name }))}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  filters.manufacturer === name
+                    ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                    : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Readiness</span>
+          {readinessPills.map((pill) => (
+            <button
+              key={pill.value}
+              onClick={() => setFilters((f) => ({ ...f, readiness: pill.value }))}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                filters.readiness === pill.value
+                  ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                  : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+              }`}
+            >
+              {pill.label}
             </button>
           ))}
         </div>
@@ -174,7 +269,7 @@ export default function FleetDashboard() {
         </span>
         <span className="text-[10px] uppercase tracking-widest text-muted/70">Sort By</span>
         <div className="flex flex-wrap items-center gap-2">
-          {(['Priority', 'Readiness'] as SortMode[]).map((mode) => (
+          {ALL_FLEET_SORT_MODES.map((mode) => (
             <button
               key={mode}
               onClick={() => setSortMode(mode)}
@@ -184,7 +279,7 @@ export default function FleetDashboard() {
                   : 'border-white/10 text-muted hover:text-white hover:border-white/25'
               }`}
             >
-              {mode}
+              {sortLabels[mode]}
             </button>
           ))}
         </div>

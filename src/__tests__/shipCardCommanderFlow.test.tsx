@@ -78,7 +78,11 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
       expect(wrapper.querySelectorAll('.min-h-11').length).toBe(2)
       expect(wrapper.querySelector('.min-h-5')).not.toBeNull()
     }
-    fireEvent.click(screen.getByRole('button', { name: 'All' })) // reset filter for the rest of the flow
+    // EWO-053 (Objective B) — Fleet Dashboard's filters are now composable,
+    // independent dimensions (Ownership/RSI Role/Manufacturer/Readiness),
+    // each with its own "All" pill, rather than one shared selector — the
+    // Ownership row's is the first in DOM order.
+    fireEvent.click(screen.getAllByRole('button', { name: 'All' })[0]) // reset the Ownership filter for the rest of the flow
 
     // 10. Open Mission Control.
     fireEvent.click(screen.getByRole('link', { name: /Mission Control/ }))

@@ -110,3 +110,107 @@ describe('<FleetDashboard /> — EWO-033 (Task 1): Priority presentation', () =>
     expect(screen.queryByTestId('priority-card-wrapper')).not.toBeInTheDocument()
   })
 })
+
+describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, independent filter dimensions', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  function tableShipNamesInOrder(): string[] {
+    return Array.from(document.querySelectorAll('tbody tr')).map((tr) => tr.querySelector('td')!.textContent ?? '')
+  }
+
+  // Uses the real seed fleet, not a fabricated fixture — MOLE (canonical
+  // manufacturer 'Argo', RSI role Industrial) alongside Vulture (Drake,
+  // Industrial) and Prospector (MISC, Industrial) is the exact "Industrial
+  // ships built by Argo" success-criterion example, already present in
+  // src/data/seed.ts.
+  it('the RSI Role filter alone shows every Industrial ship regardless of manufacturer (Mole, Vulture, Prospector)', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.getByText('Vulture')).toBeInTheDocument()
+    expect(screen.getByText('Prospector')).toBeInTheDocument()
+  })
+
+  it('the Manufacturer filter alone shows every ARGO ship regardless of role', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.queryByText('Vulture')).not.toBeInTheDocument()
+    expect(screen.queryByText('Prospector')).not.toBeInTheDocument()
+  })
+
+  it('Composable Filters: Industrial + ARGO composes (AND), narrowing to exactly the ships both dimensions agree on — not replacing one filter with the other', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.queryByText('Vulture')).not.toBeInTheDocument()
+    expect(screen.queryByText('Prospector')).not.toBeInTheDocument()
+    // Both pills stay visibly active at once — proof this is two
+    // independent dimensions, not a single mutually-exclusive selector.
+    expect(screen.getByRole('button', { name: 'Industrial' })).toHaveClass('bg-cyan/15')
+    expect(screen.getByRole('button', { name: 'Argo' })).toHaveClass('bg-cyan/15')
+  })
+
+  it('Clear Filters resets every dimension at once and disappears once nothing is active', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
+    expect(screen.getByText('Clear Filters')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Clear Filters'))
+    expect(screen.queryByText('Clear Filters')).not.toBeInTheDocument()
+    expect(screen.getByText('Vulture')).toBeInTheDocument() // Industrial ships other than ARGO are visible again
+  })
+
+  it('Sorting by Manufacturer orders the Table view by each ship\'s own canonical manufacturer name', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    fireEvent.click(screen.getByRole('button', { name: 'Manufacturer' }))
+    const names = tableShipNamesInOrder()
+    const { ships } = useFleetStore.getState()
+    const expectedOrder = [...ships].sort((a, b) => a.manufacturer.localeCompare(b.manufacturer) || a.name.localeCompare(b.name)).map((s) => s.name)
+    expect(names).toEqual(expectedOrder)
+  })
+
+  it('Sorting by Ship Name orders the Table view alphabetically', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    fireEvent.click(screen.getByRole('button', { name: 'Ship Name' }))
+    const names = tableShipNamesInOrder()
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+  })
+
+  it('Sorting by RSI Role never crashes and produces a stable, fully-ordered result for every ship, including those with no classified role', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    expect(() => fireEvent.click(screen.getByRole('button', { name: 'RSI Role' }))).not.toThrow()
+    const { ships } = useFleetStore.getState()
+    expect(tableShipNamesInOrder()).toHaveLength(ships.length)
+  })
+
+  it('a Readiness filter narrows to only Factory-only Loadouts (135c, UTV) when "Factory Only" is selected', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Factory Only' }))
+    expect(screen.getByText('135c')).toBeInTheDocument()
+    expect(screen.getByText('UTV')).toBeInTheDocument()
+    expect(screen.queryByText('MOLE')).not.toBeInTheDocument()
+  })
+
+  it('Persistent View: a filter set before navigating away is still active the next time Fleet Dashboard mounts (session persistence)', () => {
+    const { unmount } = renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    expect(screen.queryByText('Vulture')).toBeInTheDocument()
+    expect(screen.queryByText('Prospector')).toBeInTheDocument()
+    unmount()
+
+    renderDashboard()
+    // Still filtered to Industrial only — the Commander never has to
+    // re-apply a filter after visiting Ship Detail and coming back.
+    expect(screen.queryByText('135c')).not.toBeInTheDocument()
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Industrial' })).toHaveClass('bg-cyan/15')
+  })
+})
