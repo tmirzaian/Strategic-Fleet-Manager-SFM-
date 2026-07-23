@@ -70,6 +70,32 @@ export function resolveShipStockRoleFocus(shipId: string, fleetAssets: FleetAsse
 }
 
 /**
+ * SW-011A — a Fleet Asset's real DataCore entity class (e.g.
+ * "AEGS_Retaliator"), when one exists. Reuses the same
+ * `entityClassByImportedShipId` map and `resolveShipDefinitionId`
+ * `resolveShipStockRoleFocus` already uses — a deep-imported ship's
+ * `ShipDefinition.id` is its own record id, never the raw entity class
+ * (see that map's own doc comment), so this recovers it the same way.
+ * Returns `undefined` for a hand-authored seed ship (no deep-import
+ * record exists) — never the definition id itself, since that is NOT a
+ * real DataCore entity class and would silently mismatch any catalog
+ * genuinely keyed by one (e.g. `src/generated/configurableSlots.ts`).
+ */
+export function resolveShipEntityClass(shipId: string, fleetAssets: FleetAsset[]): string | undefined {
+  const definitionId = resolveShipDefinitionId(shipId, fleetAssets)
+  if (!definitionId) return undefined
+  // `shipDefinitionById.get(definitionId)` may resolve THROUGH an alias key
+  // (e.g. 'cutlass-black' -> the deep-imported definition object whose own
+  // `.id` is 'cutlass-black-imported') — `entityClassByImportedShipId` is
+  // keyed by that resolved object's OWN id, never the alias used to reach
+  // it (see this map's own doc comment above), so the lookup must go
+  // through the definition object, exactly like `resolveShipStockRoleFocus`.
+  const definition = shipDefinitionById.get(definitionId)
+  if (!definition) return undefined
+  return entityClassByImportedShipId.get(definition.id)
+}
+
+/**
  * The same tier-1/tier-2 precedence as `resolveShipStockRoleFocus`, but
  * keyed directly off a `ShipDefinition` rather than a live Fleet Asset —
  * used by the Task 9 metadata-coverage audit to check every canonical

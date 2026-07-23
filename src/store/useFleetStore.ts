@@ -230,6 +230,8 @@ function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpo
           assemblyRole: slot.assemblyRole,
           isStructural: true,
           sourcePortId: slot.sourcePortId,
+          sourceItemPortName: slot.sourceItemPortName,
+          sourceParentItemPortName: slot.sourceParentItemPortName,
         }
       }
       const assignment = overlay.assignments[slot.slotLabel]
@@ -262,6 +264,8 @@ function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpo
         groupLabel: slot.groupLabel,
         assemblyRole: slot.assemblyRole,
         sourcePortId: slot.sourcePortId,
+        sourceItemPortName: slot.sourceItemPortName,
+        sourceParentItemPortName: slot.sourceParentItemPortName,
         targetMode: assignment?.targetItem ? ('EXPLICIT_TARGET' as const) : ('FOLLOW_FACTORY' as const),
       }
     })
@@ -1322,6 +1326,8 @@ export const useFleetStore = create<FleetState>()(
           parentSlotLabel: refRow.parentSlotLabel,
           isStructural: refRow.isStructural,
           sourcePortId: refRow.sourcePortId,
+          sourceItemPortName: refRow.sourceItemPortName,
+          sourceParentItemPortName: refRow.sourceParentItemPortName,
           targetMode: baseTargetModes.get(refRow.slotLabel) ?? 'EXPLICIT_TARGET',
         }
       })
@@ -1407,6 +1413,8 @@ export const useFleetStore = create<FleetState>()(
           assemblyRole: templateRow.assemblyRole,
           isStructural: templateRow.isStructural,
           sourcePortId: templateRow.sourcePortId,
+          sourceItemPortName: templateRow.sourceItemPortName,
+          sourceParentItemPortName: templateRow.sourceParentItemPortName,
           targetMode: baseTargetModes.get(slotLabel) ?? 'EXPLICIT_TARGET',
         }
       })

@@ -1079,3 +1079,102 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     })
   })
 })
+
+/**
+ * SW-011A — Commander Configurable Slot Experience (Phase I).
+ *
+ * 'ghost' (F7C-S Hornet Ghost Mk II, real entity class
+ * ANVL_Hornet_F7CS_Mk2) is a real, live-certified configurable ship
+ * (SW-010B) whose `hardpoint_class_2` gimbal-mount children (under the
+ * Left/Right Wing Weapon mounts) and `missile_0X_attach` rack slots
+ * genuinely intersect with this app's own materialized port tree — most
+ * of the SW-010A/B-confirmed showcase ports (e.g. the Hornet's own
+ * `hardpoint_weapon_center`) do NOT, because they're `configuration-only`
+ * in the canonical model (the app's normalizer never materializes a row
+ * for them at all — see docs/SW-010B-Certification-Report.md Appendix A
+ * point 3/7) — Phase I only ever attaches to EXISTING rows (Objective 1:
+ * "no duplicate hierarchy"), so those slots are correctly invisible here,
+ * not a bug. 'utv' (GRIN_UTV) has zero Commander-visible configurable
+ * slots at all in the real committed catalog — the Objective 5 negative
+ * case.
+ */
+describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Experience (Phase I)', () => {
+  it('Objective 1/2: a real configurable port shows a Configurable Slot badge once its group is expanded', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    const badges = screen.getAllByTitle(/Configurable Slot —/)
+    expect(badges.length).toBeGreaterThan(0)
+  })
+
+  it('Objective 3: clicking the badge reveals all 7 required read-only fields with real values, and hides them again on a second click', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    const badge = screen.getAllByTitle(/Configurable Slot —/)[0]
+
+    expect(screen.queryByText('Slot Name')).not.toBeInTheDocument()
+    fireEvent.click(badge)
+
+    expect(screen.getByText('Slot Name')).toBeInTheDocument()
+    expect(screen.getByText('Default Component')).toBeInTheDocument()
+    expect(screen.getByText('Current Installed Component')).toBeInTheDocument()
+    expect(screen.getByText('Eligible Component Count')).toBeInTheDocument()
+    expect(screen.getByText('Swap Group Identifier')).toBeInTheDocument()
+    expect(screen.getByText('Confidence Level')).toBeInTheDocument()
+    expect(screen.getByText('Source Authority')).toBeInTheDocument()
+
+    fireEvent.click(badge)
+    expect(screen.queryByText('Slot Name')).not.toBeInTheDocument()
+  })
+
+  it('Objective 3: Current Installed Component reflects the live Hardpoint row, not a stale catalog snapshot', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
+    // Every real match on 'ghost' (hardpoint_class_2, missile_0X_attach)
+    // has a real installed component in the seed fixture — "None" would
+    // indicate the wrong field was read.
+    expect(screen.queryByText('None')).not.toBeInTheDocument()
+  })
+
+  it('Explicit Non-Goals: the inspection panel contains no editing control of any kind', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
+    const panel = screen.getByText('Slot Name').closest('tr') as HTMLElement
+    expect(within(panel).queryAllByRole('button')).toHaveLength(0)
+    expect(within(panel).queryAllByRole('textbox')).toHaveLength(0)
+    expect(within(panel).queryAllByRole('combobox')).toHaveLength(0)
+  })
+
+  it('Objective 4: a Category C (review-required) slot shows "Needs Review", never a raw diagnostic, with Developer Mode off (the default)', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    // Real data: every one of ghost's intersecting slots (hardpoint_class_2,
+    // missile_0X_attach) is Category C in the live-certified catalog.
+    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
+    expect(screen.getByText('Needs Review')).toBeInTheDocument()
+    expect(screen.queryByText(/Developer Mode — Raw Diagnostics/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/global members, exceeding the plausible swap-group ceiling/)).not.toBeInTheDocument()
+  })
+
+  it('Objective 4: enabling Developer Mode reveals the raw diagnostics for an inspected slot', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Developer Mode/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
+    expect(screen.getByText(/Developer Mode — Raw Diagnostics/)).toBeInTheDocument()
+  })
+
+  it('Objective 5: a ship with zero Commander-visible configurable slots (GRIN_UTV) renders with no Configurable badges at all', () => {
+    renderWorkspace('utv')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+  })
+
+  it('Objective 5: the rest of a non-configurable ship (GRIN_UTV) still renders normally — real ship data, no regression from this sprint', () => {
+    renderWorkspace('utv')
+    expect(screen.getAllByText('UTV').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+  })
+})

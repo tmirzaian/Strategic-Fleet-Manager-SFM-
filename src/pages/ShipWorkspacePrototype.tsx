@@ -16,6 +16,8 @@ import {
   Maximize2,
   Minimize2,
   ArrowDownToLine,
+  Layers,
+  Code2,
 } from 'lucide-react'
 import { useFleetStore, type TargetOverrideInput } from '../store/useFleetStore'
 import Badge, { statusTone } from '../components/Badge'
@@ -23,7 +25,9 @@ import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
 import ShipHeroFrame from '../components/ShipHeroFrame'
 import { resolveShipImage } from '../utils/resolveShipImage'
-import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
+import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
+import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
+import { catalogComponentsByEntityClass } from '../generated/componentCatalog'
 import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
@@ -137,6 +141,47 @@ export default function ShipWorkspacePrototype() {
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
   const ship = ships.find((s) => s.id === shipId)
 
+  // SW-011A (Objective 1) — the real DataCore entity class for the
+  // currently viewed ship, when a deep-import record exists (undefined
+  // for a hand-authored seed ship — see resolveShipEntityClass's own doc
+  // comment). Only used to look up Commander-visible Configurable Slots;
+  // never for display.
+  const shipEntityClass = shipId ? resolveShipEntityClass(shipId, fleetAssets) : undefined
+
+  // SW-011A (Objective 1/2) — every Commander-visible configurable slot
+  // for this ship, grouped by (immediate parent's bare port name, own
+  // bare port name). Bare `itemPortName` alone is not reliably unique per
+  // ship — DataCore reuses generic sub-port names across sibling
+  // assemblies (e.g. a left-wing and right-wing gimbal mount both having
+  // a child named `hardpoint_class_2`, confirmed live during this
+  // sprint's own verification). One level of parent context resolves
+  // every such case; a row is only ever treated as a confident match when
+  // EXACTLY ONE record shares its (parent, self) key — a genuine deeper
+  // collision (the same bare name under an ALSO-repeated parent, e.g. the
+  // Retaliator's 5 turret mounts) is treated as "no confident match,"
+  // never a guess. See `Hardpoint.sourceParentItemPortName`'s own doc
+  // comment for the full reasoning.
+  function slotKey(parentPortName: string | null | undefined, portName: string): string {
+    return `${parentPortName ?? ''}::${portName}`
+  }
+
+  const configurableSlotsByKey = useMemo(() => {
+    const map = new Map<string, ConfigurableSlotRuntimeRecord[]>()
+    for (const record of getConfigurableSlotsForShip(shipEntityClass)) {
+      const key = slotKey(record.parentPortName, record.portName)
+      const existing = map.get(key)
+      if (existing) existing.push(record)
+      else map.set(key, [record])
+    }
+    return map
+  }, [shipEntityClass])
+
+  function configurableSlotFor(hp: Hardpoint): ConfigurableSlotRuntimeRecord | undefined {
+    if (!hp.sourceItemPortName) return undefined
+    const candidates = configurableSlotsByKey.get(slotKey(hp.sourceParentItemPortName, hp.sourceItemPortName))
+    return candidates?.length === 1 ? candidates[0] : undefined
+  }
+
   // Prototype-only local state — a loadout picked here never touches
   // ship.activeBuildId or any store mutator. Re-baselines to the ship's
   // real Active Loadout (the required default) every time the selected
@@ -190,6 +235,17 @@ export default function ShipWorkspacePrototype() {
   // never a dialog (Scope Protection), just an inline detail row, the
   // same pattern MissionComposer's own expandedSlot already uses.
   const [expandedInstallRowId, setExpandedInstallRowId] = useState<string | null>(null)
+
+  // SW-011A (Objective 3) — Configurable Slot read-only inspection.
+  // Same "never a dialog" inline-disclosure pattern as
+  // expandedInstallRowId above, its own independent state so opening one
+  // never affects the other. SW-011A (Objective 4) — Developer Mode is
+  // local, unpersisted UI state (no store field, no new concept beyond
+  // this page) gating raw diagnostic detail; off by default so an
+  // ordinary Commander only ever sees the understandable "Needs Review"
+  // indicator, never a raw diagnostic message.
+  const [inspectedConfigurableSlotId, setInspectedConfigurableSlotId] = useState<string | null>(null)
+  const [developerMode, setDeveloperMode] = useState(false)
 
   // SW-008D (Objective 6) — "Set as Active" now calls the real store
   // mutator (`setActiveBuild`); this notice reports the real outcome,
@@ -753,6 +809,73 @@ export default function ShipWorkspacePrototype() {
     )
   }
 
+  // SW-011A (Objective 3) — read-only inspection. Exactly the 7 fields the
+  // work order specifies, nothing more: Slot Name, Default Component,
+  // Current Installed Component, Eligible Component Count, Swap Group
+  // Identifier, Confidence Level, Source Authority. No editing control of
+  // any kind (Explicit Non-Goals: "No editing controls").
+  function renderConfigurableSlotDisclosure(hp: Hardpoint, slot: ConfigurableSlotRuntimeRecord): ReactNode {
+    const defaultComponentLabel = slot.defaultComponentEntityClass ? (catalogComponentsByEntityClass.get(slot.defaultComponentEntityClass)?.displayName ?? slot.defaultComponentEntityClass) : '—'
+    const needsReview = slot.category === 'C-review-required'
+    return (
+      <tr key={`${hp.id}-configurable-slot-detail`} className="bg-black/20">
+        <td colSpan={lensColumnCount} className="px-5 py-3">
+          <div className="flex items-center gap-2 text-xs mb-2">
+            <Badge tone="cyan">Configurable Slot</Badge>
+            {needsReview && (
+              <span title={developerMode ? undefined : 'Engineering has not yet fully confirmed this slot’s alternatives — shown for visibility, not guaranteed complete.'}>
+                <Badge tone="warning">Needs Review</Badge>
+              </span>
+            )}
+          </div>
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-xs">
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Slot Name</dt>
+              <dd className="text-white mt-0.5">{formatHardpointLabel(hp.slotLabel)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Default Component</dt>
+              <dd className="text-white mt-0.5">{defaultComponentLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Current Installed Component</dt>
+              <dd className="text-white mt-0.5">{hp.installedItem && hp.installedItem !== '—' ? hp.installedItem : 'None'}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Eligible Component Count</dt>
+              <dd className="text-white mt-0.5">{slot.eligibleComponentCount}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Swap Group Identifier</dt>
+              <dd className="text-white mt-0.5 font-mono text-[11px]">{slot.swapGroupId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Confidence Level</dt>
+              <dd className="text-white mt-0.5">{slot.confidence === 'tag-co-membership' ? 'Tag Co-Membership' : slot.confidence === 'confirmed-bidirectional' ? 'Confirmed' : 'Unresolved'}</dd>
+            </div>
+            <div>
+              <dt className="text-muted/60 uppercase tracking-wide text-[10px]">Source Authority</dt>
+              <dd className="text-white mt-0.5">{slot.sourceAuthority === 'geometry-and-configuration' ? 'Geometry + Configuration' : 'Configuration Only'}</dd>
+            </div>
+          </dl>
+          {/* Objective 4 — raw diagnostics are Developer-Mode-only; an
+              ordinary Commander sees the "Needs Review" badge above and
+              nothing more technical than that. */}
+          {developerMode && slot.diagnostics.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-white/10 text-[11px] text-muted/70 space-y-1">
+              <div className="text-muted/50 uppercase tracking-wide text-[10px] mb-1">Developer Mode — Raw Diagnostics</div>
+              {slot.diagnostics.map((d, i) => (
+                <div key={i} className={d.severity === 'warning' ? 'text-warning/80' : ''}>
+                  {d.message}
+                </div>
+              ))}
+            </div>
+          )}
+        </td>
+      </tr>
+    )
+  }
+
   function renderLensRows(nodes: PortTreeNode<DisplayHardpoint>[], depth: number): ReactNode[] {
     return nodes.flatMap((node) => {
       const hp = node.hardpoint
@@ -762,12 +885,28 @@ export default function ShipWorkspacePrototype() {
       // avoiding a redundant duplicate badge in Lens 1.
       const showInlineDiagnostic = commanderIntent !== null && !hp.isStructural && hp.status !== 'OK'
       const CategoryIcon = componentCategoryIcon(hp)
+      // SW-011A (Objective 1/2) — additive only: a row with no confident
+      // configurable-slot match renders byte-identical to before this
+      // sprint (Objective 5's non-configurable-ship regression guarantee).
+      const configurableSlot = hp.isStructural ? undefined : configurableSlotFor(hp)
+      const isInspectingConfigurableSlot = inspectedConfigurableSlotId === hp.id
       const rows: ReactNode[] = [
         <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
           <td className={`px-4 py-2 whitespace-nowrap ${hp.isStructural ? 'text-white/70 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
             <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1.5">
               <CategoryIcon size={13} className="text-muted/50 shrink-0" aria-hidden="true" />
               {formatHardpointLabel(hp.slotLabel)}
+              {configurableSlot && (
+                <button
+                  onClick={() => setInspectedConfigurableSlotId(isInspectingConfigurableSlot ? null : hp.id)}
+                  title={`Configurable Slot — ${configurableSlot.eligibleComponentCount} known alternative(s). Click to ${isInspectingConfigurableSlot ? 'hide' : 'view'} details.`}
+                  className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border transition-colors ${
+                    isInspectingConfigurableSlot ? 'border-cyan/60 bg-cyan/15 text-cyan' : 'border-cyan/30 text-cyan/80 hover:border-cyan/60 hover:text-cyan'
+                  }`}
+                >
+                  <Layers size={11} aria-hidden="true" /> Configurable
+                </button>
+              )}
               {hp.missileAggregate && <Badge tone="cyan">×{hp.missileAggregate.quantity}</Badge>}
               {hp.missileAggregate?.inconsistent && (
                 <span title={hp.invalidMessage}>
@@ -793,6 +932,7 @@ export default function ShipWorkspacePrototype() {
         </tr>,
       ]
       if (commanderIntent === 'CHANGE_INSTALLED' && expandedInstallRowId === hp.id) rows.push(renderInstallDisclosure(hp))
+      if (configurableSlot && isInspectingConfigurableSlot) rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
       rows.push(...renderLensRows(node.children, depth + 1))
       return rows
     })
@@ -845,7 +985,22 @@ export default function ShipWorkspacePrototype() {
           </div>
           <p className="text-sm text-muted mt-1">Assess readiness, configure loadouts, and manage installed components.</p>
         </div>
-        {selectShip}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* SW-011A (Objective 4) — Developer Mode: local, unpersisted
+              toggle gating raw Configurable Slot diagnostic detail. Off by
+              default; an ordinary Commander never needs to know it
+              exists. */}
+          <button
+            onClick={() => setDeveloperMode((v) => !v)}
+            title="Developer Mode — show raw Configurable Slot diagnostics"
+            className={`inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest border rounded-lg px-2.5 py-1.5 transition-colors ${
+              developerMode ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'border-white/10 text-muted hover:border-white/25 hover:text-white'
+            }`}
+          >
+            <Code2 size={12} /> Developer Mode
+          </button>
+          {selectShip}
+        </div>
       </div>
 
       {/* STICKY CONTEXT — a compact/collapsed echo of the banner, hidden

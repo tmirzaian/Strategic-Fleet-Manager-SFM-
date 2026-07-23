@@ -340,6 +340,35 @@ export interface Hardpoint {
    * persisted row against a changed authoritative template — see
    * src/utils/fleetAssetReconciliation.ts. Never used for display. */
   sourcePortId?: string
+  /** SW-011A — the raw DataCore `itemPortName` this row was normalized
+   * from (only ever set for a deep-imported row, same population rule as
+   * `sourcePortId`) — e.g. "hardpoint_weapon_center". Bare, not the full
+   * ancestor path `sourcePortId`/`Port.sourcePath` carry internally, so it
+   * is NOT guaranteed globally unique across one ship (DataCore reuses
+   * generic sub-port names like `turret_left` across repeated sibling
+   * assemblies — see `docs/SW-010B-Certification-Report.md` §3.2/Appendix
+   * A point 6). Used only to look up this port's Configurable Slot
+   * metadata (`src/generated/configurableSlots.ts`) by exact bare-name
+   * match; a caller matching against a catalog keyed the same way must
+   * treat a collision (more than one slot sharing this bare name on this
+   * ship) as "no confident match," never guess which one. Never used for
+   * display — `slotLabel` remains the only Commander-facing label. */
+  sourceItemPortName?: string
+  /** SW-011A — the raw DataCore `itemPortName` of this row's immediate
+   * parent port (undefined for a top-level port), mirrored from
+   * `Port.internalName` the same way `sourceItemPortName` mirrors the
+   * row's own. Together with `sourceItemPortName`, this is what lets the
+   * Configurable Slot lookup disambiguate the common "same bare name
+   * under different siblings" case (e.g. left-wing vs. right-wing gimbal
+   * mount both having a child named `hardpoint_class_2`) without needing
+   * the full ancestor path — one level of parent context resolves every
+   * real case confirmed live during SW-011A (symmetric wing/rack
+   * mirroring); only a DEEPER collision (the same bare name under an
+   * ALSO-repeated parent name, e.g. the Retaliator's 5 `turret_left`
+   * mounts each with their own `hardpoint_class_2`) remains genuinely
+   * ambiguous at this level — treated as "no confident match," per
+   * `sourceItemPortName`'s own doc comment, never a guess. */
+  sourceParentItemPortName?: string
   /** EWO-043 — explicit Commander-intent semantics for this row's
    * `targetItem`. FOLLOW_FACTORY means the Commander never deliberately
    * chose this target — it should keep tracking whatever the authoritative

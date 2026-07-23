@@ -56,6 +56,12 @@ export interface FactoryHardpointTemplate {
    * src/utils/fleetAssetReconciliation.ts uses to re-match a Commander's
    * persisted Hardpoint row across an authoritative template change. */
   sourcePortId?: string
+  /** SW-011A — mirrors Hardpoint.sourceItemPortName; see that field's doc
+   * comment. The raw DataCore `itemPortName` (see src/normalizer's
+   * `Port.internalName`), bare, not the full ancestor path. */
+  sourceItemPortName?: string
+  /** SW-011A — mirrors Hardpoint.sourceParentItemPortName; see that field's doc comment. */
+  sourceParentItemPortName?: string
   /** EWO-STAB-004A (ADR-010, CAT-003) — the factory-installed component's
    * real DataCore entityClass, carried straight from the import
    * pipeline's own already-resolved `Port.factoryItemId`/`componentById`
@@ -835,7 +841,7 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   }
 
   const rows: FactoryHardpointTemplate[] = []
-  function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined) {
+  function walk(port: PortT, uniqueParentLabel: string | undefined, groupLabel: string | undefined, parentItemPortName: string | undefined) {
     const hasChildren = (childrenByParentId.get(port.id) ?? []).length > 0
     const displayLabel = presentationLabelFor(port, hasChildren)
     const uniqueLabel = uniqueParentLabel ? `${uniqueParentLabel} — ${displayLabel}` : displayLabel
@@ -850,16 +856,18 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
       assemblyRole: port.assemblyRole,
       isStructural: port.isStructural,
       sourcePortId: port.id,
+      sourceItemPortName: port.internalName,
+      sourceParentItemPortName: parentItemPortName,
     })
     for (const child of childrenByParentId.get(port.id) ?? []) {
       // A group applies only to the top-level row it was resolved for —
       // its own children already nest beneath it via parentSlotLabel, so
       // they don't need (and shouldn't repeat) the group tag themselves.
-      walk(child, uniqueLabel, undefined)
+      walk(child, uniqueLabel, undefined, port.internalName)
     }
   }
   for (const top of childrenByParentId.get(null) ?? []) {
-    walk(top, undefined, topLevelGroupLabel(top))
+    walk(top, undefined, topLevelGroupLabel(top), undefined)
   }
 
   return rows

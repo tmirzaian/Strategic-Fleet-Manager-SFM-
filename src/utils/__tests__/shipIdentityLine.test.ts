@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { resolveShipStockRoleFocus, resolveStockRoleFocusForDefinition, formatShipIdentityLine } from '../shipIdentityLine'
+import { resolveShipStockRoleFocus, resolveStockRoleFocusForDefinition, resolveShipEntityClass, formatShipIdentityLine } from '../shipIdentityLine'
 import { shipCatalogRecords } from '../../generated/shipCatalog'
 import { selectableShipDefinitions } from '../../data/shipDefinitions'
 import { useFleetStore } from '../../store/useFleetStore'
@@ -135,5 +135,21 @@ describe('EWO-033 (Task 9): metadata coverage across every canonical hull', () =
     expect(tier1).toBe(4)
     expect(tier2).toBeGreaterThan(0)
     expect(tier1 + tier2).toBe(selectableShipDefinitions.length)
+  })
+})
+
+describe('resolveShipEntityClass — SW-011A: real DataCore entity class resolution', () => {
+  it('resolves through the alias to the real entity class, not the alias key or the definition id', () => {
+    const { fleetAssets } = useFleetStore.getState()
+    // 'cutlass-black' is the seed Fleet Asset's own id, an alias key that
+    // resolves to a definition whose OWN id is 'cutlass-black-imported' —
+    // the real entity class must come from THAT resolved definition, not
+    // from a naive lookup keyed by the alias or by 'cutlass-black' itself.
+    expect(resolveShipEntityClass('cutlass-black', fleetAssets)).toBe('DRAK_Cutlass_Black')
+  })
+
+  it('returns undefined for an unknown ship id, never a guess', () => {
+    const { fleetAssets } = useFleetStore.getState()
+    expect(resolveShipEntityClass('totally-unknown-ship-id', fleetAssets)).toBeUndefined()
   })
 })

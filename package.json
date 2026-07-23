@@ -17,6 +17,7 @@
     "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",
     "generate:configurable-slot-report": "tsx scripts/generateConfigurableSlotReport.ts",
     "certify:configurable-slots": "tsx scripts/generateConfigurableSlotCertification.ts",
+    "generate:configurable-slots-runtime-catalog": "tsx scripts/generateConfigurableSlotRuntimeCatalog.ts",
     "golden-fleet:acquire": "vite-node scripts/goldenFleet/acquire.ts",
     "golden-fleet:acquire:dry-run": "vite-node scripts/goldenFleet/acquire.ts -- --dry-run",
     "ship-images:import:xlsx": "vite-node scripts/shipImages/cli.ts -- import-xlsx",

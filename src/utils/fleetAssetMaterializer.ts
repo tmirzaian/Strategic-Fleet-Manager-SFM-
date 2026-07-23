@@ -79,6 +79,8 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
         assemblyRole: slot.assemblyRole,
         isStructural: true,
         sourcePortId: slot.sourcePortId,
+        sourceItemPortName: slot.sourceItemPortName,
+        sourceParentItemPortName: slot.sourceParentItemPortName,
       }
     }
     // EWO-STAB-003C (ADR-010) — resolved once through
@@ -133,6 +135,8 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       groupLabel: slot.groupLabel,
       assemblyRole: slot.assemblyRole,
       sourcePortId: slot.sourcePortId,
+      sourceItemPortName: slot.sourceItemPortName,
+      sourceParentItemPortName: slot.sourceParentItemPortName,
       // EWO-043 — a freshly materialized Factory row's target is always
       // the current factory item by construction (see above); it has no
       // Commander-chosen intent to protect, so it always follows Factory.

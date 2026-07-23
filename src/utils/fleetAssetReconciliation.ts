@@ -245,6 +245,8 @@ export function reconcileBuildHardpoints(
       assemblyRole: newRow.assemblyRole,
       isStructural: newRow.isStructural,
       sourcePortId: newRow.sourcePortId,
+      sourceItemPortName: newRow.sourceItemPortName,
+      sourceParentItemPortName: newRow.sourceParentItemPortName,
       targetMode: old.targetMode,
     })
   }
@@ -277,6 +279,8 @@ export function reconcileBuildHardpoints(
       assemblyRole: newRow.assemblyRole,
       isStructural: newRow.isStructural,
       sourcePortId: newRow.sourcePortId,
+      sourceItemPortName: newRow.sourceItemPortName,
+      sourceParentItemPortName: newRow.sourceParentItemPortName,
       targetMode: 'FOLLOW_FACTORY',
     })
   }
