@@ -32,6 +32,13 @@ generated-data/component-metadata-catalog.json
 # counts), regenerated every run, never read by the runtime app.
 generated-data/component-classification-diagnostics.json
 
+# SW-010A — Configurable Slot Adapter validation report. Engineering-only
+# output from the Objective 6 certification driver
+# (scripts/generateConfigurableSlotReport.ts), regenerated every run,
+# never read by the runtime app (Phase I is import-layer infrastructure
+# only — "no UI consumption yet").
+generated-data/configurable-slot-report.json
+
 # Ship & Ground Vehicle Catalog Generator output (Mission M-012) — same
 # licensing posture as the component catalog above.
 generated-data/ship-catalog.json

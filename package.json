@@ -15,6 +15,7 @@
     "generate:missile-rack-slots": "tsx scripts/generateMissileRackSlots.ts",
     "generate:ship-catalog": "tsx scripts/generateShipCatalog.ts",
     "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",
+    "generate:configurable-slot-report": "tsx scripts/generateConfigurableSlotReport.ts",
     "golden-fleet:acquire": "vite-node scripts/goldenFleet/acquire.ts",
     "golden-fleet:acquire:dry-run": "vite-node scripts/goldenFleet/acquire.ts -- --dry-run",
     "ship-images:import:xlsx": "vite-node scripts/shipImages/cli.ts -- import-xlsx",
