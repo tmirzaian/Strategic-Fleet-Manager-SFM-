@@ -12,7 +12,7 @@ import { executeInstallation } from '../installationEngine'
  * real generated catalog (`SHLD_ASAS_S01_Veil_SCItem`, category Shield,
  * size 1 — confirmed by direct lookup against
  * generated-data/component-metadata-catalog.runtime.json) and, unlike
- * Slipstream/Snowblind/Mirage, carries no hand-authored override table
+ * Slipstream/SnowBlind/Mirage, carries no hand-authored override table
  * entry in src/data/componentCatalog.ts, so it resolves its entityClass
  * straight from the real catalog. No naturally-occurring duplicate
  * "Veil" entityClass exists in the current catalog snapshot — consistent

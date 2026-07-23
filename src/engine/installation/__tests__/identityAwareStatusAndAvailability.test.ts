@@ -63,8 +63,8 @@ describe('EWO-STAB-003D: computeHardpointStatus — identity-aware comparison', 
 
   it('3. a legacy name-only hardpoint (no identity argument at all) is completely unaffected', () => {
     expect(computeHardpointStatus('Veil', 'Veil', 'Veil')).toBe('OK')
-    expect(computeHardpointStatus('Veil', 'Snowblind', 'Veil')).toBe('Missing')
-    expect(computeHardpointStatus('Upgrade', 'Snowblind', 'Veil')).toBe('Upgrade Available')
+    expect(computeHardpointStatus('Veil', 'SnowBlind', 'Veil')).toBe('Missing')
+    expect(computeHardpointStatus('Upgrade', 'SnowBlind', 'Veil')).toBe('Upgrade Available')
   })
 })
 

@@ -69,7 +69,7 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
   afterEach(cleanup)
 
   it('no Actions column at all when onRemoveComponent is omitted (read-only/dev-inspection callers)', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
     expect(screen.queryByText('Actions')).not.toBeInTheDocument()
@@ -77,9 +77,9 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
   })
 
   it('a Remove action appears on an installed, non-structural row when onRemoveComponent is provided', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
-    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={() => ({ matched: true, itemName: 'Snowblind' })} />)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={() => ({ matched: true, itemName: 'SnowBlind' })} />)
     expect(screen.getByText('Actions')).toBeInTheDocument()
     const row = screen.getByText('Cooler 1').closest('tr')!
     expect(within(row).getByText('Remove')).toBeInTheDocument()
@@ -99,33 +99,33 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
   })
 
   it('Remove -> Return to Hangar checkbox -> Save calls onRemoveComponent with the slot and checkbox state, then closes', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
-    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'Snowblind' })
+    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'SnowBlind' })
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={onRemoveComponent} />)
     const row = screen.getByText('Cooler 1').closest('tr')!
     fireEvent.click(within(row).getByText('Remove'))
-    expect(screen.getByText('Remove "Snowblind"?')).toBeInTheDocument()
+    expect(screen.getByText('Remove "SnowBlind"?')).toBeInTheDocument()
     fireEvent.click(screen.getByLabelText('Return removed component to Hangar'))
     fireEvent.click(screen.getByText('Save'))
     expect(onRemoveComponent).toHaveBeenCalledWith('Cooler 1', true)
-    expect(screen.queryByText('Remove "Snowblind"?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Remove "SnowBlind"?')).not.toBeInTheDocument()
   })
 
   it('Cancel closes the modal without ever calling onRemoveComponent', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
-    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'Snowblind' })
+    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'SnowBlind' })
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={onRemoveComponent} />)
     const row = screen.getByText('Cooler 1').closest('tr')!
     fireEvent.click(within(row).getByText('Remove'))
     fireEvent.click(screen.getByText('Cancel'))
     expect(onRemoveComponent).not.toHaveBeenCalled()
-    expect(screen.queryByText('Remove "Snowblind"?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Remove "SnowBlind"?')).not.toBeInTheDocument()
   })
 
   it('a failed removal (matched: false) shows an error and keeps the modal open, never silently closing', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
     const onRemoveComponent = vi.fn().mockReturnValue({ matched: false })
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={onRemoveComponent} />)
@@ -133,13 +133,13 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
     fireEvent.click(within(row).getByText('Remove'))
     fireEvent.click(screen.getByText('Save'))
     expect(screen.getByText('Could not remove this component.')).toBeInTheDocument()
-    expect(screen.getByText('Remove "Snowblind"?')).toBeInTheDocument()
+    expect(screen.getByText('Remove "SnowBlind"?')).toBeInTheDocument()
   })
 
   it('Return to Hangar defaults unchecked — Save without checking it passes false', () => {
-    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'Snowblind' })]
+    const hardpoints = [hp({ id: 'a', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' })]
     const tree = buildPortTree(hardpoints)
-    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'Snowblind' })
+    const onRemoveComponent = vi.fn().mockReturnValue({ matched: true, itemName: 'SnowBlind' })
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} onRemoveComponent={onRemoveComponent} />)
     const row = screen.getByText('Cooler 1').closest('tr')!
     fireEvent.click(within(row).getByText('Remove'))

@@ -206,6 +206,158 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
   })
 
+  describe('SW-008D: Loadout Lifecycle Completion', () => {
+    it('Objective 1: Save Changes persists the pending New Target to the store, refreshes Current Target, and clears the Pending Changes counter', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const banner = screen.getByTestId('ship-operational-banner')
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+      expect(screen.getByText(/saved\.?$/)).toBeInTheDocument()
+      // Objective 1: real persistence, not a local-only edit anymore.
+      expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Shimmer')
+      // Current Target reflects the save immediately.
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+    })
+
+    it('Objective 2: Discard Changes restores New Target to Current Target and clears the Pending Changes counter without touching the store', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const banner = screen.getByTestId('ship-operational-banner')
+      const before = useFleetStore.getState()
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Mirage')
+      expect(useFleetStore.getState()).toBe(before)
+    })
+
+    it('Objective 5: the draft transaction model stays internally consistent across No Pending -> Pending -> Save -> No Pending -> Edit -> Pending -> Discard -> No Pending', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const banner = screen.getByTestId('ship-operational-banner')
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      selectNewTarget('Power Plant', 'Intentional Empty')
+      expect(within(banner).getByText('Pending Changes (2)')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+
+      selectNewTarget('Left Shield Generator', 'Mirage')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+    })
+
+    it('Objective 3: New Loadout creates a real Build, selects it, and enters Manage Loadout with Current/New Target correctly initialized', () => {
+      renderWorkspace('ghost')
+      const buildCountBefore = useFleetStore.getState().builds.filter((b) => b.shipId === 'ghost').length
+      fireEvent.click(screen.getByRole('button', { name: /New Loadout/ }))
+      fireEvent.change(screen.getByLabelText('Loadout Name'), { target: { value: 'Skirmish Build' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Factory Loadout' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Create Loadout' }))
+
+      const builds = useFleetStore.getState().builds.filter((b) => b.shipId === 'ghost')
+      expect(builds.length).toBe(buildCountBefore + 1)
+      const created = builds.find((b) => b.name === 'Skirmish Build')
+      expect(created).toBeDefined()
+
+      // Selected and entered Manage Loadout automatically.
+      expect(screen.getByRole('button', { name: /Skirmish Build/ })).toHaveAttribute('style', expect.stringContaining('border-color'))
+      expect(screen.getByRole('button', { name: /Manage Loadout/ })).toHaveAttribute('aria-pressed', 'true')
+      // Factory-initialized: Power Plant's New Target reads its real Factory item.
+      const factoryPowerPlant = useFleetStore.getState().hardpoints.find((h) => h.buildId === created!.id && h.slotLabel === 'Power Plant')
+      expect((screen.getByLabelText('New target for Power Plant') as HTMLInputElement).value).toBe(factoryPowerPlant?.factoryItem)
+    })
+
+    it('Objective 3: duplicate Loadout names are rejected gracefully, without creating a second record', () => {
+      renderWorkspace('ghost')
+      const buildCountBefore = useFleetStore.getState().builds.filter((b) => b.shipId === 'ghost').length
+      fireEvent.click(screen.getByRole('button', { name: /New Loadout/ }))
+      fireEvent.change(screen.getByLabelText('Loadout Name'), { target: { value: 'Stealth Build' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Create Loadout' }))
+
+      expect(screen.getByText(/already exists/)).toBeInTheDocument()
+      expect(useFleetStore.getState().builds.filter((b) => b.shipId === 'ghost').length).toBe(buildCountBefore)
+    })
+
+    it('Objective 3: Cancel leaves no partial record and no store mutation', () => {
+      renderWorkspace('ghost')
+      const before = useFleetStore.getState()
+      fireEvent.click(screen.getByRole('button', { name: /New Loadout/ }))
+      fireEvent.change(screen.getByLabelText('Loadout Name'), { target: { value: 'Abandoned Build' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+      expect(screen.queryByLabelText('Loadout Name')).not.toBeInTheDocument()
+      expect(screen.queryByText('Abandoned Build')).not.toBeInTheDocument()
+      expect(useFleetStore.getState()).toBe(before)
+      expect(useFleetStore.getState().builds.some((b) => b.name === 'Abandoned Build')).toBe(false)
+    })
+
+    it('Objective 6: full lifecycle — Create, Edit, Save, Reopen, Edit Again, Discard, Activate, Switch, Return, verify persistence', () => {
+      renderWorkspace('ghost')
+
+      // Create — initialized from the Active Loadout (ghost-stealth), so
+      // Left Shield Generator starts at its well-known real value
+      // ("Mirage", the same fixture the Objective 1/2 tests above use),
+      // making "Shimmer" a real, unambiguous, known-different edit.
+      fireEvent.click(screen.getByRole('button', { name: /New Loadout/ }))
+      fireEvent.change(screen.getByLabelText('Loadout Name'), { target: { value: 'Patrol Build' } })
+      fireEvent.click(screen.getByRole('button', { name: 'Active Loadout' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Create Loadout' }))
+      const created = useFleetStore.getState().builds.find((b) => b.shipId === 'ghost' && b.name === 'Patrol Build')!
+      expect(created).toBeDefined()
+      expect(useFleetStore.getState().hardpoints.find((h) => h.buildId === created.id && h.slotLabel === 'Left Shield Generator')?.targetItem).toBe('Mirage')
+
+      // Edit + Save.
+      const banner = screen.getByTestId('ship-operational-banner')
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+      expect(useFleetStore.getState().hardpoints.find((h) => h.buildId === created.id && h.slotLabel === 'Left Shield Generator')?.targetItem).toBe('Shimmer')
+
+      // Reopen (switch away and back — Save's persistence survives).
+      fireEvent.click(screen.getByRole('button', { name: /Stealth Build/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Patrol Build/ }))
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+
+      // Edit Again + Discard.
+      selectNewTarget('Left Shield Generator', 'Mirage')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+      // The discarded edit never persisted — the Save from earlier still stands.
+      expect(useFleetStore.getState().hardpoints.find((h) => h.buildId === created.id && h.slotLabel === 'Left Shield Generator')?.targetItem).toBe('Shimmer')
+
+      // Activate.
+      fireEvent.click(screen.getByRole('button', { name: /Set Active/ }))
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe(created.id)
+
+      // Switch Loadouts, then Return.
+      fireEvent.click(screen.getByRole('button', { name: /Stealth Build/ }))
+      expect(screen.getByRole('button', { name: /Manage Loadout/ })).toHaveAttribute('aria-pressed', 'true')
+      fireEvent.click(screen.getByRole('button', { name: /Patrol Build/ }))
+
+      // Verify persistence — a fresh render of the same store state still shows the saved edit.
+      cleanup()
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Patrol Build/ }))
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+    })
+  })
+
   it('Change Installed Components: "Install / Change" is a single unified action per row, expanding an inline disclosure (never a dialog)', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
@@ -223,9 +375,9 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
   it('Immediate Decision Intelligence: decision cards answer "what should I do," never a bare component name', () => {
     renderWorkspace('ghost')
     const decisionBox = screen.getByTestId('decision-summary')
-    // Snowblind is owned (qty 1) and unreserved in the seed Hangar — real
+    // SnowBlind is owned (qty 1) and unreserved in the seed Hangar — real
     // inventory-accounting data, not a fabricated readiness projection.
-    expect(within(decisionBox).getByText('Install Snowblind')).toBeInTheDocument()
+    expect(within(decisionBox).getByText('Install SnowBlind')).toBeInTheDocument()
     expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
     // SW-002 Revision C — Slipstream (Purchase Required, non-actionable)
     // is deliberately excluded from Decision Summary entirely.
@@ -574,6 +726,15 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       }
     })
 
+    it('ADR-004 / SW-009A Amendment 1 (Objective 9): no case-variant duplicate options — Left Cooler\'s New Target list offers exactly one "SnowBlind" entry, correctly classified', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const options = openOptions('Left Cooler')
+      const snowBlindMatches = options.filter((o) => /snowblind/i.test(o))
+      expect(snowBlindMatches).toEqual(['SnowBlind'])
+    })
+
     it('Requirement 3: Intentional Empty (—) is always the first option, for every editable slot', () => {
       renderWorkspace('ghost')
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
@@ -719,11 +880,11 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(heading.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     })
 
-    it('the Priority Components strip renders real missing components beneath Readiness (Ghost: Slipstream, Snowblind)', () => {
+    it('the Priority Components strip renders real missing components beneath Readiness (Ghost: Slipstream, SnowBlind)', () => {
       renderWorkspace('ghost')
       const strip = screen.getByTestId('priority-components-strip')
       expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
     })
 
     it('SW-002 Revision B (Part 1): "View All" does NOT appear when four or fewer priority components exist (Ghost has only 2)', () => {
@@ -764,16 +925,18 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(banner.className).toBe(bannerHeightBefore)
     })
 
-    it('"Set Active" is prototype-only: it never mutates the store\'s real Active Loadout, and the ACTIVE badge never moves', () => {
+    it('SW-008D (Objective 6): "Set Active" genuinely activates the reviewed Loadout — the ACTIVE badge moves and the store\'s real activeBuildId updates', () => {
       renderWorkspace('ghost')
       fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
       const setActiveButton = screen.getByRole('button', { name: /Set Active/ })
       fireEvent.click(setActiveButton)
-      expect(screen.getByText(/Prototype only/)).toBeInTheDocument()
+      expect(screen.getByText(/is now the Active Loadout/)).toBeInTheDocument()
 
+      const escortButton = screen.getByRole('button', { name: /Escort Build/ })
+      expect(within(escortButton).getByText('Active')).toBeInTheDocument()
       const stealthButton = screen.getByRole('button', { name: /Stealth Build/ })
-      expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
-      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe('ghost-stealth')
+      expect(within(stealthButton).queryByText('Active')).not.toBeInTheDocument()
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).not.toBe('ghost-stealth')
     })
 
     it('"Set Active" only appears when the reviewed Loadout differs from the real Active one, and visually belongs to that loadout\'s own pill', () => {
@@ -805,9 +968,9 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       const missingSummary = screen.getByTestId('readiness-missing-summary')
       const strip = screen.getByTestId('priority-components-strip')
       expect(missingSummary.textContent).toContain('Slipstream')
-      expect(missingSummary.textContent).toContain('Snowblind')
+      expect(missingSummary.textContent).toContain('SnowBlind')
       expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
     })
 
     it('Part 1: each Priority Component tile reserves placeholder image space with the component name rendered beneath it', () => {
@@ -846,7 +1009,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     it('Part 2: decision recommendations use the approved Quartermaster priority language (Available in Inventory, Available to Reserve, Borrow Available)', () => {
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
-      // Snowblind is owned and unreserved in the seed Hangar.
+      // SnowBlind is owned and unreserved in the seed Hangar.
       expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
       expect(decisionBox.textContent).not.toMatch(/Not Currently Owned|Reserved Elsewhere/)
     })
@@ -858,10 +1021,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     })
 
     it('Part 1: the canonical "No Immediate Actions" empty state renders when readiness gaps exist but none are actionable (both Ghost targets Purchase Required)', () => {
-      // Remove Snowblind from the Hangar so both of Ghost's missing
-      // targets (Slipstream, Snowblind) resolve to Purchase Required —
+      // Remove SnowBlind from the Hangar so both of Ghost's missing
+      // targets (Slipstream, SnowBlind) resolve to Purchase Required —
       // legitimate store-state test setup, not a new authority.
-      useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'Snowblind') })
+      useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
       expect(within(decisionBox).getByText('No Immediate Actions')).toBeInTheDocument()
@@ -870,7 +1033,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       // Priority Components (Part 2, unchanged) still shows the real gaps.
       const strip = screen.getByTestId('priority-components-strip')
       expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
     })
 
     it('Part 1: a fully ready Loadout (Corsair) still shows the original "No Immediate Decisions" state, distinct from "No Immediate Actions"', () => {
@@ -907,11 +1070,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(useFleetStore.getState()).toBe(before)
     })
 
-    it('no new store mutations occur anywhere on this page — the store snapshot is referentially unchanged across every Revision B interaction', () => {
+    it('reviewing a different Loadout and switching Commander Intent still cause no store mutation — only explicit lifecycle actions (Save/Discard/Set Active/New Loadout) do, per SW-008D', () => {
       renderWorkspace('ghost')
       const before = useFleetStore.getState()
       fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
-      fireEvent.click(screen.getByRole('button', { name: /Set Active/ }))
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
       expect(useFleetStore.getState()).toBe(before)
     })

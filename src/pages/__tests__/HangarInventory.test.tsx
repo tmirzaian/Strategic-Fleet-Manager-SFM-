@@ -426,17 +426,17 @@ describe('EWO-029 (Task 6/16): Release Reservation', () => {
 
 describe('EWO-029 (Task 8/10/16): unreserved match / upgrade-opportunity signal', () => {
   it('30/33. matching Available stock produces a visible unreserved-match signal identifying the Build', () => {
-    useFleetStore.getState().addHangarItem({ name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 5, neededBy: 'None', disposition: 'Store' })
+    useFleetStore.getState().addHangarItem({ name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 5, neededBy: 'None', disposition: 'Store' })
     renderHangar()
-    const row = screen.getByText('Snowblind').closest('tr')!
+    const row = screen.getByText('SnowBlind').closest('tr')!
     expect(within(row).getByText(/unreserved match/i)).toBeInTheDocument()
   })
 
   it('31/32. the signal never marks anything Installed and never auto-reserves', () => {
-    useFleetStore.getState().addHangarItem({ name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 5, neededBy: 'None', disposition: 'Store' })
+    useFleetStore.getState().addHangarItem({ name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 5, neededBy: 'None', disposition: 'Store' })
     renderHangar()
     expect(useFleetStore.getState().reservations.length).toBe(0)
     const state = useFleetStore.getState()
-    expect(state.installedLoadouts.some((e) => e.shipId === 'ghost' && e.installedItem === 'Snowblind')).toBe(false)
+    expect(state.installedLoadouts.some((e) => e.shipId === 'ghost' && e.installedItem === 'SnowBlind')).toBe(false)
   })
 })

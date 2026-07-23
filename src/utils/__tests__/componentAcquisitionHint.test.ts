@@ -9,7 +9,7 @@ const ships: Ship[] = [
 
 function baseParams(overrides: Partial<Parameters<typeof describeAcquisitionHint>[0]> = {}) {
   return {
-    componentName: 'Snowblind',
+    componentName: 'SnowBlind',
     currentShipId: 'ghost',
     hangarItems: [] as HangarItem[],
     installedLoadouts: [] as InstalledLoadoutEntry[],
@@ -22,7 +22,7 @@ function baseParams(overrides: Partial<Parameters<typeof describeAcquisitionHint
 describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () => {
   it('Tier 1 — Available Inventory takes priority when owned and unreserved', () => {
     const hint = describeAcquisitionHint(
-      baseParams({ hangarItems: [{ id: '1', name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 1, neededBy: '', disposition: 'Install' }] })
+      baseParams({ hangarItems: [{ id: '1', name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 1, neededBy: '', disposition: 'Install' }] })
     )
     expect(hint.label).toBe('Available in Inventory')
     expect(hint.tone).toBe('success')
@@ -32,9 +32,9 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
   it('Tier 2 — Available to Reserve when owned but fully committed', () => {
     const hint = describeAcquisitionHint(
       baseParams({
-        hangarItems: [{ id: '1', name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 1, disposition: 'Install', neededBy: '' }],
+        hangarItems: [{ id: '1', name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 1, disposition: 'Install', neededBy: '' }],
         reservations: [
-          { id: 'r1', missionConfigurationId: 'other-build', fleetAssetId: 'other', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
+          { id: 'r1', missionConfigurationId: 'other-build', fleetAssetId: 'other', targetSlotLabel: 'Cooler 1', componentName: 'SnowBlind', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
         ],
       })
     )
@@ -44,9 +44,9 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
 
   it('Phase 6 — reconciles with derivePortLogistics\' own slot-aware reservation authority (findActiveSlotReservation): reserved FOR this exact port reads differently than reserved elsewhere', () => {
     const reservations: MissionReservation[] = [
-      { id: 'r1', missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
+      { id: 'r1', missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'SnowBlind', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
     ]
-    const hangarItems: HangarItem[] = [{ id: '1', name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 1, disposition: 'Install', neededBy: '' }]
+    const hangarItems: HangarItem[] = [{ id: '1', name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 1, disposition: 'Install', neededBy: '' }]
 
     const ownPort = describeAcquisitionHint(baseParams({ hangarItems, reservations, currentBuildId: 'ghost-stealth', currentSlotLabel: 'Cooler 1' }))
     expect(ownPort.label).toBe('Reserved For This Port')
@@ -63,7 +63,7 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
   it('Tier 3 — Borrow Available names the real source ship when installed elsewhere and not owned free', () => {
     const hint = describeAcquisitionHint(
       baseParams({
-        installedLoadouts: [{ shipId: 'corsair', slotLabel: 'Cooler 1', installedItem: 'Snowblind' }],
+        installedLoadouts: [{ shipId: 'corsair', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' }],
       })
     )
     expect(hint.label).toBe('Borrow Available')
@@ -75,7 +75,7 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
     const hint = describeAcquisitionHint(
       baseParams({
         currentShipId: 'ghost',
-        installedLoadouts: [{ shipId: 'ghost', slotLabel: 'Cooler 2', installedItem: 'Snowblind' }],
+        installedLoadouts: [{ shipId: 'ghost', slotLabel: 'Cooler 2', installedItem: 'SnowBlind' }],
       })
     )
     expect(hint.label).toBe('Purchase Required')
@@ -89,7 +89,7 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
   })
 
   it('never fabricates a projected post-swap readiness number (Scope Protection: no Recommendation engine)', () => {
-    const hint = describeAcquisitionHint(baseParams({ installedLoadouts: [{ shipId: 'corsair', slotLabel: 'Cooler 1', installedItem: 'Snowblind' }] }))
+    const hint = describeAcquisitionHint(baseParams({ installedLoadouts: [{ shipId: 'corsair', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' }] }))
     expect(hint.detail).not.toMatch(/\d+%/)
   })
 })

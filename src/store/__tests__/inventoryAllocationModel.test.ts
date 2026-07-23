@@ -15,7 +15,7 @@ afterEach(() => {
   localStorage.clear()
 })
 
-// Several seed fixtures (Snowblind, Mirage, FR-86, ...) already carry real
+// Several seed fixtures (SnowBlind, Mirage, FR-86, ...) already carry real
 // starting Hangar stock — cleared first so each control scenario below
 // starts from the exact, known quantity its own assertions describe,
 // rather than silently adding on top of whatever the seed fixture happens
@@ -26,11 +26,11 @@ function addStock(name: string, type: string, size: string, qty: number) {
 }
 
 describe('EWO-029 (Task 15, Scenario A): partial reservation', () => {
-  it('2 Snowblind, Build A reserves 1 -> Installed 0, Reserved 1, Available 1', () => {
-    addStock('Snowblind', 'Cooler', 'S1', 2)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
+  it('2 SnowBlind, Build A reserves 1 -> Installed 0, Reserved 1, Available 1', () => {
+    addStock('SnowBlind', 'Cooler', 'S1', 2)
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'SnowBlind' })
     expect(reserve.success).toBe(true)
-    const availability = calculateComponentAvailability('Snowblind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
+    const availability = calculateComponentAvailability('SnowBlind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
     expect(availability.installedQuantity).toBe(0)
     expect(availability.reservedQuantity).toBe(1)
     expect(availability.availableQuantity).toBe(1)
@@ -38,19 +38,19 @@ describe('EWO-029 (Task 15, Scenario A): partial reservation', () => {
 })
 
 describe('EWO-029 (Task 15, Scenario B): multiple Builds competing for stock', () => {
-  it('2 Snowblind, Build A reserves 1, Build B reserves 1 -> Reserved 2, Available 0, Build C unfulfilled', () => {
-    addStock('Snowblind', 'Cooler', 'S1', 2)
-    const a = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
+  it('2 SnowBlind, Build A reserves 1, Build B reserves 1 -> Reserved 2, Available 0, Build C unfulfilled', () => {
+    addStock('SnowBlind', 'Cooler', 'S1', 2)
+    const a = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'SnowBlind' })
     expect(a.success).toBe(true)
     // 'Left Cooler' — a real S1 Cooler-type slot on Vulture, compatible
     // with a Cooler component; an incompatible slot (e.g. a Shield port)
     // would correctly fail target-compatibility validation before this
     // scenario's own stock-exhaustion logic ever runs.
-    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Needs Snowblind', startingState: 'EMPTY', targetOverrides: { 'Left Cooler': 'Snowblind' }, setActive: false })
-    const b = useFleetStore.getState().reserveComponent({ missionConfigurationId: vulture.buildId!, fleetAssetId: 'vulture', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Needs SnowBlind', startingState: 'EMPTY', targetOverrides: { 'Left Cooler': 'SnowBlind' }, setActive: false })
+    const b = useFleetStore.getState().reserveComponent({ missionConfigurationId: vulture.buildId!, fleetAssetId: 'vulture', targetSlotLabel: 'Left Cooler', componentName: 'SnowBlind' })
     expect(b.success).toBe(true)
 
-    const availability = calculateComponentAvailability('Snowblind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
+    const availability = calculateComponentAvailability('SnowBlind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
     expect(availability.reservedQuantity).toBe(2)
     expect(availability.availableQuantity).toBe(0)
 
@@ -58,25 +58,25 @@ describe('EWO-029 (Task 15, Scenario B): multiple Builds competing for stock', (
     // Left Cooler is a genuinely compatible S1 slot) remains unfulfilled —
     // no stock left to reserve, not because of an incompatible target.
     const thirdBuild = useFleetStore.getState().saveMissionConfiguration({
-      shipId: 'ghost', name: 'Also Needs Snowblind', startingState: 'EXISTING', existingBuildId: 'ghost-escort', targetOverrides: { 'Left Cooler': 'Snowblind' }, setActive: false,
+      shipId: 'ghost', name: 'Also Needs SnowBlind', startingState: 'EXISTING', existingBuildId: 'ghost-escort', targetOverrides: { 'Left Cooler': 'SnowBlind' }, setActive: false,
     })
-    const c = useFleetStore.getState().reserveComponent({ missionConfigurationId: thirdBuild.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
+    const c = useFleetStore.getState().reserveComponent({ missionConfigurationId: thirdBuild.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'SnowBlind' })
     expect(c.success).toBe(false)
   })
 })
 
 describe('EWO-029 (Task 15, Scenario C): available unreserved match', () => {
-  it('1 Snowblind, Build A has an unresolved target but no reservation -> Available 1, Reserved 0, unreserved-match signal 1, Build not fully installed', () => {
-    addStock('Snowblind', 'Cooler', 'S1', 1)
+  it('1 SnowBlind, Build A has an unresolved target but no reservation -> Available 1, Reserved 0, unreserved-match signal 1, Build not fully installed', () => {
+    addStock('SnowBlind', 'Cooler', 'S1', 1)
     const state = useFleetStore.getState()
     const missionPackage = calculateMissionPackage('ghost-stealth', state.hardpoints, state.installedLoadouts, state.reservations, state.hangarItems, false)
     // The seed fixture's own ghost-stealth Build already has a real
-    // unresolved Snowblind target (Left Cooler) — this is the mission's
+    // unresolved SnowBlind target (Left Cooler) — this is the mission's
     // own literal repro fixture, not a synthetic one.
     expect(missionPackage.availableUnreservedMatches).toBeGreaterThan(0)
     expect(missionPackage.isMissionReady).toBe(false)
 
-    const availability = calculateComponentAvailability('Snowblind', state.hangarItems, state.installedLoadouts, state.reservations)
+    const availability = calculateComponentAvailability('SnowBlind', state.hangarItems, state.installedLoadouts, state.reservations)
     expect(availability.availableQuantity).toBe(1)
     expect(availability.reservedQuantity).toBe(0)
   })
@@ -313,7 +313,7 @@ describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
   it('48. the unreserved-match signal survives rehydration', async () => {
     // MWO-001 (Task 2): 'ghost'/'ghost-stealth' now resolves through the
     // real deep-imported Ghost Mk II structure — its old hand-typed
-    // "Cooler 1" slot (which used to want "Snowblind") has no equivalent
+    // "Cooler 1" slot (which used to want "SnowBlind") has no equivalent
     // real port and is safely quarantined (EWO-043 reconciliation), rather
     // than silently kept. A manually-added Fleet Asset's own real Factory
     // structure is what actually exercises "the signal survives

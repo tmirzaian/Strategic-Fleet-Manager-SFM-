@@ -28,7 +28,7 @@ function renderQuickUpdate() {
  * seed fleet's own real data: Ghost Mk II ("F7C-S Hornet Ghost Mk II",
  * ships[0], Active Loadout "Stealth Build") has exactly one open Shield
  * slot (Shield 2 — Shield 1 already holds Mirage, status OK) and its
- * Cooler 1 slot already targets "Snowblind" (unfulfilled) — both confirmed
+ * Cooler 1 slot already targets "SnowBlind" (unfulfilled) — both confirmed
  * directly against src/data/seed.ts rather than assumed.
  */
 describe('<QuickUpdate /> — EWO-030 (Task 1): canonical component search renderer', () => {
@@ -89,7 +89,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 2): Install Component follows Compon
 })
 
 describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and auto-select', () => {
-  // Ghost's Stealth Build Cooler 1 already targets "Snowblind" (unfulfilled
+  // Ghost's Stealth Build Cooler 1 already targets "SnowBlind" (unfulfilled
   // — installedItem is still "CoolCore I") per src/data/seed.ts; Cooler 2
   // has no target at all (status OK — "nothing required," not an open
   // slot), so Cooler 1 is the exact single genuinely-open, compatible slot
@@ -102,7 +102,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
     fireEvent.click(screen.getByText('Install Component'))
-    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'SnowBlind' } })
     expect(screen.queryByText(/Weapon 1/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Quantum Drive/)).not.toBeInTheDocument()
   })
@@ -111,7 +111,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
     fireEvent.click(screen.getByText('Install Component'))
-    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'SnowBlind' } })
     expect(screen.getByText(/Left Cooler/)).toBeInTheDocument()
     // Auto-selected immediately — Save is already enabled with no further
     // manual slot selection required.
@@ -135,7 +135,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
     if (!catalogComponentsByName.has('SnowBlind')) return
     renderQuickUpdate()
     fireEvent.click(screen.getByText('Install Component'))
-    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
+    fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'SnowBlind' } })
     fireEvent.click(screen.getByText('Save Update'))
     expect(screen.getByText('Fleet Registry Updated')).toBeInTheDocument()
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-stealth' && h.slotLabel === 'Left Cooler')

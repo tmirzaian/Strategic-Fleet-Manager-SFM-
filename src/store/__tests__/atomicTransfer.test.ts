@@ -71,7 +71,7 @@ describe('Atomic component transfer (moveComponentBetweenShips)', () => {
   it('Golden Scenario E: donor loses BUILD COMPLETE status after its matched component is moved away', () => {
     // Force Ghost's Stealth Build to 100% first by installing everything it needs.
     useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant')
-    useFleetStore.getState().installComponent('ghost', 'Snowblind', 'Left Cooler')
+    useFleetStore.getState().installComponent('ghost', 'SnowBlind', 'Left Cooler')
     const before = calculateBuildProgress(hardpointsFor('ghost'))
     expect(before.isComplete).toBe(true)
 

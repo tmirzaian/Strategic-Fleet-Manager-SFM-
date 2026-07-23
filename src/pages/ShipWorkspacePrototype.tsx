@@ -17,7 +17,7 @@ import {
   Minimize2,
   ArrowDownToLine,
 } from 'lucide-react'
-import { useFleetStore } from '../store/useFleetStore'
+import { useFleetStore, type TargetOverrideInput } from '../store/useFleetStore'
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
@@ -131,6 +131,8 @@ export default function ShipWorkspacePrototype() {
   const hangarItems = useFleetStore((s) => s.hangarItems)
   const installedLoadouts = useFleetStore((s) => s.installedLoadouts)
   const reservations = useFleetStore((s) => s.reservations)
+  const saveMissionConfiguration = useFleetStore((s) => s.saveMissionConfiguration)
+  const setActiveBuildStore = useFleetStore((s) => s.setActiveBuild)
 
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
   const ship = ships.find((s) => s.id === shipId)
@@ -189,14 +191,41 @@ export default function ShipWorkspacePrototype() {
   // same pattern MissionComposer's own expandedSlot already uses.
   const [expandedInstallRowId, setExpandedInstallRowId] = useState<string | null>(null)
 
-  // Phase 7 (SW-002 Revision A) — "Set as Active" is prototype-only and
-  // local: it never calls the real store mutator (`setActiveBuild`), so
-  // it can never actually change the ship's Active Loadout. Reset
+  // SW-008D (Objective 6) — "Set as Active" now calls the real store
+  // mutator (`setActiveBuild`); this notice reports the real outcome,
+  // superseding SW-002 Revision A's "prototype only" placeholder. Reset
   // whenever the reviewed selection changes.
   const [setActiveNotice, setSetActiveNotice] = useState<string | null>(null)
   useEffect(() => {
     setSetActiveNotice(null)
   }, [reviewedBuildId])
+
+  // SW-008D (Objectives 1/2) — Save/Discard feedback for Manage Loadout.
+  // Reset whenever the reviewed Loadout changes so a stale message from a
+  // previous Loadout never lingers after switching.
+  const [saveNotice, setSaveNotice] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
+  useEffect(() => {
+    setSaveNotice(null)
+  }, [reviewedBuildId])
+
+  // SW-008D (Objective 3) — "+ New Loadout" inline creation form (never a
+  // dialog — Scope Protection's established inline-disclosure pattern,
+  // same as Change Installed Components' Install/Change row). Nothing is
+  // written to the store until the Commander explicitly confirms; Cancel
+  // simply resets this local state, leaving no partial record anywhere.
+  type NewLoadoutSource = 'FACTORY' | 'ACTIVE' | 'EXISTING' | 'EMPTY'
+  const [newLoadoutFormOpen, setNewLoadoutFormOpen] = useState(false)
+  const [newLoadoutName, setNewLoadoutName] = useState('')
+  const [newLoadoutSource, setNewLoadoutSource] = useState<NewLoadoutSource>('FACTORY')
+  const [newLoadoutExistingId, setNewLoadoutExistingId] = useState('')
+  const [newLoadoutError, setNewLoadoutError] = useState<string | null>(null)
+  function resetNewLoadoutForm() {
+    setNewLoadoutFormOpen(false)
+    setNewLoadoutName('')
+    setNewLoadoutSource('FACTORY')
+    setNewLoadoutExistingId('')
+    setNewLoadoutError(null)
+  }
 
   // Sticky Context — hidden while the banner itself is in view; appears,
   // pinned, only once the Commander has scrolled past it. A zero-height
@@ -221,6 +250,103 @@ export default function ShipWorkspacePrototype() {
   const shipBuilds = builds.filter((b) => b.shipId === ship?.id)
   const activeBuild = shipBuilds.find((b) => b.isActive)
   const reviewedBuild = shipBuilds.find((b) => b.id === reviewedBuildId) ?? activeBuild ?? shipBuilds[0]
+
+  // SW-008D (Objective 1) — Save Changes. Objective 4: the exact same
+  // `saveMissionConfiguration` authority MissionComposer's Loadout Manager
+  // already uses — never a second, parallel persistence path. Only the
+  // Commander's actual pending edits are passed as targetOverrides; every
+  // untouched slot's current real Target is preserved automatically
+  // (saveMissionConfiguration reads the reviewed Loadout's own current
+  // rows as its baseline for `startingState: 'EXISTING'`). Updates the
+  // SAME Build in place (existingBuildId, saveAsNew: false) — Current
+  // Target, readiness, and child-slot regeneration (missile racks/mining
+  // modules) all refresh for free once the store's real hardpoints change,
+  // since every derived value on this page already reads from the store.
+  function handleSaveChanges() {
+    if (!ship || !reviewedBuild) return
+    const targetOverrides: Record<string, TargetOverrideInput> = {}
+    for (const [slotLabel, targetItem] of Object.entries(desiredTargets)) {
+      targetOverrides[slotLabel] = { targetItem, targetEntityClass: desiredTargetEntityClasses[slotLabel] }
+    }
+    const outcome = saveMissionConfiguration({
+      shipId: ship.id,
+      name: reviewedBuild.name,
+      startingState: 'EXISTING',
+      existingBuildId: reviewedBuild.id,
+      targetOverrides,
+      setActive: false,
+      saveAsNew: false,
+    })
+    if (outcome.success) {
+      setDesiredTargets({})
+      setDesiredTargetEntityClasses({})
+      setSaveNotice({ tone: 'success', message: `"${reviewedBuild.name}" saved.` })
+    } else {
+      setSaveNotice({ tone: 'error', message: outcome.message ?? 'Could not save this Loadout.' })
+    }
+  }
+
+  // SW-008D (Objective 2) — Discard Changes. Clears the local pending-edit
+  // overlay only; nothing was ever written to the store while these edits
+  // were pending (SW-008A's own local-editing-only guarantee), so there is
+  // nothing to undo persistently — every New Target cell falls back to
+  // reading the real Current Target the instant this state clears.
+  function handleDiscardChanges() {
+    setDesiredTargets({})
+    setDesiredTargetEntityClasses({})
+    setSaveNotice(null)
+  }
+
+  // SW-008D (Objective 3) — New Loadout creation, through the same shared
+  // authority as Save above. "Active Loadout" as an initialize-from source
+  // maps to cloning the ship's real active Build (startingState: 'EXISTING',
+  // saveAsNew: true) — saveMissionConfiguration has no dedicated "ACTIVE"
+  // starting state of its own, so this is the equivalent composition of
+  // its existing, already-proven primitives, not a new persistence path.
+  function handleCreateLoadout() {
+    if (!ship) return
+    const trimmedName = newLoadoutName.trim()
+    if (!trimmedName) {
+      setNewLoadoutError('Name the Loadout before creating it.')
+      return
+    }
+    if (shipBuilds.some((b) => b.name.trim().toLowerCase() === trimmedName.toLowerCase())) {
+      setNewLoadoutError(`"${trimmedName}" already exists — choose a different name.`)
+      return
+    }
+    let params: { startingState: 'FACTORY' | 'EMPTY' | 'EXISTING'; existingBuildId?: string; saveAsNew?: boolean }
+    if (newLoadoutSource === 'EMPTY') {
+      params = { startingState: 'EMPTY' }
+    } else if (newLoadoutSource === 'FACTORY') {
+      params = { startingState: 'FACTORY' }
+    } else if (newLoadoutSource === 'ACTIVE') {
+      if (!activeBuild) {
+        setNewLoadoutError('This Fleet Asset has no Active Loadout to initialize from.')
+        return
+      }
+      params = { startingState: 'EXISTING', existingBuildId: activeBuild.id, saveAsNew: true }
+    } else {
+      if (!newLoadoutExistingId) {
+        setNewLoadoutError('Select a Loadout to initialize from.')
+        return
+      }
+      params = { startingState: 'EXISTING', existingBuildId: newLoadoutExistingId, saveAsNew: true }
+    }
+    const outcome = saveMissionConfiguration({
+      shipId: ship.id,
+      name: trimmedName,
+      targetOverrides: {},
+      setActive: false,
+      ...params,
+    })
+    if (outcome.success && outcome.buildId) {
+      resetNewLoadoutForm()
+      setReviewedBuildId(outcome.buildId)
+      setCommanderIntent('MANAGE_LOADOUT')
+    } else {
+      setNewLoadoutError(outcome.message ?? 'Could not create this Loadout.')
+    }
+  }
 
   // BANNER — always the ship's real Active Loadout ("Is this ship mission
   // ready?" is a fact about the ship, independent of whichever Loadout
@@ -898,13 +1024,15 @@ export default function ShipWorkspacePrototype() {
             <div className="flex flex-wrap gap-2 items-center">
               {shipBuilds.map((build) => {
                 const isReviewed = reviewedBuild?.id === build.id
-                // SW-002 Revision B (Part 3) — "Set Active" now visually
+                // SW-002 Revision B (Part 3) — "Set Active" visually
                 // belongs to the reviewed loadout's own pill (reusing the
                 // established pill language) instead of a detached action
-                // floating in the section header. Still local-only: it
-                // never calls the real store mutator, so Reviewed and
-                // Active stay distinct concepts, and selecting a loadout
-                // (clicking the pill itself) never activates it.
+                // floating in the section header. SW-008D (Objective 6):
+                // now a real activation — Reviewed and Active stay
+                // distinct concepts (selecting a loadout, i.e. clicking
+                // the pill itself, still never activates it), but "Set
+                // Active" itself genuinely changes the ship's real Active
+                // Loadout.
                 const showSetActive = isReviewed && !build.isActive
                 const accent = isReviewed ? colorFor(reviewedProgress.percentage) : undefined
                 return (
@@ -922,8 +1050,11 @@ export default function ShipWorkspacePrototype() {
                     </button>
                     {showSetActive && (
                       <button
-                        onClick={() => setSetActiveNotice(`Prototype only — "${build.name}" was not actually set as Active.`)}
-                        title="Prototype only — does not change the ship's real Active Loadout"
+                        onClick={() => {
+                          setActiveBuildStore(ship.id, build.id)
+                          setSetActiveNotice(`"${build.name}" is now the Active Loadout.`)
+                        }}
+                        title="Set this Loadout as the ship's real Active Loadout"
                         style={{ borderColor: accent, color: accent }}
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-r-full border-2 text-xs font-medium hover:bg-white/5 transition-colors"
                       >
@@ -933,15 +1064,86 @@ export default function ShipWorkspacePrototype() {
                   </div>
                 )
               })}
-              <button
-                type="button"
-                title="Loadout creation is not wired up in this prototype yet."
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-dashed border-cyan/30 text-cyan/70 hover:text-cyan hover:border-cyan/50 hover:bg-cyan/5 transition-colors"
-              >
-                <Plus size={12} /> New Loadout
-              </button>
+              {!newLoadoutFormOpen && (
+                <button
+                  type="button"
+                  onClick={() => setNewLoadoutFormOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-dashed border-cyan/30 text-cyan/70 hover:text-cyan hover:border-cyan/50 hover:bg-cyan/5 transition-colors"
+                >
+                  <Plus size={12} /> New Loadout
+                </button>
+              )}
             </div>
             {setActiveNotice && <p className="text-[11px] text-muted/70 mt-2">{setActiveNotice}</p>}
+
+            {/* SW-008D (Objective 3) — inline creation form, never a
+                dialog. Nothing persists until "Create Loadout" is clicked;
+                Cancel discards this local form state only. */}
+            {newLoadoutFormOpen && (
+              <div className="mt-3 p-3 rounded-lg border border-cyan/20 bg-cyan/5 space-y-3">
+                <div>
+                  <label htmlFor="new-loadout-name" className="block text-[11px] uppercase tracking-widest text-muted mb-1">
+                    Loadout Name
+                  </label>
+                  <input
+                    id="new-loadout-name"
+                    value={newLoadoutName}
+                    onChange={(e) => setNewLoadoutName(e.target.value)}
+                    className="w-full max-w-sm text-sm"
+                    placeholder="e.g. Skirmish Build"
+                  />
+                </div>
+                <div>
+                  <span className="block text-[11px] uppercase tracking-widest text-muted mb-1">Initialize From</span>
+                  <div className="flex flex-wrap gap-2">
+                    {(
+                      [
+                        { key: 'FACTORY' as const, label: 'Factory Loadout' },
+                        { key: 'ACTIVE' as const, label: 'Active Loadout' },
+                        { key: 'EXISTING' as const, label: 'Existing Loadout' },
+                        { key: 'EMPTY' as const, label: 'Empty' },
+                      ] as const
+                    ).map(({ key, label }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setNewLoadoutSource(key)}
+                        aria-pressed={newLoadoutSource === key}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                          newLoadoutSource === key ? 'border-cyan/50 text-cyan bg-cyan/10' : 'border-white/15 text-white/80 hover:text-white hover:border-white/35'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {newLoadoutSource === 'EXISTING' && (
+                    <select
+                      aria-label="Existing Loadout to initialize from"
+                      value={newLoadoutExistingId}
+                      onChange={(e) => setNewLoadoutExistingId(e.target.value)}
+                      className="mt-2 text-sm"
+                    >
+                      <option value="">Select a Loadout…</option>
+                      {shipBuilds.map((build) => (
+                        <option key={build.id} value={build.id}>
+                          {build.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                {newLoadoutError && <p className="text-[11px] text-danger">{newLoadoutError}</p>}
+                <div className="flex gap-2">
+                  <button type="button" onClick={handleCreateLoadout} className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-cyan/15 text-cyan border border-cyan/40 hover:bg-cyan/25 transition-colors">
+                    Create Loadout
+                  </button>
+                  <button type="button" onClick={resetNewLoadoutForm} className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-white/10 text-muted hover:text-white hover:border-white/25 transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* COMMANDER INTENT — exactly two cards (SW-002 terminology).
@@ -1004,17 +1206,41 @@ export default function ShipWorkspacePrototype() {
                 <h3 className="font-display font-semibold text-white">{lensTitle}</h3>
                 <p className="text-xs text-muted mt-1">{lensDescription}</p>
               </div>
-              {reviewedHardpoints.length > 0 && (
-                <div className="flex gap-2">
-                  <button onClick={expandAllGroups} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
-                    <Maximize2 size={12} /> Expand All
-                  </button>
-                  <button onClick={collapseAllGroups} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
-                    <Minimize2 size={12} /> Collapse All
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* SW-008D (Objectives 1/2) — Save/Discard only apply to
+                    Manage Loadout's own pending New Target edits; shown
+                    only when there's something to act on. */}
+                {commanderIntent === 'MANAGE_LOADOUT' && pendingChangeCount > 0 && (
+                  <>
+                    <button
+                      onClick={handleSaveChanges}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan bg-cyan/10 hover:bg-cyan/20 border border-cyan/40 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={handleDiscardChanges}
+                      className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      Discard Changes
+                    </button>
+                  </>
+                )}
+                {reviewedHardpoints.length > 0 && (
+                  <>
+                    <button onClick={expandAllGroups} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
+                      <Maximize2 size={12} /> Expand All
+                    </button>
+                    <button onClick={collapseAllGroups} className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-colors">
+                      <Minimize2 size={12} /> Collapse All
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
+            {saveNotice && commanderIntent === 'MANAGE_LOADOUT' && (
+              <p className={`px-5 pt-3 text-xs ${saveNotice.tone === 'success' ? 'text-success' : 'text-danger'}`}>{saveNotice.message}</p>
+            )}
             {reviewedHardpoints.length === 0 ? (
               <div className="px-5 py-6 text-sm text-muted">No port data configured for this Loadout yet.</div>
             ) : (

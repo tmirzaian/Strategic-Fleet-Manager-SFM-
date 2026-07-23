@@ -41,7 +41,7 @@ function checkItem(name: string) {
  * against the searched name with an exact (case-sensitive) comparison, and
  * "Mirage" is one of the few seed target values whose casing exactly
  * matches its real catalog display name — several other seed values (e.g.
- * "Snowblind") are written in a different case than the real catalog's
+ * "SnowBlind") are written in a different case than the real catalog's
  * resolved name ("SnowBlind") and so would never match here, a pre-existing
  * seed/catalog casing mismatch outside this mission's scope.
  */

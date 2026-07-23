@@ -112,10 +112,10 @@ describe('Reservation transactions (Part 4, tests 6-13)', () => {
 describe('Golden Scenario A — Ghost dual Missions', () => {
   it('Stealth Mission Ready; Escort starts below 100%, then Package Staged after reserving, without disturbing Stealth or moving equipment', () => {
     // Bring Stealth to genuine 100% Installed Match first (its two
-    // remaining targets — Slipstream and Snowblind — start Missing in the
+    // remaining targets — Slipstream and SnowBlind — start Missing in the
     // seed data), matching the golden scenario's starting condition.
     useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant', 'ghost-stealth')
-    useFleetStore.getState().installComponent('ghost', 'Snowblind', 'Left Cooler', 'ghost-stealth')
+    useFleetStore.getState().installComponent('ghost', 'SnowBlind', 'Left Cooler', 'ghost-stealth')
 
     const stealthPackage = packageFor('ghost-stealth')
     expect(stealthPackage.isMissionReady).toBe(true)

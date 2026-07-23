@@ -90,7 +90,7 @@ describe('Mission M-012: component selectors use the authoritative full-universe
 
 describe('EWO-024 (Task 2): isComponentSelectableForPort — Target picker suggestion filtering', () => {
   it('1. a component positively known to be a different size for this port type is not selectable (S1 Cooler in an S2 Cooler slot)', () => {
-    expect(isComponentSelectableForPort('Snowblind', 'Cooler', 'S2')).toBe(false) // Snowblind is S1
+    expect(isComponentSelectableForPort('SnowBlind', 'Cooler', 'S2')).toBe(false) // SnowBlind is S1
     expect(isComponentSelectableForPort('Blizzard', 'Cooler', 'S2')).toBe(true) // Blizzard is S2
   })
 

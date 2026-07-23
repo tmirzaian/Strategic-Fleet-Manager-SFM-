@@ -139,7 +139,7 @@ export const customBuildOverlays: SeedCustomBuildOverlay[] = [
     assignments: {
       'Power Plant': { targetItem: 'Slipstream' },
       'Left Shield Generator': { installedItem: 'Mirage', targetItem: 'Mirage' },
-      'Left Cooler': { targetItem: 'Snowblind' },
+      'Left Cooler': { targetItem: 'SnowBlind' },
     },
   },
   {
@@ -317,7 +317,7 @@ export const ships: Ship[] = [
 // Head narratives this mission's simplified overlay set doesn't use).
 export const hangarItems: HangarItem[] = [
   { id: 'item-1', name: 'Slipstream', type: 'Power Plant', size: 'S1', qty: 0, neededBy: 'Ghost Mk II — Stealth Build, Escort Build', disposition: 'Install' },
-  { id: 'item-2', name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 1, neededBy: 'Ghost Mk II — Stealth Build', disposition: 'Install' },
+  { id: 'item-2', name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 1, neededBy: 'Ghost Mk II — Stealth Build', disposition: 'Install' },
   { id: 'item-3', name: 'Mirage', type: 'Shield', size: 'S1', qty: 1, neededBy: 'Ghost Mk II — Stealth Build', disposition: 'Install' },
   { id: 'item-4', name: 'Galinstan', type: 'Cooler', size: 'S3', qty: 0, neededBy: 'MOLE — Mining Build', disposition: 'Install' },
   { id: 'item-7', name: 'Stronghold', type: 'Shield', size: 'S3', qty: 0, neededBy: 'Railen — Cargo Build', disposition: 'Install' },
@@ -342,8 +342,8 @@ export const initialLog: LogEntry[] = [
     id: 'log-2',
     timestamp: '1 day ago',
     action: 'Added to Hangar',
-    itemName: 'Snowblind',
-    details: 'Added Snowblind to Hangar',
+    itemName: 'SnowBlind',
+    details: 'Added SnowBlind to Hangar',
   },
   {
     id: 'log-3',
@@ -367,7 +367,7 @@ export const initialLog: LogEntry[] = [
 export const findItemCatalog: Array<{ path: string; item: string }> = [
   { path: 'VEH. COMP. S1 → POWERPLANT → Slipstream', item: 'Slipstream' },
   { path: 'VEH. COMP. S1 → SHIELD → Mirage', item: 'Mirage' },
-  { path: 'VEH. COMP. S1 → COOLER → Snowblind', item: 'Snowblind' },
+  { path: 'VEH. COMP. S1 → COOLER → SnowBlind', item: 'SnowBlind' },
   { path: 'VEH. WEAPONS S4 → BALLISTIC → Revenant', item: 'Revenant' },
   { path: 'VEH. COMP. S3 → SHIELD → FR-86', item: 'FR-86' },
 ]
