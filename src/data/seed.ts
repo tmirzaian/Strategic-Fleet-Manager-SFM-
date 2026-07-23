@@ -55,246 +55,10 @@ function row(
   }
 }
 
-/**
- * Builds an arbitrary hardpoint row outside the fixed SLOTS array —
- * needed for ships with non-standard physical ports (turrets, gimbals,
- * mining heads, tractor beams, missile racks) that the 11-slot SLOTS
- * template can't express, and for nested child rows via `parentSlotLabel`
- * (Alpha 2.5C). Uses the same status/validation logic as `row()`.
- */
-function customRow(
-  shipId: string,
-  buildId: string,
-  params: {
-    slotLabel: string
-    type: string
-    size: string
-    factoryItem: string
-    installedItem?: string
-    targetItem?: string
-    parentSlotLabel?: string
-    /** EWO-023 (Task 1/5) — marks a structural mount/turret row (physical
-     * housing for its child weapon(s), no configurable component of its
-     * own) exactly like a deep-imported ship's structural Port
-     * (src/normalizer/assemblyRole.ts, Hardpoint.isStructural's doc
-     * comment) — never editable as a Target, never validated for
-     * compatibility, and excluded from the readiness denominator by
-     * fleetAssetMaterializer.ts/buildProgress.ts. Without this, a mount
-     * row's own hardware-shaped `factoryItem` (e.g. "S4 Gimbal Mount")
-     * rendered as if it were a real, selectable component target — never
-     * matching anything in the real component catalog. */
-    isStructural?: boolean
-  }
-): Hardpoint {
-  const { slotLabel, type, size, factoryItem, parentSlotLabel, isStructural } = params
-  const installedItem = params.installedItem ?? factoryItem
-  const targetItem = params.targetItem ?? factoryItem
-  const { status, invalidMessage } = computeHardpointStatusWithValidation(installedItem, targetItem, factoryItem, type, size)
-  return {
-    id: `${buildId}-hp-${slotLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-    shipId,
-    buildId,
-    slotLabel,
-    type,
-    size,
-    factoryItem,
-    installedItem,
-    targetItem,
-    status,
-    invalidMessage,
-    parentSlotLabel,
-    isStructural,
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Ghost Mk II — the ship with full, hand-authored hardpoint detail.
-// Two builds: Stealth (current focus) and Escort (new in Sprint 1.1).
-// ---------------------------------------------------------------------------
-
-const ghostStealthHardpoints: Hardpoint[] = [
-  // Nose mount (Mission M-011): the Hornet Ghost's nose gimbal, with its
-  // two weapon positions nested as children — authored through the same
-  // generic customRow/parentSlotLabel mechanism Mole/Railen/Cutlass
-  // Black/Corsair already use for their own turrets, not a UI special
-  // case. The mount itself is always fully matched (factory = installed
-  // = target) so adding it doesn't manufacture a new Missing/Upgrade
-  // item for a ship that previously had none at these two slots.
-  customRow('ghost', 'ghost-stealth', { slotLabel: 'Nose Mount', type: 'Gimbal Mount', size: 'S4', factoryItem: '—', installedItem: '—', targetItem: '—', isStructural: true }),
-  row('ghost', 'ghost-stealth', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
-  row('ghost', 'ghost-stealth', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
-  row('ghost', 'ghost-stealth', 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Slipstream' }),
-  row('ghost', 'ghost-stealth', 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('ghost', 'ghost-stealth', 4, { factoryItem: 'AllStop', installedItem: 'Mirage', targetItem: 'Mirage' }),
-  row('ghost', 'ghost-stealth', 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('ghost', 'ghost-stealth', 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'Snowblind' }),
-  row('ghost', 'ghost-stealth', 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  // Ghost Mk II ships an S1 Quantum Drive — Atlas (S1) is a correct, compatible target here.
-  row('ghost', 'ghost-stealth', 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('ghost', 'ghost-stealth', 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('ghost', 'ghost-stealth', 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
-const ghostEscortHardpoints: Hardpoint[] = [
-  // Same Nose Mount + two child weapon positions as the Stealth build —
-  // every Loadout for a given ship shares the same physical port
-  // structure, only target/installed selections differ between builds.
-  customRow('ghost', 'ghost-escort', { slotLabel: 'Nose Mount', type: 'Gimbal Mount', size: 'S4', factoryItem: '—', installedItem: '—', targetItem: '—', isStructural: true }),
-  row('ghost', 'ghost-escort', 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
-  row('ghost', 'ghost-escort', 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver', parentSlotLabel: 'Nose Mount' }),
-  // Escort Build wants the same power upgrade as Stealth — demonstrates shared fleet-wide demand.
-  row('ghost', 'ghost-escort', 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Slipstream' }),
-  row('ghost', 'ghost-escort', 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  // Installed is already Mirage (changed from factory), but Escort's target is FR-66 —
-  // this is an Upgrade Available, not Missing, per the corrected logic. The Upgrade
-  // Opportunity recommendation always reads this targetItem directly (Sprint 1.3B.1) —
-  // never a separately-guessed alternative.
-  row('ghost', 'ghost-escort', 4, { factoryItem: 'AllStop', installedItem: 'Mirage', targetItem: 'FR-66' }),
-  row('ghost', 'ghost-escort', 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('ghost', 'ghost-escort', 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore II' }),
-  row('ghost', 'ghost-escort', 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('ghost', 'ghost-escort', 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('ghost', 'ghost-escort', 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('ghost', 'ghost-escort', 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
 // ---------------------------------------------------------------------------
 // Remaining fleet — lighter hardpoint detail, but statuses run through the
 // same corrected logic so Ship Detail is reliable for every ship.
 // ---------------------------------------------------------------------------
-
-const molePlan = 'mole-mining'
-const moleHardpoints: Hardpoint[] = [
-  // Two mining turret assemblies, each with a real mining head child —
-  // turret 1's head also has a mining module grandchild (Alpha 2.5C).
-  customRow('mole', molePlan, { slotLabel: 'Mining Turret 1', type: 'Mining Mount', size: 'S2', factoryItem: 'S2 Mining Turret' }),
-  customRow('mole', molePlan, {
-    slotLabel: 'Mining Head 1',
-    type: 'Mining Laser',
-    size: 'S2',
-    factoryItem: 'Arbor MH1',
-    installedItem: 'Arbor MH1',
-    targetItem: 'Helix II',
-    parentSlotLabel: 'Mining Turret 1',
-  }),
-  customRow('mole', molePlan, {
-    slotLabel: 'Mining Module 1',
-    type: 'Mining Module',
-    size: 'S1',
-    factoryItem: '—',
-    installedItem: '—',
-    targetItem: 'Rieger-C3',
-    parentSlotLabel: 'Mining Head 1',
-  }),
-  customRow('mole', molePlan, { slotLabel: 'Mining Turret 2', type: 'Mining Mount', size: 'S2', factoryItem: 'S2 Mining Turret' }),
-  customRow('mole', molePlan, {
-    slotLabel: 'Mining Head 2',
-    type: 'Mining Laser',
-    size: 'S1',
-    factoryItem: 'Arbor MH1',
-    installedItem: 'Arbor MH1',
-    targetItem: 'Arbor MH1',
-    parentSlotLabel: 'Mining Turret 2',
-  }),
-  // Core ship components — EWO-031 (Task 6/7): previously unfilled and
-  // fell through to the 'Unknown Factory Item' placeholder; real,
-  // already-proven-compatible component names reused from elsewhere in
-  // this exact seed fleet, same pattern EWO-023 used for Cutlass Red.
-  row('mole', molePlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('mole', molePlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('mole', molePlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('mole', molePlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('mole', molePlan, 6, { type: 'Cooler', size: 'S2', factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'Blizzard' }),
-  row('mole', molePlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('mole', molePlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('mole', molePlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('mole', molePlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
-const railenPlan = 'railen-cargo'
-const railenHardpoints: Hardpoint[] = [
-  // Four pilot-controlled S4 weapons (Alpha 2.5C, Part 8 golden fixture).
-  customRow('railen', railenPlan, { slotLabel: 'Pilot Weapon 1', type: 'Weapon', size: 'S4', factoryItem: 'Mass Driver' }),
-  customRow('railen', railenPlan, { slotLabel: 'Pilot Weapon 2', type: 'Weapon', size: 'S4', factoryItem: 'Mass Driver' }),
-  customRow('railen', railenPlan, { slotLabel: 'Pilot Weapon 3', type: 'Weapon', size: 'S4', factoryItem: 'Mass Driver' }),
-  customRow('railen', railenPlan, { slotLabel: 'Pilot Weapon 4', type: 'Weapon', size: 'S4', factoryItem: 'Mass Driver' }),
-  // Two side turret assemblies, each with two real S3 child weapon ports.
-  customRow('railen', railenPlan, { slotLabel: 'Port Turret', type: 'Turret Mount', size: 'S3', factoryItem: '—', installedItem: '—', targetItem: '—', isStructural: true }),
-  customRow('railen', railenPlan, { slotLabel: 'Port Turret Left Weapon', type: 'Weapon', size: 'S3', factoryItem: 'Turret Repeater', parentSlotLabel: 'Port Turret' }),
-  customRow('railen', railenPlan, { slotLabel: 'Port Turret Right Weapon', type: 'Weapon', size: 'S3', factoryItem: 'Turret Repeater', parentSlotLabel: 'Port Turret' }),
-  customRow('railen', railenPlan, { slotLabel: 'Starboard Turret', type: 'Turret Mount', size: 'S3', factoryItem: '—', installedItem: '—', targetItem: '—', isStructural: true }),
-  customRow('railen', railenPlan, { slotLabel: 'Starboard Turret Left Weapon', type: 'Weapon', size: 'S3', factoryItem: 'Turret Repeater', parentSlotLabel: 'Starboard Turret' }),
-  customRow('railen', railenPlan, { slotLabel: 'Starboard Turret Right Weapon', type: 'Weapon', size: 'S3', factoryItem: 'Turret Repeater', parentSlotLabel: 'Starboard Turret' }),
-  // Tractor beam hardpoints — Railen doesn't ship with them stocked, genuinely empty from factory.
-  customRow('railen', railenPlan, { slotLabel: 'Fore Tractor Beam', type: 'Utility', size: 'S2', factoryItem: '—', installedItem: '—', targetItem: 'Tractor Beam' }),
-  customRow('railen', railenPlan, { slotLabel: 'Aft Tractor Beam', type: 'Utility', size: 'S2', factoryItem: '—', installedItem: '—', targetItem: 'Tractor Beam' }),
-  // Core ship components.
-  customRow('railen', railenPlan, { slotLabel: 'Power Plant', type: 'Power Plant', size: 'S1', factoryItem: 'Regulus' }),
-  customRow('railen', railenPlan, { slotLabel: 'Shield Generator', type: 'Shield', size: 'S1', factoryItem: 'Mirage' }),
-  customRow('railen', railenPlan, { slotLabel: 'Cooler', type: 'Cooler', size: 'S1', factoryItem: 'CoolCore I' }),
-  customRow('railen', railenPlan, { slotLabel: 'Quantum Drive', type: 'Quantum Drive', size: 'S1', factoryItem: 'Atlas' }),
-  customRow('railen', railenPlan, { slotLabel: 'Radar', type: 'Radar', size: 'S1', factoryItem: 'Bloodhound' }),
-  customRow('railen', railenPlan, { slotLabel: 'Life Support', type: 'Life Support', size: 'S1', factoryItem: 'Vector LS-4' }),
-]
-
-const cutlassBlackPlan = 'cutlass-black-utility'
-const cutlassBlackHardpoints: Hardpoint[] = [
-  // Missile Rack target corrected to a real missile-rack-compatible item
-  // (Alpha 2.4, Part 10) — this previously targeted FR-86, which is
-  // actually an S3 Shield, not a missile rack item. That mismatch was
-  // masked by FR-86 itself being miscategorized in the component catalog
-  // until this sprint's data-validation pass fixed it there too.
-  row('cutlass-black', cutlassBlackPlan, 0, { type: 'Missile Rack', size: 'S3', factoryItem: 'CS-12', installedItem: 'CS-12', targetItem: 'CS-12' }),
-  // EWO-031 (Task 6/7): slots 1-5 and 7-10 previously unfilled and fell
-  // through to the 'Unknown Factory Item' placeholder; real,
-  // already-proven-compatible component names reused from elsewhere in
-  // this exact seed fleet, same pattern EWO-023 used for Cutlass Red.
-  row('cutlass-black', cutlassBlackPlan, 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
-  row('cutlass-black', cutlassBlackPlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('cutlass-black', cutlassBlackPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-black', cutlassBlackPlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('cutlass-black', cutlassBlackPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-black', cutlassBlackPlan, 6, { type: 'Cooler', size: 'S2', factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'Military Cooler' }),
-  row('cutlass-black', cutlassBlackPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-black', cutlassBlackPlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('cutlass-black', cutlassBlackPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('cutlass-black', cutlassBlackPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-  // Top turret with two real child weapon ports, plus a tractor beam
-  // utility port (Alpha 2.5C, Part 9 golden fixture).
-  customRow('cutlass-black', cutlassBlackPlan, { slotLabel: 'Top Turret', type: 'Turret Mount', size: 'S2', factoryItem: '—', installedItem: '—', targetItem: '—', isStructural: true }),
-  customRow('cutlass-black', cutlassBlackPlan, { slotLabel: 'Top Turret Left Weapon', type: 'Weapon', size: 'S2', factoryItem: 'Bulldog Repeater', parentSlotLabel: 'Top Turret' }),
-  customRow('cutlass-black', cutlassBlackPlan, { slotLabel: 'Top Turret Right Weapon', type: 'Weapon', size: 'S2', factoryItem: 'Bulldog Repeater', parentSlotLabel: 'Top Turret' }),
-  customRow('cutlass-black', cutlassBlackPlan, { slotLabel: 'Tractor Beam', type: 'Utility', size: 'S2', factoryItem: '—', installedItem: '—', targetItem: 'Tractor Beam' }),
-]
-
-// EWO-023 (Task 4) — every slot below was previously left unfilled
-// (10 of 11 fell through to the 'Unknown Factory Item' placeholder), and
-// the one authored row (Shield 1) declared its own port size as 'S2' to
-// match an aspirational upgrade target ("Shield Array", a real S2 Shield)
-// while its factory-installed item ("AllStop") is a real S1 Shield —
-// the port's actual factory-fresh size must match what's physically
-// installed at factory, not the upgrade target, so that mismatch made
-// Factory Cutlass Red fail compatibility validation outright. Fixed by
-// reusing the Ghost Mk II's own already-validated component set for every
-// matching slot type/size (Mass Driver S4, Regulus S1 Power Plant,
-// AllStop→Mirage S1 Shield, CoolCore I S1 Cooler, Atlas S1 Quantum Drive,
-// Bloodhound S1 Radar, Vector LS-4 S1 Life Support) rather than inventing
-// new component names — every value here is already proven compatible
-// elsewhere in this exact seed fleet.
-const cutlassRedPlan = 'cutlass-red-medical'
-const cutlassRedHardpoints: Hardpoint[] = [
-  row('cutlass-red', cutlassRedPlan, 0, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
-  row('cutlass-red', cutlassRedPlan, 1, { factoryItem: 'Mass Driver', installedItem: 'Mass Driver', targetItem: 'Mass Driver' }),
-  row('cutlass-red', cutlassRedPlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('cutlass-red', cutlassRedPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-red', cutlassRedPlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'Mirage' }),
-  row('cutlass-red', cutlassRedPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-red', cutlassRedPlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('cutlass-red', cutlassRedPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('cutlass-red', cutlassRedPlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('cutlass-red', cutlassRedPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('cutlass-red', cutlassRedPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
 
 const m80Plan = 'm80-speed'
 // EWO-031 (Task 6/7) audit note: unlike 135c/UTV/Mole/Cutlass Black/
@@ -328,148 +92,114 @@ const starliteHardpoints: Hardpoint[] = [
   ...SLOTS.slice(1).map((_, i) => row('starlite', starlitePlan, i + 1)),
 ]
 
-const vulturePlan = 'vulture-salvage'
-const vultureHardpoints: Hardpoint[] = [
-  customRow('vulture', vulturePlan, { slotLabel: 'Salvage Mount', type: 'Salvage Mount', size: 'S2', factoryItem: 'S2 Salvage Mount' }),
-  customRow('vulture', vulturePlan, {
-    slotLabel: 'Salvage Head',
-    type: 'Salvage Module',
-    size: 'S2',
-    factoryItem: 'Stock Salvage Head',
-    installedItem: 'Stock Salvage Head',
-    targetItem: 'Salvage Head (RM Series)',
-    parentSlotLabel: 'Salvage Mount',
-  }),
-  customRow('vulture', vulturePlan, { slotLabel: 'Tractor Beam', type: 'Utility', size: 'S2', factoryItem: '—', installedItem: '—', targetItem: 'Tractor Beam' }),
-  // EWO-031 (Task 6/7): the remaining core-ship slots were previously
-  // unfilled and fell through to the 'Unknown Factory Item' placeholder.
-  // Vulture is unarmed in-game (dedicated salvage vessel), so Weapon 2 is
-  // left explicitly empty ('—', "no such port"), not defaulted into a
-  // false placeholder; the rest reuse already-proven-compatible component
-  // names from elsewhere in this exact seed fleet (EWO-023's pattern).
-  row('vulture', vulturePlan, 1, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('vulture', vulturePlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('vulture', vulturePlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('vulture', vulturePlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('vulture', vulturePlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('vulture', vulturePlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('vulture', vulturePlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('vulture', vulturePlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('vulture', vulturePlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('vulture', vulturePlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
-const prospectorPlan = 'prospector-mining'
-const prospectorHardpoints: Hardpoint[] = [
-  // Prospector ships stock with Arbor MH1 — the target is a genuine upgrade
-  // away from that, not a re-statement of the same stock item.
-  row('prospector', prospectorPlan, 0, { type: 'Mining Laser', size: 'S1', factoryItem: 'Arbor MH1', installedItem: 'Arbor MH1', targetItem: 'Helix I' }),
-  // EWO-031 (Task 6/7): the remaining core-ship slots were previously
-  // unfilled and fell through to the 'Unknown Factory Item' placeholder.
-  // Prospector is unarmed in-game (dedicated single-seat mining vessel),
-  // so Weapon 2 is left explicitly empty ('—', "no such port"), not
-  // defaulted into a false placeholder; the rest reuse already-proven-
-  // compatible component names from elsewhere in this exact seed fleet
-  // (EWO-023's pattern).
-  row('prospector', prospectorPlan, 1, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('prospector', prospectorPlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('prospector', prospectorPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('prospector', prospectorPlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('prospector', prospectorPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('prospector', prospectorPlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('prospector', prospectorPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('prospector', prospectorPlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('prospector', prospectorPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('prospector', prospectorPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
 // ---------------------------------------------------------------------------
-// Corsair — a real, finished custom Build (not a Factory-only stand-in).
-// Every relevant slot has an actual named component, fully matched —
-// this is the "player customized and finished the project" case, distinct
-// from a Factory-only ship that merely happens to read 100% because
-// nothing has been targeted yet.
+// SW-006 Phase 1/2 (Canonical Commander Build Model / Canonical Overlay
+// Model) — every seed ship's CUSTOM build, except M80 and Starlite above,
+// no longer hand-authors its own mechanical structure. Mechanical
+// structure now comes exclusively from canonical topology
+// (shipFactoryTemplates, the same authority Factory Loadouts already use —
+// SW-005 Phase 2). What stays seed-owned, per SW-006's Identity Before
+// Topology principle, is purely Commander-facing: which real canonical
+// port got which installed/target choice, for demo narrative. An overlay
+// entry with no `installedItem`/`targetItem` override simply reads
+// factory-fresh at that port, exactly like every other unlisted port.
+//
+// Construction (canonical template + this overlay -> real Build/Hardpoint
+// rows) happens in useFleetStore.ts's buildCanonicalSeedCustomBuilds,
+// mirroring buildCanonicalSeedFactoryBuilds — seed.ts cannot import
+// shipDefinitions.ts (shipDefinitions.ts imports FROM seed.ts) and so was
+// never able to resolve canonical templates itself.
+//
+// M80 and Starlite are the sole, deliberate exceptions (see their own
+// comments above): both are documented regression fixtures for genuinely
+// unresolved/invalid factory data (Golden Scenario H). Real canonical data
+// for both hulls is confirmed clean (GF-002B) — moving them onto it would
+// destroy the one genuine, non-synthetic proof that Unresolved/Invalid
+// Target states are reachable from real seed data, not just a synthetic
+// fixture. They keep their original hand-authored SLOTS-based hardpoints
+// above, unchanged, exactly as SW-005 already carved them out for the
+// same reason.
 // ---------------------------------------------------------------------------
-const corsairPlan = 'corsair-gunship'
-const corsairHardpoints: Hardpoint[] = [
-  row('corsair', corsairPlan, 0, { factoryItem: 'Bulldog Repeater', installedItem: 'Bulldog Repeater', targetItem: 'Bulldog Repeater' }),
-  row('corsair', corsairPlan, 1, { factoryItem: 'Bulldog Repeater', installedItem: 'Bulldog Repeater', targetItem: 'Bulldog Repeater' }),
-  row('corsair', corsairPlan, 2, { factoryItem: 'Atlas PP', installedItem: 'Atlas PP', targetItem: 'Atlas PP' }),
-  row('corsair', corsairPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('corsair', corsairPlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('corsair', corsairPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('corsair', corsairPlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('corsair', corsairPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('corsair', corsairPlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('corsair', corsairPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('corsair', corsairPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-  // Manned remote turret — both child weapons fully matched, so this
-  // addition never disturbs Corsair's genuine Mission Ready status
-  // (Golden Scenario D from Alpha 2.0/2.1 still holds).
-  customRow('corsair', corsairPlan, { slotLabel: 'Remote Turret', type: 'Turret Mount', size: 'S2', factoryItem: 'S2 Remote Turret' }),
-  customRow('corsair', corsairPlan, { slotLabel: 'Remote Turret Left Weapon', type: 'Weapon', size: 'S2', factoryItem: 'Bulldog Repeater', parentSlotLabel: 'Remote Turret' }),
-  customRow('corsair', corsairPlan, { slotLabel: 'Remote Turret Right Weapon', type: 'Weapon', size: 'S2', factoryItem: 'Bulldog Repeater', parentSlotLabel: 'Remote Turret' }),
+
+export interface SeedCustomBuildOverlay {
+  buildId: string
+  shipId: string
+  name: string
+  role: string
+  isActive: boolean
+  /** Keyed by the ship's real canonical slotLabel (shipFactoryTemplates
+   * vocabulary) — only ports listed here differ from a pristine Factory
+   * Loadout at that port. */
+  assignments: Record<string, { installedItem?: string; targetItem?: string }>
+}
+
+export const customBuildOverlays: SeedCustomBuildOverlay[] = [
+  {
+    buildId: 'ghost-stealth', shipId: 'ghost', name: 'Stealth Build', role: 'Stealth Fighter', isActive: true,
+    assignments: {
+      'Power Plant': { targetItem: 'Slipstream' },
+      'Left Shield Generator': { installedItem: 'Mirage', targetItem: 'Mirage' },
+      'Left Cooler': { targetItem: 'Snowblind' },
+    },
+  },
+  {
+    // Escort Build wants the same power upgrade as Stealth — demonstrates
+    // shared fleet-wide demand (preserved from the original narrative) —
+    // but is mid-upgrade on Shield (Upgrade Available, not Missing, target
+    // FR-66 — the fleet's own established reservation-testing fixture item)
+    // and has already finished its own Cooler swap, distinguishing it from
+    // Stealth rather than being a duplicate.
+    buildId: 'ghost-escort', shipId: 'ghost', name: 'Escort Build', role: 'Escort / Close Support', isActive: false,
+    assignments: {
+      'Power Plant': { targetItem: 'Slipstream' },
+      'Left Shield Generator': { installedItem: 'Mirage', targetItem: 'FR-66' },
+      'Left Cooler': { installedItem: 'Glacier', targetItem: 'Glacier' },
+    },
+  },
+  {
+    // A real, finished custom Build (not a Factory-only stand-in) — every
+    // relevant slot fully matched, deliberately zero overlay entries. This
+    // is the "player customized and finished the project" case (Golden
+    // Scenario D), distinct from a Factory-only ship that merely happens
+    // to read 100% because nothing has been targeted yet.
+    buildId: 'corsair-gunship', shipId: 'corsair', name: 'Gunship Build', role: 'Gunship / Ground Support', isActive: true,
+    assignments: {},
+  },
+  {
+    buildId: 'mole-mining', shipId: 'mole', name: 'Mining Build', role: 'Mining', isActive: true,
+    assignments: { Cooler: { targetItem: 'Galinstan' } },
+  },
+  {
+    buildId: 'railen-cargo', shipId: 'railen', name: 'Cargo Build', role: 'Cargo Hauler', isActive: true,
+    assignments: { 'Shield Generator 1': { targetItem: 'Stronghold' } },
+  },
+  {
+    buildId: 'cutlass-black-utility', shipId: 'cutlass-black', name: 'Military Utility Build', role: 'Daily Driver', isActive: true,
+    assignments: { 'Left Cooler': { targetItem: 'Avalanche' } },
+  },
+  {
+    buildId: 'cutlass-red-medical', shipId: 'cutlass-red', name: 'Medical Support Build', role: 'Rescue / Medical', isActive: true,
+    assignments: { 'Right Shield Generator': { targetItem: 'Citadel' } },
+  },
+  {
+    buildId: 'vulture-salvage', shipId: 'vulture', name: 'Salvage Build', role: 'Salvage', isActive: true,
+    assignments: { 'Left Shield Generator': { targetItem: 'Mirage' } },
+  },
+  {
+    buildId: 'prospector-mining', shipId: 'prospector', name: 'Mining Build', role: 'Solo Mining', isActive: true,
+    assignments: { Cooler: { targetItem: 'Avalanche' } },
+  },
 ]
 
-// EWO-031 (Task 6/7) — 135c and UTV were the only two seed ships whose
-// hardpoints came from bare `defaultBuildHardpoints()` with zero
-// overrides, so every one of their 11 slots fell through to the
-// 'Unknown Factory Item' placeholder for Factory AND Installed (Target
-// still resolved once a Commander built a custom Loadout, since Target is
-// fed independently through Loadout Manager/Quartermaster template
-// selections — see the EWO-031 report for the full trace). Fixed the same
-// way EWO-023 fixed Cutlass Red: real, already-proven-compatible
-// component names reused from elsewhere in this exact seed fleet, not
-// invented ones. Both ships are genuinely unarmed in-game (135c is a
-// civilian shuttle, UTV a ground utility vehicle), and UTV has no
-// Shield/Quantum Drive hardpoints in-game either — those slots are left
-// explicitly empty ('—', matching every other seed ship's convention for
-// "no such port"), not defaulted into a false placeholder.
-const originPlan = '135c-shuttle'
-const originHardpoints: Hardpoint[] = [
-  row('135c', originPlan, 0, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('135c', originPlan, 1, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('135c', originPlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('135c', originPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('135c', originPlan, 4, { factoryItem: 'AllStop', installedItem: 'AllStop', targetItem: 'AllStop' }),
-  row('135c', originPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('135c', originPlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('135c', originPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('135c', originPlan, 8, { factoryItem: 'Atlas', installedItem: 'Atlas', targetItem: 'Atlas', size: 'S1' }),
-  row('135c', originPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('135c', originPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
+// SW-006 Phase 5 (Vocabulary Elimination) — this array now holds only
+// M80 and Starlite's hand-authored hardpoints (the sole documented
+// exceptions above). Every other ship's Factory Loadout AND CUSTOM
+// build(s) are constructed fresh from canonical topology in
+// useFleetStore.ts (buildCanonicalSeedFactoryBuilds /
+// buildCanonicalSeedCustomBuilds). No demo customization is lost — see
+// customBuildOverlays above for where it now lives.
 
-const utvPlan = 'utv-default'
-const utvHardpoints: Hardpoint[] = [
-  row('utv', utvPlan, 0, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 1, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 2, { factoryItem: 'Regulus', installedItem: 'Regulus', targetItem: 'Regulus' }),
-  row('utv', utvPlan, 3, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 4, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 5, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 6, { factoryItem: 'CoolCore I', installedItem: 'CoolCore I', targetItem: 'CoolCore I' }),
-  row('utv', utvPlan, 7, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 8, { factoryItem: '—', installedItem: '—', targetItem: '—' }),
-  row('utv', utvPlan, 9, { factoryItem: 'Bloodhound', installedItem: 'Bloodhound', targetItem: 'Bloodhound' }),
-  row('utv', utvPlan, 10, { factoryItem: 'Vector LS-4', installedItem: 'Vector LS-4', targetItem: 'Vector LS-4' }),
-]
-
-export const hardpoints: Hardpoint[] = [
-  ...ghostStealthHardpoints,
-  ...ghostEscortHardpoints,
-  ...moleHardpoints,
-  ...railenHardpoints,
-  ...corsairHardpoints,
-  ...originHardpoints,
-  ...cutlassBlackHardpoints,
-  ...cutlassRedHardpoints,
-  ...m80Hardpoints,
-  ...starliteHardpoints,
-  ...utvHardpoints,
-  ...vultureHardpoints,
-  ...prospectorHardpoints,
-]
+export const hardpoints: Hardpoint[] = [...m80Hardpoints, ...starliteHardpoints]
 
 function missingFor(buildId: string): string[] {
   return hardpoints
@@ -477,24 +207,27 @@ function missingFor(buildId: string): string[] {
     .map((h) => h.targetItem)
 }
 
+// SW-006 Phase 1/2/5 — this array now holds only M80 and Starlite's real,
+// hand-authored CUSTOM builds (the sole documented exceptions — see
+// customBuildOverlays above). Every other seed ship's CUSTOM build(s), and
+// every seed ship's Factory Loadout (SW-005 Phase 2), are constructed
+// fresh from canonical topology in useFleetStore.ts — mechanical topology
+// is no longer hand-authored anywhere else in this file.
 export const builds: Build[] = [
-  { id: 'ghost-stealth', shipId: 'ghost', name: 'Stealth Build', role: 'Stealth Fighter', readiness: 82, isActive: true, missing: missingFor('ghost-stealth'), kind: 'CUSTOM' },
-  { id: 'ghost-escort', shipId: 'ghost', name: 'Escort Build', role: 'Escort / Close Support', readiness: 55, isActive: false, missing: missingFor('ghost-escort'), kind: 'CUSTOM' },
-  { id: 'corsair-gunship', shipId: 'corsair', name: 'Gunship Build', role: 'Gunship / Ground Support', readiness: 100, isActive: true, missing: missingFor('corsair-gunship'), kind: 'CUSTOM' },
-  { id: 'mole-mining', shipId: 'mole', name: 'Mining Build', role: 'Mining', readiness: 71, isActive: true, missing: missingFor('mole-mining'), kind: 'CUSTOM' },
-  { id: 'railen-cargo', shipId: 'railen', name: 'Cargo Build', role: 'Cargo Hauler', readiness: 89, isActive: true, missing: missingFor('railen-cargo'), kind: 'CUSTOM' },
-  { id: '135c-shuttle', shipId: '135c', name: 'Factory Loadout', role: 'Stealth Shuttle', readiness: 100, isActive: true, missing: missingFor('135c-shuttle'), kind: 'FACTORY' },
-  { id: 'cutlass-black-utility', shipId: 'cutlass-black', name: 'Military Utility Build', role: 'Daily Driver', readiness: 74, isActive: true, missing: missingFor('cutlass-black-utility'), kind: 'CUSTOM' },
-  { id: 'cutlass-red-medical', shipId: 'cutlass-red', name: 'Medical Support Build', role: 'Rescue / Medical', readiness: 80, isActive: true, missing: missingFor('cutlass-red-medical'), kind: 'CUSTOM' },
   { id: 'm80-speed', shipId: 'm80', name: 'Speed Build', role: 'Fast Interceptor', readiness: 70, isActive: true, missing: missingFor('m80-speed'), kind: 'CUSTOM' },
   { id: 'starlite-default', shipId: 'starlite', name: 'Default Build', role: 'Future Gameplay', readiness: 50, isActive: true, missing: missingFor('starlite-default'), kind: 'CUSTOM' },
-  { id: 'utv-default', shipId: 'utv', name: 'Factory Loadout', role: 'Utility Vehicle', readiness: 100, isActive: true, missing: missingFor('utv-default'), kind: 'FACTORY' },
-  { id: 'vulture-salvage', shipId: 'vulture', name: 'Salvage Build', role: 'Salvage', readiness: 65, isActive: true, missing: missingFor('vulture-salvage'), kind: 'CUSTOM' },
-  { id: 'prospector-mining', shipId: 'prospector', name: 'Mining Build', role: 'Solo Mining', readiness: 60, isActive: true, missing: missingFor('prospector-mining'), kind: 'CUSTOM' },
 ]
 
-function buildFor(shipId: string): Build {
-  return builds.find((b) => b.shipId === shipId && b.isActive) ?? builds.find((b) => b.shipId === shipId)!
+// SW-005/SW-006 — every seed ship except M80/Starlite now has no
+// seed-authored Build at all; both their Factory Loadout and their
+// CUSTOM build(s) are constructed fresh from canonical topology in
+// useFleetStore.ts. The 100%/nothing-missing placeholder here is
+// provisional only: useFleetStore.ts's buildCanonicalSeedFactoryBuilds /
+// buildCanonicalSeedCustomBuilds overwrite every affected ship's real
+// readiness/missing with its actual freshly-constructed values before the
+// store's `ships` array is ever read by the app.
+function buildFor(shipId: string): Pick<Build, 'readiness' | 'missing'> {
+  return builds.find((b) => b.shipId === shipId && b.isActive) ?? builds.find((b) => b.shipId === shipId) ?? { readiness: 100, missing: [] }
 }
 
 /**
@@ -577,18 +310,21 @@ export const ships: Ship[] = [
 // Hangar Inventory — vendor trash is never stored here (Sprint 1.1).
 // ---------------------------------------------------------------------------
 
+// SW-006 Phase 2 — names/types/sizes below updated to match
+// customBuildOverlays' real canonical-topology targets (the old entries
+// referenced ports/items that no longer exist anywhere in the fleet, e.g.
+// Helix II/Rieger-C3 mining-laser targets and the Tractor Beam/Salvage
+// Head narratives this mission's simplified overlay set doesn't use).
 export const hangarItems: HangarItem[] = [
   { id: 'item-1', name: 'Slipstream', type: 'Power Plant', size: 'S1', qty: 0, neededBy: 'Ghost Mk II — Stealth Build, Escort Build', disposition: 'Install' },
   { id: 'item-2', name: 'Snowblind', type: 'Cooler', size: 'S1', qty: 1, neededBy: 'Ghost Mk II — Stealth Build', disposition: 'Install' },
   { id: 'item-3', name: 'Mirage', type: 'Shield', size: 'S1', qty: 1, neededBy: 'Ghost Mk II — Stealth Build', disposition: 'Install' },
-  { id: 'item-4', name: 'Helix II', type: 'Mining Laser', size: 'S2', qty: 0, neededBy: 'MOLE — Mining Build', disposition: 'Install' },
-  { id: 'item-5', name: 'Rieger-C3', type: 'Mining Module', size: 'S1', qty: 0, neededBy: 'MOLE — Mining Build', disposition: 'Install' },
-  { id: 'item-6', name: 'Blizzard', type: 'Cooler', size: 'S2', qty: 0, neededBy: 'MOLE — Mining Build', disposition: 'Install' },
-  { id: 'item-7', name: 'Tractor Beam', type: 'Utility', size: 'S2', qty: 0, neededBy: 'Railen — Cargo Build', disposition: 'Install' },
+  { id: 'item-4', name: 'Galinstan', type: 'Cooler', size: 'S3', qty: 0, neededBy: 'MOLE — Mining Build', disposition: 'Install' },
+  { id: 'item-7', name: 'Stronghold', type: 'Shield', size: 'S3', qty: 0, neededBy: 'Railen — Cargo Build', disposition: 'Install' },
   { id: 'item-9', name: 'FR-86', type: 'Missile Rack', size: 'S3', qty: 0, neededBy: 'Cutlass Black — Military Utility Build', disposition: 'Store' },
-  { id: 'item-10', name: 'Military Cooler', type: 'Cooler', size: 'S2', qty: 0, neededBy: 'Cutlass Black — Military Utility Build', disposition: 'Install' },
+  { id: 'item-10', name: 'Avalanche', type: 'Cooler', size: 'S2', qty: 0, neededBy: 'Cutlass Black — Military Utility Build', disposition: 'Install' },
   { id: 'item-11', name: 'Spare Ballistic Gimbal', type: 'Gimbal', size: 'S3', qty: 2, neededBy: 'None', disposition: 'Store' },
-  { id: 'item-12', name: 'Salvage Head (RM Series)', type: 'Salvage Module', size: 'S2', qty: 0, neededBy: 'Vulture — Salvage Build', disposition: 'Install' },
+  { id: 'item-12', name: 'Mirage', type: 'Shield', size: 'S1', qty: 0, neededBy: 'Vulture — Salvage Build', disposition: 'Install' },
 ]
 
 export const initialLog: LogEntry[] = [

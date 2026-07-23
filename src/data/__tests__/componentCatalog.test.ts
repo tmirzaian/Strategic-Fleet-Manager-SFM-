@@ -1,13 +1,20 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { validateTargetCompatibility, isComponentSelectableForPort } from '../componentCatalog'
 import { runFullValidation } from '../../engine/validation'
-import { ships, builds, hardpoints } from '../seed'
+import { hardpoints } from '../seed'
 import { shipDefinitions, shipFactoryTemplates } from '../shipDefinitions'
-import { migrateSeedFleetToAssets } from '../fleetAssetMigration'
+import { useFleetStore } from '../../store/useFleetStore'
 import { catalogComponentsByName, componentsByEntityClass, resolveComponentByEntityClass, compatibilityPortTypeFor } from '../../generated/componentCatalog'
 import { componentOwnedChildSlotSpec } from '../../utils/componentOwnedSlots'
 import { getMissileRackSlotSpec } from '../../generated/missileRackSlots'
 import missileRackSlotData from '../../../generated-data/missile-rack-slots.json'
+
+const initialState = useFleetStore.getState()
+
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+})
 
 describe('Data validation fixes (Alpha 2.4, Part 10)', () => {
   it('FR-86 is correctly categorized as an S3 Shield, not a Missile Rack', () => {
@@ -18,17 +25,35 @@ describe('Data validation fixes (Alpha 2.4, Part 10)', () => {
     expect(asMissileRack.valid).toBe(false)
   })
 
-  it('the real seed dataset has no INCOMPATIBLE_TARGET errors beyond the one intentional M80 demo defect', () => {
-    const summary = runFullValidation({ ships, builds, hardpoints, fleetAssets: migrateSeedFleetToAssets(), shipDefinitions })
+  it('the real seed dataset has no INCOMPATIBLE_TARGET errors beyond the one known, deliberate M80 demo defect', () => {
+    // SW-005 Phase 2 — every seed ship's Factory Loadout is now
+    // constructed fresh from real, validated canonical StarBreaker
+    // topology (useFleetStore.ts's buildCanonicalSeedFactoryBuilds), not
+    // hand-derived from a CUSTOM build's own factoryItem column (SW-003's
+    // approach, retired). The two defects SW-003 surfaced (M80's
+    // Factory-twin duplicate, and Mole's Mining Head 1 size mismatch) were
+    // both artifacts of that hand-derivation, not of the real canonical
+    // data — GF-002B independently confirmed MOLE's real export has zero
+    // Invalid Target rows. Only M80's own hand-authored CUSTOM build
+    // (m80-speed, the deliberate Golden Scenario H regression fixture)
+    // still carries the one intentional defect.
+    const s = useFleetStore.getState()
+    const summary = runFullValidation({ ships: s.ships, builds: s.builds, hardpoints: s.hardpoints, fleetAssets: s.fleetAssets, shipDefinitions })
     const incompatibleTargetErrors = summary.issues.filter((i) => i.code === 'INCOMPATIBLE_TARGET')
     expect(incompatibleTargetErrors).toHaveLength(1)
     expect(incompatibleTargetErrors[0].entityId).toContain('m80')
   })
 
   it('Cutlass Black no longer targets FR-86 (a Shield) in its Missile Rack slot', () => {
-    const row = hardpoints.find((h) => h.buildId === 'cutlass-black-utility' && h.type === 'Missile Rack')!
-    expect(row.targetItem).not.toBe('FR-86')
-    expect(row.status).toBe('OK')
+    // SW-006 — cutlass-black-utility's mechanical structure is now
+    // constructed fresh from canonical topology (useFleetStore.ts's
+    // buildCanonicalSeedCustomBuilds), not raw src/data/seed.ts exports.
+    const rows = useFleetStore.getState().hardpoints.filter((h) => h.buildId === 'cutlass-black-utility' && h.type === 'Missile Rack')
+    expect(rows.length).toBeGreaterThan(0)
+    for (const row of rows) {
+      expect(row.targetItem).not.toBe('FR-86')
+      expect(row.status).toBe('OK')
+    }
   })
 })
 

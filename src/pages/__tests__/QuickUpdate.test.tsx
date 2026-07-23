@@ -112,7 +112,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
     renderQuickUpdate()
     fireEvent.click(screen.getByText('Install Component'))
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
-    expect(screen.getByText(/Cooler 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Left Cooler/)).toBeInTheDocument()
     // Auto-selected immediately — Save is already enabled with no further
     // manual slot selection required.
     expect(screen.getByText('Save Update')).not.toBeDisabled()
@@ -138,7 +138,7 @@ describe('<QuickUpdate /> — EWO-030 (Task 3/4): compatible slot filtering and 
     fireEvent.change(screen.getByPlaceholderText('Search catalog components…'), { target: { value: 'Snowblind' } })
     fireEvent.click(screen.getByText('Save Update'))
     expect(screen.getByText('Fleet Registry Updated')).toBeInTheDocument()
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-stealth' && h.slotLabel === 'Cooler 1')
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-stealth' && h.slotLabel === 'Left Cooler')
     expect(hp?.installedItem).toBe('SnowBlind')
   })
 })

@@ -15,7 +15,14 @@
 // dump (which would defeat bulk querying's whole performance rationale).
 // `displayName` is now actually resolved (see
 // scripts/universeCatalog/localization.ts) rather than always null.
-export const CATALOG_SCHEMA_VERSION = 2
+//
+// Bumped 2 -> 3 for CAT-001 (Component Classification Extraction):
+// `classification` added, parsed from the item's own localized
+// description header block (see descriptionClassification.ts) — DataCore
+// has no structured field for it (DATA-001). Null for the majority of
+// records (every Weapon/Missile/Utility item, plus any Core Component
+// with no description text); never fabricated or inferred.
+export const CATALOG_SCHEMA_VERSION = 3
 export const GENERATOR_NAME = 'Strategic Fleet Manager Component Catalog Generator'
 export const GENERATOR_VERSION = '2.0.0'
 
@@ -39,6 +46,12 @@ export interface CatalogRecord {
   manufacturerRef: string | null
   localizationKey: string | null
   displayName: string | null
+  /** CAT-001 — Civilian/Industrial/Military/Competition/Stealth (or any
+   * other real value CIG ships — never validated against a closed
+   * vocabulary, see descriptionClassification.ts), parsed from the item's
+   * own localized description text. Null when the description carries no
+   * classification line at all. */
+  classification: string | null
   provenance: CatalogRecordProvenance
 }
 

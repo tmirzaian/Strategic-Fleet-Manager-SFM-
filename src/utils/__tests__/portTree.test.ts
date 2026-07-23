@@ -1,19 +1,35 @@
-import { describe, it, expect } from 'vitest'
-import { buildPortTree, flattenPortTree, derivePortLogistics, derivePortValidation } from '../portTree'
-import { ships, builds, hardpoints } from '../../data/seed'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { buildPortTree, flattenPortTree, derivePortValidation, derivePortLogistics } from '../portTree'
 import { importedShipList } from '../../generated/importedShips'
+import { useFleetStore } from '../../store/useFleetStore'
+import { hardpoints as seedHardpoints, ships as seedShips } from '../../data/seed'
 
+const initialState = useFleetStore.getState()
+
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+})
+
+// SW-006 Phase 1/2 — every ship's CUSTOM build (except M80/Starlite) is now
+// constructed fresh from real canonical topology, not raw src/data/seed.ts
+// exports (which hold only M80/Starlite's hand-authored data). Reads the
+// live store for every other ship.
 function rowsFor(shipId: string) {
-  const ship = ships.find((s) => s.id === shipId)!
-  return hardpoints.filter((h) => h.buildId === ship.activeBuildId)
+  const s = useFleetStore.getState()
+  const ship = s.ships.find((sh) => sh.id === shipId)!
+  return s.hardpoints.filter((h) => h.buildId === ship.activeBuildId)
 }
 
 describe('buildPortTree — generic structural correctness', () => {
   it('15. preserves parent-child relationships exactly as declared by parentSlotLabel', () => {
     const rows = rowsFor('railen')
     const tree = buildPortTree(rows)
-    const portTurret = tree.find((n) => n.hardpoint.slotLabel === 'Port Turret')!
-    expect(portTurret.children.map((c) => c.hardpoint.slotLabel).sort()).toEqual(['Port Turret Left Weapon', 'Port Turret Right Weapon'])
+    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Right Turret (Manned Turret)')!
+    expect(turret.children.map((c) => c.hardpoint.slotLabel).sort()).toEqual([
+      'Right Turret (Manned Turret) — Left Weapon (Gimbal Mount)',
+      'Right Turret (Manned Turret) — Right Weapon (Gimbal Mount)',
+    ])
   })
 
   it('12/13: flattening after building includes every descendant (Expand All semantics)', () => {
@@ -24,41 +40,43 @@ describe('buildPortTree — generic structural correctness', () => {
   })
 
   it('a ship with no nested rows still produces a valid (flat) tree — never crashes on absence of hierarchy', () => {
-    const tree = buildPortTree(rowsFor('starlite'))
+    // Starlite is one of the two remaining hand-authored, flat-structure
+    // seed fixtures (its own real seed.ts export, unaffected by SW-006).
+    const tree = buildPortTree(seedHardpoints.filter((h) => h.buildId === seedShips.find((s) => s.id === 'starlite')!.activeBuildId))
     expect(Array.isArray(tree)).toBe(true)
     expect(tree.every((n) => n.children.length === 0)).toBe(true)
   })
 })
 
-describe('16/17/18/19: Railen golden fixture — no pilot gun, turret, or tractor port omitted', () => {
+describe('16/17/18/19: Railen golden fixture — no pilot gun, turret, or tractor port omitted (real canonical topology)', () => {
   const tree = buildPortTree(rowsFor('railen'))
   const topLevelLabels = tree.map((n) => n.hardpoint.slotLabel)
 
-  it('16. renders all four pilot S4 weapon ports', () => {
-    const pilotWeapons = tree.filter((n) => n.hardpoint.slotLabel.startsWith('Pilot Weapon'))
+  it('16. renders all four pilot S4 weapon (gimbal mount) ports', () => {
+    const pilotWeapons = tree.filter((n) => n.hardpoint.slotLabel.includes('Weapon 1 (Gimbal Mount)') || n.hardpoint.slotLabel.includes('Weapon 2 (Gimbal Mount)'))
     expect(pilotWeapons).toHaveLength(4)
     for (const w of pilotWeapons) expect(w.hardpoint.size).toBe('S4')
   })
 
-  it('17. renders both side turrets (Port and Starboard) as top-level nodes', () => {
-    expect(topLevelLabels).toContain('Port Turret')
-    expect(topLevelLabels).toContain('Starboard Turret')
+  it('17. renders both manned turrets (Left and Right) as top-level nodes', () => {
+    expect(topLevelLabels).toContain('Left Turret (Manned Turret)')
+    expect(topLevelLabels).toContain('Right Turret (Manned Turret)')
   })
 
-  it('18. each turret exposes its child S3 weapon ports, not flattened away', () => {
-    const portTurret = tree.find((n) => n.hardpoint.slotLabel === 'Port Turret')!
-    const starboardTurret = tree.find((n) => n.hardpoint.slotLabel === 'Starboard Turret')!
-    expect(portTurret.children).toHaveLength(2)
-    expect(starboardTurret.children).toHaveLength(2)
-    for (const child of [...portTurret.children, ...starboardTurret.children]) {
-      expect(child.hardpoint.size).toBe('S3')
-      expect(child.hardpoint.type).toBe('Weapon')
+  it('18. each turret exposes its child S4 gimbal-mount weapon ports, not flattened away', () => {
+    const leftTurret = tree.find((n) => n.hardpoint.slotLabel === 'Left Turret (Manned Turret)')!
+    const rightTurret = tree.find((n) => n.hardpoint.slotLabel === 'Right Turret (Manned Turret)')!
+    expect(leftTurret.children).toHaveLength(2)
+    expect(rightTurret.children).toHaveLength(2)
+    for (const child of [...leftTurret.children, ...rightTurret.children]) {
+      expect(child.hardpoint.size).toBe('S4')
+      expect(child.hardpoint.type).toBe('Gimbal Mount')
     }
   })
 
-  it('19. renders tractor beam hardpoints', () => {
-    expect(topLevelLabels).toContain('Fore Tractor Beam')
-    expect(topLevelLabels).toContain('Aft Tractor Beam')
+  it('19. renders tractor hardpoints', () => {
+    expect(topLevelLabels).toContain('Tractor Left (Manned Turret)')
+    expect(topLevelLabels).toContain('Tractor Right (Manned Turret)')
   })
 })
 
@@ -78,76 +96,70 @@ describe('20/21: Gladius golden fixture — nose/wing weapons and missile rack h
   })
 })
 
-describe('22: MOLE golden fixture — mining turret / head / module hierarchy', () => {
+describe('22: MOLE golden fixture — mining turret / mining weapon hierarchy (real canonical topology)', () => {
   const tree = buildPortTree(rowsFor('mole'))
 
-  it('renders two mining turret assemblies', () => {
-    const turrets = tree.filter((n) => n.hardpoint.slotLabel.startsWith('Mining Turret'))
-    expect(turrets).toHaveLength(2)
+  it('renders three mining turret (manned turret) assemblies', () => {
+    const turrets = tree.filter((n) => n.hardpoint.slotLabel.includes('Mining Laser (Manned Turret)') && !n.hardpoint.slotLabel.includes('—'))
+    expect(turrets).toHaveLength(3)
   })
 
-  it('each turret has a mining head child', () => {
-    const turret1 = tree.find((n) => n.hardpoint.slotLabel === 'Mining Turret 1')!
-    expect(turret1.children.map((c) => c.hardpoint.slotLabel)).toContain('Mining Head 1')
-  })
-
-  it('mining head 1 has a mining module grandchild', () => {
-    const turret1 = tree.find((n) => n.hardpoint.slotLabel === 'Mining Turret 1')!
-    const head1 = turret1.children.find((c) => c.hardpoint.slotLabel === 'Mining Head 1')!
-    expect(head1.children.map((c) => c.hardpoint.slotLabel)).toContain('Mining Module 1')
+  it('each turret has a real Mining Laser child', () => {
+    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Front Cab Mining Laser (Manned Turret)')!
+    expect(turret.children.map((c) => c.hardpoint.slotLabel)).toContain('Front Cab Mining Laser (Manned Turret) — Mining Weapon')
+    expect(turret.children[0].hardpoint.type).toBe('Mining Laser')
   })
 })
 
-describe('23: Vulture golden fixture — salvage mount / head hierarchy', () => {
-  it('renders a salvage mount with a salvage head child, plus a tractor port', () => {
+describe('23: Vulture golden fixture — salvage head hierarchy (real canonical topology)', () => {
+  it('renders a salvage mount with a salvage head child, itself with two sub-item grandchildren', () => {
     const tree = buildPortTree(rowsFor('vulture'))
-    const mount = tree.find((n) => n.hardpoint.slotLabel === 'Salvage Mount')!
+    const mount = tree.find((n) => n.hardpoint.slotLabel === 'Left Arm Salvage Head (Mount)')
     expect(mount).toBeDefined()
-    expect(mount.children.map((c) => c.hardpoint.slotLabel)).toContain('Salvage Head')
-    expect(tree.map((n) => n.hardpoint.slotLabel)).toContain('Tractor Beam')
+    const head = mount!.children.find((c) => c.hardpoint.slotLabel === 'Left Arm Salvage Head (Mount) — Laser Salvage Head (Mount)')
+    expect(head).toBeDefined()
+    expect(head!.children.map((c) => c.hardpoint.slotLabel)).toEqual([
+      'Left Arm Salvage Head (Mount) — Laser Salvage Head (Mount) — SubItem01 Salvage Head',
+      'Left Arm Salvage Head (Mount) — Laser Salvage Head (Mount) — SubItem02 Salvage Head',
+    ])
   })
 })
 
-describe('24: Corsair golden fixture — full weapon/turret hierarchy, still Mission Ready', () => {
+describe('24: Corsair golden fixture — full weapon/turret hierarchy, still Mission Ready (real canonical topology)', () => {
   it('renders the manned Remote Turret with two matched child weapons', () => {
     const tree = buildPortTree(rowsFor('corsair'))
-    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Remote Turret')!
+    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Tail Turret (Remote Turret)')!
     expect(turret.children).toHaveLength(2)
     for (const child of turret.children) expect(child.hardpoint.status).toBe('OK')
   })
 
-  it("adding the turret never disturbed Corsair's complete custom Loadout state", () => {
-    const corsairBuild = builds.find((b) => b.id === 'corsair-gunship')!
-    // 'CUSTOM' is the original seed value; Alpha 2.2 treats it identically to 'MISSION'.
-    expect(['CUSTOM', 'MISSION']).toContain(corsairBuild.kind)
+  it("Corsair's complete custom Loadout state remains fully matched (deliberately zero overlay entries)", () => {
+    const corsairBuild = useFleetStore.getState().builds.find((b) => b.id === 'corsair-gunship')!
+    expect(corsairBuild.kind).toBe('CUSTOM')
     const allRows = rowsFor('corsair')
     const required = allRows.filter((h) => h.targetItem && h.targetItem !== '—' && h.status !== 'Unresolved')
     expect(required.every((h) => h.status === 'OK')).toBe(true)
   })
 })
 
-describe('25: Cutlass Black — FR-86 never appears as Missile Rack data, turret hierarchy present', () => {
-  it('the Missile Rack top-level port never targets FR-86 (a Shield)', () => {
+describe('25: Cutlass Black — turret hierarchy present (real canonical topology)', () => {
+  it('the Missile Rack top-level ports never target FR-86 (a Shield)', () => {
     const tree = buildPortTree(rowsFor('cutlass-black'))
-    const missileRackNode = tree.find((n) => n.hardpoint.type === 'Missile Rack')!
-    expect(missileRackNode.hardpoint.targetItem).not.toBe('FR-86')
+    const missileRackNodes = tree.filter((n) => n.hardpoint.type === 'Missile Rack')
+    expect(missileRackNodes.length).toBeGreaterThan(0)
+    for (const node of missileRackNodes) expect(node.hardpoint.targetItem).not.toBe('FR-86')
   })
 
-  it('renders the Top Turret with two child weapons, plus a Tractor Beam port', () => {
+  it('renders the manned Turret with two child weapons, plus a Tractor Turret port', () => {
     const tree = buildPortTree(rowsFor('cutlass-black'))
-    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Top Turret')!
+    const turret = tree.find((n) => n.hardpoint.slotLabel === 'Turret (Manned Turret)')!
     expect(turret.children).toHaveLength(2)
-    expect(tree.map((n) => n.hardpoint.slotLabel)).toContain('Tractor Beam')
+    expect(tree.map((n) => n.hardpoint.slotLabel)).toContain('Tractor Turret (Remote Turret)')
   })
 })
 
 describe('Mission M-011: shared port-tree source — Ship Detail and Loadout Manager must never diverge', () => {
   it('building the tree twice from the same store hardpoints for the same ship+build produces identical ids and structure', () => {
-    // Ship Detail and Loadout Manager both call buildPortTree() directly
-    // over useFleetStore's hardpoints — there is no second, parallel
-    // slot list anywhere. This proves that invariant structurally: two
-    // independent buildPortTree() calls over the same underlying rows
-    // (exactly what each page does on its own render) are identical.
     for (const shipId of ['ghost', 'railen', 'mole', 'corsair', 'cutlass-black', 'vulture']) {
       const rows = rowsFor(shipId)
       const treeA = buildPortTree(rows)
@@ -160,25 +172,21 @@ describe('Mission M-011: shared port-tree source — Ship Detail and Loadout Man
   })
 })
 
-describe('Mission M-011: Ghost Mk II nose mount — nested weapon positions', () => {
-  it('exposes a Nose Mount top-level port with two child weapon positions', () => {
+describe('Mission M-011 / SW-006: Ghost Mk II wing weapons — real canonical gimbal-mount hierarchy', () => {
+  it('exposes Left/Right Wing Weapon top-level gimbal mounts, each with a real Class 2 weapon child', () => {
     const tree = buildPortTree(rowsFor('ghost'))
-    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')
-    expect(noseMount).toBeDefined()
-    expect(noseMount!.children.map((c) => c.hardpoint.slotLabel).sort()).toEqual(['Weapon 1', 'Weapon 2'])
+    const left = tree.find((n) => n.hardpoint.slotLabel === 'Left Wing Weapon (Gimbal Mount)')
+    const right = tree.find((n) => n.hardpoint.slotLabel === 'Right Wing Weapon (Gimbal Mount)')
+    expect(left).toBeDefined()
+    expect(right).toBeDefined()
+    expect(left!.children.map((c) => c.hardpoint.slotLabel)).toEqual(['Left Wing Weapon (Gimbal Mount) — Class 2'])
+    expect(right!.children.map((c) => c.hardpoint.slotLabel)).toEqual(['Right Wing Weapon (Gimbal Mount) — Class 2'])
   })
 
-  it('the Nose Mount itself is always fully matched (never manufactures a new Missing item)', () => {
+  it('the wing weapon mounts are always fully matched (never manufacture a new Missing item) — Ghost\'s overlay never touches weapons', () => {
     const tree = buildPortTree(rowsFor('ghost'))
-    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')!
-    expect(noseMount.hardpoint.status).toBe('OK')
-  })
-
-  it('existing "Weapon 1"/"Weapon 2" slotLabels are unchanged (installed-loadout/quartermaster references keep resolving)', () => {
-    const tree = buildPortTree(rowsFor('ghost'))
-    const noseMount = tree.find((n) => n.hardpoint.slotLabel === 'Nose Mount')!
-    const weapon1 = noseMount.children.find((c) => c.hardpoint.slotLabel === 'Weapon 1')!
-    expect(weapon1.hardpoint.factoryItem).toBe('Mass Driver')
+    const left = tree.find((n) => n.hardpoint.slotLabel === 'Left Wing Weapon (Gimbal Mount)')!
+    expect(left.hardpoint.status).toBe('OK')
   })
 })
 

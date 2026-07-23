@@ -50,8 +50,8 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
   })
 
   it('INSTALLED starting state sets every target to whatever is currently physically installed', () => {
-    const setup = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Shield 1', 'ghost-escort')
-    expect(setup.matched).toBe(true) // Escort's Shield 1 starts Upgrade Available (Mirage != factory, != target FR-66), so this succeeds.
+    const setup = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Left Shield Generator', 'ghost-escort')
+    expect(setup.matched).toBe(true) // Escort's Left Shield Generator starts Upgrade Available (Mirage != factory, != target FR-66), so this succeeds.
     const result = useFleetStore.getState().saveMissionConfiguration({
       shipId: 'ghost',
       name: 'Lock In Current State',
@@ -59,7 +59,7 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
       targetOverrides: {},
       setActive: false,
     })
-    const shieldRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Shield 1')!
+    const shieldRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Left Shield Generator')!
     expect(shieldRow.targetItem).toBe('FR-66')
     expect(shieldRow.status).toBe('OK')
   })
@@ -104,7 +104,7 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
       targetOverrides: {},
       setActive: false,
     })
-    const weaponRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Weapon 1')!
+    const weaponRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Left Wing Weapon (Gimbal Mount)')!
     expect(weaponRow.targetItem).toBe('Mass Driver')
   })
 
@@ -114,10 +114,10 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
       name: 'Manually Tweaked',
       startingState: 'FACTORY',
       quartermasterTemplateId: 'template-escort-support',
-      targetOverrides: { 'Weapon 1': 'CF-337 Panther Repeater' },
+      targetOverrides: { 'Left Wing Weapon (Gimbal Mount)': 'CF-337 Panther Repeater' },
       setActive: false,
     })
-    const weaponRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Weapon 1')!
+    const weaponRow = hardpointsFor(result.buildId!).find((h) => h.slotLabel === 'Left Wing Weapon (Gimbal Mount)')!
     expect(weaponRow.targetItem).toBe('CF-337 Panther Repeater')
   })
 
@@ -166,12 +166,12 @@ describe('saveMissionConfiguration (Mission Composer)', () => {
       name: 'Stealth Build',
       startingState: 'EXISTING',
       existingBuildId: 'ghost-stealth',
-      targetOverrides: { 'Power 1': 'Slipstream' },
+      targetOverrides: { 'Power Plant': 'Slipstream' },
       setActive: false,
     })
     expect(result.buildId).toBe('ghost-stealth')
     expect(useFleetStore.getState().builds.length).toBe(totalBuildsBefore)
-    const powerRow = hardpointsFor('ghost-stealth').find((h) => h.slotLabel === 'Power 1')!
+    const powerRow = hardpointsFor('ghost-stealth').find((h) => h.slotLabel === 'Power Plant')!
     expect(powerRow.targetItem).toBe('Slipstream')
   })
 
@@ -291,7 +291,7 @@ describe('saveMissionConfiguration — FTB-001B: dynamic missile rack swap persi
       shipId: 'ghost',
       name: 'Ordinary Weapon Swap',
       startingState: 'FACTORY',
-      targetOverrides: { 'Power 1': 'Slipstream' },
+      targetOverrides: { 'Power Plant': 'Slipstream' },
       setActive: false,
     })
     expect(result.success).toBe(true)

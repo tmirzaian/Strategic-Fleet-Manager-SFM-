@@ -23,9 +23,15 @@
  * `Turret_PDC_BEHR_A`) from an ordinary Size 2 gimbal/turret mount
  * (`subtype: "GunTurret"`) sharing the same `category: "Turret"` and
  * `size: 2` — see ADR-010's EWO-STAB-004A section.
+ *
+ * `classification` added by CAT-001 (Objective 6): "Persist the extracted
+ * classification within the generated Component Catalog. The runtime
+ * shall consume the catalog normally. No runtime parsing of descriptions
+ * is authorized." — the browser loader reads this pre-computed field
+ * verbatim; it never sees or parses description text itself.
  */
 
-export const COMPONENT_CATALOG_RUNTIME_SCHEMA_VERSION = 2
+export const COMPONENT_CATALOG_RUNTIME_SCHEMA_VERSION = 3
 export const COMPONENT_CATALOG_RUNTIME_FILENAME = 'component-metadata-catalog.runtime.json'
 
 export interface ComponentCatalogRuntimeRecord {
@@ -41,6 +47,8 @@ export interface ComponentCatalogRuntimeRecord {
   displayName: string
   /** Inconsistent raw shape (short code or a `scitemmanufacturer.<code>.json` path, or null) — preserved verbatim; `manufacturerCodeFromRef` in the browser loader does the same conservative extraction it always has. */
   manufacturerRef: string | null
+  /** CAT-001 — see the schemaVersion 3 note above. Null for the majority of records. */
+  classification: string | null
 }
 
 export interface ComponentCatalogRuntimeSource {

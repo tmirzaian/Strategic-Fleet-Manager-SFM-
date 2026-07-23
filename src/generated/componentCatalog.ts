@@ -120,6 +120,10 @@ interface RawCatalogRecord {
    * null. See `manufacturerCodeFromRef` below for the conservative,
    * never-guessing extraction this mission (EWO-028, Task 2) applies. */
   manufacturerRef: string | null
+  /** CAT-001 — Civilian/Industrial/Military/Competition/Stealth (or any
+   * other real value CIG ships), parsed at generation time from the
+   * item's own localized description text. Null for most records. */
+  classification: string | null
 }
 
 interface RawCatalogFile {
@@ -188,6 +192,8 @@ const PLACEHOLDER_DISPLAY_NAME = '<= PLACEHOLDER =>'
 export interface CatalogPresentationEntry {
   displayName: string
   grade: number | null
+  /** CAT-001 — see RawCatalogRecord's own doc comment. */
+  classification: string | null
 }
 
 /**
@@ -221,7 +227,7 @@ if (rawCatalog) {
       }
     }
     if (record.displayName !== PLACEHOLDER_DISPLAY_NAME && !catalogComponentsByEntityClass.has(entityClass)) {
-      catalogComponentsByEntityClass.set(entityClass, { displayName: record.displayName, grade: record.grade })
+      catalogComponentsByEntityClass.set(entityClass, { displayName: record.displayName, grade: record.grade, classification: record.classification })
     }
   }
 }
@@ -257,6 +263,8 @@ export interface CanonicalComponentRecord {
   displayName: string
   grade: number | null
   manufacturerCode: string | null
+  /** CAT-001 — see RawCatalogRecord's own doc comment. */
+  classification: string | null
 }
 
 export type ComponentResolution =
@@ -293,6 +301,7 @@ if (rawCatalog) {
       displayName: record.displayName,
       grade: record.grade,
       manufacturerCode: manufacturerCodeFromRef(record.manufacturerRef),
+      classification: record.classification,
     }
     componentsByEntityClass.set(entityClass, canonical)
     const group = componentsByDisplayNameInternal.get(record.displayName)

@@ -12,6 +12,7 @@ import {
   BookText,
   Sparkles,
   Satellite,
+  FlaskConical,
 } from 'lucide-react'
 
 // The sidebar tells the story of the player's workflow (Alpha 2.4, Part 1)
@@ -34,6 +35,10 @@ const navItems = [
   { to: '/decision-center', label: 'Decision Center', icon: ScanSearch },
   { to: '/roadmap', label: 'Fleet Roadmap', icon: Map },
   { to: '/log', label: "Captain's Log", icon: BookText },
+  // Beta 2.0 structural prototype (Commander Sea Trials) — deliberately
+  // kept as its own nav entry rather than replacing "Ship Detail," so the
+  // existing, save-capable page stays the obvious default destination.
+  { to: '/ship-workspace', label: 'Ship Workspace (Prototype)', icon: FlaskConical },
 ]
 
 export default function Sidebar() {

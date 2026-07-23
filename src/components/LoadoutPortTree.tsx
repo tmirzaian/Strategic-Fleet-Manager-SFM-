@@ -4,9 +4,11 @@ import { ChevronDown, ChevronRight, Maximize2, Minimize2, Trash2, X } from 'luci
 import Badge from './Badge'
 import { derivePortLogistics, derivePortValidation, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree, flattenDisplayTree, displayNodeIds, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
+import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
 import type { HangarItem, InstalledLoadoutEntry, MissionReservation } from '../types'
 import ComponentAssignmentLabel from './ComponentAssignmentLabel'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
+import { componentCategoryIcon } from '../utils/componentCategoryIcon'
 
 function logisticsTone(state: string) {
   if (state === 'Installed') return 'success' as const
@@ -52,17 +54,18 @@ export default function LoadoutPortTree({
    * this is provided, so those callers' table is unchanged. */
   onRemoveComponent?: (slotLabel: string, returnToHangar: boolean) => { matched: boolean; itemName?: string }
 }) {
-  const displayTree = groupPortTree(tree)
+  const displayTree = groupPortTree(withMissileRackAggregation<DisplayHardpoint>(tree, (h) => h.targetItem, makeMissileAggregateRow))
   // EWO-037 (Task 1) — first-run certification repeatedly read an
   // all-collapsed Ship Detail as "no ship data exists" until Expand All was
-  // clicked. Seeding the initial expanded state with the Core Systems
+  // clicked. Seeding the initial expanded state with the Core Components
   // category (present for virtually every real ship — Power Plant at
-  // minimum) gives the page visible content on first paint without
-  // changing the expand/collapse model itself: this only affects the
-  // very first render's starting Set, never subsequent interaction.
+  // minimum; renamed from "Core Systems" by SW-007A) gives the page
+  // visible content on first paint without changing the expand/collapse
+  // model itself: this only affects the very first render's starting Set,
+  // never subsequent interaction.
   const [expanded, setExpanded] = useState<Set<string>>(() => {
-    const coreSystems = displayTree.find((node) => node.kind === 'group' && node.label === 'Core Systems')
-    return coreSystems ? new Set([coreSystems.id]) : new Set()
+    const coreComponents = displayTree.find((node) => node.kind === 'group' && node.label === 'Core Components')
+    return coreComponents ? new Set([coreComponents.id]) : new Set()
   })
   const [removeTarget, setRemoveTarget] = useState<{ slotLabel: string; itemLabel: string } | null>(null)
   const [returnToHangar, setReturnToHangar] = useState(false)
@@ -76,7 +79,7 @@ export default function LoadoutPortTree({
   // click, and collapsing it hides all of them again. Each row still
   // toggles only its own subtree, so independently expanding/collapsing a
   // specific nested row afterward keeps working exactly as before.
-  function toggle(node: PortTreeDisplayNode) {
+  function toggle(node: PortTreeDisplayNode<DisplayHardpoint>) {
     const ids = displayNodeIds(node)
     setExpanded((prev) => {
       const next = new Set(prev)
@@ -108,7 +111,7 @@ export default function LoadoutPortTree({
   // treatment rather than introducing a second design language). Handles
   // BOTH 'group' and 'port' kinds uniformly at every depth, since
   // `children` is now always a fully processed `PortTreeDisplayNode[]`.
-  function renderRows(nodes: PortTreeDisplayNode[], depth: number): ReactNode[] {
+  function renderRows(nodes: PortTreeDisplayNode<DisplayHardpoint>[], depth: number): ReactNode[] {
     return nodes.flatMap((node) => {
       const hasChildren = node.children.length > 0
       const isExpanded = expanded.has(node.id)
@@ -146,6 +149,7 @@ export default function LoadoutPortTree({
       // component of its own.
       const logistics = hp.isStructural ? null : derivePortLogistics(hp, reservations, hangarItems, installedLoadouts)
       const validation = hp.isStructural ? null : derivePortValidation(hp)
+      const CategoryIcon = componentCategoryIcon(hp)
 
       const rowEl = (
         <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
@@ -158,7 +162,21 @@ export default function LoadoutPortTree({
               ) : (
                 <span className="w-[13px] shrink-0" />
               )}
+              <CategoryIcon size={13} className="text-muted/50 shrink-0" aria-hidden="true" />
               {formatHardpointLabel(hp.slotLabel)}
+              {hp.missileAggregate && (
+                <Badge tone="cyan">×{hp.missileAggregate.quantity}</Badge>
+              )}
+              {hp.missileAggregate?.inconsistent && (
+                <span title={hp.invalidMessage}>
+                  <Badge tone="invalid">Inconsistent — Select Missile</Badge>
+                </span>
+              )}
+              {hp.missileAggregate?.countMismatch && (
+                <span title={`Canonical capacity is ${hp.missileAggregate.quantity}, but ${hp.missileAggregate.childSlotLabels.length} slot(s) are materialized — reported, not auto-resolved.`}>
+                  <Badge tone="warning">Count Mismatch</Badge>
+                </span>
+              )}
             </div>
           </td>
           <td className="px-4 py-2.5 text-muted whitespace-nowrap">{hp.size} {hp.type}</td>
@@ -169,7 +187,7 @@ export default function LoadoutPortTree({
           <td className="px-4 py-2.5">{validation && <Badge tone={validationTone(validation)}>{validation}</Badge>}</td>
           {hasActions && (
             <td className="px-4 py-2.5 text-right whitespace-nowrap">
-              {!hp.isStructural && hp.installedItem && hp.installedItem !== '—' && (
+              {!hp.isStructural && !hp.missileAggregate && hp.installedItem && hp.installedItem !== '—' && (
                 <button
                   onClick={() => {
                     setRemoveTarget({ slotLabel: hp.slotLabel, itemLabel: hp.installedItem })

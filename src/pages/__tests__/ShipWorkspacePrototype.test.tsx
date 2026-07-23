@@ -1,0 +1,919 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, cleanup, fireEvent, within, act } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import ShipWorkspacePrototype, { criticalHardpointsInPriorityOrder } from '../ShipWorkspacePrototype'
+import { useFleetStore } from '../../store/useFleetStore'
+import { colorFor } from '../../components/ReadinessBar'
+import { catalogComponentsByName } from '../../generated/componentCatalog'
+import type { Hardpoint } from '../../types'
+
+const initialState = useFleetStore.getState()
+
+// jsdom has no IntersectionObserver — the scroll-triggered sticky context
+// relies on one. Stub it and capture the callback so tests can simulate
+// "scrolled past the banner" directly, the same contract the real
+// browser API provides.
+let ioCallback: ((entries: Partial<IntersectionObserverEntry>[]) => void) | null = null
+class FakeIntersectionObserver {
+  constructor(cb: (entries: Partial<IntersectionObserverEntry>[]) => void) {
+    ioCallback = cb
+  }
+  observe() {}
+  disconnect() {}
+  unobserve() {}
+}
+function simulateBannerScrolledPast(scrolledPast: boolean) {
+  act(() => {
+    ioCallback?.([{ isIntersecting: !scrolledPast }])
+  })
+}
+
+// Some slot labels (e.g. "Quantum Drive") happen to equal a taxonomy
+// subgroup label too — getByText alone is ambiguous. A port row's own
+// label always sits in a <div>, never the subgroup header <td>.
+function getPortRow(slotLabel: string): HTMLElement {
+  const matches = screen.getAllByText(slotLabel)
+  const rowLabel = matches.find((el) => el.tagName === 'DIV')
+  if (!rowLabel) throw new Error(`No port row found for "${slotLabel}"`)
+  return rowLabel.closest('tr') as HTMLElement
+}
+
+// SW-008A — the New Target picker (TargetComponentPicker) only ever
+// commits a real, listed, compatible option — open it, filter toward the
+// desired option's own text, then click that option's button. Returns the
+// chosen option's own visible text (useful when the exact catalog name
+// isn't known ahead of time, e.g. "the first non-current option").
+function selectNewTarget(slotLabel: string, query: string): string {
+  const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
+  fireEvent.click(input)
+  fireEvent.change(input, { target: { value: query } })
+  const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+  const option = listbox.querySelector('button') as HTMLButtonElement
+  const chosen = option.textContent ?? ''
+  fireEvent.click(option)
+  return chosen
+}
+
+function toRgb(hex: string): string {
+  const n = parseInt(hex.slice(1), 16)
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`
+}
+
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+  ioCallback = null
+  // @ts-expect-error — test-only global stub, not a real IntersectionObserver
+  global.IntersectionObserver = FakeIntersectionObserver
+  // jsdom has no layout engine and doesn't implement scrollIntoView.
+  Element.prototype.scrollIntoView = vi.fn()
+})
+afterEach(() => cleanup())
+
+function renderWorkspace(shipId?: string) {
+  return render(
+    <MemoryRouter initialEntries={[shipId ? `/ship-workspace/${shipId}` : '/ship-workspace']}>
+      <Routes>
+        <Route path="/ship-workspace" element={<ShipWorkspacePrototype />} />
+        <Route path="/ship-workspace/:shipId" element={<ShipWorkspacePrototype />} />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
+describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () => {
+  it('shows the blank Select a Ship state when no ship is selected', () => {
+    renderWorkspace()
+    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+  })
+
+  it('Terminology: exactly two Commander Intent cards use SW-002 naming — Manage Loadout and Change Installed Components', () => {
+    renderWorkspace('ghost')
+    expect(screen.getByRole('button', { name: /Manage Loadout/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Change Installed Components/ })).toBeInTheDocument()
+    expect(screen.queryByText('Plan This Loadout')).not.toBeInTheDocument()
+    expect(screen.queryByText('Update Installed Components')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Borrow Analysis/ })).not.toBeInTheDocument()
+  })
+
+  it('Lens 1 (default, Ship Assessment): read-only columns Factory / Installed / Target / Status', () => {
+    renderWorkspace('ghost')
+    expect(screen.getByText('Ship Assessment')).toBeInTheDocument()
+    const headerRow = screen.getByText('Port').closest('tr') as HTMLElement
+    expect(within(headerRow).getByText('Factory')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Installed')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Target')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Status')).toBeInTheDocument()
+    expect(within(headerRow).queryByText('Actions')).not.toBeInTheDocument()
+  })
+
+  it('Lens 2 (Manage Loadout): columns become Installed / Current Target / New Target / Availability / Reservations / Actions — Factory removed', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    const headerRow = screen.getByText('Port').closest('tr') as HTMLElement
+    expect(within(headerRow).queryByText('Factory')).not.toBeInTheDocument()
+    expect(within(headerRow).getByText('Current Target')).toBeInTheDocument()
+    expect(within(headerRow).getByText('New Target')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Availability')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Reservations')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Actions')).toBeInTheDocument()
+  })
+
+  it('Lens 3 (Change Installed Components): columns become Installed / Target / Inventory / Availability / Actions — Factory intentionally removed', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const headerRow = screen.getByText('Port').closest('tr') as HTMLElement
+    expect(within(headerRow).queryByText('Factory')).not.toBeInTheDocument()
+    expect(within(headerRow).getByText('Inventory')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Availability')).toBeInTheDocument()
+    expect(within(headerRow).getByText('Actions')).toBeInTheDocument()
+    expect(within(headerRow).queryByText('Current Target')).not.toBeInTheDocument()
+  })
+
+  it('Engineering Guidance: switching lenses preserves the expanded taxonomy group — never resets like a new screen', () => {
+    renderWorkspace('ghost')
+    // Core Components starts expanded; expand Detection / Navigation too.
+    fireEvent.click(screen.getByText('Detection / Navigation'))
+    expect(screen.getByText('Radar')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    expect(screen.getByText('Radar')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    expect(screen.getByText('Radar')).toBeInTheDocument()
+  })
+
+  it('SW-008A: editing New Target (via the compatible-options picker) updates Change Status to Pending Changes, and the edit survives switching lenses', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    const banner = screen.getByTestId('ship-operational-banner')
+    expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+
+    // Left Shield Generator's real current target is "Mirage" (see
+    // seed.ts's customBuildOverlays); its real canonical factory item is
+    // "Shimmer" — a genuinely different, always-offered compatible option
+    // (SW-008A Objective 3), so selecting it exercises a real change
+    // without depending on Hangar stock being present.
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+
+    // Switching to Lens 3 and back never discards the edit ("Never Lose Commander Work").
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+
+    // Never persisted to the store (Objective 4).
+    expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Mirage')
+  })
+
+  it('SW-008A: returning New Target to its original value automatically clears the Pending Change (Objective 6)', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    const banner = screen.getByTestId('ship-operational-banner')
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+    selectNewTarget('Left Shield Generator', 'Mirage')
+    expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+  })
+
+  it('SW-008A: multiple simultaneous edits accumulate in the Pending Change count', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    const banner = screen.getByTestId('ship-operational-banner')
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+    selectNewTarget('Power Plant', 'Intentional Empty')
+    expect(within(banner).getByText('Pending Changes (2)')).toBeInTheDocument()
+  })
+
+  it('Manage Loadout: "Restore factory target" only appears once edited, and resets the field to the Factory value', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    expect(screen.queryByTitle('Restore factory target')).not.toBeInTheDocument()
+
+    selectNewTarget('Left Shield Generator', 'Intentional Empty')
+    const resetButton = screen.getByTitle('Restore factory target')
+    fireEvent.click(resetButton)
+    // ghost-stealth Left Shield Generator's factory item is "Shimmer" (canonical topology).
+    expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+  })
+
+  it('a reviewed-Loadout switch discards local New Target edits (they were never real Commander work on a different Loadout)', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+    const banner = screen.getByTestId('ship-operational-banner')
+    expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+  })
+
+  it('Change Installed Components: "Install / Change" is a single unified action per row, expanding an inline disclosure (never a dialog)', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const installButtons = screen.getAllByRole('button', { name: /Install \/ Change/ })
+    expect(installButtons.length).toBeGreaterThan(0)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    fireEvent.click(installButtons[0])
+    // Reference tiers are visible in the inline disclosure.
+    expect(screen.getByText(/Available Inventory/)).toBeInTheDocument()
+    expect(screen.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('Immediate Decision Intelligence: decision cards answer "what should I do," never a bare component name', () => {
+    renderWorkspace('ghost')
+    const decisionBox = screen.getByTestId('decision-summary')
+    // Snowblind is owned (qty 1) and unreserved in the seed Hangar — real
+    // inventory-accounting data, not a fabricated readiness projection.
+    expect(within(decisionBox).getByText('Install Snowblind')).toBeInTheDocument()
+    expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
+    // SW-002 Revision C — Slipstream (Purchase Required, non-actionable)
+    // is deliberately excluded from Decision Summary entirely.
+    expect(within(decisionBox).queryByText('Install Slipstream')).not.toBeInTheDocument()
+    expect(decisionBox.textContent).not.toMatch(/\d+%\s*readiness/i)
+  })
+
+  it('Taxonomy: Detection / Navigation, Manned Turrets, and Remote Turrets render as Ship Detail\'s own canonical top-level categories (SW-007C unification) — never Workspace-invented "Navigation"/"Engineering"/"Turrets" labels', () => {
+    renderWorkspace('ghost')
+    expect(screen.getByText('Detection / Navigation')).toBeInTheDocument()
+    expect(screen.queryByText('Engineering')).not.toBeInTheDocument()
+    expect(screen.queryByText('Navigation')).not.toBeInTheDocument()
+    expect(screen.queryByText('Turrets')).not.toBeInTheDocument()
+  })
+
+  it('Taxonomy: Quantum Drive now lives under Core Components (expanded by default) rather than a separate Engineering/Navigation group', () => {
+    renderWorkspace('ghost')
+    // Core Components is expanded by default (no click needed) and
+    // Quantum Drive's own port row is classified directly under it — no
+    // subgroup pill exists anymore (SW-007C dropped subgroups entirely),
+    // so the slotLabel itself is the only "Quantum Drive" text on screen.
+    expect(screen.getByText('Quantum Drive')).toBeInTheDocument()
+  })
+
+  it('the reviewed loadout still receives a readiness-colored accent, distinct from the ACTIVE badge (SW-001 behavior preserved)', () => {
+    renderWorkspace('ghost')
+    const stealthButton = screen.getByRole('button', { name: /Stealth Build/ })
+    expect(stealthButton.style.borderColor).toBe(toRgb(colorFor(92)))
+    expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
+  })
+
+  it('the banner reflects the real ACTIVE Loadout, independent of the reviewed selection (SW-001 behavior preserved)', () => {
+    renderWorkspace('ghost')
+    const banner = screen.getByTestId('ship-operational-banner')
+    expect(within(banner).getByText('92%')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+    expect(within(banner).getByText('92%')).toBeInTheDocument()
+  })
+
+  it('Part I behaviors preserved: sticky context hidden until scrolled past the banner, Ship Selector lives in the page header', () => {
+    renderWorkspace('ghost')
+    expect(screen.queryByTestId('sticky-context-bar')).not.toBeInTheDocument()
+    simulateBannerScrolledPast(true)
+    const sticky = screen.getByTestId('sticky-context-bar')
+    expect(within(sticky).getByText('F7C-S Hornet Ghost Mk II')).toBeInTheDocument()
+    const banner = screen.getByTestId('ship-operational-banner')
+    expect(within(banner).queryByLabelText('Ship')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Ship')).toBeInTheDocument()
+  })
+
+  it('SW-007D: a missile rack renders as one summarized aggregate row, never one peer row per missile slot', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByText('Missile Racks'))
+    // Ghost's Right Missile Rack is a real 4-slot S1 rack (see
+    // src/utils/__tests__/missileRackAggregation.test.ts) — the rack
+    // itself is still its own row (identity, size, installed/target rack),
+    // but its four real "Right Missile Rack — 0N Attach Missile" children
+    // collapse into exactly one aggregate row rather than rendering as
+    // four identical peer rows.
+    expect(screen.getByText('Right Missile Rack')).toBeInTheDocument()
+    const aggregateRow = getPortRow('Missile')
+    expect(within(aggregateRow).getByText('×4')).toBeInTheDocument()
+    // CAT-001 also surfaces "S1" inside the row's own Factory/Installed/
+    // Target identity subtitles now, so more than one match is expected.
+    expect(within(aggregateRow).getAllByText(/S1/).length).toBeGreaterThan(0)
+    expect(screen.queryByText(/Missile Slot 1/)).not.toBeInTheDocument()
+  })
+
+  it('SW-008C (Objective 3/5): swapping a missile rack\'s New Target immediately regenerates its child topology — count, size, and aggregation label all update, no stale children remain', () => {
+    if (catalogComponentsByName.size === 0) return
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    fireEvent.click(screen.getByText('Missile Racks'))
+    // Before: Right Missile Rack is MSD-341, a real 4-slot S1 rack.
+    const beforeRow = getPortRow('Missile')
+    expect(within(beforeRow).getByText('×4')).toBeInTheDocument()
+
+    // Manage Loadout's New Target picker is local-editing-only (SW-008A) —
+    // this pending choice was never written back to the store's real
+    // Hardpoint rows. Before SW-008C, the aggregate row below stayed
+    // frozen at the OLD rack's x4/S1 shape; this proves it now regenerates
+    // from the pending choice immediately, same as MissionComposer's own
+    // live preview already does via the same shared
+    // withComponentOwnedChildSlots mechanism.
+    selectNewTarget('Right Missile Rack', 'Mirai Fury MX 2xS2')
+
+    const afterRow = getPortRow('Missile')
+    expect(within(afterRow).getByText('×2')).toBeInTheDocument()
+    expect(within(afterRow).queryByText('×4')).not.toBeInTheDocument()
+    // The old rack's 3rd/4th slots must not survive as stale leftovers anywhere.
+    expect(screen.queryByText(/Missile Slot 3/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Missile Slot 4/)).not.toBeInTheDocument()
+  })
+
+  it('SW-007B Rev 2: every port row renders the shared Commander Glyph Language icon — the same authority Ship Detail consumes, never an independent mapping', () => {
+    renderWorkspace('ghost')
+    const powerRow = getPortRow('Power Plant')
+    const powerIcon = powerRow.querySelector('svg') as SVGElement
+    expect(powerIcon).toBeTruthy()
+    // componentCategoryIcon (the shared authority) maps Power Plant -> Zap;
+    // confirming the real lucide glyph class landed proves this row is
+    // driven by that function, not a leftover/independent icon choice.
+    expect(powerIcon.getAttribute('class')).toContain('lucide-zap')
+  })
+})
+
+describe('criticalHardpointsInPriorityOrder (SW-002 Revision A, Phase 4)', () => {
+  function hp(overrides: Partial<Hardpoint>): Hardpoint {
+    return {
+      id: overrides.id ?? 'hp',
+      shipId: 'test',
+      buildId: 'test-build',
+      slotLabel: overrides.slotLabel ?? 'Slot',
+      type: 'Weapon',
+      size: 'S1',
+      factoryItem: 'X',
+      installedItem: 'X',
+      targetItem: 'X',
+      status: 'OK',
+      ...overrides,
+    }
+  }
+
+  it('sorts Invalid Target hardpoints ahead of Missing ones, regardless of input order', () => {
+    const missing1 = hp({ id: 'm1', status: 'Missing' })
+    const missing2 = hp({ id: 'm2', status: 'Missing' })
+    const invalid1 = hp({ id: 'i1', status: 'Invalid Target' })
+    const result = criticalHardpointsInPriorityOrder([missing1, missing2, invalid1])
+    expect(result.map((h) => h.id)).toEqual(['i1', 'm1', 'm2'])
+  })
+
+  it('excludes every other status (OK, Unresolved, Upgrade Available)', () => {
+    const result = criticalHardpointsInPriorityOrder([
+      hp({ id: 'ok', status: 'OK' }),
+      hp({ id: 'unresolved', status: 'Unresolved' }),
+      hp({ id: 'upgrade', status: 'Upgrade Available' }),
+    ])
+    expect(result).toHaveLength(0)
+  })
+
+  it('the caller caps display at 4 while this function itself returns the full ordered set (capping is a presentation concern)', () => {
+    const invalids = [hp({ id: 'i1', status: 'Invalid Target' }), hp({ id: 'i2', status: 'Invalid Target' })]
+    const missing = [hp({ id: 'm1', status: 'Missing' }), hp({ id: 'm2', status: 'Missing' }), hp({ id: 'm3', status: 'Missing' })]
+    const result = criticalHardpointsInPriorityOrder([...missing, ...invalids])
+    expect(result).toHaveLength(5)
+    expect(result.slice(0, 4).map((h) => h.id)).toEqual(['i1', 'i2', 'm1', 'm2'])
+  })
+})
+
+describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, taxonomy, diagnostics, compatibility, completeness)', () => {
+  describe('Taxonomy fixtures — Corsair, Railen, MOLE', () => {
+    it('Corsair: Manned Turrets and Remote Turrets render as their own canonical categories (SW-007C unification), never a merged "Turrets"/"Internal Systems"', () => {
+      renderWorkspace('corsair')
+      expect(screen.queryByText('Turrets')).not.toBeInTheDocument()
+      fireEvent.click(screen.getByText('Manned Turrets'))
+      fireEvent.click(screen.getByText('Remote Turrets'))
+      expect(screen.getByText('Tail Turret (Remote Turret)')).toBeInTheDocument()
+      // Corsair has three turret assemblies — Left/Right Manned Turret (2)
+      // and Tail Remote Turret (1) — each contributing a child that
+      // formats to the same short label, split across the two categories.
+      expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(3)
+      expect(screen.getAllByText('Right Weapon Mount')).toHaveLength(3)
+    })
+
+    it('Railen: both Left and Right manned turret assemblies remain coherent under Manned Turrets', () => {
+      renderWorkspace('railen')
+      fireEvent.click(screen.getByText('Manned Turrets'))
+      expect(screen.getByText('Left Turret (Manned Turret)')).toBeInTheDocument()
+      expect(screen.getByText('Right Turret (Manned Turret)')).toBeInTheDocument()
+      // Both turrets' child weapon mounts format to the same short label
+      // (formatHardpointLabel operates on each row's own local name) — one
+      // pair per turret, four total.
+      expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(2)
+      expect(screen.getAllByText('Right Weapon Mount')).toHaveLength(2)
+    })
+
+    it('Railen: the Tractor Left/Right assemblies (real canonical Manned-Turret-classified ports) render under Manned Turrets', () => {
+      renderWorkspace('railen')
+      fireEvent.click(screen.getByText('Manned Turrets'))
+      expect(screen.getByText('Tractor Left (Manned Turret)')).toBeInTheDocument()
+      expect(screen.getByText('Tractor Right (Manned Turret)')).toBeInTheDocument()
+    })
+
+    it("MOLE: all three Mining Laser turret assemblies, and their own real Mining Weapon children, remain coherent under Manned Turrets", () => {
+      renderWorkspace('mole')
+      fireEvent.click(screen.getByText('Manned Turrets'))
+      expect(screen.getByText('Front Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+      expect(screen.getByText('Left Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+      expect(screen.getByText('Right Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+      // All three turrets' single child formats to the same short label.
+      expect(screen.getAllByText('Mining Weapon')).toHaveLength(3)
+    })
+  })
+
+  describe('Canonical pipeline (Phase 1)', () => {
+    it('the reviewed Loadout\'s systems tree renders canonical Factory/Installed/Target values (Ghost Left Shield Generator) in Ship Assessment', () => {
+      renderWorkspace('ghost')
+      const row = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
+      expect(within(row).getByText('Shimmer')).toBeInTheDocument()
+      expect(within(row).getAllByText('Mirage').length).toBeGreaterThan(0)
+    })
+
+    it('active and reviewed builds are prepared through the same canonical pipeline — switching the reviewed Loadout changes the systems tree data without touching the banner', () => {
+      renderWorkspace('ghost')
+      const banner = screen.getByTestId('ship-operational-banner')
+      expect(within(banner).getByText('92%')).toBeInTheDocument()
+      const shieldRowBefore = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
+      expect(within(shieldRowBefore).getAllByText('Mirage').length).toBeGreaterThan(0)
+
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      // Reviewed tree now reflects Escort Build's own Left Shield Generator target (FR-66).
+      const shieldRowAfter = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
+      expect(within(shieldRowAfter).getByText('FR-66')).toBeInTheDocument()
+      // Banner (Active Loadout) is completely unaffected.
+      expect(within(banner).getByText('92%')).toBeInTheDocument()
+    })
+  })
+
+  describe('Diagnostic truth in every lens (Phase 3) — M80, real Invalid Target + Unresolved Factory Data', () => {
+    it('Invalid Target (Quantum Drive) is visible in Ship Assessment (Lens 1)', () => {
+      renderWorkspace('m80')
+      const row = getPortRow('Quantum Drive')
+      expect(within(row).getByText('Invalid Target')).toBeInTheDocument()
+    })
+
+    it('Invalid Target (Quantum Drive) remains visible in Manage Loadout (Lens 2)', () => {
+      renderWorkspace('m80')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const row = getPortRow('Quantum Drive')
+      expect(within(row).getByText('Invalid Target')).toBeInTheDocument()
+    })
+
+    it('Invalid Target (Quantum Drive) remains visible in Change Installed Components (Lens 3)', () => {
+      renderWorkspace('m80')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const row = getPortRow('Quantum Drive')
+      expect(within(row).getByText('Invalid Target')).toBeInTheDocument()
+    })
+
+    it('Unresolved Factory Data is visible in all three lenses', () => {
+      renderWorkspace('m80')
+      // M80 has no "Nose Mount" — its Weapon 1/2 are top-level Pilot-
+      // Weapons-family ports, which start collapsed by default (only Core
+      // Components is expanded on first render).
+      fireEvent.click(screen.getByText('Pilot Weapons'))
+      const rowLens1 = getPortRow('Weapon 1')
+      expect(within(rowLens1).getByText('Unresolved')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const rowLens2 = getPortRow('Weapon 1')
+      expect(within(rowLens2).getByText('Unresolved')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const rowLens3 = getPortRow('Weapon 1')
+      expect(within(rowLens3).getByText('Unresolved')).toBeInTheDocument()
+    })
+
+    it('unknown/unresolved data never renders as "Not Required" (NOT REQUIRED / UNKNOWN DATA RULE)', () => {
+      renderWorkspace('m80')
+      fireEvent.click(screen.getByText('Pilot Weapons'))
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const row = getPortRow('Weapon 1')
+      expect(within(row).queryByText('Not Required')).not.toBeInTheDocument()
+    })
+
+    it('invalid targets appear in Immediate Decisions, matching the work order\'s own "Resolve incompatible Atlas target" example', () => {
+      renderWorkspace('m80')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(within(decisionBox).getByText('Resolve Atlas')).toBeInTheDocument()
+      expect(within(decisionBox).getByText('Incompatible Target')).toBeInTheDocument()
+    })
+
+    it('the Priority Components strip beneath Readiness also surfaces the invalid target', () => {
+      renderWorkspace('m80')
+      const strip = screen.getByTestId('priority-components-strip')
+      expect(within(strip).getByText('Atlas')).toBeInTheDocument()
+    })
+  })
+
+  describe('SW-008A Objective 2: incompatible components can never be selected (no free-form entry, no danger-hint workaround)', () => {
+    it('a real Weapon component never appears anywhere in a Power Plant port\'s New Target options — incompatible by construction, not by after-the-fact validation', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const input = screen.getByLabelText('New target for Power Plant') as HTMLInputElement
+      fireEvent.click(input)
+      fireEvent.change(input, { target: { value: 'Mass Driver' } })
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      expect(listbox.textContent).toMatch(/no matching component/i)
+    })
+
+    it('typing text with no matching compatible option can never be committed — Enter does nothing, the picker stays open on the port\'s real current value', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const input = screen.getByLabelText('New target for Power Plant') as HTMLInputElement
+      fireEvent.click(input)
+      fireEvent.change(input, { target: { value: 'Totally Uncataloged Free Text' } })
+      fireEvent.keyDown(input, { key: 'Enter' })
+      // No real option matched "Totally Uncataloged Free Text", so Enter
+      // never committed it — the underlying store target is untouched.
+      expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Power Plant' && h.buildId === 'ghost-stealth')?.targetItem).not.toBe(
+        'Totally Uncataloged Free Text'
+      )
+    })
+
+    it('no store mutation occurs from any New Target selection — local editing only (Objective 4)', () => {
+      renderWorkspace('ghost')
+      const before = useFleetStore.getState()
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Power Plant', 'Intentional Empty')
+      expect(useFleetStore.getState()).toBe(before)
+    })
+  })
+
+  describe('SW-008A Revision 1: New Target is a full compatibility-authoritative configuration catalog', () => {
+    // Each option button renders its primary name in its own first <span>,
+    // with an optional second <span> classification subtitle beneath it
+    // (ComponentAssignmentLabel's own convention) — read only the first
+    // span so a "Grade A"-style subtitle never contaminates the name.
+    function openOptions(slotLabel: string): string[] {
+      const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
+      fireEvent.click(input)
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      return Array.from(listbox.querySelectorAll('button')).map((b) => b.querySelector('span')?.textContent ?? '')
+    }
+
+    it('Requirement 1/Req: Cooler selector includes the complete real S1 Cooler catalog, ownership never narrows eligibility', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const options = openOptions('Left Cooler')
+      // A real S1 Cooler the Commander owns zero copies of (never added to
+      // the seed Hangar) is still offered — eligibility, not ownership.
+      expect(options).toContain('ArcticStorm')
+      expect(useFleetStore.getState().hangarItems.some((h) => h.name === 'ArcticStorm')).toBe(false)
+    })
+
+    it('Requirement 2: no cross-type leakage — Cooler, Quantum Drive, and Shield selectors never include a real Weapon/Gimbal component', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      for (const slotLabel of ['Left Cooler', 'Quantum Drive', 'Left Shield Generator']) {
+        const options = openOptions(slotLabel)
+        expect(options.some((o) => o.includes('Mass Driver'))).toBe(false)
+        expect(options.some((o) => o.includes('Gimbal'))).toBe(false)
+      }
+    })
+
+    it('Requirement 3: Intentional Empty (—) is always the first option, for every editable slot', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      for (const slotLabel of ['Power Plant', 'Left Cooler', 'Left Shield Generator', 'Quantum Drive']) {
+        const options = openOptions(slotLabel)
+        expect(options[0]).toBe('Intentional Empty (—)')
+      }
+    })
+
+    it('Requirement 5: option order is Intentional Empty, Current Target, Factory Target (when distinct), Installed (when distinct), then the remaining compatible catalog alphabetically — no duplicates', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      // Left Shield Generator: target=Mirage, factory=Shimmer (distinct),
+      // installed=Mirage (same as target — must not repeat).
+      const options = openOptions('Left Shield Generator')
+      expect(options[0]).toBe('Intentional Empty (—)')
+      expect(options[1]).toBe('Mirage')
+      expect(options[2]).toBe('Shimmer')
+      // No duplicates anywhere in the list.
+      expect(new Set(options).size).toBe(options.length)
+      // The remaining tail is alphabetically sorted.
+      const tail = options.slice(3)
+      expect(tail).toEqual([...tail].sort((a, b) => a.localeCompare(b)))
+    })
+
+    it('Requirement 7: selecting Intentional Empty creates a pending change exactly like any other selection, and selecting Current Target again clears it', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const banner = screen.getByTestId('ship-operational-banner')
+      selectNewTarget('Left Shield Generator', 'Intentional Empty')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+      selectNewTarget('Left Shield Generator', 'Mirage')
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+    })
+
+    it('existing topology, inventory, reservations, and installed state are all untouched by opening/selecting from the New Target catalog', () => {
+      renderWorkspace('ghost')
+      const hardpointsBefore = useFleetStore.getState().hardpoints
+      const hangarBefore = useFleetStore.getState().hangarItems
+      const reservationsBefore = useFleetStore.getState().reservations
+      const installedBefore = useFleetStore.getState().installedLoadouts
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Left Cooler', 'ArcticStorm')
+      expect(useFleetStore.getState().hardpoints).toBe(hardpointsBefore)
+      expect(useFleetStore.getState().hangarItems).toBe(hangarBefore)
+      expect(useFleetStore.getState().reservations).toBe(reservationsBefore)
+      expect(useFleetStore.getState().installedLoadouts).toBe(installedBefore)
+    })
+  })
+
+  describe('CAT-001: New Target discloses "{Class} {GradeLetter}" for Core Components — real generated Classification, no Size, word "Grade" never appears', () => {
+    function subtitleFor(slotLabel: string, optionName: string): string | null {
+      const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
+      fireEvent.click(input)
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.querySelector('span')?.textContent === optionName)
+      const spans = button?.querySelectorAll('span')
+      return spans && spans.length > 1 ? spans[1].textContent : null
+    }
+
+    it('an option with real generated Classification+Grade shows "{Class} {GradeLetter}" — no Size, no word "Grade"', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      // Left Shield Generator's own current target — real generated-data
+      // (CAT-001): Mirage's Classification is "Stealth", grade 1 -> "A".
+      const subtitle = subtitleFor('Left Shield Generator', 'Mirage')
+      expect(subtitle).toBe('Stealth A')
+      expect(subtitle).not.toMatch(/Grade|S\d/)
+    })
+
+    it('the committed (closed-picker) value also shows the fuller identity line, not the compact classification subtitle', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const input = screen.getByLabelText('New target for Left Shield Generator')
+      const subtitleContainer = input.parentElement!.querySelector('.mt-0\\.5')
+      if (subtitleContainer) expect(subtitleContainer.textContent).toBe('Stealth A')
+    })
+
+    it('Intentional Empty (—) remains the first option even with the fuller identity line enabled', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      const input = screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement
+      fireEvent.click(input)
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const first = listbox.querySelector('button')
+      expect(first?.querySelector('span')?.textContent).toBe('Intentional Empty (—)')
+    })
+  })
+
+  describe('SW-008A Revision 3: category-aware identity grammar in the real New Target selector', () => {
+    function subtitleFor(slotLabel: string, optionName: string): string | null {
+      const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
+      fireEvent.click(input)
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.querySelector('span')?.textContent === optionName)
+      const spans = button?.querySelectorAll('span')
+      return spans && spans.length > 1 ? spans[1].textContent : null
+    }
+
+    it('CAT-002: a Pilot Weapon option shows real Weapon Type — never Size, never Grade', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      fireEvent.click(screen.getByText('Pilot Weapons'))
+      // The Gimbal Mount itself (e.g. "Left Wing Weapon Mount") is real
+      // mounting hardware, not a WeaponGun-category component — its own
+      // New Target picker correctly stays on the core Size · Grade
+      // grammar. The real gun lives one level down, on its nested
+      // "— Class 2" child port — formatHardpointLabel presents every such
+      // leaf as the bare word "Weapon"; Ghost has two (Left/Right Wing),
+      // so this targets the first.
+      const input = screen.getAllByLabelText('New target for Weapon')[0] as HTMLInputElement
+      fireEvent.click(input)
+      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const anyOptionWithSubtitle = Array.from(listbox.querySelectorAll('button'))
+        .map((b) => b.querySelectorAll('span')[1]?.textContent)
+        .find((s) => s)
+      if (anyOptionWithSubtitle) {
+        expect(anyOptionWithSubtitle).not.toMatch(/^S\d+$/)
+        expect(anyOptionWithSubtitle).not.toMatch(/Grade/)
+      }
+    })
+
+    it('a Missile Rack option shows Size · Capacity', () => {
+      if (catalogComponentsByName.size === 0) return
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      fireEvent.click(screen.getByText('Missile Racks'))
+      const subtitle = subtitleFor('Right Missile Rack', 'MSD-341 Missile Rack')
+      if (subtitle) expect(subtitle).toMatch(/^S\d+ · \d+ × S\d+ Missiles$/)
+    })
+  })
+
+  describe('Completeness (Phase 7)', () => {
+    it('Decision Summary heading renders above its card content', () => {
+      renderWorkspace('ghost')
+      const decisionBox = screen.getByTestId('decision-summary')
+      const heading = within(decisionBox).getByText('Decision Summary')
+      const count = within(decisionBox).getByText(/Immediate Decision/)
+      // In DOM order, the heading node must precede the count node.
+      expect(heading.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('the Priority Components strip renders real missing components beneath Readiness (Ghost: Slipstream, Snowblind)', () => {
+      renderWorkspace('ghost')
+      const strip = screen.getByTestId('priority-components-strip')
+      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
+      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+    })
+
+    it('SW-002 Revision B (Part 1): "View All" does NOT appear when four or fewer priority components exist (Ghost has only 2)', () => {
+      renderWorkspace('ghost')
+      expect(screen.queryByRole('button', { name: /View All/ })).not.toBeInTheDocument()
+    })
+
+    it('SW-002 Revision B (Part 1): "View All" appears once more than four priority components exist, and scrolls to Ship Systems without expanding the banner', () => {
+      // Inject 3 extra genuinely-missing hardpoints onto Ghost's active
+      // build so the real decision count exceeds 4 (Ghost's own seed data
+      // tops out at 2) — legitimate store-state test setup, not a new
+      // authority.
+      const extra: Hardpoint[] = ['Extra A', 'Extra B', 'Extra C'].map((name, i) => ({
+        id: `extra-${i}`,
+        shipId: 'ghost',
+        buildId: 'ghost-stealth',
+        slotLabel: `Extra Slot ${i}`,
+        type: 'Weapon',
+        size: 'S1',
+        factoryItem: name,
+        installedItem: '—',
+        targetItem: name,
+        status: 'Missing',
+      }))
+      useFleetStore.setState({ hardpoints: [...useFleetStore.getState().hardpoints, ...extra] })
+      renderWorkspace('ghost')
+
+      const banner = screen.getByTestId('ship-operational-banner')
+      const bannerHeightBefore = banner.className
+      const strip = screen.getByTestId('priority-components-strip')
+      // Priority Components (Part 2, unchanged) still reflects the full
+      // missing list — 4 tiles + the "View All" tile itself.
+      expect(strip.children.length).toBe(5)
+      const viewAll = screen.getByRole('button', { name: /View All/ })
+      fireEvent.click(viewAll)
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
+      // The banner's own classes are unaffected by the click (never expands).
+      expect(banner.className).toBe(bannerHeightBefore)
+    })
+
+    it('"Set Active" is prototype-only: it never mutates the store\'s real Active Loadout, and the ACTIVE badge never moves', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      const setActiveButton = screen.getByRole('button', { name: /Set Active/ })
+      fireEvent.click(setActiveButton)
+      expect(screen.getByText(/Prototype only/)).toBeInTheDocument()
+
+      const stealthButton = screen.getByRole('button', { name: /Stealth Build/ })
+      expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe('ghost-stealth')
+    })
+
+    it('"Set Active" only appears when the reviewed Loadout differs from the real Active one, and visually belongs to that loadout\'s own pill', () => {
+      renderWorkspace('ghost')
+      expect(screen.queryByRole('button', { name: /Set Active/ })).not.toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      const setActiveButton = screen.getByRole('button', { name: /Set Active/ })
+      expect(setActiveButton).toBeInTheDocument()
+      // Attached directly beside the reviewed loadout's own pill, not a
+      // detached header action.
+      const escortPill = screen.getByRole('button', { name: /Escort Build/ })
+      expect(setActiveButton.parentElement).toBe(escortPill.parentElement)
+    })
+
+    it('Expand All / Collapse All control the taxonomy tree, and Collapse All hides content from every group including the one expanded by default', () => {
+      renderWorkspace('ghost')
+      expect(screen.getByText('Power Plant')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Collapse All/ }))
+      expect(screen.queryByText('Power Plant')).not.toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+      expect(screen.getByText('Power Plant')).toBeInTheDocument()
+      expect(screen.getByText('Radar')).toBeInTheDocument()
+    })
+  })
+
+  describe('SW-002 Revision B — Product Improvement Phase', () => {
+    it('Part 1: Priority Components reuses the same missing-component list already shown beneath Readiness — never a second independent list', () => {
+      renderWorkspace('ghost')
+      const missingSummary = screen.getByTestId('readiness-missing-summary')
+      const strip = screen.getByTestId('priority-components-strip')
+      expect(missingSummary.textContent).toContain('Slipstream')
+      expect(missingSummary.textContent).toContain('Snowblind')
+      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
+      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+    })
+
+    it('Part 1: each Priority Component tile reserves placeholder image space with the component name rendered beneath it', () => {
+      renderWorkspace('ghost')
+      const strip = screen.getByTestId('priority-components-strip')
+      const nameEl = within(strip).getByText('Slipstream')
+      const tile = nameEl.closest('div') as HTMLElement
+      const placeholder = tile.querySelector('div') as HTMLElement
+      expect(placeholder).toBeTruthy()
+      expect(placeholder.className).toContain('rounded-lg')
+      expect(placeholder.className).toContain('border')
+      // Placeholder box precedes the name in DOM order (image above, name beneath).
+      expect(placeholder.compareDocumentPosition(nameEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('Part 1: Priority Components never exceeds 4 visible tiles even when more decisions exist', () => {
+      const extra: Hardpoint[] = ['Extra A', 'Extra B', 'Extra C'].map((name, i) => ({
+        id: `extra-${i}`,
+        shipId: 'ghost',
+        buildId: 'ghost-stealth',
+        slotLabel: `Extra Slot ${i}`,
+        type: 'Weapon',
+        size: 'S1',
+        factoryItem: name,
+        installedItem: '—',
+        targetItem: name,
+        status: 'Missing',
+      }))
+      useFleetStore.setState({ hardpoints: [...useFleetStore.getState().hardpoints, ...extra] })
+      renderWorkspace('ghost')
+      const strip = screen.getByTestId('priority-components-strip')
+      // 5 total missing items -> 4 tiles + 1 "View All" tile = 5 direct children.
+      expect(strip.children.length).toBe(5)
+    })
+
+    it('Part 2: decision recommendations use the approved Quartermaster priority language (Available in Inventory, Available to Reserve, Borrow Available)', () => {
+      renderWorkspace('ghost')
+      const decisionBox = screen.getByTestId('decision-summary')
+      // Snowblind is owned and unreserved in the seed Hangar.
+      expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
+      expect(decisionBox.textContent).not.toMatch(/Not Currently Owned|Reserved Elsewhere/)
+    })
+
+    it('Part 1: "Purchase Required" never appears anywhere inside Decision Summary', () => {
+      renderWorkspace('ghost')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(decisionBox.textContent).not.toContain('Purchase Required')
+    })
+
+    it('Part 1: the canonical "No Immediate Actions" empty state renders when readiness gaps exist but none are actionable (both Ghost targets Purchase Required)', () => {
+      // Remove Snowblind from the Hangar so both of Ghost's missing
+      // targets (Slipstream, Snowblind) resolve to Purchase Required —
+      // legitimate store-state test setup, not a new authority.
+      useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'Snowblind') })
+      renderWorkspace('ghost')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(within(decisionBox).getByText('No Immediate Actions')).toBeInTheDocument()
+      expect(within(decisionBox).getByText('Remaining readiness gaps require future acquisition.')).toBeInTheDocument()
+      expect(decisionBox.textContent).not.toContain('Purchase Required')
+      // Priority Components (Part 2, unchanged) still shows the real gaps.
+      const strip = screen.getByTestId('priority-components-strip')
+      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
+      expect(within(strip).getByText('Snowblind')).toBeInTheDocument()
+    })
+
+    it('Part 1: a fully ready Loadout (Corsair) still shows the original "No Immediate Decisions" state, distinct from "No Immediate Actions"', () => {
+      renderWorkspace('corsair')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(within(decisionBox).getByText('No Immediate Decisions')).toBeInTheDocument()
+      expect(decisionBox.textContent).not.toContain('No Immediate Actions')
+    })
+
+    it('SW-002 Revision C (Part 4): the Operational Review helper renders as a single inline line with the approved copy', () => {
+      renderWorkspace('ghost')
+      const label = screen.getByText('Operational Review')
+      const helperLine = label.closest('p') as HTMLElement
+      expect(helperLine).toBeTruthy()
+      expect(helperLine.textContent).toContain('Operational Review')
+      expect(helperLine.textContent).toContain('Reviewing current ship status.')
+      expect(helperLine.textContent).toMatch(/Select an action above when you.re ready to make changes\./)
+      expect(screen.queryByText(/page's own default state/)).not.toBeInTheDocument()
+      // Single line: no other <p> beneath it carrying the rest of the copy.
+      expect(helperLine.querySelectorAll('p').length).toBe(0)
+    })
+
+    it('the helper disappears once a Commander Intent is selected (guidance only applies to Operational Review)', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      expect(screen.queryByText(/Reviewing current ship status/)).not.toBeInTheDocument()
+    })
+
+    it('Part 5: Commander Intent behavior is unchanged — selecting still updates local state only, no store mutation', () => {
+      renderWorkspace('ghost')
+      const before = useFleetStore.getState()
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      expect(screen.getByRole('button', { name: /Manage Loadout/ })).toHaveAttribute('aria-pressed', 'true')
+      expect(useFleetStore.getState()).toBe(before)
+    })
+
+    it('no new store mutations occur anywhere on this page — the store snapshot is referentially unchanged across every Revision B interaction', () => {
+      renderWorkspace('ghost')
+      const before = useFleetStore.getState()
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Set Active/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      expect(useFleetStore.getState()).toBe(before)
+    })
+  })
+})

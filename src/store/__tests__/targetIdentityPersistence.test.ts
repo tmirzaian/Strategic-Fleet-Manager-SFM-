@@ -6,16 +6,12 @@ import { shipDefinitions } from '../../data/shipDefinitions'
 /**
  * Adds a genuinely fresh Fleet Asset from the real Polaris ShipDefinition
  * (`addFleetAsset`, the same production path "Add Ship" uses) rather than
- * reusing a seed ship. Seed ship 'ghost' is a KNOWN, documented exception
- * (MWO-001): its hand-authored CUSTOM build predates the real deep-import
- * template and uses legacy slot labels ("Shield 1") that reconciliation
- * renames to the real port labels ("Left Shield Generator") the moment a
- * genuine reload runs — a real, pre-existing, unrelated data
- * characteristic of that one seed fixture, not something a save/reload
- * test for identity persistence should be tripped up by. A freshly
- * materialized ship's own hardpoints are, by construction, already
- * perfectly aligned with `shipFactoryTemplates`, so reconciliation is a
- * clean no-op for it.
+ * reusing a seed ship, for the tests below that need a real PDC-capable
+ * port. SW-006 — Ghost's own CUSTOM builds are now constructed fresh from
+ * canonical topology too (useFleetStore.ts's buildCanonicalSeedCustomBuilds),
+ * so 'ghost' + its real canonical slotLabel ("Left Shield Generator") is
+ * used directly elsewhere in this file for identity-persistence coverage
+ * that doesn't need a genuinely PDC-shaped port.
  */
 function addFreshPolaris(nickname: string) {
   const definition = shipDefinitions.find((d) => d.sourceMetadata.sourceType === 'StarBreaker' && d.displayName === 'Polaris')
@@ -65,11 +61,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 1',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(SWARM_NAME)
     expect(hp.targetEntityClass).toBe(PDC_BEHR)
   })
@@ -80,11 +76,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 2',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(SWARM_NAME)
     expect(hp.targetEntityClass).toBe(PDC_VNCL)
     expect(hp.targetEntityClass).not.toBe(PDC_BEHR)
@@ -96,11 +92,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 3',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_GUN } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_GUN } },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetEntityClass).toBe(PDC_GUN)
     expect(hp.targetEntityClass).not.toBe(PDC_BEHR)
     expect(hp.targetEntityClass).not.toBe(PDC_VNCL)
@@ -133,7 +129,7 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 5',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(first.success).toBe(true)
@@ -142,11 +138,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       name: '004B Test 5',
       startingState: 'EXISTING',
       existingBuildId: first.buildId,
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
       setActive: false,
     })
     expect(second.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(SWARM_NAME)
     expect(hp.targetEntityClass).toBe(PDC_VNCL)
   })
@@ -157,7 +153,7 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 6',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(first.success).toBe(true)
@@ -166,11 +162,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       name: '004B Test 6',
       startingState: 'EXISTING',
       existingBuildId: first.buildId,
-      targetOverrides: { 'Shield 1': { targetItem: 'Totally Custom Uncataloged Part' } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: 'Totally Custom Uncataloged Part' } },
       setActive: false,
     })
     expect(second.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe('Totally Custom Uncataloged Part')
     expect(hp.targetEntityClass).toBeUndefined()
   })
@@ -181,7 +177,7 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 7',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(first.success).toBe(true)
@@ -192,11 +188,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       name: '004B Test 7',
       startingState: 'EXISTING',
       existingBuildId: first.buildId,
-      targetOverrides: { 'Shield 1': { targetItem: '—', targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: '—', targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(second.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === second.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe('—')
     expect(hp.targetEntityClass).toBeUndefined()
   })
@@ -206,11 +202,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 8',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': 'Mirage' },
+      targetOverrides: { 'Left Shield Generator': 'Mirage' },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe('Mirage')
     expect(hp.status).not.toBe('Invalid Target')
   })
@@ -253,11 +249,11 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       startingState: 'EMPTY',
       // Plain string override — no entityClass supplied, exactly like a
       // pre-EWO-STAB-004B persisted save.
-      targetOverrides: { 'Shield 1': SWARM_NAME },
+      targetOverrides: { 'Left Shield Generator': SWARM_NAME },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(SWARM_NAME)
     expect(hp.targetEntityClass).toBeUndefined()
     // The status computation itself safely refuses to guess too.
@@ -271,14 +267,14 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 11',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_VNCL } },
       setActive: false,
     })
     expect(save.success).toBe(true)
     useFleetStore.getState().duplicateBuild(save.buildId!)
     const duplicated = useFleetStore.getState().builds.find((b) => b.name === '004B Test 11 (Copy)')!
     expect(duplicated).toBeDefined()
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === duplicated.id && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === duplicated.id && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(SWARM_NAME)
     expect(hp.targetEntityClass).toBe(PDC_VNCL)
   })
@@ -293,7 +289,7 @@ describe('EWO-STAB-004B: selection identity is persisted, not just validated in-
       shipId: 'ghost',
       name: '004B Test 12',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
+      targetOverrides: { 'Left Shield Generator': { targetItem: SWARM_NAME, targetEntityClass: PDC_BEHR } },
       setActive: false,
     })
     expect(save.success).toBe(true)

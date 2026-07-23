@@ -40,6 +40,7 @@ function toRuntimeRecord(record: CatalogRecord): ComponentCatalogRuntimeRecord {
     grade: record.grade,
     displayName: record.displayName!,
     manufacturerRef: record.manufacturerRef,
+    classification: record.classification,
   }
 }
 

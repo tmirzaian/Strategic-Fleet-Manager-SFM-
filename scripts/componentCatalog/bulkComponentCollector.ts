@@ -2,6 +2,7 @@ import { isPlayerUsableComponentType } from './componentTaxonomy'
 import { parseManufacturerReference } from '../universeCatalog/manufacturerResolver'
 import { resolveLocalizedName } from '../universeCatalog/localization'
 import { parseBulkNumber } from '../universeCatalog/dcbBulkQuery'
+import { parseDescriptionHeader, extractOperationalIdentityValue } from './descriptionClassification'
 import type { CatalogRecord, UnresolvedEntry } from './catalogSchema'
 
 export interface ComponentFieldMaps {
@@ -12,6 +13,11 @@ export interface ComponentFieldMaps {
   manufacturerCode: Map<string, string>
   manufacturerLocKey: Map<string, string>
   localizationName: Map<string, string>
+  /** CAT-001 (Objective 1) — the item's localized description key
+   * (`AttachDef.Localization.Description`), resolved the same way as
+   * `localizationName`. Its text carries the Classification/Grade header
+   * block parsed by `descriptionClassification.ts`. */
+  localizationDescriptionKey: Map<string, string>
 }
 
 export interface BulkComponentCollectionResult {
@@ -46,6 +52,19 @@ export function buildRecordFromBulkFields(entityClass: string, fields: Component
   const manufacturerRef = parseManufacturerReference(fields.manufacturerCode.get(entityClass), fields.manufacturerLocKey.get(entityClass))
   const localizationKey = fields.localizationName.get(entityClass) ?? null
 
+  // CAT-001 (Objective 1/2) — the same localization-key-resolution path
+  // `displayName` already uses, applied to the description key instead.
+  // Grade is deliberately NOT read out of this text here: the structured
+  // `grade` field above is always authoritative (Objective 3) — any
+  // description-text/structured-Grade disagreement is a diagnostics-only
+  // concern, computed separately in generateComponentCatalog.ts so this
+  // record-builder stays a pure, single-record function.
+  const descriptionKey = fields.localizationDescriptionKey.get(entityClass) ?? null
+  const descriptionText = resolveLocalizedName(descriptionKey, localizationTable)
+  // CAT-002 — family-aware: Core reads "Class", Weapon reads "Item Type",
+  // Missile reads "Tracking Signal"; every other category stays null.
+  const classification = extractOperationalIdentityValue(parseDescriptionHeader(descriptionText), type)
+
   return {
     entityClass,
     recordName: `EntityClassDefinition.${entityClass}`,
@@ -56,6 +75,7 @@ export function buildRecordFromBulkFields(entityClass: string, fields: Component
     manufacturerRef: manufacturerRef?.code ?? null,
     localizationKey,
     displayName: resolveLocalizedName(localizationKey, localizationTable),
+    classification,
     provenance: { source: 'starbreaker-datacore', recordPath: null },
   }
 }

@@ -49,6 +49,8 @@ export default function TargetComponentPicker({
   onChange,
   options,
   id,
+  ariaLabel,
+  showFullIdentity,
 }: {
   value: string
   /** EWO-STAB-004B (ADR-010) — `entityClass` is the chosen option's own
@@ -62,6 +64,19 @@ export default function TargetComponentPicker({
   onChange: (value: string, entityClass?: string) => void
   options: TargetComponentOption[]
   id: string
+  /** SW-008A — optional accessible name for the combobox input, for a
+   * caller (Ship Workspace's Manage Loadout lens) whose surrounding table
+   * cell carries no visible per-row label of its own. Omitted entirely by
+   * every existing caller (MissionComposer), exactly as before. */
+  ariaLabel?: string
+  /** SW-008A Revision 2 — shows the fuller "Size · Class · Grade" identity
+   * line (`ComponentLabel.identityLine`) instead of the compact
+   * `classificationLabel` subtitle. Opt-in and off by default: MissionComposer's
+   * own Target picker is unaffected by this mission and keeps its existing
+   * compact subtitle exactly as before; only a caller that explicitly asks
+   * for the fuller breakdown (Ship Workspace's Manage Loadout New Target
+   * selector) gets it. */
+  showFullIdentity?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value)
@@ -122,6 +137,7 @@ export default function TargetComponentPicker({
         role="combobox"
         aria-expanded={open}
         aria-controls={`${id}-listbox`}
+        aria-label={ariaLabel}
         autoComplete="off"
         value={query}
         onFocus={openList}
@@ -141,9 +157,9 @@ export default function TargetComponentPicker({
         }}
         className="w-full min-w-[9rem]"
       />
-      {!open && committedLabel.classificationLabel && (
+      {!open && (showFullIdentity ? committedLabel.identityLine : committedLabel.classificationLabel) && (
         <div className="mt-0.5 leading-tight">
-          <span className="block text-[11px] text-muted/70 truncate">{committedLabel.classificationLabel}</span>
+          <span className="block text-[11px] text-muted/70 truncate">{showFullIdentity ? committedLabel.identityLine : committedLabel.classificationLabel}</span>
         </div>
       )}
       {open && (
@@ -168,7 +184,9 @@ export default function TargetComponentPicker({
                     className={`w-full text-left px-3 py-1.5 text-xs hover:bg-cyan/10 hover:text-cyan transition-colors ${o.item === value ? 'text-cyan' : 'text-white/85'}`}
                   >
                     <span className="block truncate">{o.label ?? o.item}</span>
-                    {optionLabel.classificationLabel && <span className="block text-[10px] text-muted/60 truncate">{optionLabel.classificationLabel}</span>}
+                    {(showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel) && (
+                      <span className="block text-[10px] text-muted/60 truncate">{showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel}</span>
+                    )}
                   </button>
                 </li>
               )

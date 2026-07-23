@@ -2,70 +2,33 @@ import { useEffect, useMemo, useState, Fragment, type ReactNode } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy, ShipWheel } from 'lucide-react'
 import { useFleetStore, type TargetOverrideValue } from '../store/useFleetStore'
-import { validateTargetCompatibility, isComponentSelectableForPort, isPlayerSelectableRecord } from '../data/componentCatalog'
+import { validateTargetCompatibility, isComponentSelectableForPort } from '../data/componentCatalog'
 import { findItemCatalog as demoFindItemCatalog } from '../data/seed'
-import { catalogComponentsByName, componentsByEntityClass, resolveComponentByName, CATEGORY_TO_PORT_TYPE, type CanonicalComponentRecord } from '../generated/componentCatalog'
 import { shipFactoryTemplates } from '../data/shipDefinitions'
 import { buildLoadoutEditorModel, assignmentsBySlotLabel, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
+import { fullComponentCatalog } from '../utils/fullComponentCatalog'
 import type { TargetComponentOption } from '../components/TargetComponentPicker'
 
 /**
- * Mission M-012: the target-item autocomplete now draws from the full
- * authoritative component catalog, not just the 5-entry seed demo table —
- * "target-build selectors use the same component source as inventory and
- * current loadout workflows." The demo entries are kept first (existing,
- * already-tested behavior for the seed fleet) and never duplicated.
- *
- * EWO-STAB-004A (ADR-010, Assignment 9) — rebuilt from `componentsByEntityClass`
- * (entityClass-first, includes PDCTurret components `catalogComponentsByName`
- * still excludes) rather than that legacy, translated-category map. A
- * display name shared by two or more genuinely different real components
- * (`resolveComponentByName` returns `ambiguous` — e.g. `M2C "Swarm"`)
- * produces one option PER real entityClass, each carrying that
- * entityClass and a disambiguating `label`; an unambiguous name still
- * produces exactly one option, `item` alone, unchanged from before. Every
- * option's `item` stays the real catalog display name (never the
- * decorated label) — what gets committed to a Hardpoint's `targetItem` on
- * selection, and therefore what `saveMissionConfiguration` resolves
- * afterward, is completely unaffected by this list's own presentation.
+ * Mission M-012: the target-item autocomplete draws from the full
+ * authoritative component catalog (`fullComponentCatalog` — SW-008A
+ * Revision 1 extracted this page's own original inline construction into
+ * `src/utils/fullComponentCatalog.ts` so Ship Workspace's Manage Loadout
+ * New Target selector shares the exact same canonical source), not just
+ * the 5-entry seed demo table — "target-build selectors use the same
+ * component source as inventory and current loadout workflows." The demo
+ * entries are kept first (existing, already-tested behavior for the seed
+ * fleet) and never duplicated.
  */
-function categoryLabelFor(record: CanonicalComponentRecord): string {
-  if (record.subtype === 'PDCTurret') return 'PDC Turret'
-  return CATEGORY_TO_PORT_TYPE[record.category] ?? record.category
-}
-
-const catalogFindItemEntries: TargetComponentOption[] = []
-{
-  const displayNames = new Set(Array.from(componentsByEntityClass.values(), (r) => r.displayName))
-  for (const name of displayNames) {
-    const resolution = resolveComponentByName(name)
-    const candidates = resolution.status === 'ambiguous' ? resolution.candidates : resolution.status === 'resolved' ? [resolution.record] : []
-    const selectable = candidates.filter(isPlayerSelectableRecord)
-    if (selectable.length === 0) continue
-    if (selectable.length === 1) {
-      const record = selectable[0]
-      catalogFindItemEntries.push({ path: `${categoryLabelFor(record)} → ${name}`, item: name, entityClass: record.entityClass })
-    } else {
-      for (const record of selectable) {
-        catalogFindItemEntries.push({
-          path: `${categoryLabelFor(record)} → ${name}`,
-          item: name,
-          label: `${name} — ${categoryLabelFor(record)}, S${record.size}`,
-          entityClass: record.entityClass,
-        })
-      }
-    }
-  }
-  catalogFindItemEntries.sort((a, b) => (a.label ?? a.item).localeCompare(b.label ?? b.item))
-}
 const demoItemNames = new Set(demoFindItemCatalog.map((c) => c.item))
-const findItemCatalog: TargetComponentOption[] = [...demoFindItemCatalog, ...catalogFindItemEntries.filter((c) => !demoItemNames.has(c.item))]
+const findItemCatalog: TargetComponentOption[] = [...demoFindItemCatalog, ...fullComponentCatalog.filter((c) => !demoItemNames.has(c.item))]
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import TargetComponentPicker from '../components/TargetComponentPicker'
 import { buildPortTree } from '../utils/portTree'
 import { groupPortTree, flattenDisplayTree, displayNodeIds, type PortTreeDisplayNode } from '../utils/portTreeGrouping'
-import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
+import { withComponentOwnedChildSlots, componentOwnedChildSlotSpec, currentEntityClassOf, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
+import { withMissileRackAggregation, uniformOrFallback, type MissileAggregateMeta } from '../utils/missileRackAggregation'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import type { Hardpoint } from '../types'
 
@@ -339,6 +302,9 @@ export default function MissionComposer() {
   }, [editorModel, effectiveStartingState, existingAssignments, templateId, overrides, quartermasterTemplates])
 
   type PreviewRow = (typeof previewRows)[number]
+  /** EWO-054 — the one extra, always-optional field a synthetic missile-rack
+   * aggregate row carries; absent on every ordinary preview row. */
+  type AggregatedPreviewRow = PreviewRow & { missileAggregate?: MissileAggregateMeta }
 
   // FTB-001A/FTB-001B/FTB-001E — a synthetic "<label> Slot N" row for
   // whichever component currently owns real child attachment ports
@@ -375,7 +341,19 @@ export default function MissionComposer() {
     const slotLabel = `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`
     const type = isMissileSlot ? 'Missile' : 'Mining Module'
     const size = spec.size ? `S${spec.size}` : host.size
-    const existing = swapped ? undefined : existingAssignments?.get(slotLabel)
+    // EWO-054A — `swapped` alone (current identity vs the ship's own
+    // permanent FACTORY identity) stays true forever once this parent has
+    // ever been swapped away from its ship-original component and saved —
+    // gating solely on it would discard a still-valid, already-persisted
+    // assignment on every single reopen of that exact Build, not only on
+    // a genuine in-session change. The real question here is narrower:
+    // has the CURRENT identity diverged from what THIS BUILD already has
+    // persisted for this exact parent slotLabel — never from the ship's
+    // factory baseline, which a saved Loadout is routinely and validly
+    // different from forever.
+    const persistedParentEntityClass = existingAssignments?.get(host.slotLabel)?.targetEntityClass
+    const divergedFromSaved = swapped && currentEntityClassOf(host) !== persistedParentEntityClass
+    const existing = divergedFromSaved ? undefined : existingAssignments?.get(slotLabel)
     const resolved = resolvePreviewTarget(slotLabel, type, size, undefined, existing?.targetItem ?? '—', existing?.targetEntityClass)
     return {
       ...host,
@@ -395,6 +373,43 @@ export default function MissionComposer() {
     }
   }
 
+  // EWO-054 (Chief Architect Amendment) — collapses a rack's per-slot
+  // preview rows (each already correctly resolved by
+  // makePreviewChildSlotRow/resolvePreviewTarget above) into the one row a
+  // Commander actually configures: a single Missile picker plus a
+  // canonical Quantity. A rack only ever supports ONE missile identity
+  // across all its slots — when the children currently disagree
+  // (`meta.inconsistent`, a legacy/imported state, never a supported
+  // target configuration), `previewTarget` is forced to '—' rather than
+  // showing any one child's value as though it were the rack's answer, so
+  // the picker renders empty and the VAL column (renderDisplayRows below)
+  // surfaces an explicit "Inconsistent — Select Missile" state instead of
+  // Ready to Save/Incompatible. The aggregate row's own picker onChange
+  // (wired in renderDisplayRows) always writes the same selection to every
+  // child slotLabel, which is what resolves this state on the next render.
+  function makePreviewAggregateRow(parent: AggregatedPreviewRow, children: AggregatedPreviewRow[], spec: ComponentOwnedSlotSpec, meta: MissileAggregateMeta): AggregatedPreviewRow {
+    return {
+      ...parent,
+      id: `${parent.id}-missile-aggregate`,
+      slotLabel: `${parent.slotLabel} — Missile`,
+      parentSlotLabel: parent.slotLabel,
+      isStructural: false,
+      type: 'Missile',
+      size: spec.size ? `S${spec.size}` : parent.size,
+      factoryItem: uniformOrFallback(children.map((c) => c.factoryItem), 'Mixed'),
+      installedItem: uniformOrFallback(children.map((c) => c.installedItem), 'Mixed'),
+      targetItem: meta.inconsistent ? '—' : uniformOrFallback(children.map((c) => c.targetItem), 'Mixed'),
+      factoryEntityClass: undefined,
+      installedEntityClass: undefined,
+      targetEntityClass: undefined,
+      previewTarget: meta.inconsistent ? '—' : uniformOrFallback(children.map((c) => c.previewTarget), 'Mixed'),
+      previewTargetEntityClass: meta.inconsistent ? undefined : uniformOrFallback(children.map((c) => c.previewTargetEntityClass), undefined),
+      compatible: children.every((c) => c.compatible),
+      incompatibleMessage: children.find((c) => !c.compatible)?.incompatibleMessage,
+      missileAggregate: meta,
+    }
+  }
+
   // Shared Port Tree (Mission M-011): the exact same buildPortTree()
   // utility Ship Detail's LoadoutPortTree uses, over the exact same
   // Hardpoint rows (previewRows spread the full Hardpoint shape plus
@@ -405,7 +420,10 @@ export default function MissionComposer() {
   // expanded — this is an editing surface, and every configurable port
   // must be reachable without an extra click before a target can be set.
   const previewTree = useMemo(() => buildPortTree(withComponentOwnedChildSlots(previewRows, makePreviewChildSlotRow)), [previewRows])
-  const previewDisplayTree = useMemo(() => groupPortTree(previewTree), [previewTree])
+  const previewDisplayTree = useMemo(
+    () => groupPortTree(withMissileRackAggregation<AggregatedPreviewRow>(previewTree, (r) => r.previewTarget, makePreviewAggregateRow)),
+    [previewTree]
+  )
 
   // EWO-024 (Task 2) — the Target picker's suggestion list is narrowed to
   // components not positively known to be incompatible with each row's own
@@ -452,7 +470,7 @@ export default function MissionComposer() {
   // row starts expanded on this editing surface (Mission M-011) — so a
   // currently-collapsed node toggling ON means removing its whole subtree
   // from the set (uncollapsing all of it), and vice versa.
-  function toggleCollapsed(node: PortTreeDisplayNode<PreviewRow>) {
+  function toggleCollapsed(node: PortTreeDisplayNode<AggregatedPreviewRow>) {
     const ids = displayNodeIds(node)
     setCollapsed((prev) => {
       const next = new Set(prev)
@@ -547,7 +565,7 @@ export default function MissionComposer() {
   // `children` is now always a fully processed `PortTreeDisplayNode[]`
   // (Workstream A's PDC subgrouping applies at any nesting level, not
   // just top-level categories).
-  function renderDisplayRows(nodes: PortTreeDisplayNode<PreviewRow>[], depth: number): ReactNode[] {
+  function renderDisplayRows(nodes: PortTreeDisplayNode<AggregatedPreviewRow>[], depth: number): ReactNode[] {
     return nodes.flatMap((node) => {
       const hasChildren = node.children.length > 0
       const rowCollapsed = isCollapsed(node.id)
@@ -589,6 +607,12 @@ export default function MissionComposer() {
                 <button onClick={() => setExpandedSlot(expandedSlot === row.id ? null : row.id)} className="flex items-center gap-1 hover:text-cyan transition-colors">
                   {formatHardpointLabel(row.slotLabel)}
                 </button>
+                {row.missileAggregate && <Badge tone="cyan">×{row.missileAggregate.quantity}</Badge>}
+                {row.missileAggregate?.countMismatch && (
+                  <span title={`Canonical capacity is ${row.missileAggregate.quantity}, but ${row.missileAggregate.childSlotLabels.length} slot(s) are materialized — reported, not auto-resolved.`}>
+                    <Badge tone="warning">Count Mismatch</Badge>
+                  </span>
+                )}
               </div>
             </td>
             <td className="px-5 py-3 text-muted whitespace-nowrap">{row.size} {row.type}</td>
@@ -608,13 +632,55 @@ export default function MissionComposer() {
                   // text/an unresolved option) is stored exactly as this
                   // one selection dictates — a stale entityClass from a
                   // prior choice can never survive onto new text.
-                  onChange={(next, entityClass) => setOverrides((prev) => ({ ...prev, [row.slotLabel]: { targetItem: next, targetEntityClass: entityClass } }))}
+                  //
+                  // EWO-054 — a missile-rack aggregate row has no real
+                  // Hardpoint of its own (its slotLabel is synthetic); the
+                  // one Commander selection made here fans out to every
+                  // real per-slot child slotLabel it stands in for, so
+                  // saveMissionConfiguration's existing per-slot
+                  // materialization (unchanged) still writes N identical
+                  // target assignments, same as if the Commander had set
+                  // each slot individually.
+                  onChange={(selected, entityClass) => {
+                    const value = { targetItem: selected, targetEntityClass: entityClass }
+                    const targetSlotLabels = row.missileAggregate?.childSlotLabels ?? [row.slotLabel]
+
+                    // EWO-054A — a genuine parent-rack identity change (this
+                    // is the rack's OWN row, never its aggregate — an
+                    // aggregate selection only ever targets its already-
+                    // current children) invalidates every child missile
+                    // target this exact port previously owned. The new
+                    // rack's synthesized "<slotLabel> — Missile Slot N"
+                    // labels can numerically collide with the OLD rack's
+                    // own synthesized child labels (same port, same naming
+                    // scheme — see componentOwnedSlots.ts) — without this,
+                    // a stale `overrides` entry for slot N would silently
+                    // carry the previous missile into the new rack's slot
+                    // N the instant its count/size otherwise matches or
+                    // exceeds the old one.
+                    const priorEntityClass = row.missileAggregate ? undefined : currentEntityClassOf(row)
+                    const priorSpec = priorEntityClass ? componentOwnedChildSlotSpec(priorEntityClass) : null
+                    const isRackIdentityChange = priorSpec?.label === 'Missile' && entityClass !== priorEntityClass
+
+                    setOverrides((prev) => {
+                      const merged = { ...prev }
+                      if (isRackIdentityChange && priorSpec) {
+                        for (let n = 1; n <= priorSpec.count; n++) delete merged[`${row.slotLabel} — Missile Slot ${n}`]
+                      }
+                      for (const slotLabel of targetSlotLabels) merged[slotLabel] = value
+                      return merged
+                    })
+                  }}
                   options={compatibleOptionsFor(row.type, row.size, row.factoryEntityClass)}
                 />
               )}
             </td>
             <td className="px-5 py-3">
-              {row.isStructural ? null : row.compatible ? (
+              {row.isStructural ? null : row.missileAggregate?.inconsistent ? (
+                <span title={`This rack's ${row.missileAggregate.quantity} missile slots do not currently share one missile type — select one missile to apply to all of them.`}>
+                  <Badge tone="invalid">Inconsistent — Select Missile</Badge>
+                </span>
+              ) : row.compatible ? (
                 <Badge tone={statusTone(row.previewTarget === '—' || !row.previewTarget ? 'OK' : row.previewTarget === row.installedItem ? 'OK' : 'Upgrade Available')}>
                   {row.previewTarget === '—' || !row.previewTarget ? 'Not Required' : 'Ready to Save'}
                 </Badge>

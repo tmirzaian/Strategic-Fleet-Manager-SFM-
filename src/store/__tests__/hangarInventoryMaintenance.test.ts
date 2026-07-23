@@ -144,9 +144,9 @@ describe('EWO-028 (Task 5): Delete', () => {
   })
 
   it('17/18/19. resolveInventoryDependencies names the exact ship/build for both Installed and Reserved allocations, and lists multiple dependencies together', () => {
-    // Mirage is both installed on Ghost (seed fixture) and has spare stock — reserve one more against Cutlass Red for a second dependency.
+    // Mirage is both installed on Ghost (seed fixture) and has spare stock — reserve one more against Vulture's own real Mirage target for a second dependency.
     useFleetStore.getState().addHangarItem({ name: 'Mirage', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'cutlass-red-medical', fleetAssetId: 'cutlass-red', targetSlotLabel: 'Shield 1', componentName: 'Mirage' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'vulture-salvage', fleetAssetId: 'vulture', targetSlotLabel: 'Left Shield Generator', componentName: 'Mirage' })
 
     const state = useFleetStore.getState()
     const deps = resolveInventoryDependencies('Mirage', state.ships, state.builds, state.fleetAssets, state.installedLoadouts, state.reservations)
@@ -157,7 +157,7 @@ describe('EWO-028 (Task 5): Delete', () => {
     expect(installed.hullName.length).toBeGreaterThan(0)
     expect(installed.buildName.length).toBeGreaterThan(0)
     const reserved = deps.find((d) => d.kind === 'RESERVED')!
-    expect(reserved.hullName).toContain('Cutlass Red')
+    expect(reserved.hullName).toContain('Vulture')
   })
 
   it('20. Cancel (never calling deleteHangarItem) preserves the record exactly', () => {
@@ -169,7 +169,7 @@ describe('EWO-028 (Task 5): Delete', () => {
 
   it('21. deleting a referenced item removes the inventory record without touching the reservation/installed-loadout records themselves', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
 
@@ -185,7 +185,7 @@ describe('EWO-028 (Task 5): Delete', () => {
 describe('EWO-028 (Task 6/8): quantity-reduction safeguard and Available accounting', () => {
   it('22/24. reducing quantity below the reserved amount is detected by comparing against resolveInventoryDependencies — never silently accepted without the caller checking first', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 2, neededBy: 'None', disposition: 'Store' })
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     const state = useFleetStore.getState()
     const deps = resolveInventoryDependencies('FR-66', state.ships, state.builds, state.fleetAssets, state.installedLoadouts, state.reservations)
     const claimed = deps.reduce((sum, d) => sum + d.quantity, 0)
@@ -198,7 +198,7 @@ describe('EWO-028 (Task 6/8): quantity-reduction safeguard and Available account
 
   it('25. "Continue Anyway" (the store action itself) never claims more physical units are available than owned — Available floors at zero, Reserved is never silently deleted', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 2, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
@@ -214,7 +214,7 @@ describe('EWO-028 (Task 6/8): quantity-reduction safeguard and Available account
 
   it('26. Available is never negative, even after an aggressive reduction', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 5, neededBy: 'None', disposition: 'Store' })
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
     useFleetStore.getState().updateHangarItemQuantity(item.id, 0)
     const availability = calculateComponentAvailability('FR-66', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
@@ -308,7 +308,7 @@ describe('EWO-028 (Task 10): persistence across a genuine reload', () => {
 
   it('34. dependency/allocation state survives rehydration alongside the inventory record it constrains', async () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
     vi.resetModules()

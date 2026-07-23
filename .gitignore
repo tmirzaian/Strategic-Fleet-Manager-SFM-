@@ -27,6 +27,11 @@ vite.config.d.ts
 # before.
 generated-data/component-metadata-catalog.json
 
+# CAT-001 — Component Classification generation diagnostics. Engineering-
+# only output (classified/missing/unrecognized-value/grade-mismatch
+# counts), regenerated every run, never read by the runtime app.
+generated-data/component-classification-diagnostics.json
+
 # Ship & Ground Vehicle Catalog Generator output (Mission M-012) — same
 # licensing posture as the component catalog above.
 generated-data/ship-catalog.json
@@ -56,3 +61,12 @@ generated-data/ship-catalog.json
 # docs/OPERATION_GOLDEN_FLEET.md's GF-002B section and the reserved
 # GF-002C promotion step.
 staging-data/
+
+# EWO-054A test-infrastructure correction — a locally-produced packaged
+# release bundle (a full snapshot copy of an older src/ tree, including
+# its own *.test.ts(x) files), never intended to be tracked or exercised
+# by the test suite. Was previously untracked-but-present, which let
+# `npm test` (plain `vitest run`, no exclude) silently sweep its stale
+# duplicate tests in alongside the real suite — see vitest.config.ts's
+# matching `test.exclude` entry for the other half of this fix.
+artifacts/

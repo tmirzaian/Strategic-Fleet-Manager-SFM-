@@ -10,6 +10,7 @@ function fields(overrides: Partial<ComponentFieldMaps> = {}): ComponentFieldMaps
     manufacturerCode: new Map(),
     manufacturerLocKey: new Map(),
     localizationName: new Map(),
+    localizationDescriptionKey: new Map(),
     ...overrides,
   }
 }

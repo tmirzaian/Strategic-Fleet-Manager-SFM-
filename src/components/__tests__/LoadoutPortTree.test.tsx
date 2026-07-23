@@ -148,21 +148,21 @@ describe('LoadoutPortTree — EWO-030 (Task 7): Remove Installed Component', () 
   })
 })
 
-describe('LoadoutPortTree — EWO-037 (Task 1): Core Systems expanded by default on first render', () => {
-  it("the Core Systems group is expanded on initial render — its child rows are visible without clicking Expand All", () => {
+describe('LoadoutPortTree — EWO-037 (Task 1): Core Components expanded by default on first render', () => {
+  it("the Core Components group is expanded on initial render — its child rows are visible without clicking Expand All", () => {
     const hardpoints = [
-      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Components' }),
       hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
     ]
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
-    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Core Components')).toBeInTheDocument()
     expect(screen.getByText('Power Plant')).toBeInTheDocument()
   })
 
   it('every other category (e.g. Weapons) stays collapsed on initial render', () => {
     const hardpoints = [
-      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Components' }),
       hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
     ]
     const tree = buildPortTree(hardpoints)
@@ -173,7 +173,7 @@ describe('LoadoutPortTree — EWO-037 (Task 1): Core Systems expanded by default
 
   it('Expand All and Collapse All still work exactly as before, on top of the new initial state', () => {
     const hardpoints = [
-      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Systems' }),
+      hp({ id: 'power1', slotLabel: 'Power Plant', groupLabel: 'Core Components' }),
       hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' }),
     ]
     const tree = buildPortTree(hardpoints)
@@ -185,7 +185,7 @@ describe('LoadoutPortTree — EWO-037 (Task 1): Core Systems expanded by default
     expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
   })
 
-  it('a ship with no Core Systems group at all renders with every category collapsed, same as prior behavior (no crash, no assumption a match exists)', () => {
+  it('a ship with no Core Components group at all renders with every category collapsed, same as prior behavior (no crash, no assumption a match exists)', () => {
     const hardpoints = [hp({ id: 'weapon1', slotLabel: 'Weapon 1', groupLabel: 'Weapons' })]
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
@@ -195,19 +195,18 @@ describe('LoadoutPortTree — EWO-037 (Task 1): Core Systems expanded by default
 })
 
 describe('LoadoutPortTree — EWO-036B (Task 8): Factory/Installed/Target share the same classification formatter', () => {
-  it('the same component value renders the identical classification subtitle in all three columns', () => {
-    // 'DayBreak' is real generated-data with a resolvable Grade (Grade C —
-    // see componentPresentation.test.ts) and no Class, so its
-    // classification subtitle is the "Grade C" fallback tier today; the
-    // point of this test is that Factory/Installed/Target all route
-    // through the same resolveComponentLabel/ComponentAssignmentLabel
-    // path and so never disagree with each other for the same value.
+  it('the same component value renders the identical identity subtitle in all three columns', () => {
+    // 'DayBreak' is real generated-data (CAT-001): Classification
+    // "Civilian", Grade 3 -> "Civilian C". The point of this test is that
+    // Factory/Installed/Target all route through the same
+    // resolveComponentLabel/ComponentAssignmentLabel path and so never
+    // disagree with each other for the same value.
     if (!hasComponentCatalog) return // real generated-data not present on this machine
     const hardpoints = [hp({ id: 'a', slotLabel: 'Power Plant', factoryItem: 'DayBreak', installedItem: 'DayBreak', targetItem: 'DayBreak' })]
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
     const row = screen.getByText('Power Plant').closest('tr')!
-    expect(within(row).getAllByText('Grade C')).toHaveLength(3)
+    expect(within(row).getAllByText('Civilian C')).toHaveLength(3)
   })
 })
 
@@ -330,11 +329,11 @@ describe('LoadoutPortTree — FTB-001A (Workstream C): mining module slots', () 
   })
 })
 
-describe('LoadoutPortTree — FTB-001B: dynamic missile rack rendering', () => {
+describe('LoadoutPortTree — FTB-001B/EWO-054: dynamic missile rack rendering', () => {
   const POLARIS_RACK = 'MRCK_S10_RSI_Polaris_Right' // 8 slots @ S3
   const TALON_RACK = 'MRCK_S04_ESPR_Talon' // 12 slots @ S3 — a real, different rack
 
-  it('a factory rack whose Target is changed to a different real rack shows the NEW rack\'s own source-derived child count, not the old factory count', () => {
+  it('a factory rack whose Target is changed to a different real rack collapses to ONE aggregate row showing the NEW rack\'s own source-derived quantity, not the old factory count, and never a per-slot row', () => {
     if (getMissileRackSlotSpec(POLARIS_RACK) === null) return // generated-data/missile-rack-slots.json not present on this machine
     const staleFactoryChildren = Array.from({ length: 8 }, (_, i) =>
       hp({ id: `stale-${i + 1}`, slotLabel: `Right Missile Rack — Missile Slot ${i + 1}`, parentSlotLabel: 'Right Missile Rack', type: 'Missile', size: 'S3' })
@@ -352,11 +351,85 @@ describe('LoadoutPortTree — FTB-001B: dynamic missile rack rendering', () => {
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
     clickToggle('Right Missile Rack')
-    // Only the new rack's real 12 slots render...
-    expect(screen.getByText('Missile Slot 1')).toBeInTheDocument()
-    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
-    // ...never a 13th (Talon's real count, not one more), and never any
-    // stale content bleeding through from the old 8-slot Polaris shape.
-    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
+    // One aggregate row for the new (Talon) rack's real 12-slot capacity...
+    expect(screen.getAllByText('×12').length).toBeGreaterThan(0)
+    // ...never the old Polaris 8-slot shape...
+    expect(screen.queryByText('×8')).not.toBeInTheDocument()
+    // ...and never a per-slot row — the aggregate stands in for all of them.
+    expect(screen.queryByText(/Missile Slot/)).not.toBeInTheDocument()
+  })
+
+  it('a rack whose real per-slot children currently disagree (legacy/imported mixed data) is surfaced as an explicit Inconsistent state, never one child\'s value silently shown as the answer', () => {
+    if (getMissileRackSlotSpec(POLARIS_RACK) === null) return
+    const hardpoints = [
+      hp({ id: 'rack', slotLabel: 'Right Missile Rack', type: 'Missile Rack', size: 'S10', factoryEntityClass: POLARIS_RACK, installedEntityClass: POLARIS_RACK, targetEntityClass: POLARIS_RACK }),
+      hp({ id: 'slot-1', slotLabel: 'Right Missile Rack — Missile Slot 1', parentSlotLabel: 'Right Missile Rack', type: 'Missile', size: 'S3', targetItem: 'TaskForce I' }),
+      hp({ id: 'slot-2', slotLabel: 'Right Missile Rack — Missile Slot 2', parentSlotLabel: 'Right Missile Rack', type: 'Missile', size: 'S3', targetItem: 'Rattler II' }),
+      ...Array.from({ length: 6 }, (_, i) =>
+        hp({ id: `slot-${i + 3}`, slotLabel: `Right Missile Rack — Missile Slot ${i + 3}`, parentSlotLabel: 'Right Missile Rack', type: 'Missile', size: 'S3', targetItem: 'TaskForce I' })
+      ),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    clickToggle('Right Missile Rack')
+    expect(screen.getByText('Inconsistent — Select Missile')).toBeInTheDocument()
+  })
+})
+
+describe('LoadoutPortTree — SW-007B: identity iconography', () => {
+  function rowIconClass(slotLabel: string): string {
+    const label = screen.getByText(slotLabel)
+    const row = label.closest('tr') as HTMLElement
+    const icon = row.querySelector('svg') as SVGElement
+    return icon.getAttribute('class') ?? ''
+  }
+
+  it('every port row renders exactly one identity icon, distinct per category, never replacing the operational label', () => {
+    const hardpoints = [
+      hp({ id: 'cooler', slotLabel: 'Left Cooler', type: 'Cooler' }),
+      hp({ id: 'power', slotLabel: 'Power Plant', type: 'Power Plant' }),
+      hp({ id: 'shield', slotLabel: 'Left Shield Generator', type: 'Shield' }),
+      hp({ id: 'radar', slotLabel: 'Radar', type: 'Radar' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    // Operational labels remain the authoritative, unchanged text.
+    for (const h of hardpoints) expect(screen.getByText(h.slotLabel)).toBeInTheDocument()
+    const coolerIcon = rowIconClass('Left Cooler')
+    const powerIcon = rowIconClass('Power Plant')
+    const shieldIcon = rowIconClass('Left Shield Generator')
+    const radarIcon = rowIconClass('Radar')
+    // Every category gets its own distinct icon — no two of these four share one.
+    expect(new Set([coolerIcon, powerIcon, shieldIcon, radarIcon]).size).toBe(4)
+  })
+
+  it('a Manned Turret assembly and an ordinary Pilot Weapon mount share the identical "Gimbal Mount" type but render distinct icons — assemblyRole, not type alone, decides identity', () => {
+    const hardpoints = [
+      hp({ id: 'turret', slotLabel: 'Left Turret (Manned Turret)', type: 'Gimbal Mount', assemblyRole: 'MANNED_TURRET', isStructural: true }),
+      hp({ id: 'mount', slotLabel: 'Nose Weapon (Gimbal Mount)', type: 'Gimbal Mount', assemblyRole: 'GIMBAL_MOUNT' }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    // formatHardpointLabel presents "Nose Weapon (Gimbal Mount)" as "Nose
+    // Weapon Mount" — the mount's canonical slotLabel is unaffected.
+    expect(rowIconClass('Left Turret (Manned Turret)')).not.toBe(rowIconClass('Nose Weapon Mount'))
+  })
+
+  it('a Remote Turret gets its own distinct icon from a Manned Turret', () => {
+    const hardpoints = [
+      hp({ id: 'manned', slotLabel: 'Left Turret (Manned Turret)', type: 'Gimbal Mount', assemblyRole: 'MANNED_TURRET', isStructural: true }),
+      hp({ id: 'remote', slotLabel: 'Tail Turret (Remote Turret)', type: 'Gimbal Mount', assemblyRole: 'REMOTE_TURRET', isStructural: true }),
+    ]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    expect(rowIconClass('Left Turret (Manned Turret)')).not.toBe(rowIconClass('Tail Turret (Remote Turret)'))
+  })
+
+  it('an unrecognized type falls back to the generic Miscellaneous icon rather than rendering nothing', () => {
+    const hardpoints = [hp({ id: 'x', slotLabel: 'Something Unusual', type: 'SomeFutureUnseenType' })]
+    const tree = buildPortTree(hardpoints)
+    render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
+    const row = screen.getByText('Something Unusual').closest('tr') as HTMLElement
+    expect(row.querySelector('svg')).toBeTruthy()
   })
 })

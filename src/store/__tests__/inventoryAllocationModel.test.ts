@@ -28,7 +28,7 @@ function addStock(name: string, type: string, size: string, qty: number) {
 describe('EWO-029 (Task 15, Scenario A): partial reservation', () => {
   it('2 Snowblind, Build A reserves 1 -> Installed 0, Reserved 1, Available 1', () => {
     addStock('Snowblind', 'Cooler', 'S1', 2)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
     expect(reserve.success).toBe(true)
     const availability = calculateComponentAvailability('Snowblind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
     expect(availability.installedQuantity).toBe(0)
@@ -40,14 +40,14 @@ describe('EWO-029 (Task 15, Scenario A): partial reservation', () => {
 describe('EWO-029 (Task 15, Scenario B): multiple Builds competing for stock', () => {
   it('2 Snowblind, Build A reserves 1, Build B reserves 1 -> Reserved 2, Available 0, Build C unfulfilled', () => {
     addStock('Snowblind', 'Cooler', 'S1', 2)
-    const a = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind' })
+    const a = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
     expect(a.success).toBe(true)
-    // 'Cooler 1' — a real Cooler-type slot on Cutlass Red, compatible
+    // 'Left Cooler' — a real S1 Cooler-type slot on Vulture, compatible
     // with a Cooler component; an incompatible slot (e.g. a Shield port)
     // would correctly fail target-compatibility validation before this
     // scenario's own stock-exhaustion logic ever runs.
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Needs Snowblind', startingState: 'EMPTY', targetOverrides: { 'Cooler 1': 'Snowblind' }, setActive: false })
-    const b = useFleetStore.getState().reserveComponent({ missionConfigurationId: cutlass.buildId!, fleetAssetId: 'cutlass-red', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind' })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Needs Snowblind', startingState: 'EMPTY', targetOverrides: { 'Left Cooler': 'Snowblind' }, setActive: false })
+    const b = useFleetStore.getState().reserveComponent({ missionConfigurationId: vulture.buildId!, fleetAssetId: 'vulture', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
     expect(b.success).toBe(true)
 
     const availability = calculateComponentAvailability('Snowblind', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations)
@@ -55,12 +55,12 @@ describe('EWO-029 (Task 15, Scenario B): multiple Builds competing for stock', (
     expect(availability.availableQuantity).toBe(0)
 
     // Build C (a third requirement, on Ghost's own second Loadout, whose
-    // Cooler 1 is a genuinely compatible S1 slot) remains unfulfilled —
+    // Left Cooler is a genuinely compatible S1 slot) remains unfulfilled —
     // no stock left to reserve, not because of an incompatible target.
     const thirdBuild = useFleetStore.getState().saveMissionConfiguration({
-      shipId: 'ghost', name: 'Also Needs Snowblind', startingState: 'EXISTING', existingBuildId: 'ghost-escort', targetOverrides: { 'Cooler 1': 'Snowblind' }, setActive: false,
+      shipId: 'ghost', name: 'Also Needs Snowblind', startingState: 'EXISTING', existingBuildId: 'ghost-escort', targetOverrides: { 'Left Cooler': 'Snowblind' }, setActive: false,
     })
-    const c = useFleetStore.getState().reserveComponent({ missionConfigurationId: thirdBuild.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'Snowblind' })
+    const c = useFleetStore.getState().reserveComponent({ missionConfigurationId: thirdBuild.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Left Cooler', componentName: 'Snowblind' })
     expect(c.success).toBe(false)
   })
 })
@@ -71,8 +71,8 @@ describe('EWO-029 (Task 15, Scenario C): available unreserved match', () => {
     const state = useFleetStore.getState()
     const missionPackage = calculateMissionPackage('ghost-stealth', state.hardpoints, state.installedLoadouts, state.reservations, state.hangarItems, false)
     // The seed fixture's own ghost-stealth Build already has a real
-    // unresolved Snowblind target (Cooler 1) — this is the mission's own
-    // literal repro fixture, not a synthetic one.
+    // unresolved Snowblind target (Left Cooler) — this is the mission's
+    // own literal repro fixture, not a synthetic one.
     expect(missionPackage.availableUnreservedMatches).toBeGreaterThan(0)
     expect(missionPackage.isMissionReady).toBe(false)
 
@@ -85,7 +85,7 @@ describe('EWO-029 (Task 15, Scenario C): available unreserved match', () => {
 describe('EWO-029 (Task 15, Scenario D): release reservation', () => {
   it('releasing a reservation increases Available, decreases Reserved, and the Build returns to unreserved/missing', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
     expect(calculateComponentAvailability('FR-66', useFleetStore.getState().hangarItems, useFleetStore.getState().installedLoadouts, useFleetStore.getState().reservations).reservedQuantity).toBe(1)
 
@@ -105,10 +105,10 @@ describe('EWO-029 (Task 15, Scenario D): release reservation', () => {
 describe('EWO-029 (Task 15, Scenario E): install a reserved unit', () => {
   it('reserving then installing on the SAME Build: Reserved decreases, Installed increases, no double count', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
-    const install = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Shield 1', 'ghost-escort')
+    const install = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Left Shield Generator', 'ghost-escort')
     expect(install.matched).toBe(true)
     expect(install.reservationFulfilled).toBe(true)
 
@@ -121,12 +121,12 @@ describe('EWO-029 (Task 15, Scenario E): install a reserved unit', () => {
 
   it('EWO-029 (Task 7 bug fix): moveToShip on a unit reserved for the SAME ship/Build does not double-deduct Hangar quantity', () => {
     addStock('FR-66', 'Shield', 'S1', 2)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
     useFleetStore.getState().setActiveBuild('ghost', 'ghost-escort')
 
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
-    const move = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Shield 1')
+    const move = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Left Shield Generator')
     expect(move.success).toBe(true)
 
     // Started with 2; 1 was reserved+installed (fulfilled together) — the
@@ -139,14 +139,14 @@ describe('EWO-029 (Task 15, Scenario E): install a reserved unit', () => {
 describe('EWO-029 (Task 15, Scenario F): competing allocation', () => {
   it('a unit reserved for Build A cannot be silently installed on a different Build via Move to Ship', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Steal Attempt', startingState: 'EMPTY', targetOverrides: { 'Shield 1': 'FR-66' }, setActive: true })
-    expect(cutlass.success).toBe(true)
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Steal Attempt', startingState: 'EMPTY', targetOverrides: { 'Left Shield Generator': 'FR-66' }, setActive: true })
+    expect(vulture.success).toBe(true)
 
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
-    const move = useFleetStore.getState().moveToShip(item.id, 'cutlass-red', 'Shield 1')
+    const move = useFleetStore.getState().moveToShip(item.id, 'vulture', 'Left Shield Generator')
 
     expect(move.success).toBe(false)
     // Nothing was silently transferred — the original reservation is untouched.
@@ -159,7 +159,7 @@ describe('EWO-029 (Task 15, Scenario F): competing allocation', () => {
     // No addStock call at all — matches the pre-existing "directly record
     // an install with no inventory bookkeeping" scenario this fix must
     // never break.
-    const install = useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power 1', 'ghost-stealth')
+    const install = useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant', 'ghost-stealth')
     expect(install.matched).toBe(true)
     expect(install.blocked).toBeUndefined()
   })
@@ -168,21 +168,21 @@ describe('EWO-029 (Task 15, Scenario F): competing allocation', () => {
 describe('EWO-029 (Task 5): reservation quantity rules', () => {
   it('quantity must be a positive whole number', () => {
     addStock('FR-66', 'Shield', 'S1', 3)
-    expect(useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66', quantity: 0 }).success).toBe(false)
+    expect(useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66', quantity: 0 }).success).toBe(false)
   })
 
   it('cannot reserve above Available stock', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const result = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66', quantity: 2 })
+    const result = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66', quantity: 2 })
     expect(result.success).toBe(false)
   })
 
   it('one unit cannot be reserved to two Builds at once (the same slot cannot double-reserve, and stock is exhausted correctly)', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const first = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const first = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(first.success).toBe(true)
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Shield 1': 'FR-66' }, setActive: false })
-    const second = useFleetStore.getState().reserveComponent({ missionConfigurationId: cutlass.buildId!, fleetAssetId: 'cutlass-red', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Left Shield Generator': 'FR-66' }, setActive: false })
+    const second = useFleetStore.getState().reserveComponent({ missionConfigurationId: vulture.buildId!, fleetAssetId: 'vulture', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(second.success).toBe(false)
   })
 })
@@ -206,26 +206,26 @@ describe('EWO-029 (Task 11): reservation effect on procurement', () => {
 
   it('reserved for this Build: procurement need satisfied for that Build, not available to another', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Shield 1': 'FR-66' }, setActive: false })
-    void cutlass
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Left Shield Generator': 'FR-66' }, setActive: false })
+    void vulture
 
     const state = useFleetStore.getState()
     const list = buildProcurementList(state.hardpoints, state.builds, state.ships, state.installedLoadouts, state.reservations, state.hangarItems)
     const line = list.find((l) => l.itemName === 'FR-66')!
     // Ghost-Escort's own requirement is satisfied (excluded from the
-    // unresolved-demand group entirely) — only Cutlass Red's still shows.
-    expect(line.neededBy.some((label) => label.includes('Cutlass Red'))).toBe(true)
+    // unresolved-demand group entirely) — only Vulture's still shows.
+    expect(line.neededBy.some((label) => label.includes('Vulture'))).toBe(true)
     expect(line.neededBy.some((label) => label.includes('Ghost'))).toBe(false)
   })
 
   it('installed: procurement need satisfied, no longer listed at all', () => {
-    useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power 1', 'ghost-stealth')
+    useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant', 'ghost-stealth')
     const state = useFleetStore.getState()
     const list = buildProcurementList(state.hardpoints, state.builds, state.ships, state.installedLoadouts, state.reservations, state.hangarItems)
     const stillMissing = list.find((l) => l.itemName === 'Slipstream')
-    // ghost-stealth's own Power 1 Slipstream requirement is now Installed
-    // (status OK) — excluded entirely from procurement demand.
+    // ghost-stealth's own Power Plant Slipstream requirement is now
+    // Installed (status OK) — excluded entirely from procurement demand.
     if (stillMissing) {
       expect(stillMissing.neededBy.some((label) => label.includes('Stealth'))).toBe(false)
     }
@@ -235,9 +235,9 @@ describe('EWO-029 (Task 11): reservation effect on procurement', () => {
 describe('EWO-029 (Task 12): Needed By resolution', () => {
   it('resolveNeededByBuilds lists every matching unresolved requirement, distinguishing reserved from unreserved', () => {
     addStock('FR-66', 'Shield', 'S1', 2)
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Shield 1': 'FR-66' }, setActive: false })
-    void cutlass
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Also Needs FR-66', startingState: 'EMPTY', targetOverrides: { 'Left Shield Generator': 'FR-66' }, setActive: false })
+    void vulture
 
     const state = useFleetStore.getState()
     const entries = resolveNeededByBuilds('FR-66', state.ships, state.builds, state.fleetAssets, state.hardpoints, state.reservations)
@@ -247,15 +247,15 @@ describe('EWO-029 (Task 12): Needed By resolution', () => {
   })
 
   it('a removed Build no longer appears in Needed By', () => {
-    const cutlass = useFleetStore.getState().saveMissionConfiguration({ shipId: 'cutlass-red', name: 'Temp Build', startingState: 'EMPTY', targetOverrides: { 'Shield 1': 'FR-66' }, setActive: false })
+    const vulture = useFleetStore.getState().saveMissionConfiguration({ shipId: 'vulture', name: 'Temp Build', startingState: 'EMPTY', targetOverrides: { 'Left Shield Generator': 'FR-66' }, setActive: false })
     let state = useFleetStore.getState()
     let entries = resolveNeededByBuilds('FR-66', state.ships, state.builds, state.fleetAssets, state.hardpoints, state.reservations)
-    expect(entries.some((e) => e.buildId === cutlass.buildId)).toBe(true)
+    expect(entries.some((e) => e.buildId === vulture.buildId)).toBe(true)
 
-    useFleetStore.getState().deleteBuild(cutlass.buildId!)
+    useFleetStore.getState().deleteBuild(vulture.buildId!)
     state = useFleetStore.getState()
     entries = resolveNeededByBuilds('FR-66', state.ships, state.builds, state.fleetAssets, state.hardpoints, state.reservations)
-    expect(entries.some((e) => e.buildId === cutlass.buildId)).toBe(false)
+    expect(entries.some((e) => e.buildId === vulture.buildId)).toBe(false)
   })
 
   it('duplicate hulls are distinguishable by nickname/Fleet Asset identity', () => {
@@ -278,7 +278,7 @@ describe('EWO-029 (Task 12): Needed By resolution', () => {
 describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
   it('45. a reservation survives rehydration', async () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
     vi.resetModules()
@@ -289,7 +289,7 @@ describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
 
   it('46. a released reservation stays released after rehydration', async () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     useFleetStore.getState().releaseReservation(reserve.reservationId!)
 
     vi.resetModules()
@@ -300,7 +300,7 @@ describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
 
   it('47. Available/Reserved/Installed counts remain correct after rehydration', async () => {
     addStock('FR-66', 'Shield', 'S1', 2)
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
 
     vi.resetModules()
     const { useFleetStore: reloaded } = await import('../useFleetStore')
@@ -338,7 +338,7 @@ describe('EWO-029 (Task 14): persistence across a genuine reload', () => {
 
   it('49. no duplicate reservation is created merely by reloading', async () => {
     addStock('FR-66', 'Shield', 'S1', 1)
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     const before = useFleetStore.getState().reservations.filter((r) => r.status === 'ACTIVE').length
 
     vi.resetModules()

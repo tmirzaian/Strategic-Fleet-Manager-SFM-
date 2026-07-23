@@ -61,18 +61,18 @@ describe('EWO-STAB-003C: required regression coverage', () => {
     // Still fully functional: a legacy, entityClass-less component can
     // still be installed via the same engine (first vacating Shield 1,
     // which starts factory-satisfied).
-    reloaded.getState().removeComponent('ghost', 'Shield 1')
-    const result = reloaded.getState().installComponent('ghost', 'FR-66', 'Shield 1')
+    reloaded.getState().removeComponent('ghost', 'Left Shield Generator')
+    const result = reloaded.getState().installComponent('ghost', 'FR-66', 'Left Shield Generator')
     expect(result.matched).toBe(true)
   })
 
   it('2. a newly installed cataloged component persists both display name and entityClass', async () => {
     const { useFleetStore: store } = await import('../../../store/useFleetStore')
-    store.getState().removeComponent('ghost', 'Shield 1')
-    const result = store.getState().installComponent('ghost', 'Veil', 'Shield 1')
+    store.getState().removeComponent('ghost', 'Left Shield Generator')
+    const result = store.getState().installComponent('ghost', 'Veil', 'Left Shield Generator')
     expect(result.matched).toBe(true)
     const ship = store.getState().ships.find((s) => s.id === 'ghost')!
-    const hp = store.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === 'Shield 1')!
+    const hp = store.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.installedItem).toBe('Veil')
     expect(hp.installedEntityClass).toBe(VEIL_ENTITY_CLASS)
   })
@@ -108,11 +108,11 @@ describe('EWO-STAB-003C: required regression coverage', () => {
       shipId: 'ghost',
       name: 'Veil Test Loadout',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': 'Veil' },
+      targetOverrides: { 'Left Shield Generator': 'Veil' },
       setActive: true,
     })
     expect(save.success).toBe(true)
-    const reserve = store.getState().reserveComponent({ missionConfigurationId: save.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'Veil' })
+    const reserve = store.getState().reserveComponent({ missionConfigurationId: save.buildId!, fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'Veil' })
     expect(reserve.success).toBe(true)
     const reservation = store.getState().reservations.find((r) => r.id === reserve.reservationId)!
     expect(reservation.componentEntityClass).toBe(VEIL_ENTITY_CLASS)
@@ -142,10 +142,10 @@ describe('EWO-STAB-003C: required regression coverage', () => {
 
   it("8. removal and return to inventory preserve the component's own identity rather than deriving it from the destination port", async () => {
     const { useFleetStore: store } = await import('../../../store/useFleetStore')
-    store.getState().removeComponent('ghost', 'Shield 1')
-    const install = store.getState().installComponent('ghost', 'Veil', 'Shield 1')
+    store.getState().removeComponent('ghost', 'Left Shield Generator')
+    const install = store.getState().installComponent('ghost', 'Veil', 'Left Shield Generator')
     expect(install.matched).toBe(true)
-    const remove = store.getState().removeComponent('ghost', 'Shield 1', true)
+    const remove = store.getState().removeComponent('ghost', 'Left Shield Generator', true)
     expect(remove.matched).toBe(true)
     const returned = store.getState().hangarItems.find((h) => h.name === 'Veil')
     expect(returned).toBeDefined()
@@ -154,14 +154,17 @@ describe('EWO-STAB-003C: required regression coverage', () => {
 
   it('9. ship-to-ship transfer preserves canonical identity', async () => {
     const { useFleetStore: store } = await import('../../../store/useFleetStore')
-    store.getState().removeComponent('ghost', 'Shield 1')
-    const install = store.getState().installComponent('ghost', 'Veil', 'Shield 1')
+    store.getState().removeComponent('ghost', 'Left Shield Generator')
+    const install = store.getState().installComponent('ghost', 'Veil', 'Left Shield Generator')
     expect(install.matched).toBe(true)
-    store.getState().removeComponent('corsair', 'Shield 1')
-    const transfer = store.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'corsair', 'Shield 1')
+    // Vulture's Right Shield Generator (S1, genuinely empty from factory)
+    // is the real compatible destination — Corsair's own Shield Generator
+    // is S3, incompatible with an S1 Veil.
+    store.getState().removeComponent('vulture', 'Right Shield Generator')
+    const transfer = store.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
     expect(transfer.matched).toBe(true)
-    const corsair = store.getState().ships.find((s) => s.id === 'corsair')!
-    const hp = store.getState().hardpoints.find((h) => h.buildId === corsair.activeBuildId && h.slotLabel === 'Shield 1')!
+    const vulture = store.getState().ships.find((s) => s.id === 'vulture')!
+    const hp = store.getState().hardpoints.find((h) => h.buildId === vulture.activeBuildId && h.slotLabel === 'Right Shield Generator')!
     expect(hp.installedItem).toBe('Veil')
     expect(hp.installedEntityClass).toBe(VEIL_ENTITY_CLASS)
   })

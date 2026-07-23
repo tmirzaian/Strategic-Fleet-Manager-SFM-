@@ -241,6 +241,22 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
     const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
     expect(listbox.textContent).toMatch(/no matching component/i)
   })
+
+  it('SW-008A Revision 2: this page\'s own Target picker is unaffected — it never opts into the fuller Size-prefixed identity grammar introduced for Ship Workspace', () => {
+    if (catalogComponentsByName.size === 0) return
+    renderComposer('?shipId=ghost')
+    const targetInputs = document.querySelectorAll('input[role="combobox"]')
+    fireEvent.click(targetInputs[0])
+    fireEvent.change(targetInputs[0], { target: { value: 'Rhino' } })
+    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.textContent?.includes('CF-447 Rhino Repeater'))
+    const subtitle = button?.querySelectorAll('span')[1]?.textContent ?? null
+    // The new "S{n} · Grade {letter}" grammar always leads with "S" — this
+    // page's own subtitle (when present at all) must never take that form,
+    // since `showFullIdentity` is never passed here (SW-008A Rev 2 scope:
+    // additive to Ship Workspace only).
+    if (subtitle) expect(subtitle.startsWith('S') && / · /.test(subtitle)).toBe(false)
+  })
 })
 
 describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)', () => {
@@ -341,12 +357,12 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     warnSpy.mockRestore()
   })
 
-  it('15. Cutlass Black (deep-imported control ship) — CREATE mode renders the Sea-Trials-named categories (Core Systems, Weapons, Manned Turrets, Ordnance, Support Systems)', () => {
+  it('15. Cutlass Black (deep-imported control ship) — CREATE mode renders the Sea-Trials-named categories (Core Components, Pilot Weapons, Manned Turrets, Missile Racks, Support Systems)', () => {
     const result = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED')
     expect(result.success).toBe(true)
     renderComposer(`?shipId=${result.assetId}`)
 
-    for (const label of ['Core Systems', 'Weapons', 'Manned Turrets', 'Ordnance', 'Support Systems']) {
+    for (const label of ['Core Components', 'Pilot Weapons', 'Manned Turrets', 'Missile Racks', 'Support Systems']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })
@@ -362,7 +378,7 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
     renderComposer(`?shipId=${result.assetId}`)
     fireEvent.click(screen.getByText('Edit an Existing Loadout'))
 
-    for (const label of ['Core Systems', 'Weapons', 'Manned Turrets', 'Ordnance', 'Support Systems']) {
+    for (const label of ['Core Components', 'Pilot Weapons', 'Manned Turrets', 'Missile Racks', 'Support Systems']) {
       expect(screen.getByText(label)).toBeInTheDocument()
     }
   })
@@ -728,7 +744,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
   // slots @ S2) and the ship's own "Gatac Missile Rack 8xS1"
   // (MRCK_S04_GAMA_Railen_Octo_S01, 8 slots @ S1) — a real, unambiguous,
   // uniquely-named alternative already carried by the same ship.
-  it('picking a different real rack for the Target column updates the previewed child-slot count immediately, before any save', () => {
+  it('picking a different real rack for the Target column updates the previewed aggregate quantity immediately, before any save', () => {
     const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
     if (!added.success || !added.assetId) throw new Error('failed to add Railen')
     renderComposer(`?shipId=${added.assetId}`)
@@ -744,8 +760,29 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     fireEvent.click(option)
 
     // The live preview tree — not yet saved — already reflects the new
-    // rack's real 8-slot structure, and the old 2-slot structure is gone.
-    expect(screen.getAllByText('Missile Slot 8').length).toBeGreaterThan(0)
+    // rack's real 8-slot aggregate (×8), and the old 2-slot aggregate (×2)
+    // is gone. EWO-054: the per-slot rows themselves never render at all.
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(aggregateRow.textContent).toContain('Missile')
+    expect(aggregateRow.textContent).toContain('×8')
+    expect(screen.queryByText(/Missile Slot/)).not.toBeInTheDocument()
+  })
+
+  it('a missile rack exposes exactly one Target picker for the whole rack — no per-slot picker is reachable through the Commander UI (EWO-054 Chief Architect Amendment)', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    renderComposer(`?shipId=${added.assetId}`)
+    fireEvent.click(screen.getByText('Expand All'))
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(aggregateRow.textContent).toContain('Missile')
+    expect(within(aggregateRow).getAllByRole('combobox')).toHaveLength(1)
+    // The aggregate is a leaf row — no chevron/expand affordance hiding any
+    // per-slot children (the row's only button is the unrelated "expand
+    // Port & Mount Detail" toggle every row has).
+    expect(within(aggregateRow).queryByRole('button', { name: /expand row|collapse row/i })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Missile Slot/)).not.toBeInTheDocument()
   })
 
   // FTB-001B — root-cause regression: a freshly-synthesized missile slot
@@ -760,7 +797,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
   // `overrides`. Fixed in MissionComposer.tsx by routing both the
   // canonical-template rows and freshly-synthesized child-slot rows
   // through one shared `resolvePreviewTarget` helper.
-  it('assigning a missile to a freshly-synthesized rack slot actually sticks — the Target picker selection is not silently discarded on the next render', () => {
+  it('assigning a missile on the rack\'s aggregate row actually sticks — the Target picker selection is not silently discarded on the next render', () => {
     const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
     if (!added.success || !added.assetId) throw new Error('failed to add Railen')
     renderComposer(`?shipId=${added.assetId}`)
@@ -771,12 +808,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     // investigation FTB-001B's generator draws from) rather than Railen's
     // own "Gatac Missile Rack 8xS1" — that name is also this ship's OWN
     // real "Left Bottom Missile Rack," so swapping to it would make "Left
-    // Top"'s synthesized slots textually collide with "Left Bottom"'s real
-    // ones. Rather than rely on unique slot-number text at all (Left
-    // Bottom's 8 real slots already cover 1-8, so no small slot count is
-    // ever fully collision-free), this test scopes strictly to "Left Top
-    // Missile Rack"'s own DOM siblings, so it can't accidentally grab the
-    // wrong rack's row regardless of numbering overlap.
+    // Top"'s aggregate row textually collide with "Left Bottom"'s.
     const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
@@ -786,22 +818,286 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
     fireEvent.click(rackOption)
 
-    // Walk forward through this rack row's own sibling <tr>s (its freshly
-    // synthesized children) until the next top-level rack row begins.
-    const childRows: Element[] = []
-    for (let el = rackRow.nextElementSibling; el && !el.textContent?.includes('Right Top Missile Rack'); el = el.nextElementSibling) {
-      childRows.push(el)
-    }
-    const slotRow = childRows.find((tr) => tr.textContent?.includes('Missile Slot 1'))!
-    const slotTargetInput = within(slotRow as HTMLElement).getByRole('combobox') as HTMLInputElement
-    fireEvent.click(slotTargetInput)
-    fireEvent.change(slotTargetInput, { target: { value: 'TaskForce I Missile' } })
-    const slotListbox = slotTargetInput.closest('div')!.querySelector('[role="listbox"]')!
-    const slotOption = Array.from(slotListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('TaskForce I Missile'))
-    if (!slotOption) return
-    fireEvent.click(slotOption)
+    // EWO-054 (Chief Architect Amendment) — exactly one row (the
+    // aggregate), immediately following the rack row, stands in for all 4
+    // of MSD-341's freshly-synthesized child slots.
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    const aggregateTargetInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(aggregateTargetInput)
+    fireEvent.change(aggregateTargetInput, { target: { value: 'TaskForce I Missile' } })
+    const missileListbox = aggregateTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const missileOption = Array.from(missileListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('TaskForce I Missile'))
+    if (!missileOption) return
+    fireEvent.click(missileOption)
 
-    expect(slotTargetInput.value).toBe('TaskForce I Missile')
+    expect(aggregateTargetInput.value).toBe('TaskForce I Missile')
+  })
+
+  it('EWO-054 (Chief Architect Amendment) — one rack-level missile selection fans out to and persists on every one of the rack\'s real canonical child Hardpoints, unchanged flat per-slot persistence', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'EWO-054 Fan-out Repro', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+    if (!first.success || !first.buildId) return
+    const rackChildren = useFleetStore.getState().hardpoints.filter((h) => h.buildId === first.buildId && h.parentSlotLabel === 'Left Top Missile Rack')
+    if (rackChildren.length < 2) return // real Railen rack-child data not present on this machine
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const expandAll = screen.queryByText('Expand All')
+    if (expandAll) fireEvent.click(expandAll)
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    const input = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(input)
+    fireEvent.change(input, { target: { value: 'TaskForce' } })
+    const listbox = input.closest('div')!.querySelector('[role="listbox"]')!
+    const option = listbox.querySelector('button')
+    if (!option) return // no compatible S2 missile catalog entry present on this machine
+    const chosen = option.textContent
+    fireEvent.click(option)
+    fireEvent.click(screen.getByText('Save Changes'))
+
+    const persisted = useFleetStore.getState().hardpoints.filter((h) => h.buildId === first.buildId && h.parentSlotLabel === 'Left Top Missile Rack')
+    expect(persisted.length).toBe(rackChildren.length)
+    expect(persisted.every((h) => h.targetItem === chosen)).toBe(true) // every real child Hardpoint, not just one
+  })
+
+  it('EWO-054 (Chief Architect Amendment) — a rack whose real child slots currently disagree (legacy/imported mixed data) is surfaced as Inconsistent — Select Missile, and picking one missile on the aggregate row resolves it across every child', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'EWO-054 Mixed Repro', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+    if (!first.success || !first.buildId) return
+    const rackChildren = useFleetStore.getState().hardpoints.filter((h) => h.buildId === first.buildId && h.parentSlotLabel === 'Left Top Missile Rack')
+    if (rackChildren.length < 2) return // real Railen rack-child data not present on this machine
+
+    // Simulates a legacy/imported state where a rack's slots were never
+    // uniformly assigned — bypasses the Commander UI entirely (which, per
+    // this same amendment, can no longer produce this state) to construct
+    // the inconsistent fixture directly at the persistence layer.
+    const second = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'EWO-054 Mixed Repro',
+      startingState: 'EXISTING',
+      existingBuildId: first.buildId,
+      targetOverrides: { [rackChildren[0].slotLabel]: 'Mock Missile A', [rackChildren[1].slotLabel]: 'Mock Missile B' },
+      setActive: false,
+    })
+    expect(second.success).toBe(true)
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    const expandAll = screen.queryByText('Expand All')
+    if (expandAll) fireEvent.click(expandAll)
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(within(aggregateRow).getByText('Inconsistent — Select Missile')).toBeInTheDocument()
+
+    const input = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(input)
+    const listbox = input.closest('div')!.querySelector('[role="listbox"]')!
+    const option = listbox.querySelector('button')
+    if (!option) return // no compatible S2 missile catalog entry present on this machine
+    fireEvent.click(option)
+
+    expect(within(aggregateRow).queryByText('Inconsistent — Select Missile')).not.toBeInTheDocument()
+  })
+})
+
+describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile state reset on rack identity change', () => {
+  // Root cause (two distinct defects, both fixed together):
+  //
+  // 1. Session `overrides` is keyed purely by slotLabel (e.g. "Left Top
+  //    Missile Rack — Missile Slot 1"), and every rack's synthesized child
+  //    slots follow the exact same "<rack slotLabel> — Missile Slot N"
+  //    scheme (componentOwnedSlots.ts) regardless of which real rack
+  //    currently occupies that port. A Commander who assigned a missile to
+  //    slot 1 of the OLD rack, then swapped to a NEW rack whose own slot 1
+  //    shares that identical label, silently inherited the old missile —
+  //    even though `withComponentOwnedChildSlots` had already correctly
+  //    regenerated the child rows themselves. Fixed by clearing every
+  //    `overrides` entry the OLD rack's own child slots occupied the
+  //    instant the rack row's own Target picker resolves to a genuinely
+  //    different entityClass.
+  //
+  // 2. `makePreviewChildSlotRow`'s "may this slot show its already-
+  //    persisted assignment as a default" gate previously used `swapped`
+  //    alone (current identity vs the ship's permanent FACTORY identity) —
+  //    which stays true FOREVER once a rack has ever been swapped away
+  //    from ship factory and saved, discarding a still-valid persisted
+  //    assignment on every later reopen of that exact Build, not only on a
+  //    genuine in-session change. Fixed by comparing against the Build's
+  //    own already-persisted target identity instead.
+  it("changing a rack's Target to a genuinely different real rack clears every prior child missile assignment, synthesizes the new rack's own correct child count/size, and starts every new child unassigned — the Commander's previous missile never carries over and never reads as Incompatible", () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    renderComposer(`?shipId=${added.assetId}`)
+    fireEvent.click(screen.getByText('Expand All'))
+
+    // "Left Top Missile Rack" factory: Gatac Missile Rack 2xS2 (2 slots @ S2).
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(aggregateRow.textContent).toContain('×2')
+
+    // Assign a missile to the CURRENT (S2) rack first.
+    const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(aggInput)
+    const beforeListbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const beforeOption = beforeListbox.querySelector('button')
+    if (!beforeOption) return // no compatible S2 missile catalog entry present on this machine
+    const beforeMissile = beforeOption.querySelector('span')!.textContent
+    fireEvent.click(beforeOption)
+    expect(aggInput.value).toBe(beforeMissile)
+
+    // Now change the rack itself to a real, different-sized rack — MSD-341
+    // Missile Rack (S1, 4 slots), same fixture FTB-001B's own test above
+    // uses.
+    const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(rackTargetInput)
+    fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
+    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
+    if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
+    fireEvent.click(rackOption)
+
+    // New count/size are correct, and the OLD missile never carries over.
+    const aggregateRowAfter = rackRow.nextElementSibling as HTMLElement
+    expect(aggregateRowAfter.textContent).toContain('×4')
+    expect(aggregateRowAfter.textContent).toContain('S1')
+    const aggInputAfter = within(aggregateRowAfter).getByRole('combobox') as HTMLInputElement
+    expect(aggInputAfter.value).not.toBe(beforeMissile)
+    expect(aggInputAfter.value === '' || aggInputAfter.value === '—').toBe(true)
+    // Unassigned reads as "Not Required", never as a stale Incompatible.
+    expect(within(aggregateRowAfter).queryByText('Incompatible')).not.toBeInTheDocument()
+    expect(within(aggregateRowAfter).getByText('Not Required')).toBeInTheDocument()
+  })
+
+  it('re-rendering with the SAME rack identity (no genuine change) preserves the Commander\'s chosen missile — only a real identity change ever clears a child assignment', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    renderComposer(`?shipId=${added.assetId}`)
+    fireEvent.click(screen.getByText('Expand All'))
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(aggInput)
+    const listbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const option = listbox.querySelector('button')
+    if (!option) return // no compatible S2 missile catalog entry present on this machine
+    const chosenMissile = option.querySelector('span')!.textContent
+    fireEvent.click(option)
+    expect(aggInput.value).toBe(chosenMissile)
+
+    // Re-select the rack's OWN already-current identity via its own Target
+    // picker — an ordinary rerender/no-op selection, not a swap.
+    const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(rackTargetInput)
+    fireEvent.change(rackTargetInput, { target: { value: 'Gatac Missile Rack 2xS2' } })
+    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('Gatac Missile Rack 2xS2'))
+    if (rackOption) fireEvent.click(rackOption)
+
+    const aggregateRowAfter = rackRow.nextElementSibling as HTMLElement
+    const aggInputAfter = within(aggregateRowAfter).getByRole('combobox') as HTMLInputElement
+    expect(aggInputAfter.value).toBe(chosenMissile)
+  })
+
+  it('save, then reopen for editing (the app\'s own post-save transition, no full remount) preserves a valid, unchanged aggregate assignment on a genuinely-swapped rack — a Build that has ever been swapped away from ship factory must not revert to unassigned on every later reopen', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'EWO-054A Reopen Repro', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+    if (!first.success || !first.buildId) return
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText('Expand All'))
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(rackTargetInput)
+    fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
+    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
+    if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
+    fireEvent.click(rackOption)
+
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
+    fireEvent.click(aggInput)
+    const listbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const option = listbox.querySelector('button')
+    if (!option) return // no compatible S1 missile catalog entry present on this machine
+    const chosenMissile = option.querySelector('span')!.textContent
+    fireEvent.click(option)
+    fireEvent.click(screen.getByText('Save Changes'))
+
+    // EWO-026's own post-save transition — stays mounted, switches into
+    // Edit mode on the just-saved Build. This is "reopen" as the app
+    // actually performs it.
+    const rackRowAfterSave = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRowAfterSave = rackRowAfterSave.nextElementSibling as HTMLElement
+    const aggInputAfterSave = within(aggregateRowAfterSave).getByRole('combobox') as HTMLInputElement
+    expect(aggInputAfterSave.value).toBe(chosenMissile)
+    expect(aggregateRowAfterSave.textContent).toContain('×4')
+
+    // A genuine full remount (navigating away and back) must show the
+    // exact same persisted, still-valid assignment.
+    cleanup()
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText('Expand All'))
+    const rackRowRemount = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRowRemount = rackRowRemount.nextElementSibling as HTMLElement
+    const aggInputRemount = within(aggregateRowRemount).getByRole('combobox') as HTMLInputElement
+    expect(aggInputRemount.value).toBe(chosenMissile)
+  })
+
+  it('legacy/imported data where a swapped rack\'s real children disagree with the currently-selected rack size is still detected as Incompatible — compatibility validation is never bypassed by this fix', () => {
+    const added = useFleetStore.getState().addFleetAsset('railen-imported', 'OWNED')
+    if (!added.success || !added.assetId) throw new Error('failed to add Railen')
+    const shipId = added.assetId
+
+    const first = useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'EWO-054A Legacy Repro', startingState: 'FACTORY', targetOverrides: {}, setActive: false })
+    if (!first.success || !first.buildId) return
+    const rackChildren = useFleetStore.getState().hardpoints.filter((h) => h.buildId === first.buildId && h.parentSlotLabel === 'Left Top Missile Rack')
+    if (rackChildren.length === 0) return // real Railen rack-child data not present on this machine
+
+    // Simulates legacy/imported data: an S2 missile assignment surviving
+    // underneath what is (in this fixture) still the ship's own factory
+    // S2 rack, but constructed directly at the persistence layer the way
+    // corrupted/imported data would arrive — bypassing the Commander UI,
+    // which (per EWO-054) can no longer produce a mismatched assignment on
+    // its own.
+    const second = useFleetStore.getState().saveMissionConfiguration({
+      shipId,
+      name: 'EWO-054A Legacy Repro',
+      startingState: 'EXISTING',
+      existingBuildId: first.buildId,
+      targetOverrides: { [rackChildren[0].slotLabel]: 'Completely Unknown Legacy Missile' },
+      setActive: false,
+    })
+    expect(second.success).toBe(true)
+
+    renderComposer(`?shipId=${shipId}`)
+    fireEvent.click(screen.getByText('Edit an Existing Loadout'))
+    fireEvent.click(screen.getByText('Expand All'))
+
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    // Either flagged Incompatible (unresolved/unknown component) or, if
+    // some slots are still empty, Inconsistent — never silently shown as
+    // Ready to Save.
+    expect(
+      within(aggregateRow).queryByText('Incompatible') || within(aggregateRow).queryByText('Inconsistent — Select Missile')
+    ).toBeTruthy()
   })
 })
 

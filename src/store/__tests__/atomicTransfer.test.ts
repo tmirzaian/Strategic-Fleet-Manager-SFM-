@@ -16,16 +16,17 @@ function hardpointsFor(shipId: string) {
 
 describe('Atomic component transfer (moveComponentBetweenShips)', () => {
   it('25. a successful transfer updates both donor and recipient', () => {
-    // Ghost's Shield 1 (Mirage, S1 Shield) -> Cutlass Red's Shield 2 (S1 Shield, compatible).
-    const result = useFleetStore.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'cutlass-red', 'Shield 2')
+    // Ghost's Left Shield Generator (Mirage, S1 Shield) -> Vulture's Right
+    // Shield Generator (S1 Shield, genuinely empty from factory, compatible).
+    const result = useFleetStore.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
     expect(result.matched).toBe(true)
     expect(result.itemName).toBe('Mirage')
 
-    const ghostShield = hardpointsFor('ghost').find((h) => h.slotLabel === 'Shield 1')!
+    const ghostShield = hardpointsFor('ghost').find((h) => h.slotLabel === 'Left Shield Generator')!
     expect(ghostShield.installedItem).toBe('—')
 
-    const cutlassShield = hardpointsFor('cutlass-red').find((h) => h.slotLabel === 'Shield 2')!
-    expect(cutlassShield.installedItem).toBe('Mirage')
+    const vultureShield = hardpointsFor('vulture').find((h) => h.slotLabel === 'Right Shield Generator')!
+    expect(vultureShield.installedItem).toBe('Mirage')
   })
 
   it('26. a failed transfer (no compatible destination) updates neither ship', () => {
@@ -50,7 +51,7 @@ describe('Atomic component transfer (moveComponentBetweenShips)', () => {
   it('28. donor and recipient Build Progress recalculate independently after a transfer', () => {
     const donorBefore = calculateBuildProgress(hardpointsFor('ghost'))
 
-    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'cutlass-red', 'Shield 2')
+    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
 
     const donorAfter = calculateBuildProgress(hardpointsFor('ghost'))
     // Donor's own Build Progress recalculates — a matched required
@@ -58,23 +59,23 @@ describe('Atomic component transfer (moveComponentBetweenShips)', () => {
     expect(donorAfter.matchedAssignments).toBeLessThan(donorBefore.matchedAssignments)
 
     // Recipient's hardpoint graph recalculates independently too — the
-    // physical Installed change is real even though Cutlass Red's Shield 2
-    // has no resolved factory/target data of its own (Unresolved slots
+    // physical Installed change is real even though Vulture's Right Shield
+    // Generator has no resolved target data of its own (Unresolved slots
     // are correctly excluded from required-assignment counting, so the
     // aggregate percentage for that slot doesn't move — that's by design,
     // not a bug: see src/utils/hardpointStatus.ts).
-    const recipientShield = hardpointsFor('cutlass-red').find((h) => h.slotLabel === 'Shield 2')!
+    const recipientShield = hardpointsFor('vulture').find((h) => h.slotLabel === 'Right Shield Generator')!
     expect(recipientShield.installedItem).toBe('Mirage')
   })
 
   it('Golden Scenario E: donor loses BUILD COMPLETE status after its matched component is moved away', () => {
     // Force Ghost's Stealth Build to 100% first by installing everything it needs.
-    useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power 1')
-    useFleetStore.getState().installComponent('ghost', 'Snowblind', 'Cooler 1')
+    useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant')
+    useFleetStore.getState().installComponent('ghost', 'Snowblind', 'Left Cooler')
     const before = calculateBuildProgress(hardpointsFor('ghost'))
     expect(before.isComplete).toBe(true)
 
-    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'cutlass-red', 'Shield 2')
+    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
 
     const after = calculateBuildProgress(hardpointsFor('ghost'))
     expect(after.isComplete).toBe(false)
@@ -94,10 +95,14 @@ describe('Atomic component transfer (moveComponentBetweenShips)', () => {
   })
 
   it('a single coherent log entry is produced for one successful transfer, not two', () => {
-    const before = useFleetStore.getState().log.length
-    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'cutlass-red', 'Shield 2')
+    useFleetStore.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
     const after = useFleetStore.getState().log
-    expect(after.length).toBe(before + 1)
+    // Vulture's Right Shield Generator is factory-populated (canonical
+    // topology guarantees Installed = Factory everywhere by construction),
+    // so this transfer also displaces Bulwark back to the Hangar — a real,
+    // separate, expected event. The regression this test guards against is
+    // the transfer ITSELF never being logged twice.
+    expect(after.filter((e) => e.action === 'Component moved to ship')).toHaveLength(1)
     expect(after[0].action).toBe('Component moved to ship')
   })
 })

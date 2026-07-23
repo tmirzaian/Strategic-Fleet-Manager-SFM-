@@ -1,17 +1,29 @@
-import { describe, it, expect } from 'vitest'
-import { ships, builds, hardpoints } from '../../data/seed'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { useFleetStore } from '../../store/useFleetStore'
 import { calculateBuildProgress } from '../buildProgress'
 import { deriveFleetBuildState } from '../fleetBuildState'
 
+const initialState = useFleetStore.getState()
+
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+})
+
+// SW-005 Phase 2 — UTV's Factory Loadout is now constructed fresh from
+// canonical topology (useFleetStore.ts's buildCanonicalSeedFactoryBuilds),
+// not hand-authored in src/data/seed.ts, so this reads the live store
+// rather than raw seed.ts exports.
 function stateFor(shipId: string) {
-  const ship = ships.find((s) => s.id === shipId)!
-  const build = builds.find((b) => b.id === ship.activeBuildId)
-  const shipHardpoints = hardpoints.filter((h) => h.buildId === ship.activeBuildId)
+  const s = useFleetStore.getState()
+  const ship = s.ships.find((sh) => sh.id === shipId)!
+  const build = s.builds.find((b) => b.id === ship.activeBuildId)
+  const shipHardpoints = s.hardpoints.filter((h) => h.buildId === ship.activeBuildId)
   const progress = calculateBuildProgress(shipHardpoints)
   return { state: deriveFleetBuildState(build, progress), progress, build }
 }
 
-describe('Golden Scenario C — Factory-only UTV (real seed data)', () => {
+describe('Golden Scenario C — Factory-only UTV (live canonical topology)', () => {
   it('12. UTV derives FACTORY_ONLY, not MISSION_READY, even though Installed = Factory = Target', () => {
     const { state, progress, build } = stateFor('utv')
     expect(build?.kind).toBe('FACTORY')

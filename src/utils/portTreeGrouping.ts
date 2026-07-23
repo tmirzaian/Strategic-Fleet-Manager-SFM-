@@ -1,6 +1,6 @@
 import type { PortTreeNode } from './portTree'
 import type { Hardpoint } from '../types'
-import { TOP_LEVEL_GROUP_ORDER } from '../data/shipDefinitions'
+import { TOP_LEVEL_GROUP_ORDER, INTRA_GROUP_CHILD_PRIORITY } from './commanderSystemTaxonomy'
 import { deriveDestinationCapability } from '../data/componentCatalog'
 
 /**
@@ -85,7 +85,24 @@ function toDisplayChildren<T extends { id: string; factoryEntityClass?: string |
   return extractPdcSubgroup(nodes.map(toPortNode))
 }
 
-export function groupPortTree<T extends { id: string; groupLabel?: string; factoryEntityClass?: string | null }>(nodes: PortTreeNode<T>[]): PortTreeDisplayNode<T>[] {
+/** Stable-sorts a group's direct children per the shared Commander Taxonomy
+ * Authority's `INTRA_GROUP_CHILD_PRIORITY` (`src/utils/commanderSystemTaxonomy.ts`)
+ * when that group's label has an approved sibling order; every other
+ * group's children are returned untouched, in their original order. A
+ * non-'port' child (a nested PDC subgroup) always sorts last — it's never
+ * one of the ordered siblings. */
+function applyIntraGroupChildOrder<T extends { type: string }>(node: PortTreeDisplayNode<T>): PortTreeDisplayNode<T> {
+  if (node.kind !== 'group') return node
+  const priorityFor = INTRA_GROUP_CHILD_PRIORITY[node.label]
+  if (!priorityFor) return node
+  const ranked = node.children
+    .map((child, index) => ({ child, index, priority: child.kind === 'port' ? priorityFor(child.node.hardpoint.type) : Infinity }))
+    .sort((a, b) => a.priority - b.priority || a.index - b.index)
+    .map(({ child }) => child)
+  return { ...node, children: ranked }
+}
+
+export function groupPortTree<T extends { id: string; type: string; groupLabel?: string; factoryEntityClass?: string | null }>(nodes: PortTreeNode<T>[]): PortTreeDisplayNode<T>[] {
   const result: PortTreeDisplayNode<T>[] = []
   const groupIndexByLabel = new Map<string, number>()
 
@@ -113,6 +130,11 @@ export function groupPortTree<T extends { id: string; groupLabel?: string; facto
     })
   }
 
+  // SW-007A — sibling order within Core Components/Utility, applied before
+  // PDC extraction so a PDC subgroup (if one is ever pulled out of either
+  // category) still sorts last relative to its ordered siblings.
+  const withIntraGroupOrder = result.map((node) => applyIntraGroupChildOrder(node))
+
   // FTB-001A (Workstream A) — PDC extraction also applies within each
   // top-level groupLabel bucket (e.g. "Manned Turrets"), AND across bare
   // top-level ungrouped ports, in case a future ship ever carries a PDC
@@ -121,7 +143,7 @@ export function groupPortTree<T extends { id: string; groupLabel?: string; facto
   // nests PDCs one level deeper, handled by toDisplayChildren above; this
   // is defense in depth, not dead code) — fully generic, same capability
   // check, same function, regardless of nesting depth.
-  const withNestedPdcGroups = result.map((node) => (node.kind === 'group' ? { ...node, children: extractPdcSubgroup(node.children) } : node))
+  const withNestedPdcGroups = withIntraGroupOrder.map((node) => (node.kind === 'group' ? { ...node, children: extractPdcSubgroup(node.children) } : node))
   const withTopLevelPdcGroup = extractPdcSubgroup(withNestedPdcGroups)
 
   // EWO-020 (Task 10): a fixed, player-oriented order for recognized

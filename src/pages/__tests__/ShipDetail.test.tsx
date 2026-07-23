@@ -61,58 +61,72 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
 
   it('11. every top-level normalized port renders for Railen (pilot weapons, turrets, tractor beams)', () => {
     renderShipDetail('railen')
-    expect(screen.getByText('Pilot Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Pilot Weapon 4')).toBeInTheDocument()
-    expect(screen.getByText('Port Turret')).toBeInTheDocument()
-    expect(screen.getByText('Starboard Turret')).toBeInTheDocument()
-    expect(screen.getByText('Fore Tractor Beam')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Left Weapon 1 Mount')).toBeInTheDocument()
+    expect(screen.getByText('Right Weapon 2 Mount')).toBeInTheDocument()
+    expect(screen.getByText('Left Turret (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Right Turret (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Left (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Right (Manned Turret)')).toBeInTheDocument()
   })
 
   it("12. Railen's turret child weapons are collapsed by default (not rendered until expansion)", () => {
     renderShipDetail('railen')
-    expect(screen.queryByText('Port Turret Left Weapon')).not.toBeInTheDocument()
+    expect(screen.queryByText('Left Weapon Mount')).not.toBeInTheDocument()
+    expect(screen.queryByText('Right Weapon Mount')).not.toBeInTheDocument()
   })
 
   it('13. Expand All reveals nested turret child weapons', () => {
     renderShipDetail('railen')
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Port Turret Left Weapon')).toBeInTheDocument()
-    expect(screen.getByText('Starboard Turret Right Weapon')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(2)
+    expect(screen.getAllByText('Right Weapon Mount')).toHaveLength(2)
   })
 
   it('14. Collapse All hides descendants again after expanding', () => {
     renderShipDetail('railen')
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Port Turret Left Weapon')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(2)
     fireEvent.click(screen.getByText('Collapse All'))
-    expect(screen.queryByText('Port Turret Left Weapon')).not.toBeInTheDocument()
+    expect(screen.queryByText('Left Weapon Mount')).not.toBeInTheDocument()
   })
 
-  it('Mission M-011: Ghost Mk II exposes its Nose Mount with two child weapon positions, collapsed by default', () => {
+  it('Mission M-011: Ghost Mk II exposes its wing weapon mounts with a child weapon position each, collapsed by default', () => {
     renderShipDetail('ghost')
-    expect(screen.getByText('Nose Mount')).toBeInTheDocument()
-    expect(screen.queryByText('Weapon 1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Left Wing Weapon Mount')).not.toBeInTheDocument()
+    expect(screen.queryByText('Weapon')).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Weapon 1')).toBeInTheDocument()
-    expect(screen.getByText('Weapon 2')).toBeInTheDocument()
+    expect(screen.getByText('Left Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getByText('Right Wing Weapon Mount')).toBeInTheDocument()
+    expect(screen.getAllByText('Weapon')).toHaveLength(2)
   })
 
   it('MOLE renders its mining turret hierarchy', () => {
     renderShipDetail('mole')
-    expect(screen.getByText('Mining Turret 1')).toBeInTheDocument()
-    expect(screen.getByText('Mining Turret 2')).toBeInTheDocument()
+    fireEvent.click(within(screen.getByText('Manned Turrets').closest('tr')!).getByRole('button'))
+    expect(screen.getByText('Front Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Left Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Right Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getAllByText('Mining Weapon')).toHaveLength(3)
   })
 
-  it('Vulture renders its salvage mount and tractor beam', () => {
+  it('Vulture renders its salvage arm mount hierarchy', () => {
     renderShipDetail('vulture')
-    expect(screen.getByText('Salvage Mount')).toBeInTheDocument()
-    expect(screen.getAllByText('Tractor Beam').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByText('Expand All'))
+    expect(screen.getByText('Left Arm Salvage Head (Mount)')).toBeInTheDocument()
+    expect(screen.getByText('Right Arm Salvage Head (Mount)')).toBeInTheDocument()
+    expect(screen.getAllByText('Laser Salvage Head (Mount)')).toHaveLength(2)
+    expect(screen.getAllByText('SubItem01 Salvage Head')).toHaveLength(2)
+    expect(screen.getAllByText('SubItem02 Salvage Head')).toHaveLength(2)
   })
 
-  it('Cutlass Black renders its Top Turret and Tractor Beam', () => {
+  it('Cutlass Black renders its Turret and Tractor Turret assemblies', () => {
     renderShipDetail('cutlass-black')
-    expect(screen.getByText('Top Turret')).toBeInTheDocument()
-    expect(screen.getAllByText('Tractor Beam').length).toBeGreaterThan(0)
+    fireEvent.click(within(screen.getByText('Manned Turrets').closest('tr')!).getByRole('button'))
+    expect(screen.getByText('Turret (Manned Turret)')).toBeInTheDocument()
+    fireEvent.click(within(screen.getByText('Remote Turrets').closest('tr')!).getByRole('button'))
+    expect(screen.getByText('Tractor Turret (Remote Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Weapon Turret')).toBeInTheDocument()
   })
 
   it('EWO-031 (Task 6/7): Origin 135c shows no "Unknown Factory Item" anywhere on Ship Detail — Factory, Installed, and Target all resolve to real components', () => {
@@ -196,8 +210,8 @@ describe('EWO-026 (round 2, Task 1): Ship Detail rebuilds the canonical Port Tre
     cleanup()
 
     renderShipDetail(shipId)
-    expect(screen.getByText('Weapons')).toBeInTheDocument()
-    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
+    expect(screen.getByText('Core Components')).toBeInTheDocument()
     expect(screen.getByText('Manned Turrets')).toBeInTheDocument()
   })
 
@@ -396,7 +410,7 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
     expect(screen.getByText('Left Top Missile Rack')).toBeInTheDocument()
   })
 
-  it('replacing the Dual rack\'s Target with the real Talon rack removes the old 2xS2 children and shows the new 12xS3 children — count AND size both corrected', () => {
+  it('replacing the Dual rack\'s Target with the real Talon rack removes the old ×2 aggregate and shows the new ×12 aggregate — count AND size both corrected (EWO-054: one row, not per-slot children)', () => {
     if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
     const assetId = addRailenWithSwappedRack()
     render(
@@ -409,16 +423,24 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
     fireEvent.click(screen.getByText('Expand All'))
     const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
     // The rack port's own row still reads its ORIGINAL S3 mount-point
-    // size/type — only its CHILDREN change shape.
-    expect(within(rackRow).getByText(/S3/)).toBeInTheDocument()
-    // Slot 12 is unambiguous — Railen's other real rack (Octo) tops out
-    // at 8, so this can only be the swapped-in Talon rack's own 12th slot.
-    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
-    // Exactly 12 (Talon's real count), never a 13th.
-    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
+    // size/type — only its CHILD AGGREGATE changes shape. CAT-001 also
+    // surfaces "S3" inside the row's own Factory/Installed/Target identity
+    // subtitles now (missile racks show "S{size} · N × S{x} Missiles"), so
+    // more than one match is expected here.
+    expect(within(rackRow).getAllByText(/S3/).length).toBeGreaterThan(0)
+    // Exactly one aggregate row, immediately following the rack row, shows
+    // Talon's real 12-slot capacity — never a per-slot row, never the old
+    // Dual rack's ×2.
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(within(aggregateRow).getByText('×12')).toBeInTheDocument()
+    expect(within(aggregateRow).queryByText('×2')).not.toBeInTheDocument()
+    // No per-slot row survives anywhere on the ship — every rack
+    // (including Railen's own untouched "Right Top"/"Left Bottom" racks)
+    // is aggregated, not just the one that was just swapped.
+    expect(screen.queryByText(/Missile Slot/)).not.toBeInTheDocument()
   })
 
-  it('save, reload (fresh render), and a fresh render against the same store state all preserve the corrected 12-slot structure', () => {
+  it('save, reload (fresh render), and a fresh render against the same store state all preserve the corrected ×12 aggregate', () => {
     if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
     const assetId = addRailenWithSwappedRack()
     // First render (post-save).
@@ -430,7 +452,7 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
       </MemoryRouter>
     )
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
+    expect(screen.getByText('×12')).toBeInTheDocument()
     first.unmount()
     cleanup()
 
@@ -446,11 +468,13 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
       </MemoryRouter>
     )
     fireEvent.click(screen.getByText('Expand All'))
-    expect(screen.getByText('Missile Slot 12')).toBeInTheDocument()
-    expect(screen.queryByText('Missile Slot 13')).not.toBeInTheDocument()
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(within(aggregateRow).getByText('×12')).toBeInTheDocument()
+    expect(within(aggregateRow).queryByText('×2')).not.toBeInTheDocument()
   })
 
-  it('a freshly-swapped rack\'s new empty slots read OK (nothing required yet), matching how every other untouched optional port already behaves — never silently "Missing" for a slot the Commander hasn\'t decided on yet', () => {
+  it('a freshly-swapped rack\'s new empty aggregate reads OK (nothing required yet), matching how every other untouched optional port already behaves — never silently "Missing" for a rack the Commander hasn\'t decided on yet', () => {
     if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
     const assetId = addRailenWithSwappedRack()
     render(
@@ -461,18 +485,19 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
       </MemoryRouter>
     )
     fireEvent.click(screen.getByText('Expand All'))
-    const slotRow = screen.getByText('Missile Slot 12').closest('tr')!
-    expect(within(slotRow).getByText('OK')).toBeInTheDocument()
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    expect(within(aggregateRow).getByText('OK')).toBeInTheDocument()
     // Readiness never crashes/NaNs across the swap. An empty-but-OK
-    // synthesized slot is never "missing," so this ship may legitimately
-    // read as fully Mission Ready (no percentage rendered at all in that
-    // state) rather than a partial numeric percentage — either is a
-    // valid, non-broken outcome; only a literal "NaN" would indicate the
-    // swap broke the readiness calculation.
+    // aggregate is never "missing," so this ship may legitimately read as
+    // fully Mission Ready (no percentage rendered at all in that state)
+    // rather than a partial numeric percentage — either is a valid,
+    // non-broken outcome; only a literal "NaN" would indicate the swap
+    // broke the readiness calculation.
     expect(screen.queryByText(/NaN/)).not.toBeInTheDocument()
   })
 
-  it('the new Talon rack\'s own slot size (S3) renders on each synthesized child — a missile only valid on the old S2 Dual rack\'s size would now be rejected by the port\'s own size, never silently accepted', () => {
+  it('the new Talon rack\'s own slot size (S3) renders on the aggregate row — a missile only valid on the old S2 Dual rack\'s size would now be rejected by the port\'s own size, never silently accepted', () => {
     if (getMissileRackSlotSpec(DUAL_RACK) === null || getMissileRackSlotSpec(TALON_RACK) === null) return
     const assetId = addRailenWithSwappedRack()
     render(
@@ -483,15 +508,16 @@ describe('<ShipDetail /> — FTB-001B: dynamic missile rack swap, end-to-end thr
       </MemoryRouter>
     )
     fireEvent.click(screen.getByText('Expand All'))
-    const slotRow = screen.getByText('Missile Slot 12').closest('tr')!
-    // The synthesized slot carries the NEW rack's real S3 size (not the
-    // old Dual rack's S2) — an old S2 assignment would fail
+    const rackRow = screen.getByText('Left Top Missile Rack').closest('tr')!
+    const aggregateRow = rackRow.nextElementSibling as HTMLElement
+    // The aggregate carries the NEW rack's real S3 size (not the old Dual
+    // rack's S2) — an old S2 assignment would fail
     // `validateTargetCompatibility` against this exact size the moment a
     // Commander tried to keep it (proven directly at the
     // compatibility-engine level by
     // src/data/__tests__/pdcCompatibility.test.ts's own established
     // pattern; this render-level assertion confirms the size the engine
     // would validate against is really the new rack's, not the old one's).
-    expect(within(slotRow).getByText(/S3\b/)).toBeInTheDocument()
+    expect(within(aggregateRow).getByText(/S3\b/)).toBeInTheDocument()
   })
 })

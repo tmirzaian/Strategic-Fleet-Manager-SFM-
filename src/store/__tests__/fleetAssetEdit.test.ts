@@ -52,7 +52,11 @@ describe('Importer safety (Golden Scenario G, tests 37/40)', () => {
   })
 
   it('40: existing Alpha 2.0 atomic transfer behavior still holds after Alpha 2.1 changes', () => {
-    const result = useFleetStore.getState().moveComponentBetweenShips('ghost', 'Shield 1', 'cutlass-red', 'Shield 2')
+    // Ghost's real canonical Left Shield Generator has Mirage installed
+    // (seed.ts's customBuildOverlays); Vulture's Right Shield Generator
+    // (S1, same size, genuinely empty from factory) is a real compatible
+    // destination.
+    const result = useFleetStore.getState().moveComponentBetweenShips('ghost', 'Left Shield Generator', 'vulture', 'Right Shield Generator')
     expect(result.matched).toBe(true)
     expect(result.itemName).toBe('Mirage')
   })

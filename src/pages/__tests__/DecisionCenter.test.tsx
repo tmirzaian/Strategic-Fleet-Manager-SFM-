@@ -34,9 +34,9 @@ function checkItem(name: string) {
  * this page before this mission; every test below is new coverage for the
  * live-state-driven rewrite.
  *
- * Fixture: Cutlass Red's Active Loadout ("Medical Support Build" /
- * cutlass-red-medical) has a real, unresolved Shield 1 target of "Mirage"
- * — confirmed directly against src/data/seed.ts. "Mirage" is a deliberate
+ * Fixture: Vulture's Active Loadout ("Salvage Build" / vulture-salvage) has
+ * a real, unresolved Left Shield Generator target of "Mirage" — confirmed
+ * directly against src/data/seed.ts. "Mirage" is a deliberate
  * choice: `resolveNeededByBuilds` matches a hardpoint's `targetItem`
  * against the searched name with an exact (case-sensitive) comparison, and
  * "Mirage" is one of the few seed target values whose casing exactly
@@ -66,17 +66,17 @@ describe('<DecisionCenter /> — EWO-031 (Task 5, Scenario A): still required by
     renderDecisionCenter()
     checkItem('Mirage')
     expect(screen.getByText('KEEP')).toBeInTheDocument()
-    expect(screen.getByText(/Cutlass Red/)).toBeInTheDocument()
-    expect(screen.getByText(/Shield 1/)).toBeInTheDocument()
+    expect(screen.getByText(/Vulture/)).toBeInTheDocument()
+    expect(screen.getByText(/Left Shield Generator/)).toBeInTheDocument()
     expect(screen.getByText('Reserve')).toBeInTheDocument()
   })
 
   it('4. an already-reserved requirement shows "Already Reserved" instead of a Reserve action — never double-offered', () => {
     if (!catalogComponentsByName.has('Mirage')) return
     const reserveResult = useFleetStore.getState().reserveComponent({
-      missionConfigurationId: 'cutlass-red-medical',
-      fleetAssetId: 'cutlass-red',
-      targetSlotLabel: 'Shield 1',
+      missionConfigurationId: 'vulture-salvage',
+      fleetAssetId: 'vulture',
+      targetSlotLabel: 'Left Shield Generator',
       componentName: 'Mirage',
       quantity: 1,
     })

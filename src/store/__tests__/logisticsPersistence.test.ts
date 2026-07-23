@@ -12,7 +12,7 @@ describe('Logistics persistence (Alpha 2.3, schemaVersion 4)', () => {
     const { useFleetStore } = await import('../useFleetStore')
 
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
     const raw = localStorage.getItem('sfm-fleet-store')
@@ -71,7 +71,7 @@ describe('Logistics persistence (Alpha 2.3, schemaVersion 4)', () => {
     const { useFleetStore } = await import('../useFleetStore')
 
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
 
     useFleetStore.getState().deleteBuild('ghost-escort')

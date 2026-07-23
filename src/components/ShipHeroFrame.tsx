@@ -18,6 +18,12 @@ export interface ShipHeroFrameProps {
    * Quartermaster certification badge — no final artwork this sprint,
    * only rendered for a genuinely completed custom Loadout. */
   isMissionReady?: boolean
+  /** Sea Trial SW-001 (Rev 0.4) — overrides the identity subtitle line
+   * entirely (used verbatim, no further concatenation). Omitted by every
+   * existing caller (Ship Detail, ImportedShipDetail) which keeps the
+   * original "{manufacturer} · Active Loadout: {activeBuildLabel}" text
+   * unchanged — this is additive only. */
+  subtitle?: string
 }
 
 /**
@@ -44,9 +50,11 @@ export default function ShipHeroFrame({
   activeBuildLabel,
   imported = false,
   isMissionReady = false,
+  subtitle,
 }: ShipHeroFrameProps) {
   const [mode, setMode] = useState<ShipImagePresentationMode>(() => (deriveIsFallback(!imageSrc, imageMeta) ? 'contain' : 'cover'))
   const isFallback = mode === 'contain'
+  const subtitleText = subtitle ?? `${manufacturer} · Active Loadout: ${activeBuildLabel}`
 
   const badges = (
     <>
@@ -96,7 +104,7 @@ export default function ShipHeroFrame({
                 <h2 className="text-xl font-display font-bold text-white drop-shadow">{name}</h2>
                 {badges}
               </div>
-              <p className="text-sm text-white/80 mt-1 drop-shadow">{manufacturer} · Active Loadout: {activeBuildLabel}</p>
+              <p className="text-sm text-white/80 mt-1 drop-shadow">{subtitleText}</p>
             </div>
             {certificationPlaceholder}
           </>
@@ -113,7 +121,7 @@ export default function ShipHeroFrame({
             {badges}
             <span className="text-[10px] uppercase tracking-widest text-cyan/60 font-mono">{DATA_LINK_PENDING_LABEL}</span>
           </div>
-          <p className="text-sm text-muted mt-1">{manufacturer} · Active Loadout: {activeBuildLabel}</p>
+          <p className="text-sm text-muted mt-1">{subtitleText}</p>
         </div>
       )}
     </>

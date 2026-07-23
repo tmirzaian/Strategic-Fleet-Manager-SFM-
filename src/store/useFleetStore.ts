@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Ship, Build, Hardpoint, HangarItem, LogEntry, Disposition, FleetAsset, OwnershipType, InstalledLoadoutEntry, QuartermasterTemplate, SeedAssetOverride, QuarantinedAssignment } from '../types'
-import { ships as seedShips, builds as seedBuilds, hardpoints as seedHardpoints, hangarItems as seedHangarItems, initialLog } from '../data/seed'
+import { ships as seedShips, builds as seedBuilds, hardpoints as seedHardpoints, hangarItems as seedHangarItems, initialLog, customBuildOverlays } from '../data/seed'
 import { computeHardpointStatusWithValidation } from '../utils/hardpointStatus'
 import { shipDefinitions as allShipDefinitions, selectableShipDefinitions, shipDefinitionById, shipFactoryTemplates } from '../data/shipDefinitions'
 import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
@@ -16,6 +16,8 @@ import { executeInstallation, resolveComponentIdentity } from '../engine/install
 import type { InstallationEffects, InstallationStateSnapshot } from '../engine/installation'
 import type { MissionReservation } from '../types'
 import { componentOwnedChildSlotSpec } from '../utils/componentOwnedSlots'
+import { resolveShipDefinitionId } from '../utils/loadoutEditorModel'
+import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -103,15 +105,199 @@ interface SeedFleetBaseline {
   fleetAssets: FleetAsset[]
 }
 
+/**
+ * SW-005 Phase 2 (Canonical Factory Construction) — the stable Build id
+ * every seed ship's Factory Loadout has always used (kept unchanged from
+ * the ids already established by earlier missions, including the two
+ * ships — 135c, UTV — whose Factory Loadout used to be their only,
+ * hand-authored, seed.ts Build). Only the mechanical *content* changes:
+ * every one of these Build/Hardpoint sets is now produced fresh by
+ * `materializeFleetAsset` against the ship's own canonical
+ * `shipFactoryTemplates` entry — the exact same authority a manually-added
+ * Fleet Asset already used — never hand-typed in src/data/seed.ts.
+ */
+const SEED_FACTORY_BUILD_ID: Record<string, string> = {
+  ghost: 'ghost-factory',
+  corsair: 'corsair-factory',
+  mole: 'mole-factory',
+  railen: 'railen-factory',
+  '135c': '135c-shuttle',
+  'cutlass-black': 'cutlass-black-factory',
+  'cutlass-red': 'cutlass-red-factory',
+  m80: 'm80-factory',
+  starlite: 'starlite-factory',
+  utv: 'utv-default',
+  vulture: 'vulture-factory',
+  prospector: 'prospector-factory',
+}
+
+/**
+ * SW-005 Phase 2 — the set of Build ids `SEED_FACTORY_BUILD_ID` produces.
+ * A seed ship's Factory Loadout has no "Commander already installed
+ * something different" concept at all — it is always freshly regenerated,
+ * pure Installed = Target = Factory by construction (`materializeFleetAsset`'s
+ * own contract) — so it must never be overlaid with `installedLoadouts`
+ * (see the EWO-043 overlay in `merge()` below, and its own comment there).
+ */
+const SEED_CANONICAL_FACTORY_BUILD_IDS = new Set(Object.values(SEED_FACTORY_BUILD_ID))
+
+/**
+ * SW-005 Phase 2 — constructs every seed ship's Factory Loadout Build +
+ * Hardpoints fresh, via `materializeFleetAsset` against the ship's real
+ * canonical `shipFactoryTemplates` entry (`shipDefinitionById`/
+ * `shipFactoryTemplates` already resolve every seed id through
+ * `supersededByCanonical` to the richest available deep-import data — see
+ * SW-004). A minimal synthetic `existingAsset` stub forces
+ * `materializeFleetAsset` to reuse the ship's own stable id and this
+ * mission's stable Factory Build id, rather than minting a fresh unique
+ * one as it would for a genuinely new manual asset — everything else
+ * about the returned `asset`/`ship` is discarded; seed ships already have
+ * their own real identity via `migrateSeedFleetToAssets()`/`seed.ts`
+ * (Phase 5: identity/demonstration data stays seed-owned, only mechanical
+ * topology moves to canonical authority). `isActive` is set to match
+ * whichever build src/data/seed.ts's own `ships` array actually has
+ * active — true only for 135c/UTV, which have no custom Build at all.
+ */
+function buildCanonicalSeedFactoryBuilds(): { builds: Build[]; hardpoints: Hardpoint[] } {
+  const builds: Build[] = []
+  const hardpoints: Hardpoint[] = []
+  for (const [shipId, factoryBuildId] of Object.entries(SEED_FACTORY_BUILD_ID)) {
+    const definition = shipDefinitionById.get(shipId)
+    if (!definition) continue
+    const template = shipFactoryTemplates[shipId] ?? []
+    const stub: FleetAsset = {
+      id: shipId,
+      shipDefinitionId: shipId,
+      ownershipType: 'OWNED',
+      acquisitionSource: 'SEED_MIGRATION',
+      activeBuildId: factoryBuildId,
+      installedLoadoutId: `${shipId}-installed`,
+      priority: 0,
+      status: 'active',
+      addedAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    }
+    const materialized = materializeFleetAsset({ definition, template, existingAsset: stub })
+    const seedShip = seedShips.find((s) => s.id === shipId)
+    builds.push({ ...materialized.build, isActive: seedShip?.activeBuildId === factoryBuildId })
+    hardpoints.push(...materialized.hardpoints)
+  }
+  return { builds, hardpoints }
+}
+
+/**
+ * SW-006 Phase 1/2 (Canonical Commander Build Model / Canonical Overlay
+ * Model) — constructs every seed ship's CUSTOM build(s) fresh from real
+ * canonical topology (`shipFactoryTemplates`), applying `seed.ts`'s
+ * `customBuildOverlays` (the only remaining Commander-facing, seed-owned
+ * data — which real canonical port got which installed/target choice) on
+ * top. Mirrors `buildCanonicalSeedFactoryBuilds`'s row-construction rules
+ * exactly (structural rows pass through untouched; a configurable row's
+ * status is computed the same way `materializeFleetAsset` computes it),
+ * the difference being only that a row's installed/target values come
+ * from the overlay when present, factory-fresh otherwise — never a guess,
+ * never fuzzy-matched (SW-006's No Silent Conversion principle): an
+ * overlay slotLabel that doesn't exist on the current canonical template
+ * is simply inert (no such port to apply it to), not a crash or a
+ * best-effort substitution.
+ *
+ * M80 and Starlite are absent from `customBuildOverlays` by design (see
+ * its own doc comment in seed.ts) — their real, hand-authored builds keep
+ * flowing through unchanged via `seedBuilds`/`seedHardpoints`.
+ */
+function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpoint[] } {
+  const builds: Build[] = []
+  const hardpoints: Hardpoint[] = []
+  for (const overlay of customBuildOverlays) {
+    const definition = shipDefinitionById.get(overlay.shipId)
+    if (!definition) continue
+    const template = shipFactoryTemplates[overlay.shipId] ?? []
+    const rows: Hardpoint[] = template.map((slot, i) => {
+      if (slot.isStructural) {
+        return {
+          id: `${overlay.buildId}-hp-${i}`,
+          shipId: overlay.shipId,
+          buildId: overlay.buildId,
+          slotLabel: slot.slotLabel,
+          type: slot.type,
+          size: slot.size,
+          factoryItem: '—',
+          installedItem: '—',
+          targetItem: '—',
+          status: 'OK' as const,
+          parentSlotLabel: slot.parentSlotLabel,
+          groupLabel: slot.groupLabel,
+          assemblyRole: slot.assemblyRole,
+          isStructural: true,
+          sourcePortId: slot.sourcePortId,
+        }
+      }
+      const assignment = overlay.assignments[slot.slotLabel]
+      const installedItem = assignment?.installedItem ?? slot.factoryItem
+      const targetItem = assignment?.targetItem ?? slot.factoryItem
+      const factoryEntityClass = slot.factoryEntityClass ?? resolveComponentIdentity({ displayName: slot.factoryItem })?.entityClass ?? undefined
+      const installedEntityClass = assignment?.installedItem ? (resolveComponentIdentity({ displayName: assignment.installedItem })?.entityClass ?? undefined) : factoryEntityClass
+      const targetEntityClass = assignment?.targetItem ? (resolveComponentIdentity({ displayName: assignment.targetItem })?.entityClass ?? undefined) : factoryEntityClass
+      const { status, invalidMessage } = computeHardpointStatusWithValidation(installedItem, targetItem, slot.factoryItem, slot.type, slot.size, {
+        installedEntityClass,
+        targetEntityClass,
+        factoryEntityClass,
+      })
+      return {
+        id: `${overlay.buildId}-hp-${i}`,
+        shipId: overlay.shipId,
+        buildId: overlay.buildId,
+        slotLabel: slot.slotLabel,
+        type: slot.type,
+        size: slot.size,
+        factoryItem: slot.factoryItem,
+        installedItem,
+        targetItem,
+        factoryEntityClass,
+        installedEntityClass,
+        targetEntityClass,
+        status,
+        invalidMessage,
+        parentSlotLabel: slot.parentSlotLabel,
+        groupLabel: slot.groupLabel,
+        assemblyRole: slot.assemblyRole,
+        sourcePortId: slot.sourcePortId,
+        targetMode: assignment?.targetItem ? ('EXPLICIT_TARGET' as const) : ('FOLLOW_FACTORY' as const),
+      }
+    })
+    const configurableRows = rows.filter((r) => !r.isStructural)
+    const missing = configurableRows.filter((r) => r.status === 'Missing' || r.status === 'Upgrade Available').map((r) => r.targetItem)
+    const okCount = configurableRows.filter((r) => r.status === 'OK').length
+    const readiness = configurableRows.length > 0 ? Math.round((okCount / configurableRows.length) * 100) : 100
+    builds.push({ id: overlay.buildId, shipId: overlay.shipId, name: overlay.name, role: overlay.role, readiness, isActive: overlay.isActive, missing, kind: 'CUSTOM' })
+    hardpoints.push(...rows)
+  }
+  return { builds, hardpoints }
+}
+
 /** The full Alpha-era demo fleet, materialized fresh — used only when it should actually be shown (see DEV_SEED_FLEET_ENABLED and `merge`'s `includeSeedBaseline` below). */
 function buildSeedFleetBaseline(): SeedFleetBaseline {
+  const canonicalFactory = buildCanonicalSeedFactoryBuilds()
+  const canonicalCustom = buildCanonicalSeedCustomBuilds()
+  const factoryBuildById = new Map(canonicalFactory.builds.map((b) => [b.id, b]))
+  const customBuildById = new Map(canonicalCustom.builds.map((b) => [b.id, b]))
+  // SW-005/SW-006 — seed.ts's own hardcoded readiness/missing (both
+  // Factory and now CUSTOM builds) are provisional placeholders,
+  // overwritten here with the real, freshly-constructed values for
+  // whichever build is actually active. Only M80/Starlite (still
+  // seed-authored, unaffected) fall through to their own real numbers.
+  const ships = withResolvedSeedImages(seedShips).map((s) => {
+    const activeBuild = factoryBuildById.get(s.activeBuildId) ?? customBuildById.get(s.activeBuildId)
+    return activeBuild ? { ...s, readiness: activeBuild.readiness, missing: activeBuild.missing } : s
+  })
+  const allHardpoints = [...seedHardpoints, ...canonicalFactory.hardpoints, ...canonicalCustom.hardpoints]
   return {
-    ships: withResolvedSeedImages(seedShips),
-    builds: [...seedBuilds],
-    hardpoints: [...seedHardpoints],
+    ships,
+    builds: [...seedBuilds, ...canonicalFactory.builds, ...canonicalCustom.builds],
+    hardpoints: allHardpoints,
     hangarItems: [...seedHangarItems],
     log: [...initialLog],
-    installedLoadouts: deriveInitialInstalledLoadouts(seedShips, seedHardpoints),
+    installedLoadouts: deriveInitialInstalledLoadouts(ships, allHardpoints),
     fleetAssets: migrateSeedFleetToAssets(),
   }
 }
@@ -828,6 +1014,21 @@ export const useFleetStore = create<FleetState>()(
     const referenceRows = get().hardpoints.filter((h) => h.shipId === shipId && h.buildId === ship.activeBuildId)
     if (referenceRows.length === 0) return { success: false, message: 'No reference equipment data exists for this Fleet Asset.' }
 
+    // SW-005 Phase 1 (Commander Safety) — the Loadout Manager UI renders
+    // its editable row set from the ship's canonical Factory template
+    // (shipFactoryTemplates), not from `referenceRows` above. Whenever a
+    // FleetAsset's own persisted rows haven't yet converged onto that same
+    // template (a topology change since this build was last saved), an
+    // override keyed by a canonical slotLabel `referenceRows` doesn't have
+    // must never be silently dropped — see SW-004's confirmed no-op-save
+    // finding. `canonicalTemplateBySlot` is the deterministic authority
+    // used below to either self-heal (materialize the real port fresh) or
+    // fail loudly (a slotLabel that isn't real anywhere).
+    const definitionId = resolveShipDefinitionId(shipId, get().fleetAssets)
+    const canonicalTemplateBySlot = new Map<string, FactoryHardpointTemplate>(
+      (definitionId ? (shipFactoryTemplates[definitionId] ?? []) : []).map((t) => [t.slotLabel, t])
+    )
+
     const installedBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.installedItem]))
     const installedEntityClassBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.entityClass]))
 
@@ -911,8 +1112,39 @@ export const useFleetStore = create<FleetState>()(
     // EWO-STAB-004B. A cleared target ('—') never carries an entityClass
     // regardless of what was supplied — defensive, not reachable through
     // the current UI, but never trusted either way.
+    // SW-005 Phase 1 — every slotLabel synthesized below because a
+    // reference-row-less canonical port needed a home for the Commander's
+    // override; used after the loop to materialize a real Hardpoint row
+    // for each (never left as target-only bookkeeping with no row).
+    const synthesizedFromCanonical = new Map<string, FactoryHardpointTemplate>()
+    const unrecognizedOverrideSlots: string[] = []
     for (const [slotLabel, override] of Object.entries(targetOverrides)) {
-      if (!baseTargets.has(slotLabel)) continue
+      if (!baseTargets.has(slotLabel)) {
+        // Deterministic reconciliation, never a silent drop (SW-005 Phase
+        // 1): if this slotLabel is a real port on the ship's own current
+        // canonical Factory template, materialize it fresh — factory-
+        // anchored, exactly like a genuinely new port reconcileBuildHardpoints
+        // already appends elsewhere — so the override below has somewhere
+        // to land. If it isn't real anywhere, this is a genuine anomaly,
+        // not a legitimate structural drift; collected below and the whole
+        // save fails loudly rather than silently discarding Commander intent.
+        const templateRow = canonicalTemplateBySlot.get(slotLabel)
+        if (!templateRow) {
+          // Not resolvable here, but not yet a confirmed failure either —
+          // a component-owned child slot (a mining module/missile slot)
+          // never appears in the static canonical template at all; it's
+          // legitimately resolved a few steps below by the dedicated
+          // materializedChildStubs mechanism instead. Deferred to a final
+          // check after that mechanism runs (see below), so the two
+          // resolution paths never race each other.
+          unrecognizedOverrideSlots.push(slotLabel)
+          continue
+        }
+        baseTargets.set(slotLabel, templateRow.factoryItem)
+        baseTargetEntityClasses.set(slotLabel, undefined)
+        baseTargetModes.set(slotLabel, 'FOLLOW_FACTORY')
+        synthesizedFromCanonical.set(slotLabel, templateRow)
+      }
       const targetItem = typeof override === 'string' ? override : override.targetItem
       const suppliedEntityClass = typeof override === 'string' ? undefined : override.targetEntityClass
 
@@ -1008,6 +1240,22 @@ export const useFleetStore = create<FleetState>()(
       baseTargets.set(stub.slotLabel, targetItem)
       baseTargetEntityClasses.set(stub.slotLabel, resolvedEntityClass)
       baseTargetModes.set(stub.slotLabel, 'EXPLICIT_TARGET')
+    }
+
+    // SW-005 Phase 1 (Commander Safety) — final determination, now that
+    // both resolution paths (canonical-template self-heal above, and the
+    // component-owned-child materialization just above) have had their
+    // chance. An override slotLabel still unresolved by either named a
+    // port that is real nowhere — a genuine anomaly, not a legitimate
+    // structural case. The whole save fails explicitly rather than
+    // silently applying only the recognized subset; Commander intent must
+    // never be partially, invisibly honored.
+    const stillUnresolved = unrecognizedOverrideSlots.filter((slotLabel) => !baseTargets.has(slotLabel))
+    if (stillUnresolved.length > 0) {
+      return {
+        success: false,
+        message: `Could not save — ${stillUnresolved.length} assignment(s) referenced a port that no longer exists on this ship: ${stillUnresolved.join(', ')}.`,
+      }
     }
 
     const isEditingExisting = !saveAsNew && startingState === 'EXISTING' && Boolean(existingBuildId)
@@ -1119,6 +1367,50 @@ export const useFleetStore = create<FleetState>()(
       }
     })
     newRows.push(...materializedRows)
+
+    // SW-005 Phase 1 — materializes a real Hardpoint row for every
+    // slotLabel `synthesizedFromCanonical` self-healed above (a canonical
+    // port this Fleet Asset's reference rows didn't have yet). Mirrors
+    // `materializedRows` immediately above: never left as target-only
+    // bookkeeping with no physical row for the rest of the app to render
+    // or reconcile against. Excludes anything already covered by the
+    // component-owned-child materialization, which owns that slotLabel
+    // namespace already.
+    const canonicalOnlyRows: Hardpoint[] = [...synthesizedFromCanonical.entries()]
+      .filter(([slotLabel]) => !materializedChildStubs.some((stub) => stub.slotLabel === slotLabel))
+      .map(([slotLabel, templateRow], i) => {
+        const target = baseTargets.get(slotLabel) ?? templateRow.factoryItem
+        const targetEntityClass = baseTargetEntityClasses.get(slotLabel)
+        const factoryEntityClass = resolveComponentIdentity({ displayName: templateRow.factoryItem })?.entityClass ?? undefined
+        const { status, invalidMessage } = computeHardpointStatusWithValidation(templateRow.factoryItem, target, templateRow.factoryItem, templateRow.type, templateRow.size, {
+          installedEntityClass: factoryEntityClass,
+          targetEntityClass,
+          factoryEntityClass,
+        })
+        return {
+          id: `${buildId}-hp-canonical-${i}`,
+          shipId,
+          buildId,
+          slotLabel,
+          type: templateRow.type,
+          size: templateRow.size,
+          factoryItem: templateRow.factoryItem,
+          installedItem: templateRow.factoryItem,
+          targetItem: target,
+          factoryEntityClass,
+          installedEntityClass: factoryEntityClass,
+          targetEntityClass,
+          status,
+          invalidMessage,
+          parentSlotLabel: templateRow.parentSlotLabel,
+          groupLabel: templateRow.groupLabel,
+          assemblyRole: templateRow.assemblyRole,
+          isStructural: templateRow.isStructural,
+          sourcePortId: templateRow.sourcePortId,
+          targetMode: baseTargetModes.get(slotLabel) ?? 'EXPLICIT_TARGET',
+        }
+      })
+    newRows.push(...canonicalOnlyRows)
 
     const missing = newRows.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
     // Reuse the single shared Build Progress engine for readiness — never
@@ -1822,9 +2114,27 @@ export const useFleetStore = create<FleetState>()(
         // silently discarded whatever the Commander had actually installed
         // the moment that factory item wasn't already a plain factory-fresh
         // match (CWO-003, Task 2 baseline finding).
+        //
+        // SW-005 Phase 2 — this overlay assumes `shipId::slotLabel` is a
+        // stable cross-build port identity, which only holds when every
+        // build for that ship shares one construction vocabulary (true for
+        // a manually-added asset, whose every Build always derives from
+        // the same canonical template). A seed ship's `installedLoadouts`
+        // is derived from its own CUSTOM build's old, hand-authored
+        // slotLabels (deriveInitialInstalledLoadouts); its Factory
+        // Loadout's slotLabels are the real canonical vocabulary
+        // (buildCanonicalSeedFactoryBuilds, above) — a different
+        // namespace that only coincidentally shares a generic label like
+        // "Radar" or "Quantum Drive" with the old one. Applying the
+        // overlay there would silently contaminate a freshly-canonical,
+        // always-factory-fresh row with an unrelated port's stale value —
+        // exactly the class of bug this mission exists to eliminate.
+        // Excluded here; a seed ship's Factory Loadout has no "Commander
+        // installed something different" concept to protect in the first
+        // place (see SEED_CANONICAL_FACTORY_BUILD_IDS's own comment).
         const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, { installedItem: e.installedItem, entityClass: e.entityClass }]))
         hardpoints = hardpoints.map((h) => {
-          if (h.isStructural) return h
+          if (h.isStructural || SEED_CANONICAL_FACTORY_BUILD_IDS.has(h.buildId)) return h
           const authoritative = installedByShipAndSlot.get(`${h.shipId}::${h.slotLabel}`)
           if (authoritative === undefined || authoritative.installedItem === h.installedItem) return h
           // EWO-STAB-003D (ADR-010) — the overlay's own entityClass (when

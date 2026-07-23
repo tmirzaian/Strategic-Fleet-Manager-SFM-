@@ -55,7 +55,7 @@
  *   STARBREAKER_EXE=<path to starbreaker.exe>
  *   SC_DATA_P4K=<path to Data.p4k>
  */
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from 'node:child_process'
@@ -68,6 +68,7 @@ import { toPortableP4kLabel } from './componentCatalog/portablePath'
 import { writeCatalogFile } from './componentCatalog/catalogWriter'
 import { deriveRuntimeComponentCatalog, writeCatalogRuntimeFile } from './componentCatalog/catalogRuntimeWriter'
 import { collectBulkComponents, buildRecordFromBulkFields, type ComponentFieldMaps } from './componentCatalog/bulkComponentCollector'
+import { buildClassificationDiagnostics, formatClassificationDiagnosticsSummary } from './componentCatalog/classificationDiagnostics'
 import { runBulkFieldQuery } from './universeCatalog/dcbBulkQuery'
 import { extractGlobalIni, loadLocalizationTable } from './universeCatalog/localization'
 import type { CatalogRecord, UnresolvedEntry } from './componentCatalog/catalogSchema'
@@ -169,6 +170,10 @@ async function main(): Promise<void> {
     { key: 'manufacturerCode', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Manufacturer.Code' },
     { key: 'manufacturerLocKey', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Manufacturer.Localization.Name' },
     { key: 'localizationName', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Localization.Name' },
+    // CAT-001 (Objective 1) — the item's localized description, whose
+    // header carries the Classification/Grade lines this mission parses
+    // (see scripts/componentCatalog/descriptionClassification.ts).
+    { key: 'localizationDescriptionKey', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Localization.Description' },
   ]
   const bulkFields = {} as ComponentFieldMaps
   for (const { key, path } of fieldPaths) {
@@ -240,6 +245,15 @@ async function main(): Promise<void> {
   }
   console.log(`\nWrote ${runtimeWrittenPath} (RC-008 committed runtime subset)`)
   console.log(`  records: ${Object.keys(runtimeCatalog.records).length}`)
+
+  // CAT-001 (Objective 5) — engineering-only diagnostics for the new
+  // Classification extraction, computed once over the final merged record
+  // set. Never read by the runtime app.
+  const diagnostics = buildClassificationDiagnostics(bulkFields, localizationTable, records)
+  console.log(`\n${formatClassificationDiagnosticsSummary(diagnostics)}`)
+  const diagnosticsPath = join(outputDir, 'component-classification-diagnostics.json')
+  writeFileSync(diagnosticsPath, JSON.stringify(diagnostics, null, 2) + '\n', 'utf-8')
+  console.log(`Wrote ${diagnosticsPath}`)
 }
 
 main().catch((err) => {

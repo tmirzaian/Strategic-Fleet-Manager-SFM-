@@ -100,7 +100,7 @@ export interface ComponentOwnedSlotHost {
  *      permissive fallbacks FTB-001A already established for a port with
  *      nothing installed yet.
  */
-function currentEntityClassOf(row: ComponentOwnedSlotHost): string | undefined {
+export function currentEntityClassOf(row: ComponentOwnedSlotHost): string | undefined {
   return row.previewTargetEntityClass ?? row.installedEntityClass ?? row.targetEntityClass ?? row.factoryEntityClass
 }
 

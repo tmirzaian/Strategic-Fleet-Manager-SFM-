@@ -1,5 +1,5 @@
 import type { ShipDefinition } from '../types'
-import { ships as seedShips, hardpoints as seedHardpoints } from './seed'
+import { ships as seedShips, hardpoints as seedHardpoints, builds as seedBuilds } from './seed'
 import { importedShipList, type ImportedShipView } from '../generated/importedShips'
 import { shipCatalogRecords } from '../generated/shipCatalog'
 import { classificationFor } from './shipClassification'
@@ -523,12 +523,23 @@ for (const [supersededId, canonicalId] of supersededByCanonical.entries()) {
  * `undefined` here (an honest gap in the source fixture, not invented
  * data) — but `isStructural` already exists on every seed row that needs
  * it and must be passed through.
+ *
+ * SW-003 — previously anchored to `ship.activeBuildId`, the raw seed
+ * fixture's own hardcoded default. Since every seed ship now carries a
+ * real `kind: 'FACTORY'` build (src/data/seed.ts), the canonical template
+ * anchors to that build instead — deterministic and independent of
+ * whichever build the Commander has actually selected as active, never
+ * drifting if that selection changes. Falls back to `activeBuildId` only
+ * as a defensive guard against an incomplete seed entry; every current
+ * seed ship has a Factory build, so the fallback should never trigger.
  */
 function seedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
   const ship = seedShips.find((s) => s.id === shipId)
   if (!ship) return []
+  const factoryBuild = seedBuilds.find((b) => b.shipId === shipId && b.kind === 'FACTORY')
+  const sourceBuildId = factoryBuild?.id ?? ship.activeBuildId
   return seedHardpoints
-    .filter((h) => h.buildId === ship.activeBuildId)
+    .filter((h) => h.buildId === sourceBuildId)
     .map((h) => ({
       slotLabel: h.slotLabel,
       type: h.type,
@@ -855,13 +866,25 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
 }
 
 /**
- * EWO-020 (superseding EWO-019B's more conservative version) — the fixed,
- * player-oriented top-level system category for a top-level physical
- * port, used to add a synthetic header above otherwise-independent
- * sibling ports. Order matches the Chief-Architect-approved category list
- * (Core Systems, Detection/Navigation, Weapons, Manned Turrets, Remote
- * Turrets, Ordnance, Utility Systems, Support Systems) — enforced by
- * `topLevelGroupOrder` below, not by insertion order here.
+ * EWO-020 (superseding EWO-019B's more conservative version), realigned by
+ * SW-007A to the Commander's long-established in-game mental model — the
+ * fixed, player-oriented top-level system category for a top-level
+ * physical port, used to add a synthetic header above otherwise-
+ * independent sibling ports. Order matches the Chief-Architect-approved
+ * category list (Core Components, Detection/Navigation, Missile Racks,
+ * Pilot Weapons, Manned Turrets, Remote Turrets, Utility, Support Systems)
+ * — enforced by `TOP_LEVEL_GROUP_ORDER` (moved to
+ * `src/utils/commanderSystemTaxonomy.ts` by SW-007C, the single Commander
+ * Taxonomy Authority every Commander-facing presentation now shares), not
+ * by insertion order here. SW-007A moved Quantum Drive out of Detection/Navigation into Core
+ * Components (the in-game loadout sequence groups it with Power/Coolers/
+ * Shields) and renamed three labels (Core Systems -> Core Components,
+ * Weapons -> Pilot Weapons, Ordnance -> Missile Racks) to match the
+ * game's own stable category names — Manned Turrets/Remote Turrets/
+ * Support Systems already matched and are untouched. This is a display
+ * grouping/ordering change only: it never touches a port's own
+ * operational slotLabel (Left Wing Weapon, Nose Mining Turret, ...),
+ * which remains under formatHardpointLabel's location-aware presentation.
  *
  * EWO-019B could not separate Manned/Remote Turrets from plain weapon
  * mounts because the signal that distinguishes them (a mount's own raw
@@ -876,32 +899,16 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
 function topLevelGroupLabel(port: { equipmentGroup: string; assemblyRole?: string }): string | undefined {
   const { equipmentGroup: group, assemblyRole: role } = port
 
-  if (group === 'Power' || group === 'Coolers' || group === 'Shields') return 'Core Systems'
-  if (group === 'Radar' || group === 'QuantumDrive') return 'Detection / Navigation'
+  if (group === 'Power' || group === 'Coolers' || group === 'Shields' || group === 'QuantumDrive') return 'Core Components'
+  if (group === 'Radar') return 'Detection / Navigation'
   if (role === 'MANNED_TURRET') return 'Manned Turrets'
   if (role === 'REMOTE_TURRET') return 'Remote Turrets'
-  if (group === 'Weapons') return 'Weapons'
-  if (group === 'Missiles') return 'Ordnance'
-  if (group === 'Mining' || group === 'Salvage' || group === 'Utility') return 'Utility Systems'
+  if (group === 'Weapons') return 'Pilot Weapons'
+  if (group === 'Missiles') return 'Missile Racks'
+  if (group === 'Mining' || group === 'Salvage' || group === 'Utility') return 'Utility'
   if (group === 'Relays' || group === 'LifeSupport') return 'Support Systems'
   return undefined
 }
-
-/** The Chief-Architect-approved fixed display order for top-level system
- * categories (Task 10) — guidance for *known* categories only; a group
- * label not listed here (there are none today, since `topLevelGroupLabel`
- * only ever produces one of these eight) sorts after all known ones,
- * stable otherwise. Consumed by `src/utils/portTreeGrouping.ts`. */
-export const TOP_LEVEL_GROUP_ORDER: string[] = [
-  'Core Systems',
-  'Detection / Navigation',
-  'Weapons',
-  'Manned Turrets',
-  'Remote Turrets',
-  'Ordnance',
-  'Utility Systems',
-  'Support Systems',
-]
 
 /** Factory hardpoint template per ShipDefinition id — see FactoryHardpointTemplate.
  * Built from `allDefinitions` (not the filtered `shipDefinitions` picker

@@ -15,46 +15,7 @@ import { calculateMissionPackage } from '../engine/logistics/missionPackage'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { buildPortTree } from '../utils/portTree'
 import { resolveShipImage } from '../utils/resolveShipImage'
-import { shipFactoryTemplates } from '../data/shipDefinitions'
-import { overlayCanonicalHierarchy, resolveShipDefinitionId } from '../utils/loadoutEditorModel'
-import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
-import type { Hardpoint } from '../types'
-
-/**
- * FTB-001A/FTB-001B/FTB-001E — a synthetic "<label> Slot N" row for
- * whichever component currently owns real child attachment ports (mining
- * heads, missile racks — see src/utils/componentOwnedSlots.ts). Every
- * component-owned child slot is a REAL, non-structural, targetable port,
- * sized to its owner's own source-derived spec — a Commander must be able
- * to assign a real component into it via Loadout Manager's Target picker
- * (FTB-001B established this for missile slots; FTB-001E extends it to
- * mining module slots, previously left presentation-only). It always
- * starts empty (factory/installed/target all '—') here — this row is
- * freshly re-synthesized on every render; the real persisted assignment
- * (once one exists) is read from the actual saved Hardpoint, not
- * hardcoded — a swap must never silently retain a previous, possibly
- * now-incompatible assignment.
- */
-function makeHardpointChildSlotRow(host: Hardpoint, slotNumber: number, spec: ComponentOwnedSlotSpec): Hardpoint {
-  const isMissileSlot = spec.label === 'Missile'
-  return {
-    ...host,
-    id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
-    slotLabel: `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`,
-    parentSlotLabel: host.slotLabel,
-    isStructural: false,
-    type: isMissileSlot ? 'Missile' : 'Mining Module',
-    size: spec.size ? `S${spec.size}` : host.size,
-    factoryItem: '—',
-    installedItem: '—',
-    targetItem: '—',
-    status: 'OK',
-    factoryEntityClass: undefined,
-    installedEntityClass: undefined,
-    targetEntityClass: undefined,
-    invalidMessage: undefined,
-  }
-}
+import { prepareCanonicalHardpoints } from '../utils/canonicalHardpointPreparation'
 
 function SummaryTile({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string | number; accent?: string }) {
   return (
@@ -175,22 +136,17 @@ export default function ShipDetail() {
   // EWO-026 (Task 1) — the canonical, authoritative port hierarchy for
   // this exact ship (same source MissionComposer's Loadout Manager
   // already uses via EWO-025), overlaid onto `shipHardpoints` by stable
-  // slotLabel.
-  const canonicalTemplate = (() => {
-    const definitionId = resolveShipDefinitionId(ship.id, fleetAssets)
-    return definitionId ? shipFactoryTemplates[definitionId] ?? [] : []
-  })()
-  // FTB-001B — previously, progress/readiness/missing-item math (below)
-  // read `shipHardpoints` unchanged, while only the RENDERED TREE ran
-  // through the component-owned child-slot correction (EWO-026's original
-  // "for DISPLAY ONLY" separation). That was safe while the correction was
-  // purely additive (FTB-001A's mining modules, which never had real
-  // ship-baked children to begin with). A swapped missile rack's STALE
-  // child rows are real, already-counted Hardpoint rows, though — leaving
-  // them out of the tree but still in the progress calculation would
-  // report readiness/missing-items against slots the Commander can no
-  // longer even see. Both now read the same corrected set.
-  const effectiveHardpoints = withComponentOwnedChildSlots(overlayCanonicalHierarchy(shipHardpoints, canonicalTemplate), makeHardpointChildSlotRow)
+  // slotLabel, with component-owned child slots synthesized. SW-002
+  // Revision A: extracted into the shared `prepareCanonicalHardpoints`
+  // (src/utils/canonicalHardpointPreparation.ts) so the Ship Management
+  // workspace prototype consumes the exact same preparation, not a
+  // parallel reimplementation. FTB-001B — progress/readiness/missing-item
+  // math and the rendered tree both read this same corrected set; a
+  // swapped missile rack's stale child rows are real, already-counted
+  // Hardpoint rows, so leaving them out of the tree but still in the
+  // progress calculation would report readiness/missing-items against
+  // slots the Commander can no longer even see.
+  const effectiveHardpoints = prepareCanonicalHardpoints(ship.id, shipHardpoints, fleetAssets)
 
   // Missing, Upgrade Available, and Invalid Target are kept fully distinct —
   // an interim upgrade is not the same situation as an empty slot, and an

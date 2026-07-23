@@ -63,8 +63,8 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     fireEvent.click(screen.getByText('View in Ship Detail'))
     expect(screen.getAllByText('Nav Flow Cutty').length).toBeGreaterThan(0)
     // Category hierarchy is intact — the round-2 Task 1 fix.
-    expect(screen.getByText('Weapons')).toBeInTheDocument()
-    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
+    expect(screen.getByText('Core Components')).toBeInTheDocument()
     expect(screen.getByText('Manned Turrets')).toBeInTheDocument()
 
     // Ship Detail -> Loadout Manager again — Existing Loadouts must still list Flow Build A.
@@ -82,8 +82,8 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
 
     // Back to Ship Detail one more time — hierarchy still intact, nothing lost.
     fireEvent.click(screen.getByText('View in Ship Detail'))
-    expect(screen.getByText('Weapons')).toBeInTheDocument()
-    expect(screen.getByText('Core Systems')).toBeInTheDocument()
+    expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
+    expect(screen.getByText('Core Components')).toBeInTheDocument()
   })
 
   it('Save As New during the same navigation cycle produces a distinct Build that survives a further Ship Detail round-trip', () => {

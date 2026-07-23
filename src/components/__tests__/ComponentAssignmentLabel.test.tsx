@@ -9,16 +9,17 @@ afterEach(() => {
 })
 
 describe('EWO-026 (Task 6/13): ComponentAssignmentLabel static presentation contract', () => {
-  it('13. a component with a real resolvable Grade renders that Grade line (DayBreak, real generated-data)', () => {
+  it('13. a component with real generated Class+Grade renders the CAT-001 "{Class} {GradeLetter}" identity line (DayBreak, real generated-data)', () => {
     render(<ComponentAssignmentLabel value="DayBreak" />)
     expect(screen.getByText('DayBreak')).toBeInTheDocument()
-    // Real bulk-catalog grade for DayBreak is 3 -> "Grade C" (see EWO-026 report).
-    expect(screen.getByText('Grade C')).toBeInTheDocument()
+    // Real generated-data (CAT-001): DayBreak's Classification is "Civilian",
+    // grade 3 -> letter C -> "Civilian C" — the literal CAT-001 worked example.
+    expect(screen.getByText('Civilian C')).toBeInTheDocument()
   })
 
-  it('14. when both Class and Grade are available, they render as one compact combined line (EWO-036B: "Military A", not two separate lines)', async () => {
+  it('14. when both Class and Grade are available, they render as one compact combined line (CAT-001: "Military A", not two separate lines, no word "Grade")', async () => {
     vi.doMock('../../utils/componentPresentation', () => ({
-      resolveComponentLabel: () => ({ primaryLabel: 'Avalanche', classificationLabel: 'Military A', diagnosticInternalName: null }),
+      resolveComponentLabel: () => ({ primaryLabel: 'Avalanche', identityLine: 'Military A', diagnosticInternalName: null }),
     }))
     const { default: MockedLabel } = await import('../ComponentAssignmentLabel')
     render(<MockedLabel value="Avalanche" />)
@@ -28,13 +29,14 @@ describe('EWO-026 (Task 6/13): ComponentAssignmentLabel static presentation cont
     expect(screen.queryByText('Grade A')).not.toBeInTheDocument()
   })
 
-  it('15. missing Class never renders a blank line — only the primary name and (if present) Grade appear', () => {
-    // No component in the current pipeline data carries a real Class value
-    // (see EWO-026 Task 5 report) — DayBreak is real data with a Grade but
-    // no Class, exactly the "Class missing, Grade present" case.
-    const { container } = render(<ComponentAssignmentLabel value="DayBreak" />)
+  it('15. missing Class falls back to the bare grade letter alone — never the word "Grade", never a blank line', async () => {
+    vi.doMock('../../utils/componentPresentation', () => ({
+      resolveComponentLabel: () => ({ primaryLabel: 'NoClassItem', identityLine: 'C', diagnosticInternalName: null }),
+    }))
+    const { default: MockedLabel } = await import('../ComponentAssignmentLabel')
+    const { container } = render(<MockedLabel value="NoClassItem" />)
     const lines = Array.from(container.querySelectorAll('span.block')).map((el) => el.textContent)
-    expect(lines).toEqual(['DayBreak', 'Grade C'])
+    expect(lines).toEqual(['NoClassItem', 'C'])
   })
 
   it('16. missing Grade never renders false/placeholder text — an unmatched value shows only its own name', () => {

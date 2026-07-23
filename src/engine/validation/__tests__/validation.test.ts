@@ -1,13 +1,30 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { runFullValidation, validateActiveBuildReference, validateCatalogIntegrity } from '../index'
-import { ships, builds, hardpoints } from '../../../data/seed'
 import { shipDefinitions } from '../../../data/shipDefinitions'
-import { migrateSeedFleetToAssets } from '../../../data/fleetAssetMigration'
+import { ships, builds } from '../../../data/seed'
+import { useFleetStore } from '../../../store/useFleetStore'
 import type { Ship, Build } from '../../../types'
+
+const initialState = useFleetStore.getState()
+
+beforeEach(() => {
+  localStorage.clear()
+  useFleetStore.setState(initialState, true)
+})
+
+// SW-005 Phase 2 — 135c and UTV's Factory Loadout (their only Build) is no
+// longer present in raw src/data/seed.ts exports at all; it's constructed
+// fresh in useFleetStore.ts from canonical topology. These tests validate
+// the live, fully-constructed store state — what a Commander actually
+// sees — rather than the raw seed.ts fragment.
+function liveFleetInputs() {
+  const s = useFleetStore.getState()
+  return { ships: s.ships, builds: s.builds, hardpoints: s.hardpoints, fleetAssets: s.fleetAssets, shipDefinitions }
+}
 
 describe('runFullValidation (Part 2, test 38)', () => {
   it('38. returns structured, queryable ValidationIssue records with severity/code/entityType/entityId/message', () => {
-    const summary = runFullValidation({ ships, builds, hardpoints, fleetAssets: migrateSeedFleetToAssets(), shipDefinitions })
+    const summary = runFullValidation(liveFleetInputs())
     expect(Array.isArray(summary.issues)).toBe(true)
     for (const issue of summary.issues) {
       expect(['ERROR', 'WARNING', 'INFO']).toContain(issue.severity)
@@ -19,17 +36,27 @@ describe('runFullValidation (Part 2, test 38)', () => {
   })
 
   it('the real seed dataset produces at least one WARNING for unresolved factory data (M80) without crashing', () => {
-    const summary = runFullValidation({ ships, builds, hardpoints, fleetAssets: migrateSeedFleetToAssets(), shipDefinitions })
+    const summary = runFullValidation(liveFleetInputs())
     expect(summary.issues.some((i) => i.code === 'UNRESOLVED_FACTORY_DATA')).toBe(true)
   })
 
   it('the real seed dataset produces an INCOMPATIBLE_TARGET issue for M80 Atlas (Golden Scenario A)', () => {
-    const summary = runFullValidation({ ships, builds, hardpoints, fleetAssets: migrateSeedFleetToAssets(), shipDefinitions })
+    const summary = runFullValidation(liveFleetInputs())
     expect(summary.issues.some((i) => i.code === 'INCOMPATIBLE_TARGET')).toBe(true)
   })
 
-  it('the real seed dataset has exactly the one known intentional invalid-target ERROR (M80), no other structural errors', () => {
-    const summary = runFullValidation({ ships, builds, hardpoints, fleetAssets: migrateSeedFleetToAssets(), shipDefinitions })
+  it('the real seed dataset has exactly the one known, deliberate invalid-target ERROR (M80), no other structural errors', () => {
+    // SW-005 Phase 2 — every seed ship's Factory Loadout is now
+    // constructed fresh from real, validated canonical StarBreaker
+    // topology, not hand-derived from a CUSTOM build's own factoryItem
+    // column. The two defects SW-003 temporarily surfaced (M80's
+    // Factory-twin duplicate, Mole's Mining Head 1 size mismatch) were
+    // artifacts of that hand-derivation, not the real canonical data —
+    // GF-002B independently confirmed MOLE's real export has zero Invalid
+    // Target rows. Only M80's own hand-authored CUSTOM build (m80-speed,
+    // the deliberate Golden Scenario H regression fixture) still carries
+    // the one intentional defect.
+    const summary = runFullValidation(liveFleetInputs())
     const errors = summary.issues.filter((i) => i.severity === 'ERROR')
     expect(errors).toHaveLength(1)
     expect(errors[0].code).toBe('INCOMPATIBLE_TARGET')
@@ -67,12 +94,16 @@ describe('validateCatalogIntegrity (duplicate IDs)', () => {
 
 describe('Build Library vs Assigned Build (Part 14, tests 20-21)', () => {
   it('20/21: an assigned custom Build (Cutlass Red Medical Support Build) is a real, valid Build record even without a Library template', () => {
-    const cutlassRedBuild = builds.find((b) => b.id === 'cutlass-red-medical')
+    // SW-006 — cutlass-red-medical is now constructed fresh from canonical
+    // topology (useFleetStore.ts's buildCanonicalSeedCustomBuilds), not a
+    // raw src/data/seed.ts export.
+    const s = useFleetStore.getState()
+    const cutlassRedBuild = s.builds.find((b) => b.id === 'cutlass-red-medical')
     expect(cutlassRedBuild).toBeDefined()
     expect(cutlassRedBuild?.kind).toBe('CUSTOM')
-    const cutlassRed = ships.find((s) => s.id === 'cutlass-red')!
+    const cutlassRed = s.ships.find((sh) => sh.id === 'cutlass-red')!
     expect(cutlassRed.activeBuildId).toBe(cutlassRedBuild!.id)
-    const issues = validateActiveBuildReference([cutlassRed], builds)
+    const issues = validateActiveBuildReference([cutlassRed], s.builds)
     expect(issues).toEqual([])
   })
 })

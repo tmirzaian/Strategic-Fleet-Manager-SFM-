@@ -89,11 +89,12 @@ describe('EWO-026 (Task 7/13): TargetComponentPicker option presentation — Gra
   it('18. DayBreak (a component actually assigned on a deep-imported ship) keeps showing its Grade', () => {
     render(<TargetComponentPicker id="t1" value="" onChange={() => {}} options={options} />)
     fireEvent.click(screen.getByRole('combobox'))
-    // Real bulk-catalog grade for DayBreak is 3 -> "Grade C" — scoped to
+    // Real generated-data (CAT-001): DayBreak's Classification is
+    // "Civilian", grade 3 -> letter C -> "Civilian C" — scoped to
     // DayBreak's own option row, since another unrelated option may
     // coincidentally share the same grade letter.
     const dayBreakOption = screen.getByText('DayBreak').closest('button')!
-    expect(dayBreakOption).toHaveTextContent('Grade C')
+    expect(dayBreakOption).toHaveTextContent('Civilian C')
   })
 
   it('17/19. a catalog-only component with no per-ship deep-import instance (Bolide) now resolves its real Grade too — the EWO-026 root-cause fix (previously name-only, not because Grade was genuinely absent)', () => {
@@ -103,11 +104,12 @@ describe('EWO-026 (Task 7/13): TargetComponentPicker option presentation — Gra
     ]
     render(<TargetComponentPicker id="t2" value="" onChange={() => {}} options={catalogOnlyOptions} />)
     fireEvent.click(screen.getByRole('combobox'))
-    // Real bulk-catalog grades: Bolide=2 -> Grade B, Cirrus=3 -> Grade C —
-    // both use the exact same presentation formatter as the static
-    // Factory/Installed/Target columns (resolveComponentLabel), never a
-    // second, inconsistent option-only model.
-    expect(screen.getByText('Bolide').closest('button')).toHaveTextContent('Grade B')
-    expect(screen.getByText('Cirrus').closest('button')).toHaveTextContent('Grade C')
+    // Real generated-data (CAT-001): Bolide=Military/grade 2 -> "Military
+    // B", Cirrus=Stealth/grade 3 -> "Stealth C" — both use the exact same
+    // presentation formatter as the static Factory/Installed/Target
+    // columns (resolveComponentLabel), never a second, inconsistent
+    // option-only model.
+    expect(screen.getByText('Bolide').closest('button')).toHaveTextContent('Military B')
+    expect(screen.getByText('Cirrus').closest('button')).toHaveTextContent('Stealth C')
   })
 })

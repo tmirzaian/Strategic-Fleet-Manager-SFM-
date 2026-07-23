@@ -227,7 +227,7 @@ describe('EWO-028 (Task 2/12): catalog-driven Add New Item', () => {
 describe('EWO-028 (Task 4/5/6/12): Edit, Delete, and the quantity-reduction safeguard, end to end in the DOM', () => {
   it('a below-allocation quantity edit shows the Task 6 warning naming the exact ship/build, and Cancel leaves the record untouched', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 2, neededBy: 'None', disposition: 'Store' })
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     renderHangar()
 
     const row = screen.getByText('FR-66').closest('tr')!
@@ -246,7 +246,7 @@ describe('EWO-028 (Task 4/5/6/12): Edit, Delete, and the quantity-reduction safe
 
   it('Continue Anyway on the quantity safeguard saves the reduction and never deletes the reservation record', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 2, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     renderHangar()
 
     const row = screen.getByText('FR-66').closest('tr')!
@@ -261,7 +261,7 @@ describe('EWO-028 (Task 4/5/6/12): Edit, Delete, and the quantity-reduction safe
 
   it('17/18. Delete on a reserved item names the exact ship and Build, never a generic "in use" message alone', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     renderHangar()
 
     const row = screen.getByText('FR-66').closest('tr')!
@@ -407,9 +407,9 @@ describe('EWO-029 (Task 4/16): Reserve workflow', () => {
 describe('EWO-029 (Task 6/16): Release Reservation', () => {
   it('21/22/23. releasing a reservation via Manage Reservations decreases Reserved, increases Available, and never touches the Loadout target itself', () => {
     useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
-    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Shield 1', componentName: 'FR-66' })
+    const reserve = useFleetStore.getState().reserveComponent({ missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Left Shield Generator', componentName: 'FR-66' })
     expect(reserve.success).toBe(true)
-    const targetBefore = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-escort' && h.slotLabel === 'Shield 1')?.targetItem
+    const targetBefore = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-escort' && h.slotLabel === 'Left Shield Generator')?.targetItem
 
     renderHangar()
     const row = screen.getByText('FR-66').closest('tr')!
@@ -419,7 +419,7 @@ describe('EWO-029 (Task 6/16): Release Reservation', () => {
     expect(useFleetStore.getState().reservations.find((r) => r.id === reserve.reservationId)?.status).toBe('RELEASED')
     const availability = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
     expect(availability.qty).toBe(1) // Hangar stock itself is untouched by release
-    const targetAfter = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-escort' && h.slotLabel === 'Shield 1')?.targetItem
+    const targetAfter = useFleetStore.getState().hardpoints.find((h) => h.buildId === 'ghost-escort' && h.slotLabel === 'Left Shield Generator')?.targetItem
     expect(targetAfter).toBe(targetBefore) // Loadout target unchanged
   })
 })

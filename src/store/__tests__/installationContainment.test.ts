@@ -46,32 +46,32 @@ describe('EWO-STAB-002: installComponent refuses to guess a destination slot', (
     expect(ghostHardpoints().map((h) => ({ slotLabel: h.slotLabel, installedItem: h.installedItem }))).toEqual(before)
   })
 
-  it("3. the Veil scenario — a real Shield (FR-66) cannot enter a real Power Plant slot ('Power 1'), even with an explicit slotLabel", () => {
-    const before = ghostHardpoints().find((h) => h.slotLabel === 'Power 1')!
-    const result = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Power 1')
+  it("3. the Veil scenario — a real Shield (FR-66) cannot enter a real Power Plant slot ('Power Plant'), even with an explicit slotLabel", () => {
+    const before = ghostHardpoints().find((h) => h.slotLabel === 'Power Plant')!
+    const result = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Power Plant')
     expect(result.matched).toBe(false)
     expect(result.blocked).toBe('incompatible')
-    const after = ghostHardpoints().find((h) => h.slotLabel === 'Power 1')!
+    const after = ghostHardpoints().find((h) => h.slotLabel === 'Power Plant')!
     expect(after.installedItem).toBe(before.installedItem)
   })
 
   it('4. a Shield also cannot enter a Cooler slot — unrelated-category rejection is not Power-Plant-specific', () => {
-    expect(ghostHardpoints().some((h) => h.slotLabel === 'Cooler 1')).toBe(true)
-    const result = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Cooler 1')
+    expect(ghostHardpoints().some((h) => h.slotLabel === 'Left Cooler')).toBe(true)
+    const result = useFleetStore.getState().installComponent('ghost', 'FR-66', 'Left Cooler')
     expect(result.matched).toBe(false)
     expect(result.blocked).toBe('incompatible')
   })
 
   it('5. a genuinely compatible component (Slipstream, a real Power Plant) still installs into an explicit Power Plant slot', () => {
-    const result = useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power 1')
+    const result = useFleetStore.getState().installComponent('ghost', 'Slipstream', 'Power Plant')
     expect(result.matched).toBe(true)
     expect(result.blocked).toBeUndefined()
-    const after = ghostHardpoints().find((h) => h.slotLabel === 'Power 1')!
+    const after = ghostHardpoints().find((h) => h.slotLabel === 'Power Plant')!
     expect(after.installedItem).toBe('Slipstream')
   })
 
   it('6. an unrecognized/uncataloged item name is still permitted (never disprove compatibility we have no data for — EWO-024\'s existing philosophy, unchanged by containment)', () => {
-    const result = useFleetStore.getState().installComponent('ghost', 'Some Completely Unknown Component', 'Power 1')
+    const result = useFleetStore.getState().installComponent('ghost', 'Some Completely Unknown Component', 'Power Plant')
     expect(result.matched).toBe(true)
   })
 })
@@ -111,7 +111,7 @@ describe('EWO-STAB-002: moveToShip requires a validated slotLabel and performs n
   it('3. the Veil scenario via Move to Ship — a real Shield cannot land in a real Power Plant slot even with an explicit slotLabel, and Hangar quantity is untouched', () => {
     addStock('FR-66', 'Shield', 'S1', 1)
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')!
-    const result = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Power 1')
+    const result = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Power Plant')
     expect(result.success).toBe(false)
     expect(useFleetStore.getState().hangarItems.find((h) => h.name === 'FR-66')?.qty).toBe(1)
   })
@@ -119,10 +119,10 @@ describe('EWO-STAB-002: moveToShip requires a validated slotLabel and performs n
   it('4. a valid slot and a compatible component still succeeds through Move to Ship (the method is contained, not disabled)', () => {
     addStock('Slipstream', 'Power Plant', 'S1', 1)
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'Slipstream')!
-    const result = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Power 1')
+    const result = useFleetStore.getState().moveToShip(item.id, 'ghost', 'Power Plant')
     expect(result.success).toBe(true)
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
-    const installed = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === 'Power 1')!
+    const installed = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === 'Power Plant')!
     expect(installed.installedItem).toBe('Slipstream')
   })
 })

@@ -128,11 +128,11 @@ describe('EWO-STAB-003D: mission target identity propagation (saveMissionConfigu
       shipId: 'ghost',
       name: 'EWO-STAB-003D Target Test',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': 'Veil' },
+      targetOverrides: { 'Left Shield Generator': 'Veil' },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe('Veil')
     expect(hp.targetEntityClass).toBe(VEIL_ENTITY_CLASS)
   })
@@ -144,11 +144,11 @@ describe('EWO-STAB-003D: mission target identity propagation (saveMissionConfigu
       shipId: 'ghost',
       name: 'EWO-STAB-003D Unresolvable Target Test',
       startingState: 'EMPTY',
-      targetOverrides: { 'Shield 1': madeUpName },
+      targetOverrides: { 'Left Shield Generator': madeUpName },
       setActive: false,
     })
     expect(save.success).toBe(true)
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Shield 1')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === save.buildId && h.slotLabel === 'Left Shield Generator')!
     expect(hp.targetItem).toBe(madeUpName)
     expect(hp.targetEntityClass).toBeUndefined()
   })

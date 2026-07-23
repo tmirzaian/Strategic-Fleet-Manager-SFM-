@@ -9,6 +9,7 @@ import DecisionCenter from './pages/DecisionCenter'
 import FleetRoadmap from './pages/FleetRoadmap'
 import CaptainsLog from './pages/CaptainsLog'
 import MissionComposer from './pages/MissionComposer'
+import ShipWorkspacePrototype from './pages/ShipWorkspacePrototype'
 
 export default function App() {
   return (
@@ -25,6 +26,10 @@ export default function App() {
           <Route path="/ship" element={<ShipDetail />} />
           <Route path="/ship/:shipId" element={<ShipDetail />} />
           <Route path="/loadout-manager" element={<MissionComposer />} />
+          {/* Beta 2.0 structural prototype (Commander Sea Trials) — isolated
+              from Ship Detail / Loadout Manager, which remain unchanged. */}
+          <Route path="/ship-workspace" element={<ShipWorkspacePrototype />} />
+          <Route path="/ship-workspace/:shipId" element={<ShipWorkspacePrototype />} />
           <Route path="/hangar" element={<HangarInventory />} />
           <Route path="/quick-update" element={<QuickUpdate />} />
           <Route path="/decision-center" element={<DecisionCenter />} />
