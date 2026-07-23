@@ -17,10 +17,12 @@
  * `hardpoint_weapon_center`/`hardpoint_front_module`/`hardpoint_rear_module`).
  */
 export interface DefaultLoadoutConfigurationEntry {
-  /** The exact DataCore `itemPortName` — e.g. "hardpoint_weapon_center". Never a display name. */
+  /** The exact DataCore `itemPortName` — e.g. "hardpoint_weapon_center". Never a display name. NOT globally unique on its own — see `ancestorPortNames`. */
   itemPortName: string
   /** Null for a top-level entry; the parent's own `itemPortName` for a nested one — mirrors the raw `entries[]` recursion exactly, never flattened. */
   parentItemPortName: string | null
+  /** Every ancestor `itemPortName` from the root down to (not including) this entry itself, root-first. Empty for a top-level entry. SW-010B fleet-wide certification finding: `itemPortName` alone is NOT a unique identity — DataCore reuses generic sub-port names (`turret_left`, `hardpoint_class_2`, `Screen_Left_Top`) across structurally repeated sibling assemblies (confirmed live: the real `AEGS_Retaliator` record declares 5 distinct turret mounts, each with its own `turret_left`/`turret_right` children, each of THOSE with its own `hardpoint_class_2` grandchild — same names, 5 physically distinct mounts). `parentItemPortName` alone is insufficient too (the 5 `turret_left` parents are themselves same-named at their own level in some ships) — only the FULL ancestor chain disambiguates. This is what the Canonical Merge stage's duplicate-detection keys on, never `itemPortName` alone. */
+  ancestorPortNames: string[]
   /** The inline default entity class, when the raw entry carries one directly (`entityClassName !== ""`). Null otherwise — never guessed from the reference. */
   factoryEntityClassName: string | null
   /** The `file://...` reference DataCore carries when there is no inline default — present or absent independently of `factoryEntityClassName` (both can theoretically be set; only one is ever populated in every real example seen so far). */
@@ -76,6 +78,7 @@ export interface SlotDiagnostic {
     | 'swap-group-default-not-self-member'
     | 'swap-group-shared-across-slots'
     | 'swap-group-duplicate-member'
+    | 'swap-group-membership-implausible'
   message: string
   severity: 'info' | 'warning'
 }

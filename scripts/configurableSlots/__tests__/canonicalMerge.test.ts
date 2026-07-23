@@ -6,6 +6,7 @@ import type { DefaultLoadoutConfigurationEntry, PhysicalPortFact, SwapGroup } fr
 function entry(overrides: Partial<DefaultLoadoutConfigurationEntry> & { itemPortName: string }): DefaultLoadoutConfigurationEntry {
   return {
     parentItemPortName: null,
+    ancestorPortNames: [],
     factoryEntityClassName: null,
     factoryEntityClassReference: null,
     hasNestedEntries: false,
@@ -81,6 +82,28 @@ describe('mergeConfigurableTopology — duplicate port names in the configuratio
     expect(topology.configurableSlots).toHaveLength(1)
     expect(topology.configurableSlots[0].defaultComponentEntityClass).toBe('A')
     expect(topology.diagnostics.some((d) => d.code === 'configuration-duplicate-port-name')).toBe(true)
+  })
+
+  /** SW-010B fleet-wide certification finding, live-proven against the
+   * real `AEGS_Retaliator` record: the SAME `itemPortName` legitimately
+   * recurs under different parent assemblies (5 distinct turret mounts
+   * each declaring their own `turret_left` child). Before this fix, bare
+   * `itemPortName` deduplication treated these as false duplicates and
+   * silently discarded 4 of every 5 real, distinct slots. */
+  it('does NOT treat the same itemPortName under different ancestor paths as a duplicate — both are real, distinct ports', () => {
+    const configurationEntries: ResolvedConfigurationEntry[] = [
+      { entry: entry({ itemPortName: 'turret_left', parentItemPortName: 'hardpoint_turret_fronttop', ancestorPortNames: ['hardpoint_turret_fronttop'] }), resolvedDefaultEntityClass: 'Gun_A' },
+      { entry: entry({ itemPortName: 'turret_left', parentItemPortName: 'hardpoint_turret_backbottom', ancestorPortNames: ['hardpoint_turret_backbottom'] }), resolvedDefaultEntityClass: 'Gun_B' },
+    ]
+    const topology = mergeConfigurableTopology({
+      shipEntityClass: 'TEST_MultiTurretShip',
+      physicalPorts: [],
+      configurationEntries,
+      resolveSwapGroupFor: () => null,
+    })
+    expect(topology.configurableSlots).toHaveLength(2)
+    expect(topology.configurableSlots.map((s) => s.defaultComponentEntityClass).sort()).toEqual(['Gun_A', 'Gun_B'])
+    expect(topology.diagnostics.some((d) => d.code === 'configuration-duplicate-port-name')).toBe(false)
   })
 })
 

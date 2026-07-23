@@ -80,29 +80,61 @@ function buildSlot(entry: DefaultLoadoutConfigurationEntry, resolvedDefaultEntit
   }
 }
 
+/** Joins an entry's full ancestor chain plus its own name into one
+ * dedup-identity key. SW-010B fleet-wide certification finding:
+ * `itemPortName` alone is NOT unique across a ship's Default Loadout tree
+ * — DataCore reuses generic sub-port names (`turret_left`,
+ * `hardpoint_class_2`) across structurally repeated sibling assemblies
+ * (confirmed live: `AEGS_Retaliator` declares 5 distinct turret mounts,
+ * each with its own same-named `turret_left`/`turret_right` children).
+ * Before this fix, bare-name deduplication silently discarded 4 of every
+ * 5 such entries as "duplicates" — a real correctness bug, not a
+ * cosmetic one (`docs/EngineeringRiskRegister.md` should record this).
+ * See `types.ts`'s `ancestorPortNames` doc comment for the full
+ * investigation. */
+function pathKey(entry: DefaultLoadoutConfigurationEntry): string {
+  return [...entry.ancestorPortNames, entry.itemPortName].join('/')
+}
+
 /**
  * The one entry point this module exposes. Never mutates `physicalPorts`
  * — the merge only ever reads it, to decide "attach" vs. "synthesize";
  * the caller remains solely responsible for the real `Hardpoint`/`Port`
  * store (this module has no write access to it by construction).
+ *
+ * Known limitation (documented, not fixed here — SW-010B Certification
+ * Report Appendix A): "attach vs. synthesize" below still matches against
+ * `physicalPortNames`, a flat `Set<string>` of BARE port names built from
+ * the real geometry export (`PhysicalPortFact[]`, from
+ * `collectPhysicalPortNames`'s own flattening in the driver script) — it
+ * has the identical repeated-name ambiguity `pathKey` above just fixed
+ * for configuration entries, but on the geometry side instead. Two
+ * physically distinct real ports sharing a bare name (e.g. two different
+ * `turret_left` mounts) currently cannot be told apart by this check.
+ * Deliberately not fixed in this sprint: `PhysicalPortFact` and its
+ * geometry-tree source are Authority 1 (Physical Port Graph), out of
+ * `scripts/configurableSlots/`'s own scope by design (see `types.ts`'s
+ * `PhysicalPortFact` doc comment) — widening it to carry full ancestor
+ * paths is a real fix, but a separate one, for a future phase.
  */
 export function mergeConfigurableTopology(input: MergeInput): CanonicalConfigurableTopology {
   const physicalPortNames = new Set(input.physicalPorts.map((p) => p.itemPortName))
   const diagnostics: MergeDiagnostic[] = []
   const configurableSlots: ConfigurableSlot[] = []
-  const seenPortNames = new Set<string>()
+  const seenPortPaths = new Set<string>()
 
   for (const { entry, resolvedDefaultEntityClass } of input.configurationEntries) {
-    if (seenPortNames.has(entry.itemPortName)) {
+    const key = pathKey(entry)
+    if (seenPortPaths.has(key)) {
       diagnostics.push({
         code: 'configuration-duplicate-port-name',
-        message: `"${entry.itemPortName}" appears more than once in this ship's Default Loadout configuration entries — only the first occurrence is merged.`,
+        message: `"${key}" appears more than once in this ship's Default Loadout configuration entries — only the first occurrence is merged.`,
         itemPortName: entry.itemPortName,
         severity: 'warning',
       })
       continue
     }
-    seenPortNames.add(entry.itemPortName)
+    seenPortPaths.add(key)
 
     const alreadyPhysical = physicalPortNames.has(entry.itemPortName)
     const sourceAuthority: ConfigurableSlot['sourceAuthority'] = alreadyPhysical ? 'geometry-and-configuration' : 'configuration-only'

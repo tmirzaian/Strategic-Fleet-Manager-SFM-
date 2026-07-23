@@ -62,7 +62,7 @@ export function findDefaultLoadoutComponent(record: RawDcbRecordJson): unknown {
  * diagnostics. Depth-first, mirroring the exact recursion shape DataCore
  * itself uses (never flattened, never re-ordered).
  */
-function walk(entries: unknown, parentItemPortName: string | null, out: DefaultLoadoutConfigurationEntry[], diagnostics: DefaultLoadoutDiagnostic[]): void {
+function walk(entries: unknown, parentItemPortName: string | null, ancestorPortNames: string[], out: DefaultLoadoutConfigurationEntry[], diagnostics: DefaultLoadoutDiagnostic[]): void {
   if (!Array.isArray(entries)) return
   for (const raw of entries) {
     const parsed = parseRawEntry(raw)
@@ -74,6 +74,7 @@ function walk(entries: unknown, parentItemPortName: string | null, out: DefaultL
     const entry: DefaultLoadoutConfigurationEntry = {
       itemPortName: parsed.itemPortName,
       parentItemPortName,
+      ancestorPortNames,
       factoryEntityClassName: parsed.entityClassName ? parsed.entityClassName : null,
       factoryEntityClassReference: parsed.entityClassReference,
       hasNestedEntries,
@@ -107,7 +108,7 @@ function walk(entries: unknown, parentItemPortName: string | null, out: DefaultL
       })
     }
 
-    if (hasNestedEntries) walk(nestedEntries, parsed.itemPortName, out, diagnostics)
+    if (hasNestedEntries) walk(nestedEntries, parsed.itemPortName, [...ancestorPortNames, parsed.itemPortName], out, diagnostics)
   }
 }
 
@@ -140,22 +141,43 @@ export function normalizeEntityClassReference(reference: string): string {
 }
 
 /**
- * The one entry point this module exposes. Never throws — a record with
- * no default-loadout component, or one whose shape doesn't match
- * expectations, produces an empty result plus (where relevant)
+ * SW-010B (Objective 1) — extracts directly from an already-isolated raw
+ * `loadout.entries[]` array, independent of the full per-entity
+ * `RawDcbRecordJson` shape. Originally added to support a whole-universe
+ * bulk polymorphic field query (`dcb query
+ * EntityClassDefinition.Components[SEntityComponentDefaultLoadoutParams].loadout[SItemPortLoadoutManualParams].entries`)
+ * as an alternative to one `dcb query --filter <exact>` process per ship.
+ * That bulk query did not return within 10+ minutes against the real LIVE
+ * Data.p4k (StarBreaker resolving a deeply recursive polymorphic array
+ * across ~29k records is far more expensive than a scalar field) — the
+ * fleet-wide certification driver (`scripts/generateConfigurableSlotCertification.ts`)
+ * ended up using the bounded, proven per-ship `--filter` approach instead,
+ * scoped only to the known ~257 raw-data ships. This function is kept
+ * because it's still useful (any future caller with an already-isolated
+ * entries array, e.g. a unit test, doesn't need a synthetic
+ * `RawDcbRecordJson` wrapper) and shares the same `walk` logic as
+ * `extractDefaultLoadoutConfiguration`, so both entry points produce
+ * identical results for the same underlying entries.
+ */
+export function extractDefaultLoadoutEntries(entries: unknown): DefaultLoadoutExtractionResult {
+  const out: DefaultLoadoutConfigurationEntry[] = []
+  const diagnostics: DefaultLoadoutDiagnostic[] = []
+  walk(entries, null, [], out, diagnostics)
+  const referenceOnlyEntries = out.filter((e) => !e.factoryEntityClassName && e.factoryEntityClassReference)
+  return { entries: out, referenceOnlyEntries, diagnostics }
+}
+
+/**
+ * The one entry point this module exposes for a full per-entity record
+ * (the `dcbQuery.ts`-style single-entity query path). Never throws — a
+ * record with no default-loadout component, or one whose shape doesn't
+ * match expectations, produces an empty result plus (where relevant)
  * diagnostics, exactly like `dcbQuery.ts`'s own "never guessed" contract.
  */
 export function extractDefaultLoadoutConfiguration(record: RawDcbRecordJson): DefaultLoadoutExtractionResult {
   const component = findDefaultLoadoutComponent(record)
-  const entries: DefaultLoadoutConfigurationEntry[] = []
-  const diagnostics: DefaultLoadoutDiagnostic[] = []
+  if (!isObject(component)) return { entries: [], referenceOnlyEntries: [], diagnostics: [] }
 
-  if (isObject(component)) {
-    const loadout = isObject(component.loadout) ? (component.loadout as { entries?: unknown }) : null
-    if (loadout) walk(loadout.entries, null, entries, diagnostics)
-  }
-
-  const referenceOnlyEntries = entries.filter((e) => !e.factoryEntityClassName && e.factoryEntityClassReference)
-
-  return { entries, referenceOnlyEntries, diagnostics }
+  const loadout = isObject(component.loadout) ? (component.loadout as { entries?: unknown }) : null
+  return extractDefaultLoadoutEntries(loadout?.entries)
 }

@@ -74,6 +74,46 @@ describe('resolveSwapGroup — the flightReady false-positive fix (live-proven b
   })
 })
 
+/** Builds a synthetic tag map where `tag` is carried by `memberCount`
+ * distinct entities (including `defaultEntityClass`), standing in for a
+ * generic gameplay/system tag at an arbitrary scale — used to test the
+ * plausibility ceiling without hand-listing hundreds of map entries. */
+function buildTagPopulation(defaultEntityClass: string, tag: string, memberCount: number): Map<string, string> {
+  const map = new Map<string, string>()
+  map.set(defaultEntityClass, tag)
+  for (let i = 1; i < memberCount; i++) map.set(`Population_Member_${i}`, tag)
+  return map
+}
+
+describe('resolveSwapGroup — the fleet-wide membership-ceiling fix (SW-010B live-proven bug)', () => {
+  /** Real data confirmed during the SW-010B 257-ship fleet sweep: when a
+   * default component's ONLY qualifying tag is a generic, near-universal
+   * one (no narrower alternative tag present at all on that component),
+   * the smallest-membership tie-break has nothing to prefer it over — it
+   * wins by default, exactly like `flightReady` did 2,901 times across
+   * the real fleet before this fix (and 8 other generic tags:
+   * `Ship_Dock_Refuel`, `Helmet`, `weaponMountUsable`, `gimbalMount`,
+   * `miningMount`, `webcustom`, `LaserCannon`, `Station_Dock_Large`).
+   * This test locks in the fix: a tag whose global membership exceeds the
+   * plausibility ceiling is rejected outright, even as a sole candidate. */
+  it('rejects an implausibly large tag even when it is the ONLY qualifying tag on the default component', () => {
+    const tagsByEntityClass = buildTagPopulation('Some_Default', 'genericGameplayTag', 50)
+    const globalIndex = buildGlobalTagIndex(tagsByEntityClass)
+    const knownCatalogEntityClasses = new Set(tagsByEntityClass.keys())
+    const result = resolveSwapGroup({ defaultEntityClass: 'Some_Default', knownCatalogEntityClasses }, tagsByEntityClass, globalIndex)
+    expect(result).toBeNull()
+  })
+
+  it('still resolves a real, narrowly-scoped tag whose membership sits within the plausible range', () => {
+    const tagsByEntityClass = buildTagPopulation('Some_Default', 'realSwapGroupTag', 7)
+    const globalIndex = buildGlobalTagIndex(tagsByEntityClass)
+    const knownCatalogEntityClasses = new Set(tagsByEntityClass.keys())
+    const result = resolveSwapGroup({ defaultEntityClass: 'Some_Default', knownCatalogEntityClasses }, tagsByEntityClass, globalIndex)
+    expect(result?.swapGroupId).toBe('realSwapGroupTag')
+    expect(result?.eligibleComponents).toHaveLength(7)
+  })
+})
+
 describe('resolveSwapGroup — no qualifying tag', () => {
   it('returns null when the default has no tags at all', () => {
     const tagsByEntityClass = new Map<string, string>()

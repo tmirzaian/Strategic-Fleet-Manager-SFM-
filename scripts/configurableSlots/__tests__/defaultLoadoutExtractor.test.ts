@@ -132,3 +132,60 @@ describe('extractDefaultLoadoutConfiguration', () => {
     expect(result).toEqual({ entries: [], referenceOnlyEntries: [], diagnostics: [] })
   })
 })
+
+/** SW-010B fleet-wide certification finding: `itemPortName` alone is not
+ * a unique identity across a ship's Default Loadout tree. Confirmed live
+ * against the real `AEGS_Retaliator` record — 5 distinct turret mounts
+ * each declare their own same-named `turret_left`/`turret_right`
+ * children. This fixture mirrors that exact shape at smaller scale: two
+ * distinct top-level turret mounts, each with a same-named child port. */
+const REPEATED_SIBLING_NAMES_RECORD: RawDcbRecordJson = {
+  _RecordName_: 'EntityClassDefinition.TEST_MultiTurretShip',
+  _RecordId_: 'guid',
+  _RecordValue_: {
+    Components: [
+      {
+        _Type_: 'SEntityComponentDefaultLoadoutParams',
+        loadout: {
+          entries: [
+            {
+              itemPortName: 'hardpoint_turret_fronttop',
+              entityClassName: 'Turret_Base_A',
+              entityClassReference: null,
+              loadout: { entries: [{ itemPortName: 'turret_left', entityClassName: 'Gun_A', entityClassReference: null, loadout: null }] },
+            },
+            {
+              itemPortName: 'hardpoint_turret_backbottom',
+              entityClassName: 'Turret_Base_B',
+              entityClassReference: null,
+              loadout: { entries: [{ itemPortName: 'turret_left', entityClassName: 'Gun_B', entityClassReference: null, loadout: null }] },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+
+describe('extractDefaultLoadoutConfiguration — ancestorPortNames (repeated sibling names)', () => {
+  it('records the full ancestor chain for a nested entry, root-first', () => {
+    const result = extractDefaultLoadoutConfiguration(REPEATED_SIBLING_NAMES_RECORD)
+    const turretLefts = result.entries.filter((e) => e.itemPortName === 'turret_left')
+    expect(turretLefts).toHaveLength(2)
+    expect(turretLefts[0].ancestorPortNames).toEqual(['hardpoint_turret_fronttop'])
+    expect(turretLefts[1].ancestorPortNames).toEqual(['hardpoint_turret_backbottom'])
+  })
+
+  it('gives a top-level entry an empty ancestor chain', () => {
+    const result = extractDefaultLoadoutConfiguration(REPEATED_SIBLING_NAMES_RECORD)
+    const topLevel = result.entries.find((e) => e.itemPortName === 'hardpoint_turret_fronttop')
+    expect(topLevel?.ancestorPortNames).toEqual([])
+  })
+
+  it('the two same-named turret_left entries remain distinguishable by their full ancestor path, not silently identical', () => {
+    const result = extractDefaultLoadoutConfiguration(REPEATED_SIBLING_NAMES_RECORD)
+    const turretLefts = result.entries.filter((e) => e.itemPortName === 'turret_left')
+    const paths = turretLefts.map((e) => [...e.ancestorPortNames, e.itemPortName].join('/'))
+    expect(new Set(paths).size).toBe(2)
+  })
+})

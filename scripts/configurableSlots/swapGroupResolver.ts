@@ -49,11 +49,37 @@ export function buildGlobalTagIndex(tagsByEntityClass: Map<string, string>): Map
 }
 
 /**
+ * SW-010B fleet-wide certification finding: the smallest-membership
+ * tie-break (below) only protects a default component that carries BOTH
+ * a generic tag AND a real narrow one — it does nothing when the generic
+ * tag is the component's ONLY qualifying tag, which is the common case
+ * across the full 257-ship fleet. The 257-hull sweep surfaced 9 tags used
+ * as the "relevant" tag thousands of times over: `flightReady` (1,731
+ * members), `Ship_Dock_Refuel` (1,091), `Helmet` (679),
+ * `weaponMountUsable` (228), `Station_Dock_Large` (105), `gimbalMount` /
+ * `miningMount` (62), `webcustom` (57), `LaserCannon` (44) — all
+ * fleet-wide gameplay/system classification tags, not component
+ * swap-group tags. The full sorted distribution of real, resolved
+ * swap-group sizes across the fleet has a sharp natural break here: every
+ * legitimate swap group found (including every SW-010A-confirmed one)
+ * tops out at 34 members; the smallest contaminating tag starts at 44.
+ * `MAX_PLAUSIBLE_SWAP_GROUP_MEMBERSHIP` sits in that gap — a
+ * general, evidence-based ceiling on tag membership, not a rule about any
+ * specific tag or hull (a legitimate tag that happens to exceed it in a
+ * future game patch is rejected the same way `flightReady` is today; a
+ * new generic tag that happens to fall under it is not specially
+ * targeted either).
+ */
+const MAX_PLAUSIBLE_SWAP_GROUP_MEMBERSHIP = 40
+
+/**
  * Step 4 — the actual filter. A tag is "relevant" to this specific
  * default component only when: (a) the default component itself carries
- * the tag, and (b) at least one OTHER entity in the global index shares
- * it. Never "does this tag look important" — always "is this the tag on
- * a confirmed slot's own default item, shared with something else."
+ * the tag, (b) at least one OTHER entity in the global index shares it,
+ * and (c) its global membership does not exceed the plausibility ceiling
+ * above. Never "does this tag look important" — always "is this the tag
+ * on a confirmed slot's own default item, shared with something else, at
+ * a scale consistent with a real assembly-swap family."
  *
  * Deterministic when a default carries more than one qualifying tag: the
  * candidate with the SMALLEST global membership wins, not the first one
@@ -77,14 +103,31 @@ export function buildGlobalTagIndex(tagsByEntityClass: Map<string, string>): Map
 function findRelevantTag(defaultEntityClass: string, tagsByEntityClass: Map<string, string>, globalIndex: Map<string, string[]>): { tag: string; diagnostics: SlotDiagnostic[] } | null {
   const rawTags = tagsByEntityClass.get(defaultEntityClass)
   if (!rawTags) return null
-  const candidates = tokenize(rawTags).filter((token) => (globalIndex.get(token)?.length ?? 0) > 1)
+
+  const allTokens = tokenize(rawTags)
+  const multiMember = allTokens.filter((token) => (globalIndex.get(token)?.length ?? 0) > 1)
+  const implausible = multiMember.filter((token) => (globalIndex.get(token)?.length ?? 0) > MAX_PLAUSIBLE_SWAP_GROUP_MEMBERSHIP)
+  const candidates = multiMember.filter((token) => (globalIndex.get(token)?.length ?? 0) <= MAX_PLAUSIBLE_SWAP_GROUP_MEMBERSHIP)
+
+  const diagnostics: SlotDiagnostic[] = implausible.map((tag) => ({
+    code: 'swap-group-membership-implausible',
+    message: `Tag "${tag}" on default component "${defaultEntityClass}" has ${globalIndex.get(tag)?.length ?? 0} global members, exceeding the plausible swap-group ceiling (${MAX_PLAUSIBLE_SWAP_GROUP_MEMBERSHIP}) — treated as a generic gameplay/system tag, not a candidate.`,
+    severity: 'info',
+  }))
+
+  // No plausible candidate survives — including when the ONLY qualifying
+  // tag(s) were rejected as implausibly large. Returns null either way
+  // (matching this function's existing "no qualifying tag" contract);
+  // the implausible-rejection diagnostics are still valuable but have no
+  // winning tag to attach to, so they're intentionally not propagated
+  // here — the caller's own "swap-group-unknown-family" diagnostic covers
+  // the resulting unresolved outcome.
   if (candidates.length === 0) return null
 
   const bySize = [...candidates].sort((a, b) => (globalIndex.get(a)?.length ?? 0) - (globalIndex.get(b)?.length ?? 0))
   const smallestSize = globalIndex.get(bySize[0])?.length ?? 0
   const winner = bySize[0]
 
-  const diagnostics: SlotDiagnostic[] = []
   if (candidates.length > 1) {
     const tiedForSmallest = bySize.filter((tag) => (globalIndex.get(tag)?.length ?? 0) === smallestSize)
     diagnostics.push({

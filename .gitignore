@@ -39,6 +39,13 @@ generated-data/component-classification-diagnostics.json
 # only — "no UI consumption yet").
 generated-data/configurable-slot-report.json
 
+# SW-010B — Configurable Topology Certification, fleet-wide. Engineering-
+# only output (scripts/generateConfigurableSlotCertification.ts) — the
+# discovery inventory and coverage metrics behind the SW-010B
+# certification report. Regenerated every run, never read by the runtime
+# app.
+generated-data/configurable-slot-certification.json
+
 # Ship & Ground Vehicle Catalog Generator output (Mission M-012) — same
 # licensing posture as the component catalog above.
 generated-data/ship-catalog.json
