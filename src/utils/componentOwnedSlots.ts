@@ -1,23 +1,54 @@
 import { getMiningModuleSlotCount } from '../generated/miningModuleSlots'
 import { getMissileRackSlotSpec } from '../generated/missileRackSlots'
+import { getBombRackSlotSpec } from '../generated/bombRackSlots'
+import { getTurretWeaponSlotSpec } from '../generated/turretWeaponSlots'
 
 /**
- * FTB-001A/FTB-001B — a component-owned child slot's presentation shape:
- * how many, and (when the slot itself is size-constrained, e.g. a rack's
- * own missile attach points) what size. `label` is the word used in
- * "<label> Slot N" ("Module" for a mining head, "Missile" for a rack) —
- * sourced from whichever generated table produced this spec, so the
- * tree-construction step below never needs to know which kind of
- * component it's looking at.
+ * SW-013C.2C (Child-Port Semantic Modes) — the Chief Architect's own
+ * governing distinction, made an explicit, authoritative field rather
+ * than left implicit in `label`:
+ *
+ *   - `'payload-array'` (Mode A) — missile racks, bomb racks, torpedo
+ *     launchers. Children are pooled slots of one payload family; the
+ *     existing missile-rack precedent (aggregated presentation, wipe-and-
+ *     resynthesize on parent swap) is the primary, unchanged behavior.
+ *   - `'independent-equipment'` (Mode B) — turret/mount assemblies whose
+ *     children are separately-targetable equipment positions. Never
+ *     aggregated; each child gets its own Target, its own compatibility
+ *     evaluation, its own readiness contribution, its own inventory
+ *     demand. Mixed sibling equipment is a valid, ordinary state, not an
+ *     inconsistency to flag.
+ *
+ * Mode is always derived from the entity's OWN authoritative source data
+ * (which generated table produced the spec — mining/missile data always
+ * means payload-array by construction; turret data always means
+ * independent-equipment) — never inferred from child count, display name,
+ * or ship identity (the amendment's explicit "do not classify solely from
+ * quantity" instruction: a parent with two children is not automatically
+ * a rack or a turret).
+ */
+export type ComponentOwnedSlotMode = 'payload-array' | 'independent-equipment'
+
+/**
+ * FTB-001A/FTB-001B/SW-013C.2C — a component-owned child slot's
+ * presentation shape: how many, what size, and (SW-013C.2C) which
+ * semantic mode governs them. `label` is the word used in "<label> Slot
+ * N" ("Module" for a mining head, "Missile" for a rack, "Weapon" for a
+ * turret's independent equipment position) — sourced from whichever
+ * generated table produced this spec, so the tree-construction step below
+ * never needs to know which kind of component it's looking at.
  */
 export interface ComponentOwnedSlotSpec {
   count: number
   /** The size a slot itself requires — a rack's own accepted missile
-   * size, or (FTB-001H) a mining module slot's own fixed real size.
-   * Always set now; every family that owns component-owned child slots
-   * has a real, source-confirmed size of its own. */
+   * size, a mining module slot's own fixed real size (FTB-001H), or a
+   * turret's own uniform weapon-mount size (SW-013C.2C). Always set now;
+   * every family that owns component-owned child slots has a real,
+   * source-confirmed size of its own. */
   size?: number
   label: string
+  /** SW-013C.2C — see `ComponentOwnedSlotMode`'s own doc comment. */
+  mode: ComponentOwnedSlotMode
 }
 
 /** FTB-001H — every real Mining Module catalog record (all 28 currently
@@ -53,10 +84,29 @@ const MINING_MODULE_SIZE = 1
  */
 export function componentOwnedChildSlotSpec(entityClass: string | null | undefined): ComponentOwnedSlotSpec | null {
   const miningCount = getMiningModuleSlotCount(entityClass)
-  if (miningCount > 0) return { count: miningCount, size: MINING_MODULE_SIZE, label: 'Module' }
+  if (miningCount > 0) return { count: miningCount, size: MINING_MODULE_SIZE, label: 'Module', mode: 'payload-array' }
 
   const rackSpec = getMissileRackSlotSpec(entityClass)
-  if (rackSpec) return { count: rackSpec.slotCount, size: rackSpec.missileSize, label: 'Missile' }
+  if (rackSpec) return { count: rackSpec.slotCount, size: rackSpec.missileSize, label: 'Missile', mode: 'payload-array' }
+
+  // SW-013C.2D (Objectives 3/4) — a bomb rack (DataCore category
+  // BombLauncher/BombRack) is a genuinely different real component family
+  // from a missile rack (MissileLauncher/MissileRack) — same payload-array
+  // semantics, own separate generated table (never merged into
+  // getMissileRackSlotSpec's own — see scripts/generateBombRackSlots.ts's
+  // doc comment for why a shared size/category value can silently make
+  // two unrelated racks from different ships look interchangeable).
+  const bombRackSpec = getBombRackSlotSpec(entityClass)
+  if (bombRackSpec) return { count: bombRackSpec.slotCount, size: bombRackSpec.bombSize, label: 'Bomb', mode: 'payload-array' }
+
+  // SW-013C.2C (Mode B — Independent Equipment Ports) — a turret/mount
+  // assembly's own real weapon-mount children. Checked last, after both
+  // Mode A families: a component is never simultaneously a payload rack
+  // and a turret, so precedence between these three lookups never matters
+  // in practice, but Mode A is kept as the established precedent's own
+  // first-checked position, unchanged.
+  const turretSpec = getTurretWeaponSlotSpec(entityClass)
+  if (turretSpec) return { count: turretSpec.slotCount, size: turretSpec.weaponSize, label: 'Weapon', mode: 'independent-equipment' }
 
   return null
 }

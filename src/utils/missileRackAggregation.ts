@@ -38,12 +38,18 @@ export interface MissileAggregateMeta {
  * factory — so each renderer produces a row shaped for its own type without
  * this module knowing anything about `PreviewRow`'s preview-only fields.
  *
- * Mining module children (`spec.label === 'Module'`) and every ordinary
- * port are returned completely untouched — this mission only concerns
- * missile racks. Never mutates or persists anything; safe to recompute on
- * every render, so a rack swap's new child set (or removal of an
- * incompatible one) is reflected immediately, with no separate
- * regeneration step required.
+ * Mining module children (`spec.label === 'Module'` — also `mode:
+ * 'payload-array'`, but deliberately NOT aggregated: unlike a rack's
+ * identical ordnance slots, each mining module position can hold a
+ * genuinely different real module, so per-slot visibility matters more
+ * there than a collapsed count does), independent-equipment children
+ * (turret weapon slots), and every ordinary port are returned completely
+ * untouched — aggregation is gated on `spec.label` (`'Missile'` or, since
+ * SW-013C.2D, `'Bomb'`), never on `spec.mode` alone, since payload-array
+ * mode alone does not imply "identical single-selection ordnance slots."
+ * Never mutates or persists anything; safe to recompute on every render,
+ * so a rack swap's new child set (or removal of an incompatible one) is
+ * reflected immediately, with no separate regeneration step required.
  */
 export function withMissileRackAggregation<T extends ComponentOwnedSlotHost>(
   nodes: PortTreeNode<T>[],
@@ -57,9 +63,35 @@ export function withMissileRackAggregation<T extends ComponentOwnedSlotHost>(
       return children === node.children ? node : { ...node, children }
     }
 
-    const current = currentEntityClassOf(node.hardpoint)
+    // SW-013C.2D — deliberately NOT `currentEntityClassOf` (installed-
+    // first): a rack swap that has been saved but never PHYSICALLY
+    // installed (an entirely ordinary state — Manage Loadout only ever
+    // edits Target) leaves `installedEntityClass` pointing at the OLD
+    // factory rack, so the installed-first precedence would derive the
+    // aggregate's own shape (label/count/size) from the WRONG, stale
+    // family — reproduced with the Eclipse's confirmed Bomb Rack swap
+    // (`saveMissionConfiguration` correctly materializes 20 real "Bomb
+    // Slot N" children at save time, but this function was then deriving
+    // its spec from the old 3-slot Missile Rack, mislabeling the
+    // aggregate "Missile" and reporting a false countMismatch). Target
+    // wins over Installed here specifically because an un-aggregated
+    // rack's CHILDREN are themselves always materialized from Target
+    // (`withComponentOwnedChildSlots`'s own "swapped" — really "target
+    // diverged from factory" — check), so the aggregate's spec must agree
+    // with what actually produced the children it's summarizing. Falls
+    // back to `currentEntityClassOf`'s own installed-first precedence
+    // whenever there's no explicit pending/saved target (a cleared "—"
+    // target with real installed children must still summarize those real
+    // children, not show nothing).
+    const current = node.hardpoint.previewTargetEntityClass ?? node.hardpoint.targetEntityClass ?? currentEntityClassOf(node.hardpoint)
     const spec = current ? componentOwnedChildSlotSpec(current) : null
-    if (!spec || spec.label !== 'Missile') {
+    // SW-013C.2D — widened from 'Missile' only to also cover 'Bomb': the
+    // same single-selection ordnance-rack presentation the Chief
+    // Architect's own "Payload Systems" grouping (Missile Racks/Bomb
+    // Racks/Torpedo Racks) treats as one class. Every other family
+    // (Module, Weapon) stays excluded — see this function's own doc
+    // comment for why label, not mode, is the right gate here.
+    if (!spec || (spec.label !== 'Missile' && spec.label !== 'Bomb')) {
       return children === node.children ? node : { ...node, children }
     }
 
@@ -125,20 +157,28 @@ export type DisplayHardpoint = Hardpoint & { missileAggregate?: MissileAggregate
  * The single shared factory for every real-`Hardpoint` consumer of
  * `withMissileRackAggregation` — never reimplemented per page. */
 export function makeMissileAggregateRow(parent: DisplayHardpoint, children: DisplayHardpoint[], spec: ComponentOwnedSlotSpec, meta: MissileAggregateMeta): DisplayHardpoint {
+  // SW-013C.2D (Objectives 3/4) — derived from `spec.label` rather than
+  // hardcoded 'Missile', so a Bomb rack's aggregate row (same payload-array
+  // mode, same single-selection semantics, own separate generated table —
+  // see componentOwnedSlots.ts) renders as "— Bomb"/"Bomb Slot"/type
+  // "Bomb" instead of silently mislabeling itself as a missile rack.
+  // Produces byte-identical output to before this mission for every real
+  // missile rack, since `spec.label` is literally `'Missile'` there.
+  const label = spec.label
   return {
     ...parent,
-    id: `${parent.id}-missile-aggregate`,
-    slotLabel: `${parent.slotLabel} — Missile`,
+    id: `${parent.id}-${label.toLowerCase()}-aggregate`,
+    slotLabel: `${parent.slotLabel} — ${label}`,
     parentSlotLabel: parent.slotLabel,
     isStructural: false,
-    type: 'Missile',
+    type: label,
     size: spec.size ? `S${spec.size}` : parent.size,
     factoryItem: uniformOrFallback(children.map((c) => c.factoryItem), 'Mixed'),
     installedItem: uniformOrFallback(children.map((c) => c.installedItem), 'Mixed'),
     targetItem: meta.inconsistent ? '—' : uniformOrFallback(children.map((c) => c.targetItem), 'Mixed'),
     status: meta.inconsistent ? 'Invalid Target' : worstStatus(children.map((c) => c.status)),
     invalidMessage: meta.inconsistent
-      ? `This rack's ${meta.quantity} missile slots do not currently share one missile type — select one missile to apply to all of them.`
+      ? `This rack's ${meta.quantity} ${label.toLowerCase()} slots do not currently share one ${label.toLowerCase()} type — select one ${label.toLowerCase()} to apply to all of them.`
       : children.find((c) => c.status === 'Invalid Target')?.invalidMessage,
     factoryEntityClass: undefined,
     installedEntityClass: undefined,

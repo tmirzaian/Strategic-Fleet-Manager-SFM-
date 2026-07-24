@@ -41,6 +41,12 @@ export const TOP_LEVEL_GROUP_ORDER: string[] = [
   'Detection / Navigation',
   'Missile Racks',
   'Pilot Weapons',
+  // SW-013C.2B (Module Taxonomy Activation) — placed alongside the other
+  // weapon-adjacent categories: a Module position's confirmed alternatives
+  // include real armament (the Hornet Center's Ball Turret), even though
+  // not every Module position is weapon-capable (the Retaliator's cargo
+  // bays).
+  'Modules',
   'Manned Turrets',
   'Remote Turrets',
   'Utility',

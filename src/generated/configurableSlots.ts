@@ -39,6 +39,11 @@ export interface ConfigurableSlotRuntimeRecord {
   defaultComponentEntityClass: string | null
   swapGroupId: string | null
   eligibleComponentCount: number
+  /** SW-013C.2B — the real member entity classes (schema v2+). `undefined`
+   * on a runtime catalog written before this field existed — callers must
+   * treat that as "no operational compatibility data available," never as
+   * an empty set. */
+  eligibleComponents?: string[]
   confidence: 'confirmed-bidirectional' | 'tag-co-membership' | 'unresolved'
   sourceAuthority: 'geometry-and-configuration' | 'configuration-only'
   category: 'A-confirmed' | 'B-newly-discovered' | 'C-review-required'
@@ -71,4 +76,31 @@ const emptySlots: ConfigurableSlotRuntimeRecord[] = []
 export function getConfigurableSlotsForShip(shipEntityClass: string | null | undefined): ConfigurableSlotRuntimeRecord[] {
   if (!shipEntityClass || !rawCatalog) return emptySlots
   return rawCatalog.ships[shipEntityClass] ?? emptySlots
+}
+
+/** SW-013C.2D (Objective 3) — a port's own certified swap-group member
+ * entity classes, when a confirmed group exists for it (Category
+ * A-confirmed/B-newly-discovered — see `ConfigurableSlotRuntimeRecord`).
+ * `undefined` when no record matches this exact (parentPortName, portName)
+ * pair — never an empty Set (callers must be able to tell "no confirmed
+ * group, defer to the generic sweep" apart from "confirmed group with zero
+ * members," which never legitimately happens). Same
+ * `${parentPortName ?? ''}::${portName}` key shape `ShipWorkspacePrototype.tsx`'s
+ * own `configurableSlotFor` already uses — this is the store-accessible
+ * (non-component-scoped) equivalent, for compatibility validation call
+ * sites outside that one component (`useFleetStore.ts`,
+ * `fleetAssetReconciliation.ts`). */
+export function swapGroupEligibleEntityClassesFor(
+  shipEntityClass: string | null | undefined,
+  parentPortName: string | null | undefined,
+  portName: string | null | undefined
+): ReadonlySet<string> | undefined {
+  if (!portName) return undefined
+  const key = `${parentPortName ?? ''}::${portName}`
+  for (const record of getConfigurableSlotsForShip(shipEntityClass)) {
+    if (`${record.parentPortName ?? ''}::${record.portName}` === key && record.eligibleComponents?.length) {
+      return new Set(record.eligibleComponents)
+    }
+  }
+  return undefined
 }

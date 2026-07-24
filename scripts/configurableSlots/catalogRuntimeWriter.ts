@@ -32,6 +32,7 @@ export function deriveConfigurableSlotsRuntimeCatalog(sweep: FleetSweepResult, g
         defaultComponentEntityClass: slot.defaultComponentEntityClass,
         swapGroupId: slot.swapGroupId,
         eligibleComponentCount: slot.eligibleComponents.length,
+        eligibleComponents: slot.eligibleComponents,
         confidence: slot.confidence,
         sourceAuthority: slot.sourceAuthority,
         category,

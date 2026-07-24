@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-24T17:12:38.012Z",
+  "source": "starbreaker-datacore (Components[].Ports[] MinSize/MaxSize on the rack's own record)",
+  "rackSlotSpecByEntityClass": {
+    "BMBRCK_CRUS_STARL_Left": {
+      "slotCount": 2,
+      "bombSize": 10
+    },
+    "BMBRCK_CRUS_STARL_Right": {
+      "slotCount": 2,
+      "bombSize": 10
+    },
+    "BMBRCK_CRUS_Spirit_A1": {
+      "slotCount": 10,
+      "bombSize": 5
+    },
+    "BMBRCK_S03_AEGS_Eclipse": {
+      "slotCount": 20,
+      "bombSize": 3
+    },
+    "BMBRCK_S03_AEGS_Retaliator_Front": {
+      "slotCount": 64,
+      "bombSize": 3
+    },
+    "BMBRCK_S03_AEGS_Retaliator_Rear": {
+      "slotCount": 48,
+      "bombSize": 3
+    },
+    "BMBRCK_S03_ANVL_Gladiator": {
+      "slotCount": 12,
+      "bombSize": 3
+    },
+    "BMBRCK_S03_BEHR_Single_S03": {
+      "slotCount": 1,
+      "bombSize": 3
+    },
+    "BMBRCK_S05_AEGS_Eclipse": {
+      "slotCount": 4,
+      "bombSize": 5
+    },
+    "BMBRCK_S05_AEGS_Retaliator_Front": {
+      "slotCount": 8,
+      "bombSize": 5
+    },
+    "BMBRCK_S05_AEGS_Retaliator_Rear": {
+      "slotCount": 8,
+      "bombSize": 5
+    },
+    "BMBRCK_S05_ANVL_Gladiator": {
+      "slotCount": 2,
+      "bombSize": 5
+    },
+    "BMBRCK_S10_AEGS_Eclipse": {
+      "slotCount": 1,
+      "bombSize": 10
+    }
+  },
+  "skipped": [
+    {
+      "entityClass": "MRCK_S03_TEMP_BOMB",
+      "reason": "MRCK_S03_TEMP_BOMB: rack ports have no usable uniform size (Min=1, Max=10) — stopping rather than guessing one."
+    }
+  ]
+}

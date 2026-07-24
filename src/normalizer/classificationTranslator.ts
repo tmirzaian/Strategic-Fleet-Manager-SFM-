@@ -51,7 +51,56 @@ interface TranslationRule {
    * Computer, Relay). Every other rule requires an exact subtype match. */
   subtype: string | null
   canonicalPortType: string
+  /** SW-013C.2B — when present, this rule matches ONLY these exact,
+   * individually-verified entity classes, never every member of
+   * `category`/`subtype`. Used when a DataCore category is confirmed
+   * heterogeneous (see `CONFIRMED_MODULE_ENTITY_CLASSES` below) and only a
+   * specific, evidence-backed subset is confirmed to be a real,
+   * authoritative ship equipment position — the rest stay `unresolved`,
+   * exactly as before this rule existed. */
+  entityClassAllowlist?: ReadonlySet<string>
 }
+
+/**
+ * SW-013C.2B (Module Taxonomy Activation, Objective 1) — DataCore category
+ * "Module" is confirmed real ship equipment for some members (the Hornet
+ * Center Cap/Rotodome family, the Retaliator's module bays — both
+ * individually verified this session via direct raw-export + catalog
+ * inspection, and both members of a real, tag-confirmed swap group per
+ * `docs/ADR/ADR-014` Authority 3) — but also covers entities with zero
+ * verification for this mission's purposes: a ground-vehicle cosmetic
+ * bodykit (`GLSN_Basher_Addon_Mohawk_Default`) and not-yet-investigated
+ * cargo/medical modules (`ANVL_Hornet_F7C_Cargo_Mod`,
+ * `ANVL_Hornet_F7C_Mk2_Cargo_Door`, `RSI_Apollo_Module_*`). Objective 1's
+ * own instruction — "translate only authoritative module positions... do
+ * not broadly classify" — is honored by an exact entity-class allowlist,
+ * not a blanket category match. Confirmed via
+ * `generated-data/component-metadata-catalog.json`: exactly 13 entities
+ * carry category "Module" catalog-wide; the 7 NOT listed here remain
+ * unresolved, exactly as before this mission.
+ */
+const CONFIRMED_MODULE_ENTITY_CLASSES: ReadonlySet<string> = new Set([
+  'UMNT_ANVL_S5_Cap', // Hornet Center Cap — Mk I/base family factory default (e.g. F7CS)
+  'UMNT_ANVL_S5_Cap_Mk2', // Hornet Center Cap — Mk II family factory default (e.g. Ghost)
+  'UMNT_ANVL_S5_Rotodome', // Hornet Center alternative/default — Mk I/base family (e.g. F7CR)
+  'UMNT_ANVL_S5_Rotodome_Mk2', // Hornet Center alternative/default — Mk II family
+  'AEGS_Retaliator_Module_Front_Base',
+  'AEGS_Retaliator_Module_Rear_Base',
+])
+
+/**
+ * SW-013C.2B — the Hornet Mk II family's nose equipment position carries
+ * DataCore category "Misc", not "Module" (confirmed via direct raw-export
+ * inspection this session), but is the same structural concept: a real,
+ * factory-installed hull attachment point, currently unclassified. Exactly
+ * two entities, individually verified — not a blanket Misc translation
+ * (Objective 1: "do not broadly classify every Misc object as a Module").
+ * Its own swap-group/alternative-component data remains unresolved (see
+ * `docs/SW-013C.2A-Configuration-Only-Port-Materialization-Report.md`) —
+ * classifying it makes the port and its real factory item visible and
+ * operable; it does not, by itself, supply any alternative to target.
+ */
+const CONFIRMED_NOSE_CAP_ENTITY_CLASSES: ReadonlySet<string> = new Set(['ANVL_F7_Mk2_NoseCap', 'ANVL_F7CR_Mk2_NoseCap'])
 
 /**
  * Exact (category, subtype) -> canonical port type. Every target here was
@@ -144,6 +193,53 @@ const TRANSLATION_RULES: TranslationRule[] = [
    * `portClassifier.ts`'s existing `SalvageModule` canonical type
    * (`Salvage` group). */
   { category: 'SalvageModifier', subtype: null, canonicalPortType: 'SalvageModule' },
+  /** SW-013C.2B (Objective 1) — see `CONFIRMED_MODULE_ENTITY_CLASSES`'s own
+   * doc comment above for the full evidentiary basis. Maps to the new
+   * `Module` canonical port type (`Modules` equipment group,
+   * `portClassifier.ts`) — deliberately not folded into `Utility` (see
+   * `docs/ModuleTaxonomyProposal.md`'s "Why not Utility" section: a Module
+   * is never broadly interchangeable with another same-category Module the
+   * way Utility's own family is). */
+  { category: 'Module', subtype: null, canonicalPortType: 'Module', entityClassAllowlist: CONFIRMED_MODULE_ENTITY_CLASSES },
+  /** SW-013C.2B (Objective 1) — see `CONFIRMED_NOSE_CAP_ENTITY_CLASSES`'s
+   * own doc comment above. Same canonical port type as the Module-category
+   * rule above — both are the same "swappable hull attachment filler"
+   * concept, just filed under different DataCore Types. */
+  { category: 'Misc', subtype: null, canonicalPortType: 'Module', entityClassAllowlist: CONFIRMED_NOSE_CAP_ENTITY_CLASSES },
+  /** SW-013C.2D (Objectives 5/6) — the Electronic Warfare family the
+   * Architectural Certification Fleet (Avenger Warlock, Anvil Hawk;
+   * `AEGS_EMP_Device_S4`/`ANVL_Hawk_EMP_Device_S2`) exposed as completely
+   * unclassified. Confirmed via direct catalog inspection: exactly 6 real
+   * entities carry DataCore category "EMP" catalog-wide (REP-8/REP-VS EMP
+   * Generator, TroMag Burst Generator x3, Magstrand EMP Generator) — small
+   * and entirely clean (every member is real player equipment, no
+   * cosmetic/irrelevant contamination the way "Module"'s 13 members had),
+   * so a whole-category rule is justified here without an entity
+   * allowlist (Objective 6: "avoid broad catch-all mappings" — this is not
+   * a catch-all, it's a fully-audited category with zero excluded
+   * members). Maps to the new `EMP` canonical port type (`ElectronicWarfare`
+   * equipment group, `portClassifier.ts`), a top-level "Support Systems"
+   * section per the Chief Architect's own preferred placement. */
+  { category: 'EMP', subtype: null, canonicalPortType: 'EMP' },
+  /** SW-013C.2D (Objectives 5/6) — the Guardian Qi's Quantum Dampener
+   * (`QDMP_RSI_S03_Captor`) and the Mantis's QED/"Quantum Snare"
+   * (`QED_WETK_S03_Reynie`) both resolve to the SAME DataCore category,
+   * `QuantumInterdictionGenerator` — confirmed via direct catalog
+   * inspection, not inferred from either entity's own displayName (which
+   * is itself inconsistent: `QED_RSI_S03_Scorpius`'s displayName is
+   * "Tidelock QD", not "...QED", despite its QED_-prefixed entityClass —
+   * exactly the "do not infer from display names" trap this mission's own
+   * governing rule warns against). Exactly 4 real entities carry this
+   * category catalog-wide (Captor QD, Burke QD, Tidelock QD, Reynie QED)
+   * — small, clean, entirely real dampening/interdiction hardware, no
+   * unrelated members, justifying a whole-category rule. A QED device is
+   * fictionally a combined dampener+interdiction unit — the Mantis's own
+   * single confirmed port therefore satisfies both "Dampener visible" and
+   * "Snare visible" Commander-acceptance checks; no second, fabricated
+   * port was added to represent a "Snare" the raw data does not carry as
+   * a separate item-port relationship. Maps to the new `QuantumDampener`
+   * canonical port type (`ElectronicWarfare` equipment group). */
+  { category: 'QuantumInterdictionGenerator', subtype: null, canonicalPortType: 'QuantumDampener' },
 ]
 
 /**
@@ -262,14 +358,29 @@ export function translateClassification(metadata: ComponentMetadata, context?: C
 
   const normalizedSubtype = normalizeSubtype(subtype)
   const matchingRule = TRANSLATION_RULES.find(
-    (rule) => rule.category === category && (rule.subtype === null || normalizeSubtype(rule.subtype) === normalizedSubtype)
+    (rule) =>
+      rule.category === category &&
+      (rule.subtype === null || normalizeSubtype(rule.subtype) === normalizedSubtype) &&
+      // SW-013C.2B — an entity-scoped rule (Module/Misc) only matches its
+      // own individually-verified allowlist; every other entity carrying
+      // the same category/subtype falls through to `unresolved` exactly
+      // as before this rule existed.
+      (!rule.entityClassAllowlist || rule.entityClassAllowlist.has(metadata.entityClass))
   )
 
   if (!matchingRule) {
+    // SW-013C.2B — an entity-scoped rule for this exact (category, subtype)
+    // exists but didn't match because this specific entityClass isn't on
+    // its confirmed allowlist — a more precise reason than "no rule at all."
+    const allowlistedButUnverified = TRANSLATION_RULES.some(
+      (rule) => rule.category === category && (rule.subtype === null || normalizeSubtype(rule.subtype) === normalizedSubtype) && rule.entityClassAllowlist
+    )
     const categoryKnown = TRANSLATION_RULES.some((rule) => rule.category === category)
-    const reason = categoryKnown
-      ? `DataCore category "${category}" is recognized, but subtype "${subtype ?? 'UNDEFINED'}" has no translation rule — left unclassified rather than guessed.`
-      : `No translation rule for DataCore category "${category}" — left unclassified rather than guessed.`
+    const reason = allowlistedButUnverified
+      ? `DataCore category "${category}" is recognized, but "${metadata.entityClass}" is not among the individually-verified entity classes for it — left unclassified rather than broadly guessed (see docs/ModuleTaxonomyProposal.md).`
+      : categoryKnown
+        ? `DataCore category "${category}" is recognized, but subtype "${subtype ?? 'UNDEFINED'}" has no translation rule — left unclassified rather than guessed.`
+        : `No translation rule for DataCore category "${category}" — left unclassified rather than guessed.`
     return { status: 'unresolved', sourceCategory: category, sourceSubtype: subtype, reason }
   }
 

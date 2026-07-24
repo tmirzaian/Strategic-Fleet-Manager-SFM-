@@ -751,6 +751,18 @@ function compatibilityTypeFor(port: {
   // port itself (canonicalPortType "SalvageHead", handled by the ordinary
   // 'Salvage' -> 'Salvage Module' case further down).
   if (port.canonicalPortType === 'SalvageModule') return 'Salvage Modifier'
+  // SW-013C.2D — EMP and Quantum Dampener both share one EquipmentGroup
+  // ("ElectronicWarfare", so both land in the same "Support Systems"
+  // display section — see topLevelGroupLabel below), but they are NOT the
+  // same real component family (confirmed via classificationTranslator.ts:
+  // two distinct DataCore categories, EMP vs QuantumInterdictionGenerator)
+  // and must never be offered as compatible substitutes for each other.
+  // Checked here, before the generic equipmentGroup switch, exactly like
+  // SalvageModule above — the switch's default branch would otherwise
+  // collapse both into the same generic "ElectronicWarfare" type string,
+  // losing the distinction the compatibility engine needs.
+  if (port.canonicalPortType === 'EMP') return 'EMP'
+  if (port.canonicalPortType === 'QuantumDampener') return 'Quantum Dampener'
   switch (port.assemblyRole) {
     case 'WEAPON':
       return 'Weapon'
@@ -805,6 +817,12 @@ function compatibilityTypeFor(port: {
       return 'Mining Laser'
     case 'Salvage':
       return 'Salvage Module'
+    // SW-013C.2B (Module Taxonomy Activation) — singular, matching every
+    // other compatibility-type string's own convention ("Shield", "Cooler",
+    // "Weapon"), rather than falling through to the plural equipmentGroup
+    // name ("Modules") the default branch below would otherwise return.
+    case 'Modules':
+      return 'Module'
     default:
       return port.equipmentGroup
   }
@@ -914,7 +932,16 @@ function topLevelGroupLabel(port: { equipmentGroup: string; assemblyRole?: strin
   if (group === 'Weapons') return 'Pilot Weapons'
   if (group === 'Missiles') return 'Missile Racks'
   if (group === 'Mining' || group === 'Salvage' || group === 'Utility') return 'Utility'
-  if (group === 'Relays' || group === 'LifeSupport') return 'Support Systems'
+  // SW-013C.2D — Electronic Warfare (EMP/Quantum Dampener) joins the same
+  // "Support Systems" section Relays/LifeSupport already use — the Chief
+  // Architect's own preferred placement for this family.
+  if (group === 'Relays' || group === 'LifeSupport' || group === 'ElectronicWarfare') return 'Support Systems'
+  // SW-013C.2B (Module Taxonomy Activation) — a dedicated top-level
+  // section, not folded into Pilot Weapons or Support Systems: a Module
+  // position is not always weapon-capable (the Retaliator's module bays
+  // are cargo/mission equipment, not armament), so no existing category
+  // fits every confirmed case honestly.
+  if (group === 'Modules') return 'Modules'
   return undefined
 }
 

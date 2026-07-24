@@ -50,6 +50,7 @@ describe('deriveConfigurableSlotsRuntimeCatalog', () => {
       defaultComponentEntityClass: 'Some_Default',
       swapGroupId: 'someGroup',
       eligibleComponentCount: 2,
+      eligibleComponents: ['Some_Default', 'Some_Alt'],
       confidence: 'tag-co-membership',
       sourceAuthority: 'geometry-and-configuration',
       category: 'B-newly-discovered',

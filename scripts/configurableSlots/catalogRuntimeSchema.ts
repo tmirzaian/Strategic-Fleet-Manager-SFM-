@@ -23,7 +23,16 @@
  * read-only, with a visible caveat, means in Commander-facing terms.
  */
 
-export const CONFIGURABLE_SLOTS_RUNTIME_SCHEMA_VERSION = 1
+// SW-013C.2B — bumped 1 -> 2 to add `eligibleComponents` (the real member
+// list, not just a count). SW-011A's own Phase I was deliberately
+// read-only visibility ("never the full member list... not a picker") —
+// this mission activates real operational actions (target selection,
+// swap-group-only compatibility, Objective 3) on Module-classified ports,
+// which requires the actual entity classes a Commander can choose
+// between, not just how many exist. `eligibleComponentCount` is kept,
+// unchanged, alongside the new field — every existing reader of the count
+// (the read-only inspection panel) is unaffected.
+export const CONFIGURABLE_SLOTS_RUNTIME_SCHEMA_VERSION = 2
 export const CONFIGURABLE_SLOTS_RUNTIME_FILENAME = 'configurable-slots.runtime.json'
 
 export interface ConfigurableSlotRuntimeDiagnostic {
@@ -39,8 +48,15 @@ export interface ConfigurableSlotRuntimeRecord {
   /** The real DataCore entity class currently the factory default for this slot, or null when genuinely unresolvable. */
   defaultComponentEntityClass: string | null
   swapGroupId: string | null
-  /** Count only — Objective 3 asks for "Eligible Component Count," never the full member list (Phase I is read-only visibility, not a picker). */
+  /** Count only — retained for the existing read-only inspection panel. Always equals `eligibleComponents.length`. */
   eligibleComponentCount: number
+  /** SW-013C.2B — the real member entity classes, in the same order the
+   * swap-group resolver produced them. Absent (undefined) on a runtime
+   * catalog written before schema v2 — callers must treat that as "no
+   * operational compatibility data available," never as an empty set
+   * (an empty array is a real, confirmed-zero-alternatives fact; a
+   * missing field is "we don't know," a different fact). */
+  eligibleComponents?: string[]
   confidence: 'confirmed-bidirectional' | 'tag-co-membership' | 'unresolved'
   sourceAuthority: 'geometry-and-configuration' | 'configuration-only'
   category: 'A-confirmed' | 'B-newly-discovered' | 'C-review-required'

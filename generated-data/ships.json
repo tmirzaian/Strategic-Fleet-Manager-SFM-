@@ -981,7 +981,7 @@
   },
   {
     "id": "csv-cargo-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "CSV Cargo",
     "career": "",
     "role": "",
@@ -995,7 +995,7 @@
   },
   {
     "id": "mole-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "MOLE",
     "career": "",
     "role": "",
@@ -1009,7 +1009,7 @@
   },
   {
     "id": "moth-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "MOTH",
     "career": "",
     "role": "",
@@ -1023,7 +1023,7 @@
   },
   {
     "id": "mpuv-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "MPUV",
     "career": "",
     "role": "",
@@ -1037,7 +1037,7 @@
   },
   {
     "id": "mpuv-1t-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "MPUV 1T",
     "career": "",
     "role": "",
@@ -1051,7 +1051,7 @@
   },
   {
     "id": "mpuv-transport-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "MPUV Transport",
     "career": "",
     "role": "",
@@ -1065,7 +1065,7 @@
   },
   {
     "id": "raft-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "RAFT",
     "career": "",
     "role": "",
@@ -1079,7 +1079,7 @@
   },
   {
     "id": "raft-collector-indust-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "RAFT Collector Indust",
     "career": "",
     "role": "",
@@ -1093,7 +1093,7 @@
   },
   {
     "id": "srv-imported",
-    "manufacturer": "Argo",
+    "manufacturer": "ARGO",
     "name": "SRV",
     "career": "",
     "role": "",
@@ -1107,7 +1107,7 @@
   },
   {
     "id": "defender-imported",
-    "manufacturer": "",
+    "manufacturer": "BANU",
     "name": "Defender",
     "career": "",
     "role": "",
@@ -1751,7 +1751,7 @@
   },
   {
     "id": "prowler-imported",
-    "manufacturer": "",
+    "manufacturer": "Esperia",
     "name": "Prowler",
     "career": "",
     "role": "",
@@ -1765,7 +1765,7 @@
   },
   {
     "id": "prowler-utility-imported",
-    "manufacturer": "",
+    "manufacturer": "Esperia",
     "name": "Prowler Utility",
     "career": "",
     "role": "",
@@ -1779,7 +1779,7 @@
   },
   {
     "id": "prowler-utility-collector-indust-imported",
-    "manufacturer": "",
+    "manufacturer": "Esperia",
     "name": "Prowler Utility Collector Indust",
     "career": "",
     "role": "",
@@ -1793,7 +1793,7 @@
   },
   {
     "id": "talon-imported",
-    "manufacturer": "",
+    "manufacturer": "Esperia",
     "name": "Talon",
     "career": "",
     "role": "",
@@ -1807,7 +1807,7 @@
   },
   {
     "id": "talon-shrike-imported",
-    "manufacturer": "",
+    "manufacturer": "Esperia",
     "name": "Talon Shrike",
     "career": "",
     "role": "",
@@ -1891,7 +1891,7 @@
   },
   {
     "id": "mdc-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "MDC",
     "career": "",
     "role": "",
@@ -1905,7 +1905,7 @@
   },
   {
     "id": "mtc-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "MTC",
     "career": "",
     "role": "",
@@ -1919,7 +1919,7 @@
   },
   {
     "id": "ptv-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "PTV",
     "career": "",
     "role": "",
@@ -1933,7 +1933,7 @@
   },
   {
     "id": "roc-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "ROC",
     "career": "",
     "role": "",
@@ -1947,7 +1947,7 @@
   },
   {
     "id": "roc-ds-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "ROC DS",
     "career": "",
     "role": "",
@@ -1961,7 +1961,7 @@
   },
   {
     "id": "stv-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "STV",
     "career": "",
     "role": "",
@@ -1975,7 +1975,7 @@
   },
   {
     "id": "utv-imported",
-    "manufacturer": "",
+    "manufacturer": "Greycat",
     "name": "UTV",
     "career": "",
     "role": "",
@@ -2101,7 +2101,7 @@
   },
   {
     "id": "fortune-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Fortune",
     "career": "",
     "role": "",
@@ -2115,7 +2115,7 @@
   },
   {
     "id": "fortune-collector-industrial-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Fortune Collector Industrial",
     "career": "",
     "role": "",
@@ -2129,7 +2129,7 @@
   },
   {
     "id": "freelancer-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Freelancer",
     "career": "",
     "role": "",
@@ -2143,7 +2143,7 @@
   },
   {
     "id": "freelancer-dur-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Freelancer DUR",
     "career": "",
     "role": "",
@@ -2157,7 +2157,7 @@
   },
   {
     "id": "freelancer-max-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Freelancer MAX",
     "career": "",
     "role": "",
@@ -2171,7 +2171,7 @@
   },
   {
     "id": "freelancer-mis-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Freelancer MIS",
     "career": "",
     "role": "",
@@ -2185,7 +2185,7 @@
   },
   {
     "id": "fury-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Fury",
     "career": "",
     "role": "",
@@ -2199,7 +2199,7 @@
   },
   {
     "id": "fury-lx-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Fury LX",
     "career": "",
     "role": "",
@@ -2213,7 +2213,7 @@
   },
   {
     "id": "fury-miru-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Fury Miru",
     "career": "",
     "role": "",
@@ -2227,7 +2227,7 @@
   },
   {
     "id": "hull-a-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Hull A",
     "career": "",
     "role": "",
@@ -2241,7 +2241,7 @@
   },
   {
     "id": "hull-b-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Hull B",
     "career": "",
     "role": "",
@@ -2255,7 +2255,7 @@
   },
   {
     "id": "hull-c-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Hull C",
     "career": "",
     "role": "",
@@ -2269,7 +2269,7 @@
   },
   {
     "id": "prospector-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Prospector",
     "career": "",
     "role": "",
@@ -2283,7 +2283,7 @@
   },
   {
     "id": "prospector-collector-indust-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Prospector Collector Indust",
     "career": "",
     "role": "",
@@ -2297,7 +2297,7 @@
   },
   {
     "id": "razor-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Razor",
     "career": "",
     "role": "",
@@ -2311,7 +2311,7 @@
   },
   {
     "id": "razor-ex-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Razor EX",
     "career": "",
     "role": "",
@@ -2325,7 +2325,7 @@
   },
   {
     "id": "razor-lx-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Razor LX",
     "career": "",
     "role": "",
@@ -2339,7 +2339,7 @@
   },
   {
     "id": "reliant-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Reliant",
     "career": "",
     "role": "",
@@ -2353,7 +2353,7 @@
   },
   {
     "id": "reliant-mako-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Reliant Mako",
     "career": "",
     "role": "",
@@ -2367,7 +2367,7 @@
   },
   {
     "id": "reliant-sen-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Reliant Sen",
     "career": "",
     "role": "",
@@ -2381,7 +2381,7 @@
   },
   {
     "id": "reliant-tana-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Reliant Tana",
     "career": "",
     "role": "",
@@ -2395,7 +2395,7 @@
   },
   {
     "id": "starfarer-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starfarer",
     "career": "",
     "role": "",
@@ -2409,7 +2409,7 @@
   },
   {
     "id": "starfarer-gemini-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starfarer Gemini",
     "career": "",
     "role": "",
@@ -2423,7 +2423,7 @@
   },
   {
     "id": "starlancer-max-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starlancer Max",
     "career": "",
     "role": "",
@@ -2437,7 +2437,7 @@
   },
   {
     "id": "starlancer-tac-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starlancer TAC",
     "career": "",
     "role": "",
@@ -2451,7 +2451,7 @@
   },
   {
     "id": "starlancer-tac-collector-military-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starlancer TAC Collector Military",
     "career": "",
     "role": "",
@@ -2465,7 +2465,7 @@
   },
   {
     "id": "starlite-imported",
-    "manufacturer": "Misc",
+    "manufacturer": "MISC",
     "name": "Starlite",
     "career": "",
     "role": "",
@@ -2857,7 +2857,7 @@
   },
   {
     "id": "apollo-medivac-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Apollo Medivac",
     "career": "",
     "role": "",
@@ -2871,7 +2871,7 @@
   },
   {
     "id": "apollo-triage-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Apollo Triage",
     "career": "",
     "role": "",
@@ -2885,7 +2885,7 @@
   },
   {
     "id": "apollo-triage-collector-stealth-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Apollo Triage Collector Stealth",
     "career": "",
     "role": "",
@@ -2899,7 +2899,7 @@
   },
   {
     "id": "aurora-gs-cl-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS CL",
     "career": "",
     "role": "",
@@ -2913,7 +2913,7 @@
   },
   {
     "id": "aurora-gs-es-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS ES",
     "career": "",
     "role": "",
@@ -2927,7 +2927,7 @@
   },
   {
     "id": "aurora-gs-ln-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS LN",
     "career": "",
     "role": "",
@@ -2941,7 +2941,7 @@
   },
   {
     "id": "aurora-gs-lx-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS LX",
     "career": "",
     "role": "",
@@ -2955,7 +2955,7 @@
   },
   {
     "id": "aurora-gs-mr-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS MR",
     "career": "",
     "role": "",
@@ -2969,7 +2969,7 @@
   },
   {
     "id": "aurora-gs-se-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora GS SE",
     "career": "",
     "role": "",
@@ -2983,7 +2983,7 @@
   },
   {
     "id": "aurora-mk2-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Aurora Mk2",
     "career": "",
     "role": "",
@@ -2997,7 +2997,7 @@
   },
   {
     "id": "constellation-andromeda-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Andromeda",
     "career": "",
     "role": "",
@@ -3011,7 +3011,7 @@
   },
   {
     "id": "constellation-aquila-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Aquila",
     "career": "",
     "role": "",
@@ -3025,7 +3025,7 @@
   },
   {
     "id": "constellation-phoenix-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Phoenix",
     "career": "",
     "role": "",
@@ -3039,7 +3039,7 @@
   },
   {
     "id": "constellation-phoenix-emerald-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Phoenix Emerald",
     "career": "",
     "role": "",
@@ -3053,7 +3053,7 @@
   },
   {
     "id": "constellation-taurus-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Taurus",
     "career": "",
     "role": "",
@@ -3067,7 +3067,7 @@
   },
   {
     "id": "constellation-taurus-military-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Constellation Taurus Military",
     "career": "",
     "role": "",
@@ -3081,7 +3081,7 @@
   },
   {
     "id": "hermes-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Hermes",
     "career": "",
     "role": "",
@@ -3095,7 +3095,7 @@
   },
   {
     "id": "lynx-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Lynx",
     "career": "",
     "role": "",
@@ -3109,7 +3109,7 @@
   },
   {
     "id": "mantis-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Mantis",
     "career": "",
     "role": "",
@@ -3123,7 +3123,7 @@
   },
   {
     "id": "meteor-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Meteor",
     "career": "",
     "role": "",
@@ -3137,7 +3137,7 @@
   },
   {
     "id": "meteor-collector-military-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Meteor Collector Military",
     "career": "",
     "role": "",
@@ -3151,7 +3151,7 @@
   },
   {
     "id": "meteor-collector-stealth-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Meteor Collector Stealth",
     "career": "",
     "role": "",
@@ -3165,7 +3165,7 @@
   },
   {
     "id": "perseus-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Perseus",
     "career": "",
     "role": "",
@@ -3179,7 +3179,7 @@
   },
   {
     "id": "polaris-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Polaris",
     "career": "",
     "role": "",
@@ -3193,7 +3193,7 @@
   },
   {
     "id": "salvation-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Salvation",
     "career": "",
     "role": "",
@@ -3207,7 +3207,7 @@
   },
   {
     "id": "scorpius-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Scorpius",
     "career": "",
     "role": "",
@@ -3221,7 +3221,7 @@
   },
   {
     "id": "scorpius-antares-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Scorpius Antares",
     "career": "",
     "role": "",
@@ -3235,7 +3235,7 @@
   },
   {
     "id": "scorpius-stealth-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Scorpius Stealth",
     "career": "",
     "role": "",
@@ -3249,7 +3249,7 @@
   },
   {
     "id": "ursa-medivac-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Ursa Medivac",
     "career": "",
     "role": "",
@@ -3263,7 +3263,7 @@
   },
   {
     "id": "ursa-medivac-stealth-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Ursa Medivac Stealth",
     "career": "",
     "role": "",
@@ -3277,7 +3277,7 @@
   },
   {
     "id": "ursa-rover-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Ursa Rover",
     "career": "",
     "role": "",
@@ -3291,7 +3291,7 @@
   },
   {
     "id": "ursa-rover-emerald-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Ursa Rover Emerald",
     "career": "",
     "role": "",
@@ -3305,7 +3305,7 @@
   },
   {
     "id": "zeus-cl-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Zeus CL",
     "career": "",
     "role": "",
@@ -3319,7 +3319,7 @@
   },
   {
     "id": "zeus-es-imported",
-    "manufacturer": "Rsi",
+    "manufacturer": "RSI",
     "name": "Zeus ES",
     "career": "",
     "role": "",
@@ -3585,7 +3585,7 @@
   },
   {
     "id": "santokyai-imported",
-    "manufacturer": "",
+    "manufacturer": "Aopoa",
     "name": "SanTokYai",
     "career": "",
     "role": "",

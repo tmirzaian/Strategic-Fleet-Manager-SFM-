@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:23:16.510Z",
+  "generatedAt": "2026-07-24T17:19:39.537Z",
   "ships": [
     {
       "sourceFile": "raw-data\\AEGS Avenger Titan.json",
@@ -1380,10 +1380,10 @@
       "sourceFile": "raw-data\\AEGS_Avenger_Warlock.json",
       "shipId": "avenger-warlock-imported",
       "shipName": "Avenger Warlock",
-      "portsIncluded": 22,
-      "componentsDiscovered": 15,
-      "assignmentsCreated": 22,
-      "warnings": 117,
+      "portsIncluded": 23,
+      "componentsDiscovered": 16,
+      "assignmentsCreated": 23,
+      "warnings": 116,
       "errors": 0,
       "portSources": [
         {
@@ -1530,6 +1530,16 @@
           ]
         },
         {
+          "portId": "avenger-warlock-imported-port-/hardpoint_weapon_emp",
+          "displayName": "Emp Weapon",
+          "internalName": "hardpoint_weapon_emp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_emp"
+          ]
+        },
+        {
           "portId": "avenger-warlock-imported-port-/hardpoint_weapon_missilerack_left_wing",
           "displayName": "Left Wing Weapon Missile Rack",
           "internalName": "hardpoint_weapon_missilerack_left_wing",
@@ -1631,6 +1641,7 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_gun_class1_right_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_emp\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_missilerack_left_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
@@ -11699,10 +11710,10 @@
       "sourceFile": "raw-data\\AEGS_Retaliator.json",
       "shipId": "retaliator-imported",
       "shipName": "Retaliator",
-      "portsIncluded": 43,
-      "componentsDiscovered": 10,
-      "assignmentsCreated": 38,
-      "warnings": 245,
+      "portsIncluded": 45,
+      "componentsDiscovered": 12,
+      "assignmentsCreated": 40,
+      "warnings": 243,
       "errors": 0,
       "portSources": [
         {
@@ -12056,6 +12067,26 @@
           ]
         },
         {
+          "portId": "retaliator-imported-port-/hardpoint_front_module",
+          "displayName": "Front Module",
+          "internalName": "hardpoint_front_module",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_front_module"
+          ]
+        },
+        {
+          "portId": "retaliator-imported-port-/hardpoint_rear_module",
+          "displayName": "Rear Module",
+          "internalName": "hardpoint_rear_module",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_rear_module"
+          ]
+        },
+        {
           "portId": "retaliator-imported-port-/hardpoint_shieldgenerator_left_bottom",
           "displayName": "Left Bottom Shield Generator",
           "internalName": "hardpoint_shieldgenerator_left_bottom",
@@ -12176,6 +12207,8 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"turret_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_front_module\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_rear_module\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shieldgenerator_left_bottom\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shieldgenerator_left_top\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shieldgenerator_middle_bottom\" — left unconstrained rather than guessed.",
@@ -13448,10 +13481,10 @@
       "sourceFile": "raw-data\\AEGS_Sabre_Raven.json",
       "shipId": "sabre-raven-imported",
       "shipName": "Sabre Raven",
-      "portsIncluded": 15,
-      "componentsDiscovered": 11,
-      "assignmentsCreated": 15,
-      "warnings": 116,
+      "portsIncluded": 17,
+      "componentsDiscovered": 12,
+      "assignmentsCreated": 17,
+      "warnings": 114,
       "errors": 0,
       "portSources": [
         {
@@ -13587,6 +13620,26 @@
           ]
         },
         {
+          "portId": "sabre-raven-imported-port-/hardpoint_weapon_missilerack_left",
+          "displayName": "Left Weapon Missile Rack",
+          "internalName": "hardpoint_weapon_missilerack_left",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_missilerack_left"
+          ]
+        },
+        {
+          "portId": "sabre-raven-imported-port-/hardpoint_weapon_missilerack_right",
+          "displayName": "Right Weapon Missile Rack",
+          "internalName": "hardpoint_weapon_missilerack_right",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_missilerack_right"
+          ]
+        },
+        {
           "portId": "sabre-raven-imported-port-/hardpoint_lifesupport",
           "displayName": "Life Support",
           "internalName": "hardpoint_lifesupport",
@@ -13621,6 +13674,8 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_right_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_missilerack_left\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_missilerack_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay_cockpit\" — left unconstrained rather than guessed."
       ],
@@ -15998,10 +16053,10 @@
       "sourceFile": "raw-data\\AEGS_Vanguard_Sentinel.json",
       "shipId": "vanguard-sentinel-imported",
       "shipName": "Vanguard Sentinel",
-      "portsIncluded": 42,
-      "componentsDiscovered": 19,
-      "assignmentsCreated": 41,
-      "warnings": 196,
+      "portsIncluded": 43,
+      "componentsDiscovered": 20,
+      "assignmentsCreated": 42,
+      "warnings": 195,
       "errors": 0,
       "portSources": [
         {
@@ -16450,6 +16505,16 @@
           "mountPath": [
             "hardpoint_lifesupport"
           ]
+        },
+        {
+          "portId": "vanguard-sentinel-imported-port-/hardpoint_weapon_emp",
+          "displayName": "Emp Weapon",
+          "internalName": "hardpoint_weapon_emp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_emp"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -16493,7 +16558,8 @@
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay_2\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_emp\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Left Inner Weapon Missile Rack\" mount size (4-4) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
@@ -21222,10 +21288,10 @@
       "sourceFile": "raw-data\\ANVL_Hawk.json",
       "shipId": "hawk-imported",
       "shipName": "Hawk",
-      "portsIncluded": 22,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 22,
-      "warnings": 143,
+      "portsIncluded": 23,
+      "componentsDiscovered": 13,
+      "assignmentsCreated": 23,
+      "warnings": 142,
       "errors": 0,
       "portSources": [
         {
@@ -21435,6 +21501,16 @@
           ]
         },
         {
+          "portId": "hawk-imported-port-/hardpoint_missile_emp",
+          "displayName": "Emp Missile",
+          "internalName": "hardpoint_missile_emp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_missile_emp"
+          ]
+        },
+        {
           "portId": "hawk-imported-port-/hardpoint_relay",
           "displayName": "Relay",
           "internalName": "hardpoint_relay",
@@ -21476,6 +21552,7 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_wing_top_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_missile_emp\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
       ],
@@ -21935,10 +22012,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7A_Mk2.json",
       "shipId": "hornet-f7a-mk2-imported",
       "shipName": "Hornet F7A Mk2",
-      "portsIncluded": 30,
-      "componentsDiscovered": 15,
-      "assignmentsCreated": 30,
-      "warnings": 126,
+      "portsIncluded": 31,
+      "componentsDiscovered": 16,
+      "assignmentsCreated": 31,
+      "warnings": 125,
       "errors": 0,
       "portSources": [
         {
@@ -22262,6 +22339,16 @@
           "mountPath": [
             "hardpoint_lifesupport"
           ]
+        },
+        {
+          "portId": "hornet-f7a-mk2-imported-port-/hardpoint_nose_cone",
+          "displayName": "Nose Cone",
+          "internalName": "hardpoint_nose_cone",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_nose_cone"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -22294,7 +22381,8 @@
         "No allowedTypes provided for \"missile_03_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_nose_cone\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Center Weapon\" mount size (5-5) disagrees with its leaf port size (3-3) — leaf value used as authoritative.",
@@ -24266,10 +24354,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7CR.json",
       "shipId": "hornet-f7cr-imported",
       "shipName": "Hornet F7CR",
-      "portsIncluded": 26,
-      "componentsDiscovered": 14,
-      "assignmentsCreated": 26,
-      "warnings": 123,
+      "portsIncluded": 27,
+      "componentsDiscovered": 15,
+      "assignmentsCreated": 27,
+      "warnings": 122,
       "errors": 0,
       "portSources": [
         {
@@ -24392,6 +24480,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "hornet-f7cr-imported-port-/hardpoint_class_4_center",
+          "displayName": "Class 4 Center",
+          "internalName": "hardpoint_class_4_center",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_4_center"
           ]
         },
         {
@@ -24560,6 +24658,7 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2_right_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_4_center\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_3_left_bay_door\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
@@ -24588,10 +24687,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7CR_Mk2.json",
       "shipId": "hornet-f7cr-mk2-imported",
       "shipName": "Hornet F7CR Mk2",
-      "portsIncluded": 25,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 25,
-      "warnings": 126,
+      "portsIncluded": 27,
+      "componentsDiscovered": 14,
+      "assignmentsCreated": 27,
+      "warnings": 124,
       "errors": 0,
       "portSources": [
         {
@@ -24714,6 +24813,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_weapon_center",
+          "displayName": "Center Weapon",
+          "internalName": "hardpoint_weapon_center",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_center"
           ]
         },
         {
@@ -24859,6 +24968,16 @@
           "mountPath": [
             "hardpoint_power_plant_02"
           ]
+        },
+        {
+          "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_nose_cone",
+          "displayName": "Nose Cone",
+          "internalName": "hardpoint_nose_cone",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_nose_cone"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -24874,6 +24993,7 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_right_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_center\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_missile_rack_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
@@ -24886,7 +25006,8 @@
         "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_nose_cone\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Right Missile Rack\" mount size (3-3) disagrees with its leaf port size (1-1) — leaf value used as authoritative.",
@@ -24899,10 +25020,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7CS.json",
       "shipId": "hornet-f7cs-imported",
       "shipName": "Hornet F7CS",
-      "portsIncluded": 26,
-      "componentsDiscovered": 14,
-      "assignmentsCreated": 26,
-      "warnings": 119,
+      "portsIncluded": 27,
+      "componentsDiscovered": 15,
+      "assignmentsCreated": 27,
+      "warnings": 118,
       "errors": 0,
       "portSources": [
         {
@@ -24983,6 +25104,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "hornet-f7cs-imported-port-/hardpoint_class_4_center",
+          "displayName": "Class 4 Center",
+          "internalName": "hardpoint_class_4_center",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_class_4_center"
           ]
         },
         {
@@ -25189,6 +25320,7 @@
         "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_class_4_center\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2_left_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2_right_wing\" — left unconstrained rather than guessed.",
@@ -25221,10 +25353,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7CS_Mk2.json",
       "shipId": "hornet-f7cs-mk2-imported",
       "shipName": "Hornet F7CS Mk2",
-      "portsIncluded": 25,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 25,
-      "warnings": 122,
+      "portsIncluded": 27,
+      "componentsDiscovered": 14,
+      "assignmentsCreated": 27,
+      "warnings": 120,
       "errors": 0,
       "portSources": [
         {
@@ -25347,6 +25479,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_class_2"
+          ]
+        },
+        {
+          "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_weapon_center",
+          "displayName": "Center Weapon",
+          "internalName": "hardpoint_weapon_center",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_center"
           ]
         },
         {
@@ -25492,6 +25634,16 @@
           "mountPath": [
             "hardpoint_power_plant_02"
           ]
+        },
+        {
+          "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_nose_cone",
+          "displayName": "Nose Cone",
+          "internalName": "hardpoint_nose_cone",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_nose_cone"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -25507,6 +25659,7 @@
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_weapon_right_wing\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_class_2\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_center\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_missile_rack_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
@@ -25519,7 +25672,8 @@
         "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_nose_cone\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Right Missile Rack\" mount size (3-3) disagrees with its leaf port size (1-1) — leaf value used as authoritative.",
@@ -25532,10 +25686,10 @@
       "sourceFile": "raw-data\\ANVL_Hornet_F7C_Mk2.json",
       "shipId": "hornet-f7c-mk2-imported",
       "shipName": "Hornet F7C Mk2",
-      "portsIncluded": 25,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 25,
-      "warnings": 122,
+      "portsIncluded": 26,
+      "componentsDiscovered": 13,
+      "assignmentsCreated": 26,
+      "warnings": 121,
       "errors": 0,
       "portSources": [
         {
@@ -25803,6 +25957,16 @@
           "mountPath": [
             "hardpoint_power_plant_02"
           ]
+        },
+        {
+          "portId": "hornet-f7c-mk2-imported-port-/hardpoint_nose_cone",
+          "displayName": "Nose Cone",
+          "internalName": "hardpoint_nose_cone",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_nose_cone"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -25830,7 +25994,8 @@
         "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"hardpoint_power_plant_02\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_nose_cone\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Right Missile Rack\" mount size (3-3) disagrees with its leaf port size (1-1) — leaf value used as authoritative.",
@@ -43696,10 +43861,10 @@
       "sourceFile": "raw-data\\DRAK_Cutlass_Blue.json",
       "shipId": "cutlass-blue-imported",
       "shipName": "Cutlass Blue",
-      "portsIncluded": 53,
-      "componentsDiscovered": 15,
-      "assignmentsCreated": 52,
-      "warnings": 293,
+      "portsIncluded": 54,
+      "componentsDiscovered": 16,
+      "assignmentsCreated": 53,
+      "warnings": 292,
       "errors": 0,
       "portSources": [
         {
@@ -44279,6 +44444,16 @@
           "mountPath": [
             "missile_04_attach"
           ]
+        },
+        {
+          "portId": "cutlass-blue-imported-port-/hardpoint_quantum_interdiction_generator",
+          "displayName": "Quantum Interdiction Generator",
+          "internalName": "hardpoint_quantum_interdiction_generator",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_interdiction_generator"
+          ]
         }
       ],
       "unresolvedConstraints": [
@@ -44333,7 +44508,8 @@
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_03_attach\" — left unconstrained rather than guessed.",
-        "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed."
+        "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_interdiction_generator\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
         "Port \"Left Pylon 01\" mount size (4-4) disagrees with its leaf port size (2-2) — leaf value used as authoritative.",
@@ -69400,10 +69576,10 @@
       "sourceFile": "raw-data\\MRAI_Guardian_QI.json",
       "shipId": "guardian-qi-imported",
       "shipName": "Guardian QI",
-      "portsIncluded": 25,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 25,
-      "warnings": 162,
+      "portsIncluded": 26,
+      "componentsDiscovered": 13,
+      "assignmentsCreated": 26,
+      "warnings": 161,
       "errors": 0,
       "portSources": [
         {
@@ -69454,6 +69630,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "guardian-qi-imported-port-/hardpoint_quantum_damp",
+          "displayName": "Quantum Damp",
+          "internalName": "hardpoint_quantum_damp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_damp"
           ]
         },
         {
@@ -69677,6 +69863,7 @@
         "No allowedTypes provided for \"hardpoint_cooler\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_damp\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shield_generator\" — left unconstrained rather than guessed.",
@@ -69711,10 +69898,10 @@
       "sourceFile": "raw-data\\MRAI_Guardian_QI_Collector_Indust.json",
       "shipId": "guardian-qi-collector-indust-imported",
       "shipName": "Guardian QI Collector Indust",
-      "portsIncluded": 25,
-      "componentsDiscovered": 12,
-      "assignmentsCreated": 25,
-      "warnings": 162,
+      "portsIncluded": 26,
+      "componentsDiscovered": 13,
+      "assignmentsCreated": 26,
+      "warnings": 161,
       "errors": 0,
       "portSources": [
         {
@@ -69765,6 +69952,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_jump_drive"
+          ]
+        },
+        {
+          "portId": "guardian-qi-collector-indust-imported-port-/hardpoint_quantum_damp",
+          "displayName": "Quantum Damp",
+          "internalName": "hardpoint_quantum_damp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_quantum_damp"
           ]
         },
         {
@@ -69988,6 +70185,7 @@
         "No allowedTypes provided for \"hardpoint_cooler\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_quantum_drive\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_jump_drive\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_quantum_damp\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shield_generator\" — left unconstrained rather than guessed.",
@@ -85535,10 +85733,10 @@
       "sourceFile": "raw-data\\RSI_Mantis.json",
       "shipId": "mantis-imported",
       "shipName": "Mantis",
-      "portsIncluded": 26,
-      "componentsDiscovered": 13,
-      "assignmentsCreated": 26,
-      "warnings": 147,
+      "portsIncluded": 27,
+      "componentsDiscovered": 14,
+      "assignmentsCreated": 27,
+      "warnings": 146,
       "errors": 0,
       "portSources": [
         {
@@ -85730,6 +85928,16 @@
           ]
         },
         {
+          "portId": "mantis-imported-port-/hardpoint_interdiction_device",
+          "displayName": "Interdiction Device",
+          "internalName": "hardpoint_interdiction_device",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_interdiction_device"
+          ]
+        },
+        {
           "portId": "mantis-imported-port-/hardpoint_lifesupport",
           "displayName": "Life Support",
           "internalName": "hardpoint_lifesupport",
@@ -85835,6 +86043,7 @@
         "No allowedTypes provided for \"hardpoint_missiles_wing_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_01_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_interdiction_device\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_lifesupport\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay_interior\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_missile_rack_outer_left\" — left unconstrained rather than guessed.",
@@ -90276,10 +90485,10 @@
       "sourceFile": "raw-data\\RSI_Scorpius_Antares.json",
       "shipId": "scorpius-antares-imported",
       "shipName": "Scorpius Antares",
-      "portsIncluded": 40,
-      "componentsDiscovered": 16,
-      "assignmentsCreated": 40,
-      "warnings": 159,
+      "portsIncluded": 42,
+      "componentsDiscovered": 18,
+      "assignmentsCreated": 42,
+      "warnings": 157,
       "errors": 0,
       "portSources": [
         {
@@ -90675,6 +90884,16 @@
           ]
         },
         {
+          "portId": "scorpius-antares-imported-port-/hardpoint_spine",
+          "displayName": "Spine",
+          "internalName": "hardpoint_spine",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_spine"
+          ]
+        },
+        {
           "portId": "scorpius-antares-imported-port-/hardpoint_powerplant_lower_right",
           "displayName": "Right Lower Power Plant",
           "internalName": "hardpoint_powerplant_lower_right",
@@ -90702,6 +90921,16 @@
           "factorySource": "entity-hierarchy",
           "mountPath": [
             "hardpoint_relay_cockpit"
+          ]
+        },
+        {
+          "portId": "scorpius-antares-imported-port-/hardpoint_EMP",
+          "displayName": "EMP",
+          "internalName": "hardpoint_EMP",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_EMP"
           ]
         },
         {
@@ -90752,9 +90981,11 @@
         "No allowedTypes provided for \"missile_02_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_03_attach\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"missile_04_attach\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_spine\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_powerplant_lower_right\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_powerplant_lower_left\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay_cockpit\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_EMP\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_turret_missile_camera\" — left unconstrained rather than guessed."
       ],
       "conflicts": [
@@ -92835,10 +93066,10 @@
       "sourceFile": "raw-data\\TMBL_Cyclone_AA.json",
       "shipId": "cyclone-aa-imported",
       "shipName": "Cyclone AA",
-      "portsIncluded": 5,
-      "componentsDiscovered": 5,
-      "assignmentsCreated": 5,
-      "warnings": 76,
+      "portsIncluded": 7,
+      "componentsDiscovered": 6,
+      "assignmentsCreated": 6,
+      "warnings": 75,
       "errors": 0,
       "portSources": [
         {
@@ -92872,6 +93103,26 @@
           ]
         },
         {
+          "portId": "cyclone-aa-imported-port-/hardpoint_module_attach",
+          "displayName": "Module Attach",
+          "internalName": "hardpoint_module_attach",
+          "sizeSource": "unknown",
+          "factorySource": "none",
+          "mountPath": [
+            "hardpoint_module_attach"
+          ]
+        },
+        {
+          "portId": "cyclone-aa-imported-port-/hardpoint_module_attach/hardpoint_weapon_emp",
+          "displayName": "Emp Weapon",
+          "internalName": "hardpoint_weapon_emp",
+          "sizeSource": "DataCore-explicit",
+          "factorySource": "entity-hierarchy",
+          "mountPath": [
+            "hardpoint_weapon_emp"
+          ]
+        },
+        {
           "portId": "cyclone-aa-imported-port-/hardpoint_shield_generator",
           "displayName": "Shield Generator",
           "internalName": "hardpoint_shield_generator",
@@ -92896,6 +93147,7 @@
         "No allowedTypes provided for \"hardpoint_radar\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_power_plant\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_cooler\" — left unconstrained rather than guessed.",
+        "No allowedTypes provided for \"hardpoint_weapon_emp\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_shield_generator\" — left unconstrained rather than guessed.",
         "No allowedTypes provided for \"hardpoint_relay_cockpit\" — left unconstrained rather than guessed."
       ],
@@ -96953,7 +97205,7 @@
       "missingChildDefaults": []
     }
   ],
-  "totalWarnings": 48929,
+  "totalWarnings": 48907,
   "totalErrors": 1,
   "images": {
     "resolved": 0,

@@ -317,6 +317,22 @@ export interface CompatibilityIdentityHint {
   /** The destination port's own factory-installed entityClass — the
    * input to `deriveDestinationCapability`. */
   destinationFactoryEntityClass?: string | null
+  /** SW-013C.2D (Objective 3) — the destination PORT's own certified
+   * swap-group member entity classes, when a confirmed group exists (see
+   * `src/generated/configurableSlots.ts`'s `swapGroupEligibleEntityClassesFor`).
+   * When `itemEntityClass` is a member, the candidate is authoritatively
+   * known compatible REGARDLESS of what the generic size/category sweep
+   * below would conclude — this is what lets the Eclipse's own confirmed
+   * Bomb Rack alternates (real DataCore category BombLauncher, distinct
+   * from the port's own MissileLauncher-derived "Missile Rack" type)
+   * validate correctly instead of reading "Invalid Target" the instant a
+   * Commander saves the exact selection the swap-group-scoped picker
+   * (SW-013C.2C's own established pattern) just offered them. Absent or
+   * `undefined` for every port with no confirmed group — zero behavior
+   * change there, the pre-existing generic sweep decides alone, exactly
+   * as before this mission (this is what preserves the Hornet Ghost's own
+   * cross-ship missile-rack swap, SW-008C's regression). */
+  knownCompatibleEntityClasses?: ReadonlySet<string> | null
 }
 
 /**
@@ -338,6 +354,24 @@ export interface CompatibilityIdentityHint {
 function checkCompatibility(entry: CatalogEntry, portType: string, portSize: string, destinationCapability: DestinationCapability): boolean {
   const size = parsePortSize(portSize)
   if (Number.isNaN(size)) return true
+
+  // SW-013C.2B (Module Taxonomy Activation, Objective 3) — "Compatibility
+  // must be driven only by certified relationships. Never by: size alone
+  // / category alone." A candidate's OWN entity may independently resolve
+  // through some other, already-recognized category (e.g. the Hornet
+  // Center's real alternative, the Ball Turret, resolves as category
+  // "Turret" — recognized generically for ordinary turret compatibility
+  // elsewhere in the app) — that unrelated category must never be used to
+  // POSITIVELY *or* NEGATIVELY judge Module compatibility by the generic
+  // size/category sweep below, since it isn't the certified authority for
+  // this port type. The one legitimate source of Module compatibility is
+  // the swap-group eligible-component list, applied by the caller with
+  // that context (ShipWorkspacePrototype.tsx's `newTargetOptionsFor`).
+  // This function only needs to never assert a false "Invalid Target" here
+  // — the same "can't disprove compatibility we have no certified data
+  // for" philosophy `validateTargetCompatibility` already applies to
+  // uncataloged items, extended to every candidate against a Module port.
+  if (portType === 'Module') return true
 
   if (entry.subtype === 'PDCTurret') {
     return destinationCapability === 'PDC_TURRET' && entry.size === size
@@ -391,6 +425,14 @@ export function validateTargetCompatibility(
   const item = (targetItem ?? '').trim()
   if (!item || item === '—') return { valid: true }
 
+  // SW-013C.2D (Objective 3) — a certified swap-group member is
+  // authoritatively valid, checked before any resolution/translation:
+  // see `CompatibilityIdentityHint.knownCompatibleEntityClasses`'s own
+  // doc comment for why this must win over the generic sweep.
+  if (identity?.itemEntityClass && identity.knownCompatibleEntityClasses?.has(identity.itemEntityClass)) {
+    return { valid: true }
+  }
+
   const resolution = resolveCandidate(item, identity?.itemEntityClass)
   if (resolution.status === 'ambiguous') {
     return {
@@ -427,6 +469,7 @@ export function validateTargetCompatibility(
  * way to know which the Commander actually means.
  */
 export function isComponentSelectableForPort(item: string, portType: string, portSize: string, identity?: CompatibilityIdentityHint): boolean {
+  if (identity?.itemEntityClass && identity.knownCompatibleEntityClasses?.has(identity.itemEntityClass)) return true
   const resolution = resolveCandidate(item, identity?.itemEntityClass)
   if (resolution.status === 'ambiguous') return false
   if (resolution.status === 'unresolved') return true

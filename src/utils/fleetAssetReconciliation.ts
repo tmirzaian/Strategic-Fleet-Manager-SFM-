@@ -7,6 +7,7 @@ import { computeHardpointStatusWithValidation } from './hardpointStatus'
 // fleetAssetMaterializer.ts already does for a brand-new Fleet Asset.
 import { resolveComponentIdentity } from '../engine/installation'
 import { componentOwnedChildSlotSpec } from './componentOwnedSlots'
+import { swapGroupEligibleEntityClassesFor } from '../generated/configurableSlots'
 
 export interface ReconciliationResult {
   /** The Build's full, current row set: matched old rows (Commander intent
@@ -73,7 +74,17 @@ export function reconcileBuildHardpoints(
   shipId: string,
   buildId: string,
   oldHardpoints: Hardpoint[],
-  newTemplate: FactoryHardpointTemplate[]
+  newTemplate: FactoryHardpointTemplate[],
+  // SW-013C.2D (Objective 3) — the ship's own real entityClass, when the
+  // caller already has it (useFleetStore.ts's rehydration path does, via
+  // resolveShipEntityClass). Used only to re-derive a matched row's
+  // certified swap-group membership (see `CompatibilityIdentityHint.knownCompatibleEntityClasses`),
+  // so a rehydration/reload never flips a port's own already-correct
+  // status just because its saved target's translated category doesn't
+  // match the port's own type. `undefined` degrades to the pre-existing
+  // behavior — the generic sweep decides alone, exactly as before this
+  // mission.
+  shipEntityClass?: string
 ): ReconciliationResult {
   // FTB-001B/FTB-001E — a component-owned port's own children are a
   // dynamic structure (see componentOwnedSlots.ts), never part of the
@@ -101,8 +112,29 @@ export function reconcileBuildHardpoints(
   // "Front Cab Mining Laser (Manned Turret) — Mining Weapon") — what
   // matters is the PORT's OWN factory identity, never its position in the
   // hierarchy.
+  //
+  // SW-013C.2C — a parent's FACTORY identity alone isn't always enough:
+  // every existing family (missile racks, mining heads) always ships
+  // component-owning from the factory, so keying off `t.factoryEntityClass`
+  // was sufficient. The Hornet's turret Cap is the first port that is
+  // ordinary at the factory but becomes component-owning only once a
+  // Commander TARGETS a turret onto it (e.g. Center Weapon's Cap ->
+  // Ball Turret). Keying off factory identity alone left that swap's own
+  // synthesized weapon children unrecognized as component-owned on the
+  // very next rehydration — they'd fall through to normal
+  // template-matching, find no template counterpart, and get silently
+  // quarantined. So a parent slotLabel also qualifies when the OLD row
+  // persisted at that same label was itself already component-owning
+  // under its own effective (target-first) identity.
+  const oldRowBySlotLabel = new Map<string, Hardpoint>(oldHardpoints.map((h) => [h.slotLabel, h]))
   const componentOwnedParentSlotLabels = new Set(
-    newTemplate.filter((t) => componentOwnedChildSlotSpec(t.factoryEntityClass) !== null).map((t) => t.slotLabel)
+    newTemplate
+      .filter((t) => {
+        if (componentOwnedChildSlotSpec(t.factoryEntityClass) !== null) return true
+        const oldParent = oldRowBySlotLabel.get(t.slotLabel)
+        return oldParent !== undefined && componentOwnedChildSlotSpec(oldParent.targetEntityClass ?? oldParent.factoryEntityClass) !== null
+      })
+      .map((t) => t.slotLabel)
   )
   const isComponentOwnedChild = (parentSlotLabel: string | undefined) => parentSlotLabel !== undefined && componentOwnedParentSlotLabels.has(parentSlotLabel)
   const oldRackChildren = oldHardpoints.filter((h) => isComponentOwnedChild(h.parentSlotLabel))
@@ -224,6 +256,7 @@ export function reconcileBuildHardpoints(
           installedEntityClass,
           targetEntityClass,
           factoryEntityClass,
+          knownCompatibleEntityClasses: swapGroupEligibleEntityClassesFor(shipEntityClass, newRow.sourceParentItemPortName, newRow.sourceItemPortName),
         })
     hardpoints.push({
       id: old.id,

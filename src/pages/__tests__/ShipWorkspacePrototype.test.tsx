@@ -205,13 +205,72 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
   })
 
-  it('a reviewed-Loadout switch discards local New Target edits (they were never real Commander work on a different Loadout)', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
-    selectNewTarget('Left Shield Generator', 'Shimmer')
-    fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
-    const banner = screen.getByTestId('ship-operational-banner')
-    expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+  // SW-013C.1 (Objective 5) — superseded. A reviewed-Loadout switch used to
+  // discard local New Target edits immediately and silently — the exact
+  // "Commander cannot reliably save a build" failure mode SW-013C.1's live
+  // vertical proof reproduced: an edit looked committed (the New Target
+  // cell updates on selection) but vanished the instant a different
+  // Loadout pill was clicked, with no warning. The pill click no longer
+  // switches immediately when a pending edit exists; it now stages the
+  // switch behind an explicit inline confirm (see the SW-013C.1 describe
+  // block below for the guarded contract).
+  describe('SW-013C.1 (Objective 5): switching Loadouts with unsaved New Target edits is guarded, never silent', () => {
+    it('clicking a different Loadout pill does NOT switch immediately when a pending edit exists — it stages an inline confirm instead', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+
+      // Still reviewing Stealth Build — the edit is untouched.
+      const banner = screen.getByTestId('ship-operational-banner')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+      expect(screen.getByRole('button', { name: /Discard & Switch/ })).toBeInTheDocument()
+    })
+
+    it('the reviewed pill itself carries an "Unsaved" badge while a pending edit exists', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      expect(screen.getByRole('button', { name: /Stealth Build.*Unsaved/s })).toBeInTheDocument()
+    })
+
+    it('Cancel keeps the Commander on the original Loadout with the edit fully intact', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+      expect(screen.queryByRole('button', { name: /Discard & Switch/ })).not.toBeInTheDocument()
+      const banner = screen.getByTestId('ship-operational-banner')
+      expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
+      expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Shimmer')
+      // Never persisted to the store either — Cancel is a pure UI no-op.
+      expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Mirage')
+    })
+
+    it('"Discard & Switch" performs the switch and clears the pending edit, with explicit Commander consent', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      selectNewTarget('Left Shield Generator', 'Shimmer')
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Discard & Switch/ }))
+
+      expect(screen.queryByRole('button', { name: /Discard & Switch/ })).not.toBeInTheDocument()
+      const banner = screen.getByTestId('ship-operational-banner')
+      expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
+      // The discarded edit was never written to the store.
+      expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Mirage')
+    })
+
+    it('a pill click with NO pending edits still switches immediately — the guard never adds friction to the common case', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      expect(screen.queryByRole('button', { name: /Discard & Switch/ })).not.toBeInTheDocument()
+      // Escort Build is now reviewed — its own pill carries the ACTIVE/reviewed styling; confirmed indirectly via no confirm bar and a normal render.
+    })
   })
 
   describe('SW-008D: Loadout Lifecycle Completion', () => {
@@ -222,7 +281,7 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       selectNewTarget('Left Shield Generator', 'Shimmer')
       expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Save Changes/ })[0])
 
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
       expect(screen.getByText(/saved\.?$/)).toBeInTheDocument()
@@ -240,7 +299,7 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       selectNewTarget('Left Shield Generator', 'Shimmer')
       expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Discard Changes/ })[0])
 
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
       expect((screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement).value).toBe('Mirage')
@@ -257,13 +316,13 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       selectNewTarget('Power Plant', 'Intentional Empty')
       expect(within(banner).getByText('Pending Changes (2)')).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Save Changes/ })[0])
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
 
       selectNewTarget('Left Shield Generator', 'Mirage')
       expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
 
-      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Discard Changes/ })[0])
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
     })
 
@@ -331,7 +390,7 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       const banner = screen.getByTestId('ship-operational-banner')
       selectNewTarget('Left Shield Generator', 'Shimmer')
       expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
-      fireEvent.click(screen.getByRole('button', { name: /Save Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Save Changes/ })[0])
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
       expect(useFleetStore.getState().hardpoints.find((h) => h.buildId === created.id && h.slotLabel === 'Left Shield Generator')?.targetItem).toBe('Shimmer')
 
@@ -343,7 +402,7 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       // Edit Again + Discard.
       selectNewTarget('Left Shield Generator', 'Mirage')
       expect(within(banner).getByText('Pending Changes (1)')).toBeInTheDocument()
-      fireEvent.click(screen.getByRole('button', { name: /Discard Changes/ }))
+      fireEvent.click(screen.getAllByRole('button', { name: /Discard Changes/ })[0])
       expect(within(banner).getByText('No Pending Changes')).toBeInTheDocument()
       // The discarded edit never persisted — the Save from earlier still stands.
       expect(useFleetStore.getState().hardpoints.find((h) => h.buildId === created.id && h.slotLabel === 'Left Shield Generator')?.targetItem).toBe('Shimmer')
@@ -499,9 +558,12 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
   it('the banner reflects the real ACTIVE Loadout, independent of the reviewed selection (SW-001 behavior preserved)', () => {
     renderWorkspace('ghost')
     const banner = screen.getByTestId('ship-operational-banner')
-    expect(within(banner).getByText('92%')).toBeInTheDocument()
+    // SW-013C.2B — 93%, not the pre-Module-taxonomy 92%: two new, real
+    // Module ports (Center/Nose) now exist and are matched by default
+    // (factory Cap === installed === target), shifting the denominator.
+    expect(within(banner).getByText('93%')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
-    expect(within(banner).getByText('92%')).toBeInTheDocument()
+    expect(within(banner).getByText('93%')).toBeInTheDocument()
   })
 
   it('Part I behaviors preserved: sticky context hidden until scrolled past the banner, Ship Selector lives in the page header', () => {
@@ -670,7 +732,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     it('active and reviewed builds are prepared through the same canonical pipeline — switching the reviewed Loadout changes the systems tree data without touching the banner', () => {
       renderWorkspace('ghost')
       const banner = screen.getByTestId('ship-operational-banner')
-      expect(within(banner).getByText('92%')).toBeInTheDocument()
+      expect(within(banner).getByText('93%')).toBeInTheDocument()
       const shieldRowBefore = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
       expect(within(shieldRowBefore).getAllByText('Mirage').length).toBeGreaterThan(0)
 
@@ -679,7 +741,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       const shieldRowAfter = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
       expect(within(shieldRowAfter).getByText('FR-66')).toBeInTheDocument()
       // Banner (Active Loadout) is completely unaffected.
-      expect(within(banner).getByText('92%')).toBeInTheDocument()
+      expect(within(banner).getByText('93%')).toBeInTheDocument()
     })
   })
 
@@ -1263,5 +1325,77 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
     expect(screen.getAllByText('UTV').length).toBeGreaterThan(0)
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+  })
+})
+
+/**
+ * SW-013C.2D (Objective 1): Persistent Workspace Save Actions. Commander
+ * testing found the panel-header Save/Discard controls (SW-008D) scroll
+ * out of the viewport once a Commander edits a port deep in a long table.
+ * This bar is a second, always-visible entry point to the exact same
+ * `handleSaveChanges`/`handleDiscardChanges` handlers and the exact same
+ * `desiredTargets` pending-edit state — never a parallel save path.
+ */
+describe('<ShipWorkspacePrototype /> — SW-013C.2D (Objective 1): Persistent Workspace Save Actions', () => {
+  it('is absent when there are no pending changes', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    expect(screen.queryByTestId('persistent-save-bar')).not.toBeInTheDocument()
+  })
+
+  it('appears once a pending change exists, showing the correct pending count', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    const bar = screen.getByTestId('persistent-save-bar')
+    expect(within(bar).getByText(/1 Pending Change/)).toBeInTheDocument()
+  })
+
+  it('the pending count updates as further edits accumulate', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    selectNewTarget('Power Plant', 'Intentional Empty')
+    const bar = screen.getByTestId('persistent-save-bar')
+    expect(within(bar).getByText(/2 Pending Changes/)).toBeInTheDocument()
+  })
+
+  it('is not rendered outside Manage Loadout intent, even with an underlying reviewed-build change pending elsewhere', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    expect(screen.getByTestId('persistent-save-bar')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    expect(screen.queryByTestId('persistent-save-bar')).not.toBeInTheDocument()
+  })
+
+  it('Save Changes in the persistent bar commits the exact same edit the panel-header button would — real store write, pending state clears', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    const bar = screen.getByTestId('persistent-save-bar')
+    fireEvent.click(within(bar).getByText('Save Changes'))
+    expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Shimmer')
+    expect(screen.queryByTestId('persistent-save-bar')).not.toBeInTheDocument()
+  })
+
+  it('Discard Changes in the persistent bar clears the pending edit without writing to the store', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    const bar = screen.getByTestId('persistent-save-bar')
+    fireEvent.click(within(bar).getByText('Discard Changes'))
+    expect(screen.queryByTestId('persistent-save-bar')).not.toBeInTheDocument()
+    expect(useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === 'ghost-stealth')?.targetItem).toBe('Mirage')
+  })
+
+  it('existing unsaved-change protection (SW-013C.1\'s guarded Loadout switch) is unaffected — switching Loadouts with a pending edit still requires explicit confirmation', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    selectNewTarget('Left Shield Generator', 'Shimmer')
+    fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+    expect(screen.getByText(/has 1 unsaved target/)).toBeInTheDocument()
+    // The reviewed build has not actually switched yet — still on Stealth Build.
+    expect(screen.getByTestId('persistent-save-bar')).toBeInTheDocument()
   })
 })

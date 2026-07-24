@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest'
 import { TOP_LEVEL_GROUP_ORDER, INTRA_GROUP_CHILD_PRIORITY, legacyPortGroupLabel } from '../commanderSystemTaxonomy'
 
 describe('SW-007C — Commander Taxonomy Authority', () => {
-  it('TOP_LEVEL_GROUP_ORDER is the fixed, SW-007A-approved eight-category Commander mental model, in display order', () => {
+  it('TOP_LEVEL_GROUP_ORDER is the fixed, SW-007A-approved Commander mental model (nine categories as of SW-013C.2B), in display order', () => {
     expect(TOP_LEVEL_GROUP_ORDER).toEqual([
       'Core Components',
       'Detection / Navigation',
       'Missile Racks',
       'Pilot Weapons',
+      'Modules',
       'Manned Turrets',
       'Remote Turrets',
       'Utility',

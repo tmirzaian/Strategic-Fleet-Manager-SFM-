@@ -523,6 +523,10 @@
         "componentId": "component-AMRS_LaserCannon_S3"
       },
       {
+        "portId": "avenger-warlock-imported-port-/hardpoint_weapon_emp",
+        "componentId": "component-AEGS_EMP_Device_S4"
+      },
+      {
         "portId": "avenger-warlock-imported-port-/hardpoint_weapon_missilerack_left_wing",
         "componentId": "component-MRCK_S03_BEHR_Dual_S02"
       },
@@ -3962,6 +3966,14 @@
         "componentId": "component-KLWE_LaserRepeater_S3"
       },
       {
+        "portId": "retaliator-imported-port-/hardpoint_front_module",
+        "componentId": "component-AEGS_Retaliator_Module_Front_Base"
+      },
+      {
+        "portId": "retaliator-imported-port-/hardpoint_rear_module",
+        "componentId": "component-AEGS_Retaliator_Module_Rear_Base"
+      },
+      {
         "portId": "retaliator-imported-port-/hardpoint_shieldgenerator_left_bottom",
         "componentId": "component-SHLD_GODI_S02_FullStop_SCItem"
       },
@@ -4487,6 +4499,14 @@
       {
         "portId": "sabre-raven-imported-port-/hardpoint_weapon_right_wing/hardpoint_class_2",
         "componentId": "component-KRIG_LaserCannon_S3"
+      },
+      {
+        "portId": "sabre-raven-imported-port-/hardpoint_weapon_missilerack_left",
+        "componentId": "component-MXOX_EMP_Device_S2"
+      },
+      {
+        "portId": "sabre-raven-imported-port-/hardpoint_weapon_missilerack_right",
+        "componentId": "component-MXOX_EMP_Device_S2"
       },
       {
         "portId": "sabre-raven-imported-port-/hardpoint_lifesupport",
@@ -5458,6 +5478,10 @@
       {
         "portId": "vanguard-sentinel-imported-port-/hardpoint_lifesupport",
         "componentId": "component-LFSP_TYDT_S01_ComfortAir"
+      },
+      {
+        "portId": "vanguard-sentinel-imported-port-/hardpoint_weapon_emp",
+        "componentId": "component-AEGS_EMP_Sentinel_S4"
       }
     ],
     "updatedAt": "On import"
@@ -7153,6 +7177,10 @@
         "componentId": "component-KLWE_LaserRepeater_S2"
       },
       {
+        "portId": "hawk-imported-port-/hardpoint_missile_emp",
+        "componentId": "component-ANVL_Hawk_EMP_Device_S2"
+      },
+      {
         "portId": "hawk-imported-port-/hardpoint_relay",
         "componentId": "component-RELAY_3slot"
       },
@@ -7437,6 +7465,10 @@
       {
         "portId": "hornet-f7a-mk2-imported-port-/hardpoint_lifesupport",
         "componentId": "component-LFSP_TYDT_S01_ComfortAir"
+      },
+      {
+        "portId": "hornet-f7a-mk2-imported-port-/hardpoint_nose_cone",
+        "componentId": "component-ANVL_F7_Mk2_NoseCap"
       }
     ],
     "updatedAt": "On import"
@@ -8157,6 +8189,10 @@
         "componentId": "component-KLWE_LaserRepeater_S3"
       },
       {
+        "portId": "hornet-f7cr-imported-port-/hardpoint_class_4_center",
+        "componentId": "component-UMNT_ANVL_S5_Rotodome"
+      },
+      {
         "portId": "hornet-f7cr-imported-port-/hardpoint_class_3_left_bay_door",
         "componentId": "component-MRCK_S03_BEHR_Dual_S02"
       },
@@ -8268,6 +8304,10 @@
         "componentId": "component-APAR_BallisticGatling_S4"
       },
       {
+        "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_weapon_center",
+        "componentId": "component-UMNT_ANVL_S5_Rotodome_Mk2"
+      },
+      {
         "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_missile_rack_right",
         "componentId": "component-MRCK_S03_BEHR_Quad_S01"
       },
@@ -8318,6 +8358,10 @@
       {
         "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_power_plant_02",
         "componentId": "component-POWR_AEGS_S01_Regulus_SCItem"
+      },
+      {
+        "portId": "hornet-f7cr-mk2-imported-port-/hardpoint_nose_cone",
+        "componentId": "component-ANVL_F7CR_Mk2_NoseCap"
       }
     ],
     "updatedAt": "On import"
@@ -8357,6 +8401,10 @@
       {
         "portId": "hornet-f7cs-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
         "componentId": "component-JDRV_TARS_S01_Explorer_SCItem"
+      },
+      {
+        "portId": "hornet-f7cs-imported-port-/hardpoint_class_4_center",
+        "componentId": "component-UMNT_ANVL_S5_Cap"
       },
       {
         "portId": "hornet-f7cs-imported-port-/hardpoint_class_2_left_wing",
@@ -8486,6 +8534,10 @@
         "componentId": "component-APAR_BallisticGatling_S4"
       },
       {
+        "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_weapon_center",
+        "componentId": "component-UMNT_ANVL_S5_Cap_Mk2"
+      },
+      {
         "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_missile_rack_right",
         "componentId": "component-MRCK_S03_BEHR_Quad_S01"
       },
@@ -8536,6 +8588,10 @@
       {
         "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_power_plant_02",
         "componentId": "component-POWR_TYDT_S01_SonicLite_SCItem"
+      },
+      {
+        "portId": "hornet-f7cs-mk2-imported-port-/hardpoint_nose_cone",
+        "componentId": "component-ANVL_F7_Mk2_NoseCap"
       }
     ],
     "updatedAt": "On import"
@@ -8643,6 +8699,10 @@
       {
         "portId": "hornet-f7c-mk2-imported-port-/hardpoint_power_plant_02",
         "componentId": "component-POWR_AEGS_S01_Regulus_SCItem"
+      },
+      {
+        "portId": "hornet-f7c-mk2-imported-port-/hardpoint_nose_cone",
+        "componentId": "component-ANVL_F7_Mk2_NoseCap"
       }
     ],
     "updatedAt": "On import"
@@ -14958,6 +15018,10 @@
       {
         "portId": "cutlass-blue-imported-port-/hardpoint_Right_Pylon_03/missile_04_attach",
         "componentId": "component-MISL_S02_CS_FSKI_Tempest"
+      },
+      {
+        "portId": "cutlass-blue-imported-port-/hardpoint_quantum_interdiction_generator",
+        "componentId": "component-QDMP_WETK_S01_Burke"
       }
     ],
     "updatedAt": "On import"
@@ -23459,6 +23523,10 @@
         "componentId": "component-JDRV_TARS_S02_Excelsior_SCItem"
       },
       {
+        "portId": "guardian-qi-imported-port-/hardpoint_quantum_damp",
+        "componentId": "component-QDMP_RSI_S03_Captor"
+      },
+      {
         "portId": "guardian-qi-imported-port-/hardpoint_radar",
         "componentId": "component-RADR_GRNP_S02_Epier"
       },
@@ -23564,6 +23632,10 @@
       {
         "portId": "guardian-qi-collector-indust-imported-port-/hardpoint_quantum_drive/hardpoint_jump_drive",
         "componentId": "component-JDRV_TARS_S02_Excelsior_SCItem"
+      },
+      {
+        "portId": "guardian-qi-collector-indust-imported-port-/hardpoint_quantum_damp",
+        "componentId": "component-QDMP_RSI_S03_Captor"
       },
       {
         "portId": "guardian-qi-collector-indust-imported-port-/hardpoint_radar",
@@ -28946,6 +29018,10 @@
         "componentId": "component-MISL_S02_IR_FSKI_Ignite"
       },
       {
+        "portId": "mantis-imported-port-/hardpoint_interdiction_device",
+        "componentId": "component-QED_WETK_S03_Reynie"
+      },
+      {
         "portId": "mantis-imported-port-/hardpoint_lifesupport",
         "componentId": "component-LFSP_TYDT_S01_ComfortAir"
       },
@@ -30622,6 +30698,10 @@
         "componentId": "component-MISL_S02_CS_FSKI_Tempest"
       },
       {
+        "portId": "scorpius-antares-imported-port-/hardpoint_spine",
+        "componentId": "component-QED_RSI_S03_Scorpius"
+      },
+      {
         "portId": "scorpius-antares-imported-port-/hardpoint_powerplant_lower_right",
         "componentId": "component-POWR_AEGS_S01_Regulus_SCItem"
       },
@@ -30632,6 +30712,10 @@
       {
         "portId": "scorpius-antares-imported-port-/hardpoint_relay_cockpit",
         "componentId": "component-RELAY_3slot"
+      },
+      {
+        "portId": "scorpius-antares-imported-port-/hardpoint_EMP",
+        "componentId": "component-RSI_Scorpius_EMP_Device"
       },
       {
         "portId": "scorpius-antares-imported-port-/hardpoint_turret_missile_camera",
@@ -31363,6 +31447,10 @@
       {
         "portId": "cyclone-aa-imported-port-/hardpoint_cooler",
         "componentId": "component-COOL_JSPN_S00_FrostStarSL_SCItem"
+      },
+      {
+        "portId": "cyclone-aa-imported-port-/hardpoint_module_attach/hardpoint_weapon_emp",
+        "componentId": "component-TMBL_EMP_Device_S1"
       },
       {
         "portId": "cyclone-aa-imported-port-/hardpoint_shield_generator",

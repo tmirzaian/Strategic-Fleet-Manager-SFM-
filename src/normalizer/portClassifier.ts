@@ -61,6 +61,18 @@ const INCLUDED_TYPE_TO_GROUP: Record<string, EquipmentGroup> = {
   PointDefense: 'Defense',
   Paint: 'Customization',
   Livery: 'Customization',
+  /** SW-013C.2B (Module Taxonomy Activation) — see
+   * `src/normalizer/classificationTranslator.ts`'s `CONFIRMED_MODULE_ENTITY_CLASSES`/
+   * `CONFIRMED_NOSE_CAP_ENTITY_CLASSES` for the narrow, evidence-gated set
+   * of entities that ever actually translate to this canonical type — this
+   * table entry only decides the EquipmentGroup once that translation has
+   * already happened; it never widens which raw entities qualify. */
+  Module: 'Modules',
+  /** SW-013C.2D — see `src/normalizer/classificationTranslator.ts`'s `EMP`/
+   * `QuantumInterdictionGenerator` rules for the narrow, evidence-gated
+   * set of entities that ever translate to these canonical types. */
+  EMP: 'ElectronicWarfare',
+  QuantumDampener: 'ElectronicWarfare',
 }
 
 /** Explicitly excluded raw port types — listed for clarity/debugging even

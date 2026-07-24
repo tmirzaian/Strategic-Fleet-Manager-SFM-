@@ -29,7 +29,7 @@ import ShipHeroFrame from '../components/ShipHeroFrame'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
-import { catalogComponentsByEntityClass } from '../generated/componentCatalog'
+import { catalogComponentsByEntityClass, resolveComponentByEntityClass } from '../generated/componentCatalog'
 import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
@@ -226,6 +226,16 @@ export default function ShipWorkspacePrototype() {
     setDesiredTargetEntityClasses({})
   }, [reviewedBuildId])
 
+  // SW-013C.1 (Objective 5) — UI Truthfulness. Switching the reviewed
+  // Loadout (the effect above) silently drops any unsaved New Target edits
+  // with no warning of any kind — the exact "Commander cannot reliably
+  // save a build" failure mode this job's live proof reproduced. A pill
+  // click no longer switches immediately whenever a pending edit exists;
+  // it stages the destination here and the Loadout panel renders an
+  // inline confirm (never a modal — consistent with this page's own
+  // convention) requiring an explicit "Discard & Switch" or "Cancel."
+  const [pendingSwitchBuildId, setPendingSwitchBuildId] = useState<string | null>(null)
+
   // SW-013A (Objective 2) — tree expansion is a ship-topology concern, not
   // a per-Loadout one: the same ports/taxonomy groups exist regardless of
   // which Loadout is being reviewed, only the installed/target items
@@ -394,6 +404,28 @@ export default function ShipWorkspacePrototype() {
     setSaveNotice(null)
   }
 
+  // SW-013C.1 (Objective 5) — the guarded entry point for changing which
+  // Loadout is reviewed. Stages the switch behind an explicit confirm
+  // whenever a pending New Target edit exists; switches immediately (the
+  // prior, unguarded behavior) otherwise — a Commander who isn't mid-edit
+  // sees no change at all.
+  function requestReviewedBuildSwitch(nextBuildId: string) {
+    if (nextBuildId === reviewedBuildId) return
+    if (Object.keys(desiredTargets).length > 0) {
+      setPendingSwitchBuildId(nextBuildId)
+      return
+    }
+    setReviewedBuildId(nextBuildId)
+  }
+  function confirmDiscardAndSwitch() {
+    if (!pendingSwitchBuildId) return
+    setReviewedBuildId(pendingSwitchBuildId)
+    setPendingSwitchBuildId(null)
+  }
+  function cancelPendingSwitch() {
+    setPendingSwitchBuildId(null)
+  }
+
   // SW-008D (Objective 3) — New Loadout creation, through the same shared
   // authority as Save above. "Active Loadout" as an initialize-from source
   // maps to cloning the ship's real active Build (startingState: 'EXISTING',
@@ -540,6 +572,84 @@ export default function ShipWorkspacePrototype() {
     addPinned(hp.targetItem, hp.targetEntityClass)
     addPinned(hp.factoryItem, hp.factoryEntityClass)
     addPinned(hp.installedItem, hp.installedEntityClass)
+
+    // SW-013C.2B (Objective 3) / SW-013C.2D — appends every member of this
+    // port's own certified swap-group (SW-011A's Configurable Slot
+    // authority) as an option, tagged with `pathPrefix`. A member entity
+    // class that doesn't resolve in the browser catalog is skipped, not
+    // fabricated — see SW-013C.2B report's own documented gap
+    // (UMNT_ANVL_S5_Rotodome_Mk2, present in generation-time data, absent
+    // from the shipped runtime component catalog).
+    function appendSwapGroupOptions(pathPrefix: string): void {
+      const slot = configurableSlotFor(hp)
+      for (const entityClass of slot?.eligibleComponents ?? []) {
+        if (seen.has(entityClass)) continue
+        const resolution = resolveComponentByEntityClass(entityClass)
+        if (resolution.status !== 'resolved') continue
+        const { displayName, size } = resolution.record
+        if (seen.has(displayName)) continue
+        seen.add(displayName)
+        options.push({ item: displayName, path: `${pathPrefix} → ${displayName}`, entityClass, label: `${displayName} — S${size}` })
+      }
+    }
+
+    // SW-013C.2B (Objective 3) — "Compatibility must be driven only by
+    // certified relationships. Never by: size alone / category alone /
+    // manufacturer / display name." A Module port's factory component
+    // deliberately has no entry in CATEGORY_TO_PORT_TYPE (see
+    // src/generated/componentCatalog.ts), so the generic full-catalog
+    // sweep below naturally offers it nothing — that omission IS the
+    // compatibility gate, not an oversight. The one legitimate source of
+    // Module alternatives is the certified swap-group eligible-component
+    // list.
+    //
+    // SW-013C.2D (Objective 5) — EMP and Quantum Dampener/Interdiction
+    // ports get the exact same treatment for the exact same reason:
+    // neither DataCore category (EMP, QuantumInterdictionGenerator) has a
+    // CATEGORY_TO_PORT_TYPE entry either, so the generic sweep below would
+    // already offer them nothing — this just makes the swap-group-only
+    // posture explicit and, where a real confirmed group exists (the
+    // Avenger Warlock's EMP port genuinely has one — AEGS_EMP_Device_S4 /
+    // AEGS_EMP_Sentinel_S4), actually surfaces it. A port with no
+    // confirmed group (Guardian Qi's Quantum Dampener, the Mantis's QED)
+    // simply offers no alternatives today — never a fabricated one, and
+    // never a schema change if a future generator run discovers a group
+    // for one of them.
+    if (hp.type === 'Module' || hp.type === 'EMP' || hp.type === 'Quantum Dampener') {
+      appendSwapGroupOptions(hp.type)
+      return options
+    }
+
+    // SW-013C.2D (Objectives 3/4) — a rack PARENT port (Missile Rack) is
+    // the one case where "swap-group-only" must NOT be the universal rule:
+    // most ships' rack ports (e.g. the Hornet Ghost's own — see SW-008C's
+    // regression test) have no confirmed swap group at all, and have
+    // always relied on the broad generic size/category sweep below to
+    // offer cross-ship rack alternatives — a real, deliberate, tested
+    // feature this mission must not regress. But when a port's own
+    // confirmed swap group DOES exist (the Eclipse's `hardpoint_torpedorack`
+    // — a genuine, tag-derived `Eclipse_BombRack` group), it is the
+    // authoritative answer and the generic sweep must defer to it
+    // entirely: `MRCK_S09_AEGS_Retaliator_Fore`/`_Rear` share the Eclipse's
+    // own rack's exact DataCore category (MissileLauncher/MissileRack) AND
+    // exact catalog size (S9 — the accepted torpedo class, not a
+    // rack-family identifier), so the generic sweep below could never
+    // distinguish "Eclipse's own rack family" from "any other ship's S9
+    // torpedo rack" — confirmed the literal root cause of "Retaliator rack
+    // selectable on Eclipse." Deriving the distinction from whether a
+    // confirmed group EXISTS (not from ship identity) means this applies
+    // to any future ship whose rack port gets its own confirmed group,
+    // never an `if (ship === 'Eclipse')` special case.
+    if (hp.type === 'Missile Rack') {
+      const slot = configurableSlotFor(hp)
+      if (slot?.eligibleComponents?.length) {
+        appendSwapGroupOptions(hp.type)
+        return options
+      }
+      // No confirmed group for this specific rack port — fall through to
+      // the generic sweep below, unchanged from before this mission.
+    }
+
     for (const c of fullComponentCatalog) {
       if (seen.has(c.item)) continue
       if (isComponentSelectableForPort(c.item, hp.type, hp.size, { itemEntityClass: c.entityClass, destinationFactoryEntityClass: hp.factoryEntityClass })) {
@@ -1268,7 +1378,7 @@ export default function ShipWorkspacePrototype() {
                 return (
                   <div key={build.id} className="inline-flex items-center">
                     <button
-                      onClick={() => setReviewedBuildId(build.id)}
+                      onClick={() => requestReviewedBuildSwitch(build.id)}
                       style={isReviewed ? { borderColor: accent, color: accent, backgroundColor: `${accent}1A` } : undefined}
                       className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium transition-colors ${showSetActive ? 'rounded-l-full' : 'rounded-full'} ${
                         isReviewed ? `border-2 ${showSetActive ? 'border-r-0' : ''}` : 'border border-white/15 text-white/80 hover:text-white hover:border-white/35 hover:bg-white/5'
@@ -1277,6 +1387,11 @@ export default function ShipWorkspacePrototype() {
                       {build.name}
                       {build.kind === 'FACTORY' && <Badge tone="cyan">Factory</Badge>}
                       {build.isActive && <Badge tone="success">Active</Badge>}
+                      {/* SW-013C.1 (Objective 5) — UI Truthfulness: the reviewed
+                          pill itself carries the draft-state fact, not just the
+                          Save/Discard buttons below the table, so it's visible
+                          before the Commander ever reaches for another pill. */}
+                      {isReviewed && pendingChangeCount > 0 && <Badge tone="warning">Unsaved</Badge>}
                     </button>
                     {showSetActive && (
                       <button
@@ -1305,6 +1420,47 @@ export default function ShipWorkspacePrototype() {
               )}
             </div>
             {setActiveNotice && <p className="text-[11px] text-muted/70 mt-2">{setActiveNotice}</p>}
+
+            {/* SW-013C.1 (Objective 5) — UI Truthfulness. A persistent,
+                unmissable status line for draft state — distinct from the
+                Save/Discard buttons themselves, which only appear inside
+                the Manage Loadout lens below and are easy to not notice as
+                meaningfully different from ordinary page chrome. */}
+            {pendingChangeCount > 0 && !pendingSwitchBuildId && (
+              <p className="text-[11px] text-warning mt-2">
+                Unsaved changes — {pendingChangeCount} target{pendingChangeCount === 1 ? '' : 's'} pending on &ldquo;{reviewedBuild?.name}&rdquo;. Save or Discard before switching Loadouts.
+              </p>
+            )}
+
+            {/* SW-013C.1 (Objective 5) — the guarded switch's inline
+                confirm. Never a modal (this page's own convention) — a
+                Commander must explicitly choose Discard & Switch or
+                Cancel; the pill click that triggered this never silently
+                switches on its own. */}
+            {pendingSwitchBuildId && (
+              <div className="mt-2 p-3 rounded-lg border border-warning/30 bg-warning/5 flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-[11px] text-warning">
+                  &ldquo;{reviewedBuild?.name}&rdquo; has {pendingChangeCount} unsaved target{pendingChangeCount === 1 ? '' : 's'}. Switching Loadouts now discards{' '}
+                  {pendingChangeCount === 1 ? 'it' : 'them'} — this cannot be undone.
+                </p>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={confirmDiscardAndSwitch}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-warning/15 text-warning border border-warning/40 hover:bg-warning/25 transition-colors"
+                  >
+                    Discard &amp; Switch
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelPendingSwitch}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/10 text-muted hover:text-white hover:border-white/25 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* SW-008D (Objective 3) — inline creation form, never a
                 dialog. Nothing persists until "Create Loadout" is clicked;
@@ -1553,6 +1709,60 @@ export default function ShipWorkspacePrototype() {
             </div>
           </div>
         )}
+        </>
+      )}
+
+      {/* SW-013C.2D (Objective 1) — Persistent Workspace Save Actions.
+          Commander testing found the existing Save/Discard controls (in
+          the Systems Workspace panel header above) scroll out of the
+          viewport once a Commander edits a child port deep in a long
+          table — the Commander then has to scroll back up to commit.
+          This bar is a SECOND, always-visible entry point to the exact
+          same handlers (handleSaveChanges/handleDiscardChanges) and the
+          exact same pending-edit state (desiredTargets) SW-008D already
+          established — never a parallel save path. `fixed` (not
+          `sticky`) so it stays pinned to the viewport regardless of
+          table scroll position; the trailing spacer div reserves real
+          document height for it so it never permanently covers the
+          table's own last rows. Rendered only while there is something
+          to act on (Manage Loadout intent + at least one pending
+          target) — hidden entirely otherwise, matching every other
+          conditional control on this page (e.g. the panel-header
+          Save/Discard buttons it doesn't replace, only supplements).
+          z-10 — deliberately BELOW TargetComponentPicker's dropdown
+          popover (z-20), so a New Target picker opened on a row near the
+          bottom of the viewport always renders above this bar, never
+          hidden beneath it. */}
+      {ship && commanderIntent === 'MANAGE_LOADOUT' && pendingChangeCount > 0 && (
+        <>
+          <div className="h-20" aria-hidden="true" />
+          <div
+            data-testid="persistent-save-bar"
+            className="fixed inset-x-0 md:left-64 bottom-0 z-10 border-t border-cyan/30 bg-bg/95 backdrop-blur-sm shadow-[0_-4px_16px_rgba(0,0,0,0.35)] px-6 md:px-10 py-3"
+          >
+            <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2 text-sm">
+                <Badge tone="warning">
+                  {pendingChangeCount} Pending Change{pendingChangeCount === 1 ? '' : 's'}
+                </Badge>
+                <span className="text-muted text-xs hidden sm:inline">on &ldquo;{reviewedBuild?.name}&rdquo;</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveChanges}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-bg bg-cyan hover:bg-cyan/90 border border-cyan rounded-lg px-4 py-2 transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={handleDiscardChanges}
+                  className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-4 py-2 transition-colors"
+                >
+                  Discard Changes
+                </button>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>

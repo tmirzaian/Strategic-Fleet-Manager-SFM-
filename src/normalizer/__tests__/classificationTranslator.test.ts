@@ -49,6 +49,60 @@ describe('translateClassification — every initial exact category/subtype mappi
   })
 })
 
+describe('SW-013C.2B (Module Taxonomy Activation, Objective 1): Module classification is entity-scoped, never blanket-category', () => {
+  it('a confirmed Module-family entity class (Hornet Center Cap Mk II) translates to canonical port type "Module"', () => {
+    const result = translateClassification(metadata({ entityClass: 'UMNT_ANVL_S5_Cap_Mk2', category: 'Module', subtype: null }))
+    expect(result.status).toBe('translated')
+    if (result.status === 'translated') expect(result.canonicalPortType).toBe('Module')
+  })
+
+  it('every confirmed Module-family entity class translates — Hornet Cap/Rotodome (both generations) and Retaliator Front/Rear Base', () => {
+    const confirmed = [
+      'UMNT_ANVL_S5_Cap',
+      'UMNT_ANVL_S5_Cap_Mk2',
+      'UMNT_ANVL_S5_Rotodome',
+      'UMNT_ANVL_S5_Rotodome_Mk2',
+      'AEGS_Retaliator_Module_Front_Base',
+      'AEGS_Retaliator_Module_Rear_Base',
+    ]
+    for (const entityClass of confirmed) {
+      const result = translateClassification(metadata({ entityClass, category: 'Module', subtype: null }))
+      expect(result.status, `${entityClass} should translate`).toBe('translated')
+      if (result.status === 'translated') expect(result.canonicalPortType).toBe('Module')
+    }
+  })
+
+  it('an UNVERIFIED Module-category entity class stays unresolved — never a blanket category match (Objective 1: "translate only authoritative module positions")', () => {
+    const unverified = [
+      'RSI_Apollo_Module_Left_Tier_2', // real Module-category entity, not part of this mission's evidence
+      'GLSN_Basher_Addon_Mohawk_Default', // ground-vehicle cosmetic bodykit, same DataCore category, wrong domain entirely
+      'ANVL_Hornet_F7C_Cargo_Mod', // real Module-category entity, unverified swap-group behavior
+    ]
+    for (const entityClass of unverified) {
+      const result = translateClassification(metadata({ entityClass, category: 'Module', subtype: null }))
+      expect(result.status, `${entityClass} should remain unresolved`).toBe('unresolved')
+    }
+  })
+
+  it('a confirmed nose-cap entity class (DataCore category "Misc") also translates to canonical port type "Module"', () => {
+    for (const entityClass of ['ANVL_F7_Mk2_NoseCap', 'ANVL_F7CR_Mk2_NoseCap']) {
+      const result = translateClassification(metadata({ entityClass, category: 'Misc', subtype: null }))
+      expect(result.status, `${entityClass} should translate`).toBe('translated')
+      if (result.status === 'translated') expect(result.canonicalPortType).toBe('Module')
+    }
+  })
+
+  it('an UNVERIFIED Misc-category entity class stays unresolved — never a blanket Misc translation (Objective 1: "do not broadly classify every Misc object as a Module")', () => {
+    const result = translateClassification(metadata({ entityClass: 'SOME_OTHER_MISC_ENTITY', category: 'Misc', subtype: null }))
+    expect(result.status).toBe('unresolved')
+  })
+
+  it('preserves conservative behavior for a genuinely unknown category — unaffected by the Module/Misc additions', () => {
+    const result = translateClassification(metadata({ entityClass: 'X', category: 'SomeFutureCIGCategory', subtype: null }))
+    expect(result.status).toBe('unresolved')
+  })
+})
+
 describe('translateClassification — exact matching only', () => {
   it('does not match a subtype case-insensitively or via substring', () => {
     expect(translateClassification(metadata({ category: 'WeaponGun', subtype: 'gun' })).status).toBe('unresolved')

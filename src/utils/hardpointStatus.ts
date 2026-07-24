@@ -41,6 +41,11 @@ export interface HardpointStatusIdentity {
   installedEntityClass?: string | null
   targetEntityClass?: string | null
   factoryEntityClass?: string | null
+  /** SW-013C.2D (Objective 3) — forwarded verbatim to
+   * `validateTargetCompatibility`'s own identity hint of the same name;
+   * see `CompatibilityIdentityHint.knownCompatibleEntityClasses`'s doc
+   * comment in src/data/componentCatalog.ts for the full reasoning. */
+  knownCompatibleEntityClasses?: ReadonlySet<string> | null
 }
 
 /**
@@ -146,6 +151,7 @@ export function computeHardpointStatusWithValidation(
   const validation = validateTargetCompatibility(targetItem, portType, portSize, {
     itemEntityClass: identity?.targetEntityClass,
     destinationFactoryEntityClass: identity?.factoryEntityClass,
+    knownCompatibleEntityClasses: identity?.knownCompatibleEntityClasses,
   })
   if (!validation.valid) {
     return { status: 'Invalid Target', invalidMessage: validation.message }

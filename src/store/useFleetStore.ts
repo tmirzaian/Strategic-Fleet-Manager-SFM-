@@ -15,8 +15,10 @@ import { calculateComponentAvailability } from '../engine/logistics/availability
 import { executeInstallation, resolveComponentIdentity } from '../engine/installation'
 import type { InstallationEffects, InstallationStateSnapshot } from '../engine/installation'
 import type { MissionReservation } from '../types'
-import { componentOwnedChildSlotSpec } from '../utils/componentOwnedSlots'
+import { componentOwnedChildSlotSpec, type ComponentOwnedSlotSpec } from '../utils/componentOwnedSlots'
 import { resolveShipDefinitionId } from '../utils/loadoutEditorModel'
+import { resolveShipEntityClass } from '../utils/shipIdentityLine'
+import { swapGroupEligibleEntityClassesFor } from '../generated/configurableSlots'
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
@@ -1036,6 +1038,18 @@ export const useFleetStore = create<FleetState>()(
     const installedBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.installedItem]))
     const installedEntityClassBySlot = new Map(get().installedLoadouts.filter((e) => e.shipId === shipId).map((e) => [e.slotLabel, e.entityClass]))
 
+    // SW-013C.2D (Objective 3) — resolved once per save, not per row: a
+    // rack (or any other) port's own certified swap-group members are
+    // authoritatively valid targets even when their translated category
+    // doesn't match the port's own type (e.g. the Eclipse's confirmed Bomb
+    // Rack alternates, DataCore category BombLauncher, on a port whose
+    // type is "Missile Rack") — see `CompatibilityIdentityHint.knownCompatibleEntityClasses`'s
+    // own doc comment. `undefined` for a port with no confirmed group,
+    // which defers entirely to the pre-existing generic sweep.
+    const shipEntityClassForSwapGroups = resolveShipEntityClass(shipId, get().fleetAssets)
+    const swapGroupEligibleFor = (row: { sourceParentItemPortName?: string; sourceItemPortName?: string }) =>
+      swapGroupEligibleEntityClassesFor(shipEntityClassForSwapGroups, row.sourceParentItemPortName, row.sourceItemPortName)
+
     const baseTargets = new Map<string, string>()
     // EWO-STAB-003D (ADR-010) — the target's canonical identity, tracked
     // alongside baseTargets through every one of the same sources below
@@ -1052,6 +1066,23 @@ export const useFleetStore = create<FleetState>()(
     // fleetAssetReconciliation.ts); every other source is a genuine
     // Commander decision and must never be silently replaced.
     const baseTargetModes = new Map<string, 'FOLLOW_FACTORY' | 'EXPLICIT_TARGET'>()
+    // SW-013C.2C (Objective 6) — the component-owned-child carry-over
+    // logic below needs each PARENT slot's own real, previously-effective
+    // spec (what turret/rack was targeted there before THIS save) to
+    // decide whether a swap between two independent-equipment parents can
+    // preserve sibling targets. `referenceRows` (used throughout this
+    // function as a generic structural template) is NOT reliably this
+    // exact build's own data — it's keyed to the SHIP's active build,
+    // which may be a different build entirely. Populated only in the
+    // `EXISTING` branch below, from `existingBuildId`'s own real rows —
+    // the one array that IS guaranteed to be this exact build's own
+    // pre-save state.
+    const priorEffectiveSpecBySlotLabel = new Map<string, ComponentOwnedSlotSpec | null>()
+    // SW-013C.2C — this exact build's own real, pre-save component-owned
+    // child rows, keyed by PARENT slotLabel then child position number.
+    // Same "existingBuildId is the only reliable source" reasoning as
+    // `priorEffectiveSpecBySlotLabel` above.
+    const priorChildTargetsByParentSlotLabel = new Map<string, Map<number, { targetItem: string; targetEntityClass: string | undefined }>>()
     if (startingState === 'FACTORY') {
       for (const row of referenceRows) {
         baseTargets.set(row.slotLabel, row.factoryItem)
@@ -1081,6 +1112,14 @@ export const useFleetStore = create<FleetState>()(
         // as EXPLICIT_TARGET, the safe default (never silently start
         // auto-following Factory for a row the Commander never tagged).
         baseTargetModes.set(row.slotLabel, row.targetMode ?? 'EXPLICIT_TARGET')
+        priorEffectiveSpecBySlotLabel.set(row.slotLabel, componentOwnedChildSlotSpec(row.targetEntityClass ?? row.factoryEntityClass))
+        if (row.parentSlotLabel) {
+          const match = /Slot (\d+)$/.exec(row.slotLabel)
+          if (match) {
+            if (!priorChildTargetsByParentSlotLabel.has(row.parentSlotLabel)) priorChildTargetsByParentSlotLabel.set(row.parentSlotLabel, new Map())
+            priorChildTargetsByParentSlotLabel.get(row.parentSlotLabel)!.set(Number(match[1]), { targetItem: row.targetItem, targetEntityClass: row.targetEntityClass })
+          }
+        }
       }
     }
 
@@ -1207,19 +1246,75 @@ export const useFleetStore = create<FleetState>()(
       const currentEntityClass = finalTargetEntityClass ?? row.factoryEntityClass
       const oldSpec = componentOwnedChildSlotSpec(row.factoryEntityClass)
       const newSpec = componentOwnedChildSlotSpec(currentEntityClass)
+      // SW-013C.2C — `oldSpec` above is keyed to the ship's permanent
+      // FACTORY identity (correct for the pre-existing `swapped` check,
+      // unchanged). Carry-over eligibility (below) needs a different
+      // question: what spec was in effect the LAST time THIS EXACT BUILD
+      // saved this row — read from `priorEffectiveSpecBySlotLabel`
+      // (sourced from `existingBuildId`'s own real rows, hoisted above),
+      // never from `referenceRows` (a generic structural template that
+      // may belong to a completely different build sharing the same
+      // slotLabel).
+      const previousEffectiveSpec = priorEffectiveSpecBySlotLabel.get(row.slotLabel) ?? null
       if (!oldSpec && !newSpec) continue // an ordinary component (e.g. a gimbal-mounted weapon) — nothing component-owned about this port, never touch its real children
       const childPrefix = `${row.slotLabel} — `
       const existingChildren = referenceRows.filter((candidate) => candidate.slotLabel.startsWith(childPrefix))
       if (existingChildren.length > 0 && !swapped) continue // real, untouched children (an unswapped rack) — leave completely alone
+
+      // SW-013C.2C (Objective 6, Independent-Equipment Parent Replacement)
+      // — this exact build's own real, pre-save child targets (from
+      // `priorChildTargetsByParentSlotLabel`, same "existingBuildId is the
+      // only reliable source" reasoning), used only when BOTH the old and
+      // new parent are Mode B (`independent-equipment`) — e.g. swapping
+      // between two turret variants. Mode A (payload-array — missile
+      // racks, mining heads) is deliberately excluded from this map and
+      // keeps its existing, unchanged "always restart empty" behavior —
+      // "existing missile-rack semantics remain the primary precedent"
+      // (the amendment's own words); this is additive, never a behavior
+      // change for Mode A.
+      const priorIndependentEquipmentTargetByPosition =
+        previousEffectiveSpec?.mode === 'independent-equipment' ? (priorChildTargetsByParentSlotLabel.get(row.slotLabel) ?? new Map()) : new Map()
+
       if (existingChildren.length > 0 && swapped) {
         for (const candidate of existingChildren) staleChildSlotLabels.add(candidate.slotLabel)
       }
       if (!newSpec) continue // swapped away to an uncataloged component — old real children removed, nothing fabricated: an honest "unknown structure" state
-      const childType = newSpec.label === 'Missile' ? 'Missile' : 'Mining Module'
+      // SW-013C.2C/SW-013C.2D — `label` IS the type string for every
+      // family except mining modules (see canonicalHardpointPreparation.ts's
+      // identical fix for why).
+      const childType = newSpec.label === 'Module' ? 'Mining Module' : newSpec.label
+      const carryOverEligible = newSpec.mode === 'independent-equipment' && previousEffectiveSpec?.mode === 'independent-equipment'
       for (let n = 1; n <= newSpec.count; n++) {
         const slotLabel = `${childPrefix}${newSpec.label} Slot ${n}`
         materializedChildStubs.push({ slotLabel, type: childType, size: newSpec.size ? `S${newSpec.size}` : row.size, parentSlotLabel: row.slotLabel })
-        if (!baseTargets.has(slotLabel)) {
+
+        // SW-013C.2C — Mode B (independent-equipment) on a genuine parent
+        // swap always explicitly decides this slot's value, even when
+        // `baseTargets` already holds an entry for the same slotLabel:
+        // position-based labels ("Weapon Slot 1") are NOT globally unique
+        // identity — two different turret variants both use "Slot 1" for
+        // their own first weapon position, so a stale value surviving
+        // only because the label string happens to match a PRIOR,
+        // now-incompatible turret's own slot 1 would be exactly the kind
+        // of un-diagnosed, silent migration Objective 6 forbids. Mode A
+        // (Missile/Module) keeps the pre-existing `!baseTargets.has(...)`
+        // gate completely unchanged — "existing missile-rack semantics
+        // remain the primary precedent."
+        if (newSpec.mode === 'independent-equipment' && swapped) {
+          const prior = carryOverEligible ? priorIndependentEquipmentTargetByPosition.get(n) : undefined
+          const priorSizeCompatible = prior !== undefined && previousEffectiveSpec?.size === newSpec.size
+          if (prior && priorSizeCompatible) {
+            baseTargets.set(slotLabel, prior.targetItem)
+            baseTargetEntityClasses.set(slotLabel, prior.targetEntityClass)
+          } else {
+            // No authoritative correspondence (new turret, or an
+            // incompatible size at this position) — an honest, empty
+            // slot, never a guess.
+            baseTargets.set(slotLabel, '—')
+            baseTargetEntityClasses.set(slotLabel, undefined)
+          }
+          baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
+        } else if (!baseTargets.has(slotLabel)) {
           baseTargets.set(slotLabel, '—')
           baseTargetEntityClasses.set(slotLabel, undefined)
           baseTargetModes.set(slotLabel, 'EXPLICIT_TARGET')
@@ -1276,6 +1371,7 @@ export const useFleetStore = create<FleetState>()(
           installedEntityClass,
           targetEntityClass,
           factoryEntityClass: refRow.factoryEntityClass,
+          knownCompatibleEntityClasses: swapGroupEligibleFor(refRow),
         })
         return {
           id: `${buildId}-hp-${i}`,
@@ -2091,7 +2187,13 @@ export const useFleetStore = create<FleetState>()(
             reconciledCustomHardpoints.push(...oldRowsForBuild)
             continue
           }
-          const { hardpoints: reconciled, quarantined, slotLabelMigrations } = reconcileBuildHardpoints(build.shipId, build.id, oldRowsForBuild, template)
+          const { hardpoints: reconciled, quarantined, slotLabelMigrations } = reconcileBuildHardpoints(
+            build.shipId,
+            build.id,
+            oldRowsForBuild,
+            template,
+            resolveShipEntityClass(build.shipId, fleetAssets)
+          )
           reconciledCustomHardpoints.push(...reconciled)
           quarantinedAssignments.push(...quarantined)
           if (slotLabelMigrations.length > 0) {

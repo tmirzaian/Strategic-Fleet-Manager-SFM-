@@ -13,6 +13,8 @@
     "generate:component-catalog": "tsx scripts/generateComponentCatalog.ts",
     "generate:mining-module-slots": "tsx scripts/generateMiningModuleSlots.ts",
     "generate:missile-rack-slots": "tsx scripts/generateMissileRackSlots.ts",
+    "generate:bomb-rack-slots": "tsx scripts/generateBombRackSlots.ts",
+    "generate:turret-weapon-slots": "tsx scripts/generateTurretWeaponSlots.ts",
     "generate:component-owned-port-constraints": "tsx scripts/generateComponentOwnedPortConstraints.ts",
     "generate:ship-catalog": "tsx scripts/generateShipCatalog.ts",
     "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",

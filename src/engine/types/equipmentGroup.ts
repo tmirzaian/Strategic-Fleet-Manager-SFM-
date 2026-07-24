@@ -27,6 +27,24 @@ export type EquipmentGroup =
   | 'Cargo'
   | 'Defense'
   | 'Customization'
+  /** SW-013C.2B (Module Taxonomy Activation) — a real, first-class DataCore
+   * equipment category (`AttachDef.Type: "Module"`, and the structurally
+   * identical Hornet nose position filed under "Misc"), deliberately not
+   * folded into `Utility`: unlike Utility's own family (SalvageHead/
+   * SalvageModifier/TractorBeam/WeaponMining), same-category Modules are
+   * NOT broadly interchangeable with each other (a Retaliator front-module
+   * item and a Hornet center-mount item share a category but are never
+   * swappable) — see docs/ModuleTaxonomyProposal.md's "Why not Utility"
+   * section for the full reasoning. */
+  | 'Modules'
+  /** SW-013C.2D — Electronic Warfare (EMP generators, Quantum Dampener/
+   * Interdiction devices). Its own equipment group rather than folded
+   * into `Relays`/`LifeSupport`: those two share the "Support Systems"
+   * top-level display section (see `topLevelGroupLabel` in
+   * src/data/shipDefinitions.ts) but remain distinct groups for
+   * inventory/filtering purposes — Electronic Warfare follows the exact
+   * same pattern, distinct group, same display section. */
+  | 'ElectronicWarfare'
 
 export const EQUIPMENT_GROUPS: EquipmentGroup[] = [
   'Weapons',
@@ -45,4 +63,6 @@ export const EQUIPMENT_GROUPS: EquipmentGroup[] = [
   'Cargo',
   'Defense',
   'Customization',
+  'Modules',
+  'ElectronicWarfare',
 ]

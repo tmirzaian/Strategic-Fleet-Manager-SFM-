@@ -111,7 +111,7 @@ describe('componentOwnedChildSlotSpec / withComponentOwnedChildSlots — FTB-001
     expect(componentOwnedChildSlotCount(HELIX_II)).toBe(3)
     // FTB-001H — mining slots now carry their own fixed real size (1),
     // never inherited from the host laser's own port size.
-    expect(componentOwnedChildSlotSpec(HELIX_II)).toEqual({ count: 3, size: 1, label: 'Module' })
+    expect(componentOwnedChildSlotSpec(HELIX_II)).toEqual({ count: 3, size: 1, label: 'Module', mode: 'payload-array' })
   })
 
   it('4. equipping Helix II synthesizes exactly three module child rows', () => {
@@ -179,8 +179,8 @@ describe('componentOwnedChildSlotSpec — FTB-001H: mining module slot size is f
     if (!hasData) return
     const moleSpec = componentOwnedChildSlotSpec(ARBOR_MH2)
     const prospectorSpec = componentOwnedChildSlotSpec(ARBOR_MH1)
-    expect(moleSpec).toEqual({ count: 2, size: 1, label: 'Module' })
-    expect(prospectorSpec).toEqual({ count: 1, size: 1, label: 'Module' })
+    expect(moleSpec).toEqual({ count: 2, size: 1, label: 'Module', mode: 'payload-array' })
+    expect(prospectorSpec).toEqual({ count: 1, size: 1, label: 'Module', mode: 'payload-array' })
     // The regression this fix closes: before FTB-001H, the MOLE's spec
     // carried no `size` at all, and the host's own S2 port size leaked
     // through at the tree-construction call sites instead — this
@@ -241,9 +241,9 @@ const hasRackData = getMissileRackSlotSpec(POLARIS_RACK) !== null
 describe('componentOwnedChildSlotSpec — FTB-001B: missile racks', () => {
   it('the Polaris rack, a Talon rack, and an Asgard rack (three real families) each expose genuinely different real slot counts, all at the same real missile size', () => {
     if (!hasRackData) return
-    expect(componentOwnedChildSlotSpec(POLARIS_RACK)).toEqual({ count: 8, size: 3, label: 'Missile' })
-    expect(componentOwnedChildSlotSpec(TALON_MSD683)).toEqual({ count: 12, size: 3, label: 'Missile' })
-    expect(componentOwnedChildSlotSpec(ASGARD_MSD683)).toEqual({ count: 16, size: 3, label: 'Missile' })
+    expect(componentOwnedChildSlotSpec(POLARIS_RACK)).toEqual({ count: 8, size: 3, label: 'Missile', mode: 'payload-array' })
+    expect(componentOwnedChildSlotSpec(TALON_MSD683)).toEqual({ count: 12, size: 3, label: 'Missile', mode: 'payload-array' })
+    expect(componentOwnedChildSlotSpec(ASGARD_MSD683)).toEqual({ count: 16, size: 3, label: 'Missile', mode: 'payload-array' })
   })
 
   it('two racks sharing the ambiguous display name "MSD-683 Missile Rack" (Talon vs Asgard) resolve to different real specs by entityClass alone', () => {
@@ -257,28 +257,28 @@ describe('componentOwnedChildSlotSpec — FTB-001B: missile racks', () => {
 
   it('"MSD-543 Missile Rack" (325a) resolves its own real spec independent of the "MSD-683" cases sharing a similar naming scheme', () => {
     if (!hasRackData) return
-    expect(componentOwnedChildSlotSpec(RACK_325A_MSD543)).toEqual({ count: 4, size: 3, label: 'Missile' })
+    expect(componentOwnedChildSlotSpec(RACK_325A_MSD543)).toEqual({ count: 4, size: 3, label: 'Missile', mode: 'payload-array' })
   })
 
   it('three single-missile racks at different real missile sizes (S1/S2/S3) are distinguished by entityClass, never a shared "single rack" default', () => {
     if (!hasRackData) return
-    expect(componentOwnedChildSlotSpec(RACK_S01_SINGLE)).toEqual({ count: 1, size: 1, label: 'Missile' })
-    expect(componentOwnedChildSlotSpec(RACK_S02_SINGLE)).toEqual({ count: 1, size: 2, label: 'Missile' })
-    expect(componentOwnedChildSlotSpec(RACK_S03_SINGLE)).toEqual({ count: 1, size: 3, label: 'Missile' })
+    expect(componentOwnedChildSlotSpec(RACK_S01_SINGLE)).toEqual({ count: 1, size: 1, label: 'Missile', mode: 'payload-array' })
+    expect(componentOwnedChildSlotSpec(RACK_S02_SINGLE)).toEqual({ count: 1, size: 2, label: 'Missile', mode: 'payload-array' })
+    expect(componentOwnedChildSlotSpec(RACK_S03_SINGLE)).toEqual({ count: 1, size: 3, label: 'Missile', mode: 'payload-array' })
   })
 
   it('a dual-slot rack (Fury) at S1 is distinguished from the single-slot S1 rack by count alone, same missile size', () => {
     if (!hasRackData) return
     const single = componentOwnedChildSlotSpec(RACK_S01_SINGLE)
     const dual = componentOwnedChildSlotSpec(RACK_FURY_DUAL)
-    expect(dual).toEqual({ count: 2, size: 1, label: 'Missile' })
+    expect(dual).toEqual({ count: 2, size: 1, label: 'Missile', mode: 'payload-array' })
     expect(dual?.size).toBe(single?.size)
     expect(dual?.count).not.toBe(single?.count)
   })
 
   it('a mining head and a missile rack are never confused with each other — disjoint label, independent of lookup order', () => {
     if (!hasRackData) return
-    expect(componentOwnedChildSlotSpec('Mining_Laser_GRIN_Arbor_S2')).toEqual({ count: 2, size: 1, label: 'Module' })
+    expect(componentOwnedChildSlotSpec('Mining_Laser_GRIN_Arbor_S2')).toEqual({ count: 2, size: 1, label: 'Module', mode: 'payload-array' })
     expect(componentOwnedChildSlotSpec(POLARIS_RACK)?.label).toBe('Missile')
   })
 })

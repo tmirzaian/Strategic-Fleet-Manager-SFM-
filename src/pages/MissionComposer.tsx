@@ -337,9 +337,11 @@ export default function MissionComposer() {
   // OLD component's module/missile slots is never a valid default for the
   // NEW one's.
   function makePreviewChildSlotRow(host: PreviewRow, slotNumber: number, spec: ComponentOwnedSlotSpec, swapped: boolean): PreviewRow {
-    const isMissileSlot = spec.label === 'Missile'
     const slotLabel = `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`
-    const type = isMissileSlot ? 'Missile' : 'Mining Module'
+    // SW-013C.2C/SW-013C.2D — `label` IS the type string for every family
+    // except mining modules (see canonicalHardpointPreparation.ts's
+    // identical fix for why).
+    const type = spec.label === 'Module' ? 'Mining Module' : spec.label
     const size = spec.size ? `S${spec.size}` : host.size
     // EWO-054A — `swapped` alone (current identity vs the ship's own
     // permanent FACTORY identity) stays true forever once this parent has
@@ -388,13 +390,19 @@ export default function MissionComposer() {
   // (wired in renderDisplayRows) always writes the same selection to every
   // child slotLabel, which is what resolves this state on the next render.
   function makePreviewAggregateRow(parent: AggregatedPreviewRow, children: AggregatedPreviewRow[], spec: ComponentOwnedSlotSpec, meta: MissileAggregateMeta): AggregatedPreviewRow {
+    // SW-013C.2D — mirrors missileRackAggregation.ts's own
+    // makeMissileAggregateRow generalization: derived from spec.label
+    // rather than hardcoded 'Missile', so a Bomb rack's preview aggregate
+    // row is labeled correctly too. Identical output to before this
+    // mission for a real missile rack.
+    const label = spec.label
     return {
       ...parent,
-      id: `${parent.id}-missile-aggregate`,
-      slotLabel: `${parent.slotLabel} — Missile`,
+      id: `${parent.id}-${label.toLowerCase()}-aggregate`,
+      slotLabel: `${parent.slotLabel} — ${label}`,
       parentSlotLabel: parent.slotLabel,
       isStructural: false,
-      type: 'Missile',
+      type: label,
       size: spec.size ? `S${spec.size}` : parent.size,
       factoryItem: uniformOrFallback(children.map((c) => c.factoryItem), 'Mixed'),
       installedItem: uniformOrFallback(children.map((c) => c.installedItem), 'Mixed'),

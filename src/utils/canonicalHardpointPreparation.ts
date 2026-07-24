@@ -23,14 +23,22 @@ import { withComponentOwnedChildSlots, type ComponentOwnedSlotSpec } from './com
  * silently retain a previous, possibly now-incompatible assignment.
  */
 export function makeHardpointChildSlotRow(host: Hardpoint, slotNumber: number, spec: ComponentOwnedSlotSpec): Hardpoint {
-  const isMissileSlot = spec.label === 'Missile'
+  // SW-013C.2C/SW-013C.2D — a component-owned family's own presentation
+  // `type` string. `label` IS the type string for every family except
+  // mining modules (`'Module'`), whose historical display type is "Mining
+  // Module" — so this is a single mapping, never a family-by-family
+  // ternary that silently mislabels the next new family (SW-013C.2D added
+  // `'Bomb'` for free this way; the pre-SW-013C.2C version of this line
+  // would have needed a fourth branch and, before that fix shipped, did
+  // silently mislabel any unrecognized family as "Mining Module").
+  const childType = spec.label === 'Module' ? 'Mining Module' : spec.label
   return {
     ...host,
     id: `${host.id}-${spec.label.toLowerCase()}-slot-${slotNumber}`,
     slotLabel: `${host.slotLabel} — ${spec.label} Slot ${slotNumber}`,
     parentSlotLabel: host.slotLabel,
     isStructural: false,
-    type: isMissileSlot ? 'Missile' : 'Mining Module',
+    type: childType,
     size: spec.size ? `S${spec.size}` : host.size,
     factoryItem: '—',
     installedItem: '—',

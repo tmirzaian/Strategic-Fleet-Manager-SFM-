@@ -1,6 +1,6 @@
 # Module Taxonomy Proposal
 
-> **Status: design only.** Companion to `docs/ADR/ADR-014-Configurable-Slot-Architecture.md` (Decision D5). No implementation authorized.
+> **Status: Activated (SW-013C.2B).** Companion to `docs/ADR/ADR-014-Configurable-Slot-Architecture.md` (Decision D5) and its Amendment. Implementation record: `docs/SW-013C.2B-Module-Taxonomy-Activation-Report.md`. The sections below are preserved as the original design record; each is annotated with how it was actually resolved.
 
 ## Problem
 
@@ -17,9 +17,13 @@ Concretely: even if the Import Pipeline v2 work (Stages 7-9) is fully implemente
 
 A new canonical SFM category, added at the same translation boundary ADR-011 established for `Turret`: `CATEGORY_TO_PORT_TYPE['Module'] = 'Module'` (a new canonical port type, not folded into `Utility` or any existing bucket — see "Why not Utility" below).
 
+> **Resolved (SW-013C.2B):** implemented at the **port-inclusion** translation boundary (`src/normalizer/classificationTranslator.ts`/`portClassifier.ts`), not at `src/generated/componentCatalog.ts`'s `CATEGORY_TO_PORT_TYPE` — that table stays deliberately without a `Module` entry (see Compatibility below, resolved). Scoped to individually-verified entity classes only (`CONFIRMED_MODULE_ENTITY_CLASSES`/`CONFIRMED_NOSE_CAP_ENTITY_CLASSES`), never a blanket category match — real, unverified DataCore `Module`-category entities (a ground-vehicle cosmetic bodykit, unswept Apollo/cargo modules) remain unclassified until individually confirmed.
+
 ### Compatibility
 
 A Module-category component's compatibility is **never** evaluated by the existing `isComponentSelectableForPort` Size/Type sweep alone. Per ADR-014 Decision D1/D4, a Module's eligible-port relationship is exclusively swap-group-derived (`SwapGroupSpecification.md`) — there is no "any Module of the right size fits any Module slot" fallback, because the investigated evidence explicitly contradicts that: a Retaliator front-module item and a Hornet center-mount item are both nominally "Module" category but are never interchangeable with each other. Size/Type alone is proven insufficient for this category specifically (this is, in effect, the concrete, in-hand example of the "vessel restriction" concern the original SW-008C work order raised).
+
+> **Resolved (SW-013C.2B):** achieved by deliberately **not** adding `Module` to `CATEGORY_TO_PORT_TYPE` — the generic catalog sweep (`isComponentSelectableForPort`/`checkCompatibility`) then naturally offers nothing for a Module port by construction, with an explicit early-return in `checkCompatibility` preventing a false "Invalid Target" for a candidate that happens to resolve via an unrelated recognized category (e.g. the Ball Turret alternative resolves as `Turret` elsewhere in the app). The real, certified alternative list is sourced directly from the swap-group authority (SW-011A's Configurable Slot runtime catalog, extended from a read-only count to the real `eligibleComponents` entity-class list) in `ShipWorkspacePrototype.tsx`'s `newTargetOptionsFor`.
 
 ### Why not fold into `Utility`?
 
@@ -38,9 +42,13 @@ A Module-category component participates in Hangar Inventory exactly like any ot
 
 The evidence gathered does not resolve which model matches Commander expectations — this requires a product decision, not an engineering one, before implementation.
 
+> **Resolved (Chief Architect decision, SW-013C.2B):** a hybrid of Strict and Permissive. A Module port is readiness-neutral while its target follows the factory default (the Cap, or any unedited port) — matching Permissive. The instant a Commander explicitly targets a real alternative, the port becomes readiness-bearing until installed — matching Strict. Delivered entirely by the existing `computeHardpointStatus`/`calculateBuildProgress` engine, unmodified — no Module-specific readiness code was written, per the work order's explicit instruction to use shared architecture only.
+
 ### UI Treatment
 
 **Explicitly out of scope for this proposal** (Non-Goal, per the Chief Architect's own sprint boundary: "No new UI"). Documented here only so a future UI design has the right vocabulary: CIG's own confirmed, real, generic localization key `port_NameConfigurableSlot` ("Configurable Slot") is available for reuse with confidence — it is CIG's own term, not an SFM invention.
+
+> **SW-013C.2B note:** SW-013C.2B's own scope permitted the minimum UI surfacing required for real operational use (the port now renders in a dedicated "Modules" taxonomy section, with the existing Configurable badge) — not a new UI design. `port_NameConfigurableSlot` was not directly wired to a new label; the existing "Configurable" badge/inspection panel (SW-011A) already covers this vocabulary need.
 
 ### Future Extensibility
 
@@ -52,3 +60,5 @@ The taxonomy is defined generically enough to require zero new code for a not-ye
 ## Non-Goals
 
 No catalog generator changes, no `CATEGORY_TO_PORT_TYPE` edits, no UI, and no resolution of the Readiness Participation open question — all deferred to implementation, pending the Chief Architect's decision on the question above.
+
+> **SW-013C.2B outcome:** no catalog generator changes and no `CATEGORY_TO_PORT_TYPE` edits, exactly as scoped (see Compatibility, resolved, above — that was the correct final design, not just a deferred Non-Goal). UI and Readiness Participation were both resolved as implementation, per the annotations above.
