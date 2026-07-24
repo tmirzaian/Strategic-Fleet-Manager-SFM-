@@ -359,11 +359,14 @@ export default function FleetDashboard() {
                         )}
                       </td>
                       <td className="px-5 py-3 text-right">
+                        {/* SW-013B (Objective 1) — table view's own per-row
+                            destination is now Ship Workspace, matching the
+                            card view's click-anywhere target above. */}
                         <Link
-                          to={`/ship/${ship.id}`}
+                          to={`/ship-workspace/${ship.id}`}
                           className="inline-flex items-center gap-1 text-cyan text-xs font-medium hover:gap-1.5 transition-all"
                         >
-                          Ship Detail <ArrowRight size={13} />
+                          Ship Workspace <ArrowRight size={13} />
                         </Link>
                       </td>
                     </tr>

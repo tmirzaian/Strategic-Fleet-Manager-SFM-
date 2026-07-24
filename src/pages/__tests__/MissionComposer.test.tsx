@@ -512,12 +512,12 @@ describe('EWO-026 (Task 1/2/13): post-save workflow stays inside Loadout Manager
   })
 })
 
-describe('EWO-026 (Task 3/4/13): explicit "View in Ship Detail" navigation', () => {
-  it('9/10. renders "View in Ship Detail" (not "Back to Ship Detail") carrying the exact selected Fleet Asset id', () => {
+describe('EWO-026 (Task 3/4/13)/SW-013B (Objective 4): explicit "View in Ship Workspace" navigation', () => {
+  it('9/10. renders "View in Ship Workspace" (not "Back to Ship Detail") carrying the exact selected Fleet Asset id', () => {
     renderComposer('?shipId=utv')
     expect(screen.queryByText('Back to Ship Detail')).not.toBeInTheDocument()
-    const link = screen.getByText('View in Ship Detail').closest('a')!
-    expect(link.getAttribute('href')).toBe('/ship/utv')
+    const link = screen.getByText('View in Ship Workspace').closest('a')!
+    expect(link.getAttribute('href')).toBe('/ship-workspace/utv')
   })
 
   it('11. two Fleet Assets of the same hull each link to their own exact instance, not the first matching hull', () => {
@@ -526,9 +526,9 @@ describe('EWO-026 (Task 3/4/13): explicit "View in Ship Detail" navigation', () 
     expect(a.assetId).not.toBe(b.assetId)
 
     renderComposer(`?shipId=${b.assetId}`)
-    const link = screen.getByText('View in Ship Detail').closest('a')!
-    expect(link.getAttribute('href')).toBe(`/ship/${b.assetId}`)
-    expect(link.getAttribute('href')).not.toBe(`/ship/${a.assetId}`)
+    const link = screen.getByText('View in Ship Workspace').closest('a')!
+    expect(link.getAttribute('href')).toBe(`/ship-workspace/${b.assetId}`)
+    expect(link.getAttribute('href')).not.toBe(`/ship-workspace/${a.assetId}`)
   })
 })
 

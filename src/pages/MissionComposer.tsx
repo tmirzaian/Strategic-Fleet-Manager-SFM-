@@ -992,11 +992,15 @@ export default function MissionComposer() {
             save. `ship.id` is this exact selected Fleet Asset's own unique
             materialized id (not the shared hull/ShipDefinition id), so two
             owned copies of the same hull always route to the correct,
-            distinct instance (Ruling 4/5) — the existing `/ship/:shipId`
-            route already carries that per-instance identity; no second
-            navigation/selection mechanism is introduced here (Ruling 8). */}
-        <Link to={`/ship/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
-          <Rocket size={15} /> View in Ship Detail
+            distinct instance (Ruling 4/5) — the existing per-instance
+            identity carries through to the `/ship-workspace/:shipId` route
+            exactly the same way it did to `/ship/:shipId`; no second
+            navigation/selection mechanism is introduced here (Ruling 8).
+            SW-013B (Objective 4) — this cross-link now lands in Ship
+            Workspace, matching every other primary ship-selection entry
+            point; Ship Detail has no explicit reason to be required here. */}
+        <Link to={`/ship-workspace/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
+          <Rocket size={15} /> View in Ship Workspace
         </Link>
       </div>
       </>

@@ -1,10 +1,10 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   ShipWheel,
   ChevronDown,
   ChevronRight,
-  FlaskConical,
+  Rocket,
   Plus,
   AlertTriangle,
   AlertOctagon,
@@ -1033,17 +1033,15 @@ export default function ShipWorkspacePrototype() {
   return (
     <div className="space-y-6">
       {/* PAGE IDENTITY — deliberately lightweight: title, one-line
-          functional description, a small dev badge, and Ship Selection
-          (a workspace-level action, not ship-state). No ship-state of any
-          kind lives here. */}
+          functional description, and Ship Selection (a workspace-level
+          action, not ship-state). No ship-state of any kind lives here.
+          SW-013B (Objective 1/5) — the "Prototype" badge is removed: this
+          is now the canonical, primary ship-management surface (Ship
+          Workspace Promotion), not an experimental page — the label was
+          no longer accurate. */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-display font-bold text-white">Ship Management</h1>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-cyan/30 bg-cyan/5 text-cyan/80 text-[10px] uppercase tracking-widest">
-              <FlaskConical size={10} /> Prototype
-            </span>
-          </div>
+          <h1 className="text-2xl font-display font-bold text-white">Ship Management</h1>
           <p className="text-sm text-muted mt-1">Assess readiness, configure loadouts, and manage installed components.</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
@@ -1060,6 +1058,22 @@ export default function ShipWorkspacePrototype() {
           >
             <Code2 size={12} /> Developer Mode
           </button>
+          {/* SW-013B (Objective 2) — "Preserve Legacy Access." Ship
+              Workspace is now the primary destination, so this is the one
+              place a Commander who arrived here needs a discoverable path
+              back to Ship Detail for familiarity/comparison/regression
+              investigation — replacing Loadout Manager's own former
+              "View in Ship Detail" link, which now points here instead
+              (Objective 4). Only rendered once a real ship is selected;
+              omitted entirely on the blank workspace state. */}
+          {ship && (
+            <Link
+              to={`/ship/${ship.id}`}
+              className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest border border-white/10 text-muted hover:border-white/25 hover:text-white rounded-lg px-2.5 py-1.5 transition-colors"
+            >
+              <Rocket size={12} /> View in Ship Detail
+            </Link>
+          )}
           {selectShip}
         </div>
       </div>

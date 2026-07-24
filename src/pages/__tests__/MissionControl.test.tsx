@@ -84,7 +84,7 @@ describe('<MissionControl /> rendering (terminology + context names)', () => {
 
   it('14. clicking a displayed ship name links to its Ship Detail route', () => {
     renderMissionControl()
-    const link = screen.getAllByRole('link').find((a) => a.getAttribute('href') === '/ship/corsair')
+    const link = screen.getAllByRole('link').find((a) => a.getAttribute('href') === '/ship-workspace/corsair')
     expect(link).toBeDefined()
   })
 
@@ -271,7 +271,7 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     expect(wrappers).toHaveLength(expected.length)
     wrappers.forEach((wrapper, i) => {
       const cardLink = within(wrapper).getByRole('link')
-      expect(cardLink).toHaveAttribute('href', `/ship/${expected[i].id}`)
+      expect(cardLink).toHaveAttribute('href', `/ship-workspace/${expected[i].id}`)
     })
   })
 
@@ -457,7 +457,7 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     const first = [...ships].sort((a, b) => a.priority - b.priority)[0]
     const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
     const cardLink = within(wrapper).getByRole('link')
-    expect(cardLink).toHaveAttribute('href', `/ship/${first.id}`)
+    expect(cardLink).toHaveAttribute('href', `/ship-workspace/${first.id}`)
     expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
   })
 

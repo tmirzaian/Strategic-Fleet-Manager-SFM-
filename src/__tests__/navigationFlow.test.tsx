@@ -45,8 +45,8 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
       </MemoryRouter>
     )
 
-    // Mission Control -> Ship Detail (real full-card Link).
-    const cardLink = document.querySelector(`a[href="/ship/${shipId}"]`) as HTMLAnchorElement
+    // Mission Control -> Ship Workspace (real full-card Link, SW-013B Objective 1).
+    const cardLink = document.querySelector(`a[href="/ship-workspace/${shipId}"]`) as HTMLAnchorElement
     expect(cardLink).toBeTruthy()
     fireEvent.click(cardLink)
     expect(screen.getAllByText('Nav Flow Cutty').length).toBeGreaterThan(0)
@@ -60,7 +60,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(screen.getAllByText('Flow Build A').length).toBeGreaterThan(0)
 
     // Explicit navigation to Ship Detail for the exact same Fleet Asset.
-    fireEvent.click(screen.getByText('View in Ship Detail'))
+    fireEvent.click(screen.getByText('View in Ship Workspace'))
     expect(screen.getAllByText('Nav Flow Cutty').length).toBeGreaterThan(0)
     // Category hierarchy is intact — the round-2 Task 1 fix.
     expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
@@ -81,7 +81,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(screen.getAllByText('Flow Build A').length).toBeGreaterThan(0)
 
     // Back to Ship Detail one more time — hierarchy still intact, nothing lost.
-    fireEvent.click(screen.getByText('View in Ship Detail'))
+    fireEvent.click(screen.getByText('View in Ship Workspace'))
     expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
     expect(screen.getByText('Core Components')).toBeInTheDocument()
   })
@@ -105,7 +105,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(clone).toBeDefined()
     expect(clone.id).not.toBe(original.id)
 
-    fireEvent.click(screen.getByText('View in Ship Detail'))
+    fireEvent.click(screen.getByText('View in Ship Workspace'))
     expect(document.body.textContent).not.toMatch(/undefined|NaN/)
 
     openLoadoutManagerFor(shipId)

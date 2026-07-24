@@ -106,11 +106,11 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
       expect(wrapper.querySelectorAll('.min-h-11').length).toBe(2)
     }
 
-    // 15. The entire card navigates to the correct Ship Detail.
+    // 15. The entire card navigates to the correct Ship Workspace (SW-013B Objective 1).
     const firstLink = within(mcWrappers[0]).getByRole('link')
-    expect(firstLink).toHaveAttribute('href', `/ship/${top4[0].id}`)
+    expect(firstLink).toHaveAttribute('href', `/ship-workspace/${top4[0].id}`)
     fireEvent.click(firstLink)
-    expect(screen.getByText('Is this ship ready?')).toBeInTheDocument()
+    expect(screen.getByTestId('ship-operational-banner')).toBeInTheDocument()
 
     // 16. Manufacturer and stock role/focus display consistently — spot
     // check a known-resolved ship's identity line renders identically to

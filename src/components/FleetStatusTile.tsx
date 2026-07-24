@@ -33,7 +33,10 @@ export default function FleetStatusTile({
           {context.shown.map((entry, i) => (
             <span key={entry.shipId}>
               {i > 0 && ' • '}
-              <Link to={`/ship/${entry.shipId}`} className="hover:text-cyan hover:underline">
+              {/* SW-013B (Objective 1) — Mission Control's own ship-name
+                  links now land in Ship Workspace, matching every other
+                  primary ship-selection entry point. */}
+              <Link to={`/ship-workspace/${entry.shipId}`} className="hover:text-cyan hover:underline">
                 {entry.name}
               </Link>
             </span>

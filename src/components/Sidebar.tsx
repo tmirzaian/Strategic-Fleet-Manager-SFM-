@@ -12,7 +12,7 @@ import {
   BookText,
   Sparkles,
   Satellite,
-  FlaskConical,
+  Wrench,
 } from 'lucide-react'
 
 // The sidebar tells the story of the player's workflow (Alpha 2.4, Part 1)
@@ -20,6 +20,17 @@ import {
 // Quartermaster Template / assigned-loadout functionality lives in
 // Loadout Manager now), and Mission Composer is renamed to the term
 // players actually think in: Loadout Manager.
+//
+// SW-013B (Ship Workspace Promotion, Objectives 1/5) — Ship Workspace is
+// now the primary ship-management entry point, in the position Ship
+// Detail previously held (right after Fleet Dashboard), relabeled from
+// "Ship Workspace (Prototype)" to "Ship Workspace" now that the
+// underlying page has cleared feature parity, certification, and
+// Commander acceptance (SW-011A/SW-012B/SW-013A/CAT-HOLD-001/002) — the
+// "Prototype" framing was no longer accurate. Ship Detail moves later in
+// the list, reflecting its new role as a supporting/comparison tool
+// (Objective 2) rather than the default destination — it is not removed,
+// hidden, or demoted in capability, only in position.
 const navItems = [
   { to: '/', label: 'Mission Control', icon: Radar, end: true },
   { to: '/fleet', label: 'Fleet Dashboard', icon: LayoutGrid },
@@ -27,18 +38,16 @@ const navItems = [
   // which silently opened a specific seed ship (whether or not it existed
   // in the Commander's real fleet) any time this generic nav link was
   // clicked. General navigation now lands on a blank ship selection
-  // instead of an inferred/hardcoded ship.
-  { to: '/ship', label: 'Ship Detail', icon: Rocket },
+  // instead of an inferred/hardcoded ship. Unchanged by SW-013B — this
+  // reasoning applies equally to the blank `/ship-workspace` entry below.
+  { to: '/ship-workspace', label: 'Ship Workspace', icon: Wrench },
   { to: '/loadout-manager', label: 'Loadout Manager', icon: Sparkles },
   { to: '/hangar', label: 'Hangar Inventory', icon: Package },
   { to: '/quick-update', label: 'Quick Update', icon: Zap },
   { to: '/decision-center', label: 'Decision Center', icon: ScanSearch },
   { to: '/roadmap', label: 'Fleet Roadmap', icon: Map },
   { to: '/log', label: "Captain's Log", icon: BookText },
-  // Beta 2.0 structural prototype (Commander Sea Trials) — deliberately
-  // kept as its own nav entry rather than replacing "Ship Detail," so the
-  // existing, save-capable page stays the obvious default destination.
-  { to: '/ship-workspace', label: 'Ship Workspace (Prototype)', icon: FlaskConical },
+  { to: '/ship', label: 'Ship Detail', icon: Rocket },
 ]
 
 export default function Sidebar() {

@@ -51,8 +51,16 @@ export default function ShipCard({
   const [mode, setMode] = useState<ShipImagePresentationMode>('cover')
 
   return (
+    // SW-013B (Objective 1) — Ship Workspace Promotion. The canonical
+    // click-anywhere-to-navigate target for every ship-grid surface
+    // (Fleet Dashboard, Mission Control) is now Ship Workspace, not Ship
+    // Detail — Ship Detail remains fully reachable (its own Select Ship
+    // dropdown, and a new "View in Ship Detail" link inside Ship
+    // Workspace itself — Objective 2's "Preserve Legacy Access") but is
+    // no longer the default destination a Commander lands on by clicking
+    // a ship.
     <Link
-      to={`/ship/${ship.id}`}
+      to={`/ship-workspace/${ship.id}`}
       className="panel p-4 flex flex-col gap-3 h-full hover:shadow-glow hover:border-cyan/30 transition-all group"
     >
       {/* Region 1 — Image: fixed shared aspect ratio, full card width,

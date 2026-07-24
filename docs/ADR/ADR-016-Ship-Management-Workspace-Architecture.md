@@ -1,6 +1,6 @@
 # ADR-016 — Ship Management Workspace Architecture
 
-> **Status: Accepted (Phase I).** Formalizes SW-013A (Ship Management Workspace Architecture, Beta 2.0 Product Sprint). This sprint establishes architecture and workflow for the convergence of Ship Detail and Loadout Manager into one operational workspace — explicitly not the final UI vision. Companion to `docs/SW-013A-Workflow-Evaluation-Report.md` (Objective 6 findings, regression summary, remaining UX backlog).
+> **Status: Accepted (Phase I, SW-013A) — Promoted (Phase II, SW-013B).** Formalizes SW-013A (Ship Management Workspace Architecture, Beta 2.0 Product Sprint), which established architecture and workflow for the convergence of Ship Detail and Loadout Manager into one operational workspace. SW-013B (Ship Workspace Promotion) subsequently promoted that workspace to the application's primary ship-management navigation target — see §11. Companion to `docs/SW-013A-Workflow-Evaluation-Report.md` (Objective 6 findings, regression summary, remaining UX backlog) and `docs/SW-013B-Navigation-Audit.md` (navigation audit, context-preservation and Commander-acceptance validation, regression summary).
 
 ## 1. Mission
 
@@ -45,13 +45,11 @@ Every piece of local state in the workspace, its purpose, and its reset trigger 
 | `newLoadoutFormOpen` + its fields | "+ New Loadout" inline draft | **Ship change** (corrected this sprint — see §5) | Loadout-pill switches on the SAME ship intentionally do NOT reset this — composing a new Loadout while reviewing a different existing one is legitimate in-progress work |
 | `showStickyContext` | Sticky context bar visibility | Ship change (IntersectionObserver re-attach) | |
 
-## 4. Navigation Boundaries (Objective 1)
+## 4. Navigation Boundaries (Objective 1) — superseded by §11
 
-**Current entry points to Ship Workspace:** the sidebar's own "Ship Workspace (Prototype)" link, and direct URL (`/ship-workspace/:shipId`). No other page links here yet.
+**As of SW-013A (historical):** the sidebar's own "Ship Workspace (Prototype)" link and direct URL (`/ship-workspace/:shipId`) were the only entry points; `ShipCard`, Fleet Dashboard's table view, `FleetStatusTile`, and Loadout Manager's own cross-link all pointed at Ship Detail. Whether to redirect `ShipCard`'s primary click-through to Ship Workspace was raised and **deferred to SW-013B** by Commander decision, pending closure of the remaining capability-parity gap (Fleet Asset editing, Remove from Fleet — both still UX-012 scope).
 
-**Current entry points to Ship Detail (unchanged this sprint):** `ShipCard` (used by Fleet Dashboard's card view and Mission Control's priority cards), Fleet Dashboard's table view, `FleetStatusTile`, the sidebar, and Loadout Manager's own "View in Ship Detail" link.
-
-**Explicit decision record:** whether to redirect `ShipCard`'s primary click-through to Ship Workspace was raised this sprint and **deferred to SW-013B** by Commander decision — Ship Workspace does not yet have full capability parity with Ship Detail (Fleet Asset editing, Remove from Fleet remain Ship-Detail-only pending UX-012), and the navigation-convergence question deserves its own explicit sign-off once that parity gap closes further. This is a considered deferral, not an oversight.
+**Current state (SW-013B, see §11 for full detail):** Ship Workspace is now the primary destination reached by every one of those entry points. Ship Detail remains fully reachable — as a supporting/comparison view, not the default — via its own sidebar entry, its own ship selector, and a new reciprocal "View in Ship Detail" link inside Ship Workspace itself.
 
 **Where a Commander still needs to leave Ship Workspace today:** editing nickname/ownership/priority/role or removing a ship from the fleet (Ship Detail); browsing or deleting fleet-wide Loadouts (Loadout Manager); managing Hangar stock (Hangar Inventory); bulk updates (Quick Update).
 
@@ -92,8 +90,32 @@ Reviewed the three lenses and the operational banner for unnecessary duplication
 - **Future Ship Settings dialog (UX-012)** — the intended, explicit home for Fleet Asset identity/ownership/priority/role editing and ship removal. Ship Workspace is expected to link to it once built, not reimplement it — consistent with Objective 1's "avoid duplicated responsibility between screens."
 - **Validation** — Remove routes through the exact same `executeInstallation` compatibility pipeline as Install/Change and every other mutation; no new or parallel validation path was introduced this sprint.
 
-## 10. Validation Performed This Sprint
+## 10. Validation Performed This Sprint (SW-013A)
 
 - `npx tsc --noEmit`: clean, whole repo.
 - Full regression suite: see `docs/SW-013A-Workflow-Evaluation-Report.md` §4 for the exact count.
 - Live workflow validation (Playwright, real dev server, real seed data): Inspect ship, Change Installed Components (Install/Change disclosure), Remove weapon + Return displaced component to Hangar, Review configurable slot, Verify readiness recalculation — all clean, zero console errors. Screenshots and full findings in the companion report.
+
+## 11. SW-013B — Ship Workspace Promotion (Navigation)
+
+**Decision.** Ship Workspace is promoted from a secondary, sidebar-only surface to the application's primary ship-management navigation target. This is a navigation change only — no architecture, workspace responsibility (§2), state ownership (§3), or interaction-model (§5) change accompanied it. Ship Detail is retained in full, unmodified, as a supporting view: available for familiarity, side-by-side comparison, regression investigation, and emergency fallback during Beta 2.x.
+
+**Rationale.** Ship Workspace closed its capability-parity gap incrementally across SW-011A (Configurable Slot inspection), SW-012B (Port Authority certification), and SW-013A (Remove Installed Component, full operational parity for day-to-day ship configuration) and passed Commander acceptance at each stage (CAT-HOLD-001/002). The deferred decision recorded in the original §4 was revisited and approved once that parity was demonstrated live, closing the deferral on its own stated terms.
+
+**Navigation map (every entry point that changed):**
+
+| Entry point | Before | After |
+|---|---|---|
+| `ShipCard` (Fleet Dashboard card view, Mission Control priority cards) | `/ship/:id` | `/ship-workspace/:id` |
+| Fleet Dashboard table view row action | `/ship/:id` ("Ship Detail") | `/ship-workspace/:id` ("Ship Workspace") |
+| `FleetStatusTile` (Mission Control ship-name links) | `/ship/:id` | `/ship-workspace/:id` |
+| Loadout Manager cross-link | `/ship/:id` ("View in Ship Detail") | `/ship-workspace/:id` ("View in Ship Workspace") |
+| Sidebar position/label | Last item, "Ship Workspace (Prototype)" | 3rd item (after Fleet Dashboard), "Ship Workspace" |
+| Sidebar — Ship Detail | 3rd item | Last item (unchanged capability, demoted position only) |
+
+**Deliberately unchanged (out of scope):**
+- `ShipDetail.tsx`'s own internal ship-switcher dropdown stays on `/ship/:id` — a Commander already reviewing Ship Detail who picks a different ship should stay in Ship Detail, not be redirected mid-comparison.
+- `ShipRecordCard.tsx`/`PriorityCard.tsx` — confirmed dead code (no live page imports `PriorityCard`, the sole consumer of `ShipRecordCard`); left untouched.
+- Ship Workspace gains one new reciprocal link — "View in Ship Detail" (carrying the same ship id) — so the path back is always one click away, matching Loadout Manager's prior convention in the opposite direction.
+
+**Validation.** Full navigation audit and Commander-acceptance results (live, real dev server, both new entry points end-to-end) recorded in `docs/SW-013B-Navigation-Audit.md`. `npx tsc --noEmit` clean; full regression suite (159 files / 1920 tests) passing after updating tests that asserted the old `/ship/:id` navigation targets and "View in Ship Detail" label — pure test staleness from this intentional change, not new defects.

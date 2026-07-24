@@ -99,7 +99,7 @@ describe('<FleetDashboard /> — EWO-033 (Task 1): Priority presentation', () =>
     const first = ships[0]
     const card = screen.getByText(first.name).closest('[data-testid="priority-card-wrapper"]') as HTMLElement
     const link = within(card).getByRole('link')
-    expect(link).toHaveAttribute('href', `/ship/${first.id}`)
+    expect(link).toHaveAttribute('href', `/ship-workspace/${first.id}`)
   })
 
   it('7. Table view remains functional and unaffected (no Priority column added, per "report don\'t redesign" instruction)', () => {
