@@ -141,6 +141,14 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.getByText('Radar')).toBeInTheDocument()
   })
 
+  it('SW-013A (Objective 2): switching the reviewed Loadout (the pill selector) also preserves the expanded taxonomy group — tree structure is a ship-topology concern, not a per-Loadout one', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByText('Detection / Navigation'))
+    expect(screen.getByText('Radar')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+    expect(screen.getByText('Radar')).toBeInTheDocument()
+  })
+
   it('SW-008A: editing New Target (via the compatible-options picker) updates Change Status to Pending Changes, and the edit survives switching lenses', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
@@ -370,6 +378,85 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.getByText(/Available Inventory/)).toBeInTheDocument()
     expect(screen.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  describe('SW-013A (Objective 3): Remove Installed Component', () => {
+    it('shows a Remove action per installed row in Change Installed Components, and opens a real confirm modal (the one deliberate exception to this page\'s "no dialog" convention)', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const removeButtons = screen.getAllByRole('button', { name: /Remove/ })
+      expect(removeButtons.length).toBeGreaterThan(0)
+
+      fireEvent.click(removeButtons[0])
+      expect(screen.getByText(/Remove "/)).toBeInTheDocument()
+      expect(screen.getByText('Return removed component to Hangar')).toBeInTheDocument()
+    })
+
+    it('Cancel closes the modal without mutating the store', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const before = useFleetStore.getState()
+      fireEvent.click(screen.getAllByRole('button', { name: /Remove/ })[0])
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(screen.queryByText(/Return removed component to Hangar/)).not.toBeInTheDocument()
+      expect(useFleetStore.getState()).toBe(before)
+    })
+
+    it('Save removes the real installed component via the shared installation engine — the Installed cell clears and the Hangar quantity is unaffected when "Return to Hangar" is unchecked', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const row = getPortRow('Left Shield Generator')
+      const removeButton = within(row).getByRole('button', { name: /Remove/ })
+      const hangarBefore = useFleetStore.getState().hangarItems.find((h) => h.name === 'Mirage')?.qty ?? 0
+
+      fireEvent.click(removeButton)
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      expect(screen.queryByText(/Remove "/)).not.toBeInTheDocument()
+      const hp = useFleetStore.getState().hardpoints.find((h) => h.slotLabel === 'Left Shield Generator' && h.buildId === useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId)
+      expect(hp?.installedItem).toBe('—')
+      // Not returned to Hangar — quantity untouched.
+      const hangarAfter = useFleetStore.getState().hangarItems.find((h) => h.name === 'Mirage')?.qty ?? 0
+      expect(hangarAfter).toBe(hangarBefore)
+    })
+
+    it('"Return removed component to Hangar" checked increases the Hangar quantity for the removed item', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const row = getPortRow('Left Shield Generator')
+      fireEvent.click(within(row).getByRole('button', { name: /Remove/ }))
+
+      const itemName = screen.getByText(/Remove "/).textContent?.match(/Remove "(.+)"\?/)?.[1] ?? ''
+      expect(itemName).toBe('Mirage')
+      const hangarBefore = useFleetStore.getState().hangarItems.find((h) => h.name === itemName)?.qty ?? 0
+
+      fireEvent.click(screen.getByLabelText('Return removed component to Hangar'))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      const hangarAfter = useFleetStore.getState().hangarItems.find((h) => h.name === itemName)?.qty ?? 0
+      expect(hangarAfter).toBe(hangarBefore + 1)
+    })
+
+    it('a Captain\'s Log entry is recorded on a successful removal', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const logCountBefore = useFleetStore.getState().log.length
+      const row = getPortRow('Left Shield Generator')
+      fireEvent.click(within(row).getByRole('button', { name: /Remove/ }))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(useFleetStore.getState().log.length).toBe(logCountBefore + 1)
+      expect(useFleetStore.getState().log[0].action).toBe('Removed component')
+    })
+
+    it('a missile-rack aggregate row (representing N real slots) never shows a Remove action — no single unambiguous target', () => {
+      renderWorkspace('ghost')
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const aggregateRow = screen.getAllByText(/Missile/).map((el) => el.closest('tr')).find((tr) => tr && within(tr).queryByText(/×\d/))
+      if (aggregateRow) {
+        expect(within(aggregateRow).queryByRole('button', { name: /Remove/ })).not.toBeInTheDocument()
+      }
+    })
+
   })
 
   it('Immediate Decision Intelligence: decision cards answer "what should I do," never a bare component name', () => {

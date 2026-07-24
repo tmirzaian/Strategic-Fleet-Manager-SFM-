@@ -18,6 +18,8 @@ import {
   ArrowDownToLine,
   Layers,
   Code2,
+  Trash2,
+  X,
 } from 'lucide-react'
 import { useFleetStore, type TargetOverrideInput } from '../store/useFleetStore'
 import Badge, { statusTone } from '../components/Badge'
@@ -137,6 +139,12 @@ export default function ShipWorkspacePrototype() {
   const reservations = useFleetStore((s) => s.reservations)
   const saveMissionConfiguration = useFleetStore((s) => s.saveMissionConfiguration)
   const setActiveBuildStore = useFleetStore((s) => s.setActiveBuild)
+  // SW-013A (Objective 3) — Remove Installed Component. The same shared
+  // installation engine Ship Detail's own LoadoutPortTree already uses
+  // (`executeInstallation`/`REMOVE`, via this one store action) — never a
+  // second, parallel uninstall implementation.
+  const removeComponentStore = useFleetStore((s) => s.removeComponent)
+  const addLogEntry = useFleetStore((s) => s.addLogEntry)
 
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
   const ship = ships.find((s) => s.id === shipId)
@@ -218,10 +226,18 @@ export default function ShipWorkspacePrototype() {
     setDesiredTargetEntityClasses({})
   }, [reviewedBuildId])
 
+  // SW-013A (Objective 2) — tree expansion is a ship-topology concern, not
+  // a per-Loadout one: the same ports/taxonomy groups exist regardless of
+  // which Loadout is being reviewed, only the installed/target items
+  // differ. Previously reset on every `reviewedBuildId` change, which
+  // collapsed the Commander's expanded view on every loadout-pill switch
+  // — real, avoidable friction, since switching loadouts on the SAME ship
+  // is a one-click, extremely common operation. Now reset only when the
+  // ship itself changes (a genuinely different port tree).
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Core Components']))
   useEffect(() => {
     setExpandedGroups(new Set(['Core Components']))
-  }, [reviewedBuildId])
+  }, [shipId])
   function toggleGroup(group: string) {
     setExpandedGroups((prev) => {
       const next = new Set(prev)
@@ -246,6 +262,18 @@ export default function ShipWorkspacePrototype() {
   // indicator, never a raw diagnostic message.
   const [inspectedConfigurableSlotId, setInspectedConfigurableSlotId] = useState<string | null>(null)
   const [developerMode, setDeveloperMode] = useState(false)
+
+  // SW-013A (Objective 3) — Remove Installed Component. The one
+  // deliberate exception to this page's own "never a dialog" convention:
+  // a real confirm modal, not an inline disclosure, matching the existing
+  // precedent for every other destructive/irreversible action already in
+  // this codebase (Ship Detail's own LoadoutPortTree remove modal, its
+  // "Remove from Fleet" confirmation, Loadout Manager's "Delete Loadout"
+  // confirmation) — a Commander should never uninstall a real component
+  // one accidental click away from a silent mutation.
+  const [removeTarget, setRemoveTarget] = useState<{ slotLabel: string; itemLabel: string } | null>(null)
+  const [returnToHangar, setReturnToHangar] = useState(false)
+  const [removeError, setRemoveError] = useState<string | null>(null)
 
   // SW-008D (Objective 6) — "Set as Active" now calls the real store
   // mutator (`setActiveBuild`); this notice reports the real outcome,
@@ -282,6 +310,19 @@ export default function ShipWorkspacePrototype() {
     setNewLoadoutExistingId('')
     setNewLoadoutError(null)
   }
+  // SW-013A (Objective 2) — a real state-preservation bug, not just a
+  // missing convenience: this form's own "Copy an Existing Loadout"
+  // dropdown holds a Build id scoped to whichever ship was selected when
+  // the Commander opened it. Switching ships via the Ship dropdown while
+  // this draft is open previously left that stale id in place — an
+  // open-but-invalid reference into the OLD ship's builds. A genuinely
+  // different ship is a genuinely different draft context, unlike a mere
+  // Loadout-pill switch on the SAME ship (which intentionally does NOT
+  // reset this — reviewing a different existing Loadout while composing a
+  // new one is legitimate, in-progress Commander work).
+  useEffect(() => {
+    resetNewLoadoutForm()
+  }, [shipId])
 
   // Sticky Context — hidden while the banner itself is in view; appears,
   // pinned, only once the Commander has scrolled past it. A zero-height
@@ -665,7 +706,7 @@ export default function ShipWorkspacePrototype() {
     )
   }
 
-  function renderLensCells(hp: Hardpoint): ReactNode {
+  function renderLensCells(hp: DisplayHardpoint): ReactNode {
     if (hp.isStructural) {
       return (
         <td colSpan={lensColumnCount - 2} className="px-4 py-2 text-muted/50">
@@ -756,14 +797,34 @@ export default function ShipWorkspacePrototype() {
             <Badge tone={availability.availableQuantity > 0 ? 'success' : 'muted'}>{availability.availableQuantity} Available</Badge>
           </td>
           <td className="px-4 py-2">
-            {hp.targetItem && hp.targetItem !== '—' && (
-              <button
-                onClick={() => setExpandedInstallRowId(isRowExpanded ? null : hp.id)}
-                className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
-              >
-                <Package size={12} /> Install / Change
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {hp.targetItem && hp.targetItem !== '—' && (
+                <button
+                  onClick={() => setExpandedInstallRowId(isRowExpanded ? null : hp.id)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
+                >
+                  <Package size={12} /> Install / Change
+                </button>
+              )}
+              {/* SW-013A (Objective 3) — Remove Installed Component. Same
+                  guard LoadoutPortTree.tsx's own Remove action uses: a real
+                  installed item, never a missile-aggregate row (which
+                  represents N real slots at once — removing "one" of them
+                  from an aggregate has no single unambiguous target). */}
+              {!hp.missileAggregate && hp.installedItem && hp.installedItem !== '—' && (
+                <button
+                  onClick={() => {
+                    setRemoveTarget({ slotLabel: hp.slotLabel, itemLabel: hp.installedItem })
+                    setReturnToHangar(false)
+                    setRemoveError(null)
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-muted hover:text-danger transition-colors"
+                  title="Remove Installed Component"
+                >
+                  <Trash2 size={12} /> Remove
+                </button>
+              )}
+            </div>
           </td>
         </>
       )
@@ -1429,6 +1490,55 @@ export default function ShipWorkspacePrototype() {
               </div>
             )}
           </div>
+        {/* SW-013A (Objective 3) — Remove Installed Component confirm modal.
+            Mirrors LoadoutPortTree.tsx's own modal exactly (Remove -> optional
+            "Return removed component to Hangar" -> Save), the one deliberate
+            exception to this page's "never a dialog" convention — see the
+            removeTarget state declaration above for why. Nested inside this
+            `{ship && (...)}` block so `ship` is known non-null here without
+            a non-null assertion. */}
+        {removeTarget && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setRemoveTarget(null)}>
+            <div className="panel p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-display font-semibold text-white">Remove "{removeTarget.itemLabel}"?</h3>
+                <button onClick={() => setRemoveTarget(null)} className="text-muted hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-sm text-muted mb-4">Removing from {formatHardpointLabel(removeTarget.slotLabel)}. This clears the Installed assignment for the reviewed Loadout.</p>
+              <label className="flex items-center gap-2 text-sm text-white cursor-pointer mb-4">
+                <input type="checkbox" checked={returnToHangar} onChange={(e) => setReturnToHangar(e.target.checked)} className="accent-cyan" />
+                Return removed component to Hangar
+              </label>
+              {removeError && <p className="text-xs text-danger mb-3">{removeError}</p>}
+              <div className="flex gap-2">
+                <button onClick={() => setRemoveTarget(null)} className="flex-1 border border-white/15 text-white text-sm py-2 rounded-lg hover:border-white/35 transition-colors">
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const result = removeComponentStore(ship.id, removeTarget.slotLabel, returnToHangar, reviewedBuildId)
+                    if (result.matched) {
+                      addLogEntry({
+                        action: returnToHangar ? 'Removed component to Hangar' : 'Removed component',
+                        shipName: ship.name,
+                        itemName: result.itemName,
+                        details: `Removed ${result.itemName} from ${ship.name} (${removeTarget.slotLabel})${returnToHangar ? ' — returned to Hangar' : ''}`,
+                      })
+                      setRemoveTarget(null)
+                    } else {
+                      setRemoveError('Could not remove this component.')
+                    }
+                  }}
+                  className="flex-1 bg-danger text-white font-semibold text-sm py-2 rounded-lg hover:bg-danger/90 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         </>
       )}
     </div>
