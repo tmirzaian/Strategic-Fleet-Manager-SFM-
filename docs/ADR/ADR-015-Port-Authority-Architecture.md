@@ -1,6 +1,6 @@
 # ADR-015 — Port Authority Architecture
 
-> **Status: Accepted.** Formalizes SW-012A (Port Authority Architecture, Architecture & Investigation sprint). Non-Goals for this sprint: Commander UI, editing workflows, inventory behavior, persistence changes — this is a documentation and validation pass over an existing, working implementation, not new implementation work.
+> **Status: Accepted.** Formalizes SW-012A (Port Authority Architecture, Architecture & Investigation sprint). Non-Goals for this sprint: Commander UI, editing workflows, inventory behavior, persistence changes — this is a documentation and validation pass over an existing, working implementation, not new implementation work. **Amended by SW-012B** (Port Authority Implementation Certification) — §3.1 added, documenting a real wiring trap found during certification; no other change.
 
 ## Numbering note
 
@@ -65,6 +65,12 @@ These are the rules the implementation already enforces; stated here as the cont
 5. **A genuine data disagreement is excluded, never arbitrarily resolved.** Two `Ports[]` entries sharing one name with different constraints are both dropped from the map, with the anomaly recorded — never resolved by picking the first, the last, or any other implicit rule.
 6. **Nothing here mutates its input.** `classifyOwnership`, `resolvePortAuthority`, and `resolvePortAuthorities` are pure — no mutation, no reparenting, no synthesized nodes, no global state, no persistence write, no React dependency. Ownership is a derived side table (`Map<id, OwnershipResult>`), computed at query/render time from fields the pipeline already authoritatively carries — exactly the same discipline `withMissileRackAggregation`/`withComponentOwnedChildSlots` already established for other derived-at-render-time concerns.
 7. **Extension requires no shape change.** A future ownership kind (e.g. a maintenance-only sub-assembly) is added by extending the `OwnershipContext` union and giving the boundary check a second marker table — `classifyOwnership`'s own ancestry walk is already generic over "the nearest ancestor matching *any* known boundary kind wins." A future port-owning family (beyond the current five assembly roles) is added by extending `OWNER_ASSEMBLY_ROLES` alone.
+
+### 3.1 Wiring Trap — `entityClass` Must Come From the Parent Port, Never the Port's Own
+
+Confirmed live during SW-012B certification, against the real Hornet Mk II: `resolvePortAuthority`'s `entityClass` input must be the owning MOUNT/TURRET/RACK's own `sourceEntityClass` — i.e. the **parent** port's — never the port's own. A weapon-mount child port's own `sourceEntityClass` is whatever *component* is currently installed there (e.g. `hardpoint_class_2`'s own `sourceEntityClass` on a real Hornet is `APAR_BallisticGatling_S4`, the weapon), not the mount itself (`Mount_Gimbal_S4`, the parent `hardpoint_weapon_left_wing` port's `sourceEntityClass`). `component-owned-port-constraints.json` is keyed by owning MOUNT/TURRET/RACK entities only (`OWNER_ASSEMBLY_ROLES`) — a weapon's own entityClass is never a key in it.
+
+The failure mode this produces if gotten wrong is silent, not loud: passing the port's own `sourceEntityClass` doesn't throw or crash — it just returns `constraint-not-found` for every real port, which reads as "the whole system says nothing is ever editable" rather than as an obvious wiring bug. `src/utils/__tests__/portAuthority.test.ts`'s `SW-012B end-to-end wiring verification` suite proves both directions live: the correct derivation (parent's `sourceEntityClass`) resolves a real, positive authority result, and the incorrect one (the port's own) is proven to silently degrade to `constraint-not-found`. Any future consumer (SW-011B) deriving `entityClass` from a real `Port`/`Hardpoint` object must read it off the **parent**, not the node itself.
 
 ## 4. Terminology Disambiguation — Two Different "Authorities"
 
