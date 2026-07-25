@@ -124,6 +124,17 @@ interface RawCatalogRecord {
    * other real value CIG ships), parsed at generation time from the
    * item's own localized description text. Null for most records. */
   classification: string | null
+  /** SW-013C.2F Amendment A (Finding 2) — the subset of DataCore's own
+   * `AttachDef.RequiredTags` confirmed self-referential (the entity's own
+   * `Tags` also carries the same value "$"-prefixed) — CIG's real
+   * vessel/hull-lock convention, never a name/entityClass heuristic, and
+   * deliberately narrower than raw RequiredTags (which also covers
+   * ordinary shared port-family requirements like "miningMount" — see
+   * catalogSchema.ts's schemaVersion 4 note). See
+   * src/data/componentCatalog.ts's `isComponentSelectableForPort`, the
+   * only reader. Absent on an older cached runtime JSON — defaults to
+   * empty (unrestricted), never assumed bound. */
+  vesselBoundTags?: string[]
 }
 
 interface RawCatalogFile {
@@ -265,6 +276,8 @@ export interface CanonicalComponentRecord {
   manufacturerCode: string | null
   /** CAT-001 — see RawCatalogRecord's own doc comment. */
   classification: string | null
+  /** SW-013C.2F Amendment A (Finding 2) — see RawCatalogRecord's own doc comment. Always an array, never undefined, here. */
+  vesselBoundTags: string[]
 }
 
 export type ComponentResolution =
@@ -302,6 +315,7 @@ if (rawCatalog) {
       grade: record.grade,
       manufacturerCode: manufacturerCodeFromRef(record.manufacturerRef),
       classification: record.classification,
+      vesselBoundTags: record.vesselBoundTags ?? [],
     }
     componentsByEntityClass.set(entityClass, canonical)
     const group = componentsByDisplayNameInternal.get(record.displayName)
@@ -338,11 +352,28 @@ export function resolveComponentByEntityClass(entityClass: string): ComponentRes
  *     pre-existing behavior for e.g. a mount/turret housing's own row,
  *     category "Turret"/"TurretBase"), so every such candidate shares one
  *     shape regardless of its specific raw category string.
+ *   - SW-013C.2F Amendment A (Finding 2) — whether `vesselBoundTags` is
+ *     empty also participates in shape now. Confirmed real case: "MSD-322
+ *     Missile Rack" is shared by both the Warlock's own unrestricted
+ *     `MRCK_S03_BEHR_Dual_S02` and a Cyclone_MT-tagged ground-vehicle
+ *     variant — same category/size/subtype shape by every other measure,
+ *     but `isComponentSelectableForPort` (src/data/componentCatalog.ts)
+ *     now evaluates them differently. Collapsing them would silently pick
+ *     whichever entityClass happens to sort first, sometimes hiding the
+ *     one genuinely unrestricted candidate behind a vessel-bound one that
+ *     "won" the collapse — exactly the kind of real disagreement this
+ *     function's own ambiguity check exists to catch, not paper over.
+ *     Deliberately keyed on `vesselBoundTags`, never raw `requiredTags` —
+ *     an ordinary shared requirement (e.g. every mining laser's
+ *     "miningMount") is common to nearly every candidate in its family and
+ *     must not fragment otherwise-identical real components into
+ *     spurious ambiguity.
  */
 function compatibilityShapeKey(record: CanonicalComponentRecord): string {
-  if (record.subtype === 'PDCTurret') return `pdc-turret:${record.size}`
+  const restriction = record.vesselBoundTags.length > 0 ? 'restricted' : 'open'
+  if (record.subtype === 'PDCTurret') return `pdc-turret:${record.size}:${restriction}`
   const translated = compatibilityPortTypeFor(record.category, record.subtype)
-  return translated ? `${translated}:${record.size}` : 'untranslatable'
+  return translated ? `${translated}:${record.size}:${restriction}` : `untranslatable:${restriction}`
 }
 
 /**

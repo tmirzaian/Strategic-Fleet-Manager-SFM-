@@ -45,6 +45,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stripTrailingCommas } from '../src/engine/importer/trailingCommaJson'
+import { runDcbQuery, parseDcbQueryResult } from './componentCatalog/dcbQuery'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -66,8 +67,109 @@ interface Catalog {
  * session) Turret-category assemblies whose own direct children are real,
  * independent weapon-mount positions — never a blanket "every Turret
  * entity" sweep. Each entry here was traced to a real, currently-imported
- * ship's own factory loadout. */
-const CONFIRMED_TURRET_ENTITY_CLASSES = new Set(['ANVL_Hornet_F7CM_Mk2_Ball_Turret', 'ANVL_Hornet_F7CM_Mk2_Ball_Turret_Bespoke'])
+ * ship's own factory loadout.
+ *
+ * SW-013C.2G — `ANVL_Hornet_F7A_Nose_Turret` added: the Hornet Mk II
+ * canard nose turret, confirmed installed (factory-real, not inferred) on
+ * the F7A Mk2/F7CM Mk2/F7CM Mk2 Heartseeker/F7 Mk2 Collector Mod raw-data
+ * fixtures, each with two real `WeaponGun`-category children
+ * (`hardpoint_weapon_S1_left`/`_right`, both S3 — confirmed directly via
+ * `generated-data/ports.json`: AMRS_LaserCannon_S3/KLWE_LaserRepeater_S3).
+ * This is the spec the F7C-S Hornet Ghost Mk II's own dormant nose
+ * hardpoint (SW-013C.2G, docs/SW-013C.2G-Dormant-Hardpoint-Materialization-Report.md)
+ * needs once a Commander targets a real turret there.
+ *
+ * `ANVL_Hornet_F7C_Mk2_Nose_Turret` — the swap group's OTHER confirmed
+ * member (see `generated-data/configurable-slots.runtime.json`'s
+ * `ANVL_Hornet_Mk2` group) — is deliberately NOT added here. Direct
+ * `entity export --dump-hierarchy` on it confirmed identical geometry
+ * (same .cga file, same `hardpoint_weapon_S1_left`/`_right` node names)
+ * to the F7A variant, but its own `loadout` is empty (no ship in this
+ * fixture set factory-installs it), so its own weapon-mount SIZE has no
+ * direct, independent confirmation — only strong circumstantial identity
+ * to the F7A variant, which this generator's own discipline (derive only
+ * from real, installed, sized evidence — never geometry-name inference)
+ * declines to assume. Selecting this specific swap-group member currently
+ * produces zero synthesized children — an honest gap, not a defect; see
+ * the SW-013C.2G report's own "Remaining Risks" section. */
+const CONFIRMED_TURRET_ENTITY_CLASSES = new Set([
+  'ANVL_Hornet_F7CM_Mk2_Ball_Turret',
+  'ANVL_Hornet_F7CM_Mk2_Ball_Turret_Bespoke',
+  'ANVL_Hornet_F7A_Nose_Turret',
+])
+
+/**
+ * SW-013C.2G Amendment C — a turret assembly that is never factory-installed
+ * on any real ship in the `raw-data/*.json` corpus (so the derivation above
+ * has no installed-child evidence to read) can still carry authoritative,
+ * independently-confirmable weapon-slot geometry: its OWN intrinsic
+ * `SItemPortDef` children, declared directly on the turret's own DataCore
+ * component definition (`EntityClassDefinition.<class>.Components[].Ports[]`),
+ * independent of installation anywhere. This is a live `dcb query` per
+ * entity (STARBREAKER_EXE/SC_DATA_P4K, same convention as
+ * `scripts/generateConfigurableSlotReport.ts`) — a genuinely different
+ * authority from the raw-data geometry-hierarchy fixtures above, so it is
+ * kept as an explicit, separate, opt-in second pass rather than folded into
+ * the loop above: a size range (MinSize !== MaxSize) is real, common on
+ * these ports, and deliberately skipped here (never guessed down to one
+ * value) rather than treated as a confirmed uniform size.
+ *
+ * `ANVL_Hornet_F7C_Mk2_Nose_Turret` — the Hornet Mk II Nose Turret swap
+ * group's OTHER member (`ANVL_Hornet_Mk2`,
+ * `generated-data/configurable-slots.runtime.json`), never factory-installed
+ * anywhere in this corpus (see the CONFIRMED_TURRET_ENTITY_CLASSES doc
+ * comment above for the prior "honest gap" finding) — confirmed via direct
+ * `dcb query` to carry two intrinsic `WeaponGun` ports, both
+ * `MinSize: 2, MaxSize: 2` (a fixed, uniform S2 — not a range), independent
+ * of any ship's own loadout. This directly corroborates the Commander's own
+ * independent SPPV validation (SW-013C.2G Amendment C): "Mk II S2 Nose
+ * Turret — Turret mount size S3, Number of weapon ports 2, Child weapon
+ * size S2." SPPV was used only as a validation oracle prompting this
+ * re-investigation, per Amendment C's own explicit instruction — the actual
+ * geometry recorded here is the live DataCore query result, not a value
+ * copied from SPPV.
+ */
+const CONFIRMED_INTRINSIC_PORT_TURRET_ENTITY_CLASSES = new Set(['ANVL_Hornet_F7C_Mk2_Nose_Turret'])
+
+interface RawPortDef {
+  MinSize?: number
+  MaxSize?: number
+  Types?: Array<{ Type?: string }>
+}
+interface RawComponent {
+  Ports?: RawPortDef[]
+}
+
+function deriveFromIntrinsicPorts(entityClass: string, starbreakerExe: string, dataP4k: string): { slotCount: number; weaponSize: number } | null {
+  const outcome = parseDcbQueryResult(entityClass, runDcbQuery(starbreakerExe, dataP4k, entityClass))
+  if (outcome.kind !== 'resolved') {
+    console.warn(`"${entityClass}": ${outcome.reason} — skipped (intrinsic-port derivation).`)
+    return null
+  }
+  const recordValue = outcome.record._RecordValue_
+  const components = recordValue && typeof recordValue === 'object' ? (recordValue as { Components?: unknown }).Components : undefined
+  const componentList = Array.isArray(components) ? (components as RawComponent[]) : []
+
+  const weaponPorts = componentList
+    .flatMap((c) => c.Ports ?? [])
+    .filter((p) => (p.Types ?? []).some((t) => t.Type === 'WeaponGun'))
+
+  if (weaponPorts.length === 0) {
+    console.warn(`"${entityClass}": no intrinsic WeaponGun ports found on its own component definition — skipped.`)
+    return null
+  }
+  const sizes = weaponPorts.map((p) => (p.MinSize === p.MaxSize ? p.MinSize : null))
+  if (sizes.some((s) => s === null || typeof s !== 'number')) {
+    console.warn(`"${entityClass}": intrinsic weapon ports are a size RANGE (MinSize !== MaxSize) or unsized — skipped rather than guessed. Sizes: ${JSON.stringify(weaponPorts.map((p) => [p.MinSize, p.MaxSize]))}`)
+    return null
+  }
+  const uniform = sizes[0]
+  if (!sizes.every((s) => s === uniform)) {
+    console.warn(`"${entityClass}": intrinsic weapon ports do not share one uniform size (${JSON.stringify(sizes)}) — skipped rather than guessed.`)
+    return null
+  }
+  return { slotCount: weaponPorts.length, weaponSize: uniform as number }
+}
 
 /** A child whose own category is one of these is a Mode-A payload array
  * (or otherwise not a Mode-B weapon position) — never folded into this
@@ -146,6 +248,22 @@ function main() {
 
     result[entityClass] = { slotCount: weaponChildren.length, weaponSize: uniformSize }
     console.log(`"${entityClass}" (${foundFile}): ${weaponChildren.length} weapon slot(s), size S${uniformSize}.`)
+  }
+
+  if (CONFIRMED_INTRINSIC_PORT_TURRET_ENTITY_CLASSES.size > 0) {
+    const starbreakerExe = process.env.STARBREAKER_EXE ?? 'D:\\StarBreaker-main\\StarBreaker-main\\target\\release\\starbreaker.exe'
+    const dataP4k = process.env.SC_DATA_P4K ?? 'C:\\Program Files\\Roberts Space Industries\\StarCitizen\\LIVE\\Data.p4k'
+    if (!existsSync(starbreakerExe) || !existsSync(dataP4k)) {
+      console.warn(`StarBreaker executable or Data.p4k not found — skipping intrinsic-port derivation pass for: ${[...CONFIRMED_INTRINSIC_PORT_TURRET_ENTITY_CLASSES].join(', ')}. Set STARBREAKER_EXE/SC_DATA_P4K to include it.`)
+    } else {
+      for (const entityClass of CONFIRMED_INTRINSIC_PORT_TURRET_ENTITY_CLASSES) {
+        if (entityClass in result) continue
+        const derived = deriveFromIntrinsicPorts(entityClass, starbreakerExe, dataP4k)
+        if (!derived) continue
+        result[entityClass] = derived
+        console.log(`"${entityClass}" (intrinsic ports, live DataCore query): ${derived.slotCount} weapon slot(s), size S${derived.weaponSize}.`)
+      }
+    }
   }
 
   const document = { schemaVersion: 1, turretWeaponSlotSpecByEntityClass: result }

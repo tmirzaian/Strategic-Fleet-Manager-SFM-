@@ -82,4 +82,30 @@ export interface Port {
    * never renders an editable target selector — see
    * src/utils/buildProgress.ts and src/utils/procurement.ts. */
   isStructural?: boolean
+
+  /** SW-013C.2G — true only for a Port synthesized at runtime by
+   * `src/generated/dormantHardpoints.ts`'s materialization step
+   * (`src/generated/importedShips.ts`'s `buildView`), never present in
+   * `generated-data/ports.json` itself (that raw artifact is never
+   * mutated). See `Hardpoint.isDormant`'s own doc comment for the full
+   * provenance and evidence model. */
+  isDormant?: boolean
+  /** SW-013C.2G — only set alongside `isDormant`. The real DataCore ship
+   * entity class of a donor ship that actually earns this port's own
+   * confirmed swap-group entry — see `DormantHardpointSpec.donorShipEntityClassForCompatibility`'s
+   * own doc comment for why the dormant port's own ship can never have
+   * one of its own. */
+  dormantDonorShipEntityClass?: string
+  /** SW-013C.2G Amendment C — only set alongside `isDormant`. When present,
+   * restricts this dormant port's own candidate list to ONLY these entity
+   * classes, even though `dormantDonorShipEntityClass`'s own confirmed swap
+   * group may list more members. A confirmed swap group proves "these
+   * components are interchangeable on SOME ship" — it does not by itself
+   * prove every member is valid on THIS specific (dormant) ship's own
+   * variant/family. See `DormantHardpointSpec.restrictCandidatesToEntityClasses`'s
+   * own doc comment for the evidence model (DataCore `AttachDef.RequiredTags`
+   * divergence + factory-installation-pattern + independent SPPV
+   * corroboration). Undefined/absent means no restriction beyond the swap
+   * group itself — the pre-Amendment-C default. */
+  dormantAllowedComponentEntityClasses?: string[]
 }

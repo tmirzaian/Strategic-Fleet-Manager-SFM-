@@ -211,6 +211,17 @@ export function overlayCanonicalHierarchy(hardpoints: Hardpoint[], template: Fac
   return hardpoints.map((hp) => {
     const t = templateBySlot.get(hp.slotLabel)
     if (!t) return hp
-    return { ...hp, parentSlotLabel: t.parentSlotLabel, groupLabel: t.groupLabel, assemblyRole: t.assemblyRole, isStructural: t.isStructural }
+    return {
+      ...hp,
+      parentSlotLabel: t.parentSlotLabel,
+      groupLabel: t.groupLabel,
+      assemblyRole: t.assemblyRole,
+      isStructural: t.isStructural,
+      // SW-013C.2G — same "recomputed from the current template, never
+      // persisted on the saved row" treatment as the four fields above.
+      isDormant: t.isDormant,
+      dormantDonorShipEntityClass: t.dormantDonorShipEntityClass,
+      dormantAllowedComponentEntityClasses: t.dormantAllowedComponentEntityClasses,
+    }
   })
 }

@@ -197,11 +197,23 @@ describe('FTB-001D: mining laser catalog eligibility (Helix II Mining Laser and 
     expect(template.some((t) => t.type === 'Mining')).toBe(false)
   })
 
-  it('9. census — every real mining laser in the catalog (WeaponMining/Gun) is selectable at its own size against a Mining Laser port, none excluded by the fixed defect', () => {
+  it('9. census — every real, genuinely unrestricted mining laser in the catalog (WeaponMining/Gun) is selectable at its own size against a Mining Laser port, none excluded by the fixed defect', () => {
     if (!hasCatalog) return
     const miningLasers = Array.from(componentsByEntityClass.values()).filter((r) => r.category === 'WeaponMining' && r.subtype === 'Gun')
     expect(miningLasers.length).toBeGreaterThan(5) // Helix I/II, Impact I/II, Lancet MH1/MH2, Klein-S1/S2, Hofstede-S1/S2, Arbor MH1/MH2/MHV, Pitman, etc.
+    // SW-013C.2F Amendment A (Finding 2) — Mining_Laser_DRAK_Golem_S1
+    // ("Pitman Mining Laser") is a genuine exception, not a regression:
+    // direct dcb query confirmed it carries Tags "... $DRAK_Golem" +
+    // RequiredTags "DRAK_Golem" — the Drake Golem's own real, hull-locked
+    // mining head (the same authoritative self-referential-tag convention
+    // that excludes the Warlock's leaking Gatac missile rack). Genuinely
+    // not suggestible on any other ship's generic Mining Laser port.
+    const KNOWN_VESSEL_BOUND = new Set(['Mining_Laser_DRAK_Golem_S1'])
     for (const record of miningLasers) {
+      if (KNOWN_VESSEL_BOUND.has(record.entityClass)) {
+        expect(record.vesselBoundTags.length).toBeGreaterThan(0)
+        continue
+      }
       expect(isComponentSelectableForPort(record.displayName, 'Mining Laser', `S${record.size}`, { itemEntityClass: record.entityClass })).toBe(true)
     }
   })

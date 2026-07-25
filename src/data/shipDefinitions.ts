@@ -73,6 +73,12 @@ export interface FactoryHardpointTemplate {
    * already known at generation time. Undefined for a hand-authored seed
    * row, which has no import pipeline behind it. */
   factoryEntityClass?: string
+  /** SW-013C.2G — mirrors Port.isDormant/Hardpoint.isDormant; see either's doc comment. */
+  isDormant?: boolean
+  /** SW-013C.2G — mirrors Port.dormantDonorShipEntityClass; see that field's doc comment. */
+  dormantDonorShipEntityClass?: string
+  /** SW-013C.2G Amendment C — mirrors Port.dormantAllowedComponentEntityClasses; see that field's doc comment. */
+  dormantAllowedComponentEntityClasses?: string[]
 }
 
 const shipCatalogRecordByEntityClass = new Map(shipCatalogRecords.map((r) => [r.entityClass, r]))
@@ -876,6 +882,9 @@ function importedFactoryTemplate(shipId: string): FactoryHardpointTemplate[] {
       sourcePortId: port.id,
       sourceItemPortName: port.internalName,
       sourceParentItemPortName: parentItemPortName,
+      isDormant: port.isDormant,
+      dormantDonorShipEntityClass: port.dormantDonorShipEntityClass,
+      dormantAllowedComponentEntityClasses: port.dormantAllowedComponentEntityClasses,
     })
     for (const child of childrenByParentId.get(port.id) ?? []) {
       // A group applies only to the top-level row it was resolved for —

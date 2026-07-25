@@ -224,7 +224,7 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
     const weaponInput = screen.getAllByText('Weapon')[0].closest('tr')!.querySelector('input[role="combobox"]')!
     fireEvent.click(weaponInput)
     fireEvent.change(weaponInput, { target: { value: 'Rhino' } })
-    const listbox = weaponInput.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(weaponInput.getAttribute('aria-controls')!)!
     const optionLabels = Array.from(listbox.querySelectorAll('button')).map((b) => b.textContent ?? '')
     // A real catalog-only component (not one of the 5 hardcoded demo entries) is present.
     expect(optionLabels.some((label) => label.includes('CF-447 Rhino Repeater'))).toBe(true)
@@ -238,7 +238,7 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
     const targetInputs = document.querySelectorAll('input[role="combobox"]')
     fireEvent.click(targetInputs[0])
     fireEvent.change(targetInputs[0], { target: { value: 'Beacon' } })
-    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(targetInputs[0].getAttribute('aria-controls')!)!
     expect(listbox.textContent).toMatch(/no matching component/i)
   })
 
@@ -248,7 +248,7 @@ describe('Mission M-012: target-build selector uses the same authoritative compo
     const targetInputs = document.querySelectorAll('input[role="combobox"]')
     fireEvent.click(targetInputs[0])
     fireEvent.change(targetInputs[0], { target: { value: 'Rhino' } })
-    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(targetInputs[0].getAttribute('aria-controls')!)!
     const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.textContent?.includes('CF-447 Rhino Repeater'))
     const subtitle = button?.querySelectorAll('span')[1]?.textContent ?? null
     // The new "S{n} · Grade {letter}" grammar always leads with "S" — this
@@ -560,7 +560,7 @@ describe('EWO-025: Loadout Edit-Mode Hierarchy Reconstruction (Sea Trials repro)
       const targetInputs = document.querySelectorAll('input[role="combobox"]')
       fireEvent.click(targetInputs[0])
       fireEvent.change(targetInputs[0], { target: { value: 'Beacon' } })
-      const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+      const listbox = document.getElementById(targetInputs[0].getAttribute('aria-controls')!)!
       expect(listbox.textContent).toMatch(/no matching component/i)
     }
   })
@@ -671,7 +671,7 @@ describe('EWO-027 (Scenario A): starting a New Loadout resets prior metadata —
     // only ever updates TargetComponentPicker's own uncommitted local text
     // and never reaches MissionComposer's `overrides` state at all.
     fireEvent.click(targetInputs[0])
-    const listbox = targetInputs[0].closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(targetInputs[0].getAttribute('aria-controls')!)!
     const optionButtons = Array.from(listbox.querySelectorAll('button'))
     const differentOption = optionButtons.find((b) => b.querySelector('span')?.textContent !== factoryDefault) ?? optionButtons[0]
     fireEvent.click(differentOption)
@@ -754,7 +754,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
     fireEvent.change(rackTargetInput, { target: { value: 'Gatac Missile Rack 8xS1' } })
-    const listbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(rackTargetInput.getAttribute('aria-controls')!)!
     const option = Array.from(listbox.querySelectorAll('button')).find((b) => b.textContent?.includes('Gatac Missile Rack 8xS1'))
     if (!option) return // real generated-data/component-metadata-catalog.json not present on this machine
     fireEvent.click(option)
@@ -813,7 +813,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
     fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
-    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackListbox = document.getElementById(rackTargetInput.getAttribute('aria-controls')!)!
     const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
     if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
     fireEvent.click(rackOption)
@@ -825,7 +825,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     const aggregateTargetInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(aggregateTargetInput)
     fireEvent.change(aggregateTargetInput, { target: { value: 'TaskForce I Missile' } })
-    const missileListbox = aggregateTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const missileListbox = document.getElementById(aggregateTargetInput.getAttribute('aria-controls')!)!
     const missileOption = Array.from(missileListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('TaskForce I Missile'))
     if (!missileOption) return
     fireEvent.click(missileOption)
@@ -853,7 +853,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
     const input = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(input)
     fireEvent.change(input, { target: { value: 'TaskForce' } })
-    const listbox = input.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(input.getAttribute('aria-controls')!)!
     const option = listbox.querySelector('button')
     if (!option) return // no compatible S2 missile catalog entry present on this machine
     const chosen = option.textContent
@@ -900,7 +900,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001B: dynamic missile ra
 
     const input = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(input)
-    const listbox = input.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(input.getAttribute('aria-controls')!)!
     const option = listbox.querySelector('button')
     if (!option) return // no compatible S2 missile catalog entry present on this machine
     fireEvent.click(option)
@@ -947,7 +947,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     // Assign a missile to the CURRENT (S2) rack first.
     const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(aggInput)
-    const beforeListbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const beforeListbox = document.getElementById(aggInput.getAttribute('aria-controls')!)!
     const beforeOption = beforeListbox.querySelector('button')
     if (!beforeOption) return // no compatible S2 missile catalog entry present on this machine
     const beforeMissile = beforeOption.querySelector('span')!.textContent
@@ -960,7 +960,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
     fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
-    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackListbox = document.getElementById(rackTargetInput.getAttribute('aria-controls')!)!
     const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
     if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
     fireEvent.click(rackOption)
@@ -987,7 +987,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     const aggregateRow = rackRow.nextElementSibling as HTMLElement
     const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(aggInput)
-    const listbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(aggInput.getAttribute('aria-controls')!)!
     const option = listbox.querySelector('button')
     if (!option) return // no compatible S2 missile catalog entry present on this machine
     const chosenMissile = option.querySelector('span')!.textContent
@@ -999,7 +999,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
     fireEvent.change(rackTargetInput, { target: { value: 'Gatac Missile Rack 2xS2' } })
-    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackListbox = document.getElementById(rackTargetInput.getAttribute('aria-controls')!)!
     const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('Gatac Missile Rack 2xS2'))
     if (rackOption) fireEvent.click(rackOption)
 
@@ -1024,7 +1024,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     const rackTargetInput = within(rackRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(rackTargetInput)
     fireEvent.change(rackTargetInput, { target: { value: 'MSD-341 Missile Rack' } })
-    const rackListbox = rackTargetInput.closest('div')!.querySelector('[role="listbox"]')!
+    const rackListbox = document.getElementById(rackTargetInput.getAttribute('aria-controls')!)!
     const rackOption = Array.from(rackListbox.querySelectorAll('button')).find((b) => b.textContent?.includes('MSD-341 Missile Rack'))
     if (!rackOption) return // real generated-data/component-metadata-catalog.json not present on this machine
     fireEvent.click(rackOption)
@@ -1032,7 +1032,7 @@ describe('<MissionComposer /> (Loadout Manager) — EWO-054A: dependent missile 
     const aggregateRow = rackRow.nextElementSibling as HTMLElement
     const aggInput = within(aggregateRow).getByRole('combobox') as HTMLInputElement
     fireEvent.click(aggInput)
-    const listbox = aggInput.closest('div')!.querySelector('[role="listbox"]')!
+    const listbox = document.getElementById(aggInput.getAttribute('aria-controls')!)!
     const option = listbox.querySelector('button')
     if (!option) return // no compatible S1 missile catalog entry present on this machine
     const chosenMissile = option.querySelector('span')!.textContent

@@ -41,6 +41,7 @@ function toRuntimeRecord(record: CatalogRecord): ComponentCatalogRuntimeRecord {
     displayName: record.displayName!,
     manufacturerRef: record.manufacturerRef,
     classification: record.classification,
+    vesselBoundTags: record.vesselBoundTags,
   }
 }
 

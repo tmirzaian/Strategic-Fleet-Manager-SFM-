@@ -22,7 +22,27 @@
 // has no structured field for it (DATA-001). Null for the majority of
 // records (every Weapon/Missile/Utility item, plus any Core Component
 // with no description text); never fabricated or inferred.
-export const CATALOG_SCHEMA_VERSION = 3
+//
+// Bumped 3 -> 4 for SW-013C.2F Amendment A (Finding 2): `vesselBoundTags`
+// added. `AttachDef.RequiredTags` alone is NOT a vessel-binding signal —
+// direct `dcb query` inspection found it's also used for ordinary,
+// widely-shared port-family requirements (e.g. every real mining laser
+// carries `RequiredTags: "miningMount"`, shared across dozens of ships —
+// excluding on that alone broke 6 real, unrelated tests). The real
+// vessel-binding signal is CIG's own established convention (already read
+// elsewhere in this codebase — see scripts/generateConfigurableSlotRuntimeCatalog.ts's
+// swap-group discovery, whose own diagnostics already call out "$gama_railen"/
+// "$MISC_Fury_Miru" as vessel-scoped tags): a required tag is vessel-bound
+// only when the SAME entity's own `AttachDef.Tags` also carries that exact
+// tag with a "$" prefix (a self-referential loadout-group marker), e.g.
+// `MRCK_S03_GAMA_Railen_Dual_S02` carries `Tags: "flightReady $gama_railen"`
+// + `RequiredTags: "gama_railen"` — genuinely vessel-bound. The mining
+// laser's `Tags: "flightReady weaponMountUsable miningMount"` (no "$"
+// prefix on "miningMount") + `RequiredTags: "miningMount"` is an ordinary
+// shared port-family requirement, not a vessel lock. `vesselBoundTags` is
+// the pre-filtered subset of RequiredTags meeting this rule — empty for
+// the common case, non-empty only for a genuine hull lock.
+export const CATALOG_SCHEMA_VERSION = 4
 export const GENERATOR_NAME = 'Strategic Fleet Manager Component Catalog Generator'
 export const GENERATOR_VERSION = '2.0.0'
 
@@ -52,6 +72,14 @@ export interface CatalogRecord {
    * own localized description text. Null when the description carries no
    * classification line at all. */
   classification: string | null
+  /** SW-013C.2F Amendment A (Finding 2) — see the schemaVersion 4 note
+   * above. Empty array means genuinely unrestricted (the common case,
+   * including every ordinary shared-port-family requirement like
+   * "miningMount"), never null/undefined — a record that was never
+   * resolved through the bulk field extraction path (e.g. every
+   * pre-existing test fixture) simply has an empty array too, which is
+   * the correct "no restriction known" default. */
+  vesselBoundTags: string[]
   provenance: CatalogRecordProvenance
 }
 

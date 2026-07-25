@@ -43,6 +43,16 @@ interface CatalogEntry {
    * rules below read — never `category`, which stays in the ordinary,
    * unrelated port-type vocabulary. */
   subtype?: string | null
+  /** SW-013C.2F Amendment A (Finding 2) — the confirmed-vessel-bound
+   * subset of DataCore's own `AttachDef.RequiredTags` (see
+   * scripts/componentCatalog/catalogSchema.ts's schemaVersion 4 note),
+   * present only when resolution came from the generated catalog. A
+   * non-empty array means this component is authoritatively locked to a
+   * specific hull — read only by `isComponentSelectableForPort` (the
+   * suggestion-filtering path), never by
+   * `checkCompatibility`/`validateTargetCompatibility` (the save-time path
+   * stays exactly as permissive as before). */
+  requiredTags?: string[]
 }
 
 const CATALOG: Record<string, CatalogEntry> = {
@@ -93,7 +103,25 @@ const CATALOG: Record<string, CatalogEntry> = {
   // it (confirmed against generated-data/components.json), the same
   // pattern already established above for FR-86.
   'Revenant Gatling': { category: 'Weapon', size: 4 }, // Avenger Titan's nose gun — APAR_BallisticGatling_S4
-  'MSD-313 Missile Rack': { category: 'Missile Rack', size: 3 }, // Gladius's inner wing racks — MRCK_S03_BEHR_Single_S03
+  // SW-013C.2F Amendment A (Finding 3) — 'MSD-313 Missile Rack' override
+  // REMOVED. It predates EWO-STAB-004A/CAT-003's entityClass-first,
+  // ambiguity-aware resolution chain and was written to patch the older
+  // "first entry wins" name-only dedup bug this same override comment
+  // describes. Direct dcb query + catalog audit found the display name is
+  // now shared by FIVE real, differently-shaped entityClasses (the
+  // Gladius's own MRCK_S03_BEHR_Single_S03 — MissileLauncher/S3/1 child —
+  // plus four unrelated BombLauncher racks on the Spirit A1/Starlancer,
+  // sizes 3/5/10). This blanket override forced EVERY one of them to
+  // resolve as "Missile Rack, S3" regardless of which was actually
+  // installed — the exact root cause of the reported "MSD-313 geometry is
+  // wrong on multiple ships" defect (label vs identity-subtitle
+  // mismatches, wrong child count). Removing it lets every caller that
+  // already supplies `itemEntityClass` (every real compatibility/save/
+  // readiness path — confirmed via shipDefinitions.test.ts's own
+  // factoryEntityClass-first assertion) resolve each ship's own real
+  // installed entity correctly; a caller with NO entityClass now correctly
+  // reports 'ambiguous' instead of silently guessing the Gladius's shape
+  // for a Spirit/Starlancer bomb rack.
 
   // MWO-001 (Task 4/5) — the same "first entry wins" bulk-catalog dedup
   // gap, newly exercised at scale by the 4.9 Golden Fleet promotion (250
@@ -190,7 +218,13 @@ function toCandidateResolution(record: CanonicalComponentRecord): CandidateResol
   const translatedCategory = compatibilityPortTypeFor(record.category, record.subtype)
   return {
     status: 'resolved',
-    entry: { category: translatedCategory ?? record.category, size: record.size, entityClass: record.entityClass, subtype: record.subtype },
+    entry: {
+      category: translatedCategory ?? record.category,
+      size: record.size,
+      entityClass: record.entityClass,
+      subtype: record.subtype,
+      requiredTags: record.vesselBoundTags,
+    },
   }
 }
 
@@ -473,6 +507,28 @@ export function isComponentSelectableForPort(item: string, portType: string, por
   const resolution = resolveCandidate(item, identity?.itemEntityClass)
   if (resolution.status === 'ambiguous') return false
   if (resolution.status === 'unresolved') return true
+
+  // SW-013C.2F Amendment A (Finding 2) — a candidate carrying a confirmed
+  // vesselBoundTags entry is authoritatively bound to a specific
+  // vessel/hull (confirmed via direct dcb query: the Warlock's "leaking"
+  // Gatac Missile Rack 2xS2 carries Tags "flightReady $gama_railen" +
+  // RequiredTags "gama_railen" — a self-referential hull lock; the
+  // Warlock's own MSD-322 rack carries no RequiredTags at all). Deliberately
+  // NOT gated on raw RequiredTags alone — that field is also used for
+  // ordinary shared port-family requirements (e.g. every mining laser's
+  // "miningMount"), which must remain selectable; see
+  // scripts/componentCatalog/catalogSchema.ts's schemaVersion 4 note for
+  // the full derivation. The generic size/category sweep below has no way
+  // to confirm the destination port carries the matching hull tag, so a
+  // vessel-bound candidate is only ever SUGGESTED via a confirmed swap
+  // group (the branch above, which already tag-matched it at discovery
+  // time) — never via this permissive fallback. This narrows SUGGESTIONS
+  // only, per this function's own established contract — save-time
+  // validation (checkCompatibility/validateTargetCompatibility) is
+  // unaffected, so a ship's own factory-installed, tag-restricted
+  // component still validates normally.
+  if (resolution.entry.requiredTags && resolution.entry.requiredTags.length > 0) return false
+
   const destinationCapability = deriveDestinationCapability(identity?.destinationFactoryEntityClass)
   return checkCompatibility(resolution.entry, portType, portSize, destinationCapability)
 }

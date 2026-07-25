@@ -47,7 +47,7 @@ function selectNewTarget(slotLabel: string, query: string): string {
   const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
   fireEvent.click(input)
   fireEvent.change(input, { target: { value: query } })
-  const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+  const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
   const option = listbox.querySelector('button') as HTMLButtonElement
   const chosen = option.textContent ?? ''
   fireEvent.click(option)
@@ -433,9 +433,13 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     fireEvent.click(installButtons[0])
-    // Reference tiers are visible in the inline disclosure.
-    expect(screen.getByText(/Available Inventory/)).toBeInTheDocument()
+    // Reference tiers (the preserved existing intelligence — SW-014A keeps
+    // this exact text) are visible in the inline disclosure.
     expect(screen.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
+    // SW-014A — the tier list is now actionable: a "Record New Component"
+    // entry point is always present (Tier 4 never depends on existing
+    // ownership/reservation data to be reachable).
+    expect(screen.getByText('Record New Component')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
@@ -611,10 +615,35 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     // from the pending choice immediately, same as MissionComposer's own
     // live preview already does via the same shared
     // withComponentOwnedChildSlots mechanism.
-    selectNewTarget('Right Missile Rack', 'Mirai Fury MX 2xS2')
+    //
+    // SW-013C.2F Amendment A (Finding 2) — was "Mirai Fury MX 2xS2" (the
+    // Fury's own rack). Direct dcb query confirmed that rack carries a
+    // real, self-referential DataCore Tags/RequiredTags pair
+    // ("$MISC_Fury_Miru"/"MISC_Fury_Miru") — CIG's own vessel-lock
+    // convention, meaning it was never actually a legitimate, unrestricted
+    // cross-ship swap; it only ever appeared here because the generic
+    // sweep couldn't yet see that restriction (the exact defect Finding 2
+    // reported for the Warlock's Gatac rack). Now correctly excluded from
+    // the picker's suggestions.
+    //
+    // Swapped to "MSD-313 Missile Rack" (entityClass MRCK_S03_BEHR_Single_S03,
+    // vesselBoundTags: []) — this is ALSO the Finding 3 fixture: this
+    // display name is shared by five real, differently-shaped entityClasses
+    // (four unrelated BombLauncher racks on the Spirit A1/Starlancer, plus
+    // this one genuine MissileLauncher/S3 rack), formerly forced to a
+    // single stale answer by a now-removed hand-authored CATALOG override
+    // (see src/data/componentCatalog.ts). With the override gone, the
+    // BombLauncher variants correctly fail this Missile-Rack-typed port's
+    // compatibility check, leaving exactly one real, unambiguous,
+    // unrestricted candidate — which also happens to give a clean,
+    // different-from-factory shape (1x S3 child vs the factory's 4x S1),
+    // a stronger regeneration proof than the original Fury rack (which
+    // only changed count, not size).
+    selectNewTarget('Right Missile Rack', 'MSD-313 Missile Rack')
 
     const afterRow = getPortRow('Missile')
-    expect(within(afterRow).getByText('×2')).toBeInTheDocument()
+    expect(within(afterRow).getByText('×1')).toBeInTheDocument()
+    expect(within(afterRow).getByText('S3 Missile')).toBeInTheDocument()
     expect(within(afterRow).queryByText('×4')).not.toBeInTheDocument()
     // The old rack's 3rd/4th slots must not survive as stale leftovers anywhere.
     expect(screen.queryByText(/Missile Slot 3/)).not.toBeInTheDocument()
@@ -814,7 +843,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       const input = screen.getByLabelText('New target for Power Plant') as HTMLInputElement
       fireEvent.click(input)
       fireEvent.change(input, { target: { value: 'Mass Driver' } })
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       expect(listbox.textContent).toMatch(/no matching component/i)
     })
 
@@ -849,7 +878,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     function openOptions(slotLabel: string): string[] {
       const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
       fireEvent.click(input)
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       return Array.from(listbox.querySelectorAll('button')).map((b) => b.querySelector('span')?.textContent ?? '')
     }
 
@@ -938,7 +967,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     function subtitleFor(slotLabel: string, optionName: string): string | null {
       const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
       fireEvent.click(input)
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.querySelector('span')?.textContent === optionName)
       const spans = button?.querySelectorAll('span')
       return spans && spans.length > 1 ? spans[1].textContent : null
@@ -969,7 +998,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
       const input = screen.getByLabelText('New target for Left Shield Generator') as HTMLInputElement
       fireEvent.click(input)
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       const first = listbox.querySelector('button')
       expect(first?.querySelector('span')?.textContent).toBe('Intentional Empty (—)')
     })
@@ -979,7 +1008,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
     function subtitleFor(slotLabel: string, optionName: string): string | null {
       const input = screen.getByLabelText(`New target for ${slotLabel}`) as HTMLInputElement
       fireEvent.click(input)
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       const button = Array.from(listbox.querySelectorAll('button')).find((b) => b.querySelector('span')?.textContent === optionName)
       const spans = button?.querySelectorAll('span')
       return spans && spans.length > 1 ? spans[1].textContent : null
@@ -999,7 +1028,7 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       // so this targets the first.
       const input = screen.getAllByLabelText('New target for Weapon')[0] as HTMLInputElement
       fireEvent.click(input)
-      const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+      const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
       const anyOptionWithSubtitle = Array.from(listbox.querySelectorAll('button'))
         .map((b) => b.querySelectorAll('span')[1]?.textContent)
         .find((s) => s)

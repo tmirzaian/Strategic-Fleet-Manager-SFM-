@@ -11,6 +11,8 @@ function fields(overrides: Partial<ComponentFieldMaps> = {}): ComponentFieldMaps
     manufacturerLocKey: new Map(),
     localizationName: new Map(),
     localizationDescriptionKey: new Map(),
+    requiredTags: new Map(),
+    tags: new Map(),
     ...overrides,
   }
 }

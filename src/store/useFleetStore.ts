@@ -265,6 +265,21 @@ function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpo
         parentSlotLabel: slot.parentSlotLabel,
         groupLabel: slot.groupLabel,
         assemblyRole: slot.assemblyRole,
+        // SW-013C.2G Amendment A — this row-construction path
+        // (buildCanonicalSeedCustomBuilds) duplicates
+        // materializeFleetAsset's own row shape rather than reusing it
+        // (see this function's own doc comment), so the isDormant/
+        // dormantDonorShipEntityClass passthrough added to
+        // materializeFleetAsset and overlayCanonicalHierarchy for
+        // SW-013C.2G was missed here. This is the root cause of the
+        // Ghost Mk II Nose Turret never appearing as a candidate on the
+        // seed 'ghost' fixture specifically: without isDormant on the
+        // row, ShipWorkspacePrototype.tsx's configurableSlotFor never
+        // takes its donor-ship swap-group fallback, so the port resolves
+        // as unconfigurable and only "Intentional Empty" is offered.
+        isDormant: slot.isDormant,
+        dormantDonorShipEntityClass: slot.dormantDonorShipEntityClass,
+        dormantAllowedComponentEntityClasses: slot.dormantAllowedComponentEntityClasses,
         sourcePortId: slot.sourcePortId,
         sourceItemPortName: slot.sourceItemPortName,
         sourceParentItemPortName: slot.sourceParentItemPortName,
@@ -1237,12 +1252,27 @@ export const useFleetStore = create<FleetState>()(
     // `oldSpec || newSpec` so an ordinary (non-component-owned) port's
     // real children (e.g. a gimbal mount's own "— Weapon" child) are never
     // touched, swapped or not.
+    // SW-013C.2G — `!row.factoryEntityClass` used to also skip this row
+    // entirely, which was safe only because every pre-existing component-
+    // owned family (missile racks, mining heads, ball turrets) always
+    // ships with SOME real factory identity, even on a ship that later
+    // swaps it. A materialized dormant hardpoint (see
+    // src/generated/dormantHardpoints.ts) is the first case that breaks
+    // that assumption BY DESIGN — Objective 6's own explicit "must not
+    // make dormant ports appear occupied by default" means
+    // `factoryEntityClass` is genuinely, permanently undefined for it,
+    // yet it must still become component-owned the moment a Commander
+    // targets a real turret onto it. Dropped the factoryEntityClass
+    // requirement entirely — `oldSpec`/`newSpec` below already derive
+    // independently from `row.factoryEntityClass`/`currentEntityClass`
+    // and correctly resolve to `null` for either when there's nothing to
+    // derive from, so an ordinary, never-component-owned port is
+    // unaffected either way (confirmed by the full regression suite).
     const staleChildSlotLabels = new Set<string>()
     const materializedChildStubs: { slotLabel: string; type: string; size: string; parentSlotLabel: string }[] = []
     for (const row of referenceRows) {
-      if (row.isStructural || !row.factoryEntityClass) continue
+      if (row.isStructural) continue
       const finalTargetEntityClass = baseTargetEntityClasses.get(row.slotLabel)
-      const swapped = Boolean(finalTargetEntityClass && finalTargetEntityClass !== row.factoryEntityClass)
       const currentEntityClass = finalTargetEntityClass ?? row.factoryEntityClass
       const oldSpec = componentOwnedChildSlotSpec(row.factoryEntityClass)
       const newSpec = componentOwnedChildSlotSpec(currentEntityClass)
@@ -1256,7 +1286,33 @@ export const useFleetStore = create<FleetState>()(
       // may belong to a completely different build sharing the same
       // slotLabel).
       const previousEffectiveSpec = priorEffectiveSpecBySlotLabel.get(row.slotLabel) ?? null
-      if (!oldSpec && !newSpec) continue // an ordinary component (e.g. a gimbal-mounted weapon) — nothing component-owned about this port, never touch its real children
+      // SW-013C.2G — a materialized dormant hardpoint (see
+      // src/generated/dormantHardpoints.ts) has NO factory identity by
+      // design (`row.factoryEntityClass` permanently undefined), so
+      // `swapped`'s original definition — comparing the new target
+      // against the ship's own permanent FACTORY baseline — can never
+      // fire true for it: reverting its Commander-chosen turret back to
+      // Intentional Empty produces `finalTargetEntityClass: undefined`,
+      // and `Boolean(undefined && ...)` is always false regardless of
+      // what the row USED to be targeted at. Confirmed live: the Ghost's
+      // own 2 weapon children survived a revert-to-empty + save
+      // untouched, because this row fell straight through the "leave
+      // completely alone" branch below. `droppedToEmpty` catches
+      // specifically the case the original definition couldn't: real
+      // component-owned children existed as of the LAST save
+      // (`previousEffectiveSpec`), but nothing is component-owned here
+      // anymore (`!newSpec`) — a genuine topology change the Commander
+      // made, regardless of what the ship's own permanent factory default
+      // is or was. This is not dormant-port-specific — the identical gap
+      // existed for any REAL component-owned port too (e.g. the Center
+      // Ball Turret) once swapped away from its factory default and later
+      // reverted to Intentional Empty; simply never exercised by an
+      // existing test, since every pre-existing component-owned family
+      // always has a real, non-empty factory identity as its OWN
+      // fallback baseline to revert to instead of empty.
+      const droppedToEmpty = previousEffectiveSpec !== null && !newSpec
+      const swapped = Boolean((finalTargetEntityClass && finalTargetEntityClass !== row.factoryEntityClass) || droppedToEmpty)
+      if (!oldSpec && !newSpec && !previousEffectiveSpec) continue // an ordinary component (e.g. a gimbal-mounted weapon) — nothing component-owned about this port, now or previously — never touch its real children
       const childPrefix = `${row.slotLabel} — `
       const existingChildren = referenceRows.filter((candidate) => candidate.slotLabel.startsWith(childPrefix))
       if (existingChildren.length > 0 && !swapped) continue // real, untouched children (an unswapped rack) — leave completely alone

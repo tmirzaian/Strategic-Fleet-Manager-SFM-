@@ -8,6 +8,14 @@
     "ANVL_Hornet_F7CM_Mk2_Ball_Turret_Bespoke": {
       "slotCount": 2,
       "weaponSize": 4
+    },
+    "ANVL_Hornet_F7A_Nose_Turret": {
+      "slotCount": 2,
+      "weaponSize": 3
+    },
+    "ANVL_Hornet_F7C_Mk2_Nose_Turret": {
+      "slotCount": 2,
+      "weaponSize": 2
     }
   }
 }

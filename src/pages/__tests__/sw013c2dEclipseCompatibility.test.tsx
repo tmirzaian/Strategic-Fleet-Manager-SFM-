@@ -47,7 +47,7 @@ function renderEclipseWorkspace() {
 function openRackOptions(): string[] {
   const input = screen.getByLabelText('New target for Torpedorack') as HTMLInputElement
   fireEvent.click(input)
-  const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+  const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
   return Array.from(listbox.querySelectorAll('button')).map((b) => b.textContent ?? '')
 }
 
@@ -88,7 +88,7 @@ describe('SW-013C.2D (Objective 3): Eclipse rack compatibility is scoped to its 
     const input = screen.getByLabelText('New target for Torpedorack') as HTMLInputElement
     fireEvent.click(input)
     fireEvent.change(input, { target: { value: '20xS3' } })
-    const listbox = input.closest('div')!.querySelector('[role="listbox"]') as HTMLElement
+    const listbox = document.getElementById(input.getAttribute('aria-controls')!) as HTMLElement
     fireEvent.click(listbox.querySelector('button') as HTMLButtonElement)
     // Both the panel-header Save Changes button and SW-013C.2D's own
     // persistent save bar render "Save Changes" once a pending edit

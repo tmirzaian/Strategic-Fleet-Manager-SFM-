@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Search } from 'lucide-react'
 import { resolveComponentLabel } from '../utils/componentPresentation'
 
@@ -88,6 +89,8 @@ export default function TargetComponentPicker({
   // actually typed something new since opening.
   const [filterText, setFilterText] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listboxRef = useRef<HTMLUListElement>(null)
 
   // Keep the local edit buffer in sync when the committed value changes
   // from outside (switching ship/starting-state/preset), but never while
@@ -101,6 +104,61 @@ export default function TargetComponentPicker({
     const matches = q ? options.filter((o) => o.item.toLowerCase().includes(q) || o.label?.toLowerCase().includes(q)) : options
     return matches.slice(0, MAX_VISIBLE_OPTIONS)
   }, [options, filterText])
+
+  // SW-013C.2G (Objective 7) — a row near the bottom of the Ship
+  // Workspace loadout tree previously opened its menu downward
+  // unconditionally (`position: absolute` + `mt-1`), which either
+  // overflowed past the visible viewport or was silently clipped by the
+  // table's own scroll container/sticky action bar — a Commander could
+  // open a picker and see nothing. Rendered through a portal (so no
+  // ancestor's `overflow`/stacking context can clip it) with
+  // `position: fixed`, measured against the real input's own
+  // `getBoundingClientRect()` at open time and on resize/scroll: opens
+  // downward when there's reasonable room, flips upward otherwise, and
+  // always caps its own height to the space actually available in
+  // whichever direction it opened, so it stays internally scrollable
+  // rather than ever running off-screen. Applies to every Ship Workspace
+  // selector generically — this component is the one shared
+  // implementation every "New Target"/"Change Installed" picker already
+  // renders through, never a per-row special case.
+  const [menuPlacement, setMenuPlacement] = useState<{ top?: number; bottom?: number; left: number; width: number; maxHeight: number } | null>(null)
+
+  useLayoutEffect(() => {
+    if (!open || !inputRef.current) {
+      setMenuPlacement(null)
+      return
+    }
+    const PREFERRED_MAX_HEIGHT = 256 // matches the previous fixed max-h-64
+    const MIN_USABLE_HEIGHT = 120
+    const VIEWPORT_MARGIN = 8
+    const GAP = 4
+
+    function reposition() {
+      if (!inputRef.current) return
+      const rect = inputRef.current.getBoundingClientRect()
+      const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_MARGIN
+      const spaceAbove = rect.top - VIEWPORT_MARGIN
+      const left = Math.max(VIEWPORT_MARGIN, Math.min(rect.left, window.innerWidth - rect.width - VIEWPORT_MARGIN))
+      // Prefer opening downward whenever it has at least a minimally
+      // usable amount of room, or more room than upward — only flips
+      // when downward is both cramped AND worse than upward.
+      if (spaceBelow >= MIN_USABLE_HEIGHT || spaceBelow >= spaceAbove) {
+        setMenuPlacement({ top: rect.bottom + GAP, left, width: rect.width, maxHeight: Math.max(MIN_USABLE_HEIGHT, Math.min(PREFERRED_MAX_HEIGHT, spaceBelow)) })
+      } else {
+        setMenuPlacement({ bottom: window.innerHeight - rect.top + GAP, left, width: rect.width, maxHeight: Math.max(MIN_USABLE_HEIGHT, Math.min(PREFERRED_MAX_HEIGHT, spaceAbove)) })
+      }
+    }
+    reposition()
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+    return () => {
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+    // filtered.length: the list's own real content height changes as
+    // filtering narrows results, which can change whether it still fits
+    // in its current direction — recompute alongside every filter change.
+  }, [open, filtered.length])
 
   function openList() {
     setFilterText('')
@@ -128,11 +186,17 @@ export default function TargetComponentPicker({
         // Closing on blur would fire before a click on an option inside
         // this same container registers — only close once focus has
         // genuinely left the whole picker, not moved between its own
-        // input and its own listbox.
-        if (!containerRef.current?.contains(e.relatedTarget as Node)) setOpen(false)
+        // input and its own listbox. SW-013C.2G — the listbox now renders
+        // through a portal (see above), so it's no longer a DOM
+        // descendant of `containerRef`; `listboxRef` is checked
+        // alongside it so keyboard focus moving into a portaled option
+        // (e.g. Tab) is still recognized as "still inside this picker."
+        const related = e.relatedTarget as Node | null
+        if (!containerRef.current?.contains(related) && !listboxRef.current?.contains(related)) setOpen(false)
       }}
     >
       <input
+        ref={inputRef}
         id={id}
         role="combobox"
         aria-expanded={open}
@@ -162,41 +226,59 @@ export default function TargetComponentPicker({
           <span className="block text-[11px] text-muted/70 truncate">{showFullIdentity ? committedLabel.identityLine : committedLabel.classificationLabel}</span>
         </div>
       )}
-      {open && (
-        <ul
-          id={`${id}-listbox`}
-          role="listbox"
-          className="absolute z-20 mt-1 max-h-64 w-max min-w-full overflow-y-auto rounded-lg border border-white/10 bg-[#0b141b] shadow-xl"
-        >
-          {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-muted flex items-center gap-1.5">
-              <Search size={12} /> No matching component — press Enter to use this exact text.
-            </li>
-          ) : (
-            filtered.map((o) => {
-              const optionLabel = resolveComponentLabel(o.item)
-              return (
-                <li key={o.item}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => commit(o.item, o.entityClass)}
-                    className={`w-full text-left px-3 py-1.5 text-xs hover:bg-cyan/10 hover:text-cyan transition-colors ${o.item === value ? 'text-cyan' : 'text-white/85'}`}
-                  >
-                    <span className="block truncate">{o.label ?? o.item}</span>
-                    {(showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel) && (
-                      <span className="block text-[10px] text-muted/60 truncate">{showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel}</span>
-                    )}
-                  </button>
-                </li>
-              )
-            })
-          )}
-          {options.length > MAX_VISIBLE_OPTIONS && filtered.length === MAX_VISIBLE_OPTIONS && (
-            <li className="px-3 py-1.5 text-[11px] text-muted/60 border-t border-white/5">Keep typing to narrow down further results…</li>
-          )}
-        </ul>
-      )}
+      {open &&
+        menuPlacement &&
+        createPortal(
+          <ul
+            ref={listboxRef}
+            id={`${id}-listbox`}
+            role="listbox"
+            // SW-013C.2G (Objective 7) — `position: fixed` + a portal
+            // target of `document.body` means no ancestor table/sticky
+            // layer's own `overflow`/stacking context can clip this menu;
+            // `top`/`bottom` (whichever `menuPlacement` computed) and
+            // `maxHeight` are real measured values, not a fixed guess —
+            // see the `useLayoutEffect` above for the flip/measure logic.
+            style={{
+              position: 'fixed',
+              top: menuPlacement.top,
+              bottom: menuPlacement.bottom,
+              left: menuPlacement.left,
+              minWidth: menuPlacement.width,
+              maxHeight: menuPlacement.maxHeight,
+            }}
+            className="z-50 w-max overflow-y-auto rounded-lg border border-white/10 bg-[#0b141b] shadow-xl"
+          >
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-xs text-muted flex items-center gap-1.5">
+                <Search size={12} /> No matching component — press Enter to use this exact text.
+              </li>
+            ) : (
+              filtered.map((o) => {
+                const optionLabel = resolveComponentLabel(o.item)
+                return (
+                  <li key={o.item}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => commit(o.item, o.entityClass)}
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-cyan/10 hover:text-cyan transition-colors ${o.item === value ? 'text-cyan' : 'text-white/85'}`}
+                    >
+                      <span className="block truncate">{o.label ?? o.item}</span>
+                      {(showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel) && (
+                        <span className="block text-[10px] text-muted/60 truncate">{showFullIdentity ? optionLabel.identityLine : optionLabel.classificationLabel}</span>
+                      )}
+                    </button>
+                  </li>
+                )
+              })
+            )}
+            {options.length > MAX_VISIBLE_OPTIONS && filtered.length === MAX_VISIBLE_OPTIONS && (
+              <li className="px-3 py-1.5 text-[11px] text-muted/60 border-t border-white/5">Keep typing to narrow down further results…</li>
+            )}
+          </ul>,
+          document.body
+        )}
     </div>
   )
 }

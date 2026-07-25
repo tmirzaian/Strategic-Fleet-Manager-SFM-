@@ -29,9 +29,15 @@
  * shall consume the catalog normally. No runtime parsing of descriptions
  * is authorized." — the browser loader reads this pre-computed field
  * verbatim; it never sees or parses description text itself.
+ *
+ * `vesselBoundTags` added by SW-013C.2F Amendment A (Finding 2) — see
+ * catalogSchema.ts's schemaVersion 4 note. Read by
+ * src/data/componentCatalog.ts's `isComponentSelectableForPort` only (the
+ * suggestion-filtering path), never by the stricter save-time
+ * `validateTargetCompatibility` path.
  */
 
-export const COMPONENT_CATALOG_RUNTIME_SCHEMA_VERSION = 3
+export const COMPONENT_CATALOG_RUNTIME_SCHEMA_VERSION = 4
 export const COMPONENT_CATALOG_RUNTIME_FILENAME = 'component-metadata-catalog.runtime.json'
 
 export interface ComponentCatalogRuntimeRecord {
@@ -49,6 +55,8 @@ export interface ComponentCatalogRuntimeRecord {
   manufacturerRef: string | null
   /** CAT-001 — see the schemaVersion 3 note above. Null for the majority of records. */
   classification: string | null
+  /** SW-013C.2F Amendment A (Finding 2) — see the schemaVersion 4 note above. Empty array = unrestricted. */
+  vesselBoundTags: string[]
 }
 
 export interface ComponentCatalogRuntimeSource {

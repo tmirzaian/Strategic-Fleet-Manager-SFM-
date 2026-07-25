@@ -281,6 +281,9 @@ export function reconcileBuildHardpoints(
       sourceItemPortName: newRow.sourceItemPortName,
       sourceParentItemPortName: newRow.sourceParentItemPortName,
       targetMode: old.targetMode,
+      isDormant: newRow.isDormant,
+      dormantDonorShipEntityClass: newRow.dormantDonorShipEntityClass,
+      dormantAllowedComponentEntityClasses: newRow.dormantAllowedComponentEntityClasses,
     })
   }
 
@@ -315,6 +318,9 @@ export function reconcileBuildHardpoints(
       sourceItemPortName: newRow.sourceItemPortName,
       sourceParentItemPortName: newRow.sourceParentItemPortName,
       targetMode: 'FOLLOW_FACTORY',
+      isDormant: newRow.isDormant,
+      dormantDonorShipEntityClass: newRow.dormantDonorShipEntityClass,
+      dormantAllowedComponentEntityClasses: newRow.dormantAllowedComponentEntityClasses,
     })
   }
 

@@ -80,6 +80,57 @@ const REPO_ROOT = resolve(__dirname, '..')
 const DEFAULT_STARBREAKER_EXE = 'D:\\StarBreaker-main\\StarBreaker-main\\target\\release\\starbreaker.exe'
 const DEFAULT_DATA_P4K = 'C:\\Program Files\\Roberts Space Industries\\StarCitizen\\LIVE\\Data.p4k'
 
+/**
+ * SW-013C.2E (Objective 3) — a small, individually-verified supplement to
+ * Path 1's raw-data-derived entity set, added to the SAME `allEntities`
+ * set Path 1 resolves via `Map.get` against Path 2's already-fetched bulk
+ * field maps (see the file's own doc comment) — zero new StarBreaker
+ * spawns, no change to Path 2's own category-allowlist sweep. Each entry
+ * here is a real, confirmed member of a swap group already discovered by
+ * `generateConfigurableSlotRuntimeCatalog.ts` (`configurable-slots.runtime.json`,
+ * category A-confirmed) whose entityClass is never referenced by ANY
+ * checked-in raw-data ship export — the Retaliator's Front/Rear Cargo and
+ * Ordnance ("Bomber") module variants and their "Unladen" bare-name
+ * counterparts, confirmed real via a direct `dcb query` against each
+ * record (category "Module", real Localization keys) — so Path 1's own
+ * "every entity a real ship export mounts" rule would otherwise never see
+ * them, and the New Target picker would silently drop every one of these
+ * real, Commander-facing alternatives (the exact gap SW-013C.2B's report
+ * already documented for `UMNT_ANVL_S5_Rotodome_Mk2`). Never a blanket
+ * category sweep — only entities this mission individually verified.
+ *
+ * The two bare "Unladen" entries (`AEGS_Retaliator_Module_Front`/`_Rear`,
+ * no suffix) resolve into the FULL catalog but are then correctly excluded
+ * from the shipped RUNTIME subset by `deriveRuntimeComponentCatalog`'s own
+ * existing "no fabricated display name" rule — their real DataCore
+ * localization key is a literal unresolved `@LOC_PLACEHOLDER`, unlike
+ * every other entry here. This is not a bug: the port's own factory
+ * default (`..._Front_Base`/`..._Rear_Base`, already classified since
+ * SW-013C.2B, real display name "Retaliator Unladen Front/Rear Module")
+ * already IS the real, named Unladen option — the nameless bare variant
+ * would only ever be a misleading, unnamed duplicate of it (Objective 6:
+ * "do not present misleading duplicates"). Left in this list anyway, not
+ * removed, so this investigation's own conclusion is visible in code, not
+ * just in this mission's report.
+ */
+const CONFIRMED_SUPPLEMENTARY_ENTITY_CLASSES: readonly string[] = [
+  'AEGS_Retaliator_Module_Front', // Unladen (bare) — real record, but no usable display name; see doc comment above
+  'AEGS_Retaliator_Module_Front_Cargo',
+  'AEGS_Retaliator_Module_Front_Bomber',
+  'AEGS_Retaliator_Module_Rear', // Unladen (bare) — real record, but no usable display name; see doc comment above
+  'AEGS_Retaliator_Module_Rear_Cargo',
+  'AEGS_Retaliator_Module_Rear_Bomber',
+  // SW-013C.2F (Objective 1) — the real, live-confirmed Mk II canard nose
+  // turret alternate (`ANVL_Hornet_Mk2` swap group, category A-confirmed,
+  // 2 members) discovered on `hardpoint_weapon_nose` — a REAL, factory-
+  // OCCUPIED port on the Hornet F7CM Mk2/F7A Mk2 (never on the Ghost,
+  // whose own copy of this hardpoint ships factory-empty — see
+  // hornetNoseTurretDiscovery.test.ts). Never referenced as any raw-data
+  // ship's own factory default, so Path 1 never saw it — same shape of
+  // gap as the Retaliator module variants above.
+  'ANVL_Hornet_F7C_Mk2_Nose_Turret',
+]
+
 function requireVersion(starbreakerExePath: string): string {
   const result = spawnSync(starbreakerExePath, ['--version'], { encoding: 'utf-8' })
   if (result.error) {
@@ -147,6 +198,8 @@ async function main(): Promise<void> {
   }
 
   console.log(`Collected ${allEntities.size} distinct entity class(es) from ${rawFiles.length} raw-data file(s).`)
+  for (const e of CONFIRMED_SUPPLEMENTARY_ENTITY_CLASSES) allEntities.add(e)
+  console.log(`Added ${CONFIRMED_SUPPLEMENTARY_ENTITY_CLASSES.length} individually-confirmed supplementary entity class(es) (SW-013C.2E) — ${allEntities.size} total.`)
   for (const w of collectionWarnings) console.warn(`  [warn] ${w}`)
 
   console.log('\nExtracting English localization table...')
@@ -174,6 +227,11 @@ async function main(): Promise<void> {
     // header carries the Classification/Grade lines this mission parses
     // (see scripts/componentCatalog/descriptionClassification.ts).
     { key: 'localizationDescriptionKey', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Localization.Description' },
+    // SW-013C.2F Amendment A (Finding 2) — CIG's own attachment-restriction
+    // field, plus the item's own Tags (needed together to derive
+    // vesselBoundTags — see catalogSchema.ts's schemaVersion 4 note).
+    { key: 'requiredTags', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.RequiredTags' },
+    { key: 'tags', path: 'EntityClassDefinition.Components[SAttachableComponentParams].AttachDef.Tags' },
   ]
   const bulkFields = {} as ComponentFieldMaps
   for (const { key, path } of fieldPaths) {

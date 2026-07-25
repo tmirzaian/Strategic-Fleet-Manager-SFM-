@@ -10,6 +10,7 @@ import equipmentAssignmentsJson from '../../generated-data/equipment-assignments
 import shipImagesJson from '../../generated-data/ship-images.json'
 import importReportJson from '../../generated-data/import-report.json'
 import type { ShipImageManifestEntry } from '../normalizer/shipImageManifest'
+import { materializeDormantPorts } from './dormantHardpoints'
 
 /**
  * Browser-side loader for the generalized import pipeline's output.
@@ -57,7 +58,12 @@ export interface ImportedShipView {
 }
 
 function buildView(ship: Ship): ImportedShipView {
-  const shipPorts = ports.filter((p) => p.shipId === ship.id)
+  const importedPorts = ports.filter((p) => p.shipId === ship.id)
+  // SW-013C.2G — authoritative supplemental topology, additive only,
+  // never touching the raw `ports.json` artifact this filter reads from.
+  // See src/generated/dormantHardpoints.ts's own doc comment for the full
+  // evidence model and safety guarantees (never duplicates a real port).
+  const shipPorts = [...importedPorts, ...materializeDormantPorts(ship.id, importedPorts)]
   const usedComponentIds = new Set(shipPorts.map((p) => p.factoryItemId).filter((id): id is string => Boolean(id)))
   const shipComponents = components.filter((c) => usedComponentIds.has(c.id))
   return {

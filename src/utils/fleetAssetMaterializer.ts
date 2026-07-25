@@ -141,6 +141,9 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
       // the current factory item by construction (see above); it has no
       // Commander-chosen intent to protect, so it always follows Factory.
       targetMode: 'FOLLOW_FACTORY',
+      isDormant: slot.isDormant,
+      dormantDonorShipEntityClass: slot.dormantDonorShipEntityClass,
+      dormantAllowedComponentEntityClasses: slot.dormantAllowedComponentEntityClasses,
     }
   })
 

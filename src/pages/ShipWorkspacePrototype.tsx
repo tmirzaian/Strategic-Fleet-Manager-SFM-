@@ -20,6 +20,8 @@ import {
   Code2,
   Trash2,
   X,
+  ArrowRightLeft,
+  PackagePlus,
 } from 'lucide-react'
 import { useFleetStore, type TargetOverrideInput } from '../store/useFleetStore'
 import Badge, { statusTone } from '../components/Badge'
@@ -29,7 +31,8 @@ import ShipHeroFrame from '../components/ShipHeroFrame'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
-import { catalogComponentsByEntityClass, resolveComponentByEntityClass } from '../generated/componentCatalog'
+import { catalogComponentsByEntityClass, catalogComponentsByName, resolveComponentByEntityClass } from '../generated/componentCatalog'
+import { deriveInstallCandidates, type BorrowInstallCandidate } from '../utils/installCandidates'
 import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
@@ -145,6 +148,14 @@ export default function ShipWorkspacePrototype() {
   // second, parallel uninstall implementation.
   const removeComponentStore = useFleetStore((s) => s.removeComponent)
   const addLogEntry = useFleetStore((s) => s.addLogEntry)
+  // SW-014A — Ship Workspace becomes another client of the SAME shared
+  // installation engine every other install/reservation/hangar surface
+  // already uses (`installComponent`/`addHangarItem`/`releaseReservation`)
+  // — never a second, parallel install implementation.
+  const installComponentStore = useFleetStore((s) => s.installComponent)
+  const moveToShipStore = useFleetStore((s) => s.moveToShip)
+  const addHangarItemStore = useFleetStore((s) => s.addHangarItem)
+  const releaseReservationStore = useFleetStore((s) => s.releaseReservation)
 
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
   const ship = ships.find((s) => s.id === shipId)
@@ -185,9 +196,38 @@ export default function ShipWorkspacePrototype() {
   }, [shipEntityClass])
 
   function configurableSlotFor(hp: Hardpoint): ConfigurableSlotRuntimeRecord | undefined {
-    if (!hp.sourceItemPortName) return undefined
-    const candidates = configurableSlotsByKey.get(slotKey(hp.sourceParentItemPortName, hp.sourceItemPortName))
-    return candidates?.length === 1 ? candidates[0] : undefined
+    const sourceItemPortName = hp.sourceItemPortName
+    if (!sourceItemPortName) return undefined
+    const sourceParentItemPortName = hp.sourceParentItemPortName
+    const candidates = configurableSlotsByKey.get(slotKey(sourceParentItemPortName, sourceItemPortName))
+    if (candidates?.length === 1) return candidates[0]
+    // SW-013C.2G — a dormant port's own ship never occupies it, so it can
+    // never earn a confirmed-slot entry of its own (that data is indexed
+    // strictly per occupying ship) — see Port.dormantDonorShipEntityClass's
+    // own doc comment. Falls back to the donor ship's own confirmed entry
+    // for the identical (parent, self) port-name key — the SAME
+    // authority, resolved through the ship that actually earned it.
+    const donorShipEntityClass = hp.dormantDonorShipEntityClass
+    if (hp.isDormant && donorShipEntityClass) {
+      const donorCandidates = getConfigurableSlotsForShip(donorShipEntityClass).filter(
+        (record) => slotKey(record.parentPortName, record.portName) === slotKey(sourceParentItemPortName, sourceItemPortName)
+      )
+      if (donorCandidates.length === 1) {
+        const record = donorCandidates[0]
+        // SW-013C.2G Amendment C — a confirmed swap group proves
+        // components are interchangeable on SOME real ship; it does not
+        // by itself prove every member is valid on THIS dormant port's
+        // own ship/variant/family (see Hardpoint.dormantAllowedComponentEntityClasses's
+        // own doc comment for the evidence model). When present, narrows
+        // the donor's own full eligibleComponents list down to only the
+        // independently-confirmed subset — never widens it.
+        const allowList = hp.dormantAllowedComponentEntityClasses
+        if (!allowList) return record
+        const restricted = (record.eligibleComponents ?? []).filter((entityClass) => allowList.includes(entityClass))
+        return { ...record, eligibleComponents: restricted, eligibleComponentCount: restricted.length }
+      }
+    }
+    return undefined
   }
 
   // Prototype-only local state — a loadout picked here never touches
@@ -261,6 +301,25 @@ export default function ShipWorkspacePrototype() {
   // never a dialog (Scope Protection), just an inline detail row, the
   // same pattern MissionComposer's own expandedSlot already uses.
   const [expandedInstallRowId, setExpandedInstallRowId] = useState<string | null>(null)
+  // SW-014A — the disclosure's own action feedback (success/error from the
+  // last Install/Reassign/Borrow/Record attempt), scoped to whichever row
+  // is currently expanded — reset whenever a different row opens so a
+  // stale result from a previous row's action can never bleed into this
+  // one. Never a toast/modal — inline, matching this page's own
+  // established "never a dialog" convention.
+  const [installNotice, setInstallNotice] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
+  // Tier 2 (Reserved Components) — which candidate's "reassign" confirm
+  // step is currently showing, keyed by `${hp.id}:${item}` so two
+  // different candidates (or two different rows) never share state.
+  const [reassignConfirmKey, setReassignConfirmKey] = useState<string | null>(null)
+  // Tier 3 (Borrow From Another Ship) — same per-candidate confirm-step
+  // pattern, keyed by `${hp.id}:${item}:${donorShipId}` (the same
+  // component can be borrowable from more than one ship at once).
+  const [borrowConfirmKey, setBorrowConfirmKey] = useState<string | null>(null)
+  // Tier 4 (Newly Acquired Component) — the inline "record a new
+  // component" form's own open/selection state, keyed per row.
+  const [newComponentFormHpId, setNewComponentFormHpId] = useState<string | null>(null)
+  const [newComponentSelection, setNewComponentSelection] = useState<{ item: string; entityClass?: string }>({ item: '' })
 
   // SW-011A (Objective 3) — Configurable Slot read-only inspection.
   // Same "never a dialog" inline-disclosure pattern as
@@ -560,6 +619,78 @@ export default function ShipWorkspacePrototype() {
   // no target of its own at all and never reaches this function or renders
   // a picker; that is the one, already-documented exclusion (EWO-020's own
   // "structural rows carry no assignment" rule), not a new doctrine.
+  // SW-013C.2F (Objective 3) — Retaliator Commander Messaging. A narrow,
+  // individually-verified set of entity classes whose real, confirmed
+  // DataCore record carries its own further child topology (SW-013C.2E's
+  // own investigation: the Ordnance module's real `hardpoint_torpedo_launcher_fore`/
+  // `_rear` rack-mount port) that SFM's current architecture cannot yet
+  // materialize — a multi-category (Missile/Bomb/Rocket), size-range
+  // (S3–S9) port shape no existing compatibility mechanism represents,
+  // requiring a genuinely new capability (see SW-013C.2E's report). Rather
+  // than silently showing an Ordnance module as if selecting it were
+  // "complete" — which would be misleading, not merely incomplete — this
+  // set drives a small, honest "Additional Topology Pending" badge (never
+  // a fabricated child row, never a placeholder graphic). Generic
+  // mechanism (a Set lookup), narrow evidence-gated data — exactly the
+  // same posture as `CONFIRMED_MODULE_ENTITY_CLASSES`; extending it to a
+  // future confirmed case never requires touching the rendering code
+  // below, only this list.
+  const DORMANT_TOPOLOGY_ENTITY_CLASSES = new Set(['AEGS_Retaliator_Module_Front_Bomber', 'AEGS_Retaliator_Module_Rear_Bomber'])
+
+  function dormantTopologyNoticeFor(hp: Hardpoint): string | undefined {
+    const currentEntityClass = hp.targetEntityClass ?? hp.installedEntityClass ?? hp.factoryEntityClass
+    if (!currentEntityClass || !DORMANT_TOPOLOGY_ENTITY_CLASSES.has(currentEntityClass)) return undefined
+    return 'This module contains additional topology (its own torpedo/bomb mount) that will be supported by a future topology engine. Not a failure — the module selection itself is fully saved.'
+  }
+
+  // SW-013C.2F (Objective 4) — Commander Label Cleanup, Phase 1. Generic
+  // (not Retaliator-specific): strips a leading "{shipName} " prefix from
+  // a component's real catalog display name ONLY for cosmetic display
+  // purposes — the underlying committed value (`item`, what's actually
+  // saved) is never touched. Any future ship whose own component names
+  // redundantly repeat the ship's own name gets this for free; a ship
+  // whose components don't (the overwhelming majority) renders byte-
+  // identical to before this mission.
+  function stripRedundantShipNamePrefix(displayName: string, shipName: string | undefined): string {
+    if (!shipName) return displayName
+    const prefix = `${shipName} `
+    return displayName.startsWith(prefix) ? displayName.slice(prefix.length) : displayName
+  }
+
+  // SW-013C.2E (Objective 2/6) — the canonical display category for a
+  // swap-group candidate, matching `fullComponentCatalog.ts`'s own
+  // `categoryLabelFor` convention (translate DataCore's raw category to
+  // the same Commander-facing vocabulary used everywhere else), but
+  // sourced from this file's own small, evidence-gated swap-group
+  // families rather than `CATEGORY_TO_PORT_TYPE` (deliberately excluded
+  // there — see `appendSwapGroupOptions`'s own doc comment). Only the
+  // categories a real swap-group branch can ever actually offer are
+  // listed; an unrecognized category (should never happen given the
+  // swap-group data these branches consume) falls back to the raw
+  // DataCore string itself rather than fabricating a label.
+  function swapGroupCategoryLabelFor(category: string): string {
+    switch (category) {
+      case 'Module':
+        return 'Module'
+      case 'EMP':
+        return 'EMP'
+      case 'QuantumInterdictionGenerator':
+        return 'Quantum Dampener'
+      case 'MissileLauncher':
+        return 'Missile Rack'
+      case 'BombLauncher':
+        return 'Bomb Rack'
+      // SW-013C.2F (Objective 1) — matches `compatibilityTypeFor`'s own
+      // Turret/TurretBase fallback (VRF-002) and CATEGORY_TO_PORT_TYPE's
+      // own mapping — the same canonical vocabulary every other turret-
+      // shell component already reads as "Gimbal Mount".
+      case 'Turret':
+        return 'Gimbal Mount'
+      default:
+        return category
+    }
+  }
+
   function newTargetOptionsFor(hp: Hardpoint): TargetComponentOption[] {
     const seen = new Set<string>()
     const options: TargetComponentOption[] = []
@@ -569,6 +700,40 @@ export default function ShipWorkspacePrototype() {
       options.push({ item, path: item, entityClass, label })
     }
     addPinned('—', undefined, 'Intentional Empty (—)')
+
+    // SW-013C.2F (Objective 2) — for a swap-group-only port, the
+    // certified sweep runs BEFORE Current/Factory/Installed are pinned
+    // (reversed from every other port type below), so that whichever of
+    // those three happens to already be a certified swap-group member
+    // (the overwhelmingly common case — a port's own factory/installed/
+    // target item usually IS a member of its own swap group) gets the
+    // SAME canonical "{name} — {category}, S{size}" label as every other
+    // option, instead of showing up unlabeled (bare display name only).
+    // Root cause of "Factory Device / Factory Device"-style ambiguity
+    // (Commander Certification, Warlock EMP): REP-8 (the factory default,
+    // previously pinned FIRST with no label at all) and REP-VS (a swap-
+    // group option, already correctly labeled since SW-013C.2E) rendered
+    // with visibly different formatting for what a Commander reasonably
+    // expects to look like two parallel, comparable choices — not because
+    // the data disagreed, but because only one of the two ever passed
+    // through the canonical-label code path. `addPinned`'s own
+    // already-seen guard (by display name) means a value that's a real
+    // swap-group member is only ever added ONCE, by whichever branch
+    // reaches it first — swapping the order is the entire fix; the
+    // fallback pinning after this block still covers a target/factory/
+    // installed value that ISN'T a swap-group member (legacy data, or a
+    // free-text/unresolved value), exactly as before.
+    const swapGroupOnlyType = hp.type === 'Module' || hp.type === 'EMP' || hp.type === 'Quantum Dampener'
+    const swapGroupConditionalType = hp.type === 'Missile Rack' || hp.type === 'Gimbal Mount'
+    const hasConfirmedGroup = swapGroupConditionalType && Boolean(configurableSlotFor(hp)?.eligibleComponents?.length)
+    if (swapGroupOnlyType || hasConfirmedGroup) {
+      appendSwapGroupOptions(hp.type)
+      addPinned(hp.targetItem, hp.targetEntityClass)
+      addPinned(hp.factoryItem, hp.factoryEntityClass)
+      addPinned(hp.installedItem, hp.installedEntityClass)
+      return options
+    }
+
     addPinned(hp.targetItem, hp.targetEntityClass)
     addPinned(hp.factoryItem, hp.factoryEntityClass)
     addPinned(hp.installedItem, hp.installedEntityClass)
@@ -580,76 +745,57 @@ export default function ShipWorkspacePrototype() {
     // fabricated — see SW-013C.2B report's own documented gap
     // (UMNT_ANVL_S5_Rotodome_Mk2, present in generation-time data, absent
     // from the shipped runtime component catalog).
+    //
+    // SW-013C.2E (Objective 2/6) — `label` now follows the SAME canonical
+    // convention `fullComponentCatalog.ts` already established for a
+    // genuinely ambiguous name ("{name} — {category}, S{size}"), rather
+    // than this branch's own ad hoc "{name} — S{size}" shape (missing the
+    // category, and set unconditionally rather than only when a real
+    // disambiguation need exists elsewhere in the app). `swapGroupCategoryLabelFor`
+    // translates the CANDIDATE's own raw DataCore category — never the
+    // destination port's type — matching `categoryLabelFor`'s own
+    // candidate-centric convention exactly (relevant when the candidate's
+    // category genuinely differs from the port's, e.g. a Bomb Rack
+    // candidate on a Missile-Rack-typed port).
     function appendSwapGroupOptions(pathPrefix: string): void {
       const slot = configurableSlotFor(hp)
       for (const entityClass of slot?.eligibleComponents ?? []) {
         if (seen.has(entityClass)) continue
         const resolution = resolveComponentByEntityClass(entityClass)
         if (resolution.status !== 'resolved') continue
-        const { displayName, size } = resolution.record
+        const { displayName, size, category } = resolution.record
         if (seen.has(displayName)) continue
         seen.add(displayName)
-        options.push({ item: displayName, path: `${pathPrefix} → ${displayName}`, entityClass, label: `${displayName} — S${size}` })
+        options.push({
+          item: displayName,
+          path: `${pathPrefix} → ${displayName}`,
+          entityClass,
+          // SW-013C.2F (Objective 4) — the LABEL only (never `item`, the
+          // real committed value TargetComponentPicker always saves) drops
+          // a leading "{Ship Name} " prefix when the real catalog display
+          // name redundantly repeats it (the Retaliator's own module
+          // family: "Retaliator Cargo Front Module" -> "Cargo Front
+          // Module") — the "Ship: Retaliator" context is already shown at
+          // the top of this exact page, so the repetition adds nothing.
+          // "Front"/"Rear" is deliberately KEPT (unlike the work order's
+          // own illustrative "Unladen Module" example, which would make
+          // Front and Rear read identically) — Objective 4's own
+          // overriding rule, "do not remove information needed for
+          // clarity," wins over the shorter illustrative text.
+          label: `${stripRedundantShipNamePrefix(displayName, ship?.name)} — ${swapGroupCategoryLabelFor(category)}, S${size}`,
+        })
       }
     }
 
-    // SW-013C.2B (Objective 3) — "Compatibility must be driven only by
-    // certified relationships. Never by: size alone / category alone /
-    // manufacturer / display name." A Module port's factory component
-    // deliberately has no entry in CATEGORY_TO_PORT_TYPE (see
-    // src/generated/componentCatalog.ts), so the generic full-catalog
-    // sweep below naturally offers it nothing — that omission IS the
-    // compatibility gate, not an oversight. The one legitimate source of
-    // Module alternatives is the certified swap-group eligible-component
-    // list.
-    //
-    // SW-013C.2D (Objective 5) — EMP and Quantum Dampener/Interdiction
-    // ports get the exact same treatment for the exact same reason:
-    // neither DataCore category (EMP, QuantumInterdictionGenerator) has a
-    // CATEGORY_TO_PORT_TYPE entry either, so the generic sweep below would
-    // already offer them nothing — this just makes the swap-group-only
-    // posture explicit and, where a real confirmed group exists (the
-    // Avenger Warlock's EMP port genuinely has one — AEGS_EMP_Device_S4 /
-    // AEGS_EMP_Sentinel_S4), actually surfaces it. A port with no
-    // confirmed group (Guardian Qi's Quantum Dampener, the Mantis's QED)
-    // simply offers no alternatives today — never a fabricated one, and
-    // never a schema change if a future generator run discovers a group
-    // for one of them.
-    if (hp.type === 'Module' || hp.type === 'EMP' || hp.type === 'Quantum Dampener') {
-      appendSwapGroupOptions(hp.type)
-      return options
-    }
-
-    // SW-013C.2D (Objectives 3/4) — a rack PARENT port (Missile Rack) is
-    // the one case where "swap-group-only" must NOT be the universal rule:
-    // most ships' rack ports (e.g. the Hornet Ghost's own — see SW-008C's
-    // regression test) have no confirmed swap group at all, and have
-    // always relied on the broad generic size/category sweep below to
-    // offer cross-ship rack alternatives — a real, deliberate, tested
-    // feature this mission must not regress. But when a port's own
-    // confirmed swap group DOES exist (the Eclipse's `hardpoint_torpedorack`
-    // — a genuine, tag-derived `Eclipse_BombRack` group), it is the
-    // authoritative answer and the generic sweep must defer to it
-    // entirely: `MRCK_S09_AEGS_Retaliator_Fore`/`_Rear` share the Eclipse's
-    // own rack's exact DataCore category (MissileLauncher/MissileRack) AND
-    // exact catalog size (S9 — the accepted torpedo class, not a
-    // rack-family identifier), so the generic sweep below could never
-    // distinguish "Eclipse's own rack family" from "any other ship's S9
-    // torpedo rack" — confirmed the literal root cause of "Retaliator rack
-    // selectable on Eclipse." Deriving the distinction from whether a
-    // confirmed group EXISTS (not from ship identity) means this applies
-    // to any future ship whose rack port gets its own confirmed group,
-    // never an `if (ship === 'Eclipse')` special case.
-    if (hp.type === 'Missile Rack') {
-      const slot = configurableSlotFor(hp)
-      if (slot?.eligibleComponents?.length) {
-        appendSwapGroupOptions(hp.type)
-        return options
-      }
-      // No confirmed group for this specific rack port — fall through to
-      // the generic sweep below, unchanged from before this mission.
-    }
-
+    // Every swap-group-only port (Module/EMP/Quantum Dampener always;
+    // Missile Rack/Gimbal Mount when a confirmed group exists) already
+    // returned above, before this point — see that block's own doc
+    // comment for the full "why" (SW-013C.2B/SW-013C.2D/SW-013C.2F). What
+    // remains below is the broad generic size/category sweep, used by
+    // every other port type, and by Missile Rack/Gimbal Mount ports with
+    // no confirmed group of their own (the overwhelming majority — e.g.
+    // the Hornet Ghost's own rack/wing-weapon ports, SW-008C's own
+    // regression) — unchanged from before this mission.
     for (const c of fullComponentCatalog) {
       if (seen.has(c.item)) continue
       if (isComponentSelectableForPort(c.item, hp.type, hp.size, { itemEntityClass: c.entityClass, destinationFactoryEntityClass: hp.factoryEntityClass })) {
@@ -826,9 +972,44 @@ export default function ShipWorkspacePrototype() {
     }
 
     if (commanderIntent === 'MANAGE_LOADOUT') {
-      const desired = desiredTargets[hp.slotLabel] ?? hp.targetItem
+      // SW-013C.2F Amendment B — a payload-array aggregate row (missile
+      // rack, bomb rack, or any future rack family sharing the same
+      // `withMissileRackAggregation` mechanism) has no real Hardpoint of
+      // its own — `hp.slotLabel` is the synthetic label (e.g. "Torpedorack
+      // — Bomb"), and Amendment A's own `commitNewTarget` fan-out (below)
+      // deliberately never writes an entry keyed by it, writing instead to
+      // every real child slotLabel (`hp.missileAggregate.childSlotLabels`).
+      // Reading `desiredTargets[hp.slotLabel]` here — the SAME synthetic
+      // key the write side never populates — is therefore always
+      // `undefined` for an aggregate row, so `desired` silently fell
+      // through to `hp.targetItem` (the last-SAVED value) immediately
+      // after every pending pick: the picker visibly "reverted" even
+      // though the pending edit was correctly recorded (save already
+      // worked, per Amendment A). Confirmed the live selection handler
+      // was exactly the mismatch the Amendment B work order named: the
+      // WRITE side treats an aggregate row as N real child rows; the READ
+      // side was still treating it as if it were one real row keyed by
+      // its own (nonexistent) slotLabel.
+      //
+      // Fix: for an aggregate row, resolve the pending value from its own
+      // children's real slotLabels instead — `commitNewTarget`'s fan-out
+      // always writes the identical value to every child in the same
+      // state update, so any one child that has a pending entry speaks
+      // for the whole rack. `hp.targetItem`/`hp.targetEntityClass`
+      // themselves are left completely untouched (still the aggregate's
+      // own correctly-computed last-SAVED baseline, from
+      // `makeMissileAggregateRow` — see missileRackAggregation.ts) so
+      // `isEdited` below still compares "pending" against "saved," not a
+      // value against itself.
+      const aggregateChildLabels = hp.missileAggregate?.childSlotLabels
+      const pendingChildEntry = aggregateChildLabels?.find((label) => desiredTargets[label] !== undefined)
+      const desired = aggregateChildLabels ? (pendingChildEntry !== undefined ? desiredTargets[pendingChildEntry] : hp.targetItem) : (desiredTargets[hp.slotLabel] ?? hp.targetItem)
       const isEdited = desired !== hp.targetItem
-      const desiredEntityClass = isEdited ? desiredTargetEntityClasses[hp.slotLabel] : hp.targetEntityClass
+      const desiredEntityClass = !isEdited
+        ? hp.targetEntityClass
+        : aggregateChildLabels
+          ? aggregateChildLabels.map((label) => desiredTargetEntityClasses[label]).find((ec) => ec !== undefined)
+          : desiredTargetEntityClasses[hp.slotLabel]
       const availability = calculateComponentAvailability(desired, hangarItems, installedLoadouts, reservations, desiredEntityClass)
       const logistics = derivePortLogistics(hp, reservations, hangarItems, installedLoadouts)
 
@@ -837,30 +1018,76 @@ export default function ShipWorkspacePrototype() {
       // the entry entirely (not merely a no-op value) so Pending Change
       // detection — untouched below, still exactly `desired !== hp.targetItem`
       // — has nothing left to count for this slot.
+      //
+      // SW-013C.2F Amendment A (Finding 1) — mirrors MissionComposer.tsx's
+      // own EWO-054 fan-out, previously never replicated here: a payload-
+      // array aggregate row (missile rack or bomb rack) has no real
+      // Hardpoint of its own — its `slotLabel` (e.g. "Torpedorack — Bomb")
+      // is synthetic, standing in for N real per-slot children
+      // ("Torpedorack — Bomb Slot 1"..."Slot 20"). Writing the Commander's
+      // one selection to the aggregate's own synthetic label produced a
+      // `targetOverrides` entry `saveMissionConfiguration` could never
+      // resolve to a real port — confirmed the exact root cause of "Could
+      // not save — 1 assignment(s) referenced a port that no longer
+      // exists on this ship: Torpedorack — Bomb," which also silently
+      // rolled back the parent rack's own pending swap (the whole save
+      // transaction fails together, per saveMissionConfiguration's own
+      // all-or-nothing contract — see its own "every recognized slot must
+      // resolve" doc comment). Fixed identically to MissionComposer: the
+      // one Commander selection fans out to every real child slotLabel
+      // the aggregate stands in for, so saveMissionConfiguration's
+      // existing per-slot materialization (unchanged) writes N identical
+      // target assignments, same as if the Commander had set each slot
+      // individually. Every non-aggregate row (the overwhelming majority)
+      // still writes to exactly its own single slotLabel, unchanged.
+      //
+      // SW-013C.2F Amendment B — a rack swap regenerates its children with
+      // fresh, POSITION-based slotLabels ("<rack> — Bomb Slot 1"..."N")
+      // that can coincidentally match a PRIOR rack generation's own child
+      // labels — "Slot 1" exists regardless of which rack geometry
+      // produced it. Confirmed real: swapping a 20xS3 rack (a Thunderball
+      // Bomb assigned to every slot) to a 1xS10 rack left the NEW S10
+      // child's own picker showing the stale Thunderball selection —
+      // `desiredTargets["Torpedorack — Bomb Slot 1"]` from the OLD
+      // generation was never cleared, and the new generation's own first
+      // child happens to reuse that exact same slotLabel. Whenever a
+      // RACK's own target changes (never an aggregate row's own targets,
+      // which this same function fans OUT to, never in), clear every
+      // pending entry already recorded under that rack's own child-label
+      // prefix first, so a fresh rack generation always starts clean — a
+      // harmless no-op for every ordinary, childless port.
       function commitNewTarget(value: string, entityClass: string | undefined) {
+        const targetSlotLabels = hp.missileAggregate?.childSlotLabels ?? [hp.slotLabel]
+        const staleChildPrefix = hp.missileAggregate ? null : `${hp.slotLabel} — `
         setDesiredTargets((prev) => {
           const next = { ...prev }
-          if (value === hp.targetItem) delete next[hp.slotLabel]
-          else next[hp.slotLabel] = value
+          if (staleChildPrefix) for (const key of Object.keys(next)) if (key.startsWith(staleChildPrefix)) delete next[key]
+          for (const slotLabel of targetSlotLabels) {
+            if (!hp.missileAggregate && value === hp.targetItem) delete next[slotLabel]
+            else next[slotLabel] = value
+          }
           return next
         })
         setDesiredTargetEntityClasses((prev) => {
           const next = { ...prev }
-          if (value === hp.targetItem) delete next[hp.slotLabel]
-          else next[hp.slotLabel] = entityClass
+          if (staleChildPrefix) for (const key of Object.keys(next)) if (key.startsWith(staleChildPrefix)) delete next[key]
+          for (const slotLabel of targetSlotLabels) {
+            if (!hp.missileAggregate && value === hp.targetItem) delete next[slotLabel]
+            else next[slotLabel] = entityClass
+          }
           return next
         })
       }
 
       return (
         <>
-          <td className="px-4 py-2 text-muted">
+          <td className="px-4 py-1.5 text-muted">
             <ComponentAssignmentLabel value={hp.installedItem} />
           </td>
-          <td className="px-4 py-2 text-muted/80">
+          <td className="px-4 py-1.5 text-muted/80">
             <ComponentAssignmentLabel value={hp.targetItem} />
           </td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5">
             <TargetComponentPicker
               id={`new-target-${hp.id}`}
               value={desired}
@@ -870,13 +1097,13 @@ export default function ShipWorkspacePrototype() {
               showFullIdentity
             />
           </td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5">
             <Badge tone={availability.availableQuantity > 0 ? 'success' : 'muted'}>{availability.availableQuantity} Available</Badge>
           </td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5">
             <Badge tone={logistics === 'Reserved' ? 'cyan' : 'muted'}>{logistics}</Badge>
           </td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5">
             {isEdited && (
               <button
                 onClick={() => commitNewTarget(hp.factoryItem, hp.factoryEntityClass)}
@@ -896,21 +1123,28 @@ export default function ShipWorkspacePrototype() {
       const isRowExpanded = expandedInstallRowId === hp.id
       return (
         <>
-          <td className="px-4 py-2 text-muted">
+          <td className="px-4 py-1.5 text-muted">
             <ComponentAssignmentLabel value={hp.installedItem} />
           </td>
-          <td className="px-4 py-2 text-cyan/90">
+          <td className="px-4 py-1.5 text-cyan/90">
             <ComponentAssignmentLabel value={hp.targetItem} />
           </td>
-          <td className="px-4 py-2 text-muted">{availability.ownedQuantity}</td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5 text-muted">{availability.ownedQuantity}</td>
+          <td className="px-4 py-1.5">
             <Badge tone={availability.availableQuantity > 0 ? 'success' : 'muted'}>{availability.availableQuantity} Available</Badge>
           </td>
-          <td className="px-4 py-2">
+          <td className="px-4 py-1.5">
             <div className="flex items-center gap-3">
               {hp.targetItem && hp.targetItem !== '—' && (
                 <button
-                  onClick={() => setExpandedInstallRowId(isRowExpanded ? null : hp.id)}
+                  onClick={() => {
+                    setExpandedInstallRowId(isRowExpanded ? null : hp.id)
+                    setInstallNotice(null)
+                    setReassignConfirmKey(null)
+                    setBorrowConfirmKey(null)
+                    setNewComponentFormHpId(null)
+                    setNewComponentSelection({ item: '' })
+                  }}
                   className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
                 >
                   <Package size={12} /> Install / Change
@@ -943,27 +1177,207 @@ export default function ShipWorkspacePrototype() {
     // Lens 1 — Ship Assessment (default), read-only.
     return (
       <>
-        <td className="px-4 py-2 text-muted/70">
+        <td className="px-4 py-1.5 text-muted/70">
           <ComponentAssignmentLabel value={hp.factoryItem} />
         </td>
-        <td className="px-4 py-2 text-muted">
+        <td className="px-4 py-1.5 text-muted">
           <ComponentAssignmentLabel value={hp.installedItem} />
         </td>
-        <td className="px-4 py-2 text-cyan/90">
+        <td className="px-4 py-1.5 text-cyan/90">
           <ComponentAssignmentLabel value={hp.targetItem} />
         </td>
-        <td className="px-4 py-2">
+        <td className="px-4 py-1.5">
           <Badge tone={statusTone(hp.status)}>{hp.status}</Badge>
         </td>
       </>
     )
   }
 
+  // SW-014A — every mutation below is a thin call into the SAME shared
+  // installation engine every other install/reservation surface already
+  // uses (installComponent/moveToShip/addHangarItem/releaseReservation,
+  // all already certified — see
+  // docs/SW-014A-Inline-Installed-Component-Workflow-Report.md). This
+  // function's only job is translating a store result into the inline
+  // `installNotice` feedback this page's own "never a dialog" convention
+  // requires.
+  //
+  // `resolveDestinationHardpoint` (the engine's own, unmodified gate —
+  // src/engine/installation/installationEngine.ts) refuses to target a
+  // port whose status is already 'OK' (installed === target === factory,
+  // nothing outstanding) — a deliberate, pre-existing constraint this
+  // mission does not touch. "Replace: Installed -> Different Component"
+  // (a required certification scenario) therefore needs the port's own
+  // TARGET updated to the newly chosen component FIRST — via the exact
+  // same `saveMissionConfiguration` single-slot override Manage Loadout's
+  // own Save already uses — so status becomes 'Missing'/'Upgrade
+  // Available' and the install below is accepted. Skipped entirely when
+  // the chosen item already matches the current target (the common "just
+  // acquire what Manage Loadout already asked for" case), so this never
+  // performs a redundant save.
+  //
+  // `hangarItemId`, when known (every real, owned candidate this page's
+  // own tiers produce carries one — see `deriveInstallCandidates`), routes
+  // through `moveToShip` rather than `installComponent`. This is required
+  // for correct bookkeeping, not a style choice: `installComponent`'s own
+  // `planHangarDecrement` only decrements Hangar stock when a matching
+  // ACTIVE reservation already exists for this exact port; its "no
+  // reservation, no hangarItemId" branch is a deliberate no-inventory-
+  // bookkeeping no-op (EWO-029) — correct for Quick Update's free-text
+  // flow (which never references a specific owned row) but wrong here,
+  // where the row is already known. `moveToShip`'s own reservation lookup
+  // still takes priority automatically when one applies (its own
+  // `planHangarDecrement` call checks a matching reservation before ever
+  // consulting `hangarItemId`), so passing a `hangarItemId` is always safe
+  // even for the "reserved for this port" case.
+  function performInstall(hp: Hardpoint, item: string, entityClass?: string, hangarItemId?: string) {
+    if (!ship) return
+    if (item !== hp.targetItem) {
+      const retarget = saveMissionConfiguration({
+        shipId: ship.id,
+        name: reviewedBuild?.name ?? 'Loadout',
+        startingState: 'EXISTING',
+        existingBuildId: reviewedBuildId,
+        targetOverrides: { [hp.slotLabel]: { targetItem: item, targetEntityClass: entityClass } },
+        setActive: true,
+        saveAsNew: false,
+      })
+      if (!retarget.success) {
+        setInstallNotice({ tone: 'error', message: `Could not set ${item} as the target for ${formatHardpointLabel(hp.slotLabel)} — nothing was changed.` })
+        return
+      }
+    }
+    const result = hangarItemId
+      ? (() => {
+          const r = moveToShipStore(hangarItemId, ship.id, hp.slotLabel)
+          return { matched: r.success, blocked: undefined as 'reserved-elsewhere' | 'incompatible' | undefined, message: r.message }
+        })()
+      : installComponentStore(ship.id, item, hp.slotLabel, reviewedBuildId)
+    if (result.matched) {
+      addLogEntry({
+        action: 'Installed component',
+        shipName: ship.name,
+        itemName: item,
+        details: `Installed ${item} on ${ship.name} (${formatHardpointLabel(hp.slotLabel)})`,
+      })
+      setInstallNotice({ tone: 'success', message: `Installed ${item} on ${formatHardpointLabel(hp.slotLabel)}.` })
+      setReassignConfirmKey(null)
+      setBorrowConfirmKey(null)
+      setNewComponentFormHpId(null)
+      setNewComponentSelection({ item: '' })
+    } else if (result.blocked === 'reserved-elsewhere') {
+      setInstallNotice({ tone: 'error', message: `${item} has no Available stock — the remaining unit(s) are reserved for a different Fleet Asset/Build.` })
+    } else if (result.blocked === 'incompatible') {
+      setInstallNotice({ tone: 'error', message: `${item} is not compatible with ${formatHardpointLabel(hp.slotLabel)}.` })
+    } else {
+      setInstallNotice({ tone: 'error', message: ('message' in result && result.message) || `Could not install ${item} — nothing was changed.` })
+    }
+  }
+
+  // The live post-mutation lookup `performBorrow`/`performRecordAndInstall`
+  // both need: after a REMOVE-to-Hangar or a fresh addHangarItem, the
+  // resulting row's own id (neither store action returns one directly),
+  // so the follow-up install can route through `moveToShip` too rather
+  // than silently falling back to the no-bookkeeping `installComponent`
+  // path.
+  function resolveHangarItemId(item: string, entityClass?: string): string | undefined {
+    const rows = useFleetStore.getState().hangarItems
+    return (
+      rows.find((h) => h.qty > 0 && entityClass && h.entityClass && h.entityClass === entityClass)?.id ??
+      rows.find((h) => h.qty > 0 && h.name === item)?.id
+    )
+  }
+
+  // Tier 2 — releases exactly the one blocking reservation the Commander
+  // confirmed against, then attempts the install. If another blocking
+  // reservation still exists (a component reserved by more than one other
+  // Build), the candidate simply re-renders with that one still listed —
+  // never a silent mass-release of every competing reservation at once.
+  function performReassign(hp: Hardpoint, item: string, entityClass: string | undefined, reservationId: string, hangarItemId: string | undefined) {
+    releaseReservationStore(reservationId)
+    performInstall(hp, item, entityClass, hangarItemId)
+  }
+
+  // Tier 3 — composed from the two already-certified REMOVE/INSTALL
+  // operations (never the separate, still-deferred TRANSFER/moveComponentBetweenShips
+  // path — see docs/SW-014A-Inline-Installed-Component-Workflow-Report.md
+  // for why): returning the donor's component to Hangar first means the
+  // destination install goes through the exact same compatibility/
+  // reservation checks as every other Tier, and the Commander gets a real,
+  // inspectable Hangar Inventory transaction in between rather than an
+  // opaque ship-to-ship move.
+  function performBorrow(hp: Hardpoint, candidate: BorrowInstallCandidate) {
+    if (!ship) return
+    const removeResult = removeComponentStore(candidate.shipId, candidate.slotLabel, true)
+    if (!removeResult.matched) {
+      setInstallNotice({ tone: 'error', message: `Could not remove ${candidate.item} from ${candidate.shipName} — nothing was changed.` })
+      return
+    }
+    const donorShipName = candidate.shipName
+    const hangarItemId = resolveHangarItemId(candidate.item, candidate.entityClass)
+    const before = useFleetStore.getState().hardpoints.find((h) => h.buildId === reviewedBuildId && h.slotLabel === hp.slotLabel) ?? hp
+    performInstall(before, candidate.item, candidate.entityClass, hangarItemId)
+    const after = useFleetStore.getState().hardpoints.find((h) => h.buildId === reviewedBuildId && h.slotLabel === hp.slotLabel)
+    if (after?.installedItem === candidate.item) {
+      addLogEntry({
+        action: 'Borrowed component',
+        shipName: ship.name,
+        itemName: candidate.item,
+        details: `Transferred ${candidate.item} from ${donorShipName} (${formatHardpointLabel(candidate.slotLabel)}) to ${ship.name} (${formatHardpointLabel(hp.slotLabel)})`,
+      })
+      setInstallNotice({ tone: 'success', message: `Transferred ${candidate.item} from ${donorShipName} to ${formatHardpointLabel(hp.slotLabel)}.` })
+    } else {
+      // The donor's unit is now safely sitting in Hangar Inventory (the
+      // REMOVE above already committed) — never lost, just not yet
+      // installed. Tier 1 (Available Inventory) will offer it on the next
+      // render since it's now real Hangar stock.
+      setInstallNotice({ tone: 'error', message: `${candidate.item} was returned to Hangar from ${donorShipName}, but could not be installed on ${formatHardpointLabel(hp.slotLabel)} — install it from Available Inventory instead.` })
+    }
+  }
+
+  // Tier 4 — "Record, Install, Persist, in one workflow" (equivalent to
+  // Quick Update's own separate Add-to-Hangar + Install steps, composed
+  // here into a single Commander action). `addHangarItem` merges into any
+  // existing matching row rather than creating a duplicate (its own
+  // existing behavior, unchanged) — never a second inventory-accounting
+  // path.
+  function performRecordAndInstall(hp: Hardpoint, item: string, entityClass?: string) {
+    const entry = catalogComponentsByName.get(item)
+    if (!entry) {
+      setInstallNotice({ tone: 'error', message: `${item} is not a recognized catalog component.` })
+      return
+    }
+    const resolvedEntityClass = entry.entityClass ?? entityClass
+    addHangarItemStore({ name: item, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: resolvedEntityClass })
+    const hangarItemId = resolveHangarItemId(item, resolvedEntityClass)
+    performInstall(hp, item, resolvedEntityClass, hangarItemId)
+  }
+
   function renderInstallDisclosure(hp: Hardpoint): ReactNode {
     const hint = hintFor(hp)
+    const candidateOptions = newTargetOptionsFor(hp)
+    const candidates = ship
+      ? deriveInstallCandidates(candidateOptions, {
+          currentShipId: ship.id,
+          currentBuildId: reviewedBuildId,
+          currentSlotLabel: hp.slotLabel,
+          currentlyInstalledItem: hp.installedItem,
+          hangarItems,
+          installedLoadouts,
+          reservations,
+          ships,
+          builds,
+        })
+      : { availableInventory: [], reserved: [], borrowable: [], remainingCompatible: [] }
+    const newComponentOptions = candidateOptions.filter((o) => o.item !== '—')
+
     return (
       <tr key={`${hp.id}-install-detail`} className="bg-black/20">
         <td colSpan={lensColumnCount} className="px-5 py-3">
+          {/* Preserved existing intelligence — the acquisition hint badge
+              and the reference tier list stay exactly as before (SW-014A's
+              own explicit "Information + Actions, not a replacement"
+              requirement). Everything from here down is new. */}
           <div className="flex items-start gap-2 text-xs">
             <Badge tone={hint.tone}>{hint.label}</Badge>
             <span className="text-muted">{hint.detail}</span>
@@ -974,6 +1388,185 @@ export default function ShipWorkspacePrototype() {
                 {i + 1}. {tier}
               </div>
             ))}
+          </div>
+
+          {installNotice && (
+            <div className={`mt-3 text-xs rounded-md px-3 py-2 border ${installNotice.tone === 'success' ? 'border-success/30 bg-success/10 text-success' : 'border-danger/30 bg-danger/10 text-danger'}`}>
+              {installNotice.message}
+            </div>
+          )}
+
+          <div className="mt-3 space-y-3">
+            {/* Tier 1 — Available Inventory. */}
+            {candidates.availableInventory.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Available Inventory</div>
+                <div className="space-y-1">
+                  {candidates.availableInventory.map((c) => (
+                    <div key={c.item} className="flex items-center justify-between gap-2 bg-black/20 border border-white/10 rounded-md px-2.5 py-1.5">
+                      <div className="min-w-0">
+                        <div className="text-xs text-white truncate">{c.label}</div>
+                        <div className="text-[10px] text-muted/60">{c.reservedForThisPort ? 'Reserved for this port' : `${c.quantity} Available`}</div>
+                      </div>
+                      <button
+                        onClick={() => performInstall(hp, c.item, c.entityClass, c.hangarItemId)}
+                        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-success hover:underline"
+                      >
+                        <Package size={12} /> Install
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tier 2 — Reserved Components. */}
+            {candidates.reserved.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Reserved Components</div>
+                <div className="space-y-1">
+                  {candidates.reserved.map((c) =>
+                    c.blockingReservations.map((r) => {
+                      const key = `${hp.id}:${c.item}:${r.id}`
+                      const confirming = reassignConfirmKey === key
+                      return (
+                        <div key={key} className="bg-black/20 border border-warning/20 rounded-md px-2.5 py-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-xs text-white truncate">{c.label}</div>
+                              <div className="text-[10px] text-muted/60">Reserved for {r.shipName} — {r.buildName} ({formatHardpointLabel(r.slotLabel)})</div>
+                            </div>
+                            {!confirming && (
+                              <button onClick={() => setReassignConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-warning hover:underline">
+                                <RotateCcw size={12} /> Reassign
+                              </button>
+                            )}
+                          </div>
+                          {confirming && (
+                            <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
+                              <span className="text-warning/90">Reassigning releases the reservation for {r.shipName} — {r.buildName}. Continue?</span>
+                              <div className="shrink-0 flex items-center gap-2">
+                                <button onClick={() => setReassignConfirmKey(null)} className="text-muted hover:text-white">
+                                  Cancel
+                                </button>
+                                <button onClick={() => performReassign(hp, c.item, c.entityClass, r.id, c.hangarItemId)} className="text-warning font-medium hover:underline">
+                                  Confirm
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tier 3 — Borrow From Another Ship. */}
+            {candidates.borrowable.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Borrow From Another Ship</div>
+                <div className="space-y-1">
+                  {candidates.borrowable.map((c) => {
+                    // Keyed by donor slotLabel too — the same component can
+                    // legitimately be borrowable from more than one port on
+                    // the same donor ship (e.g. a symmetric Left/Right pair).
+                    const key = `${hp.id}:${c.item}:${c.shipId}:${c.slotLabel}`
+                    const confirming = borrowConfirmKey === key
+                    return (
+                      <div key={key} className="bg-black/20 border border-cyan/20 rounded-md px-2.5 py-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-xs text-white truncate">{c.label}</div>
+                            <div className="text-[10px] text-muted/60">
+                              Installed On: {c.shipName} — {formatHardpointLabel(c.slotLabel)} ({c.buildName})
+                            </div>
+                          </div>
+                          {!confirming && (
+                            <button onClick={() => setBorrowConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline">
+                              <ArrowRightLeft size={12} /> Transfer?
+                            </button>
+                          )}
+                        </div>
+                        {confirming && (
+                          <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
+                            <span className="text-cyan/90">Transfer from {c.shipName} — this removes it there and installs it here.</span>
+                            <div className="shrink-0 flex items-center gap-2">
+                              <button onClick={() => setBorrowConfirmKey(null)} className="text-muted hover:text-white">
+                                Cancel
+                              </button>
+                              <button onClick={() => performBorrow(hp, c)} className="text-cyan font-medium hover:underline">
+                                Confirm Transfer
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tier 4 — Newly Acquired Component. */}
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Newly Acquired Component</div>
+              {newComponentFormHpId === hp.id ? (
+                <div className="bg-black/20 border border-white/10 rounded-md px-2.5 py-2 space-y-2">
+                  <TargetComponentPicker
+                    id={`new-component-${hp.id}`}
+                    value={newComponentSelection.item}
+                    onChange={(item, entityClass) => setNewComponentSelection({ item, entityClass })}
+                    options={newComponentOptions}
+                    ariaLabel={`New acquired component for ${formatHardpointLabel(hp.slotLabel)}`}
+                    showFullIdentity
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setNewComponentFormHpId(null)}
+                      className="flex-1 border border-white/15 text-white text-xs py-1.5 rounded-md hover:border-white/35 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={!newComponentSelection.item}
+                      onClick={() => performRecordAndInstall(hp, newComponentSelection.item, newComponentSelection.entityClass)}
+                      className="flex-1 bg-cyan text-black font-semibold text-xs py-1.5 rounded-md hover:bg-cyan/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Record &amp; Install
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setNewComponentFormHpId(hp.id)
+                    setNewComponentSelection({ item: '' })
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
+                >
+                  <PackagePlus size={12} /> Record New Component
+                </button>
+              )}
+            </div>
+
+            {/* Tier 5 — Remaining Compatible Components (reference only). */}
+            {candidates.remainingCompatible.length > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Remaining Compatible Components</div>
+                <div className="text-[11px] text-muted/70 space-y-0.5">
+                  {candidates.remainingCompatible.slice(0, 8).map((c) => (
+                    <div key={c.item} className="truncate">
+                      {c.label}
+                    </div>
+                  ))}
+                  {candidates.remainingCompatible.length > 8 && (
+                    <div className="text-muted/50">+{candidates.remainingCompatible.length - 8} more — see Loadout Manager for the full catalog.</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </td>
       </tr>
@@ -1061,12 +1654,18 @@ export default function ShipWorkspacePrototype() {
       // sprint (Objective 5's non-configurable-ship regression guarantee).
       const configurableSlot = hp.isStructural ? undefined : configurableSlotFor(hp)
       const isInspectingConfigurableSlot = inspectedConfigurableSlotId === hp.id
+      const dormantTopologyNotice = hp.isStructural ? undefined : dormantTopologyNoticeFor(hp)
       const rows: ReactNode[] = [
         <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-          <td className={`px-4 py-2 whitespace-nowrap ${hp.isStructural ? 'text-white/70 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
+          <td className={`px-4 py-1.5 whitespace-nowrap ${hp.isStructural ? 'text-white/70 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
             <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1.5">
               <CategoryIcon size={13} className="text-muted/50 shrink-0" aria-hidden="true" />
               {formatHardpointLabel(hp.slotLabel)}
+              {dormantTopologyNotice && (
+                <span title={dormantTopologyNotice}>
+                  <Badge tone="cyan">Additional Topology Pending</Badge>
+                </span>
+              )}
               {configurableSlot && (
                 <button
                   onClick={() => setInspectedConfigurableSlotId(isInspectingConfigurableSlot ? null : hp.id)}
@@ -1096,7 +1695,7 @@ export default function ShipWorkspacePrototype() {
               )}
             </div>
           </td>
-          <td className="px-4 py-2 text-muted whitespace-nowrap">
+          <td className="px-4 py-1.5 text-muted whitespace-nowrap">
             {hp.size} {hp.type}
           </td>
           {renderLensCells(hp)}
@@ -1141,7 +1740,7 @@ export default function ShipWorkspacePrototype() {
         : 'Organized the way a Commander thinks about a ship, not by raw port hierarchy.'
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* PAGE IDENTITY — deliberately lightweight: title, one-line
           functional description, and Ship Selection (a workspace-level
           action, not ship-state). No ship-state of any kind lives here.
@@ -1644,7 +2243,7 @@ export default function ShipWorkspacePrototype() {
                             <td colSpan={lensColumnCount} className="p-0">
                               <button
                                 onClick={() => toggleGroup(group)}
-                                className="w-full flex items-center gap-1.5 px-5 py-3 text-left text-cyan/80 font-semibold uppercase tracking-wide text-xs hover:bg-white/[0.03] transition-colors"
+                                className="w-full flex items-center gap-1.5 px-5 py-2.5 text-left text-cyan/80 font-semibold uppercase tracking-wide text-xs hover:bg-white/[0.03] transition-colors"
                               >
                                 {isExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                                 {group}

@@ -390,6 +390,25 @@ export interface Hardpoint {
   installedEntityClass?: string
   targetEntityClass?: string
   factoryEntityClass?: string
+  /** SW-013C.2G — true only for a Hardpoint whose originating Port was
+   * NOT present in this ship's own raw imported topology
+   * (`generated-data/ports.json`) but was authoritatively materialized at
+   * runtime from `src/generated/dormantHardpoints.ts`'s own small,
+   * individually-curated, evidence-gated list (confirmed physically
+   * present via the ship's own StarBreaker geometry export, `root_nmc`,
+   * yet never factory-populated in `loadout`). Absent/false for every
+   * ordinary real port. Read only for Commander-facing provenance
+   * presentation (a "Dormant" badge — see ShipWorkspacePrototype.tsx) and
+   * by this mission's own regression tests; never affects compatibility,
+   * readiness, procurement, or persistence, which all already treat this
+   * row exactly like any other real, empty-factory port — see
+   * docs/DormantHardpointMaterializationProposal.md and
+   * docs/SW-013C.2G-Dormant-Hardpoint-Materialization-Report.md. */
+  isDormant?: boolean
+  /** SW-013C.2G — mirrors Port.dormantDonorShipEntityClass; see that field's doc comment. */
+  dormantDonorShipEntityClass?: string
+  /** SW-013C.2G Amendment C — mirrors Port.dormantAllowedComponentEntityClasses; see that field's doc comment. */
+  dormantAllowedComponentEntityClasses?: string[]
 }
 
 /**

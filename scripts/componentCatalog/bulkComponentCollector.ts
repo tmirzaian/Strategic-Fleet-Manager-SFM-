@@ -18,6 +18,14 @@ export interface ComponentFieldMaps {
    * `localizationName`. Its text carries the Classification/Grade header
    * block parsed by `descriptionClassification.ts`. */
   localizationDescriptionKey: Map<string, string>
+  /** SW-013C.2F Amendment A (Finding 2) — `AttachDef.RequiredTags`,
+   * raw space-separated string (e.g. "gama_railen", "miningMount", ""). */
+  requiredTags: Map<string, string>
+  /** SW-013C.2F Amendment A (Finding 2) — `AttachDef.Tags`, raw
+   * space-separated string (e.g. "flightReady $gama_railen"). Used
+   * alongside `requiredTags` to derive `vesselBoundTags` — see
+   * catalogSchema.ts's schemaVersion 4 note. */
+  tags: Map<string, string>
 }
 
 export interface BulkComponentCollectionResult {
@@ -65,6 +73,18 @@ export function buildRecordFromBulkFields(entityClass: string, fields: Component
   // Missile reads "Tracking Signal"; every other category stays null.
   const classification = extractOperationalIdentityValue(parseDescriptionHeader(descriptionText), type)
 
+  // SW-013C.2F Amendment A (Finding 2) — a required tag is vessel-bound
+  // only when this SAME entity's own Tags also carries it with a "$"
+  // prefix (CIG's self-referential loadout-group marker convention) — see
+  // catalogSchema.ts's schemaVersion 4 note for the full rationale
+  // (RequiredTags alone also covers ordinary shared requirements like
+  // "miningMount", which must NOT be treated as vessel-bound).
+  const requiredTagsRaw = fields.requiredTags?.get(entityClass) ?? ''
+  const requiredTagsList = requiredTagsRaw.split(/\s+/).filter((t) => t.length > 0)
+  const ownTagsRaw = fields.tags?.get(entityClass) ?? ''
+  const ownTags = new Set(ownTagsRaw.split(/\s+/).filter((t) => t.length > 0))
+  const vesselBoundTags = requiredTagsList.filter((t) => ownTags.has(`$${t}`))
+
   return {
     entityClass,
     recordName: `EntityClassDefinition.${entityClass}`,
@@ -76,6 +96,7 @@ export function buildRecordFromBulkFields(entityClass: string, fields: Component
     localizationKey,
     displayName: resolveLocalizedName(localizationKey, localizationTable),
     classification,
+    vesselBoundTags,
     provenance: { source: 'starbreaker-datacore', recordPath: null },
   }
 }

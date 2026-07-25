@@ -291,3 +291,64 @@
   with stable synthetic fixtures, so expanding the Commander workbook or
   promoting new Golden Fleet content never requires updating unrelated
   tests.
+- **ARCH-008 — Countermeasure Launchers (Chaff/Flare/Decoy/Noise)**:
+  reconnaissance (SW-013C.2E) confirmed real, currently-invisible
+  equipment on every single ship in the Architectural Certification Fleet
+  (Ghost, Eclipse, Retaliator, Guardian Qi, Mantis, Warlock) — DataCore
+  category `WeaponDefensive`, one or two real launcher ports per ship
+  (e.g. `hardpoint_countermeasure_launcher_left`/`_right`), consistently
+  unclassified. This is the clearest, best-evidenced next-mission
+  candidate from that audit: a real, ship-level, Commander-relevant
+  survivability system, not a cosmetic/habitation item (unlike the
+  audit's other findings — personal lockers, fire extinguishers, cockpit
+  MFDs — which were correctly NOT recommended). Candidate presentation:
+  a new canonical port type/equipment group under the existing "Support
+  Systems" top-level section (alongside Relay/Life Support/Electronic
+  Warfare), reading Chaff/Flare/Noise/Decoy per the specific real device
+  installed — following the exact same activation pattern already proven
+  for Module (SW-013C.2B) and Electronic Warfare (SW-013C.2D): one or two
+  new `classificationTranslator.ts` rules, no importer redesign. Not yet
+  scoped or approved for implementation — reconnaissance only.
+- **ARCH-009 — Fleet-Wide Dormant Hardpoint Candidates**: SW-013C.2G
+  built and certified a generic Dormant Hardpoint Materialization
+  mechanism (see `docs/ADR/ADR-014-Configurable-Slot-Architecture.md`'s
+  own SW-013C.2G amendment) against exactly one individually-proven case
+  — the F7C-S Hornet Ghost Mk II's Nose Weapon mount — and then ran a
+  fleet-wide reconnaissance audit (`scripts/generateDormantHardpointAudit.ts`,
+  output `generated-data/dormant-hardpoint-audit.json`) to find every
+  OTHER ship in the corpus with a real geometry node absent from its own
+  `loadout`. Per the work order's own explicit instruction, none of these
+  were activated merely because the mechanism now exists — each requires
+  its own per-candidate evidence review and dedicated test coverage
+  before implementation. Current audit totals: 31 Confirmed, 498
+  Probable, 3,278 Needs Investigation (plus 1,984 suppressed as known
+  non-equipment / fleet-wide system markers — antennae, seats, paint,
+  landing gear, etc.). Highest-value next candidates, by evidence
+  strength:
+  - **Confirmed tier (swap group + consistent-category donor)** — e.g.
+    the Idris-P's `hardpoint_nose_railgun` (Military/Collector variants,
+    donor: Idris-M's S10 mass driver, swap group `$AEGS_Idris_Nose`, 5
+    eligible members) and the Hornet F7C/Wildfire's own
+    `hardpoint_class_4_nose` (donor: F7A Mk I's confirmed nose turret,
+    swap group `ANVL_Hornet_Center`, 4 eligible members) are the
+    strongest-evidenced candidates after the Ghost — both are the exact
+    same evidentiary shape SW-013C.2G already proved out.
+  - **Probable tier (consistent-category donor, no confirmed swap
+    group)** — e.g. `hardpoint_scanner` (Radar) appears dormant on
+    several ships with a consistent single-category donor family
+    (`ARGO_MPUV` variants) but lacks swap-group confirmation; would need
+    that confirmation gathered before it could ever reach Confirmed.
+  - **Known audit limitations to account for before treating ANY entry as
+    ready to implement** — the audit's blind cross-fleet `internalName`
+    matching produces both false positives (e.g. the Asgard's
+    `hardpoint_weapon_wing_left`/`_right` mixes a Valkyrie remote turret
+    donor with an unrelated family of VariPuck gimbal mounts sharing the
+    same node name coincidentally — a human must resolve which, if
+    either, is the right shape before materializing) and at least one
+    false negative (the Ghost's own `hardpoint_weapon_nose` itself scored
+    only "Needs Investigation" in the generic audit, because its donor
+    set includes an unrelated Vanduul Mauler cannon; SW-013C.2G's actual
+    Confirmed status required additional manual narrowing to the
+    Hornet-specific swap group that the generic audit does not do
+    automatically). Treat the audit as a triage tool for human review,
+    never an auto-activation list.
