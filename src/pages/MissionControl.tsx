@@ -1,6 +1,23 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShipWheel, ScanSearch, LayoutGrid, ClipboardList, PackageCheck, CheckCircle2, AlertTriangle, Wrench, Factory, PackageX, Plus } from 'lucide-react'
+import {
+  ShipWheel,
+  LayoutGrid,
+  ClipboardList,
+  PackageCheck,
+  CheckCircle2,
+  AlertTriangle,
+  Wrench,
+  Factory,
+  PackageX,
+  Plus,
+  ScanSearch,
+  AlertOctagon,
+  BookmarkCheck,
+  PackageOpen,
+  ArrowUpCircle,
+  XCircle,
+} from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import ShipCard from '../components/ShipCard'
 import PriorityLabel from '../components/PriorityLabel'
@@ -8,13 +25,60 @@ import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
 import SortableHeader from '../components/SortableHeader'
 import FleetStatusTile from '../components/FleetStatusTile'
 import CriticalMetricTile from '../components/CriticalMetricTile'
+import ActionCard from '../components/ActionCard'
 import WorkflowDestinationCard from '../components/WorkflowDestinationCard'
 import PageEnvironment from '../components/layout/PageEnvironment'
 import { colorFor } from '../components/ReadinessBar'
 import { buildProcurementList, sortProcurementList, type ProcurementSortColumn, type SortDirection } from '../utils/procurement'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
-import { buildTileContextNames } from '../utils/tileContextNames'
+import { buildTileContextNames, type TileContextResult } from '../utils/tileContextNames'
+import { deriveFleetPriorityActions, type PriorityActionCategory } from '../utils/priorityActions'
+
+/** UX-001A.2 — the exact same per-ship deep-link markup Priority Actions
+ * already rendered (never changed, per this mission's own "no changes to
+ * deep-link behavior" constraint) — now passed as an Action Card's own
+ * `children` (supporting context) rather than owned by a bespoke row
+ * component. Kept here, not inside ActionCard itself, so ActionCard stays
+ * domain-agnostic (no ship/fleet concept baked into a component meant for
+ * reuse across Decision Center, Fleet Dashboard, and future modules). */
+function renderShipContext(context: TileContextResult) {
+  if (context.shown.length === 0) return null
+  return (
+    <span title={context.shown.map((c) => c.name).join(', ')}>
+      {context.shown.map((entry, i) => (
+        <span key={entry.shipId}>
+          {i > 0 && ' • '}
+          <Link to={`/ship-workspace/${entry.shipId}`} className="hover:text-cyan hover:underline">
+            {entry.name}
+          </Link>
+        </span>
+      ))}
+      {context.overflowCount > 0 && (
+        <>
+          {' '}
+          <Link to="/fleet" className="hover:text-cyan hover:underline">
+            +{context.overflowCount}
+          </Link>
+        </>
+      )}
+    </span>
+  )
+}
+
+/** UX-001A — Glyph Standard v1 (Hero-scoped): one icon, one accent color
+ * family, per Priority Actions category. Color communicates state (danger
+ * red = a real problem, success green = a zero-friction win available
+ * right now, warning gold = an optional improvement); the glyph
+ * disambiguates meaning within a shared color. Never reused for another
+ * concept within the Hero — see ActionCard's own doc comment. */
+const PRIORITY_ACTION_PRESENTATION: Record<PriorityActionCategory, { label: string; icon: any; accent: string }> = {
+  INVALID_TARGET: { label: 'Invalid Targets', icon: AlertOctagon, accent: '#FF5F73' },
+  RESERVED_AWAITING_INSTALL: { label: 'Reserved — Awaiting Install', icon: BookmarkCheck, accent: '#42E695' },
+  READY_TO_INSTALL: { label: 'Ready to Install', icon: PackageOpen, accent: '#42E695' },
+  UPGRADE_OPPORTUNITY: { label: 'Upgrade Opportunities', icon: ArrowUpCircle, accent: '#FFD166' },
+  CRITICAL_MISSING: { label: 'Critical Missing Components', icon: XCircle, accent: '#FF5F73' },
+}
 
 /** Circular Fleet Readiness gauge — the primary bridge instrument, docked
  * into the observation window rather than floating as its own widget.
@@ -29,7 +93,13 @@ function ReadinessRing({ value }: { value: number }) {
   const offset = circumference * (1 - Math.min(100, Math.max(0, value)) / 100)
   const color = colorFor(value)
   return (
-    <div className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20">
+    // UX-001A.3 (Deliverable 1) — diameter raised ~7% at every breakpoint
+    // (56→60, 64→68, 80→86) so Fleet Readiness reads as the right column's
+    // first focal point. Everything that scales with the container (stroke
+    // width, cap style, track/value colors) scales with it automatically
+    // via the shared viewBox — no separate styling change needed to keep
+    // the ring's existing proportions intact.
+    <div className="relative shrink-0 w-[60px] h-[60px] sm:w-[68px] sm:h-[68px] lg:w-[86px] lg:h-[86px]">
       <svg viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} className="-rotate-90 w-full h-full">
         <circle cx={viewBoxSize / 2} cy={viewBoxSize / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={strokeWidth} />
         <circle
@@ -60,15 +130,16 @@ export default function MissionControl() {
   const hangarItems = useFleetStore((s) => s.hangarItems)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
 
-  // Ships Active / Needed Items are computed fresh from the same Build
-  // Progress engine every other page uses, never from a stored readiness/
-  // missing cache (Alpha 2.5A).
+  // Ships Active is computed fresh from the same Build Progress engine
+  // every other page uses, never from a stored readiness/missing cache
+  // (Alpha 2.5A). UX-001A — the old standalone "Needed Items" raw count
+  // is retired: Priority Actions (below) now conveys the same "something
+  // needs attention" signal in genuinely actionable, categorized form, so
+  // keeping both would repeat one fact under two different numbers
+  // (Engineering Constraint: "Do not add additional metrics simply
+  // because space exists").
   const progressByShipId = new Map(ships.map((s) => [s.id, calculateBuildProgress(hardpoints.filter((h) => h.buildId === s.activeBuildId))]))
   const overallReadiness = ships.length > 0 ? Math.round(ships.reduce((sum, s) => sum + (progressByShipId.get(s.id)?.percentage ?? 0), 0) / ships.length) : 0
-  const neededItems = ships.reduce((sum, s) => {
-    const p = progressByShipId.get(s.id)
-    return sum + (p ? p.missingAssignments.length + p.upgradeOpportunities.length + p.invalidTargets.length : 0)
-  }, 0)
   // EWO-012: the Priority Ship section is sized for up to four records —
   // never invents a filler ship when fewer exist. EWO-033 (Task 2) raised
   // this from 3 to 4 per Commander direction; the sort/slice logic itself
@@ -105,6 +176,12 @@ export default function MissionControl() {
   const missingComponentsCount = procurementRaw.reduce((sum, l) => sum + l.qtyNeeded, 0)
   const unreservedInventoryCount = procurementRaw.reduce((sum, l) => sum + l.availableToReserve, 0)
 
+  // UX-001A (Deliverable 4) — Priority Actions: the Hero's own action
+  // queue, "what should I do right now." Same accounting authorities as
+  // everything else on this page (see priorityActions.ts's own doc
+  // comment) — never a second readiness/inventory computation.
+  const priorityActionGroups = deriveFleetPriorityActions(ships, hardpoints, hangarItems, installedLoadouts, reservations)
+
   const [sortColumn, setSortColumn] = useState<ProcurementSortColumn>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
   const procurement = sortProcurementList(procurementRaw, sortColumn, sortDirection)
@@ -129,44 +206,124 @@ export default function MissionControl() {
           <p className="text-xs uppercase tracking-[0.15em] sm:tracking-[0.3em] text-cyan/70 mt-2">Fleet Operations</p>
         </div>
 
-        {/* Fleet Operations region — HP-001 hardpoint for the future cinematic environment,
-            reserved at the left/center; the right side is the permanent command-console
-            rail. Height is sized for a meaningful cinematic viewport (not the excessively
-            large empty rectangle used in earlier passes) so the environment can later dock
-            in without moving this information architecture.
-            EWO-035A-R2 — the root's own gradient (originally /70,/60 for atmospheric depth
-            before real artwork existed, then reduced to /15,/10 in EWO-035A-R1) is removed
-            entirely per Commander direction: PageEnvironment's artwork is opaque, full-cover,
-            and now rendered at full presentation strength (opacity/brightness/contrast/
-            saturation all 1.0, see environmentAssets.ts) — any background here would only
-            ever show through in the disabled/no-artwork case, and the goal is zero shading
-            over the loaded image, not a fallback tone. `lg:border` and `rounded-xl` are
-            framing, not shading, and are unchanged. */}
-        <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:min-h-[400px] flex flex-col lg:flex-row lg:items-stretch">
+        {/* UX-001A — Command Briefing Hero. Three columns, one responsibility
+            each, in the order a Commander reads them: Fleet Status ("where do
+            I stand"), Operations Center ("what am I commanding" — the visual
+            anchor, unchanged in spirit from the prior cinematic rail), Priority
+            Actions ("what should I do next"). Stacks in that same order below
+            the lg: breakpoint. Height is sized for a meaningful cinematic
+            viewport, not an excessively large empty rectangle, so the
+            environment artwork can dock in later without moving this
+            information architecture (HP-001).
+            EWO-035A-R2 — PageEnvironment's own artwork is opaque, full-cover,
+            rendered at full presentation strength; any background here only
+            ever shows through in the disabled/no-artwork case (today's actual
+            state — every environment definition still ships `enabled: false`),
+            so the center column below carries its own subtle backdrop rather
+            than reading as an empty gap until real artwork lands. */}
+        <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:min-h-[380px] flex flex-col lg:flex-row lg:items-stretch">
           <PageEnvironment id="mission-control" />
           <div className="hidden lg:block absolute top-3 left-3 w-5 h-5 border-t border-l border-cyan/20 pointer-events-none" aria-hidden="true" />
           <div className="hidden lg:block absolute bottom-3 left-3 w-5 h-5 border-b border-l border-cyan/10 pointer-events-none" aria-hidden="true" />
-          <div className="hidden lg:block relative z-10 flex-1" aria-hidden="true" />
 
-          {/* Command-console rail — permanent. HP-002 (Commander identity/badge) and
-              HP-003 (UTC time/date) are approved future hardpoints that will dock above
-              the readiness console within this same vertical stack; no placeholder is
-              rendered for either today.
-              EWO-035A — now that the hero artwork (§ above) reads brighter, the rail
-              gets its own translucent "glass" backdrop at the lg: breakpoint
-              (bg-panel/55 + backdrop-blur, the same treatment Sidebar.tsx already
-              uses) instead of `lg:bg-transparent`, rather than the artwork being
-              re-darkened globally to keep this column legible. Deliberately still
-              not the fully opaque `panel` fill (unchanged below lg:) — the artwork
-              must stay visible through it at the breakpoint where they overlap. */}
-          <div className="panel lg:bg-panel/55 lg:backdrop-blur-md lg:border-0 lg:border-l lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[300px] shrink-0 p-4 lg:pl-5 lg:pr-5 flex flex-col items-center gap-4 justify-center min-w-0">
-            <ReadinessRing value={overallReadiness} />
-            <div className="text-[11px] uppercase tracking-widest text-muted text-center">Overall Fleet Readiness</div>
-            <div className="w-full h-px bg-white/10" />
-            <div className="w-full flex flex-col gap-3">
-              <CriticalMetricTile icon={ShipWheel} value={ships.length} label="Ships Active" />
-              <CriticalMetricTile icon={ScanSearch} value={neededItems} label="Needed Items" accent={neededItems > 0 ? '#FFD166' : undefined} />
+          {/* Fleet Status (left) — Deliverable 2 (UX-001A). Relocated verbatim
+              from Quartermaster Logistics: an operational classification of
+              the fleet, not a logistics/inventory metric (which stays put,
+              below). Ships Active has no meaningful per-ship "context" (every
+              ship trivially qualifies), so it renders as a plain metric
+              rather than through FleetStatusTile's own name-list treatment.
+              UX-001A.1 (Deliverable 1) — Ships Active is the parent
+              classification the other three are a breakdown OF, not four
+              independent counts. Advisory Gold (docs/UI_ARCHITECTURE.md §4)
+              marks it as the anchor — explicitly authorized for this one
+              case by this mission's own work order — and the three children
+              sit in a gold-tinted, left-bracketed sub-container beneath it,
+              the same parent/branch visual grammar an org chart or file tree
+              already uses, never a size change (WO's own "avoid increasing
+              card size dramatically"). */}
+          <div className="panel lg:bg-panel/55 lg:backdrop-blur-md lg:border-0 lg:border-r lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[260px] shrink-0 p-3.5 lg:p-4 flex flex-col gap-3 min-w-0">
+            <p className="text-[10px] uppercase tracking-widest text-muted/60">Fleet Status</p>
+            <CriticalMetricTile icon={ShipWheel} value={ships.length} label="Ships Active" className="border-gold/40" />
+            <div className="flex flex-col gap-2 ml-2 pl-3 border-l border-gold/20">
+              <FleetStatusTile icon={CheckCircle2} label="Mission Ready" count={missionReadyShips.length} accent="#42E695" context={missionReadyContext} />
+              <FleetStatusTile icon={Wrench} label="Loadouts In Progress" count={inProgressShips.length} accent="#FFD166" context={inProgressContext} />
+              <FleetStatusTile icon={Factory} label="Factory Loadout" count={factoryShips.length} context={factoryContext} />
             </div>
+          </div>
+
+          {/* Operations Center (center) — UX-001A.1 Deliverable 2/5. Purely
+              atmospheric: command context and visual identity, no
+              operational instrumentation of any kind (Fleet Readiness moved
+              below, into Priority Actions — see that column's own doc
+              comment for why). The EWO-035A-R2 philosophy this restores:
+              "the goal is zero shading over the loaded image, not a
+              fallback tone" — the dimmed glass backdrop UX-001A added here
+              existed only to keep the readiness ring legible; with no
+              instrument left to protect, the artwork shows at full
+              presentation strength again. Kept as its own flex column
+              (rather than collapsed away) so the Hero's three-part
+              proportions and min-height are unchanged from UX-001A. */}
+          <div className="relative z-10 flex-1 min-w-0 min-h-[120px] lg:min-h-0" aria-hidden="true" />
+
+          {/* Priority Actions (right) — UX-001A.1 Deliverable 2/3/5. Fleet
+              Readiness (the Hero metric — "how healthy is my fleet?") now
+              docks at the top of this same column, directly above Priority
+              Actions ("what can I do about it?") — one operational unit,
+              per this mission's own explicit relationship, rather than
+              split across two columns the way UX-001A first shipped it.
+              Below it: the operational action queue, ranked by Commander
+              value (lowest effort / highest readiness impact first, not
+              severity alone — see priorityActions.ts's own reordered
+              PRIORITY_ACTION_CATEGORY_ORDER). Every row deep-links into the
+              ship(s) it concerns, in fleet priority order (Deliverable 4 —
+              already the case via buildTileContextNames' own sort; see
+              priorityActions.test.ts). */}
+          <div className="panel lg:bg-panel/55 lg:backdrop-blur-md lg:border-0 lg:border-l lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[280px] shrink-0 p-3.5 lg:p-4 flex flex-col min-w-0">
+            {/* UX-001A.3 (Deliverable 2) — pb-3→pb-4 and mb-3→mb-4 give the
+                now-larger gauge a touch more room to breathe as the
+                column's own anchor, rather than crowding straight into the
+                divider; intentional vertical distribution, not a mechanical
+                side-effect of the diameter change alone. */}
+            <div className="flex flex-col items-center gap-1.5 pb-4 mb-4 border-b border-white/10">
+              <ReadinessRing value={overallReadiness} />
+              <div className="text-[11px] uppercase tracking-widest text-muted text-center">Overall Fleet Readiness</div>
+            </div>
+            <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-1.5">Priority Actions</p>
+            {priorityActionGroups.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center gap-1.5 py-4">
+                <CheckCircle2 size={18} className="text-success" />
+                <p className="text-xs text-white font-medium">No Immediate Priority Actions</p>
+                <p className="text-[11px] text-muted/70">Fleet Readiness has nothing outstanding to act on.</p>
+              </div>
+            ) : (
+              // UX-001A.2 (Deliverable 1/4) — a stack of individually
+              // bounded Action Cards, never a divided list — one card =
+              // one action = one decision, matching Fleet Status's "one
+              // card per operational concept" cadence on the opposite
+              // side of the Hero. UX-001A.3 (Deliverable 2) widened the
+              // rhythm slightly (gap-2→gap-2.5). UX-001A.4A (Deliverable
+              // 4) — `flex-1` lets this stack absorb whatever vertical
+              // space the Hero row's `items-stretch` gives the Priority
+              // Actions panel beyond its own content height (the panel
+              // otherwise matches Operations Center/Fleet Status's
+              // height); `justify-between` then distributes that leftover
+              // space as extra gaps between cards rather than leaving it
+              // as dead space below the last card — gap-2.5 remains the
+              // floor when there's little or no leftover space (1-2 short
+              // cards) or when there are enough cards to fill the panel
+              // on its own (justify-between never compresses below the
+              // cards' own compact height either way).
+              <div className="flex-1 flex flex-col justify-between gap-2.5">
+                {priorityActionGroups.map((group) => {
+                  const p = PRIORITY_ACTION_PRESENTATION[group.category]
+                  return (
+                    <ActionCard key={group.category} icon={p.icon} title={p.label} count={group.count} accent={p.accent}>
+                      {renderShipContext(group.context)}
+                    </ActionCard>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -231,28 +388,19 @@ export default function MissionControl() {
           )}
         </div>
 
-        {/* Quartermaster Logistics — architecture approved (EWO-007); refined only.
-            Fleet Status and Inventory Status remain two departments in one division. */}
+        {/* Quartermaster Logistics — architecture approved (EWO-007); refined
+            only. UX-001A (Deliverable 2) relocated Fleet Status into the Hero
+            (it is a fleet operational classification, not a logistics
+            metric) — Inventory Status is Quartermaster Logistics' own
+            remaining, unchanged department. */}
         <div className="panel p-5 lg:p-6">
           <p className="text-sm font-display font-semibold text-white flex items-center gap-2 mb-4 min-w-0">
             <PackageCheck size={15} className="text-cyan shrink-0" /> <span className="truncate">Quartermaster Logistics</span>
           </p>
-          <div className="flex flex-col lg:flex-row lg:divide-x lg:divide-white/[0.04] gap-4 lg:gap-0">
-            <div className="lg:pr-5 lg:flex-[3] min-w-0">
-              <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Fleet Status</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <FleetStatusTile icon={CheckCircle2} label="Mission Ready" count={missionReadyShips.length} accent="#42E695" context={missionReadyContext} />
-                <FleetStatusTile icon={Wrench} label="Loadouts In Progress" count={inProgressShips.length} accent="#FFD166" context={inProgressContext} />
-                <FleetStatusTile icon={Factory} label="Factory Loadout" count={factoryShips.length} context={factoryContext} />
-              </div>
-            </div>
-            <div className="lg:pl-5 lg:flex-[2] min-w-0">
-              <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Inventory Status</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <CriticalMetricTile icon={AlertTriangle} label="Missing Components" value={missingComponentsCount} accent={missingComponentsCount > 0 ? '#FF5F73' : undefined} />
-                <CriticalMetricTile icon={ScanSearch} label="Unreserved Inventory" value={unreservedInventoryCount} />
-              </div>
-            </div>
+          <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Inventory Status</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <CriticalMetricTile icon={AlertTriangle} label="Missing Components" value={missingComponentsCount} accent={missingComponentsCount > 0 ? '#FF5F73' : undefined} />
+            <CriticalMetricTile icon={ScanSearch} label="Unreserved Inventory" value={unreservedInventoryCount} />
           </div>
         </div>
 

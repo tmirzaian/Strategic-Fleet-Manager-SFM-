@@ -203,7 +203,7 @@ Readiness percentage inside the readiness ring (`ReadinessRing`, local to
 | Navigation White | `white` | — | primary neutral text/guidance |
 | Readiness Green | `success` | `#42E695` | healthy / complete / operational / mission-ready |
 | Operational Amber | `warning` | `#FFD166` | incomplete / active work / pending readiness / attention required |
-| Advisory Gold | `gold` | `#C9A227` | reserved for restricted command/advisory authority only. Defined by EWO-014 for the Sidebar slogan's "Outfit" word, which EWO-015 removed from live JSX — that word (and its gold color) is now baked into the commissioned brand-lockup image (§2) rather than rendered by the Tailwind token. The `gold` token itself remains defined (harmless, currently unreferenced in application code) in case a future JSX use case needs it. **Do not use it as a general accent without a new explicit Design Authority instruction.** |
+| Advisory Gold | `gold` | `#C9A227` | reserved for restricted command/advisory authority only. Defined by EWO-014 for the Sidebar slogan's "Outfit" word, which EWO-015 removed from live JSX — that word (and its gold color) is now baked into the commissioned brand-lockup image (§2) rather than rendered by the Tailwind token. **UX-001A.1** is the first live-JSX use since EWO-015: Mission Control's Fleet Status "Ships Active" parent-metric outline and its children's connector bracket (`src/pages/MissionControl.tsx`), an explicit Design Authority instruction (the work order itself named "Quartermaster Gold outline" as an option) — narrowly scoped to that one parent/child relationship, not a general accent. **Do not extend it to a new use without a new explicit Design Authority instruction.** |
 | Alert Red | `danger` | `#FF5F73` | genuine failure / critical / urgent only |
 
 Counts derive their color from operational state through the one existing
@@ -812,3 +812,80 @@ Sea Trials flagged the universal fallback artwork rendering as a small object su
 **Coverage audit (Task 9, as of this mission — a snapshot, not a static guarantee; re-run the live tests in `src/data/__tests__/shipImageRegistry.test.ts` for the current count):** 258 total canonical selectable hulls, 12 with a registry-resolved image, 246 falling through to the universal fallback, 0 orphan registry keys, 0 duplicate keys, 0 malformed entries. Partial coverage is the expected, approved Beta state — the Commander adds entries incrementally, one HTTPS URL per line, no generation step, no re-import.
 
 **Stock role/focus (Tasks 6-9):** the identity line's second segment ("Manufacturer · Stock Role/Focus") is resolved by `resolveShipStockRoleFocus()` (`src/utils/shipIdentityLine.ts`) — deliberately independent of `Ship.role` (which mirrors the active Build's role text at materialization time, not stock metadata — see `docs/DataModel.md`'s "Stock role/focus vs. operational role"). Precedence: (1) the canonical `ShipDefinition.role`, when genuinely populated; (2) for a deep-imported definition whose own role/career came back empty (a real gap in the raw StarBreaker export envelope, not a wiring bug — see `docs/ImportPipeline.md`'s "Current known gaps" #8), the Mission M-012 catalog's own record for that same real hull, cross-referenced by entity class; (3) no text — never invented from the ship's name, never substituted from a Build or the Commander's future Fleet Profile role. `formatShipIdentityLine()` joins manufacturer and the resolved role with " · ", or renders manufacturer alone — never a dangling separator. **Coverage: 100% of the 258 canonical selectable hull definitions resolve a real stock role/focus** (252 at tier 1, 6 — every deep-imported ship — at tier 2) — see the EWO-033 final report for the full numbers and representative examples (Cutlass Red, 135c, Cutlass Black, Eclipse, Gladius).
+
+## 20. ActionCard — the canonical operational action standard (UX-001A.2–UX-001A.4A, IMPLEMENTED NOW / APPROVED FUTURE HARDPOINT)
+
+`src/components/ActionCard.tsx` — the canonical presentation for an
+operational action (a Commander decision, as distinct from an
+operational metric — see §7/§3's `CriticalMetricTile` for the metric
+side of that same visual language). First consumer: Mission Control's
+Priority Actions panel, replacing the prior `PriorityActionRow` floating
+notification-list treatment (retired, deleted — superseded, not kept
+alongside).
+
+- a colored left border stripe (`border-l-[3px]`), an icon housing
+  tinted with that same accent color, and the count rendered in that
+  same accent — three independent places the same severity signal
+  lands, so relative importance scans before any text is read
+- **UX-001A.4 — internal typography shares `CriticalMetricTile`'s own
+  hierarchy, not merely its bone structure.** The count renders first,
+  the action title renders beneath it using Fleet Status's own label
+  treatment (`text-[11px] uppercase tracking-widest text-muted`) rather
+  than a bespoke notification-style heading, and ship context renders
+  last, same subordinate treatment as `FleetStatusTile`'s own context row
+  (`text-[11px] text-muted/80`). The result: Fleet Status reads "Number →
+  State → Ship Context," Priority Actions reads "Number → Action → Ship
+  Context" — a shared scan rhythm.
+- **UX-001A.4A correction — shared hierarchy does not mean shared
+  geometry.** UX-001A.4's first pass copied Fleet Status's dimensions too
+  literally (`text-2xl` count, `w-10 h-10` icon housing, `p-4` padding),
+  stretching each card past what three compact lines need and leaving
+  unused space in the Priority Actions column. The fix keeps the
+  hierarchy and typography *family* but steps the geometry down: count is
+  `text-xl font-display font-bold leading-none` (one scale step below
+  Fleet Status's own `text-2xl`, still display font, bold, and
+  accent-colored — still unmistakably the primary scan target), icon
+  housing is `w-8 h-8` (was `w-10 h-10`), card padding is `p-3` (was
+  `p-4`). Label and ship-context treatment are unchanged from UX-001A.4 —
+  those never caused the fitment problem. **Design System guidance:**
+  document *shared hierarchy* between related components (count-first
+  scan order, label treatment, supporting-context treatment), not
+  mandatory identical CSS classes — a classification panel (Fleet Status)
+  and a compact work queue (Priority Actions) are related, not
+  interchangeable.
+- the icon housing stayed accent-tinted rather than adopting Fleet
+  Status's uniform cyan tint — Priority Actions' glyph-plus-color pairing
+  is the one place the two panels are meant to diverge, per Design
+  Intent: "they should not be identical, but they should share the same
+  visual grammar"
+- domain-agnostic: no ship/fleet concept baked into the component
+  itself (an optional `to` prop for a whole-card link, an optional
+  `children` slot for supporting context) — Mission Control supplies
+  its own ship-context rendering via a local `renderShipContext()`
+  helper rather than teaching `ActionCard` about ships
+- one card = one action = one decision: each `PriorityActionGroup`
+  (`src/utils/priorityActions.ts`) renders as its own bounded `.panel`
+  element — never a divided list, never rows sharing one shared panel.
+  The stack container (`flex-1 flex flex-col justify-between gap-2.5`,
+  UX-001A.4A Deliverable 4) absorbs whatever leftover vertical space the
+  Hero row's `items-stretch` gives the Priority Actions panel and
+  distributes it as extra gaps between cards, rather than leaving it as
+  dead space below the last card — `gap-2.5` remains the floor either
+  way, so this never compresses cards below their own compact height.
+
+Used today for Mission Control's five Priority Action categories
+(Reserved — Awaiting Install, Ready to Install, Upgrade Opportunities,
+Invalid Targets, Critical Missing Components). Intended for reuse
+anywhere else in Strategic Fleet Manager an operational action needs the
+same treatment — Decision Center, Fleet Dashboard, Organization
+Management, Manufacturing, Insurance, and future Quartermaster modules
+are the named future consumers; no changes to `ActionCard` itself should
+be required to adopt it elsewhere.
+
+**Design System Amendment (UX-001A.2):** *Operational concepts are
+encapsulated. Metrics, status summaries, and operational actions should
+be presented as bounded visual units whenever they represent independent
+Commander decisions. Containment improves scan efficiency, reinforces
+information hierarchy, and establishes consistent interaction targets.
+Lists remain appropriate for supporting information within a card, but
+top-level operational concepts should be visually encapsulated.*

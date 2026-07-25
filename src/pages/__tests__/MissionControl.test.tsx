@@ -26,6 +26,25 @@ function renderMissionControl() {
   )
 }
 
+/** Forces the seed 'ghost' ship into two simultaneous Priority Action
+ * categories (Upgrade Opportunities + Invalid Targets) so tests can
+ * assert on more than one Action Card at once. Shared across the
+ * UX-001A.2 and UX-001A.4 describe blocks below. */
+function forceTwoCategories() {
+  const { ships, builds, hardpoints } = useFleetStore.getState()
+  const ghost = ships.find((s) => s.id === 'ghost')!
+  const ghostHardpoints = hardpoints.filter((h) => h.buildId === ghost.activeBuildId && !h.isStructural && h.targetItem && h.targetItem !== '—')
+  useFleetStore.setState({
+    ships: [ghost],
+    builds: builds.filter((b) => b.shipId === 'ghost'),
+    hardpoints: hardpoints.map((h) => {
+      if (h.id === ghostHardpoints[0]?.id) return { ...h, status: 'Invalid Target' as const, invalidMessage: 'Test' }
+      if (h.id === ghostHardpoints[1]?.id) return { ...h, status: 'Upgrade Available' as const }
+      return h
+    }),
+  })
+}
+
 describe('Fleet Status invariant (Alpha 2.5A, Part 1/4)', () => {
   it('4. Mission Ready + Loadouts In Progress + Factory Loadout always equals Ships Active, for the real seed fleet', () => {
     const { ships, builds, hardpoints } = useFleetStore.getState()
@@ -142,31 +161,43 @@ describe('Procurement sorting on Mission Control (tests 20-23)', () => {
   })
 })
 
-describe('<MissionControl /> — EWO-006 command surface composition', () => {
-  it('renders the Fleet Readiness command rail with its two supporting metrics, Fleet Readiness most prominent', () => {
+describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-006 command surface composition)', () => {
+  it('renders the three-column Command Briefing: Fleet Status, Operations Center (Fleet Readiness), and Priority Actions', () => {
     renderMissionControl()
+    expect(screen.getByText('Fleet Status')).toBeInTheDocument()
     expect(screen.getByText('Overall Fleet Readiness')).toBeInTheDocument()
+    expect(screen.getByText('Priority Actions')).toBeInTheDocument()
     expect(screen.getByText('Ships Active')).toBeInTheDocument()
-    expect(screen.getByText('Needed Items')).toBeInTheDocument()
+    // Deliverable 4's own retirement of the old standalone "Needed Items"
+    // count — Priority Actions now conveys that signal in actionable form.
+    expect(screen.queryByText('Needed Items')).not.toBeInTheDocument()
   })
 
-  it('the two supporting metrics are contained within the same command rail panel as Fleet Readiness', () => {
+  it('Deliverable 2: Fleet Status (Ships Active, Mission Ready, Loadouts In Progress, Factory Loadout) is its own Hero column, separate from Operations Center', () => {
     renderMissionControl()
-    const readiness = screen.getByText('Overall Fleet Readiness').closest('.panel')
-    expect(readiness).not.toBeNull()
-    expect(readiness).toHaveTextContent('Ships Active')
-    expect(readiness).toHaveTextContent('Needed Items')
+    const fleetStatusHeading = screen.getByText('Fleet Status')
+    const fleetStatusColumn = fleetStatusHeading.parentElement as HTMLElement
+    expect(fleetStatusColumn).toHaveTextContent('Ships Active')
+    expect(fleetStatusColumn).toHaveTextContent('Mission Ready')
+    expect(fleetStatusColumn).toHaveTextContent('Loadouts In Progress')
+    expect(fleetStatusColumn).toHaveTextContent('Factory Loadout')
+    // Operations Center carries only the Hero metric — no Fleet Status
+    // counts leak into it (Deliverable 3: "shall not compete with
+    // operational metrics").
+    const readinessColumn = screen.getByText('Overall Fleet Readiness').parentElement as HTMLElement
+    expect(readinessColumn).not.toHaveTextContent('Ships Active')
+    expect(readinessColumn).not.toHaveTextContent('Mission Ready')
   })
 
-  it('Quartermaster Logistics contains all five existing logistics/inventory values as one operational band', () => {
+  it('Deliverable 2: Quartermaster Logistics keeps only Inventory Status — Fleet Status is relocated out, not duplicated', () => {
     renderMissionControl()
     const band = screen.getByText('Quartermaster Logistics').closest('.panel')
     expect(band).not.toBeNull()
-    expect(band).toHaveTextContent('Mission Ready')
-    expect(band).toHaveTextContent('Loadouts In Progress')
-    expect(band).toHaveTextContent('Factory Loadout')
     expect(band).toHaveTextContent('Missing Components')
     expect(band).toHaveTextContent('Unreserved Inventory')
+    expect(band).not.toHaveTextContent('Mission Ready')
+    expect(band).not.toHaveTextContent('Loadouts In Progress')
+    expect(band).not.toHaveTextContent('Factory Loadout')
   })
 
   it('Priority Ship section uses live fleet data — the real lowest-priority-number seed ship renders first, never a hard-coded name', () => {
@@ -333,13 +364,27 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
     consoleError.mockRestore()
   })
 
-  it('EWO-035A: the Fleet Readiness rail gets its own translucent glass backdrop at the lg: breakpoint, not the fully transparent treatment, so it stays legible over the brighter hero artwork', () => {
+  it('EWO-035A/UX-001A.1: Fleet Status and Priority Actions (which now carries Fleet Readiness) get their own translucent glass backdrop at the lg: breakpoint, so each stays legible over the brighter hero artwork; Operations Center carries no instrumentation and no backdrop to protect', () => {
     renderMissionControl()
-    const rail = screen.getByText('Overall Fleet Readiness').closest('.panel')
-    expect(rail).not.toBeNull()
-    expect(rail!.className).toContain('lg:bg-panel/55')
-    expect(rail!.className).toContain('lg:backdrop-blur-md')
-    expect(rail!.className).not.toContain('lg:bg-transparent')
+    // UX-001A.1 (Deliverable 2) — Fleet Readiness now docks inside Priority
+    // Actions; Operations Center is pure atmosphere with nothing left to
+    // keep legible, so EWO-035A's own dimming treatment is removed there
+    // (full presentation strength, per EWO-035A-R2's original philosophy).
+    const readinessColumn = screen.getByText('Overall Fleet Readiness').closest('.panel')
+    expect(readinessColumn).not.toBeNull()
+    expect(readinessColumn!.className).toContain('lg:bg-panel/55')
+    expect(readinessColumn!.className).toContain('lg:backdrop-blur-md')
+    // Fleet Status (left) and Priority Actions (right) — the same `panel`
+    // glass treatment the original single rail used.
+    const fleetStatusColumn = screen.getByText('Fleet Status').closest('.panel')
+    expect(fleetStatusColumn).not.toBeNull()
+    expect(fleetStatusColumn!.className).toContain('lg:bg-panel/55')
+    expect(fleetStatusColumn!.className).toContain('lg:backdrop-blur-md')
+    expect(fleetStatusColumn!.className).not.toContain('lg:bg-transparent')
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel')
+    expect(priorityActionsColumn).not.toBeNull()
+    expect(priorityActionsColumn!.className).toContain('lg:bg-panel/55')
+    expect(priorityActionsColumn!.className).toContain('lg:backdrop-blur-md')
   })
 
   it('EWO-035A-R2: the hero region\'s own gradient background is removed entirely — no deliberate shading, tint, or dark gradient remains over the main artwork region', () => {
@@ -374,6 +419,314 @@ describe('<MissionControl /> — EWO-006 command surface composition', () => {
   })
 })
 
+describe('<MissionControl /> — UX-001A.1 Commander Review Amendments', () => {
+  it('Deliverable 1: Ships Active carries the Advisory Gold parent-metric outline, and its three children sit inside a gold-tinted bracket container beneath it', () => {
+    renderMissionControl()
+    const fleetStatusColumn = screen.getByText('Fleet Status').parentElement as HTMLElement
+    const shipsActiveTile = within(fleetStatusColumn).getByText('Ships Active').closest('.panel') as HTMLElement
+    expect(shipsActiveTile).not.toBeNull()
+    expect(shipsActiveTile.className).toContain('border-gold/40')
+    // The children container is a distinct element from the parent tile,
+    // sitting after it, with its own gold-tinted left border — the same
+    // parent/branch visual grammar an org chart or file tree already uses.
+    // EWO-033 (Task 2)'s own established note applies here too: "Mission
+    // Ready" can legitimately also match a Top-4 priority card's own
+    // status text elsewhere on the page — scoped to the Fleet Status
+    // column specifically to disambiguate.
+    const missionReadyTile = within(fleetStatusColumn).getByText('Mission Ready').closest('.panel') as HTMLElement
+    const childrenContainer = missionReadyTile.parentElement as HTMLElement
+    expect(childrenContainer.className).toContain('border-l')
+    expect(childrenContainer.className).toContain('border-gold/20')
+    expect(childrenContainer).toHaveTextContent('Loadouts In Progress')
+    expect(childrenContainer).toHaveTextContent('Factory Loadout')
+  })
+
+  it('Deliverable 2: Fleet Readiness now docks at the top of the Priority Actions column, directly above the action queue; Operations Center carries no instrumentation at all', () => {
+    renderMissionControl()
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    expect(priorityActionsColumn).toHaveTextContent('Overall Fleet Readiness')
+    // Fleet Readiness renders BEFORE the "Priority Actions" label in
+    // reading order — the gauge docks at the top of the column, not below.
+    const readinessNode = within(priorityActionsColumn).getByText('Overall Fleet Readiness')
+    const priorityActionsLabel = within(priorityActionsColumn).getByText('Priority Actions')
+    expect(readinessNode.compareDocumentPosition(priorityActionsLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Operations Center itself is now a bare, content-free spacer.
+    const environmentLayer = document.querySelector('[data-environment-id="mission-control"]') as HTMLElement
+    const operationsCenter = environmentLayer.parentElement as HTMLElement
+    const centerColumn = Array.from(operationsCenter.children).find(
+      (el) => el.getAttribute('aria-hidden') === 'true' && !el.className.includes('border-t') && !el.className.includes('border-b')
+    ) as HTMLElement
+    expect(centerColumn).not.toBeNull()
+    expect(centerColumn.textContent).toBe('')
+  })
+
+  it('Deliverable 3: Priority Actions categories still resolve through the reordered, Commander-value PRIORITY_ACTION_CATEGORY_ORDER (Upgrade Opportunities ranks ahead of Invalid Targets)', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    const ghostHardpoints = hardpoints.filter((h) => h.buildId === ghost.activeBuildId && !h.isStructural && h.targetItem && h.targetItem !== '—')
+    useFleetStore.setState({
+      ships: [ghost],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints.map((h) => {
+        if (h.id === ghostHardpoints[0]?.id) return { ...h, status: 'Invalid Target' as const, invalidMessage: 'Test' }
+        if (h.id === ghostHardpoints[1]?.id) return { ...h, status: 'Upgrade Available' as const }
+        return h
+      }),
+    })
+    renderMissionControl()
+    const upgradeNode = screen.getByText('Upgrade Opportunities')
+    const invalidNode = screen.getByText('Invalid Targets')
+    expect(upgradeNode.compareDocumentPosition(invalidNode) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('Deliverable 4: ships within a Priority Actions category render in fleet priority order, not alphabetical order', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const zulu = { ...ships.find((s) => s.id === 'ghost')!, id: 'zulu-ship', name: 'Zulu', priority: 1 }
+    const alpha = { ...ships.find((s) => s.id === 'corsair')!, id: 'alpha-ship', name: 'Alpha', priority: 9, activeBuildId: 'alpha-build' }
+    const zuluBuild = { ...builds.find((b) => b.shipId === 'ghost')!, id: zulu.activeBuildId, shipId: zulu.id }
+    const alphaBuild = { ...builds.find((b) => b.shipId === 'corsair')!, id: alpha.activeBuildId, shipId: alpha.id }
+    const baseGhostHp = hardpoints.find((h) => h.buildId === ships.find((s) => s.id === 'ghost')!.activeBuildId && !h.isStructural && h.targetItem && h.targetItem !== '—')!
+    const forcedZulu = { ...baseGhostHp, id: 'zulu-hp', shipId: zulu.id, buildId: zulu.activeBuildId, status: 'Invalid Target' as const, invalidMessage: 'Test' }
+    const forcedAlpha = { ...baseGhostHp, id: 'alpha-hp', shipId: alpha.id, buildId: alpha.activeBuildId, status: 'Invalid Target' as const, invalidMessage: 'Test' }
+    useFleetStore.setState({
+      ships: [alpha, zulu],
+      builds: [alphaBuild, zuluBuild],
+      hardpoints: [forcedAlpha, forcedZulu],
+    })
+    renderMissionControl()
+    const invalidTargetsRow = screen.getByText('Invalid Targets').closest('.flex.items-start') as HTMLElement
+    const zuluLink = within(invalidTargetsRow).getByText('Zulu')
+    const alphaLink = within(invalidTargetsRow).getByText('Alpha')
+    // Zulu (priority 1, higher priority) must render before Alpha
+    // (priority 9) despite Alpha sorting first alphabetically.
+    expect(zuluLink.compareDocumentPosition(alphaLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
+describe('<MissionControl /> — UX-001A Deliverable 4: Priority Actions panel', () => {
+  it('renders the "no immediate actions" empty state for a fleet with nothing outstanding', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const utv = ships.find((s) => s.id === 'utv')!
+    useFleetStore.setState({
+      ships: [utv],
+      builds: builds.filter((b) => b.shipId === 'utv'),
+      hardpoints: hardpoints.filter((h) => h.shipId === 'utv'),
+    })
+    renderMissionControl()
+    expect(screen.getByText('No Immediate Priority Actions')).toBeInTheDocument()
+  })
+
+  it('a ship with an Invalid Target assignment renders under the Invalid Targets category, deep-linked to that ship\'s Ship Workspace', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    const ghostHardpoints = hardpoints.filter((h) => h.buildId === ghost.activeBuildId)
+    const targetSlot = ghostHardpoints.find((h) => !h.isStructural && h.targetItem && h.targetItem !== '—')!
+    useFleetStore.setState({
+      ships: [ghost],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints
+        .filter((h) => h.shipId === 'ghost')
+        .map((h) => (h.id === targetSlot.id ? { ...h, status: 'Invalid Target' as const, invalidMessage: 'Test-forced invalid target' } : h)),
+    })
+    renderMissionControl()
+    // Scoped to the Invalid Targets row specifically — the Ghost's own
+    // seed data can independently also have a genuinely Ready to Install
+    // assignment elsewhere, which would otherwise make the ship's own name
+    // ambiguous across two different Priority Actions rows.
+    const invalidTargetsRow = screen.getByText('Invalid Targets').closest('.flex.items-start') as HTMLElement
+    expect(invalidTargetsRow).not.toBeNull()
+    const shipLink = within(invalidTargetsRow).getByText(ghost.name).closest('a')
+    expect(shipLink).toHaveAttribute('href', `/ship-workspace/${ghost.id}`)
+  })
+})
+
+describe('<MissionControl /> — UX-001A.2: Priority Actions render as individually bounded Action Cards', () => {
+  it('Deliverable 1: each category renders as its own bounded card, not rows sharing one divided list', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    const invalidCard = screen.getByText('Invalid Targets').closest('.panel') as HTMLElement
+    expect(upgradeCard).not.toBeNull()
+    expect(invalidCard).not.toBeNull()
+    // Two distinct cards, not one shared panel with an internal divider.
+    expect(upgradeCard).not.toBe(invalidCard)
+    expect(upgradeCard.className).not.toContain('divide-y')
+    expect(invalidCard.className).not.toContain('divide-y')
+  })
+
+  it('Deliverable 2/3: each card carries its own severity-colored left border stripe and icon housing tint (accent applied in three places, per ActionCard\'s own doc comment)', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    const invalidCard = screen.getByText('Invalid Targets').closest('.panel') as HTMLElement
+    // Operational Amber (Upgrade Opportunity) vs Alert Red (Invalid Target)
+    // — distinct colors, each applied to that card's own left border stripe.
+    expect(upgradeCard.style.borderLeftColor).toBe('rgb(255, 209, 102)')
+    expect(invalidCard.style.borderLeftColor).toBe('rgb(255, 95, 115)')
+    const upgradeIconBox = upgradeCard.querySelector('div[style*="background-color"]') as HTMLElement
+    const invalidIconBox = invalidCard.querySelector('div[style*="background-color"]') as HTMLElement
+    expect(upgradeIconBox).not.toBeNull()
+    expect(invalidIconBox).not.toBeNull()
+    expect(upgradeIconBox.style.backgroundColor).not.toBe(invalidIconBox.style.backgroundColor)
+  })
+
+  it('Deliverable 4/5: the Priority Actions panel renders one bounded card per category, stacked with the same rhythm as Fleet Status\'s own card stack', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    // UX-001A.3 (Deliverable 2) widened this stack's own rhythm to gap-2.5.
+    const cardStack = priorityActionsColumn.querySelector('.flex.flex-col.gap-2\\.5') as HTMLElement
+    expect(cardStack).not.toBeNull()
+    const cards = cardStack.querySelectorAll(':scope > .panel')
+    expect(cards).toHaveLength(2)
+  })
+})
+
+describe('<MissionControl /> — UX-001A.4/UX-001A.4A: Action Cards share Fleet Status\'s hierarchy without sharing its geometry', () => {
+  it('Deliverable 2: the count renders first (DOM order, ahead of the label), in display-font bold accent-colored typography — one scale step below Fleet Status\'s own count, not byte-identical to it', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    const countEl = upgradeCard.querySelector('.font-display.font-bold') as HTMLElement
+    expect(countEl).not.toBeNull()
+    expect(countEl.textContent).toBe('1')
+    expect(countEl.className).toContain('text-xl')
+    // UX-001A.4A (Deliverable 2): a controlled step down from Fleet
+    // Status's own text-2xl scale, not identical to it — relative
+    // prominence and shared typography family, not shared geometry.
+    expect(countEl.className).not.toContain('text-2xl')
+    const shipsActiveValue = (screen.getByText('Ships Active').closest('.panel') as HTMLElement).querySelector(
+      '.text-2xl.font-display.font-bold'
+    ) as HTMLElement
+    expect(shipsActiveValue).not.toBeNull()
+    const labelEl = screen.getByText('Upgrade Opportunities')
+    expect(countEl.compareDocumentPosition(labelEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('Deliverable 3: the action label uses Fleet Status\'s own label treatment, not the retired notification-style title', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const label = screen.getByText('Upgrade Opportunities')
+    expect(label.className).toContain('uppercase')
+    expect(label.className).toContain('tracking-widest')
+    expect(label.className).toContain('text-[11px]')
+    expect(label.className).toContain('text-muted')
+    // Not the old bespoke notification-title treatment this superseded.
+    expect(label.className).not.toContain('font-semibold')
+    expect(label.className).not.toContain('text-white')
+  })
+
+  it('Deliverable 4 (UX-001A.4 data ordering): ship context remains present and reads after both the count and the label, never ahead of them', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    const ghostLink = within(upgradeCard).getByText('F7C-S Hornet Ghost Mk II')
+    expect(ghostLink.closest('a')).toHaveAttribute('href', '/ship-workspace/ghost')
+    const countEl = upgradeCard.querySelector('.font-display.font-bold') as HTMLElement
+    const labelEl = screen.getByText('Upgrade Opportunities')
+    expect(countEl.compareDocumentPosition(labelEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(labelEl.compareDocumentPosition(ghostLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('Deliverable 5: semantic color is preserved — the count still carries the accent color, alongside the existing border stripe and icon tint', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    const countEl = upgradeCard.querySelector('.font-display.font-bold') as HTMLElement
+    expect(countEl.style.color).toBe('rgb(255, 209, 102)') // Operational Amber — Upgrade Opportunity
+    expect(upgradeCard.style.borderLeftColor).toBe('rgb(255, 209, 102)')
+  })
+
+  it('UX-001A.4A Deliverable 1: Action Card geometry is compact — smaller icon housing and tighter padding than Fleet Status\'s own CriticalMetricTile', () => {
+    forceTwoCategories()
+    renderMissionControl()
+    const upgradeCard = screen.getByText('Upgrade Opportunities').closest('.panel') as HTMLElement
+    expect(upgradeCard.className).toContain('p-3')
+    expect(upgradeCard.className).not.toContain('p-4')
+    const iconBox = upgradeCard.querySelector('div[style*="background-color"]') as HTMLElement
+    expect(iconBox.className).toContain('w-8')
+    expect(iconBox.className).toContain('h-8')
+    expect(iconBox.className).not.toContain('w-10')
+    const fleetStatusTile = (screen.getByText('Ships Active').closest('.panel') as HTMLElement).className
+    expect(fleetStatusTile).toContain('p-4')
+  })
+
+  it('UX-001A.4A Deliverable 4: the card stack absorbs the panel\'s leftover vertical space and distributes cards within it (flex-1 + justify-between), rather than leaving dead space below a short list', () => {
+    renderMissionControl()
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    const stack = priorityActionsColumn.querySelector('.flex-1.flex.flex-col.justify-between') as HTMLElement
+    expect(stack).not.toBeNull()
+  })
+
+  it('Required Regression Review — one-action state: a single Priority Action category renders as exactly one compact card', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    const ghostHp = hardpoints.find((h) => h.buildId === ghost.activeBuildId && !h.isStructural && h.targetItem && h.targetItem !== '—')!
+    useFleetStore.setState({
+      ships: [ghost],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      // Only the one forced hardpoint — Ghost's own other seed hardpoints
+      // would otherwise independently contribute additional categories
+      // (e.g. a genuine Ready to Install), defeating the one-card assertion.
+      hardpoints: [{ ...ghostHp, status: 'Invalid Target' as const, invalidMessage: 'Test' }],
+    })
+    renderMissionControl()
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    const cards = priorityActionsColumn.querySelectorAll('.flex-1 > .panel')
+    expect(cards).toHaveLength(1)
+  })
+
+  it('Required Regression Review — overflow state: all five Priority Action categories render simultaneously, each its own card', () => {
+    const ship = { id: 's1', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned' as const, career: 'Combat', role: 'Gunship', activeBuildId: 'b1', readiness: 50, priority: 1, missing: [] }
+    const build = { id: 'b1', shipId: 's1', name: 'Loadout', role: 'Gunship', readiness: 50, isActive: true, missing: [] }
+    const hardpoints = [
+      { id: 'hp-reserved', shipId: 's1', buildId: 'b1', slotLabel: 'Slot A', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Mirage', status: 'Missing' as const },
+      { id: 'hp-ready', shipId: 's1', buildId: 'b1', slotLabel: 'Slot B', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Basilisk', status: 'Missing' as const },
+      { id: 'hp-upgrade', shipId: 's1', buildId: 'b1', slotLabel: 'Slot C', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: 'Old', targetItem: 'New', status: 'Upgrade Available' as const },
+      { id: 'hp-invalid', shipId: 's1', buildId: 'b1', slotLabel: 'Slot D', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'BadTarget', status: 'Invalid Target' as const, invalidMessage: 'Test' },
+      { id: 'hp-missing', shipId: 's1', buildId: 'b1', slotLabel: 'Slot E', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Scorpion', status: 'Missing' as const },
+    ]
+    const hangarItems = [{ id: 'hi-1', name: 'Basilisk', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' as const }]
+    const reservations = [
+      { id: 'r1', missionConfigurationId: 'b1', fleetAssetId: 's1', targetSlotLabel: 'Slot A', componentName: 'Mirage', quantity: 1, status: 'ACTIVE' as const, createdAt: '', updatedAt: '' },
+    ]
+    useFleetStore.setState({ ships: [ship], builds: [build], hardpoints, hangarItems, reservations, installedLoadouts: [] })
+    renderMissionControl()
+    expect(screen.getByText('Reserved — Awaiting Install')).toBeInTheDocument()
+    expect(screen.getByText('Ready to Install')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade Opportunities')).toBeInTheDocument()
+    expect(screen.getByText('Invalid Targets')).toBeInTheDocument()
+    expect(screen.getByText('Critical Missing Components')).toBeInTheDocument()
+    const priorityActionsColumn = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    const cards = priorityActionsColumn.querySelectorAll('.flex-1 > .panel')
+    expect(cards).toHaveLength(5)
+  })
+
+  it('Required Regression Review — truncation at a realistic long ship name: the ship-context row truncates rather than wrapping or overflowing the card', () => {
+    const ship = {
+      id: 's1',
+      name: 'F7CM Super Hornet Heartseeker Mk II',
+      manufacturer: 'Anvil',
+      ownership: 'Owned' as const,
+      career: 'Combat',
+      role: 'Fighter',
+      activeBuildId: 'b1',
+      readiness: 50,
+      priority: 1,
+      missing: [],
+    }
+    const build = { id: 'b1', shipId: 's1', name: 'Loadout', role: 'Fighter', readiness: 50, isActive: true, missing: [] }
+    const hardpoints = [
+      { id: 'hp1', shipId: 's1', buildId: 'b1', slotLabel: 'Slot A', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Scorpion', status: 'Invalid Target' as const, invalidMessage: 'Test' },
+    ]
+    useFleetStore.setState({ ships: [ship], builds: [build], hardpoints, hangarItems: [], reservations: [], installedLoadouts: [] })
+    renderMissionControl()
+    const invalidCard = screen.getByText('Invalid Targets').closest('.panel') as HTMLElement
+    const contextRow = within(invalidCard).getByText(ship.name).closest('div') as HTMLElement
+    expect(contextRow.className).toContain('truncate')
+  })
+})
+
 describe('<MissionControl /> — Mission M-012 empty-state', () => {
   it('9. renders a valid, deliberate empty state with zero ships (not a blank page or crash)', () => {
     useFleetStore.setState({ ships: [], builds: [], hardpoints: [] })
@@ -405,16 +758,31 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.queryByText('Update Budget')).not.toBeInTheDocument()
   })
 
-  it('4/5/7. the two rail supporting metrics and all five Quartermaster Logistics counts share one critical-metric-tile scale', () => {
+  it('4/5/7. UX-001A: every Hero Fleet Status count and both Quartermaster Logistics Inventory Status counts share one critical-metric-tile scale', () => {
     const { container } = renderMissionControl()
-    // Every critical count (Ships Active, Needed Items, Mission Ready, Loadouts In
-    // Progress, Factory Loadout, Missing Components, Unreserved Inventory) renders
-    // through the shared CriticalMetricTile contract — same value/label typography.
-    const values = container.querySelectorAll('.panel .text-2xl.font-display.font-bold')
-    expect(values.length).toBe(7)
+    // Every critical count (Ships Active, Mission Ready, Loadouts In
+    // Progress, Factory Loadout, Missing Components, Unreserved Inventory)
+    // renders through the shared CriticalMetricTile contract — same
+    // value/label typography. "Needed Items" no longer exists (retired by
+    // UX-001A Deliverable 4 in favor of Priority Actions), so the prior
+    // count of 7 is now 6.
+    //
+    // UX-001A.4 (Deliverable 2) deliberately extended this exact scale to
+    // the Priority Actions column's own Action Card counts too ("the
+    // count should use the same ... numeric typography and visual weight
+    // as the Fleet Status numbers") — so the raw selector below no longer
+    // uniquely fingerprints only these six tiles. Scope it to everywhere
+    // but the Priority Actions panel to keep testing what this assertion
+    // has always meant: Fleet Status (Hero) + Inventory Status
+    // (Quartermaster Logistics) share one scale.
+    const priorityActionsPanel = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
+    const values = Array.from(container.querySelectorAll('.panel .text-2xl.font-display.font-bold')).filter(
+      (el) => !priorityActionsPanel.contains(el)
+    )
+    expect(values.length).toBe(6)
   })
 
-  it('6. Quartermaster Logistics renders all five critical cards', () => {
+  it('6. UX-001A: all six critical cards render somewhere on the page — Fleet Status in the Hero, Inventory Status in Quartermaster Logistics', () => {
     renderMissionControl()
     // EWO-033 (Task 2): getAllByText tolerates a Top-4 priority card's own
     // status text legitimately overlapping a Fleet Status tile's label —
