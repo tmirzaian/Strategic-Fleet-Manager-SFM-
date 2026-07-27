@@ -1571,3 +1571,224 @@ ship…]"). No extra rebalancing markup was needed — the group's existing
 `flex items-center gap-3` wrapper collapses naturally to a single child
 in the ordinary Commander case (Developer Mode still occupies its slot
 correctly on the rare local-developer session where the flag is on).
+
+## 33. Hero State Synchronization (EWO-063, IMPLEMENTED NOW)
+
+**Audit finding, disclosed rather than silently assumed away:** targeted
+live browser reproduction (rapid switching between ships with genuinely
+differing readiness — a Factory-only 100%-ready ship and one with a real
+unresolved target; a ship with real photography and one without) and a
+full static read of every `useMemo`/`useEffect`/`useState` in
+`ShipWorkspacePrototype.tsx` found Readiness %, Missing Components,
+Decision Summary, and the image-presentation mode all already
+recalculating correctly and immediately on every ship switch — none of
+this page's Hero-relevant values (`activeProgress`, `missingSummary`,
+`decisionCount`, `prioritizedDecisions`, `actionableDecisions`) are
+memoized against a dependency array at all; they are plain `const`s
+recomputed fresh on every render, and `ship` itself is `ships.find((s)
+=> s.id === shipId)` recomputed fresh from `useParams()` on every
+render — there is no `useFleetStore.getState()` snapshot read and no
+module-level cache anywhere in the Hero's own data path. No reproducible
+staleness was found.
+
+Two hardening changes were made anyway, directly answering this
+mission's own stated concern, as defense-in-depth rather than a fix to
+an observed defect:
+
+- **`<ShipHeroFrame key={ship.id} .../>`** — forces React to fully
+  unmount/remount `ShipHeroFrame` (and its child `ShipImage`) on every
+  ship change, rather than reusing the same component instance. This is
+  the one piece of Hero-adjacent state that lives inside a child
+  component (`ShipHeroFrame`'s own `mode`, `ShipImage`'s own load/
+  fallback `state`) rather than being derived fresh on every
+  `ShipWorkspacePrototype` render; a `key` change is the idiomatic React
+  guarantee that no such internal state can ever leak from one ship to
+  the next, regardless of prop-driven `useEffect` timing.
+- **A single consolidated per-ship reset effect** (`[shipId]`) for the
+  Change Installed Components row-level UI state
+  (`expandedInstallRowId`, `installNotice`, `reassignConfirmKey`,
+  `borrowConfirmKey`, `newComponentFormHpId`/`newComponentSelection`,
+  `inspectedConfigurableSlotId`) that had no explicit per-ship reset
+  before. Each is keyed by a build-scoped Hardpoint/candidate id, so a
+  stale key already harmlessly matched nothing on a different ship's own
+  hardpoint set — but an orphaned "still open" disclosure is stale UI
+  state a Commander never asked to carry across a ship switch, and this
+  mission's own bar is "no Commander action required," not merely "no
+  visible wrong data." Joins the existing per-ship resets this file
+  already had for `reviewedBuildId`, `expandedGroups`, and the New
+  Loadout form.
+
+Regression coverage locks in what the audit already found true: rapid
+repeated switching between a 100%-ready ship and one with a real
+Missing gap never shows stale Readiness/Missing/Decision Summary data,
+and the Hero image `<img>` genuinely changes (not just its wrapping
+layout) on every switch — via the same live `navigate()` route-param
+transition a real Commander's dropdown triggers, never a fresh
+`render()` per ship (which would trivially mask a genuine
+client-navigation-only bug, the same principle §32's Part B navigation
+test already documents).
+
+## 34. ShipManagementSummary — One Authoritative Calculation (EWO-063 v2, IMPLEMENTED NOW)
+
+A Commander-reported follow-up to §33: a screenshot showed the Hero and
+the Systems Workspace table appearing to disagree. Re-investigation
+(Part B) found no cached/stale object anywhere in the derivation layer —
+every Hero-relevant value was already a fresh `const` recomputed every
+render — but did confirm the real, by-design split §33 already
+documents: the Hero always reflects the ship's **Active** Loadout, while
+the Systems Workspace tables reflect whichever Loadout the Commander is
+currently **Reviewing** ("the ship never changes, only the tools
+change" — SW-002's own founding principle, unchanged by this mission).
+When Active and Reviewed differ, a screenshot comparing the two can read
+as a bug even though it's the intended design. Regardless of that
+finding, five independent hand-maintained expressions computing from the
+same hardpoint set — real duplication risk even without a proven active
+defect — is exactly what this mission's Part C asks to eliminate.
+
+**`src/utils/shipManagementSummary.ts`** — the one authoritative
+calculation. `buildShipManagementSummary(hardpoints, context)` returns a
+single `ShipManagementSummary`: Readiness (`progress`, `buildState`),
+Missing Components (`missingSummary`), Decision Summary
+(`decisionHardpoints`/`decisionCount`/`prioritizedDecisions`/
+`actionableDecisions`/`actionableCount`/`hasNonActionableGaps`), and two
+precomputed per-hardpoint maps — `hintByHardpointId` (acquisition hint,
+every non-structural hardpoint) and `availabilityByHardpointId`
+(inventory availability, every non-structural hardpoint's own saved
+target) — so notification icons (the Priority Components strip) and
+Availability badges (Change Installed Components) look up a value
+instead of each independently calling `describeAcquisitionHint`/
+`calculateComponentAvailability` a second (or third, or fourth) time for
+the same hardpoint. `criticalHardpointsInPriorityOrder` (previously
+defined in `ShipWorkspacePrototype.tsx`, re-exported unchanged from
+there for existing test imports) moved here too, as the pure derivation
+it always was.
+
+**One principled exception, not a gap.** Manage Loadout's New Target
+column shows availability for a live, unsaved, per-keystroke pending
+edit (`desiredTargets`) — that value doesn't exist until the Commander
+starts typing, so it cannot come from a summary computed once per
+render pass over saved hardpoint data. It keeps its own inline
+`calculateComponentAvailability` call against the pending value. This is
+ephemeral UI-editing feedback, not part of the ship's own summary — the
+one case "one calculation" deliberately doesn't reach into.
+
+**Active vs Reviewed, preserved, not collapsed.** `ShipWorkspacePrototype`
+computes `activeSummary = buildShipManagementSummary(activeHardpoints,
+...)` unconditionally (powers the Hero, Decision Summary, and the
+Priority Components strip) and `reviewedSummary` — literally the *same
+object* when the Reviewed Loadout is the Active one (the common case,
+zero extra computation), or a second `buildShipManagementSummary` call
+against `reviewedHardpoints` only when the Commander is genuinely
+reviewing a different Loadout (powers the Systems Workspace tables'
+Availability badges and hint disclosures). Same function, same logic,
+different input for a legitimate different purpose — "one calculation,"
+not "one input everywhere," since collapsing Active and Reviewed into a
+single concept would be a materially different, much larger change than
+this mission asked for (and would contradict SW-002's own founding
+design this document has recorded since §19).
+
+Regression coverage: a dedicated unit-test suite for
+`buildShipManagementSummary` itself (readiness/missing/decision/hint/
+availability correctness against constructed fixtures), plus an
+integration test proving Part A/B directly — removing an installed
+component via the real Change Installed Components UI immediately
+updates the Hero's own rendered Readiness % and Missing Components text,
+with no separate refresh action, because Hero and Table now derive from
+the same one calculation by construction.
+
+## 35. Commander Operations Panel — Hero Refactor (EWO-064, IMPLEMENTED NOW)
+
+**Governing principle, layered on top of SW-002/§34's Active-vs-Reviewed
+split: "Sticky Header owns context, Hero owns action."** The Sticky
+Context Bar (`data-testid="sticky-context-bar"`, pre-existing, unchanged
+by this mission) is the single owner of Ship / Reviewed Loadout /
+Current Intent / Pending Changes. The Hero owns Operational Readiness,
+Immediate Actions, Priority Components, and the Decision Summary — no
+contextual duplication between them.
+
+**Part F — the Hero now reflects Reviewed, not merely Active.**
+§34 deliberately preserved Active-vs-Reviewed as two separate summary
+objects (`activeSummary` powering the Hero, `reviewedSummary` powering
+the Systems Workspace tables) and flagged that choice explicitly as a
+judgment call the Commander could reverse. EWO-064 reverses it for the
+Hero specifically: `ShipHeroFrame`, the Priority Components strip, and
+the Decision Summary panel now all read `reviewedSummary` — the same
+object the Systems Workspace tables already used. This is a
+**presentation** change, not an **architecture** change (Part H): the
+underlying Active/Reviewed data model, the Loadout pill selector, and
+the Sticky Context Bar are byte-for-byte unchanged — only which of the
+two already-computed `ShipManagementSummary` objects feeds the Hero
+moved. Because the Sticky Context Bar already names which Loadout is
+Reviewed, the Hero switching to match it removes the exact
+screenshot-reads-as-a-bug ambiguity §34 diagnosed, rather than papering
+over it.
+
+**Part C — the Decision Summary's "no decisions" state is now
+genuinely empty-only.** Previously `ShipManagementSummary` additionally
+tracked `actionableDecisions`/`actionableCount`/`hasNonActionableGaps`,
+and any hardpoint whose only acquisition path was "Purchase Required"
+(not yet owned) was excluded from the Decision Summary entirely,
+falling back to a "No Immediate Actions" placeholder even when real
+readiness gaps existed. That three-state model (Immediate Decisions /
+No Immediate Actions / No Immediate Decisions) is retired. Every
+Missing or Upgrade Available hardpoint is now a real decision,
+regardless of acquisition tier — recording an acquisition plan for a
+not-yet-owned component is itself a Commander action now, surfaced as
+"Record {item}" with a "Purchase Required" badge. "No Immediate
+Decisions" renders only when `decisionCount === 0` — the genuinely
+empty case. `Upgrade Available` hardpoints (a real, non-factory
+component installed but differing from Target) are newly included in
+`criticalHardpointsInPriorityOrder` alongside `Missing` — they already
+counted against readiness % and appeared in the "Missing: …" summary
+text, but were previously invisible to every decision-facing surface.
+
+**Acquisition priority order, reordered (Part C/G).** Within the
+Missing/Upgrade Available tier, decisions now rank Reserved-elsewhere
+(`warning` — resolving an existing commitment via reassignment) >
+Available Inventory (`success` — genuinely free stock, including stock
+already reserved for this exact port) > Borrow Available (`cyan`) >
+Purchase Required (`muted`, no longer excluded). `acquisitionRank` in
+`shipManagementSummary.ts` encodes this order; Invalid Target rows
+still sort ahead of all of it, unchanged.
+
+**Part D — the Priority Components strip is restored and reactive.**
+Each entry now renders the canonical `componentCategoryIcon(hp)` glyph
+(the same Cooler/PowerPlant/QuantumDrive/Shield/Weapon taxonomy §22
+established for Mission Control's Quartermaster Report and already used
+in the Systems Workspace table rows) plus an acquisition-tone `Badge`
+underneath, both driven by `reviewedSummary.prioritizedDecisions` /
+`hintByHardpointId` — no separate calculation, no generic `Package`
+placeholder icon.
+
+**Part E — `buildShipManagementSummary()` remains the single engine,**
+now with a narrower interface: `actionableDecisions`/`actionableCount`/
+`hasNonActionableGaps` are removed (every decision is actionable now, so
+the distinction no longer exists); `decisionCount`/`prioritizedDecisions`
+carry the full ordered set the Hero, Decision Summary, and Priority
+Strip all read directly.
+
+**Part G — Change Installed Components' disclosure reordered** to the
+Commander-approved priority: Reserved Target Component (resolving an
+existing commitment) → Available Inventory Target Component → a new
+**Compatible Upgrade Opportunity** informational callout (renders only
+when the row's own status is `Upgrade Available` — names what's already
+happening on that row; the tiers around it still resolve how to source
+the Target) → Record Newly Acquired Component → **Borrow From Another
+Ship** (collapsed by default, `borrowSectionOpen`) → **Remaining
+Compatible Components** (collapsed by default, `remainingSectionOpen`).
+Both collapse toggles reset on ship switch and whenever a different
+row's own disclosure opens, matching the existing per-ship/per-row reset
+discipline §33 established.
+
+Regression coverage: `shipManagementSummary.test.ts` rewritten for the
+new interface and acquisition order (including a dedicated
+Reserved-elsewhere > Available > Borrow > Purchase-Required priority
+fixture, and an Upgrade Available inclusion test); the
+`ShipWorkspacePrototype.test.tsx` and `sw014aInlineInstalledComponent
+Workflow.test.tsx` suites updated everywhere they asserted the retired
+three-state Decision Summary model, the old exclusion of Purchase
+Required/Upgrade Available, or the pre-collapse Borrow/Remaining
+disclosure text — all rewritten to assert this mission's intended
+behavior rather than defensively preserved against it. Full project
+regression (`tsc --noEmit`, 181 test files / 2197 tests) and a
+production build both pass clean.

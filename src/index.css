@@ -127,6 +127,17 @@ body {
   white-space: nowrap;
 }
 
+/* EWO-064 (Part D) — opt-in wrapping variant for badges placed in a
+   narrow fixed-width column (the Priority Components strip): the default
+   `.badge` is `nowrap` by design (it lives in wide table cells/rows
+   everywhere else), which overflows straight into a neighboring column
+   instead of wrapping when the column itself is only ~80px wide. */
+.badge-wrap {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+
 /* Branded fallback ship artwork gets a brief, subtle fade-in — just
    enough to feel polished, never a dramatic entrance (Sprint 1.3H). */
 @keyframes ship-image-fade-in {

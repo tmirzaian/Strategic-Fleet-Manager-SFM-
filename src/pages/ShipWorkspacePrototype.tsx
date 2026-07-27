@@ -37,12 +37,11 @@ import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
 import { componentCategoryIcon } from '../utils/componentCategoryIcon'
-import { calculateBuildProgress } from '../utils/buildProgress'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
-import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import { TOP_LEVEL_GROUP_ORDER, legacyPortGroupLabel } from '../utils/commanderSystemTaxonomy'
-import { describeAcquisitionHint, type AcquisitionHint } from '../utils/componentAcquisitionHint'
+import { buildShipManagementSummary, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
+import type { AcquisitionHint } from '../utils/componentAcquisitionHint'
 import { prepareCanonicalHardpoints, makeHardpointChildSlotRow } from '../utils/canonicalHardpointPreparation'
 import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
 import { isComponentSelectableForPort } from '../data/componentCatalog'
@@ -74,48 +73,48 @@ const COMMANDER_INTENT_LABEL: Record<CommanderIntent, string> = {
   CHANGE_INSTALLED: 'Change Installed Components',
 }
 
-/** SW-002's five-tier Component Selection Priority — reference-only text;
- * tiers 1/2/3 are backed by real data via describeAcquisitionHint, tiers
- * 4/5 are honest labels for workflows this prototype doesn't implement
- * (inventory writes, full catalog browsing) rather than fabricated ones. */
+/** SW-002's Component Selection Priority — reference-only text; every
+ * tier is backed by real data (`describeAcquisitionHint`/
+ * `deriveInstallCandidates`), never a fabricated placeholder. EWO-064
+ * (Part G) reorders this to the Commander-approved priority: resolving
+ * an existing Reserved commitment first, then genuinely free Available
+ * stock, then recording a newly acquired component, with the two
+ * biggest-decision tiers (Borrow, Remaining Compatible) collapsed by
+ * default below the disclosure — see `renderInstallDisclosure`. */
 const COMPONENT_SELECTION_TIERS = [
-  'Available Inventory — highest priority, immediately actionable',
-  'Reserved Components — available, with a reservation-impact warning',
-  'Installed On Other Ships — Borrow Intelligence, Commander chooses whether to transfer',
+  'Reserved Components — already committed to another Loadout; reassigning it resolves that commitment',
+  'Available Inventory — genuinely free stock, immediately installable',
   'Add Newly Acquired Component — looted, purchased, crafted, or NPC acquired',
-  'Remaining Compatible Components — reference list (see Loadout Manager for the full catalog)',
+  'Installed On Other Ships — Borrow Intelligence, collapsed by default; a cross-ship transfer, Commander chooses whether to proceed',
+  'Remaining Compatible Components — reference list, collapsed by default (see Loadout Manager for the full catalog)',
 ] as const
 
-/** A "critical" decision row is either a real diagnostic (Invalid Target)
- * or a genuinely missing assignment — invalid targets always sort first
- * (SW-002 Phase 4: "priority should place invalid/incompatible
- * configuration ahead of ordinary missing items"). Both sets come
- * straight from `hp.status`, the same field `calculateBuildProgress`
- * itself partitions internally — never an independently redefined rule. */
-export function criticalHardpointsInPriorityOrder(hardpoints: Hardpoint[]): Hardpoint[] {
-  const invalid = hardpoints.filter((h) => h.status === 'Invalid Target')
-  const missing = hardpoints.filter((h) => h.status === 'Missing')
-  return [...invalid, ...missing]
-}
-
-/** SW-002 Revision B (Part 2) — "do not allow non-actionable information
- * to dominate the summary." Ranks a Missing hardpoint's own acquisition
- * hint by the approved priority order (Available in Inventory > Available
- * to Reserve > Borrow Available > Purchase Required), purely for display
- * ordering — never a new eligibility rule, never changes which hardpoints
- * qualify as decisions, only which of them a Commander sees first. */
-function acquisitionRank(hint: AcquisitionHint): number {
+/** EWO-064 (Part C) — the Commander-facing verb for a Decision Summary
+ * row, matched to the same acquisition tone `acquisitionRank` (in
+ * shipManagementSummary.ts) already ranks by. */
+function decisionActionVerb(hint: AcquisitionHint): string {
   switch (hint.tone) {
-    case 'success':
-      return 0
     case 'warning':
-      return 1
+      return 'Reassign'
+    case 'success':
+      return 'Install'
     case 'cyan':
-      return 2
+      return 'Borrow'
     default:
-      return 3
+      return 'Record'
   }
 }
+
+// EWO-063 (Part C) — `criticalHardpointsInPriorityOrder` and the
+// acquisition-rank/hint/availability calculations that used to live here
+// (and the standalone `hintFor` closure below) all moved into
+// `src/utils/shipManagementSummary.ts`'s `buildShipManagementSummary` —
+// the one authoritative calculation the Hero, Decision Summary,
+// notification icons, Missing Components, and Availability badges all
+// now read from, rather than five independently hand-maintained
+// expressions. Re-exported unchanged so existing test imports still
+// resolve.
+export { criticalHardpointsInPriorityOrder } from '../utils/shipManagementSummary'
 
 /**
  * Beta 2.0 structural prototype (Commander Sea Trials, SW-002 Revision A).
@@ -345,6 +344,45 @@ export default function ShipWorkspacePrototype() {
   const [inspectedConfigurableSlotId, setInspectedConfigurableSlotId] = useState<string | null>(null)
   const [developerMode, setDeveloperMode] = useState(false)
 
+  // EWO-064 (Part G) — Borrow From Another Ship and Remaining Compatible
+  // Components are collapsed by default within the Install/Change
+  // disclosure (a cross-ship transfer and a full open-ended catalog
+  // browse are both bigger decisions than the tiers above them); only
+  // one install disclosure is ever open at a time, so a single shared
+  // toggle per section (not a per-row map) is sufficient — reset
+  // whenever a different row's disclosure opens, below.
+  const [borrowSectionOpen, setBorrowSectionOpen] = useState(false)
+  const [remainingSectionOpen, setRemainingSectionOpen] = useState(false)
+
+  // EWO-063 — Hero State Synchronization. Every one of these row-level
+  // Change Installed Components states is keyed by a Hardpoint/candidate
+  // id that is itself build-scoped, so switching ships already made a
+  // stale key harmlessly match nothing on the new ship's own hardpoint
+  // set — but a harmlessly-orphaned "open" disclosure/notice is still
+  // stale UI state a Commander never asked to carry to a different ship.
+  // Reset explicitly, alongside every other per-ship reset in this file,
+  // rather than relying on the id-mismatch as an implicit safety net.
+  useEffect(() => {
+    setExpandedInstallRowId(null)
+    setInstallNotice(null)
+    setReassignConfirmKey(null)
+    setBorrowConfirmKey(null)
+    setNewComponentFormHpId(null)
+    setNewComponentSelection({ item: '' })
+    setInspectedConfigurableSlotId(null)
+    setBorrowSectionOpen(false)
+    setRemainingSectionOpen(false)
+  }, [shipId])
+
+  // EWO-064 (Part G) — a freshly-opened (or closed) Install/Change
+  // disclosure always starts with Borrow/Remaining Compatible collapsed,
+  // never carrying over whichever section happened to be expanded on a
+  // previously-reviewed row.
+  useEffect(() => {
+    setBorrowSectionOpen(false)
+    setRemainingSectionOpen(false)
+  }, [expandedInstallRowId])
+
   // SW-013A (Objective 3) — Remove Installed Component. The one
   // deliberate exception to this page's own "never a dialog" convention:
   // a real confirm modal, not an inline disclosure, matching the existing
@@ -556,22 +594,27 @@ export default function ShipWorkspacePrototype() {
   // through the same canonical pipeline Ship Detail uses, not raw rows.
   const activeHardpointsRaw = hardpoints.filter((h) => h.buildId === activeBuild?.id)
   const activeHardpoints = ship ? prepareCanonicalHardpoints(ship.id, activeHardpointsRaw, fleetAssets) : []
-  const activeProgress = calculateBuildProgress(activeHardpoints)
-  const activeBuildState = deriveFleetBuildState(activeBuild, activeProgress)
-  const missingSummary = [...activeProgress.missingAssignments, ...activeProgress.upgradeOpportunities, ...activeProgress.invalidTargets]
-  // Phase 4 — invalid targets are critical decisions too, sorted ahead of
-  // ordinary missing items; both partitions are the same `hp.status`
-  // check calculateBuildProgress already performs internally.
-  const decisionHardpoints = criticalHardpointsInPriorityOrder(activeHardpoints)
-  const decisionCount = decisionHardpoints.length
-
   // LOADOUT WORKFLOW / SYSTEMS WORKSPACE — the Loadout the Commander is
   // actually reviewing/managing; defaults to Active but is independent of
   // it from here down. Same canonical preparation as the banner (Phase 1:
   // "all three lenses consume the same prepared hardpoint set").
   const reviewedHardpointsRaw = hardpoints.filter((h) => h.buildId === reviewedBuild?.id)
   const reviewedHardpoints = ship ? prepareCanonicalHardpoints(ship.id, reviewedHardpointsRaw, fleetAssets) : []
-  const reviewedProgress = calculateBuildProgress(reviewedHardpoints)
+
+  // EWO-063 (Part C) — ONE authoritative calculation, not five
+  // independent ones. `activeSummary` powers the Hero, Decision Summary,
+  // notification icons (Priority Components strip), and Missing
+  // Components — always the ship's real Active Loadout, independent of
+  // whichever Loadout the Commander happens to be reviewing below ("the
+  // ship never changes, only the tools change" — unchanged design).
+  // `reviewedSummary` powers the Systems Workspace tables' own
+  // Availability badges for whichever Loadout is currently under review;
+  // when that's the same Loadout as Active (the common case), it's
+  // literally the same object — never a second, independently-recomputed
+  // pass over identical data.
+  const summaryContext: ShipManagementSummaryContext = { shipId: ship?.id ?? '', build: activeBuild, hangarItems, installedLoadouts, reservations, ships }
+  const activeSummary = buildShipManagementSummary(activeHardpoints, summaryContext)
+  const reviewedSummary = reviewedBuild?.id === activeBuild?.id ? activeSummary : buildShipManagementSummary(reviewedHardpoints, { ...summaryContext, build: reviewedBuild })
 
   // Change Status — derived from real local edits (SW-002's own
   // "Prototype interaction"), never a fixed placeholder. Applying
@@ -591,20 +634,6 @@ export default function ShipWorkspacePrototype() {
   const quartermasterBayEmptySrc = resolveShipManagementIllustration('quartermaster-bay-empty')
   const role = ship ? resolveShipStockRoleFocus(ship.id, fleetAssets) : undefined
   const identitySubtitle = ship ? (role ? `${ship.manufacturer} · ${role}` : ship.manufacturer) : ''
-
-  function hintFor(hp: Hardpoint): AcquisitionHint {
-    return describeAcquisitionHint({
-      componentName: hp.targetItem,
-      componentEntityClass: hp.targetEntityClass,
-      currentShipId: ship!.id,
-      currentBuildId: hp.buildId,
-      currentSlotLabel: hp.slotLabel,
-      hangarItems,
-      installedLoadouts,
-      reservations,
-      ships,
-    })
-  }
 
   // SW-008A Revision 1 — New Target is a configuration catalog ("what
   // should this build call for?"), not an inventory picker ("what can I
@@ -824,39 +853,13 @@ export default function ShipWorkspacePrototype() {
     return options
   }
 
-  // SW-002 Revision B (Part 2) — the SAME decisionHardpoints list, just
-  // reordered so actionable work (Available in Inventory / Available to
-  // Reserve / Borrow Available) never gets buried behind a Purchase
-  // Required item. Invalid Target rows stay first regardless (they need
-  // resolution, not acquisition, and were already the top priority).
-  // Feeds both the Priority Components strip and the Decision Summary —
-  // one list, never two independently maintained ones.
-  const prioritizedDecisions = ship
-    ? [
-        ...decisionHardpoints.filter((h) => h.status === 'Invalid Target'),
-        ...decisionHardpoints
-          .filter((h) => h.status === 'Missing')
-          .map((h) => ({ hp: h, hint: hintFor(h) }))
-          .sort((a, b) => acquisitionRank(a.hint) - acquisitionRank(b.hint))
-          .map((x) => x.hp),
-      ]
-    : []
-
-  // SW-002 Revision C (Part 1) — Decision Summary is Commander decision
-  // intelligence, not a second readiness report or a shopping list: it
-  // shows only what the Commander can actually DO right now. Invalid
-  // Target rows stay (resolving one is a real, immediate action); a
-  // Missing row whose own acquisition hint is "Purchase Required" (tone
-  // 'muted' — acquisitionRank 3, the one non-actionable tier) is excluded
-  // entirely — that fact is already conveyed by Readiness/"Missing: …"
-  // and by the Priority Components strip (Part 2, unchanged), so
-  // repeating it here would just be a second readiness report under a
-  // different heading.
-  const actionableDecisions = ship
-    ? prioritizedDecisions.filter((hp) => hp.status === 'Invalid Target' || acquisitionRank(hintFor(hp)) < 3)
-    : []
-  const actionableCount = actionableDecisions.length
-  const hasNonActionableGaps = decisionHardpoints.length > 0 && actionableCount === 0
+  // EWO-063 (Part C) — `prioritizedDecisions`/`actionableDecisions`/
+  // `actionableCount`/`hasNonActionableGaps` (SW-002 Revision B Part
+  // 2/Revision C Part 1's own decision-intelligence rules — unchanged)
+  // now live inside `buildShipManagementSummary` itself; both the
+  // Priority Components strip and the Decision Summary panel below read
+  // `activeSummary.prioritizedDecisions`/`activeSummary.actionableDecisions`
+  // directly rather than this page re-deriving its own copy.
 
   // SW-007C — Commander Taxonomy Authority. Same `groupPortTree()` engine
   // Ship Detail's LoadoutPortTree calls, so top-level categories, category
@@ -1137,7 +1140,11 @@ export default function ShipWorkspacePrototype() {
     }
 
     if (commanderIntent === 'CHANGE_INSTALLED') {
-      const availability = calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations, hp.targetEntityClass)
+      // EWO-063 (Part C) — reads the one precomputed summary rather than
+      // recalculating; `reviewedSummary` always reflects whichever
+      // Loadout this table is currently rendering (Active when no
+      // different Loadout is under review).
+      const availability = reviewedSummary.availabilityByHardpointId.get(hp.id)!
       const isRowExpanded = expandedInstallRowId === hp.id
       return (
         <>
@@ -1372,7 +1379,7 @@ export default function ShipWorkspacePrototype() {
   }
 
   function renderInstallDisclosure(hp: Hardpoint): ReactNode {
-    const hint = hintFor(hp)
+    const hint = reviewedSummary.hintByHardpointId.get(hp.id)!
     const candidateOptions = newTargetOptionsFor(hp)
     const candidates = ship
       ? deriveInstallCandidates(candidateOptions, {
@@ -1414,31 +1421,17 @@ export default function ShipWorkspacePrototype() {
             </div>
           )}
 
+          {/* EWO-064 (Part G) — reordered to the Commander-approved
+              priority: Reserved Target Component (resolving an existing
+              commitment) > Available Inventory Target Component > a
+              Compatible Upgrade Opportunity callout, when this exact row
+              already has a real (non-empty) component installed and the
+              swap is simply pending > Record Newly Acquired Component >
+              Borrow From Another Ship (collapsed by default — a
+              cross-ship transfer) > Remaining Compatible Components
+              (collapsed by default — the open-ended catalog). */}
           <div className="mt-3 space-y-3">
-            {/* Tier 1 — Available Inventory. */}
-            {candidates.availableInventory.length > 0 && (
-              <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Available Inventory</div>
-                <div className="space-y-1">
-                  {candidates.availableInventory.map((c) => (
-                    <div key={c.item} className="flex items-center justify-between gap-2 bg-black/20 border border-white/10 rounded-md px-2.5 py-1.5">
-                      <div className="min-w-0">
-                        <div className="text-xs text-white truncate">{c.label}</div>
-                        <div className="text-[10px] text-muted/60">{c.reservedForThisPort ? 'Reserved for this port' : `${c.quantity} Available`}</div>
-                      </div>
-                      <button
-                        onClick={() => performInstall(hp, c.item, c.entityClass, c.hangarItemId)}
-                        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-success hover:underline"
-                      >
-                        <Package size={12} /> Install
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tier 2 — Reserved Components. */}
+            {/* Tier 1 — Reserved Components (already committed to another Loadout). */}
             {candidates.reserved.length > 0 && (
               <div>
                 <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Reserved Components</div>
@@ -1481,49 +1474,40 @@ export default function ShipWorkspacePrototype() {
               </div>
             )}
 
-            {/* Tier 3 — Borrow From Another Ship. */}
-            {candidates.borrowable.length > 0 && (
+            {/* Tier 2 — Available Inventory (genuinely free stock, or stock already reserved for this exact port). */}
+            {candidates.availableInventory.length > 0 && (
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Borrow From Another Ship</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Available Inventory</div>
                 <div className="space-y-1">
-                  {candidates.borrowable.map((c) => {
-                    // Keyed by donor slotLabel too — the same component can
-                    // legitimately be borrowable from more than one port on
-                    // the same donor ship (e.g. a symmetric Left/Right pair).
-                    const key = `${hp.id}:${c.item}:${c.shipId}:${c.slotLabel}`
-                    const confirming = borrowConfirmKey === key
-                    return (
-                      <div key={key} className="bg-black/20 border border-cyan/20 rounded-md px-2.5 py-1.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="text-xs text-white truncate">{c.label}</div>
-                            <div className="text-[10px] text-muted/60">
-                              Installed On: {c.shipName} — {formatHardpointLabel(c.slotLabel)} ({c.buildName})
-                            </div>
-                          </div>
-                          {!confirming && (
-                            <button onClick={() => setBorrowConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline">
-                              <ArrowRightLeft size={12} /> Transfer?
-                            </button>
-                          )}
-                        </div>
-                        {confirming && (
-                          <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
-                            <span className="text-cyan/90">Transfer from {c.shipName} — this removes it there and installs it here.</span>
-                            <div className="shrink-0 flex items-center gap-2">
-                              <button onClick={() => setBorrowConfirmKey(null)} className="text-muted hover:text-white">
-                                Cancel
-                              </button>
-                              <button onClick={() => performBorrow(hp, c)} className="text-cyan font-medium hover:underline">
-                                Confirm Transfer
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                  {candidates.availableInventory.map((c) => (
+                    <div key={c.item} className="flex items-center justify-between gap-2 bg-black/20 border border-white/10 rounded-md px-2.5 py-1.5">
+                      <div className="min-w-0">
+                        <div className="text-xs text-white truncate">{c.label}</div>
+                        <div className="text-[10px] text-muted/60">{c.reservedForThisPort ? 'Reserved for this port' : `${c.quantity} Available`}</div>
                       </div>
-                    )
-                  })}
+                      <button
+                        onClick={() => performInstall(hp, c.item, c.entityClass, c.hangarItemId)}
+                        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-success hover:underline"
+                      >
+                        <Package size={12} /> Install
+                      </button>
+                    </div>
+                  ))}
                 </div>
+              </div>
+            )}
+
+            {/* Tier 3 — Compatible Upgrade Opportunity. Informational only
+                — this row already has a real component installed and a
+                different, compatible Target is pending; the acquisition
+                tiers above/below still resolve HOW to source that Target,
+                this just names what's actually happening on this row. */}
+            {hp.status === 'Upgrade Available' && (
+              <div className="flex items-center gap-2 bg-cyan/5 border border-cyan/20 rounded-md px-2.5 py-1.5 text-xs">
+                <ArrowRightLeft size={12} className="text-cyan shrink-0" />
+                <span className="text-white">
+                  Compatible Upgrade Opportunity — <span className="text-muted">{hp.installedItem}</span> is installed; <span className="text-cyan">{hp.targetItem}</span> is the current Target.
+                </span>
               </div>
             )}
 
@@ -1569,20 +1553,82 @@ export default function ShipWorkspacePrototype() {
               )}
             </div>
 
-            {/* Tier 5 — Remaining Compatible Components (reference only). */}
+            {/* Tier 5 — Borrow From Another Ship. Collapsed by default — a cross-ship transfer is a bigger decision than the tiers above it. */}
+            {candidates.borrowable.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setBorrowSectionOpen((v) => !v)}
+                  className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted/60 hover:text-white transition-colors"
+                >
+                  {borrowSectionOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                  Borrow From Another Ship ({candidates.borrowable.length})
+                </button>
+                {borrowSectionOpen && (
+                  <div className="space-y-1 mt-1">
+                    {candidates.borrowable.map((c) => {
+                      // Keyed by donor slotLabel too — the same component can
+                      // legitimately be borrowable from more than one port on
+                      // the same donor ship (e.g. a symmetric Left/Right pair).
+                      const key = `${hp.id}:${c.item}:${c.shipId}:${c.slotLabel}`
+                      const confirming = borrowConfirmKey === key
+                      return (
+                        <div key={key} className="bg-black/20 border border-cyan/20 rounded-md px-2.5 py-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-xs text-white truncate">{c.label}</div>
+                              <div className="text-[10px] text-muted/60">
+                                Installed On: {c.shipName} — {formatHardpointLabel(c.slotLabel)} ({c.buildName})
+                              </div>
+                            </div>
+                            {!confirming && (
+                              <button onClick={() => setBorrowConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline">
+                                <ArrowRightLeft size={12} /> Transfer?
+                              </button>
+                            )}
+                          </div>
+                          {confirming && (
+                            <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
+                              <span className="text-cyan/90">Transfer from {c.shipName} — this removes it there and installs it here.</span>
+                              <div className="shrink-0 flex items-center gap-2">
+                                <button onClick={() => setBorrowConfirmKey(null)} className="text-muted hover:text-white">
+                                  Cancel
+                                </button>
+                                <button onClick={() => performBorrow(hp, c)} className="text-cyan font-medium hover:underline">
+                                  Confirm Transfer
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tier 6 — Remaining Compatible Components (reference only). Collapsed by default — the open-ended catalog. */}
             {candidates.remainingCompatible.length > 0 && (
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Remaining Compatible Components</div>
-                <div className="text-[11px] text-muted/70 space-y-0.5">
-                  {candidates.remainingCompatible.slice(0, 8).map((c) => (
-                    <div key={c.item} className="truncate">
-                      {c.label}
-                    </div>
-                  ))}
-                  {candidates.remainingCompatible.length > 8 && (
-                    <div className="text-muted/50">+{candidates.remainingCompatible.length - 8} more — see Loadout Manager for the full catalog.</div>
-                  )}
-                </div>
+                <button
+                  onClick={() => setRemainingSectionOpen((v) => !v)}
+                  className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted/60 hover:text-white transition-colors"
+                >
+                  {remainingSectionOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                  Remaining Compatible Components ({candidates.remainingCompatible.length})
+                </button>
+                {remainingSectionOpen && (
+                  <div className="text-[11px] text-muted/70 space-y-0.5 mt-1">
+                    {candidates.remainingCompatible.slice(0, 8).map((c) => (
+                      <div key={c.item} className="truncate">
+                        {c.label}
+                      </div>
+                    ))}
+                    {candidates.remainingCompatible.length > 8 && (
+                      <div className="text-muted/50">+{candidates.remainingCompatible.length - 8} more — see Loadout Manager for the full catalog.</div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1873,56 +1919,97 @@ export default function ShipWorkspacePrototype() {
           <>
             <div className="absolute top-3 right-3 z-10">{changeStatusBadge}</div>
 
+            {/* EWO-063 — `key={ship.id}` forces React to fully unmount and
+                remount ShipHeroFrame (and its child ShipImage) whenever the
+                selected ship changes, rather than reusing the same
+                component instance across ships. All of this page's own
+                readiness/missing/decision-summary values below are already
+                computed fresh every render (never useMemo'd against a
+                stale dependency), so this key is a defense-in-depth
+                guarantee for the Hero's own internal image-presentation
+                state (ShipHeroFrame's `mode`, ShipImage's load/fallback
+                state) specifically — the one piece of Hero state that
+                lives inside a child component rather than being derived
+                fresh on every ShipWorkspacePrototype render. */}
             <ShipHeroFrame
+              key={ship.id}
               imageSrc={imageSrc}
               name={ship.name}
               manufacturer={ship.manufacturer}
               ownership={ship.ownership}
               activeBuildLabel={activeBuild?.name ?? '—'}
               subtitle={identitySubtitle}
-              isMissionReady={activeBuildState === 'MISSION_READY'}
+              isMissionReady={reviewedSummary.buildState === 'MISSION_READY'}
             />
+            {/* EWO-064 — "Sticky Header owns context, Hero owns action."
+                Every value in this block now reads `reviewedSummary`
+                (Part F): the Sticky Context Bar above is already the
+                single source of truth for WHICH Loadout is under review
+                ("Ship / Reviewed Loadout / Intent / Pending Changes"),
+                so the Hero shows operational state for that SAME
+                Loadout — Readiness, Missing Components, the Priority
+                Components strip, and Decision Summary — rather than
+                silently reflecting the ship's Active Loadout underneath
+                a header that says something else. No architectural
+                change (Part H): `reviewedSummary` already existed
+                (EWO-063) and is literally the same object as
+                `activeSummary` whenever Reviewed and Active are the same
+                Loadout — only which one feeds the Hero has changed. */}
             <div className="p-6 space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <ReadinessBar value={activeProgress.percentage} />
-                  {missingSummary.length > 0 && (
+                  <ReadinessBar value={reviewedSummary.progress.percentage} />
+                  {reviewedSummary.missingSummary.length > 0 && (
                     <p data-testid="readiness-missing-summary" className="flex items-start gap-1.5 text-xs text-warning mt-1.5">
                       <AlertTriangle size={12} className="mt-0.5 shrink-0" />
-                      <span className="line-clamp-2">Missing: {missingSummary.join(', ')}</span>
+                      <span className="line-clamp-2">Missing: {reviewedSummary.missingSummary.join(', ')}</span>
                     </p>
                   )}
 
-                  {/* SW-002 Revision B (Part 1) — the SAME missing-
-                      component list already shown above (Missing: …) and
-                      in Decision Summary, just a richer visual — never a
-                      second independent list. Prototype presentation is
-                      [Placeholder]/name per component, matching the
-                      approved mock exactly; no canonical component-image
-                      resolver exists anywhere in this codebase (confirmed
-                      by inspection — only src/constants/shipImage.ts, for
-                      ship photography, not components), so this stays a
-                      named placeholder, never a page-local image lookup
-                      table. "View All" only appears when components are
-                      actually hidden beyond the four shown, and only ever
-                      scrolls to Ship Systems — it never expands the
-                      banner. */}
-                  {decisionCount > 0 && (
+                  {/* EWO-064 (Part D) — Priority Components strip restored:
+                      each item is the SAME canonical per-component-type
+                      glyph Mission Control's own Quartermaster Report and
+                      this page's own Systems Workspace table already use
+                      (`componentCategoryIcon`, never a generic Package
+                      icon), plus an acquisition Badge (the same tone/
+                      label vocabulary as Change Installed Components'
+                      own disclosure — one shared vocabulary, never a
+                      second one invented for this strip), plus a native
+                      tooltip. Invalid Target rows keep the diagnostic
+                      AlertOctagon glyph (a data problem, not a component
+                      type) and the "Incompatible Target" badge. "View
+                      All" only appears when items are hidden beyond the
+                      four shown, and only ever scrolls to Ship Systems —
+                      it never expands the banner. */}
+                  {reviewedSummary.decisionCount > 0 && (
                     <div data-testid="priority-components-strip" className="flex flex-wrap items-start gap-2.5 mt-3">
-                      {prioritizedDecisions.slice(0, 4).map((hp) => (
-                        <div key={hp.id} title={hp.status === 'Invalid Target' ? (hp.invalidMessage ?? 'Incompatible target') : hp.targetItem} className="flex flex-col items-center gap-1 w-16">
-                          <div
-                            className={`w-12 h-12 rounded-lg border flex items-center justify-center ${
-                              hp.status === 'Invalid Target' ? 'border-danger/40 bg-danger/10' : 'border-white/10 bg-black/20'
-                            }`}
-                          >
-                            {hp.status === 'Invalid Target' ? <AlertOctagon size={16} className="text-danger" /> : <Package size={16} className="text-muted" />}
+                      {reviewedSummary.prioritizedDecisions.slice(0, 4).map((hp) => {
+                        const isInvalid = hp.status === 'Invalid Target'
+                        const hint = reviewedSummary.hintByHardpointId.get(hp.id)
+                        const GlyphIcon = componentCategoryIcon(hp)
+                        return (
+                          <div key={hp.id} title={isInvalid ? (hp.invalidMessage ?? 'Incompatible target') : hint?.detail} className="flex flex-col items-center gap-1 w-24">
+                            <div
+                              className={`w-12 h-12 rounded-lg border flex items-center justify-center ${
+                                isInvalid ? 'border-danger/40 bg-danger/10' : 'border-white/10 bg-black/20'
+                              }`}
+                            >
+                              {isInvalid ? <AlertOctagon size={16} className="text-danger" /> : <GlyphIcon size={16} className="text-muted" aria-hidden="true" />}
+                            </div>
+                            <span className="text-[10px] text-white/80 text-center truncate w-full">{hp.targetItem}</span>
+                            {/* `wrap` — this column is only ~96px wide, far
+                                narrower than every other place Badge
+                                renders; without it, a label like "Available
+                                in Inventory" overflows straight into the
+                                neighboring item instead of wrapping. */}
+                            <Badge tone={isInvalid ? 'invalid' : hint!.tone} wrap>
+                              {isInvalid ? 'Incompatible Target' : hint!.label}
+                            </Badge>
                           </div>
-                          <span className="text-[10px] text-white/80 text-center truncate w-full">{hp.targetItem}</span>
-                        </div>
-                      ))}
-                      {prioritizedDecisions.length > 4 && (
-                        <button onClick={scrollToSystemsWorkspace} className="flex flex-col items-center gap-1 w-16 text-cyan group">
+                        )
+                      })}
+                      {reviewedSummary.prioritizedDecisions.length > 4 && (
+                        <button onClick={scrollToSystemsWorkspace} className="flex flex-col items-center gap-1 w-24 text-cyan group">
                           <div className="w-12 h-12 rounded-lg border border-dashed border-cyan/30 flex items-center justify-center group-hover:border-cyan/60 transition-colors">
                             <ArrowDownToLine size={16} />
                           </div>
@@ -1932,40 +2019,36 @@ export default function ShipWorkspacePrototype() {
                     </div>
                   )}
                 </div>
-                {/* Decision Intelligence (SW-002 Revision C, Part 1) — only
-                    actionable Commander decisions: something the Commander
-                    can do right now (resolve an incompatible target,
-                    install from inventory, reserve, or borrow). Never a
-                    second readiness report and never a shopping list — a
-                    Missing item whose only path forward is a future
-                    purchase is deliberately excluded here; Readiness and
-                    the Priority Components strip already convey it. */}
-                <div
-                  data-testid="decision-summary"
-                  className={`rounded-lg p-3.5 border ${actionableCount > 0 ? 'bg-warning/10 border-warning/30' : 'bg-black/20 border-white/5'}`}
-                >
+                {/* EWO-064 (Part C) — Decision Summary now lists every
+                    decision hardpoint (Invalid Target, Missing, and
+                    Upgrade Available — never silently excluding a real
+                    gap), ranked by acquisition priority: Reserved Target
+                    Component > Available Inventory Component > Borrow
+                    From Another Ship > Record Newly Acquired Component.
+                    "No Immediate Decisions" is now correct precisely
+                    because it is the genuinely-empty case — there is no
+                    longer a separate "gaps exist but none are actionable"
+                    state to represent, since even a Purchase-Required gap
+                    now surfaces here as a real, trackable Commander
+                    action (Record Newly Acquired Component) rather than
+                    being deferred to "future procurement" and hidden. */}
+                <div data-testid="decision-summary" className={`rounded-lg p-3.5 border ${reviewedSummary.decisionCount > 0 ? 'bg-warning/10 border-warning/30' : 'bg-black/20 border-white/5'}`}>
                   <div className="text-[10px] uppercase tracking-widest text-muted mb-2">Decision Summary</div>
                   <div className="flex items-center gap-2">
-                    {actionableCount > 0 ? (
+                    {reviewedSummary.decisionCount > 0 ? (
                       <AlertTriangle size={16} className="shrink-0 text-warning" />
                     ) : (
                       <CheckCircle2 size={16} className="shrink-0 text-success" />
                     )}
                     <span className="text-sm font-display font-bold leading-none text-white">
-                      {actionableCount === 0
-                        ? hasNonActionableGaps
-                          ? 'No Immediate Actions'
-                          : 'No Immediate Decisions'
-                        : `${actionableCount} Immediate Decision${actionableCount === 1 ? '' : 's'}`}
+                      {reviewedSummary.decisionCount === 0
+                        ? 'No Immediate Decisions'
+                        : `${reviewedSummary.decisionCount} Immediate Decision${reviewedSummary.decisionCount === 1 ? '' : 's'}`}
                     </span>
                   </div>
-                  {/* SW-002 Revision C — the canonical empty state when
-                      readiness gaps exist but none of them are actionable
-                      right now (every one is Purchase Required). */}
-                  {hasNonActionableGaps && <p className="text-xs text-muted mt-1.5">Remaining readiness gaps require future acquisition.</p>}
-                  {actionableCount > 0 && (
+                  {reviewedSummary.decisionCount > 0 && (
                     <div className="mt-2 space-y-1.5">
-                      {actionableDecisions.slice(0, 4).map((hp) => {
+                      {reviewedSummary.prioritizedDecisions.slice(0, 4).map((hp) => {
                         if (hp.status === 'Invalid Target') {
                           return (
                             <div key={hp.id} className="flex items-center justify-between gap-2 text-xs" title={hp.invalidMessage}>
@@ -1974,15 +2057,17 @@ export default function ShipWorkspacePrototype() {
                             </div>
                           )
                         }
-                        const hint = hintFor(hp)
+                        const hint = reviewedSummary.hintByHardpointId.get(hp.id)!
                         return (
                           <div key={hp.id} className="flex items-center justify-between gap-2 text-xs" title={hint.detail}>
-                            <span className="text-white truncate">Install {hp.targetItem}</span>
+                            <span className="text-white truncate">
+                              {decisionActionVerb(hint)} {hp.targetItem}
+                            </span>
                             <Badge tone={hint.tone}>{hint.label}</Badge>
                           </div>
                         )
                       })}
-                      {actionableDecisions.length > 4 && <div className="text-[11px] text-muted/70">+{actionableDecisions.length - 4} more</div>}
+                      {reviewedSummary.prioritizedDecisions.length > 4 && <div className="text-[11px] text-muted/70">+{reviewedSummary.prioritizedDecisions.length - 4} more</div>}
                     </div>
                   )}
                 </div>
@@ -2013,7 +2098,7 @@ export default function ShipWorkspacePrototype() {
                 // Active" itself genuinely changes the ship's real Active
                 // Loadout.
                 const showSetActive = isReviewed && !build.isActive
-                const accent = isReviewed ? colorFor(reviewedProgress.percentage) : undefined
+                const accent = isReviewed ? colorFor(reviewedSummary.progress.percentage) : undefined
                 return (
                   <div key={build.id} className="inline-flex items-center">
                     <button

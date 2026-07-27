@@ -202,7 +202,10 @@ describe('SW-014A: Tier 3 — Borrow From Another Ship', () => {
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
 
-    expect(disclosure.getByText('Borrow From Another Ship')).toBeInTheDocument()
+    // EWO-064 (Part G) — Borrow From Another Ship is collapsed by default;
+    // the toggle itself carries the count, the donor details only render once expanded.
+    expect(disclosure.getByText(/Borrow From Another Ship \(\d+\)/)).toBeInTheDocument()
+    fireEvent.click(disclosure.getByRole('button', { name: /Borrow From Another Ship/ }))
     expect(disclosure.getByText(new RegExp(`Installed On: Corsair — ${donorSlotLabel}`))).toBeInTheDocument()
 
     fireEvent.click(disclosure.getByRole('button', { name: /Transfer\?/ }))
@@ -258,7 +261,8 @@ describe('SW-014A: Tier 5 — Remaining Compatible Components', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
-    expect(disclosure.getByText('Remaining Compatible Components')).toBeInTheDocument()
+    // EWO-064 (Part G) — collapsed by default; the toggle carries the count.
+    expect(disclosure.getByText(/Remaining Compatible Components \(\d+\)/)).toBeInTheDocument()
   })
 })
 
@@ -268,7 +272,8 @@ describe('SW-014A: Preserve Existing Intelligence', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
-    expect(disclosure.getByText(/Available Inventory — highest priority/)).toBeInTheDocument()
+    // EWO-064 (Part G) reworded the reference tier list's own wording — still present, just reordered/rephrased.
+    expect(disclosure.getByText(/Available Inventory — genuinely free stock/)).toBeInTheDocument()
     expect(disclosure.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })

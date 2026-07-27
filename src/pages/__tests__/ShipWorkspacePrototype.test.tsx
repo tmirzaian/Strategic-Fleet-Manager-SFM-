@@ -142,6 +142,59 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.getByRole('button', { name: /Developer Mode/ })).toBeInTheDocument()
   })
 
+  /**
+   * EWO-063 — Hero State Synchronization. '135c' is Factory-only (100%
+   * ready by construction — Installed = Target = Factory). 'ghost''s
+   * Stealth Build has a genuinely unresolved Cooler 1 target ("SnowBlind")
+   * per its own seed data (see QuickUpdate.test.tsx's identical fixture
+   * note) — a real, pre-existing readiness gap, not a fixture I invented
+   * for this test. Switching the Ship selector between them exercises the
+   * exact same live-navigation path (`navigate()` -> new `:shipId` route
+   * param -> re-render) a real Commander's dropdown triggers — never a
+   * fresh `render()` per ship, which would trivially mask a genuine
+   * client-navigation-only staleness bug the same way navigationFlow.
+   * test.tsx's own doc comment already warns against.
+   */
+  it('EWO-063: switching ships immediately recalculates Readiness % and Missing Components — repeated rapid switches never leave stale data from the previous ship', () => {
+    renderWorkspace('135c')
+    const select = screen.getByLabelText('Ship') as HTMLSelectElement
+
+    for (let round = 0; round < 3; round++) {
+      fireEvent.change(select, { target: { value: '135c' } })
+      expect(screen.getByText('100%')).toBeInTheDocument()
+      expect(screen.queryByTestId('readiness-missing-summary')).not.toBeInTheDocument()
+
+      fireEvent.change(select, { target: { value: 'ghost' } })
+      expect(screen.queryByText('100%')).not.toBeInTheDocument()
+      expect(screen.getByTestId('readiness-missing-summary')).toHaveTextContent(/SnowBlind/)
+    }
+  })
+
+  it('EWO-063: switching ships immediately recalculates the Decision Summary — an actionable-decision ship never shows the previous ship\'s "No Immediate Decisions" state', () => {
+    renderWorkspace('135c')
+    const select = screen.getByLabelText('Ship') as HTMLSelectElement
+
+    fireEvent.change(select, { target: { value: '135c' } })
+    expect(screen.getByText('No Immediate Decisions')).toBeInTheDocument()
+
+    fireEvent.change(select, { target: { value: 'ghost' } })
+    expect(screen.queryByText('No Immediate Decisions')).not.toBeInTheDocument()
+  })
+
+  it('EWO-063: the Hero image remounts per ship (key={ship.id}) — no leftover image-presentation state from the previously selected ship', () => {
+    renderWorkspace('135c')
+    const select = screen.getByLabelText('Ship') as HTMLSelectElement
+    const banner = () => screen.getByTestId('ship-operational-banner')
+
+    fireEvent.change(select, { target: { value: '135c' } })
+    const firstImg = within(banner()).getByRole('img') as HTMLImageElement
+    const firstSrc = firstImg.src
+
+    fireEvent.change(select, { target: { value: 'ghost' } })
+    const secondImg = within(banner()).getByRole('img') as HTMLImageElement
+    expect(secondImg.src).not.toBe(firstSrc)
+  })
+
   it('EWO-062A (Part D): the Ship selector remains present and functional once Developer Mode/View in Ship Detail are removed', () => {
     renderWorkspace('ghost')
     const select = screen.getByLabelText('Ship') as HTMLSelectElement
@@ -517,6 +570,21 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
       expect(screen.getByText('Return removed component to Hangar')).toBeInTheDocument()
     })
 
+    it('EWO-063 (Parts A/B): removing an installed component immediately updates the Hero\'s own Readiness % and Missing Components — no separate action needed to refresh it, since Hero and Table now read the one same ShipManagementSummary', () => {
+      renderWorkspace('ghost')
+      const readinessBefore = screen.getByText('Readiness').nextElementSibling!.textContent
+      expect(screen.queryByTestId('readiness-missing-summary')).not.toHaveTextContent(/Mirage/)
+
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const row = getPortRow('Left Shield Generator')
+      fireEvent.click(within(row).getByRole('button', { name: /Remove/ }))
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      const readinessAfter = screen.getByText('Readiness').nextElementSibling!.textContent
+      expect(readinessAfter).not.toBe(readinessBefore)
+      expect(screen.getByTestId('readiness-missing-summary')).toHaveTextContent(/Mirage/)
+    })
+
     it('Cancel closes the modal without mutating the store', () => {
       renderWorkspace('ghost')
       fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
@@ -621,15 +689,17 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
   })
 
-  it('the banner reflects the real ACTIVE Loadout, independent of the reviewed selection (SW-001 behavior preserved)', () => {
+  it('EWO-064 (Part F): the banner starts on the real ACTIVE Loadout, then follows the reviewed selection once switched — the Hero reflects Reviewed, not merely Active (supersedes the old SW-001 "independent of reviewed selection" behavior)', () => {
     renderWorkspace('ghost')
     const banner = screen.getByTestId('ship-operational-banner')
     // SW-013C.2B — 93%, not the pre-Module-taxonomy 92%: two new, real
     // Module ports (Center/Nose) now exist and are matched by default
     // (factory Cap === installed === target), shifting the denominator.
+    // Stealth Build is both Active and (by default) Reviewed here.
     expect(within(banner).getByText('93%')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
-    expect(within(banner).getByText('93%')).toBeInTheDocument()
+    // Escort Build's own readiness now drives the Hero — no longer frozen on Stealth Build's 93%.
+    expect(within(banner).queryByText('93%')).not.toBeInTheDocument()
   })
 
   it('Part I behaviors preserved: sticky context hidden until scrolled past the banner, Ship Selector lives in the page header', () => {
@@ -749,13 +819,13 @@ describe('criticalHardpointsInPriorityOrder (SW-002 Revision A, Phase 4)', () =>
     expect(result.map((h) => h.id)).toEqual(['i1', 'm1', 'm2'])
   })
 
-  it('excludes every other status (OK, Unresolved, Upgrade Available)', () => {
+  it('excludes OK and Unresolved; EWO-064 (Part C) now includes Upgrade Available as a genuine decision', () => {
     const result = criticalHardpointsInPriorityOrder([
       hp({ id: 'ok', status: 'OK' }),
       hp({ id: 'unresolved', status: 'Unresolved' }),
       hp({ id: 'upgrade', status: 'Upgrade Available' }),
     ])
-    expect(result).toHaveLength(0)
+    expect(result.map((h) => h.id)).toEqual(['upgrade'])
   })
 
   it('the caller caps display at 4 while this function itself returns the full ordered set (capping is a presentation concern)', () => {
@@ -820,10 +890,9 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(within(row).getAllByText('Mirage').length).toBeGreaterThan(0)
     })
 
-    it('active and reviewed builds are prepared through the same canonical pipeline — switching the reviewed Loadout changes the systems tree data without touching the banner', () => {
+    it('EWO-064 (Part F): active and reviewed builds are prepared through the same canonical pipeline — switching the reviewed Loadout changes the systems tree data AND the Hero, since the Hero now reflects the Reviewed Loadout rather than merely the Active one', () => {
       renderWorkspace('ghost')
-      const banner = screen.getByTestId('ship-operational-banner')
-      expect(within(banner).getByText('93%')).toBeInTheDocument()
+      const readinessBefore = screen.getByText('Readiness').nextElementSibling!.textContent
       const shieldRowBefore = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
       expect(within(shieldRowBefore).getAllByText('Mirage').length).toBeGreaterThan(0)
 
@@ -831,8 +900,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       // Reviewed tree now reflects Escort Build's own Left Shield Generator target (FR-66).
       const shieldRowAfter = screen.getByText('Left Shield Generator').closest('tr') as HTMLElement
       expect(within(shieldRowAfter).getByText('FR-66')).toBeInTheDocument()
-      // Banner (Active Loadout) is completely unaffected.
-      expect(within(banner).getByText('93%')).toBeInTheDocument()
+      // The Hero recalculates for the newly-reviewed Escort Build too (Part F) — no
+      // longer frozen on whatever the ship's Active Loadout happened to be.
+      const readinessAfter = screen.getByText('Readiness').nextElementSibling!.textContent
+      expect(readinessAfter).not.toBe(readinessBefore)
     })
   })
 
@@ -1254,29 +1325,32 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(decisionBox.textContent).not.toMatch(/Not Currently Owned|Reserved Elsewhere/)
     })
 
-    it('Part 1: "Purchase Required" never appears anywhere inside Decision Summary', () => {
+    it('EWO-064 (Part C): "Purchase Required" now correctly appears inside Decision Summary, as a Record Newly Acquired Component entry — no longer excluded and deferred to "future procurement"', () => {
+      // Remove SnowBlind from the Hangar so it resolves to Purchase Required.
+      useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
-      expect(decisionBox.textContent).not.toContain('Purchase Required')
+      expect(decisionBox.textContent).toContain('Purchase Required')
+      expect(within(decisionBox).getByText(/Record\s+SnowBlind/)).toBeInTheDocument()
     })
 
-    it('Part 1: the canonical "No Immediate Actions" empty state renders when readiness gaps exist but none are actionable (both Ghost targets Purchase Required)', () => {
+    it('EWO-064 (Part C): the retired "No Immediate Actions" placeholder never renders — every readiness gap, even an all-Purchase-Required one, is now a real Decision Summary entry', () => {
       // Remove SnowBlind from the Hangar so both of Ghost's missing
       // targets (Slipstream, SnowBlind) resolve to Purchase Required —
       // legitimate store-state test setup, not a new authority.
       useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
-      expect(within(decisionBox).getByText('No Immediate Actions')).toBeInTheDocument()
-      expect(within(decisionBox).getByText('Remaining readiness gaps require future acquisition.')).toBeInTheDocument()
-      expect(decisionBox.textContent).not.toContain('Purchase Required')
-      // Priority Components (Part 2, unchanged) still shows the real gaps.
+      expect(screen.queryByText('No Immediate Actions')).not.toBeInTheDocument()
+      expect(screen.queryByText('Remaining readiness gaps require future acquisition.')).not.toBeInTheDocument()
+      expect(within(decisionBox).getByText('2 Immediate Decisions')).toBeInTheDocument()
+      // Priority Components strip (Part D, restored) still shows the real gaps too.
       const strip = screen.getByTestId('priority-components-strip')
       expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
       expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
     })
 
-    it('Part 1: a fully ready Loadout (Corsair) still shows the original "No Immediate Decisions" state, distinct from "No Immediate Actions"', () => {
+    it('EWO-064 (Part C): a fully ready Loadout (Corsair) shows "No Immediate Decisions" — now correct precisely because it is the genuinely-empty case', () => {
       renderWorkspace('corsair')
       const decisionBox = screen.getByTestId('decision-summary')
       expect(within(decisionBox).getByText('No Immediate Decisions')).toBeInTheDocument()

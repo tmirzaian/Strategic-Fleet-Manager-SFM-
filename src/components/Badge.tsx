@@ -11,8 +11,8 @@ const toneStyles: Record<Tone, string> = {
   invalid: 'bg-danger/30 text-white ring-1 ring-inset ring-danger font-bold',
 }
 
-export default function Badge({ children, tone = 'muted' }: { children: React.ReactNode; tone?: Tone }) {
-  return <span className={`badge ${toneStyles[tone]}`}>{children}</span>
+export default function Badge({ children, tone = 'muted', wrap = false }: { children: React.ReactNode; tone?: Tone; wrap?: boolean }) {
+  return <span className={`badge ${wrap ? 'badge-wrap' : ''} ${toneStyles[tone]}`}>{children}</span>
 }
 
 export function ownershipTone(ownership: string): Tone {
