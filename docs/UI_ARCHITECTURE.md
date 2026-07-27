@@ -24,21 +24,29 @@ in Engineering.
 
 ## 1. Mission Control operational cadence
 
-Mission Control communicates, top to bottom, in this fixed order:
+Mission Control communicates, top to bottom, in this fixed order (current
+as of UX-001B.5 — see §19-§25 for the full history of how it got here):
 
 1. Application identity (sidebar, persistent, not part of the page itself)
 2. Mission Control identity — "Mission Control" / "Fleet Operations"
-3. Overall Fleet Readiness (command-console rail, right side of the Fleet
-   Operations region)
-4. Fleet size ("Ships Active") and Needed Items (same rail)
-5. Top Priority Ship(s) — up to three live records (EWO-012)
-6. Quartermaster Fleet Status (Mission Ready / Loadouts In Progress /
-   Factory Loadout)
-7. Quartermaster Inventory Status (Missing Components / Unreserved
-   Inventory)
-8. Procurement
-9. Operational workflow destinations (Found Loot? / Something Changed?)
-10. Application footer (Update Budget + version identity)
+3. The Command Briefing Hero (§20-§21 amendments) — three columns: Fleet
+   Status (Ships Active / Mission Ready / Loadouts In Progress / Factory
+   Loadout), Operations Center (pure atmosphere, no instrumentation), and
+   Priority Actions (Overall Fleet Readiness + the Hero's own actionable
+   queue)
+4. Top Priority Ship(s) — up to four live records (EWO-012/EWO-033)
+5. Quartermaster Report (§21/§25) — one consolidated panel: Logistics
+   Demand (one card per canonical component category, always including
+   the five stable categories — Coolers, Power Plants, Quantum Drives,
+   Shields, Weapons — regardless of current demand), Quartermaster
+   Assessment (always present, reacting to the current filter), and the
+   Procurement Work Queue (actionable Available/Reserved rows only,
+   unconditionally — §25), all filterable in place by clicking a
+   Logistics Demand card
+6. End-of-Briefing Action Center (§11/§24/§26, UX-001B.4/UX-001C) — Loot
+   Lookup / Add Inventory / Modify Ship, the transition from assessment
+   to execution
+7. Application footer (Update Budget + version identity)
 
 No explanatory or marketing copy appears between these — the interface
 explains itself. `src/pages/MissionControl.tsx` is the reference
@@ -517,20 +525,32 @@ destination, not a metric. Visually distinct from `CriticalMetricTile`:
 - the entire card is a single `<Link>` (full-card click), with a visible
   `focus-visible:ring-2` keyboard focus state
 
-Used today for "Found Loot? Check It." → `/decision-center` and
-"Something Changed?" → `/quick-update`, placed near the bottom of the
-operational cadence, after Procurement.
+**Mission Control's End-of-Briefing Action Center** (UX-001B.4
+Deliverable 5, destinations corrected by UX-001C — see §26), three cards
+closing the page: "Loot Lookup" → `/decision-center`, "Add Inventory" →
+`/hangar`, "Modify Ship" → `/ship-workspace`. Chief Architect framing:
+everything above this row answers "what is the condition of my fleet,"
+everything in this row answers "what should I do next" — Observe → Decide
+→ Execute, the three highest-frequency operational pathways rather than
+a return trip to the nav menu.
 
-**Semantic illustration registry — EWO-035, Beta artwork live:**
-`src/config/assets/workflowAssets.ts` registers two semantic illustration
-IDs — `decision-center-found-loot` and `quick-update-hangar` — both now
-`enabled: true` with Commander-approved Beta illustrations
-(`decision-center-found-loot.webp`, `quick-update-maintenance.webp`,
-delivered under `public/assets/environments/mission-control/`), mirroring
-the branding/environment asset pattern. `MissionControl.tsx` references
-only the semantic ID, never a raw path. These are Beta 1.0 artwork — a
-future Release 2.0 Quartermaster Edition commission may replace either
-file with no change to `WorkflowDestinationCard` or `MissionControl.tsx`.
+**Semantic illustration registry — EWO-057 production artwork:**
+`src/config/assets/workflowAssets.ts` registers three semantic
+illustration IDs, all now `enabled: true` with Commander-approved
+production art delivered under
+`public/assets/environments/mission-control/`: `decision-center-found-loot`
+(`decision-center-card.webp`, backs "Loot Lookup" — Decision Center was
+always this illustration's real destination), `hangar-add-inventory`
+(`add-inventory-card.webp`, renamed from the retired `quick-update-hangar`
+id now that this card routes to Hangar Inventory, never Quick Update),
+and `ship-workspace-modify` (`ship-workspace-card.webp`, backs "Modify
+Ship" — newly commissioned by EWO-057; before that it rendered
+`WorkflowDestinationCard`'s neutral dashed-circle fallback). All three ids
+are stable semantic identifiers, intentionally not renamed just because
+an underlying asset filename changed. `MissionControl.tsx` references
+only the semantic ID, never a raw path. A future Release 2.0
+Quartermaster Edition commission may replace any of the three files again
+with no change to `WorkflowDestinationCard` or `MissionControl.tsx`.
 
 ## 12. PageEnvironment and future hardpoints (APPROVED FUTURE HARDPOINT)
 
@@ -889,3 +909,382 @@ Commander decisions. Containment improves scan efficiency, reinforces
 information hierarchy, and establishes consistent interaction targets.
 Lists remain appropriate for supporting information within a card, but
 top-level operational concepts should be visually encapsulated.*
+
+## 21. Quartermaster Report — Logistics Demand, Assessment & Procurement Work Queue (UX-001B/UX-001B.1/UX-001B.5, IMPLEMENTED NOW)
+
+Mission Control's lower half was an inventory report ("which database
+rows exist") — a flat Missing Components / Unreserved Inventory tile
+pair, then every procurement row in the fleet. UX-001B rebuilt it into a
+logistics briefing answering "what is limiting fleet readiness"; UX-001B.5
+renamed and consolidated it into the **Quartermaster Report** — one
+`.panel` reading top to bottom as a single document (Logistics Demand →
+Quartermaster Assessment → Procurement Work Queue), not three
+independent dashboard widgets stitched together. Same reuse discipline
+throughout: no second accounting authority, no second category taxonomy.
+
+**Logistics Demand** — the report's first section. A grid of
+`ActionCard`s, one per demand category, each showing the category's own
+true shortage (`qtyNeeded`, never `availableToReserve` — a category with
+everything already available shows Complete, never absent). Categories
+are **not** a new taxonomy invented for this feature — see §22, the
+Canonical Component Taxonomy. All demand cards share one neutral
+Quartermaster Blue accent (`#35D0FF`) rather than an invented severity
+color — these are aggregate counts, not state classifications, so
+Priority Actions' green/gold/red vocabulary (§4) does not apply, except
+the deliberate Complete exception (§23).
+
+**Category cards are filters, not links (`ActionCard`'s `onClick`
+mode).** Clicking a demand card scopes the ENTIRE Quartermaster Report
+below it to that category in place (toggles off on a second click) — no
+route change, no panel collapse, no repositioned surrounding content
+(UX-001B.5 Deliverable 5). `ActionCard` gained a third interaction mode
+for this alongside the existing `to` (Link) and bare (static) modes:
+`onClick` + `active`, rendered as a real `<button>` for native keyboard
+operability. Mutually exclusive with `to`.
+
+**Quartermaster Assessment** — the report's second section, always
+present, reacting to the current scope (one category, or the whole
+fleet). Exactly one of three operational outcomes
+(`assessCategoryWorkQueue()` in `src/utils/quartermasterBriefing.ts`),
+and no two ever share a presentation:
+
+| Assessment | Meaning | Presentation |
+|---|---|---|
+| `ACTIONABLE` | Reserved/Available rows exist in scope | "N inventory assets are immediately available…" + the Work Queue table below it. |
+| `PROCUREMENT_ONLY` ("No Inventory Available") | Real demand exists, but nothing owned | A muted assessment line explaining procurement is required; no table — there is nothing actionable to tabulate. |
+| `COMPLETE` ("Fleet Demand Complete") | Nothing outstanding at all | The green Quartermaster completion treatment (reusing §23's own Complete vocabulary); no table. |
+
+**Procurement Work Queue** — the report's third section, rendered only
+when the assessment is `ACTIONABLE`. **UX-001B.5 Deliverable 3 —
+Available/Reserved rows only, unconditionally.** Purchase Required rows
+never render in Mission Control, full stop — this supersedes UX-001B.4's
+own per-category exception (which kept a bare "must purchase" list
+visible for a category with no owned inventory; Commander review
+reclassified that as procurement planning, which belongs to a future
+dedicated tool, not today's execution-focused briefing). Colors remain
+canonical, not Mission-Control-specific — see §23 for the full Design
+System Amendment.
+
+| State | Badge tone | Meaning |
+|---|---|---|
+| Reserved | `cyan` (Quartermaster Blue) | Owned, committed to another Loadout — available only through reprioritization, not immediately deployable. |
+| Available | `success` (green) | Owned, unreserved — go reserve it, immediate readiness gain possible. |
+| ~~Purchase Required~~ | — | Never rendered in Mission Control (UX-001B.5). Still a real `ProcurementRowState` and still colored `muted` wherever else it's shown (e.g. a future dedicated procurement-planning surface) — the state and its color remain canonical, only Mission Control's own display of it was removed. |
+
+Reused, not reinvented: `buildProcurementList` (unchanged — still the
+one true-shortage/available-to-reserve authority) supplies
+Available/Purchase-Required rows; the new, additive
+`buildReservedAwaitingInstallLines` (`src/utils/procurement.ts`) walks
+the same hardpoints with the *inverse* reservation filter to surface the
+"reserved but not yet installed" rows `buildProcurementList` deliberately
+excludes (Alpha 2.3 Part 15 — installing a reserved unit is execution,
+not acquisition). `filterActionableWorkQueue()` then unconditionally
+strips Purchase Required rows for Mission Control's own display — the
+underlying `WorkQueueRow[]` (including Purchase Required) is still what
+`assessCategoryWorkQueue()` reads, so the Assessment section above can
+still tell "no inventory, but real demand" apart from "genuinely nothing
+outstanding" even though the table itself never shows that row.
+
+**Needed By is a hyperlink; inventory state is a badge (Deliverable
+5/6).** `ProcurementLine.neededBy` is structured `{ shipId, buildId,
+label }[]` so each entry links straight to `/ship-workspace/{shipId}`.
+Badges (`Badge.tsx`'s `procurementRowStateTone`/`procurementRowStateLabel`)
+communicate state; links communicate destinations — never the reverse.
+
+**Scrolling reduction.** A row only exists if it represents real
+actionable quantity — `buildQuartermasterWorkQueue` never emits a
+zero-quantity row. Hangar Inventory remains the complete system of
+record; Mission Control shows only what the fleet can act on today.
+
+## 22. Canonical Component Taxonomy (UX-001B.1, Design System Amendment, IMPLEMENTED NOW)
+
+UX-001B's first pass grouped Quartermaster demand using
+`commanderSystemTaxonomy.ts`'s `TOP_LEVEL_GROUP_ORDER` — the taxonomy
+that groups a ship's *ports* into layout sections for Ship Detail's
+Loadout Tree and Ship Workspace's Systems Workspace (Manned Turrets,
+Remote Turrets, Modules, and one catch-all "Core Components" bucket
+containing Coolers, Power Plants, Quantum Drives, Shields, and Life
+Support together). Commander review found this wrong for a demand
+summary: a Quartermaster does not think "I need sixty core components,"
+they think "I am short twenty-one shields." Grouping by physical mounting
+layout answers a different question than grouping by what you'd actually
+go acquire.
+
+**The corrected authority is `src/utils/componentCategoryIcon.ts`**,
+elevated from a Ship-Workspace-only icon picker into the one canonical
+component-*system* taxonomy — glyph, label, and display order together,
+not just glyph:
+
+- `canonicalComponentCategoryKey(hp)` — the one classification switch
+  (unchanged from the original `componentCategoryIcon` body, only
+  factored out so nothing else has to duplicate this matching logic).
+- `CANONICAL_COMPONENT_CATEGORY_ICON` / `_LABEL` — per-category icon and
+  plural display label (`Cooler` → Wind icon / "Coolers", `PowerPlant` →
+  Zap / "Power Plants", `QuantumDrive` → Rocket / "Quantum Drives",
+  `Shield` → Shield / "Shields", `Weapon` → Crosshair / "Weapons", and so
+  on through Missile Racks, Missiles, Jump Drives, Radar, Mining, Salvage,
+  Utility, Life Support, Manned/Remote Turrets, and an `Other Systems`
+  fail-safe).
+- `CANONICAL_COMPONENT_CATEGORY_ORDER` — the fixed display order:
+  Coolers, Power Plants, Quantum Drives, Shields, and Weapons lead (the
+  WO's own required set), the remaining categories follow in the same
+  additive pattern.
+- `componentCategoryIcon(hp)` itself — Ship Workspace's Systems table and
+  `LoadoutPortTree`'s own per-row icon — is now a one-line composition of
+  the key lookup and the icon map, byte-identical behavior to before
+  (verified by the existing "SW-007B Rev 2" regression test asserting
+  Power Plant still renders `lucide-zap`).
+
+Mission Control's `quartermasterBriefing.ts` imports
+`canonicalComponentCategoryLabel`/`CANONICAL_COMPONENT_CATEGORY_ORDER`
+directly; its demand-card icon map (`MissionControl.tsx`) is built by
+zipping the same order/label/icon exports together — no icon is
+independently re-picked for Mission Control's own use, satisfying "no
+alternate icons or naming conventions... for the same component systems."
+
+**Design System Amendment.** *Strategic Fleet Manager shall maintain one
+component taxonomy across the application. Component systems shall use
+the same glyph, ordering, terminology, and semantic meaning regardless of
+page. The Commander should learn the visual language once and encounter
+it consistently throughout Strategic Fleet Manager. Component glyphs
+represent systems, not individual parts.* Future features — Fleet
+Dashboard analytics, Decision Center, Manufacturing, Procurement,
+Inventory, Analytics, Reporting, Notifications — should import from
+`componentCategoryIcon.ts` rather than introducing an alternate grouping.
+`commanderSystemTaxonomy.ts`'s `TOP_LEVEL_GROUP_ORDER` remains correct
+and unchanged for its own original purpose (port layout sections within
+a single ship's Systems Workspace/Loadout Tree) — the two taxonomies
+answer different questions and both remain in use, each in its own
+domain.
+
+## 23. Canonical Operational State Language (UX-001B.3, Design System Amendment, IMPLEMENTED NOW)
+
+Glyph and color are independent systems that must never compete: **glyph
+answers "what system am I looking at," color answers "what is its
+operational state."** §22 covers the glyph half (one canonical icon per
+component system); this section covers the color half (one canonical
+color per operational inventory state) and completes the Quartermaster
+Logistics stable-layout behavior.
+
+**Canonical Procurement State Colors.** `Badge.tsx`'s
+`procurementRowStateTone()` maps each `ProcurementRowState` to one fixed
+tone, reused verbatim everywhere the app shows this state — never a
+Mission-Control-only palette:
+
+| State | Tone | Reuses |
+|---|---|---|
+| Available | `success` (green) | Readiness Green (§4) — ready now. |
+| Reserved | `cyan` (Quartermaster Blue) | The exact existing Reserved color: Hangar Inventory's own reserved-quantity cell and `LoadoutPortTree.tsx`'s `logisticsTone()` both already render Reserved in `cyan` — Mission Control's first pass (UX-001B) wrongly reused `success` here instead, reasoning Reserved and Available both read as zero-friction wins. Commander review corrected it: Reserved is owned but committed elsewhere, not immediately deployable the way Available is, and must not share Available's color. |
+| Purchase Required | `muted` (white/gray) | `componentAcquisitionHint.ts`'s own established "Purchase Required" tone. |
+
+Two future states are named but not implemented — Craft Required
+(purple) and Loot Source (orange) — no unused `Tone` values were added
+ahead of actual need; when those states exist, they extend this same
+table rather than requiring a redesign.
+
+**Design System Amendment.** *Strategic Fleet Manager shall maintain one
+semantic color system for operational inventory states. The same state
+shall always use the same color throughout the application. State colors
+become part of the user's learned operational vocabulary and shall not
+vary between Mission Control, Hangar Inventory, Ship Workspace,
+Procurement, or future Quartermaster modules.*
+
+**Stable Logistics Categories (Deliverable 3/4).** Quartermaster
+Logistics' five required demand categories (Coolers, Power Plants,
+Quantum Drives, Shields, Weapons —
+`CANONICAL_STABLE_CATEGORY_KEYS` in `componentCategoryIcon.ts`) always
+render, even at zero outstanding demand, so the layout becomes familiar
+through repetition rather than growing/shrinking with fleet state. A
+category at zero demand does not disappear — it renders **Complete**:
+its `ActionCard` accent switches from Quartermaster Blue to Readiness
+Green (`#42E695`, the same green `success` already means everywhere
+else), its count becomes a checkmark rather than "0," and a "Complete"
+caption replaces the ship-context line. This is the one deliberate
+exception to §22's "demand cards carry one neutral accent, not a state
+color" rule — Complete is a real operational state (nothing to do here),
+just not a severity one. Every other (additive/future) category still
+follows the original "only render with real demand" rule — only the
+stable five are exempt, so the grid never grows into a wall of empty
+cards for systems a fleet has no Mining/Salvage/Turret presence in.
+
+**Console stability (Deliverable 5/6/7, unchanged from UX-001B).**
+Selecting a category card filters the Work Queue in place — no route
+change, no Hero movement, no column-width shift. State badges remain
+informational, never a navigation target; "Needed By" remains the one
+hyperlink, carrying the Commander to Ship Workspace to actually perform
+the work. Mission Control identifies work; Ship Workspace performs it.
+
+## 24. Commander Acceptance Polish — Locked Columns, Actionable-Only Filtering, Dual Assessment States (UX-001B.4, IMPLEMENTED NOW)
+
+The final Mission Control refinement pass before Commander certification.
+No architectural change — presentation and workflow refinement only,
+completing the console feel §21-§23 established.
+
+**Locked column widths (Deliverable 1).** The Procurement Work Queue
+`<table>` uses `table-fixed` with an explicit `<colgroup>` (26% / 18% /
+18% / 10% / 28% — Component Name, Size/Type, State, Qty, Needed By),
+based on the Quantum Drives category's own natural proportions. Every
+category filter reuses the identical widths; only row contents change
+when a Logistics Demand card is clicked, never column geometry. Cell
+text that would have wrapped under the old auto-layout now truncates
+(`truncate` on Component Name, Size/Type, and Needed By) rather than
+reflowing the table.
+
+**Actionable-only filtering (Deliverable 2) — superseded by UX-001B.5,
+see §25.** UX-001B's own first pass at "actionable inventory only" would
+have hidden every Purchase Required row unconditionally; this mission
+(UX-001B.4) instead applied the rule per-category, keeping a bare "must
+acquire" list visible for a category with no owned inventory at all.
+Commander operational testing later reclassified that per-category
+exception as procurement planning rather than execution — §25 documents
+the unconditional rule that replaced it. Kept here as the historical
+record of the intermediate design; `filterActionableWorkQueue()` no
+longer behaves as described in this paragraph.
+
+**Dual category assessment states (Deliverable 3/4).** `quartermasterBriefing.ts`'s
+`assessCategoryWorkQueue()` classifies a category-filtered Work Queue
+into exactly one of three outcomes, and Case A/B must never share a
+presentation — this classification function itself is unchanged by
+UX-001B.5; only what the Work Queue table renders for `PROCUREMENT_ONLY`
+changed (see §25):
+
+| Assessment | Trigger | Presentation |
+|---|---|---|
+| `ACTIONABLE` | Reserved/Available rows present | Normal table, no banner. |
+| `PROCUREMENT_ONLY` (Case A — "No Inventory Available") | Only Purchase Required rows remain | A muted "Quartermaster Assessment" banner. |
+| `COMPLETE` (Case B — "Fleet Demand Complete") | No rows at all | The green Quartermaster completion banner. |
+
+Case B reuses the exact completion vocabulary §23 established for a
+zero-demand Logistics Demand card (Readiness Green, checkmark glyph,
+explicit "Complete" designation) — the same visual language at two
+different points in the same operational story, never a competing one.
+
+**End-of-Briefing Action Center (Deliverable 5) — see §11/§26** for the
+full three-card breakdown (Loot Lookup / Add Inventory / Modify Ship —
+destinations corrected by UX-001C) and the illustration-registry changes
+it required.
+
+**Chief Architect's organizing principle**, recorded here because it
+governs how future Mission Control sections should be designed: the page
+tells one complete operational story, Observe → Decide → Execute.
+Everything above the Action Center answers "what is the condition of my
+fleet"; the Action Center itself answers "what should I do next." A
+future addition to Mission Control should say which of those three beats
+it belongs to before it is built.
+
+## 25. Quartermaster Report Consolidation (UX-001B.5, IMPLEMENTED NOW)
+
+The final Quartermaster sprint. No architectural redesign — information
+architecture and presentation only, closing out the arc §21-§24 opened.
+
+**Rename (Deliverable 1).** "Quartermaster Logistics" → "Quartermaster
+Report" — the title now names what the section actually is: the
+Quartermaster's own briefing to the Commander, not a logistics data
+panel.
+
+**One reporting surface, not three panels (Deliverable 2).** Logistics
+Demand, Quartermaster Assessment, and Procurement Work Queue now live
+inside a single `<div className="panel">`, separated by plain `border-t`
+dividers rather than separate `.panel` boundaries — read top to bottom as
+one document. The Work Queue's table wrapper dropped its own nested
+`.panel` styling (now a lighter `rounded-lg border border-white/5`) for
+the same reason: a card-within-a-card reads as two things, not one.
+
+**Unconditional actionable-only filtering (Deliverable 3) — the
+correction to UX-001B.4.** Commander operational testing drew a hard
+line between execution and planning: *"If a component does not
+currently exist in inventory, the Commander cannot act on it during
+today's operational briefing."* `filterActionableWorkQueue()` simplified
+from UX-001B.4's per-category conditional (keep Purchase Required rows
+visible for a category with nothing else actionable) to an unconditional
+one — Purchase Required rows never render in Mission Control, full stop,
+regardless of category state. Procurement planning is explicitly deferred
+to a future dedicated tool.
+
+**Contextual assessment, now always present (Deliverable 4).** Because
+Purchase Required rows never render, a category (or the whole fleet)
+with only Purchase Required demand would otherwise show an empty table
+with no explanation — worse than UX-001B.4's own "No Inventory Available"
+banner, which at least still showed the bare purchase list. UX-001B.5
+keeps the banner and drops the list: the Quartermaster Assessment is now
+a permanent, always-rendered part of the report (not a conditional
+edge-case banner), reacting to whichever scope is active:
+
+- **Inventory Exists** (`ACTIONABLE`) — *"N inventory assets are
+  immediately available to improve fleet readiness[for {category}]."*
+  Table renders below it.
+- **No Inventory Available** (`PROCUREMENT_ONLY`) — *"There are
+  currently no inventory assets available to satisfy the selected target
+  loadouts[for {category}]."* No table.
+- **Fleet Demand Complete** (`COMPLETE`) — *"All target loadouts
+  [for {category}] have been satisfied. Quartermaster Report complete."*
+  Green completion treatment, no table.
+
+Critically, `assessCategoryWorkQueue()` itself is called on the
+**unfiltered** `WorkQueueRow[]` for the current scope (before
+`filterActionableWorkQueue()` strips Purchase Required rows) — this is
+the one place Mission Control still looks at Purchase Required rows at
+all, purely to distinguish "no inventory, but real demand exists" from
+"genuinely nothing outstanding." The Commander never sees a Purchase
+Required row; the Assessment text is the only trace that distinction
+leaves in the UI.
+
+**Stable filtering and canonical taxonomy (Deliverable 5/6) —
+unchanged.** Category selection remains an in-place filter (§21); no
+navigation, no panel collapse, no repositioned Hero content. The
+canonical component taxonomy (§22) is untouched — Coolers, Power Plants,
+Quantum Drives, Shields, Weapons remain the stable five, with the same
+additive model for Mining, Salvage, Missile Racks, Utility, and future
+systems.
+
+**Mission Control's three-stage operational flow**, the organizing
+structure this mission formalized:
+
+1. **Commander Briefing** (the Hero) — Fleet Status, Fleet Readiness,
+   Priority Actions, Priority Ships. *What is the condition of my fleet?*
+2. **Quartermaster Report** (§21, this section) — Logistics Demand,
+   Quartermaster Assessment, Procurement Work Queue. *What can I act on
+   today?*
+3. **Execute Orders** (§24/§26's End-of-Briefing Action Center) — Loot
+   Lookup, Add Inventory, Modify Ship. *What do I do next?*
+
+Observe → Assess → Execute. Chief Architect's framing: this is no longer
+a polish pass on a page, it's the rhythm of opening Strategic Fleet
+Manager — the same three beats, every session, until the Commander stops
+thinking about navigation and starts thinking about the fleet.
+
+## 26. Mission Control Execution Links Correction (UX-001C, IMPLEMENTED NOW)
+
+The final Mission Control sprint — a navigation correction, not a
+redesign. Commander acceptance testing found all three End-of-Briefing
+Action Center cards (§11/§24) pointing at the wrong, or wrongly-labeled,
+destinations.
+
+| Card | Before | After | Why |
+|---|---|---|---|
+| Loot Lookup | "Loot Lockup" → `/hangar` | "Loot Lookup" → `/decision-center` | The label typo is fixed ("a real component still gets reviewed, not arrested" — Chief Architect), and the destination reverts to Decision Center, where unresolved/recovered/unassigned component decisions actually live. This restores the pre-UX-001B.4 destination; UX-001B.4's own detour through Hangar Inventory is fully undone. |
+| Add Inventory | "Add Inventory" → `/quick-update` | "Add Inventory" → `/hangar` | Hangar Inventory is the intended future home of the reusable Add Inventory workflow. Quick Update itself is untouched by this mission — only this one card no longer routes there. |
+| Modify Ship | "Modify Ship" → `/ship-workspace` | Unchanged | Already correct. |
+
+**Illustration registry.** `decision-center-found-loot` is reused
+unchanged for "Loot Lookup" (it was always Decision Center's own art).
+`quick-update-hangar` — UX-001B.4's own id, real art, but now misleadingly
+named given this mission's explicit "never route to Quick Update"
+directive — is renamed to `hangar-add-inventory`, same asset file, no
+new commissioning. `hangar-loot-lockup` (UX-001B.4's id for the retired
+Hangar-bound "Loot Lockup" card, never commissioned) is deleted outright —
+no remaining consumer. Net: three illustration IDs, not four.
+
+**Regression coverage** (`MissionControl.test.tsx`) explicitly asserts
+the negative space this correction closes: the string "Loot Lockup"
+never renders anywhere in Mission Control, and no `<a>` on the page
+carries `href="/quick-update"` — not just that the three cards route
+correctly, but that the two specific mistakes Commander review found are
+provably gone, not just superficially relabeled.
+
+With this correction shipped, Mission Control is functionally and
+visually complete for Beta 2.0 per Chief Architect certification:
+Commander Briefing, Fleet Status, Fleet Readiness, Priority Actions, Top
+Priority Ships, Quartermaster Report, and Execution Actions all read as
+one coherent operational briefing — Observe → Assess → Execute — with no
+further Hero or Quartermaster Report work anticipated before release.

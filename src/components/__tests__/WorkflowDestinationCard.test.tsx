@@ -34,7 +34,7 @@ describe('<WorkflowDestinationCard /> — EWO-011 operational workflow destinati
   })
 
   it('renders an intentional neutral illustration hardpoint, not a broken image, when no illustration is approved yet', async () => {
-    // decision-center-found-loot/quick-update-hangar are both real,
+    // decision-center-found-loot/hangar-add-inventory are both real,
     // Commander-approved Beta artwork as of EWO-035 — this test instead
     // mocks the resolver back to its pre-EWO-035 "nothing approved yet"
     // state, so the neutral-icon contract itself (never a broken <img>)
@@ -64,8 +64,8 @@ describe('<WorkflowDestinationCard /> — EWO-011 operational workflow destinati
   })
 })
 
-describe('<WorkflowDestinationCard /> — EWO-035 Beta artwork integration', () => {
-  it('renders the real "Found Loot?" illustration filling the frame via object-cover', () => {
+describe('<WorkflowDestinationCard /> — EWO-035/EWO-057 Beta artwork integration', () => {
+  it('renders the real "Loot Lookup" illustration filling the frame via object-cover', () => {
     // The illustration is decorative (alt="" by design, the title/supporting
     // line already carry the accessible content) so it has no accessible
     // "img" role — queried by tag, matching the pre-existing convention
@@ -73,24 +73,41 @@ describe('<WorkflowDestinationCard /> — EWO-035 Beta artwork integration', () 
     const { container } = renderCard('decision-center-found-loot')
     const img = container.querySelector('img') as HTMLImageElement
     expect(img).not.toBeNull()
-    expect(img.src).toContain('/assets/environments/mission-control/decision-center-found-loot.webp')
+    expect(img.src).toContain('/assets/environments/mission-control/decision-center-card.webp')
     expect(img.className).toContain('object-cover')
   })
 
-  it('renders the real "Something Changed?" illustration filling the frame via object-cover', () => {
+  it('renders the real "Add Inventory" illustration filling the frame via object-cover', () => {
     const { container } = render(
       <MemoryRouter>
         <WorkflowDestinationCard
-          to="/quick-update"
-          title="Something Changed?"
-          supportingLine="Log new components, fittings, or fleet changes fast."
-          illustrationId="quick-update-hangar"
+          to="/hangar"
+          title="Add Inventory"
+          supportingLine="Record newly acquired or purchased components."
+          illustrationId="hangar-add-inventory"
         />
       </MemoryRouter>
     )
     const img = container.querySelector('img') as HTMLImageElement
     expect(img).not.toBeNull()
-    expect(img.src).toContain('/assets/environments/mission-control/quick-update-maintenance.webp')
+    expect(img.src).toContain('/assets/environments/mission-control/add-inventory-card.webp')
+    expect(img.className).toContain('object-cover')
+  })
+
+  it('renders the real "Modify Ship" illustration filling the frame via object-cover (EWO-057 — newly commissioned, was previously the neutral fallback)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <WorkflowDestinationCard
+          to="/ship-workspace"
+          title="Modify Ship"
+          supportingLine="Adjust loadouts, reservations, or installed components."
+          illustrationId="ship-workspace-modify"
+        />
+      </MemoryRouter>
+    )
+    const img = container.querySelector('img') as HTMLImageElement
+    expect(img).not.toBeNull()
+    expect(img.src).toContain('/assets/environments/mission-control/ship-workspace-card.webp')
     expect(img.className).toContain('object-cover')
   })
 })

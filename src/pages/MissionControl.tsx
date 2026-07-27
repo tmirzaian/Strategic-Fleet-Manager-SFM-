@@ -3,20 +3,20 @@ import { Link } from 'react-router-dom'
 import {
   ShipWheel,
   LayoutGrid,
-  ClipboardList,
   PackageCheck,
   CheckCircle2,
-  AlertTriangle,
   Wrench,
   Factory,
   PackageX,
   Plus,
-  ScanSearch,
   AlertOctagon,
   BookmarkCheck,
   PackageOpen,
   ArrowUpCircle,
   XCircle,
+  X,
+  ShoppingCart,
+  Boxes,
 } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import ShipCard from '../components/ShipCard'
@@ -26,10 +26,22 @@ import SortableHeader from '../components/SortableHeader'
 import FleetStatusTile from '../components/FleetStatusTile'
 import CriticalMetricTile from '../components/CriticalMetricTile'
 import ActionCard from '../components/ActionCard'
+import Badge, { procurementRowStateTone, procurementRowStateLabel } from '../components/Badge'
 import WorkflowDestinationCard from '../components/WorkflowDestinationCard'
 import PageEnvironment from '../components/layout/PageEnvironment'
 import { colorFor } from '../components/ReadinessBar'
-import { buildProcurementList, sortProcurementList, type ProcurementSortColumn, type SortDirection } from '../utils/procurement'
+import { buildProcurementList, buildReservedAwaitingInstallLines, type ProcurementNeededByEntry } from '../utils/procurement'
+import {
+  buildQuartermasterDemandSummary,
+  buildQuartermasterWorkQueue,
+  filterActionableWorkQueue,
+  assessCategoryWorkQueue,
+  sortWorkQueue,
+  type WorkQueueSortColumn,
+  type WorkQueueSortDirection,
+  type CategoryWorkQueueAssessment,
+} from '../utils/quartermasterBriefing'
+import { CANONICAL_COMPONENT_CATEGORY_ORDER, CANONICAL_COMPONENT_CATEGORY_LABEL, CANONICAL_COMPONENT_CATEGORY_ICON } from '../utils/componentCategoryIcon'
 import { calculateBuildProgress } from '../utils/buildProgress'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
 import { buildTileContextNames, type TileContextResult } from '../utils/tileContextNames'
@@ -64,6 +76,81 @@ function renderShipContext(context: TileContextResult) {
       )}
     </span>
   )
+}
+
+/** UX-001B (Deliverable 5) — "Needed By" as real hyperlinks straight to
+ * the relevant Ship Workspace, not inert text (the Procurement table's
+ * prior behavior). Inventory state itself is never hyperlinked here —
+ * that's the Badge column's job (Deliverable 6): badges communicate
+ * state, links communicate destinations. */
+function renderNeededByLinks(entries: ProcurementNeededByEntry[]) {
+  if (entries.length === 0) return <span className="text-muted/50">—</span>
+  return (
+    <>
+      {entries.map((entry, i) => (
+        <span key={`${entry.shipId}-${entry.buildId}`}>
+          {i > 0 && ', '}
+          <Link to={`/ship-workspace/${entry.shipId}`} className="text-cyan hover:underline">
+            {entry.label}
+          </Link>
+        </span>
+      ))}
+    </>
+  )
+}
+
+/** UX-001B.1 (Deliverable 2/9) — Canonical Component Taxonomy. Categories,
+ * glyphs, and ordering are NOT reinvented here — they are reused directly
+ * from `componentCategoryIcon.ts`'s own canonical per-system exports
+ * (`CANONICAL_COMPONENT_CATEGORY_ICON`/`_LABEL`), the one Chief-Architect-
+ * approved component-system taxonomy Ship Workspace already draws its own
+ * row glyphs from. A Quartermaster who reads "Shields" here sees the
+ * identical icon and word Ship Workspace already uses for that system,
+ * never a second, Mission-Control-only meaning. Every category with real
+ * outstanding demand shares one neutral accent (Quartermaster Blue)
+ * rather than an invented severity color — these are aggregate demand
+ * counts, not procurement-row state classifications, so Priority
+ * Actions'/the Work Queue's own green/blue/white vocabulary does not
+ * apply here (see docs/UI_ARCHITECTURE.md §4) — EXCEPT the one deliberate
+ * exception below: a stable category at zero demand borrows Readiness
+ * Green to read as "Complete," per UX-001B.3 Deliverable 3 ("the
+ * Commander should perceive 'nothing to do here' without opening the
+ * Work Queue"). Glyph still answers "what system," color still answers
+ * "what state" — Complete is a real state, just not a severity one. */
+const QUARTERMASTER_CATEGORY_ACCENT = '#35D0FF'
+const QUARTERMASTER_COMPLETE_ACCENT = '#42E695'
+const QUARTERMASTER_CATEGORY_ICON: Record<string, any> = Object.fromEntries(
+  CANONICAL_COMPONENT_CATEGORY_ORDER.map((key) => [CANONICAL_COMPONENT_CATEGORY_LABEL[key], CANONICAL_COMPONENT_CATEGORY_ICON[key]])
+)
+
+/** UX-001B.5 (Deliverable 4) — Contextual Quartermaster Assessment: one
+ * short, plain-language line that reacts to the current report scope
+ * (one category, or the whole fleet), reusing the exact same three-way
+ * classification and color vocabulary `assessCategoryWorkQueue` and the
+ * Logistics Demand "Complete" cards already established — never a fourth
+ * competing presentation for the same three operational outcomes. */
+const QUARTERMASTER_ASSESSMENT_PRESENTATION: Record<CategoryWorkQueueAssessment, { icon: any; accent: string; title: string | null }> = {
+  ACTIONABLE: { icon: Boxes, accent: QUARTERMASTER_CATEGORY_ACCENT, title: null },
+  PROCUREMENT_ONLY: { icon: ShoppingCart, accent: '#8B93A1', title: null },
+  // The only state that adds a designation beyond the "Quartermaster
+  // Assessment" section label already sitting directly above it — the
+  // other two states would otherwise repeat that exact text twice in a row.
+  COMPLETE: { icon: CheckCircle2, accent: QUARTERMASTER_COMPLETE_ACCENT, title: 'Quartermaster Assessment — Complete' },
+}
+
+function describeQuartermasterAssessment(assessment: CategoryWorkQueueAssessment, categoryFilter: string | null, assetCount: number): string {
+  if (assessment === 'COMPLETE') {
+    return categoryFilter
+      ? `All target loadouts for ${categoryFilter} have been satisfied. Quartermaster Report complete.`
+      : 'All target loadouts have been satisfied fleet-wide. Quartermaster Report complete.'
+  }
+  if (assessment === 'PROCUREMENT_ONLY') {
+    return categoryFilter
+      ? `There are currently no inventory assets available to satisfy the selected target loadouts for ${categoryFilter}.`
+      : 'There are currently no inventory assets available to satisfy outstanding target loadouts fleet-wide.'
+  }
+  const noun = assetCount === 1 ? 'asset is' : 'assets are'
+  return `${assetCount} inventory ${noun} immediately available to improve fleet readiness${categoryFilter ? ` for ${categoryFilter}` : ''}.`
 }
 
 /** UX-001A — Glyph Standard v1 (Hero-scoped): one icon, one accent color
@@ -173,20 +260,40 @@ export default function MissionControl() {
   const inProgressContext = buildTileContextNames(inProgressShips)
   const factoryContext = buildTileContextNames(factoryShips)
 
-  const missingComponentsCount = procurementRaw.reduce((sum, l) => sum + l.qtyNeeded, 0)
-  const unreservedInventoryCount = procurementRaw.reduce((sum, l) => sum + l.availableToReserve, 0)
-
   // UX-001A (Deliverable 4) — Priority Actions: the Hero's own action
   // queue, "what should I do right now." Same accounting authorities as
   // everything else on this page (see priorityActions.ts's own doc
   // comment) — never a second readiness/inventory computation.
   const priorityActionGroups = deriveFleetPriorityActions(ships, hardpoints, hangarItems, installedLoadouts, reservations)
 
-  const [sortColumn, setSortColumn] = useState<ProcurementSortColumn>('name')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
-  const procurement = sortProcurementList(procurementRaw, sortColumn, sortDirection)
+  // UX-001B — Quartermaster Briefing. `procurementRaw` (unchanged
+  // computation) covers Available/Purchase-Required; `reservedLines`
+  // covers the "reserved but not yet installed" half that
+  // `buildProcurementList` deliberately excludes. `demandSummary`
+  // aggregates true shortage by category (Deliverable 1/2/7);
+  // `workQueueRaw` is the flat, individually-actionable row list
+  // (Deliverable 3/4/8) a category card can filter down to.
+  const reservedLines = buildReservedAwaitingInstallLines(hardpoints, builds, ships, reservations)
+  const demandSummary = buildQuartermasterDemandSummary(procurementRaw)
+  const workQueueRaw = buildQuartermasterWorkQueue(procurementRaw, reservedLines)
 
-  function handleSort(column: ProcurementSortColumn) {
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<WorkQueueSortColumn>('state')
+  const [sortDirection, setSortDirection] = useState<WorkQueueSortDirection>('asc')
+
+  // UX-001B.5 — the Quartermaster Report's own current scope: one
+  // category, or the whole fleet. `workQueueScopedRaw` keeps Purchase
+  // Required rows (needed by the assessment below to tell "no inventory,
+  // but real demand" apart from "genuinely nothing outstanding");
+  // `workQueue` is what the table actually renders — actionable
+  // (Reserved/Available) only, per Deliverable 3, unconditionally.
+  const workQueueScopedRaw = categoryFilter ? workQueueRaw.filter((row) => row.category === categoryFilter) : workQueueRaw
+  const workQueueFiltered = filterActionableWorkQueue(workQueueScopedRaw)
+  const workQueue = sortWorkQueue(workQueueFiltered, sortColumn, sortDirection)
+  const reportAssessment = assessCategoryWorkQueue(workQueueScopedRaw)
+  const reportAssessmentAssetCount = workQueueFiltered.reduce((sum, row) => sum + row.quantity, 0)
+
+  function handleSort(column: WorkQueueSortColumn) {
     if (column === sortColumn) {
       setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'))
     } else {
@@ -388,94 +495,171 @@ export default function MissionControl() {
           )}
         </div>
 
-        {/* Quartermaster Logistics — architecture approved (EWO-007); refined
-            only. UX-001A (Deliverable 2) relocated Fleet Status into the Hero
-            (it is a fleet operational classification, not a logistics
-            metric) — Inventory Status is Quartermaster Logistics' own
-            remaining, unchanged department. */}
+        {/* Quartermaster Report — UX-001B.5 consolidates what were three
+            visually independent panels (Logistics Demand, Quartermaster
+            Assessment, Procurement Work Queue) into ONE reporting
+            surface, read top to bottom as a single document rather than
+            three unrelated dashboard widgets. This is stage II of Mission
+            Control's own three-stage operational flow (Commander Briefing
+            → Quartermaster Report → Execute Orders): the fleet's demand,
+            the Quartermaster's plain-language read on it, and exactly the
+            inventory that can act on it today. */}
         <div className="panel p-5 lg:p-6">
-          <p className="text-sm font-display font-semibold text-white flex items-center gap-2 mb-4 min-w-0">
-            <PackageCheck size={15} className="text-cyan shrink-0" /> <span className="truncate">Quartermaster Logistics</span>
-          </p>
-          <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Inventory Status</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <CriticalMetricTile icon={AlertTriangle} label="Missing Components" value={missingComponentsCount} accent={missingComponentsCount > 0 ? '#FF5F73' : undefined} />
-            <CriticalMetricTile icon={ScanSearch} label="Unreserved Inventory" value={unreservedInventoryCount} />
+          <div className="flex items-center justify-between gap-2 mb-4 min-w-0">
+            <p className="text-sm font-display font-semibold text-white flex items-center gap-2 min-w-0">
+              <PackageCheck size={15} className="text-cyan shrink-0" /> <span className="truncate">Quartermaster Report</span>
+            </p>
+            {categoryFilter && (
+              <button
+                onClick={() => setCategoryFilter(null)}
+                className="text-xs text-cyan hover:underline shrink-0 flex items-center gap-1"
+              >
+                {categoryFilter} <X size={13} />
+              </button>
+            )}
           </div>
+
+          <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Logistics Demand</p>
+          {/* UX-001B.3 (Deliverable 3/4) — the stable core categories
+              (Coolers, Power Plants, Quantum Drives, Shields, Weapons)
+              always populate `demandSummary`, so this grid always
+              renders — no page-level "nothing to procure" empty state to
+              maintain separately. A category at zero demand renders
+              Complete (green accent, checkmark, "Complete" caption)
+              rather than disappearing, so the layout stays fixed and
+              learnable through repetition. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {demandSummary.map((group) => {
+              const isActive = categoryFilter === group.category
+              const isComplete = group.needed === 0
+              return (
+                // Deliverable 5 — a demand category card is an in-place
+                // report filter, not a passive metric: clicking it scopes
+                // the whole Quartermaster Report below to this category
+                // (toggles off on a second click). No `to` — this changes
+                // in-page state, never navigates away from the Briefing.
+                <ActionCard
+                  key={group.category}
+                  icon={QUARTERMASTER_CATEGORY_ICON[group.category] ?? CANONICAL_COMPONENT_CATEGORY_ICON.Other}
+                  title={group.category}
+                  count={isComplete ? '✓' : group.needed}
+                  accent={isComplete ? QUARTERMASTER_COMPLETE_ACCENT : QUARTERMASTER_CATEGORY_ACCENT}
+                  active={isActive}
+                  onClick={() => setCategoryFilter(isActive ? null : group.category)}
+                >
+                  {isComplete ? 'Complete' : undefined}
+                </ActionCard>
+              )
+            })}
+          </div>
+
+          <div className="border-t border-white/10 my-4" />
+
+          <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Quartermaster Assessment</p>
+          {/* UX-001B.5 (Deliverable 4) — always present, reacting to the
+              current scope (one category, or the whole fleet): exactly
+              one of three operational outcomes, reusing the same
+              classification and color vocabulary the Logistics Demand
+              cards and Work Queue already established — never a fourth
+              competing presentation. */}
+          {(() => {
+            const presentation = QUARTERMASTER_ASSESSMENT_PRESENTATION[reportAssessment]
+            const AssessmentIcon = presentation.icon
+            return (
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border-l-[3px]" style={{ borderLeftColor: presentation.accent }}>
+                <AssessmentIcon size={18} className="shrink-0 mt-0.5" style={{ color: presentation.accent }} />
+                <div className="min-w-0">
+                  {presentation.title && <div className="text-sm font-semibold text-success">{presentation.title}</div>}
+                  <div className={presentation.title ? 'text-xs text-muted mt-0.5' : 'text-sm text-white'}>
+                    {describeQuartermasterAssessment(reportAssessment, categoryFilter, reportAssessmentAssetCount)}
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          {reportAssessment === 'ACTIONABLE' && (
+            <>
+              <div className="border-t border-white/10 my-4" />
+              <p className="text-[10px] uppercase tracking-widest text-muted/60 mb-2">Procurement Work Queue</p>
+              {/* UX-001B.4 (Deliverable 1) — locked column widths. The
+                  Quantum Drives view's own natural proportions became the
+                  fixed template (`table-fixed` + explicit `<col>` widths)
+                  for every category, so switching filters only ever
+                  changes row contents, never column geometry.
+                  UX-001B.5 (Deliverable 3) — Available/Reserved rows
+                  only; Purchase Required never renders in Mission
+                  Control, unconditionally (procurement planning belongs
+                  to a future dedicated tool). */}
+              <div className="rounded-lg border border-white/5 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm table-fixed">
+                    <colgroup>
+                      <col className="w-[26%]" />
+                      <col className="w-[18%]" />
+                      <col className="w-[18%]" />
+                      <col className="w-[10%]" />
+                      <col className="w-[28%]" />
+                    </colgroup>
+                    <thead>
+                      <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
+                        <SortableHeader label="Component Name" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="Size / Type" column="sizeType" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="State" column="state" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <SortableHeader label="Qty" column="quantity" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                        <th className="px-3 py-2 font-medium">Needed By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {workQueue.map((row) => (
+                        <tr key={`${row.itemName}-${row.state}`} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                          <td className="px-3 py-2 text-white font-medium truncate">{row.itemName}</td>
+                          <td className="px-3 py-2 text-muted truncate">{row.size} {row.type}</td>
+                          <td className="px-3 py-2">
+                            <Badge tone={procurementRowStateTone(row.state)}>{procurementRowStateLabel(row.state)}</Badge>
+                          </td>
+                          <td className="px-3 py-2 font-mono text-cyan">{row.quantity}</td>
+                          <td className="px-3 py-2 text-muted text-xs truncate">{renderNeededByLinks(row.neededBy)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Procurement workflow — Procurement, Found Loot, and Quick Update read as one
-            connected sequence (review, then act), not unrelated dashboard cards. */}
+        {/* Execute Orders — stage III of Mission Control's operational
+            flow (End-of-Briefing Action Center, UX-001B.4 Deliverable 5).
+            Deliberately kept OUTSIDE the Quartermaster Report panel
+            above — the report identifies work, this transitions into
+            performing it. UX-001C corrected all three destinations:
+            "Loot Lookup" (not "Loot Lockup" — a real component still
+            gets reviewed, not arrested) routes to Decision Center, where
+            unresolved/recovered/unassigned component decisions actually
+            live; "Add Inventory" routes to Hangar Inventory, the future
+            home of the reusable Add Inventory workflow, never Quick
+            Update; "Modify Ship" was already correct and is unchanged. */}
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <ClipboardList size={16} className="text-cyan" />
-            <h2 className="font-display font-semibold text-lg text-white">Procurement</h2>
-          </div>
-          {procurement.length === 0 ? (
-            <div className="panel p-5 flex items-center gap-3">
-              <CheckCircle2 className="text-success shrink-0" size={22} />
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-white">All Loadout Targets Satisfied</div>
-                <div className="text-xs text-muted mt-0.5">Nothing to procure fleet-wide right now.</div>
-              </div>
-            </div>
-          ) : (
-            <div className="panel overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
-                      <SortableHeader label="Component Name" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                      <SortableHeader label="Size / Type" column="sizeType" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                      <SortableHeader label="Qty Needed" column="quantity" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                      <SortableHeader label="Unreserved Inventory" column="unreserved" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                      <th className="px-3 py-2 font-medium">Needed By</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {procurement.map((line) => (
-                      <tr key={line.itemName} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                        <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{line.itemName}</td>
-                        <td className="px-3 py-2 text-muted whitespace-nowrap">{line.size} {line.type}</td>
-                        <td className="px-3 py-2 font-mono text-cyan">{line.qtyNeeded > 0 ? line.qtyNeeded : <span className="text-success">0</span>}</td>
-                        <td className="px-3 py-2 font-mono">
-                          {line.availableToReserve > 0 ? (
-                            // EWO-029 (Task 10) — an unreserved-match signal
-                            // must carry an actual action, not just a label;
-                            // Hangar Inventory owns the Reserve workflow
-                            // itself (Task 4), so this hands off there
-                            // rather than duplicating it here.
-                            <Link to="/hangar" className="text-cyan hover:underline" title={`Reserve ${line.itemName} in Hangar Inventory`}>
-                              {line.availableToReserve} — Reserve
-                            </Link>
-                          ) : (
-                            <span className="text-muted/50">—</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-muted text-xs">{line.neededBy.join(', ') || '—'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Operational Workflow Destinations — the natural next step after
-              Procurement, but workflows, not metrics: visually distinct from the data
-              tiles above via WorkflowDestinationCard (EWO-011). */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <WorkflowDestinationCard
               to="/decision-center"
-              title="Found Loot? Check It."
-              supportingLine="Review unassigned components and decide what to keep."
+              title="Loot Lookup"
+              supportingLine="Review unresolved, recovered, or unassigned component decisions."
               illustrationId="decision-center-found-loot"
             />
             <WorkflowDestinationCard
-              to="/quick-update"
-              title="Something Changed?"
-              supportingLine="Log new components, fittings, or fleet changes fast."
-              illustrationId="quick-update-hangar"
+              to="/hangar"
+              title="Add Inventory"
+              supportingLine="Record newly acquired or purchased components."
+              illustrationId="hangar-add-inventory"
+            />
+            <WorkflowDestinationCard
+              to="/ship-workspace"
+              title="Modify Ship"
+              supportingLine="Adjust loadouts, reservations, or installed components."
+              illustrationId="ship-workspace-modify"
             />
           </div>
         </div>

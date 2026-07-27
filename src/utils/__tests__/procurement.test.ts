@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { buildProcurementList, sortProcurementList } from '../procurement'
+import { buildProcurementList, buildReservedAwaitingInstallLines, sortProcurementList } from '../procurement'
 import { hardpoints, builds, ships } from '../../data/seed'
-import type { Hardpoint, Build, Ship } from '../../types'
+import type { Hardpoint, Build, Ship, MissionReservation } from '../../types'
 
 function hp(overrides: Partial<Hardpoint> = {}): Hardpoint {
   return {
@@ -42,7 +42,7 @@ describe('buildProcurementList (Golden Scenario A + Part 3)', () => {
     const list = buildProcurementList([row], [testBuild], [testShip])
     expect(list).toHaveLength(1)
     expect(list[0].itemName).toBe('Real Item')
-    expect(list[0].neededBy).toEqual(['Test Ship — Test Build'])
+    expect(list[0].neededBy).toEqual([{ shipId: 's', buildId: 'b', label: 'Test Ship — Test Build' }])
   })
 
   it('39: invalid procurement entries never inflate the total Needed Items count', () => {
@@ -50,6 +50,52 @@ describe('buildProcurementList (Golden Scenario A + Part 3)', () => {
     const invalidRow = hp({ status: 'Invalid Target', targetItem: 'Bad Item' })
     const list = buildProcurementList([validRow, invalidRow], [testBuild], [testShip])
     expect(list.reduce((sum, l) => sum + l.qtyNeeded, 0)).toBe(1)
+  })
+})
+
+describe('buildReservedAwaitingInstallLines (UX-001B Deliverable 4)', () => {
+  it('a Missing assignment with an active reservation for this exact port produces a reserved line, never a plain procurement line', () => {
+    const row = hp({ status: 'Missing', targetItem: 'Mirage', slotLabel: 'Left Shield' })
+    const reservation: MissionReservation = {
+      id: 'r1', missionConfigurationId: 'b', fleetAssetId: 's', targetSlotLabel: 'Left Shield', componentName: 'Mirage', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '',
+    }
+    const reserved = buildReservedAwaitingInstallLines([row], [testBuild], [testShip], [reservation])
+    expect(reserved).toHaveLength(1)
+    expect(reserved[0]).toMatchObject({ itemName: 'Mirage', quantity: 1 })
+    expect(reserved[0].neededBy).toEqual([{ shipId: 's', buildId: 'b', label: 'Test Ship — Test Build' }])
+
+    // The same row must never simultaneously appear in the true-shortage list.
+    const procurement = buildProcurementList([row], [testBuild], [testShip], [], [reservation])
+    expect(procurement).toEqual([])
+  })
+
+  it('a Missing assignment with no active reservation produces no reserved line', () => {
+    const row = hp({ status: 'Missing', targetItem: 'Mirage' })
+    expect(buildReservedAwaitingInstallLines([row], [testBuild], [testShip], [])).toEqual([])
+  })
+
+  it('two hardpoints reserving the same component aggregate into one line with quantity 2', () => {
+    const rowA = hp({ id: 'h1', status: 'Missing', targetItem: 'Mirage', slotLabel: 'Left Shield' })
+    const rowB = hp({ id: 'h2', status: 'Missing', targetItem: 'Mirage', slotLabel: 'Right Shield' })
+    const reservations: MissionReservation[] = [
+      { id: 'r1', missionConfigurationId: 'b', fleetAssetId: 's', targetSlotLabel: 'Left Shield', componentName: 'Mirage', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
+      { id: 'r2', missionConfigurationId: 'b', fleetAssetId: 's', targetSlotLabel: 'Right Shield', componentName: 'Mirage', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
+    ]
+    const reserved = buildReservedAwaitingInstallLines([rowA, rowB], [testBuild], [testShip], reservations)
+    expect(reserved).toHaveLength(1)
+    expect(reserved[0].quantity).toBe(2)
+  })
+
+  it('an Invalid Target or OK hardpoint never produces a reserved line even with a matching reservation', () => {
+    const row = hp({ status: 'Invalid Target', targetItem: 'Mirage', slotLabel: 'Left Shield' })
+    const reservation: MissionReservation = {
+      id: 'r1', missionConfigurationId: 'b', fleetAssetId: 's', targetSlotLabel: 'Left Shield', componentName: 'Mirage', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '',
+    }
+    expect(buildReservedAwaitingInstallLines([row], [testBuild], [testShip], [reservation])).toEqual([])
+  })
+
+  it('returns an empty array for zero hardpoints without error', () => {
+    expect(buildReservedAwaitingInstallLines([], [], [], [])).toEqual([])
   })
 })
 

@@ -120,8 +120,22 @@ export interface BrandingAssetDefinition {
  * Semantic identifiers for WorkflowDestinationCard's future fixed
  * illustration (EWO-011). Each maps to one operational workflow
  * destination on Mission Control — never a raw path in application code.
+ *
+ * UX-001C — the End-of-Briefing Action Center's three cards are "Loot
+ * Lookup" (→ Decision Center, reusing 'decision-center-found-loot'
+ * unchanged — this corrects UX-001B.4's own detour through a "Loot
+ * Lockup" → Hangar Inventory card back to the original Decision Center
+ * destination), "Add Inventory" (→ Hangar Inventory, `hangar-add-
+ * inventory` — renamed from the retired `quick-update-hangar` id now
+ * that this card no longer routes to Quick Update; reuses the exact same
+ * commissioned art), and "Modify Ship" (→ Ship Workspace,
+ * `ship-workspace-modify`, unchanged). `hangar-loot-lockup` (UX-001B.4's
+ * own now-retired id) is removed — it had no commissioned art and no
+ * other consumer. `ship-workspace-modify` still has no commissioned Beta
+ * artwork, so it renders `WorkflowDestinationCard`'s existing neutral
+ * dashed-circle fallback rather than a broken image.
  */
-export type WorkflowIllustrationId = 'decision-center-found-loot' | 'quick-update-hangar'
+export type WorkflowIllustrationId = 'decision-center-found-loot' | 'hangar-add-inventory' | 'ship-workspace-modify'
 
 export interface WorkflowIllustrationDefinition {
   id: WorkflowIllustrationId

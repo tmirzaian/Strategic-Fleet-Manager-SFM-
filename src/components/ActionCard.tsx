@@ -27,8 +27,20 @@ export interface ActionCardProps {
    * inside `children` as the only interactive targets (Mission Control's
    * own Priority Actions usage — one action can name several ships, each
    * with its own destination, so no single whole-card link would be
-   * correct there). */
+   * correct there). Mutually exclusive with `onClick` — a card navigates
+   * to a destination or performs an in-page action, never both. */
   to?: string
+  /** UX-001B — an alternative to `to` for actions that filter/toggle
+   * state on the current page rather than navigate away (Quartermaster
+   * Logistics' own demand-category cards: click filters the Work Queue
+   * below to that category, no route change). Renders as a real `<button>`
+   * for native keyboard operability rather than a `to`-less `div` with a
+   * synthetic click handler. */
+  onClick?: () => void
+  /** Whether this card's own `onClick` filter is currently engaged —
+   * purely a visual toggle state (brighter ring), no effect when `onClick`
+   * is omitted. */
+  active?: boolean
 }
 
 /**
@@ -73,8 +85,15 @@ export interface ActionCardProps {
  * Management, Manufacturing, Insurance, future Quartermaster modules) —
  * kept presentation-only and domain-agnostic (no ship/fleet concept baked
  * in) so it travels cleanly.
+ *
+ * UX-001B — second consumer, Quartermaster Logistics' own demand-category
+ * cards. These filter the Procurement Work Queue in place rather than
+ * navigating anywhere, so this mission added `onClick`/`active` as a third
+ * interaction mode alongside the existing `to` (Link) and bare (no
+ * interaction) modes — mutually exclusive with `to`, rendered as a real
+ * `<button>` so it stays keyboard-operable like every other Action Card.
  */
-export default function ActionCard({ icon: Icon, title, count, accent, children, to }: ActionCardProps) {
+export default function ActionCard({ icon: Icon, title, count, accent, children, to, onClick, active }: ActionCardProps) {
   const body = (
     <>
       <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${accent}1f` }}>
@@ -101,6 +120,20 @@ export default function ActionCard({ icon: Icon, title, count, accent, children,
       >
         {body}
       </Link>
+    )
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active ?? false}
+        className={`${className} text-left hover:bg-white/[0.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${active ? 'ring-1 ring-inset' : ''}`}
+        style={{ borderLeftColor: accent, ...(active ? { boxShadow: `inset 0 0 0 1px ${accent}` } : undefined) }}
+      >
+        {body}
+      </button>
     )
   }
 

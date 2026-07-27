@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, within } from '@testing-library/react'
+import { render, screen, cleanup, within, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import MissionControl from '../MissionControl'
 import FleetDashboard from '../FleetDashboard'
@@ -114,10 +114,11 @@ describe('<MissionControl /> rendering (terminology + context names)', () => {
     expect(screen.queryByText('Available to Reserve')).not.toBeInTheDocument()
   })
 
-  it('15/16: Missing Components and Unreserved Inventory remain component-quantity tiles', () => {
+  it('UX-001B: Quartermaster Report summarizes demand by category rather than raw Missing Components/Unreserved Inventory counts', () => {
     renderMissionControl()
-    expect(screen.getByText('Missing Components')).toBeInTheDocument()
-    expect(screen.getAllByText('Unreserved Inventory').length).toBeGreaterThan(0)
+    expect(screen.getByText('Logistics Demand')).toBeInTheDocument()
+    expect(screen.queryByText('Missing Components')).not.toBeInTheDocument()
+    expect(screen.queryByText('Unreserved Inventory')).not.toBeInTheDocument()
   })
 
   it('25. the non-sortable Needed By header renders without a sort button', () => {
@@ -126,10 +127,12 @@ describe('<MissionControl /> rendering (terminology + context names)', () => {
     expect(header.closest('button')).toBeNull()
   })
 
-  it('26. the active sort column exposes aria-sort', () => {
+  it('26. the active sort column exposes aria-sort — UX-001B defaults the Work Queue to State (Commander-value order), not Component Name', () => {
     renderMissionControl()
+    const stateHeader = screen.getByText('State').closest('th')
+    expect(stateHeader?.getAttribute('aria-sort')).toBe('ascending')
     const nameHeader = screen.getByText('Component Name').closest('th')
-    expect(nameHeader?.getAttribute('aria-sort')).toBe('ascending')
+    expect(nameHeader?.getAttribute('aria-sort')).toBe('none')
   })
 })
 
@@ -189,12 +192,11 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
     expect(readinessColumn).not.toHaveTextContent('Mission Ready')
   })
 
-  it('Deliverable 2: Quartermaster Logistics keeps only Inventory Status — Fleet Status is relocated out, not duplicated', () => {
+  it('UX-001B: Quartermaster Report shows the Logistics Demand summary, not Fleet Status — Fleet Status stays relocated to the Hero, never duplicated', () => {
     renderMissionControl()
-    const band = screen.getByText('Quartermaster Logistics').closest('.panel')
+    const band = screen.getByText('Quartermaster Report').closest('.panel')
     expect(band).not.toBeNull()
-    expect(band).toHaveTextContent('Missing Components')
-    expect(band).toHaveTextContent('Unreserved Inventory')
+    expect(band).toHaveTextContent('Logistics Demand')
     expect(band).not.toHaveTextContent('Mission Ready')
     expect(band).not.toHaveTextContent('Loadouts In Progress')
     expect(band).not.toHaveTextContent('Factory Loadout')
@@ -350,8 +352,12 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
   it('existing navigation and action links remain functional', () => {
     renderMissionControl()
     expect(screen.getByText('Full fleet').closest('a')).toHaveAttribute('href', '/fleet')
-    expect(screen.getByText('Found Loot? Check It.').closest('a')).toHaveAttribute('href', '/decision-center')
-    expect(screen.getByText('Something Changed?').closest('a')).toHaveAttribute('href', '/quick-update')
+    // UX-001C — corrected destinations: Loot Lookup -> Decision Center,
+    // Add Inventory -> Hangar Inventory (never Quick Update), Modify
+    // Ship unchanged.
+    expect(screen.getByText('Loot Lookup').closest('a')).toHaveAttribute('href', '/decision-center')
+    expect(screen.getByText('Add Inventory').closest('a')).toHaveAttribute('href', '/hangar')
+    expect(screen.getByText('Modify Ship').closest('a')).toHaveAttribute('href', '/ship-workspace')
   })
 
   it('mounts PageEnvironment for "mission-control" without any runtime failure, rendering the EWO-035 Beta hero artwork', () => {
@@ -758,31 +764,31 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.queryByText('Update Budget')).not.toBeInTheDocument()
   })
 
-  it('4/5/7. UX-001A: every Hero Fleet Status count and both Quartermaster Logistics Inventory Status counts share one critical-metric-tile scale', () => {
+  it('4/5/7. UX-001A: every Hero Fleet Status count shares one critical-metric-tile scale', () => {
     const { container } = renderMissionControl()
-    // Every critical count (Ships Active, Mission Ready, Loadouts In
-    // Progress, Factory Loadout, Missing Components, Unreserved Inventory)
-    // renders through the shared CriticalMetricTile contract — same
-    // value/label typography. "Needed Items" no longer exists (retired by
-    // UX-001A Deliverable 4 in favor of Priority Actions), so the prior
-    // count of 7 is now 6.
+    // Every Fleet Status count (Ships Active, Mission Ready, Loadouts In
+    // Progress, Factory Loadout) renders through the shared
+    // CriticalMetricTile contract — same value/label typography. "Needed
+    // Items" no longer exists (retired by UX-001A Deliverable 4 in favor
+    // of Priority Actions); Quartermaster Logistics' own Missing
+    // Components/Unreserved Inventory tiles were retired in turn by
+    // UX-001B in favor of the Logistics Demand summary — so the prior
+    // count of 7, then 6, is now 4.
     //
     // UX-001A.4 (Deliverable 2) deliberately extended this exact scale to
-    // the Priority Actions column's own Action Card counts too ("the
-    // count should use the same ... numeric typography and visual weight
-    // as the Fleet Status numbers") — so the raw selector below no longer
-    // uniquely fingerprints only these six tiles. Scope it to everywhere
-    // but the Priority Actions panel to keep testing what this assertion
-    // has always meant: Fleet Status (Hero) + Inventory Status
-    // (Quartermaster Logistics) share one scale.
+    // the Priority Actions column's own Action Card counts too — so the
+    // raw selector below no longer uniquely fingerprints only these four
+    // tiles. Scope it to everywhere but the Priority Actions panel to
+    // keep testing what this assertion has always meant: every Fleet
+    // Status tile in the Hero shares one scale.
     const priorityActionsPanel = screen.getByText('Priority Actions').closest('.panel') as HTMLElement
     const values = Array.from(container.querySelectorAll('.panel .text-2xl.font-display.font-bold')).filter(
       (el) => !priorityActionsPanel.contains(el)
     )
-    expect(values.length).toBe(6)
+    expect(values.length).toBe(4)
   })
 
-  it('6. UX-001A: all six critical cards render somewhere on the page — Fleet Status in the Hero, Inventory Status in Quartermaster Logistics', () => {
+  it('6. UX-001A/UX-001B: all four Fleet Status cards render in the Hero, and the Quartermaster Report renders its own Logistics Demand summary instead of raw inventory counts', () => {
     renderMissionControl()
     // EWO-033 (Task 2): getAllByText tolerates a Top-4 priority card's own
     // status text legitimately overlapping a Fleet Status tile's label —
@@ -790,9 +796,9 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.getAllByText('Mission Ready').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Loadouts In Progress').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Factory Loadout').length).toBeGreaterThan(0)
-    expect(screen.getByText('Missing Components')).toBeInTheDocument()
-    // Also appears as a Procurement column header — the Logistics tile is one of the matches.
-    expect(screen.getAllByText('Unreserved Inventory').length).toBeGreaterThan(0)
+    expect(screen.getByText('Logistics Demand')).toBeInTheDocument()
+    expect(screen.queryByText('Missing Components')).not.toBeInTheDocument()
+    expect(screen.queryByText('Unreserved Inventory')).not.toBeInTheDocument()
   })
 
   it('9/10. EWO-032: Priority Ship renders through the canonical Fleet Ship Card — image and metadata share one integrated card, the exact same component Fleet Dashboard uses', () => {
@@ -829,17 +835,28 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
   })
 
-  it('14/15. Workflow destinations link to Decision Center and Quick Update, and are not rendered as metric tiles', () => {
+  it('UX-001C: the End-of-Briefing Action Center links to Decision Center, Hangar Inventory, and Ship Workspace, and is not rendered as metric tiles', () => {
     renderMissionControl()
-    const decisionCard = screen.getByText('Found Loot? Check It.').closest('a')
-    const quickUpdateCard = screen.getByText('Something Changed?').closest('a')
-    expect(decisionCard).toHaveAttribute('href', '/decision-center')
-    expect(quickUpdateCard).toHaveAttribute('href', '/quick-update')
+    const lootCard = screen.getByText('Loot Lookup').closest('a')
+    const addInventoryCard = screen.getByText('Add Inventory').closest('a')
+    const modifyShipCard = screen.getByText('Modify Ship').closest('a')
+    expect(lootCard).toHaveAttribute('href', '/decision-center')
+    expect(addInventoryCard).toHaveAttribute('href', '/hangar')
+    expect(modifyShipCard).toHaveAttribute('href', '/ship-workspace')
     // Workflow cards carry no numeric critical-metric value — only title, one
     // supporting line, and an "Open" action.
-    expect(decisionCard!.querySelector('.text-2xl')).toBeNull()
-    expect(quickUpdateCard!.querySelector('.text-2xl')).toBeNull()
-    expect(within(decisionCard as HTMLElement).getByText('Open')).toBeInTheDocument()
+    expect(lootCard!.querySelector('.text-2xl')).toBeNull()
+    expect(addInventoryCard!.querySelector('.text-2xl')).toBeNull()
+    expect(modifyShipCard!.querySelector('.text-2xl')).toBeNull()
+    expect(within(lootCard as HTMLElement).getByText('Open')).toBeInTheDocument()
+  })
+
+  it('UX-001C Regression Requirements: the obsolete "Loot Lockup" text never renders, and no Action Center card routes to Quick Update', () => {
+    const { container } = renderMissionControl()
+    expect(screen.queryByText('Loot Lockup')).not.toBeInTheDocument()
+    expect(screen.getByText('Loot Lookup')).toBeInTheDocument()
+    const quickUpdateLinks = Array.from(container.querySelectorAll('a')).filter((a) => a.getAttribute('href') === '/quick-update')
+    expect(quickUpdateLinks).toHaveLength(0)
   })
 
   it('16. the operational footer renders exactly once', () => {
@@ -888,5 +905,229 @@ describe('<MissionControl /> — EWO-032: canonical Fleet Ship Card parity with 
     for (const ship of ships) {
       expect(screen.getByText(ship.name)).toBeInTheDocument()
     }
+  })
+})
+
+describe('<MissionControl /> — UX-001B/UX-001B.5: Quartermaster Report', () => {
+  /** One ship, four hardpoints covering all three report-assessment
+   * states across three categories:
+   *   - Shields: Mirage, Purchase Required only — no owned inventory at
+   *     all (PROCUREMENT_ONLY / "No Inventory Available"). Mirage itself
+   *     never renders anywhere in the UI, per UX-001B.5 Deliverable 3's
+   *     unconditional exclusion — this supersedes UX-001B.4's own
+   *     per-category exception.
+   *   - Weapons: Bulldog (Reserved) + Scorpion (Purchase Required,
+   *     always hidden regardless of Weapons' own actionable state) —
+   *     ACTIONABLE.
+   *   - Coolers: Ice Breaker (Available, fully covered by owned stock,
+   *     so the Logistics Demand card itself reads "Complete" — zero
+   *     PURCHASE demand — while the Work Queue Assessment still reads
+   *     ACTIONABLE, since an owned unit is still sitting uninstalled).
+   * Power Plants / Quantum Drives have no hardpoints at all — COMPLETE. */
+  function forceQuartermasterScenario() {
+    const ship = {
+      id: 'qm-ship-1',
+      name: 'Quartermaster Test Ship',
+      manufacturer: 'Anvil',
+      ownership: 'Owned' as const,
+      career: 'Combat',
+      role: 'Fighter',
+      activeBuildId: 'qm-build-1',
+      readiness: 40,
+      priority: 1,
+      missing: [],
+    }
+    const build = { id: 'qm-build-1', shipId: 'qm-ship-1', name: 'Test Loadout', role: 'Fighter', readiness: 40, isActive: true, missing: [] }
+    const hardpoints = [
+      { id: 'qm-hp1', shipId: 'qm-ship-1', buildId: 'qm-build-1', slotLabel: 'Left Shield', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Mirage', status: 'Missing' as const },
+      { id: 'qm-hp2', shipId: 'qm-ship-1', buildId: 'qm-build-1', slotLabel: 'Nose Gun', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Scorpion', status: 'Missing' as const },
+      { id: 'qm-hp3', shipId: 'qm-ship-1', buildId: 'qm-build-1', slotLabel: 'Tail Gun', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Bulldog', status: 'Missing' as const },
+      { id: 'qm-hp4', shipId: 'qm-ship-1', buildId: 'qm-build-1', slotLabel: 'Cooler', type: 'Cooler', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Ice Breaker', status: 'Missing' as const },
+    ]
+    const reservations = [
+      { id: 'qm-r1', missionConfigurationId: 'qm-build-1', fleetAssetId: 'qm-ship-1', targetSlotLabel: 'Tail Gun', componentName: 'Bulldog', quantity: 1, status: 'ACTIVE' as const, createdAt: '', updatedAt: '' },
+    ]
+    const hangarItems = [{ id: 'hi-1', name: 'Ice Breaker', type: 'Cooler', size: 'S2', qty: 1, neededBy: 'None', disposition: 'Store' as const }]
+    useFleetStore.setState({ ships: [ship], builds: [build], hardpoints, hangarItems, installedLoadouts: [], reservations })
+    return { ship }
+  }
+
+  it('Deliverable 1: the section is titled Quartermaster Report, not Quartermaster Logistics', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    expect(screen.getByText('Quartermaster Report')).toBeInTheDocument()
+    expect(screen.queryByText('Quartermaster Logistics')).not.toBeInTheDocument()
+  })
+
+  it('Deliverable 2: Logistics Demand, Quartermaster Assessment, and Procurement Work Queue render inside one consolidated panel, not three separate ones', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const report = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    expect(within(report).getByText('Logistics Demand')).toBeInTheDocument()
+    expect(within(report).getByText('Quartermaster Assessment')).toBeInTheDocument()
+    expect(within(report).getByText('Procurement Work Queue')).toBeInTheDocument()
+  })
+
+  it('Logistics Demand summarizes true shortage by category — Reserved and Available rows never inflate the demand count', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const shieldsCard = within(band).getByText('Shields').closest('.panel') as HTMLElement
+    const weaponsCard = within(band).getByText('Weapons').closest('.panel') as HTMLElement
+    expect(within(shieldsCard).getByText('1')).toBeInTheDocument()
+    expect(within(weaponsCard).getByText('1')).toBeInTheDocument()
+    // Coolers is fully covered by owned stock — zero further purchase
+    // demand, even though the unit itself still needs installing.
+    const coolersCard = within(band).getByText('Coolers').closest('.panel') as HTMLElement
+    expect(within(coolersCard).getByText('Complete')).toBeInTheDocument()
+  })
+
+  it('UX-001B.5 Deliverable 3: Purchase Required rows never render in Mission Control, unconditionally — even for a category with no actionable rows at all', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    // Weapons has an actionable Reserved row; its Purchase Required row (Scorpion) is hidden.
+    expect(screen.getByText('Bulldog')).toBeInTheDocument()
+    expect(screen.queryByText('Scorpion')).not.toBeInTheDocument()
+    // Shields has ONLY a Purchase Required row (Mirage) — UX-001B.4 kept
+    // this visible as a procurement-planning list; UX-001B.5 removes that
+    // exception. Mirage never renders anywhere in the UI.
+    expect(screen.queryByText('Mirage')).not.toBeInTheDocument()
+    expect(screen.queryByText('Purchase Required')).not.toBeInTheDocument()
+  })
+
+  it('Available rows render alongside Reserved rows, correctly badged and colored', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const iceBreakerRow = screen.getByText('Ice Breaker').closest('tr') as HTMLElement
+    const availableBadge = within(iceBreakerRow).getByText('Available')
+    expect(availableBadge.className).toContain('text-success')
+  })
+
+  it('Deliverable 6: canonical taxonomy is preserved — Coolers, Power Plants, Quantum Drives, Shields, Weapons remain distinct categories', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    for (const category of ['Coolers', 'Power Plants', 'Quantum Drives', 'Shields', 'Weapons']) {
+      expect(within(band).getByText(category)).toBeInTheDocument()
+    }
+  })
+
+  it('Needed By renders as a real hyperlink straight to the relevant Ship Workspace, not inert text', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const bulldogRow = screen.getByText('Bulldog').closest('tr') as HTMLElement
+    const link = within(bulldogRow).getByText('Quartermaster Test Ship — Test Loadout').closest('a')
+    expect(link).toHaveAttribute('href', '/ship-workspace/qm-ship-1')
+  })
+
+  it('Deliverable 5: clicking a demand category card filters the whole report to that category in place, and clicking again clears the filter', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const weaponsCard = within(band).getByText('Weapons').closest('button') as HTMLElement
+    expect(screen.getByText('Bulldog')).toBeInTheDocument()
+    expect(screen.getByText('Ice Breaker')).toBeInTheDocument()
+
+    fireEvent.click(weaponsCard)
+    // Filtered to Weapons: Bulldog remains, Ice Breaker (Coolers) is gone.
+    expect(screen.getByText('Bulldog')).toBeInTheDocument()
+    expect(screen.queryByText('Ice Breaker')).not.toBeInTheDocument()
+    // The active filter surfaces as a clear-filter pill next to the
+    // report title itself.
+    const reportHeader = screen.getByText('Quartermaster Report').closest('div') as HTMLElement
+    expect(within(reportHeader).getByText('Weapons')).toBeInTheDocument()
+
+    fireEvent.click(weaponsCard)
+    // Toggled off — everything is visible again. Mission Control never
+    // navigated or rebuilt; the Hero above is untouched throughout.
+    expect(screen.getByText('Ice Breaker')).toBeInTheDocument()
+    expect(screen.getByText('Fleet Status')).toBeInTheDocument()
+  })
+
+  it('UX-001B.4 Deliverable 1: column widths stay identical whether the Work Queue is unfiltered or filtered to a category', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const colsBefore = Array.from(document.querySelectorAll('table col')).map((c) => c.className)
+    expect(colsBefore).toHaveLength(5)
+
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const weaponsCard = within(band).getByText('Weapons').closest('button') as HTMLElement
+    fireEvent.click(weaponsCard)
+
+    const colsAfter = Array.from(document.querySelectorAll('table col')).map((c) => c.className)
+    expect(colsAfter).toEqual(colsBefore)
+  })
+
+  it('UX-001B.5 Deliverable 4: Inventory Exists — the assessment states how many inventory assets are immediately available for the selected category', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const weaponsCard = within(band).getByText('Weapons').closest('button') as HTMLElement
+    fireEvent.click(weaponsCard)
+    expect(screen.getByText('Quartermaster Assessment')).toBeInTheDocument()
+    expect(screen.getByText(/1 inventory asset is immediately available to improve fleet readiness for Weapons/)).toBeInTheDocument()
+  })
+
+  it('UX-001B.5 Deliverable 4: No Inventory Available — the assessment explains why, and no table renders', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const shieldsCard = within(band).getByText('Shields').closest('button') as HTMLElement
+    fireEvent.click(shieldsCard)
+    expect(screen.getByText(/There are currently no inventory assets available to satisfy the selected target loadouts for Shields/)).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(screen.queryByText('Mirage')).not.toBeInTheDocument()
+  })
+
+  it('UX-001B.5 Deliverable 4: Fleet Demand Complete — the green completion assessment renders, no table', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const powerPlantsCard = within(band).getByText('Power Plants').closest('button') as HTMLElement
+    fireEvent.click(powerPlantsCard)
+    expect(screen.getByText('Quartermaster Assessment — Complete')).toBeInTheDocument()
+    expect(screen.getByText(/All target loadouts for Power Plants have been satisfied\. Quartermaster Report complete\./)).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+  })
+
+  it('UX-001B.5 Deliverable 4: the Quartermaster Assessment reflects the whole fleet when no category is selected', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    // Two actionable assets exist fleet-wide: Bulldog (Reserved) + Ice Breaker (Available).
+    expect(screen.getByText(/2 inventory assets are immediately available to improve fleet readiness\./)).toBeInTheDocument()
+  })
+
+  it('with nothing actionable or demanded fleet-wide, the five stable categories still render Complete, and the fleet-wide assessment reads Complete too', () => {
+    useFleetStore.setState({ ships: [], builds: [], hardpoints: [], hangarItems: [], installedLoadouts: [], reservations: [] })
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    for (const category of ['Coolers', 'Power Plants', 'Quantum Drives', 'Shields', 'Weapons']) {
+      const card = within(band).getByText(category).closest('.panel') as HTMLElement
+      expect(within(card).getByText('✓')).toBeInTheDocument()
+      expect(within(card).getByText('Complete')).toBeInTheDocument()
+    }
+    expect(screen.getByText('Quartermaster Assessment — Complete')).toBeInTheDocument()
+    expect(screen.getByText(/All target loadouts have been satisfied fleet-wide\. Quartermaster Report complete\./)).toBeInTheDocument()
+  })
+
+  it('a Complete stable-category card uses Readiness Green, not Quartermaster Blue', () => {
+    useFleetStore.setState({ ships: [], builds: [], hardpoints: [], hangarItems: [], installedLoadouts: [], reservations: [] })
+    renderMissionControl()
+    const band = screen.getByText('Quartermaster Report').closest('.panel') as HTMLElement
+    const shieldsCard = within(band).getByText('Shields').closest('.panel') as HTMLElement
+    expect(shieldsCard.style.borderLeftColor).toBe('rgb(66, 230, 149)') // #42E695 Readiness Green
+  })
+
+  it('procurement state badges use canonical colors — Available green, Reserved blue (Quartermaster Blue)', () => {
+    forceQuartermasterScenario()
+    renderMissionControl()
+    const bulldogRow = screen.getByText('Bulldog').closest('tr') as HTMLElement
+    const reservedBadge = within(bulldogRow).getByText('Reserved')
+    expect(reservedBadge.className).toContain('text-cyan')
+    expect(reservedBadge.className).not.toContain('text-success')
+
+    const iceBreakerRow = screen.getByText('Ice Breaker').closest('tr') as HTMLElement
+    const availableBadge = within(iceBreakerRow).getByText('Available')
+    expect(availableBadge.className).toContain('text-success')
   })
 })

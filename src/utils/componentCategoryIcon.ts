@@ -40,42 +40,146 @@ import { Wind, Zap, Rocket, ArrowUpRight, Shield, Telescope, Package, CircleDot,
  * Badge/validation pill system. A type this table has never seen (Relay,
  * or any future port type) resolves to the generic `Box` — Miscellaneous
  * — rather than guessing or leaving a gap.
+ *
+ * UX-001B.1 — Canonical Component Taxonomy. This module is now the one
+ * place Strategic Fleet Manager defines glyph + display label + display
+ * order for a component *system* (Cooler, Power Plant, Quantum Drive,
+ * Shield, Weapon, ...), elevated from a Ship Workspace-only icon picker
+ * to an app-wide taxonomy per the Design System Amendment: "Component
+ * systems shall use the same glyph, ordering, terminology, and semantic
+ * meaning regardless of page." `canonicalComponentCategoryKey()` is the
+ * one classification switch (unchanged from the original
+ * `componentCategoryIcon` body, just factored out so nothing else has to
+ * duplicate this matching logic); `CANONICAL_COMPONENT_CATEGORY_ICON`,
+ * `CANONICAL_COMPONENT_CATEGORY_LABEL`, and
+ * `CANONICAL_COMPONENT_CATEGORY_ORDER` are plain lookups keyed off its
+ * result, so `componentCategoryIcon()` itself becomes a one-line
+ * composition of the two and every existing call site (Ship Workspace's
+ * Systems table, `LoadoutPortTree`) keeps its exact prior behavior byte-
+ * for-byte. Mission Control's Quartermaster Logistics (UX-001B.1) is the
+ * first consumer of the label/order exports; future consumers (Fleet
+ * Dashboard analytics, Decision Center, Manufacturing, Procurement,
+ * Inventory, Analytics, Reporting, Notifications) should import from here
+ * rather than inventing a parallel category list.
  */
-export function componentCategoryIcon(hp: { type: string; assemblyRole?: string }): LucideIcon {
-  if (hp.assemblyRole === 'MANNED_TURRET') return Target
-  if (hp.assemblyRole === 'REMOTE_TURRET') return Radio
+export function canonicalComponentCategoryKey(hp: { type: string; assemblyRole?: string }): string {
+  if (hp.assemblyRole === 'MANNED_TURRET') return 'MannedTurret'
+  if (hp.assemblyRole === 'REMOTE_TURRET') return 'RemoteTurret'
 
   switch (hp.type) {
     case 'Cooler':
-      return Wind
+      return 'Cooler'
     case 'Power Plant':
-      return Zap
+      return 'PowerPlant'
     case 'Quantum Drive':
     case 'QuantumDrive':
-      return Rocket
+      return 'QuantumDrive'
     case 'Jump Drive':
-      return ArrowUpRight
+      return 'JumpDrive'
     case 'Shield':
-      return Shield
+      return 'Shield'
     case 'Radar':
-      return Telescope
+      return 'Radar'
     case 'Missile Rack':
-      return Package
+      return 'MissileRack'
     case 'Missile':
-      return CircleDot
+      return 'Missile'
     case 'Gimbal Mount':
     case 'Weapon':
-      return Crosshair
+      return 'Weapon'
     case 'Mining Laser':
-      return Gem
+      return 'MiningLaser'
     case 'Salvage Module':
     case 'Salvage Modifier':
-      return Anvil
+      return 'Salvage'
     case 'Utility':
-      return Magnet
+      return 'Utility'
     case 'Life Support':
-      return Heart
+      return 'LifeSupport'
     default:
-      return Box
+      return 'Other'
   }
+}
+
+/** Required categories (UX-001B.1 Deliverable 1) lead the order; the
+ * remaining categories are the explicitly-approved "additive, same
+ * pattern" future set (Deliverable 1: "Future categories (Missiles,
+ * Utility, Mining, Salvage, Tractor Systems, etc.)"). `MannedTurret`/
+ * `RemoteTurret`/`Other` trail — assemblies and fallbacks, not individual
+ * procurable component systems a Quartermaster shops for. */
+export const CANONICAL_COMPONENT_CATEGORY_ORDER: string[] = [
+  'Cooler',
+  'PowerPlant',
+  'QuantumDrive',
+  'Shield',
+  'Weapon',
+  'MissileRack',
+  'Missile',
+  'JumpDrive',
+  'Radar',
+  'MiningLaser',
+  'Salvage',
+  'Utility',
+  'LifeSupport',
+  'MannedTurret',
+  'RemoteTurret',
+  'Other',
+]
+
+/** UX-001B.3 (Deliverable 3/4) — the stable, always-visible core set: a
+ * Quartermaster should learn a fixed 5-card layout through repetition,
+ * regardless of current fleet demand. The remaining "additive, same
+ * pattern" categories above stay demand-driven (a fleet with zero Mining
+ * or Salvage demand should not carry a permanent Mining/Salvage card) —
+ * only this required set is exempt from that omission rule. */
+export const CANONICAL_STABLE_CATEGORY_KEYS: string[] = ['Cooler', 'PowerPlant', 'QuantumDrive', 'Shield', 'Weapon']
+
+export const CANONICAL_COMPONENT_CATEGORY_LABEL: Record<string, string> = {
+  Cooler: 'Coolers',
+  PowerPlant: 'Power Plants',
+  QuantumDrive: 'Quantum Drives',
+  Shield: 'Shields',
+  Weapon: 'Weapons',
+  MissileRack: 'Missile Racks',
+  Missile: 'Missiles',
+  JumpDrive: 'Jump Drives',
+  Radar: 'Radar',
+  MiningLaser: 'Mining',
+  Salvage: 'Salvage',
+  Utility: 'Utility',
+  LifeSupport: 'Life Support',
+  MannedTurret: 'Manned Turrets',
+  RemoteTurret: 'Remote Turrets',
+  Other: 'Other Systems',
+}
+
+export const CANONICAL_COMPONENT_CATEGORY_ICON: Record<string, LucideIcon> = {
+  Cooler: Wind,
+  PowerPlant: Zap,
+  QuantumDrive: Rocket,
+  Shield: Shield,
+  Weapon: Crosshair,
+  MissileRack: Package,
+  Missile: CircleDot,
+  JumpDrive: ArrowUpRight,
+  Radar: Telescope,
+  MiningLaser: Gem,
+  Salvage: Anvil,
+  Utility: Magnet,
+  LifeSupport: Heart,
+  MannedTurret: Target,
+  RemoteTurret: Radio,
+  Other: Box,
+}
+
+/** The canonical display label for a component's system, e.g. "Power
+ * Plants" — plural, since every consumer so far (Mission Control's
+ * demand cards) presents this as a fleet-wide aggregate, never a
+ * per-unit label. */
+export function canonicalComponentCategoryLabel(hp: { type: string; assemblyRole?: string }): string {
+  return CANONICAL_COMPONENT_CATEGORY_LABEL[canonicalComponentCategoryKey(hp)] ?? CANONICAL_COMPONENT_CATEGORY_LABEL.Other
+}
+
+export function componentCategoryIcon(hp: { type: string; assemblyRole?: string }): LucideIcon {
+  return CANONICAL_COMPONENT_CATEGORY_ICON[canonicalComponentCategoryKey(hp)] ?? Box
 }

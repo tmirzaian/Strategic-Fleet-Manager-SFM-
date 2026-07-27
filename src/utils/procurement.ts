@@ -3,6 +3,17 @@ import { calculateComponentAvailability } from '../engine/logistics/availability
 import { findActiveSlotReservation } from '../engine/logistics/reservationLookup'
 import { identitiesMatch } from '../engine/installation/componentIdentityService'
 
+/** UX-001B (Deliverable 5) — a "Needed By" entry now carries its own
+ * ship/build identity, not just a formatted display label, so the
+ * Quartermaster Work Queue can hyperlink straight to the relevant Ship
+ * Workspace rather than showing inert text. `label` keeps the exact same
+ * "ShipName — BuildName" formatting every existing caller already reads. */
+export interface ProcurementNeededByEntry {
+  shipId: string
+  buildId: string
+  label: string
+}
+
 export interface ProcurementLine {
   itemName: string
   type: string
@@ -12,7 +23,23 @@ export interface ProcurementLine {
   /** Owned but not yet committed to any of these requirements — a
    * Reserve action opportunity, never counted as a shortage. */
   availableToReserve: number
-  neededBy: string[]
+  neededBy: ProcurementNeededByEntry[]
+}
+
+/** UX-001B — the exact same entityClass-first, exact-name-fallback
+ * component-identity rule `buildProcurementList` has always used
+ * internally, now exported so `buildReservedAwaitingInstallLines` (below)
+ * can group by the identical rule rather than inventing a second one. */
+export function componentIdentityMatches(
+  aName: string,
+  aEntityClass: string | null | undefined,
+  bName: string,
+  bEntityClass: string | null | undefined
+): boolean {
+  if (aEntityClass && bEntityClass) {
+    return identitiesMatch({ displayName: aName, entityClass: aEntityClass, category: null, size: null }, { displayName: bName, entityClass: bEntityClass, category: null, size: null })
+  }
+  return aName === bName
 }
 
 export type ProcurementSortColumn = 'name' | 'sizeType' | 'quantity' | 'unreserved'
@@ -60,11 +87,11 @@ export function buildProcurementList(
      * group, passed through to calculateComponentAvailability below. */
     entityClass?: string
     rowCount: number
-    neededBy: string[]
+    neededBy: ProcurementNeededByEntry[]
   }
   // EWO-STAB-003E (ADR-010) — demand groups are an array, not a Map keyed
   // by raw display name: two rows only ever join the SAME group when
-  // `demandMatchesGroup` (below) says they're the same canonical
+  // `componentIdentityMatches` (above) says they're the same canonical
   // component, using the exact identity-first/name-fallback rule
   // established in EWO-STAB-003D. A plain Map<string, ...> keyed by name
   // OR by entityClass can't express this correctly on its own — a row
@@ -75,20 +102,6 @@ export function buildProcurementList(
   // even though their names match. A single string key can encode one of
   // those outcomes, not both — the array+linear-scan form can.
   const groups: UnresolvedGroup[] = []
-
-  /** EWO-STAB-003E — the same entityClass-first, exact-name-fallback rule
-   * used everywhere else in ADR-010's identity work (never
-   * identitiesMatch's own case-insensitive name fallback, to avoid
-   * silently loosening this file's pre-existing exact-name grouping). */
-  function demandMatchesGroup(group: UnresolvedGroup, itemName: string, entityClass: string | null | undefined): boolean {
-    if (group.entityClass && entityClass) {
-      return identitiesMatch(
-        { displayName: group.itemName, entityClass: group.entityClass, category: null, size: null },
-        { displayName: itemName, entityClass, category: null, size: null }
-      )
-    }
-    return group.itemName === itemName
-  }
 
   for (const hp of hardpoints) {
     if (hp.status === 'OK') continue
@@ -112,12 +125,14 @@ export function buildProcurementList(
     if (activeReservation) continue
 
     const label = `${ship.name} — ${build.name}`
-    const existing = groups.find((g) => demandMatchesGroup(g, hp.targetItem, hp.targetEntityClass))
+    const existing = groups.find((g) => componentIdentityMatches(g.itemName, g.entityClass, hp.targetItem, hp.targetEntityClass))
     if (existing) {
       existing.rowCount += 1
-      if (!existing.neededBy.includes(label)) existing.neededBy.push(label)
+      if (!existing.neededBy.some((e) => e.shipId === ship.id && e.buildId === build.id)) {
+        existing.neededBy.push({ shipId: ship.id, buildId: build.id, label })
+      }
     } else {
-      groups.push({ itemName: hp.targetItem, type: hp.type, size: hp.size, entityClass: hp.targetEntityClass, rowCount: 1, neededBy: [label] })
+      groups.push({ itemName: hp.targetItem, type: hp.type, size: hp.size, entityClass: hp.targetEntityClass, rowCount: 1, neededBy: [{ shipId: ship.id, buildId: build.id, label }] })
     }
   }
 
@@ -132,7 +147,71 @@ export function buildProcurementList(
   return lines.sort((a, b) => a.itemName.localeCompare(b.itemName))
 }
 
-function parseSizeNumber(size: string): number {
+/** UX-001B (Deliverable 4) — a real fleet-wide "reserved but not yet
+ * installed" line, aggregated by component identity the same way
+ * `buildProcurementList` aggregates true shortages. `buildProcurementList`
+ * itself deliberately EXCLUDES any hardpoint with an active reservation
+ * (Alpha 2.3 Part 15 — "installing it is just execution, not something
+ * still to acquire") so these lines never appear there; this is the other
+ * half of that same fleet-wide walk, surfacing exactly the rows that walk
+ * dropped, for the Quartermaster Work Queue's own "Reserved" state. Reuses
+ * the same authorities (`findActiveSlotReservation`,
+ * `componentIdentityMatches`) — never a second reservation/identity rule. */
+export interface ReservedLine {
+  itemName: string
+  type: string
+  size: string
+  quantity: number
+  neededBy: ProcurementNeededByEntry[]
+}
+
+export function buildReservedAwaitingInstallLines(hardpoints: Hardpoint[], builds: Build[], ships: Ship[], reservations: MissionReservation[] = []): ReservedLine[] {
+  interface ReservedGroup {
+    itemName: string
+    type: string
+    size: string
+    entityClass?: string
+    rowCount: number
+    neededBy: ProcurementNeededByEntry[]
+  }
+  const groups: ReservedGroup[] = []
+
+  for (const hp of hardpoints) {
+    if (hp.status === 'OK') continue
+    if (hp.status === 'Invalid Target' || hp.status === 'Unresolved') continue
+    if (!hp.targetItem || hp.targetItem === '—') continue
+
+    const build = builds.find((b) => b.id === hp.buildId)
+    if (!build) continue
+    const ship = ships.find((s) => s.id === build.shipId)
+    if (!ship) continue
+
+    const activeReservation = findActiveSlotReservation(reservations, {
+      missionConfigurationId: hp.buildId,
+      targetSlotLabel: hp.slotLabel,
+      componentName: hp.targetItem,
+      componentEntityClass: hp.targetEntityClass,
+    })
+    if (!activeReservation) continue
+
+    const label = `${ship.name} — ${build.name}`
+    const existing = groups.find((g) => componentIdentityMatches(g.itemName, g.entityClass, hp.targetItem, hp.targetEntityClass))
+    if (existing) {
+      existing.rowCount += 1
+      if (!existing.neededBy.some((e) => e.shipId === ship.id && e.buildId === build.id)) {
+        existing.neededBy.push({ shipId: ship.id, buildId: build.id, label })
+      }
+    } else {
+      groups.push({ itemName: hp.targetItem, type: hp.type, size: hp.size, entityClass: hp.targetEntityClass, rowCount: 1, neededBy: [{ shipId: ship.id, buildId: build.id, label }] })
+    }
+  }
+
+  return groups.map((g) => ({ itemName: g.itemName, type: g.type, size: g.size, quantity: g.rowCount, neededBy: g.neededBy })).sort((a, b) => a.itemName.localeCompare(b.itemName))
+}
+
+/** Exported so `quartermasterBriefing.ts`'s own work-queue sort can reuse
+ * the identical numeric-size parsing rather than a second copy of it. */
+export function parseSizeNumber(size: string): number {
   const match = /(\d+)/.exec(size)
   return match ? Number(match[1]) : 0
 }

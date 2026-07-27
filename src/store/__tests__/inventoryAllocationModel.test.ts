@@ -215,8 +215,8 @@ describe('EWO-029 (Task 11): reservation effect on procurement', () => {
     const line = list.find((l) => l.itemName === 'FR-66')!
     // Ghost-Escort's own requirement is satisfied (excluded from the
     // unresolved-demand group entirely) — only Vulture's still shows.
-    expect(line.neededBy.some((label) => label.includes('Vulture'))).toBe(true)
-    expect(line.neededBy.some((label) => label.includes('Ghost'))).toBe(false)
+    expect(line.neededBy.some((entry) => entry.label.includes('Vulture'))).toBe(true)
+    expect(line.neededBy.some((entry) => entry.label.includes('Ghost'))).toBe(false)
   })
 
   it('installed: procurement need satisfied, no longer listed at all', () => {
@@ -227,7 +227,7 @@ describe('EWO-029 (Task 11): reservation effect on procurement', () => {
     // ghost-stealth's own Power Plant Slipstream requirement is now
     // Installed (status OK) — excluded entirely from procurement demand.
     if (stillMissing) {
-      expect(stillMissing.neededBy.some((label) => label.includes('Stealth'))).toBe(false)
+      expect(stillMissing.neededBy.some((entry) => entry.label.includes('Stealth'))).toBe(false)
     }
   })
 })
