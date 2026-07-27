@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import ShipHeroFrame from '../ShipHeroFrame'
 
 afterEach(() => cleanup())
@@ -121,5 +121,65 @@ describe('<ShipHeroFrame /> adaptive layout', () => {
   it('no readiness bar/percentage renders in the hero at all anymore', () => {
     render(<ShipHeroFrame name="Ghost" manufacturer="Anvil" ownership="Owned" activeBuildLabel="Stealth Build" />)
     expect(screen.queryByText(/^\d+%$/)).not.toBeInTheDocument()
+  })
+
+  describe('EWO-065 (Part A): onOpenSettings — opt-in Ship Settings control replaces the manufacturer plate', () => {
+    it('omitted: the manufacturer logo renders exactly as before (backward compatible default — Ship Detail/ImportedShipDetail are unaffected)', () => {
+      render(<ShipHeroFrame name="Ghost" manufacturer="Anvil" ownership="Owned" activeBuildLabel="Stealth Build" />)
+      expect(screen.getByTitle('Anvil')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Ship Settings' })).not.toBeInTheDocument()
+    })
+
+    it('supplied: a Ship Settings control replaces the manufacturer plate, and clicking it calls the handler', () => {
+      const onOpenSettings = vi.fn()
+      render(<ShipHeroFrame name="Ghost" manufacturer="Anvil" ownership="Owned" activeBuildLabel="Stealth Build" onOpenSettings={onOpenSettings} />)
+      expect(screen.queryByTitle('Anvil')).not.toBeInTheDocument()
+      const settingsButton = screen.getByRole('button', { name: 'Ship Settings' })
+      expect(settingsButton).toBeInTheDocument()
+      fireEvent.click(settingsButton)
+      expect(onOpenSettings).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('EWO-065 (Part F): quartermasterSeal — the upgraded Quartermaster Completion Seal', () => {
+    it('omitted/null: renders nothing in the accomplishment corner (even if isMissionReady is also unset)', () => {
+      render(<ShipHeroFrame name="Ghost" manufacturer="Anvil" ownership="Owned" activeBuildLabel="Stealth Build" />)
+      expect(screen.queryByTestId('quartermaster-completion-seal')).not.toBeInTheDocument()
+    })
+
+    it('supplied: renders the headline and detail text, distinct from the plain isMissionReady placeholder', () => {
+      render(
+        <ShipHeroFrame
+          name="Ghost"
+          manufacturer="Anvil"
+          ownership="Owned"
+          activeBuildLabel="Stealth Build"
+          quartermasterSeal={{ headline: 'QUARTERMASTER CERTIFIED', detail: 'Ghost — Stealth Build' }}
+        />
+      )
+      const seal = screen.getByTestId('quartermaster-completion-seal')
+      expect(seal.textContent).toContain('QUARTERMASTER CERTIFIED')
+      expect(seal.textContent).toContain('Ghost — Stealth Build')
+      // Never both at once — no caller passes isMissionReady alongside quartermasterSeal.
+      expect(screen.queryByTitle(/Quartermaster certification badge reserved/i)).not.toBeInTheDocument()
+    })
+
+    it('EWO-065A (Part C): the border/glow and headline are Quartermaster Gold; the shield/check glyph itself stays green', () => {
+      render(
+        <ShipHeroFrame
+          name="Ghost"
+          manufacturer="Anvil"
+          ownership="Owned"
+          activeBuildLabel="Stealth Build"
+          quartermasterSeal={{ headline: 'QUARTERMASTER CERTIFIED', detail: 'Ghost — Stealth Build' }}
+        />
+      )
+      const seal = screen.getByTestId('quartermaster-completion-seal')
+      expect(seal.className).toContain('border-gold')
+      const headline = within(seal).getByText('QUARTERMASTER CERTIFIED')
+      expect(headline.className).toContain('text-gold')
+      const glyphHousing = seal.querySelector('.text-success') as HTMLElement
+      expect(glyphHousing).toBeTruthy()
+    })
   })
 })

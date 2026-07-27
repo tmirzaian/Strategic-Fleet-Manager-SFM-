@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Plus,
   AlertTriangle,
-  AlertOctagon,
   CheckCircle2,
   ListChecks,
   Wrench as WrenchIcon,
@@ -14,7 +13,6 @@ import {
   Package,
   Maximize2,
   Minimize2,
-  ArrowDownToLine,
   Layers,
   Code2,
   Trash2,
@@ -27,6 +25,7 @@ import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
 import ShipHeroFrame from '../components/ShipHeroFrame'
+import EditFleetAssetModal from '../components/EditFleetAssetModal'
 import { resolveShipManagementIllustration } from '../config/assets'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
@@ -72,6 +71,13 @@ const COMMANDER_INTENT_LABEL: Record<CommanderIntent, string> = {
   MANAGE_LOADOUT: 'Manage Loadout',
   CHANGE_INSTALLED: 'Change Installed Components',
 }
+
+/** EWO-065 (Part C) — the Hero's "Missing: …" text shows exact component
+ * names up to this count before falling back to an inline "View All" text
+ * link; chosen to comfortably fit the Hero's own two-line clamp at this
+ * text's actual size/column width without the link appearing prematurely
+ * on a still-short list. */
+const MISSING_SUMMARY_VISIBLE_LIMIT = 6
 
 /** SW-002's Component Selection Priority — reference-only text; every
  * tier is backed by real data (`describeAcquisitionHint`/
@@ -354,6 +360,11 @@ export default function ShipWorkspacePrototype() {
   const [borrowSectionOpen, setBorrowSectionOpen] = useState(false)
   const [remainingSectionOpen, setRemainingSectionOpen] = useState(false)
 
+  // EWO-065 (Part A) — Ship Settings entry point, opened from the Hero's
+  // top-left control; reuses the existing EditFleetAssetModal verbatim
+  // (this mission establishes the access point only, not a modal redesign).
+  const [editOpen, setEditOpen] = useState(false)
+
   // EWO-063 — Hero State Synchronization. Every one of these row-level
   // Change Installed Components states is keyed by a Hardpoint/candidate
   // id that is itself build-scoped, so switching ships already made a
@@ -372,6 +383,7 @@ export default function ShipWorkspacePrototype() {
     setInspectedConfigurableSlotId(null)
     setBorrowSectionOpen(false)
     setRemainingSectionOpen(false)
+    setEditOpen(false)
   }, [shipId])
 
   // EWO-064 (Part G) — a freshly-opened (or closed) Install/Change
@@ -602,16 +614,16 @@ export default function ShipWorkspacePrototype() {
   const reviewedHardpoints = ship ? prepareCanonicalHardpoints(ship.id, reviewedHardpointsRaw, fleetAssets) : []
 
   // EWO-063 (Part C) — ONE authoritative calculation, not five
-  // independent ones. `activeSummary` powers the Hero, Decision Summary,
-  // notification icons (Priority Components strip), and Missing
-  // Components — always the ship's real Active Loadout, independent of
-  // whichever Loadout the Commander happens to be reviewing below ("the
-  // ship never changes, only the tools change" — unchanged design).
-  // `reviewedSummary` powers the Systems Workspace tables' own
-  // Availability badges for whichever Loadout is currently under review;
-  // when that's the same Loadout as Active (the common case), it's
-  // literally the same object — never a second, independently-recomputed
-  // pass over identical data.
+  // independent ones. EWO-064 (Part F) — `reviewedSummary` (not
+  // `activeSummary`) is what powers the Hero, Decision Summary, Category
+  // Demand Cards, and Missing Components: the Sticky Context Bar already
+  // shows which Loadout is under review, so the Hero reflects that same
+  // Loadout, not silently the ship's Active one underneath a header that
+  // says something else. `activeSummary` still exists as the seed for
+  // `reviewedSummary` when Reviewed and Active are the same Loadout (the
+  // common case) — literally the same object, never a second,
+  // independently-recomputed pass over identical data — and is otherwise
+  // unused directly by this page.
   const summaryContext: ShipManagementSummaryContext = { shipId: ship?.id ?? '', build: activeBuild, hangarItems, installedLoadouts, reservations, ships }
   const activeSummary = buildShipManagementSummary(activeHardpoints, summaryContext)
   const reviewedSummary = reviewedBuild?.id === activeBuild?.id ? activeSummary : buildShipManagementSummary(reviewedHardpoints, { ...summaryContext, build: reviewedBuild })
@@ -853,13 +865,13 @@ export default function ShipWorkspacePrototype() {
     return options
   }
 
-  // EWO-063 (Part C) — `prioritizedDecisions`/`actionableDecisions`/
-  // `actionableCount`/`hasNonActionableGaps` (SW-002 Revision B Part
-  // 2/Revision C Part 1's own decision-intelligence rules — unchanged)
-  // now live inside `buildShipManagementSummary` itself; both the
-  // Priority Components strip and the Decision Summary panel below read
-  // `activeSummary.prioritizedDecisions`/`activeSummary.actionableDecisions`
-  // directly rather than this page re-deriving its own copy.
+  // EWO-063 (Part C) — the decision-intelligence rules live inside
+  // `buildShipManagementSummary` itself, not re-derived here: the
+  // Category Demand Cards read `reviewedSummary.categoryDemand` (full
+  // unresolved demand) and the Decision Summary panel below reads
+  // `reviewedSummary.actionableDecisions`/`actionableCount` (EWO-065B —
+  // genuinely actionable only, excluding Purchase-Required catalog-only
+  // gaps).
 
   // SW-007C — Commander Taxonomy Authority. Same `groupPortTree()` engine
   // Ship Detail's LoadoutPortTree calls, so top-level categories, category
@@ -1939,7 +1951,18 @@ export default function ShipWorkspacePrototype() {
               ownership={ship.ownership}
               activeBuildLabel={activeBuild?.name ?? '—'}
               subtitle={identitySubtitle}
-              isMissionReady={reviewedSummary.buildState === 'MISSION_READY'}
+              onOpenSettings={() => setEditOpen(true)}
+              // EWO-065A (Part C) — supporting text is exactly "Ship Name
+              // — Reviewed Loadout Name," nothing else: readiness is
+              // already conveyed by the 100% bar, the green glyph, and
+              // zero Immediate Decisions, so "Mission Ready" here would
+              // be redundant. Never ownership/manufacturer/role — those
+              // already live on the identity subtitle line above.
+              quartermasterSeal={
+                reviewedSummary.isFullyCompletedCustomLoadout
+                  ? { headline: 'QUARTERMASTER CERTIFIED', detail: `${ship.name} — ${reviewedBuild?.name ?? 'Custom Loadout'}` }
+                  : null
+              }
             />
             {/* EWO-064 — "Sticky Header owns context, Hero owns action."
                 Every value in this block now reads `reviewedSummary`
@@ -1959,96 +1982,127 @@ export default function ShipWorkspacePrototype() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <ReadinessBar value={reviewedSummary.progress.percentage} />
+                  {/* EWO-065 (Part C) — the exact-name summary is
+                      retained (precise detail a Commander can act on
+                      immediately), but now caps at
+                      MISSING_SUMMARY_VISIBLE_LIMIT names and appends a
+                      plain inline text link — never a tile, badge, or
+                      icon — only when real names are hidden beyond it.
+                      Ordinary <button> (not an anchor) since it scrolls
+                      within the page rather than navigating; already
+                      keyboard-focusable/activatable by default. */}
                   {reviewedSummary.missingSummary.length > 0 && (
                     <p data-testid="readiness-missing-summary" className="flex items-start gap-1.5 text-xs text-warning mt-1.5">
                       <AlertTriangle size={12} className="mt-0.5 shrink-0" />
-                      <span className="line-clamp-2">Missing: {reviewedSummary.missingSummary.join(', ')}</span>
+                      <span className="line-clamp-2">
+                        Missing: {reviewedSummary.missingSummary.slice(0, MISSING_SUMMARY_VISIBLE_LIMIT).join(', ')}
+                        {reviewedSummary.missingSummary.length > MISSING_SUMMARY_VISIBLE_LIMIT && (
+                          <>
+                            …{' '}
+                            <button type="button" onClick={scrollToSystemsWorkspace} className="text-cyan hover:underline font-medium">
+                              View All
+                            </button>
+                          </>
+                        )}
+                      </span>
                     </p>
                   )}
 
-                  {/* EWO-064 (Part D) — Priority Components strip restored:
-                      each item is the SAME canonical per-component-type
-                      glyph Mission Control's own Quartermaster Report and
-                      this page's own Systems Workspace table already use
-                      (`componentCategoryIcon`, never a generic Package
-                      icon), plus an acquisition Badge (the same tone/
-                      label vocabulary as Change Installed Components'
-                      own disclosure — one shared vocabulary, never a
-                      second one invented for this strip), plus a native
-                      tooltip. Invalid Target rows keep the diagnostic
-                      AlertOctagon glyph (a data problem, not a component
-                      type) and the "Incompatible Target" badge. "View
-                      All" only appears when items are hidden beyond the
-                      four shown, and only ever scrolls to Ship Systems —
-                      it never expands the banner. */}
-                  {reviewedSummary.decisionCount > 0 && (
-                    <div data-testid="priority-components-strip" className="flex flex-wrap items-start gap-2.5 mt-3">
-                      {reviewedSummary.prioritizedDecisions.slice(0, 4).map((hp) => {
-                        const isInvalid = hp.status === 'Invalid Target'
-                        const hint = reviewedSummary.hintByHardpointId.get(hp.id)
-                        const GlyphIcon = componentCategoryIcon(hp)
+                  {/* EWO-065 (Part B) — retires the per-component Priority
+                      strip in favor of compact category-level demand
+                      cards, modeled on Mission Control's Quartermaster
+                      Report visual language: the SAME canonical taxonomy/
+                      icon/order (`buildCategoryDemand` inside
+                      shipManagementSummary.ts, reusing
+                      componentCategoryIcon.ts's resolver verbatim — Part D
+                      — never a second classification table), glyph +
+                      outstanding count + category label, nothing more.
+                      These are informational only (Part H) — never a
+                      click target, never a duplicate of the Decision
+                      Summary's own per-item action list. Demand-driven
+                      visibility (Part B): a category with zero outstanding
+                      targets renders no card at all, so this region
+                      collapses to nothing (no reserved empty height) once
+                      every category clears.
+
+                      EWO-065A (Part A) — sized and colored to visibly
+                      belong to the same card family as Mission Control's
+                      own Quartermaster Report `ActionCard`s: the `panel`
+                      surface + `border-l-[3px]` cyan accent edge, a
+                      tinted icon housing, and count-first typography —
+                      proportionally smaller (not a literal `ActionCard`
+                      reuse, since these are always non-interactive/
+                      hover-free here, unlike Mission Control's clickable
+                      filter cards) but unmistakably the same family. Cyan
+                      only, deliberately — a category's color never
+                      encodes which category it is, only that it's an
+                      operational demand card (unlike Mission Control's
+                      own complete/incomplete accent switch, which this
+                      surface has no equivalent state for). */}
+                  {reviewedSummary.categoryDemand.length > 0 && (
+                    <div data-testid="category-demand-cards" className="grid grid-cols-4 gap-2 mt-3">
+                      {reviewedSummary.categoryDemand.map((cat) => {
+                        const CategoryIcon = cat.icon
                         return (
-                          <div key={hp.id} title={isInvalid ? (hp.invalidMessage ?? 'Incompatible target') : hint?.detail} className="flex flex-col items-center gap-1 w-24">
-                            <div
-                              className={`w-12 h-12 rounded-lg border flex items-center justify-center ${
-                                isInvalid ? 'border-danger/40 bg-danger/10' : 'border-white/10 bg-black/20'
-                              }`}
-                            >
-                              {isInvalid ? <AlertOctagon size={16} className="text-danger" /> : <GlyphIcon size={16} className="text-muted" aria-hidden="true" />}
+                          <div key={cat.key} className="panel border-l-[3px] border-l-cyan p-2.5 flex items-center gap-2.5 min-w-0" title={`${cat.count} outstanding — ${cat.label}`}>
+                            <div className="w-7 h-7 rounded-lg bg-cyan/10 flex items-center justify-center shrink-0">
+                              <CategoryIcon size={15} className="text-cyan" aria-hidden="true" />
                             </div>
-                            <span className="text-[10px] text-white/80 text-center truncate w-full">{hp.targetItem}</span>
-                            {/* `wrap` — this column is only ~96px wide, far
-                                narrower than every other place Badge
-                                renders; without it, a label like "Available
-                                in Inventory" overflows straight into the
-                                neighboring item instead of wrapping. */}
-                            <Badge tone={isInvalid ? 'invalid' : hint!.tone} wrap>
-                              {isInvalid ? 'Incompatible Target' : hint!.label}
-                            </Badge>
+                            <div className="min-w-0">
+                              <div className="text-lg font-display font-bold leading-none text-cyan">{cat.count}</div>
+                              <div className="text-[10px] uppercase tracking-widest text-muted mt-0.5 truncate">{cat.label}</div>
+                            </div>
                           </div>
                         )
                       })}
-                      {reviewedSummary.prioritizedDecisions.length > 4 && (
-                        <button onClick={scrollToSystemsWorkspace} className="flex flex-col items-center gap-1 w-24 text-cyan group">
-                          <div className="w-12 h-12 rounded-lg border border-dashed border-cyan/30 flex items-center justify-center group-hover:border-cyan/60 transition-colors">
-                            <ArrowDownToLine size={16} />
-                          </div>
-                          <span className="text-[10px]">View All</span>
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>
-                {/* EWO-064 (Part C) — Decision Summary now lists every
-                    decision hardpoint (Invalid Target, Missing, and
-                    Upgrade Available — never silently excluding a real
-                    gap), ranked by acquisition priority: Reserved Target
-                    Component > Available Inventory Component > Borrow
-                    From Another Ship > Record Newly Acquired Component.
-                    "No Immediate Decisions" is now correct precisely
-                    because it is the genuinely-empty case — there is no
-                    longer a separate "gaps exist but none are actionable"
-                    state to represent, since even a Purchase-Required gap
-                    now surfaces here as a real, trackable Commander
-                    action (Record Newly Acquired Component) rather than
-                    being deferred to "future procurement" and hidden. */}
-                <div data-testid="decision-summary" className={`rounded-lg p-3.5 border ${reviewedSummary.decisionCount > 0 ? 'bg-warning/10 border-warning/30' : 'bg-black/20 border-white/5'}`}>
+                {/* EWO-065B — Decision Summary now lists only
+                    `actionableDecisions`: Invalid Target rows (always
+                    immediately actionable — pick a different compatible
+                    target) plus Missing/Upgrade Available rows whose
+                    acquisition hint is NOT Purchase Required. Restores
+                    the distinction EWO-064 (Part C) had collapsed —
+                    "Missing tells the Commander what the build lacks;
+                    Immediate Decisions tells them what they can do about
+                    it right now." A catalog-only gap (nothing reserved,
+                    available, upgradeable, or borrowable) never
+                    generates a "Record {item}" line here — Record Newly
+                    Acquired Component remains available as an explicit
+                    workflow entry point inside Change Installed
+                    Components' own disclosure, just never an automatic
+                    standing recommendation. "No Immediate Decisions" is
+                    correct whenever nothing is genuinely actionable, even
+                    while real Purchase-Required demand remains (visible
+                    instead via Missing text and the category cards,
+                    which still read the FULL `decisionHardpoints` set).
+
+                    EWO-065A (Part B) — a non-zero Decision Summary is a
+                    Quartermaster operational recommendation (go install/
+                    reassign/borrow something), not a warning about an
+                    unsafe condition — it reads in Quartermaster Gold
+                    (`gold`), never `warning` (Caution Yellow), per the
+                    semantic split documented in §37. The genuinely-empty
+                    "No Immediate Decisions" state is unchanged — still
+                    the calm green `CheckCircle2` treatment. */}
+                <div data-testid="decision-summary" className={`rounded-lg p-3.5 border ${reviewedSummary.actionableCount > 0 ? 'bg-gold/10 border-gold/30' : 'bg-black/20 border-white/5'}`}>
                   <div className="text-[10px] uppercase tracking-widest text-muted mb-2">Decision Summary</div>
                   <div className="flex items-center gap-2">
-                    {reviewedSummary.decisionCount > 0 ? (
-                      <AlertTriangle size={16} className="shrink-0 text-warning" />
+                    {reviewedSummary.actionableCount > 0 ? (
+                      <AlertTriangle size={16} className="shrink-0 text-gold" />
                     ) : (
                       <CheckCircle2 size={16} className="shrink-0 text-success" />
                     )}
-                    <span className="text-sm font-display font-bold leading-none text-white">
-                      {reviewedSummary.decisionCount === 0
+                    <span className={`text-sm font-display font-bold leading-none ${reviewedSummary.actionableCount > 0 ? 'text-gold' : 'text-white'}`}>
+                      {reviewedSummary.actionableCount === 0
                         ? 'No Immediate Decisions'
-                        : `${reviewedSummary.decisionCount} Immediate Decision${reviewedSummary.decisionCount === 1 ? '' : 's'}`}
+                        : `${reviewedSummary.actionableCount} Immediate Decision${reviewedSummary.actionableCount === 1 ? '' : 's'}`}
                     </span>
                   </div>
-                  {reviewedSummary.decisionCount > 0 && (
+                  {reviewedSummary.actionableCount > 0 && (
                     <div className="mt-2 space-y-1.5">
-                      {reviewedSummary.prioritizedDecisions.slice(0, 4).map((hp) => {
+                      {reviewedSummary.actionableDecisions.slice(0, 4).map((hp) => {
                         if (hp.status === 'Invalid Target') {
                           return (
                             <div key={hp.id} className="flex items-center justify-between gap-2 text-xs" title={hp.invalidMessage}>
@@ -2067,7 +2121,7 @@ export default function ShipWorkspacePrototype() {
                           </div>
                         )
                       })}
-                      {reviewedSummary.prioritizedDecisions.length > 4 && <div className="text-[11px] text-muted/70">+{reviewedSummary.prioritizedDecisions.length - 4} more</div>}
+                      {reviewedSummary.actionableDecisions.length > 4 && <div className="text-[11px] text-muted/70">+{reviewedSummary.actionableDecisions.length - 4} more</div>}
                     </div>
                   )}
                 </div>
@@ -2433,6 +2487,13 @@ export default function ShipWorkspacePrototype() {
             </div>
           </div>
         )}
+
+        {/* EWO-065 (Part A) — Ship Settings, opened from the Hero's
+            top-left control. Reuses EditFleetAssetModal exactly as Ship
+            Detail's own "Edit" button already does — this mission
+            establishes the Ship Management access point only, not a
+            modal redesign. */}
+        {editOpen && <EditFleetAssetModal ship={ship} onClose={() => setEditOpen(false)} />}
         </>
       )}
 

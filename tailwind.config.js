@@ -11,10 +11,17 @@ export default {
         warning: '#FFD166',
         danger: '#FF5F73',
         muted: '#8FB0BD',
-        // Advisory Gold (docs/UI_ARCHITECTURE.md §4) — reserved for restricted
-        // command/advisory authority only. Previously named but undefined;
-        // EWO-014 is the first authorized, narrowly-scoped use (the sidebar
-        // slogan's "Outfit" word). Do not use as a general accent.
+        // Quartermaster Gold (docs/UI_ARCHITECTURE.md §4/§37) — the one
+        // canonical token for a Quartermaster operational recommendation
+        // or an earned certification: procurement/readiness action
+        // callouts (e.g. Ship Management's non-zero Decision Summary) and
+        // the Quartermaster Completion Seal's border/label. Distinct from
+        // `warning` (Caution Yellow — an unsafe condition) even though
+        // both read as "amber" at a glance; see §37 for the full semantic
+        // split. First authorized use was EWO-014 (the sidebar slogan's
+        // "Outfit" word); EWO-065A widens this to the two uses above.
+        // Still not a general-purpose accent — reach for `cyan`/`success`
+        // first unless the concept genuinely is a Quartermaster one.
         gold: '#C9A227',
       },
       fontFamily: {

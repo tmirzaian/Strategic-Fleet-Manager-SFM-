@@ -5,7 +5,7 @@ import ShipWorkspacePrototype, { criticalHardpointsInPriorityOrder } from '../Sh
 import { useFleetStore } from '../../store/useFleetStore'
 import { colorFor } from '../../components/ReadinessBar'
 import { catalogComponentsByName } from '../../generated/componentCatalog'
-import type { Hardpoint } from '../../types'
+import type { Hardpoint, MissionReservation, InstalledLoadoutEntry } from '../../types'
 
 const initialState = useFleetStore.getState()
 
@@ -659,9 +659,12 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     // inventory-accounting data, not a fabricated readiness projection.
     expect(within(decisionBox).getByText('Install SnowBlind')).toBeInTheDocument()
     expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
-    // SW-002 Revision C — Slipstream (Purchase Required, non-actionable)
-    // is deliberately excluded from Decision Summary entirely.
-    expect(within(decisionBox).queryByText('Install Slipstream')).not.toBeInTheDocument()
+    // EWO-065B — Slipstream (Purchase Required, non-actionable) is
+    // deliberately excluded from Decision Summary entirely, not merely
+    // rendered under a different verb — the component name itself never
+    // appears here (restores SW-002 Revision C's original rule, which
+    // EWO-064 had temporarily reversed).
+    expect(decisionBox.textContent).not.toContain('Slipstream')
     expect(decisionBox.textContent).not.toMatch(/\d+%\s*readiness/i)
   })
 
@@ -961,10 +964,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(within(decisionBox).getByText('Incompatible Target')).toBeInTheDocument()
     })
 
-    it('the Priority Components strip beneath Readiness also surfaces the invalid target', () => {
+    it('EWO-065 (Part B): the Category Demand Cards beneath Readiness also surface the invalid target\'s own category (Atlas is a Quantum Drive)', () => {
       renderWorkspace('m80')
-      const strip = screen.getByTestId('priority-components-strip')
-      expect(within(strip).getByText('Atlas')).toBeInTheDocument()
+      const cards = screen.getByTestId('category-demand-cards')
+      expect(within(cards).getByText('Quantum Drives')).toBeInTheDocument()
     })
   })
 
@@ -1191,24 +1194,25 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(heading.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     })
 
-    it('the Priority Components strip renders real missing components beneath Readiness (Ghost: Slipstream, SnowBlind)', () => {
+    it('EWO-065 (Part B): the Category Demand Cards render real missing categories beneath Readiness (Ghost: Power Plants for Slipstream, Coolers for SnowBlind)', () => {
       renderWorkspace('ghost')
-      const strip = screen.getByTestId('priority-components-strip')
-      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
+      const cards = screen.getByTestId('category-demand-cards')
+      expect(within(cards).getByText('Power Plants')).toBeInTheDocument()
+      expect(within(cards).getByText('Coolers')).toBeInTheDocument()
     })
 
-    it('SW-002 Revision B (Part 1): "View All" does NOT appear when four or fewer priority components exist (Ghost has only 2)', () => {
+    it('EWO-065 (Part C): "View All" does NOT appear when the Missing text already shows every name (Ghost has only 2, well under the 6-name limit)', () => {
       renderWorkspace('ghost')
       expect(screen.queryByRole('button', { name: /View All/ })).not.toBeInTheDocument()
     })
 
-    it('SW-002 Revision B (Part 1): "View All" appears once more than four priority components exist, and scrolls to Ship Systems without expanding the banner', () => {
-      // Inject 3 extra genuinely-missing hardpoints onto Ghost's active
-      // build so the real decision count exceeds 4 (Ghost's own seed data
-      // tops out at 2) — legitimate store-state test setup, not a new
-      // authority.
-      const extra: Hardpoint[] = ['Extra A', 'Extra B', 'Extra C'].map((name, i) => ({
+    it('EWO-065 (Part C): "View All" appears once the Missing text exceeds the visible-name limit, and scrolls to Ship Systems without expanding the banner', () => {
+      // Inject 5 extra genuinely-missing hardpoints onto Ghost's active
+      // build so the real missing-name count exceeds
+      // MISSING_SUMMARY_VISIBLE_LIMIT (6) — Ghost's own seed data tops out
+      // at 2 (Slipstream, SnowBlind) — legitimate store-state test setup,
+      // not a new authority.
+      const extra: Hardpoint[] = ['Extra A', 'Extra B', 'Extra C', 'Extra D', 'Extra E'].map((name, i) => ({
         id: `extra-${i}`,
         shipId: 'ghost',
         buildId: 'ghost-stealth',
@@ -1225,11 +1229,11 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
 
       const banner = screen.getByTestId('ship-operational-banner')
       const bannerHeightBefore = banner.className
-      const strip = screen.getByTestId('priority-components-strip')
-      // Priority Components (Part 2, unchanged) still reflects the full
-      // missing list — 4 tiles + the "View All" tile itself.
-      expect(strip.children.length).toBe(5)
+      const missingSummary = screen.getByTestId('readiness-missing-summary')
+      // Ordinary inline text link, never a tile/badge/icon (Part C).
+      expect(missingSummary.textContent).toContain('Slipstream')
       const viewAll = screen.getByRole('button', { name: /View All/ })
+      expect(missingSummary.contains(viewAll)).toBe(true)
       fireEvent.click(viewAll)
       expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
       // The banner's own classes are unaffected by the click (never expands).
@@ -1274,31 +1278,32 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
   })
 
   describe('SW-002 Revision B — Product Improvement Phase', () => {
-    it('Part 1: Priority Components reuses the same missing-component list already shown beneath Readiness — never a second independent list', () => {
+    it('EWO-065 (Part D): Category Demand Cards derive from the same decisionHardpoints authority already backing the Missing text — never a second independent list', () => {
       renderWorkspace('ghost')
       const missingSummary = screen.getByTestId('readiness-missing-summary')
-      const strip = screen.getByTestId('priority-components-strip')
+      const cards = screen.getByTestId('category-demand-cards')
       expect(missingSummary.textContent).toContain('Slipstream')
       expect(missingSummary.textContent).toContain('SnowBlind')
-      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
+      // Slipstream (Power Plant) and SnowBlind (Cooler) — each category present.
+      expect(within(cards).getByText('Power Plants')).toBeInTheDocument()
+      expect(within(cards).getByText('Coolers')).toBeInTheDocument()
     })
 
-    it('Part 1: each Priority Component tile reserves placeholder image space with the component name rendered beneath it', () => {
+    it('EWO-065 (Part B): each Category Demand Card shows glyph, outstanding count, and category label — never a component name or acquisition badge', () => {
       renderWorkspace('ghost')
-      const strip = screen.getByTestId('priority-components-strip')
-      const nameEl = within(strip).getByText('Slipstream')
-      const tile = nameEl.closest('div') as HTMLElement
-      const placeholder = tile.querySelector('div') as HTMLElement
-      expect(placeholder).toBeTruthy()
-      expect(placeholder.className).toContain('rounded-lg')
-      expect(placeholder.className).toContain('border')
-      // Placeholder box precedes the name in DOM order (image above, name beneath).
-      expect(placeholder.compareDocumentPosition(nameEl) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      const cards = screen.getByTestId('category-demand-cards')
+      const labelEl = within(cards).getByText('Coolers')
+      const card = labelEl.closest('div[title]') as HTMLElement
+      expect(card).toBeTruthy()
+      // Ghost has exactly one Cooler gap (SnowBlind) -> count "1".
+      expect(within(card).getByText('1')).toBeInTheDocument()
+      expect(card.querySelector('svg')).toBeTruthy()
+      expect(card.textContent).not.toContain('SnowBlind')
     })
 
-    it('Part 1: Priority Components never exceeds 4 visible tiles even when more decisions exist', () => {
-      const extra: Hardpoint[] = ['Extra A', 'Extra B', 'Extra C'].map((name, i) => ({
+    it('EWO-065 (Part B): Category Demand Cards aggregate multiple gaps in the same category into one count, never one card per component', () => {
+      // Two extra Weapon gaps alongside Ghost's real Power Plant/Cooler gaps.
+      const extra: Hardpoint[] = ['Extra A', 'Extra B'].map((name, i) => ({
         id: `extra-${i}`,
         shipId: 'ghost',
         buildId: 'ghost-stealth',
@@ -1312,9 +1317,12 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       }))
       useFleetStore.setState({ hardpoints: [...useFleetStore.getState().hardpoints, ...extra] })
       renderWorkspace('ghost')
-      const strip = screen.getByTestId('priority-components-strip')
-      // 5 total missing items -> 4 tiles + 1 "View All" tile = 5 direct children.
-      expect(strip.children.length).toBe(5)
+      const cards = screen.getByTestId('category-demand-cards')
+      // Exactly 3 categories (Power Plants, Coolers, Weapons) despite 4 total gaps.
+      expect(cards.children.length).toBe(3)
+      const weaponsLabel = within(cards).getByText('Weapons')
+      const weaponsCard = weaponsLabel.closest('div[title]') as HTMLElement
+      expect(within(weaponsCard).getByText('2')).toBeInTheDocument()
     })
 
     it('Part 2: decision recommendations use the approved Quartermaster priority language (Available in Inventory, Available to Reserve, Borrow Available)', () => {
@@ -1325,29 +1333,30 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(decisionBox.textContent).not.toMatch(/Not Currently Owned|Reserved Elsewhere/)
     })
 
-    it('EWO-064 (Part C): "Purchase Required" now correctly appears inside Decision Summary, as a Record Newly Acquired Component entry — no longer excluded and deferred to "future procurement"', () => {
+    it('EWO-065B: "Purchase Required" never appears inside Decision Summary — restores the exclusion EWO-064 had removed', () => {
       // Remove SnowBlind from the Hangar so it resolves to Purchase Required.
       useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
-      expect(decisionBox.textContent).toContain('Purchase Required')
-      expect(within(decisionBox).getByText(/Record\s+SnowBlind/)).toBeInTheDocument()
+      expect(decisionBox.textContent).not.toContain('Purchase Required')
+      expect(within(decisionBox).queryByText(/Record\s+SnowBlind/)).not.toBeInTheDocument()
     })
 
-    it('EWO-064 (Part C): the retired "No Immediate Actions" placeholder never renders — every readiness gap, even an all-Purchase-Required one, is now a real Decision Summary entry', () => {
+    it('EWO-065B: a Loadout whose ONLY gaps are Purchase Required shows "No Immediate Decisions," even though real demand remains', () => {
       // Remove SnowBlind from the Hangar so both of Ghost's missing
       // targets (Slipstream, SnowBlind) resolve to Purchase Required —
       // legitimate store-state test setup, not a new authority.
       useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
       renderWorkspace('ghost')
       const decisionBox = screen.getByTestId('decision-summary')
-      expect(screen.queryByText('No Immediate Actions')).not.toBeInTheDocument()
-      expect(screen.queryByText('Remaining readiness gaps require future acquisition.')).not.toBeInTheDocument()
-      expect(within(decisionBox).getByText('2 Immediate Decisions')).toBeInTheDocument()
-      // Priority Components strip (Part D, restored) still shows the real gaps too.
-      const strip = screen.getByTestId('priority-components-strip')
-      expect(within(strip).getByText('Slipstream')).toBeInTheDocument()
-      expect(within(strip).getByText('SnowBlind')).toBeInTheDocument()
+      expect(within(decisionBox).getByText('No Immediate Decisions')).toBeInTheDocument()
+      // Missing text and Category Demand Cards still show the real gaps —
+      // Purchase Required demand is real, just not an "immediate decision."
+      expect(screen.getByTestId('readiness-missing-summary').textContent).toContain('Slipstream')
+      expect(screen.getByTestId('readiness-missing-summary').textContent).toContain('SnowBlind')
+      const cards = screen.getByTestId('category-demand-cards')
+      expect(within(cards).getByText('Power Plants')).toBeInTheDocument()
+      expect(within(cards).getByText('Coolers')).toBeInTheDocument()
     })
 
     it('EWO-064 (Part C): a fully ready Loadout (Corsair) shows "No Immediate Decisions" — now correct precisely because it is the genuinely-empty case', () => {
@@ -1391,6 +1400,239 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
       expect(useFleetStore.getState()).toBe(before)
     })
+  })
+})
+
+/**
+ * EWO-065 — Ship Management Hero Intelligence & Completion Reward.
+ * 'corsair' (Gunship Build) is seed.ts's own documented "real, finished
+ * custom Build — every relevant slot fully matched, deliberately zero
+ * overlay entries... distinct from a Factory-only ship that merely
+ * happens to read 100%" fixture (see customBuildOverlays' own comment) —
+ * the exact genuinely-completed-custom-Loadout case Part E defines. '135c'
+ * has no customBuildOverlays entry at all, so its active build is
+ * Factory-only (kind 'FACTORY') and reads 100% trivially — the Part E
+ * Factory-exclusion case (the work order's own "STV" example).
+ */
+describe('<ShipWorkspacePrototype /> — EWO-065: Ship Management Hero Intelligence & Completion Reward', () => {
+  describe('Part A: Ship Settings control replaces the manufacturer plate', () => {
+    it('the manufacturer abbreviation plate no longer renders in the Hero image area', () => {
+      renderWorkspace('ghost')
+      const imageArea = screen.getByTestId('ship-hero-image-area')
+      expect(within(imageArea).queryByTitle('Anvil')).not.toBeInTheDocument()
+    })
+
+    it('a Ship Settings control renders in its place, and opens the existing Edit Fleet Asset settings surface', () => {
+      renderWorkspace('ghost')
+      const settingsButton = screen.getByRole('button', { name: 'Ship Settings' })
+      expect(settingsButton).toBeInTheDocument()
+      fireEvent.click(settingsButton)
+      expect(screen.getByText('Edit Fleet Asset')).toBeInTheDocument()
+    })
+
+    it('the manufacturer name itself is still shown on the identity subtitle line — only the corner plate is retired', () => {
+      renderWorkspace('ghost')
+      const overlay = screen.queryByTestId('ship-hero-overlay-info') ?? screen.getByTestId('ship-hero-metadata-band')
+      expect(overlay.textContent).toContain('Anvil')
+    })
+  })
+
+  describe('Part E/F: the Quartermaster Completion Seal', () => {
+    it('a Factory Loadout at 100% (135c) receives no Completion Seal — a stock ship stays clean and nominal', () => {
+      renderWorkspace('135c')
+      expect(screen.getByText('100%')).toBeInTheDocument()
+      expect(screen.queryByTestId('quartermaster-completion-seal')).not.toBeInTheDocument()
+    })
+
+    it('a genuinely completed custom Loadout (Corsair Gunship Build) receives the Completion Seal', () => {
+      renderWorkspace('corsair')
+      const seal = screen.getByTestId('quartermaster-completion-seal')
+      expect(seal.textContent).toContain('QUARTERMASTER CERTIFIED')
+      expect(seal.textContent).toContain('Gunship Build')
+    })
+
+    it('an incomplete custom Loadout (Ghost Stealth Build) receives no Completion Seal', () => {
+      renderWorkspace('ghost')
+      expect(screen.queryByTestId('quartermaster-completion-seal')).not.toBeInTheDocument()
+    })
+
+    it('switching ships recalculates the seal immediately — Corsair shows it, switching to Ghost removes it, with no stale carry-over', () => {
+      renderWorkspace('corsair')
+      expect(screen.getByTestId('quartermaster-completion-seal')).toBeInTheDocument()
+      const select = screen.getByLabelText('Ship') as HTMLSelectElement
+      fireEvent.change(select, { target: { value: 'ghost' } })
+      expect(screen.queryByTestId('quartermaster-completion-seal')).not.toBeInTheDocument()
+    })
+
+    it('removing a required installed component immediately removes the seal — it never incorrectly persists once the Loadout is no longer complete', () => {
+      renderWorkspace('corsair')
+      expect(screen.getByTestId('quartermaster-completion-seal')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+      const removeButtons = screen.getAllByRole('button', { name: /Remove/ })
+      fireEvent.click(removeButtons[0])
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+      expect(screen.queryByTestId('quartermaster-completion-seal')).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe('<ShipWorkspacePrototype /> — EWO-065A: Hero Palette Alignment & Certification Polish', () => {
+  describe('Part A: Category Demand Cards visually belong to the Mission Control Quartermaster Report family', () => {
+    it('each card uses the panel surface with a cyan left accent edge, never a category-specific color', () => {
+      renderWorkspace('ghost')
+      const cards = screen.getByTestId('category-demand-cards')
+      const label = within(cards).getByText('Coolers')
+      const card = label.closest('div[title]') as HTMLElement
+      expect(card.className).toContain('panel')
+      expect(card.className).toContain('border-l-cyan')
+      const otherLabel = within(cards).getByText('Power Plants')
+      const otherCard = otherLabel.closest('div[title]') as HTMLElement
+      // Same accent class on every card — color never encodes which category it is.
+      expect(otherCard.className).toContain('border-l-cyan')
+    })
+
+    it('the count renders in cyan, larger and more prominent than the category label beneath it', () => {
+      renderWorkspace('ghost')
+      const cards = screen.getByTestId('category-demand-cards')
+      const label = within(cards).getByText('Coolers')
+      const card = label.closest('div[title]') as HTMLElement
+      const count = within(card).getByText('1')
+      expect(count.className).toContain('text-cyan')
+      expect(count.className).toContain('text-lg')
+    })
+  })
+
+  describe('Part B: the Decision Summary header uses Quartermaster Gold, never Caution Yellow, for non-zero decisions', () => {
+    it('a non-zero Decision Summary reads in gold — the callout icon, the count/label text, and the panel accent', () => {
+      renderWorkspace('ghost')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(decisionBox.className).toContain('border-gold')
+      expect(decisionBox.className).not.toContain('border-warning')
+      const countText = within(decisionBox).getByText(/Immediate Decision/)
+      expect(countText.className).toContain('text-gold')
+      expect(decisionBox.querySelector('.text-gold svg, svg.text-gold')).toBeTruthy()
+    })
+
+    it('the genuinely-empty "No Immediate Decisions" state retains the calm green treatment, untouched by the gold change', () => {
+      renderWorkspace('corsair')
+      const decisionBox = screen.getByTestId('decision-summary')
+      expect(decisionBox.className).not.toContain('border-gold')
+      const label = within(decisionBox).getByText('No Immediate Decisions')
+      expect(label.className).not.toContain('text-gold')
+    })
+  })
+
+  describe('Part C: the Quartermaster Certification Card uses a gold border/label with the green glyph preserved', () => {
+    it('the seal border and headline are Quartermaster Gold; the shield/check glyph stays green', () => {
+      renderWorkspace('corsair')
+      const seal = screen.getByTestId('quartermaster-completion-seal')
+      expect(seal.className).toContain('border-gold')
+      const headline = within(seal).getByText('QUARTERMASTER CERTIFIED')
+      expect(headline.className).toContain('text-gold')
+      expect(seal.querySelector('.text-success')).toBeTruthy()
+    })
+
+    it('the supporting text is exactly "Ship Name — Reviewed Loadout Name" — no "Mission Ready," ownership, manufacturer, or role', () => {
+      renderWorkspace('corsair')
+      const seal = screen.getByTestId('quartermaster-completion-seal')
+      expect(seal.textContent).not.toContain('Mission Ready')
+      expect(seal.textContent).not.toContain('Owned')
+      expect(seal.textContent).not.toContain('Drake')
+      expect(seal.textContent).toContain('Corsair — Gunship Build')
+    })
+  })
+})
+
+/**
+ * EWO-065B — Actionable Decision Qualification. 'mole' (MOLE, real seed
+ * data, Mining Build) is this suite's own real-fixture procurement-only
+ * case: its one real gap (Galinstan, a Cooler) has zero Hangar stock —
+ * genuinely nothing reserved, available, or borrowable — so Decision
+ * Summary must show "No Immediate Decisions" while Missing text and the
+ * Category Demand Cards still show the real gap. This uses the ship's
+ * own actual current seed state rather than the work order's own
+ * illustrative numbers (a different MOLE snapshot — different missing
+ * items, different readiness %) — the underlying qualification rule is
+ * what's being verified, not that specific snapshot.
+ */
+describe('<ShipWorkspacePrototype /> — EWO-065B: Actionable Decision Qualification', () => {
+  it('MOLE (procurement-only real fixture): Decision Summary shows "No Immediate Decisions" while Missing text and Category Demand Cards still show the real gap', () => {
+    renderWorkspace('mole')
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(within(decisionBox).getByText('No Immediate Decisions')).toBeInTheDocument()
+    expect(decisionBox.textContent).not.toContain('Purchase Required')
+    expect(decisionBox.textContent).not.toContain('Galinstan')
+
+    expect(screen.getByTestId('readiness-missing-summary').textContent).toContain('Galinstan')
+    const cards = screen.getByTestId('category-demand-cards')
+    expect(within(cards).getByText('Coolers')).toBeInTheDocument()
+  })
+
+  it('inventory-available state: a Missing target with real Hangar stock is an Immediate Decision', () => {
+    renderWorkspace('ghost')
+    const decisionBox = screen.getByTestId('decision-summary')
+    // SnowBlind (Cooler) is owned/unreserved in the seed Hangar.
+    expect(within(decisionBox).getByText('Install SnowBlind')).toBeInTheDocument()
+    expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
+  })
+
+  it('reserved state: a target fully committed to another Loadout is an Immediate Decision (Reassign)', () => {
+    // A synthetic Missing hardpoint on Ghost's reviewed (Stealth) build —
+    // same pattern the rest of this suite already uses for injecting a
+    // fabricated gap (see the "extra hardpoints" tests above) — targeting
+    // a component whose only Hangar unit is fully reserved for a
+    // DIFFERENT build, so the acquisition hint resolves to 'warning'
+    // (Reserved Elsewhere) rather than 'success'.
+    const extra: Hardpoint = {
+      id: 'test-reserved-hp', shipId: 'ghost', buildId: 'ghost-stealth', slotLabel: 'Test Reserved Slot',
+      type: 'Shield', size: 'S1', factoryItem: 'ReservedTestItem', installedItem: '—', targetItem: 'ReservedTestItem', status: 'Missing',
+    }
+    useFleetStore.setState({
+      hardpoints: [...useFleetStore.getState().hardpoints, extra],
+      hangarItems: [...useFleetStore.getState().hangarItems, { id: 'test-res-hangar', name: 'ReservedTestItem', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Install' }],
+      reservations: [
+        ...useFleetStore.getState().reservations,
+        { id: 'test-res', missionConfigurationId: 'ghost-escort', fleetAssetId: 'ghost', targetSlotLabel: 'Other Slot', componentName: 'ReservedTestItem', quantity: 1, status: 'ACTIVE', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' } as MissionReservation,
+      ],
+    })
+    renderWorkspace('ghost')
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(decisionBox.textContent).toMatch(/Reassign\s+ReservedTestItem/)
+  })
+
+  it('borrow-only state: a target installed on another ship (and nowhere else) is an Immediate Decision', () => {
+    // Same synthetic-gap pattern, this time with zero Hangar stock but a
+    // real donor ship (Corsair) currently carrying the target component —
+    // resolves to 'cyan' (Borrow Available).
+    const extra: Hardpoint = {
+      id: 'test-borrow-hp', shipId: 'ghost', buildId: 'ghost-stealth', slotLabel: 'Test Borrow Slot',
+      type: 'Shield', size: 'S1', factoryItem: 'BorrowTestItem', installedItem: '—', targetItem: 'BorrowTestItem', status: 'Missing',
+    }
+    useFleetStore.setState({
+      hardpoints: [...useFleetStore.getState().hardpoints, extra],
+      hangarItems: [],
+      installedLoadouts: [...useFleetStore.getState().installedLoadouts, { shipId: 'corsair', slotLabel: 'A Shield Generator', installedItem: 'BorrowTestItem' } as InstalledLoadoutEntry],
+    })
+    renderWorkspace('ghost')
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(decisionBox.textContent).toMatch(/Borrow\s+BorrowTestItem/)
+  })
+
+  it('mixed procurement/actionable state: the count reflects only genuinely actionable items, and completing/removing inventory updates it reactively', () => {
+    // Ghost's default state: SnowBlind actionable (Available), Slipstream
+    // procurement-only (Purchase Required) -> exactly 1 Immediate Decision.
+    renderWorkspace('ghost')
+    let decisionBox = screen.getByTestId('decision-summary')
+    expect(within(decisionBox).getByText('1 Immediate Decision')).toBeInTheDocument()
+
+    // Removing SnowBlind from the Hangar clears the one actionable item -> "No Immediate Decisions," reactively.
+    act(() => {
+      useFleetStore.setState({ hangarItems: useFleetStore.getState().hangarItems.filter((h) => h.name !== 'SnowBlind') })
+    })
+    decisionBox = screen.getByTestId('decision-summary')
+    expect(within(decisionBox).getByText('No Immediate Decisions')).toBeInTheDocument()
   })
 })
 

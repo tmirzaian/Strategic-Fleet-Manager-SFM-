@@ -1792,3 +1792,239 @@ disclosure text — all rewritten to assert this mission's intended
 behavior rather than defensively preserved against it. Full project
 regression (`tsc --noEmit`, 181 test files / 2197 tests) and a
 production build both pass clean.
+
+## 36. Hero Intelligence & Completion Reward (EWO-065, IMPLEMENTED NOW)
+
+Refines §35's Hero into three things at once: a Ship Settings entry
+point, a compact category-level demand report, and a completion
+ceremony — without adding clutter. Governing principle, extending §35's
+"Sticky Header owns context, Hero owns action": **Hero owns action and
+accomplishment.**
+
+**Part A — Ship Settings replaces the manufacturer plate.** The
+manufacturer abbreviation badge in the Hero image's top-left corner is
+retired in favor of a Ship Settings control (`ShipHeroFrame`'s new
+`onOpenSettings` prop) that opens the existing `EditFleetAssetModal`
+verbatim — this mission establishes the access point only, not a modal
+redesign. The manufacturer name itself is unaffected; it already lives
+on the identity subtitle line beneath. Scoped to Ship Management only:
+`onOpenSettings` is opt-in, so Ship Detail/ImportedShipDetail (the
+other two `ShipHeroFrame` consumers) keep the original manufacturer
+badge unchanged — this mission's objective and every Part explicitly
+names the Ship Management Hero, never those other pages.
+
+**Part B/D — Category Demand Cards replace the per-component Priority
+Strip.** §35's Priority Components strip (one small tile per missing
+component) is retired in favor of compact category-level cards —
+glyph, outstanding count, category label — reusing
+`componentCategoryIcon.ts`'s canonical taxonomy/order/icon verbatim
+(the same resolver Mission Control's Quartermaster Report already
+uses), never a second classification table. `buildCategoryDemand()` in
+`shipManagementSummary.ts` aggregates `decisionHardpoints` (the same
+authoritative set already backing the Decision Summary — Part D) by
+`canonicalComponentCategoryKey`, so a component cannot appear under
+different categories on different pages. Demand-driven visibility only
+(unlike the Quartermaster Report's stable-5-always-visible rule) — a
+category with zero outstanding targets renders no card at all, so this
+region collapses to nothing (no reserved empty height) as gaps clear.
+
+**Part C — Missing text keeps exact names, gains an inline View All.**
+The "Missing: …" text is retained (precise, actionable detail) but now
+caps at `MISSING_SUMMARY_VISIBLE_LIMIT` (6) names before appending a
+plain inline text link — never a tile, badge, or icon — that scrolls to
+Ship Systems via the same `scrollToSystemsWorkspace` handler §35's old
+strip button used. Absent whenever every name already fits or nothing
+is outstanding.
+
+**Part E/F — the Quartermaster Completion Seal.** `shipManagementSummary
+.ts` adds `isFullyCompletedCustomLoadout`, true only when ALL of: the
+reviewed Build is real custom (`kind !== 'FACTORY'`), it defines at
+least one real target (`progress.requiredAssignments > 0`), and every
+target is satisfied (`decisionCount === 0`, `percentage === 100`). The
+middle condition is the one genuinely new rule this mission adds:
+`deriveFleetBuildState`'s own `MISSION_READY` state (§33's old
+`isMissionReady` prop) already excludes Factory, but its underlying
+`progress.isComplete` treats zero required assignments as trivially
+complete — without the explicit `requiredAssignments > 0` check, an
+entirely empty/undefined custom Build would silently earn the seal
+purely from having no targets at all, exactly the false positive Part E
+names. `ShipHeroFrame` gets a new `quartermasterSeal` prop (headline +
+detail medallion block, `data-testid="quartermaster-completion-seal"`)
+that renders instead of (never alongside) the old `isMissionReady`
+placeholder icon — opt-in, Ship Management only, same reasoning as
+Part A's `onOpenSettings`.
+
+**Part G — natural compaction, not a separate collapsed layout.** No
+dedicated "completed" branch was written for the Hero: `categoryDemand`
+is already empty (nothing renders) and the Missing text is already
+absent whenever `decisionCount === 0` — the exact condition that also
+grants the Seal. The Hero compacts to readiness bar + Decision Summary
+("No Immediate Decisions") + the Seal purely as a consequence of the
+existing conditional rendering already in place, never a second
+"completed Hero" code path to keep in sync with the normal one.
+
+**Part H — unchanged.** Category cards remain informational only,
+never a click target and never a duplicate of the Decision Summary's
+own per-item action list — confirmed by inspection; nothing in Parts
+B/C/D introduces an `onClick` on a card.
+
+Regression coverage: `shipManagementSummary.test.ts` gains dedicated
+`categoryDemand` (aggregation, canonical order, zero-omission) and
+`isFullyCompletedCustomLoadout` (true/false across Factory-at-100%,
+empty-custom-Build, real-gap-remaining, and no-Build-at-all cases)
+suites. `ShipHeroFrame.test.tsx` gains coverage for both new opt-in
+props alongside their unaffected defaults. `ShipWorkspacePrototype
+.test.tsx` gains a dedicated EWO-065 describe block (Ship Settings
+control, manufacturer plate absence, Completion Seal presence/absence
+across Corsair's real finished custom Build vs 135c's Factory-only
+100% vs Ghost's incomplete custom Build, seal removal on switching
+ships and on removing a required installed component) plus every prior
+test that referenced the retired `priority-components-strip` testid
+rewritten against `category-demand-cards`. Full project regression
+(`tsc --noEmit`, 181 test files / 2217 tests) and a production build
+both pass clean.
+
+## 37. Hero Palette Alignment & Certification Polish (EWO-065A, IMPLEMENTED NOW)
+
+Visual polish only (per this mission's own explicit "no business logic
+or workflow behavior changes" constraint) — §36's Category Demand
+Cards, Decision Summary, and Quartermaster Completion Seal all keep
+their exact prior data/behavior, restyled to match the semantic palette
+rule below.
+
+**The semantic palette rule** (Part D — the canonical reference this
+mission establishes; every future color choice on an operational
+surface should map to one of these five, not invent a sixth):
+
+| Color | Meaning |
+|---|---|
+| **Cyan** (`cyan`) | Operational information, navigation, structure — "where and what." |
+| **Green** (`success`) | Satisfied, available, complete — "this is done." |
+| **Quartermaster Gold** (`gold`) | Recommended action, procurement intelligence, certification — "the Quartermaster suggests/recognizes this." |
+| **Yellow** (`warning`, "Caution Yellow") | An unsafe or attention-worthy condition — never used interchangeably with Gold, even though both read as "amber" at a glance. |
+| **Red** (`danger`) | Critical failure or a missing requirement. |
+
+**Part A — Category Demand Cards now visually belong to the Mission
+Control Quartermaster Report family.** Restyled from a bare `bg-black/20
+border border-white/10` tile to the `panel` surface (the same dark
+operational card background/border every `ActionCard` — Mission
+Control's own Quartermaster Report cards — already uses) plus a
+`border-l-[3px] border-l-cyan` accent edge, a cyan-tinted icon housing,
+and a bumped-up `text-lg` cyan count over a `text-[10px]` muted label —
+proportionally smaller than `ActionCard`'s own `w-8 h-8`/`text-xl`
+scale, not a literal reuse of that component, since these cards are
+always non-interactive here (no hover treatment) unlike Mission
+Control's clickable category filters. Cyan only, on every card,
+regardless of category — color communicates "this is an operational
+demand card," never which category, matching Part A's explicit "do not
+introduce category-specific colors."
+
+**Part B — a non-zero Decision Summary reads in Quartermaster Gold.**
+Previously `warning` (Caution Yellow) for both the container accent and
+the callout icon, with the count/label text always plain white. Now
+`gold` throughout the non-zero state (container background/border,
+`AlertTriangle` icon, and the count/label text itself) — a Decision
+Summary is the Quartermaster recommending an action (install/reassign/
+borrow/record), not warning of an unsafe condition, so it never shares
+Caution Yellow's color. The genuinely-empty "No Immediate Decisions"
+state is untouched — still the calm green `CheckCircle2` treatment §35
+established.
+
+**Part C — the Quartermaster Certification Card's border and label are
+gold; its glyph stays green.** The seal's border/background (previously
+`border-success/40`, plain dark background) is now `border-gold/50`
+with a soft gold ambient glow (`shadow-[0_0_16px_rgba(201,162,39,0.3)]`)
+— recognition and certification, not the "this specific thing is
+satisfied" meaning green already carries elsewhere on the same block.
+The `QUARTERMASTER CERTIFIED` headline is `text-gold`; the `ShieldCheck`
+glyph itself deliberately stays `text-success` green — two colors,
+two meanings, on the same card (gold = "the Quartermaster certifies
+this," green = "and it's complete"). Supporting text is now exactly
+`{Ship Name} — {Reviewed Loadout Name}` (e.g. "Corsair — Gunship
+Build") — the "· Mission Ready" suffix is removed (readiness is
+already conveyed by the 100% bar, the green glyph, and "No Immediate
+Decisions," so restating it here was redundant), and no ownership/
+manufacturer/role is ever added (those already live on the identity
+subtitle line above). `truncate` plus the existing `title` attribute
+(unchanged from §36) keep a long combination on one line without
+overflowing the card, with the full value still reachable via tooltip.
+
+**Part D — token, not a refactor.** `gold` (`#C9A227`) already existed
+(tailwind.config.js, first authorized by EWO-014 for the sidebar
+slogan's "Outfit" word) — no new token was created. Its own doc comment
+is widened from "restricted... narrowly-scoped... do not use as a
+general accent" to name the two authorized uses this mission adds
+(Decision Summary callout, Certification Seal), while still explicitly
+not becoming a general-purpose accent. No other color values changed;
+no broad palette audit was performed, per this mission's own explicit
+scope boundary.
+
+Regression coverage: `ShipHeroFrame.test.tsx` gains a dedicated
+gold-border/gold-label/green-glyph assertion for `quartermasterSeal`.
+`ShipWorkspacePrototype.test.tsx` gains an EWO-065A describe block
+covering the category cards' `panel`/`border-l-cyan` family styling and
+cyan count prominence, the Decision Summary's gold-vs-untouched-green
+split across a non-zero (Ghost) and genuinely-empty (Corsair) case, and
+the Certification Card's gold border/label with green glyph plus the
+exact supporting-text content (no "Mission Ready," ownership,
+manufacturer, or role). Full project regression (`tsc --noEmit`, full
+test suite) and a production build both pass clean.
+
+## 38. Actionable Decision Qualification (EWO-065B, IMPLEMENTED NOW)
+
+A logic correction, explicitly reversing EWO-064 (Part C)'s own choice
+to include Purchase Required gaps in the Decision Summary. Restores the
+distinction SW-002 Revision C originally established and this mission's
+own framing states directly: **Missing tells the Commander what the
+build lacks. Immediate Decisions tells them what they can do about it
+right now.** A target that exists only in the catalog and must still be
+obtained is real, trackable demand — but it is not something the
+Commander can act on this instant, so it no longer belongs in the
+Hero's own actionable list.
+
+**Qualification rule.** A Missing/Upgrade Available gap qualifies as an
+Immediate Decision only when its acquisition hint tone is NOT `'muted'`
+(Purchase Required) — i.e. the exact target is reserved for this build,
+genuinely available in inventory, or borrowable from another ship. An
+Invalid Target row is unconditionally actionable regardless of any
+acquisition hint — resolving one is always immediate (pick a different,
+compatible target), never an inventory problem.
+
+**`shipManagementSummary.ts` — two collections, two purposes.**
+`decisionHardpoints`/`decisionCount`/`prioritizedDecisions` are
+unchanged: the FULL unresolved-demand set (including Purchase
+Required), still the sole source for `missingSummary` and
+`categoryDemand` — Missing text and the Category Demand Cards continue
+to reflect every real gap, exactly as §36 established. New
+`actionableDecisions`/`actionableCount` filter that same ordered list
+down to the genuinely-actionable subset described above; the Hero's own
+Decision Summary panel reads ONLY these two fields now, never
+`decisionCount`/`prioritizedDecisions` directly. `isFullyCompletedCustomLoadout`
+(§36, Part E) deliberately keeps checking `decisionCount === 0`, not
+`actionableCount === 0` — a ship with only Purchase-Required gaps has
+zero actionable items but is very much NOT complete, and must not earn
+the Quartermaster Completion Seal.
+
+**Record New Component stays a workflow entry point, not a standing
+recommendation.** Because `actionableDecisions` never includes a
+Purchase-Required row, the Decision Summary can no longer auto-generate
+a "Record {item}" line from a catalog-only gap — the exact behavior
+this mission's own acceptance criteria names. The Record Newly Acquired
+Component button inside Change Installed Components' own disclosure
+(§35's "Add Newly Acquired Component" tier) is untouched: it remains a
+real, explicit, Commander-invoked workflow entry point, always
+reachable from any row regardless of that row's own status.
+
+Regression coverage: `shipManagementSummary.test.ts` gains a dedicated
+`actionableDecisions`/`actionableCount` suite (Purchase-Required
+excluded, Available/Reserved/Borrowable/Invalid-Target included, a
+mixed-set case confirming the count reflects only the actionable
+subset in the same acquisition-priority order). `ShipWorkspacePrototype
+.test.tsx`'s EWO-064-era Purchase-Required-inclusion tests are rewritten
+to assert the restored exclusion, and a new EWO-065B describe block adds
+a real-fixture procurement-only case (MOLE — Decision Summary reads "No
+Immediate Decisions" while Missing text and Category Demand Cards still
+show the real Cooler gap), plus dedicated inventory-available/reserved/
+borrow-only/mixed-state coverage and a reactive removal-updates-the-count
+case. Full project regression (`tsc --noEmit`, 181 test files / 2235
+tests) and a production build both pass clean.
