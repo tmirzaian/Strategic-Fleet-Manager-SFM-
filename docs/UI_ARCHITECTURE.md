@@ -2028,3 +2028,201 @@ show the real Cooler gap), plus dedicated inventory-available/reserved/
 borrow-only/mixed-state coverage and a reactive removal-updates-the-count
 case. Full project regression (`tsc --noEmit`, 181 test files / 2235
 tests) and a production build both pass clean.
+
+## 39. Loadout Safety Capsule & Fleet Priority Refactor (EWO-066, IMPLEMENTED NOW)
+
+A UX architecture refactor with one real logic addition (the Priority
+Model itself, explicitly authorized) — otherwise no changes to
+readiness, inventory, reservation logic, or ship behavior. STV — a ship
+with only its Factory Loadout, no Commander customization at all — is
+this mission's own canonical reference state (Part H): the golden path
+every more complex Loadout scenario builds on, so this mission is
+mostly about making that state read cleanly rather than layering
+complexity on top of it. (135c fills the same real-fixture role STV did
+conceptually — no such fixture exists in seed.ts, matching §36's own
+"STV" precedent.)
+
+**Part A — the Safety Capsule splits into two zones sharing one
+panel.** The single `panel p-4` Loadout section is now a `grid
+md:grid-cols-3` — Loadout at `md:col-span-2` (~2/3), Ship Priority to
+its right behind a `md:border-l` divider (~1/3) — still one capsule,
+one `<div className="panel">`, never two separate ones. Every existing
+Loadout behavior (pill selection, Set Active, the guarded-switch
+confirm, New Loadout's inline form) is unchanged; only where it sits
+moved.
+
+**Part B — Factory presentation simplified.** A Factory build's own
+stored name has always been the literal string `"Factory Loadout"`
+(`fleetAssetMaterializer.ts`), and the pill additionally rendered a
+`Badge tone="cyan"` reading "Factory" — together, "Factory Loadout •
+Factory." The pill now renders `build.kind === 'FACTORY' ? 'Factory' :
+build.name` and drops the redundant badge entirely; the real `ACTIVE`
+badge (unchanged) still applies when it's the ship's active Loadout.
+Every other build keeps its own real name — this only ever touches the
+Factory case. The underlying stored `Build.name` is untouched (still
+`"Factory Loadout"` internally — other surfaces like New Loadout's own
+"Initialize From: Factory Loadout" source-selector button intentionally
+keep that fuller phrase, a different context than the pill's identity).
+
+**Part E/F/G — Fleet Priority becomes a real unique manual ranking,**
+not a free-form number. New `src/utils/fleetPriority.ts` is the one
+place ranks are ever computed:
+- `reorderFleetPriority(ships, targetId, requestedPriority)` — a
+  Commander-initiated re-rank; every other ranked ship shifts as needed
+  to stay a unique, gap-free `1..N` sequence (de-ranking closes the gap
+  it leaves; ranking/re-ranking shifts everything at or after the
+  target position down by one). `requestedPriority` clamps into `[1,
+  rankedCount + 1]` — requesting beyond the fleet size lands at the end,
+  never a gap or an error.
+- `closePriorityGapOnRemoval(ships, removedId)` — `removeFleetAsset`'s
+  own convenience wrapper for the same shift, minus the departing
+  ship's own now-irrelevant entry.
+- `normalizeFleetPriorities(ships)` — the read-path self-heal (Part G),
+  called at the end of `useFleetStore.ts`'s `merge()` on every
+  hydration, not a one-time schema migration. Repairs duplicate
+  priorities, gaps, and invalid values (anything not a positive
+  integer) into a clean sequence, preserving relative order (current
+  priority, then original array position) wherever possible.
+  Idempotent — a no-op against already-clean data. This also self-heals
+  the seed baseline's own known duplicate: MOLE and Vulture are both
+  hand-authored as `priority: 2` in seed.ts, and always have been; every
+  ship ranked after that duplicate shifts by one once normalized (e.g.
+  Cutlass Red's raw `priority: 7` becomes `8`) — a real, deliberate
+  effect of this engine, not a bug, and specifically not "undone" by
+  anything else in the store (see the `seedImageResolution.test.ts` fix
+  this surfaced).
+- `Ship.priority`/`FleetAsset.priority`/`SeedAssetOverride.priority` are
+  now `number | null` — `null` is "Unprioritized," a first-class value,
+  never a magic number like `0`. `comparePriority(a, b)` is the one
+  null-safe ascending comparator (Unprioritized always sorts last),
+  reused everywhere Priority is a sort key: Fleet Dashboard's Priority
+  sort, Mission Control's Top 4 slice and tile-context names, and
+  `compareByReadinessRank`'s own tiebreak — Part F's "canonical value"
+  requirement extends to how it sorts, not only how it's stored.
+- **`setFleetPriority(shipId, priority)`** — the sole entry point that
+  mutates Fleet Priority, replacing `updateFleetProfile`'s own former
+  ad hoc `priority` field (removed from its type entirely — that action
+  now only ever touches Primary/Secondary Role). Applies the same
+  dual/triple-write persistence pattern
+  (`ships`/`fleetAssets`/`seedAssetOverrides` for a seed-migrated asset)
+  every other Fleet Asset mutation already uses, across every ship
+  `reorderFleetPriority` says actually changed — often more than the
+  one the Commander directly edited.
+- A freshly-added ship now defaults to Unprioritized (`null`), never
+  auto-appended to the end of the ranking the way `addFleetAsset` used
+  to (`max(existing) + 1`) — the Commander assigns a real priority
+  explicitly if and when they want one.
+- The Ship Priority field is removed from `EditFleetAssetModal` — Ship
+  Management's own new panel is the one place it's edited now, rather
+  than two competing surfaces (one enforcing the uniqueness invariant,
+  one not).
+
+**Ship Priority panel UI** — a `<select>` (`Unprioritized` plus
+`Priority 1..N`, `N` = the current ranked fleet size, extended by one
+when this ship is the one about to become newly ranked) calling
+`setFleetPriority` on change. Purely fleet metadata — confirmed by a
+dedicated regression test that changing it never touches Readiness,
+Missing Components, or the Decision Summary.
+
+**Part D — New Loadout unchanged in place.** Still the last element of
+the Loadout group, never Ship Priority's — unaffected by the split
+apart from which column it now renders inside.
+
+**Part C/H/I — preserved by construction, not by new logic.** Reviewed
+vs Active safety (SW-002) required no code change — selecting a
+Loadout pill still only ever changes the reviewed Loadout; `Set
+Active` remains the one explicit action that changes the ship's real
+Active Loadout. A Factory-only ship was already the entire Loadout
+zone's content whenever no custom Loadout exists (the capsule itself
+is conditionally rendered only when a ship is selected) — there was
+never an empty placeholder state to eliminate; Part H's acceptance
+criterion is satisfied by inspection, confirmed by a dedicated test.
+
+Regression coverage: `fleetPriority.ts` behavior is exercised via
+`fleetProfile.test.ts`'s rewritten `setFleetPriority` suite (specific
+rank, Unprioritized gap-closing, insertion-shifts-others, clamping
+beyond fleet size, rejecting non-positive/non-integer values, unknown
+ship). A new EWO-066 describe block in `ShipWorkspacePrototype
+.test.tsx` covers the split-zone structure, the Factory pill's
+simplified text/badge, New Loadout's placement, the Ship Priority
+selector's value/options/onChange and its non-interference with
+readiness/decisions, the 135c Factory-only reference state, and
+Reviewed-vs-Active safety post-restructure. Every direct
+`a.priority - b.priority` sort comparison across the codebase (Fleet
+Dashboard, Mission Control, `fleetBuildState.ts`, `fleetNavigation.ts`,
+`tileContextNames.ts`, and their own tests) was replaced with
+`comparePriority` for null-safety. Full project regression (`tsc
+--noEmit`, 181 test files / 2253 tests) and a production build both
+pass clean.
+
+## 40. Fleet Priority Behavior Refinement (EWO-066A, IMPLEMENTED NOW)
+
+A small, immediate follow-on to §39, filed after Commander review of the
+shipped result rather than reopening EWO-066 itself.
+
+**Part A — the Factory ACTIVE badge bug.** "One ship. One active
+Loadout. One ACTIVE badge" was already the intended rule, but the pill
+render, `showSetActive`, and the page's own `activeBuild` lookup all
+compared against each Build's own denormalized `isActive` boolean
+rather than the ship's single authoritative `activeBuildId` field. Any
+drift between the two (a real risk any per-row mirror carries) could
+read as two simultaneously-active pills — Factory and whichever custom
+Loadout is genuinely active. All three now compare `build.id ===
+ship.activeBuildId` directly, which makes "exactly one ACTIVE badge"
+true by construction rather than by hoping every `isActive` flag stays
+in sync. `Build.isActive` itself is untouched (still written correctly
+elsewhere) — only these three read sites changed.
+
+**Part B — renamed "Ship Priority" → "Fleet Priority."** Small wording
+change, correct mental model: the Commander is editing this ship's
+*position within the fleet*, not an intrinsic property of the ship
+itself.
+
+**Part C — the selector shows the fleet's real order, not anonymous
+numbers.** "Priority 1" alone invites "relative to what?" New
+`buildFleetPriorityOptions()` (`fleetPriority.ts`) renders the actual
+current sequence — `"1 • Corsair," "2 • Ghost Mk II," "3 • MOLE
+(Current)," "4 • STV"` — so picking a different ship's slot is
+self-explanatory: the target takes that position, and that ship (and
+everyone after it) shifts down by one. An Unprioritized target gets one
+extra trailing option (`"{N+1} • (Last Priority)"`) since inserting it
+displaces no one. The literal `"Unprioritized"` option remains, for
+removing a ship from the ranking entirely.
+
+**Part D — no confirmation dialog.** Never had one to begin with (this
+mission's own review reconsidered an earlier internal discussion and
+decided against adding one) — selecting an occupied position reorders
+the fleet immediately via the same `reorderFleetPriority` engine §39
+established. What changed here: `reorderFleetPriority` now genuinely
+returns *only* the entries whose rank actually changed (previously its
+own doc comment claimed this but the implementation always
+recomputed the full affected range regardless of whether individual
+values actually moved) — a request that clamps back to a ship's own
+current position now correctly produces zero writes and zero log
+noise, closing an edge case where a wildly out-of-range request (e.g.
+asking for rank 999 on an already-last ship) would have logged a
+misleading "moved to 999" despite no real change taking effect. The
+store's own Captain's-Log message always uses the *resulting* clamped
+rank, never the raw requested number.
+
+**Part E — Captain's Log records the transition, not just the new
+value.** `setFleetPriority` captures the ship's prior rank before
+reordering and logs `action: 'Fleet Priority Updated'`, `details:
+"{Ship}: Priority {from} → Priority {to}"` (or `"Unprioritized"` on
+either side) — a single Commander choice can shift the whole fleet, so
+the log names the one ship that actually moved by choice, not the
+positions everyone else was pushed into.
+
+Regression coverage: a new dedicated `fleetPriority.test.ts` unit suite
+covers `comparePriority`, `normalizeFleetPriorities`,
+`reorderFleetPriority` (including the corrected "only genuinely-changed
+entries" guarantee and the Chief Architect's own worked example via
+`buildFleetPriorityOptions`), and `closePriorityGapOnRemoval` directly.
+A new EWO-066A describe block in `ShipWorkspacePrototype.test.tsx`
+covers the single-ACTIVE-badge invariant for both a Factory-active ship
+and a custom-Loadout-active ship, the "Fleet Priority" rename, the
+ordered dropdown's exact label format, a full fleet reorder with no
+confirmation UI present, and the Captain's Log transition message
+(including the no-op-produces-no-log-entry case). Full project
+regression (`tsc --noEmit`, 182 test files / 2275 tests) and a
+production build both pass clean.

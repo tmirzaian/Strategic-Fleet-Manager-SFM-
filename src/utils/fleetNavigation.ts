@@ -1,6 +1,7 @@
 import type { FleetBuildState, Ownership, RsiRole, Ship } from '../types'
 import type { BuildProgressResult } from './buildProgress'
 import { classifyFleetStatusTile, compareByReadinessRank, type FleetStatusTile } from './fleetBuildState'
+import { comparePriority } from './fleetPriority'
 
 /**
  * EWO-053 (Objective B — Fleet Navigation Refactor) — a dedicated,
@@ -122,7 +123,7 @@ export function sortFleetEntries<T extends FleetNavigationEntry>(entries: T[], m
   return [...entries].sort((a, b) => {
     switch (mode) {
       case 'Priority':
-        return withStableFallback(a.ship.priority - b.ship.priority, a, b)
+        return withStableFallback(comparePriority(a.ship.priority, b.ship.priority), a, b)
       case 'Readiness':
         return compareByReadinessRank(a, b)
       case 'Name':

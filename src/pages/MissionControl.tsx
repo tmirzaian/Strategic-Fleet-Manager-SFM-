@@ -46,6 +46,7 @@ import { calculateBuildProgress } from '../utils/buildProgress'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
 import { buildTileContextNames, type TileContextResult } from '../utils/tileContextNames'
 import { deriveFleetPriorityActions, type PriorityActionCategory } from '../utils/priorityActions'
+import { comparePriority } from '../utils/fleetPriority'
 
 /** UX-001A.2 — the exact same per-ship deep-link markup Priority Actions
  * already rendered (never changed, per this mission's own "no changes to
@@ -231,7 +232,7 @@ export default function MissionControl() {
   // never invents a filler ship when fewer exist. EWO-033 (Task 2) raised
   // this from 3 to 4 per Commander direction; the sort/slice logic itself
   // is presentation-independent and unchanged by either card migration.
-  const topPriority = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
+  const topPriority = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 4)
   const procurementRaw = buildProcurementList(hardpoints, builds, ships, installedLoadouts, reservations, hangarItems)
 
   // EWO-032: computed once and reused both by the Fleet Status partition

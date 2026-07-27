@@ -20,6 +20,7 @@ import { resolveShipDefinitionId } from '../utils/loadoutEditorModel'
 import { resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { swapGroupEligibleEntityClassesFor } from '../generated/configurableSlots'
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
+import { normalizeFleetPriorities, reorderFleetPriority, closePriorityGapOnRemoval } from '../utils/fleetPriority'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -177,7 +178,7 @@ function buildCanonicalSeedFactoryBuilds(): { builds: Build[]; hardpoints: Hardp
       acquisitionSource: 'SEED_MIGRATION',
       activeBuildId: factoryBuildId,
       installedLoadoutId: `${shipId}-installed`,
-      priority: 0,
+      priority: null,
       status: 'active',
       addedAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
@@ -403,15 +404,24 @@ interface FleetState {
     shipDefinitionId: string,
     ownershipType: OwnershipType,
     nickname?: string,
-    priority?: number
+    priority?: number | null
   ) => { success: boolean; assetId?: string; message?: string }
   removeFleetAsset: (assetId: string) => { success: boolean; message?: string }
   updateFleetAssetNickname: (assetId: string, nickname: string | undefined) => { success: boolean; message?: string }
   updateFleetAssetOwnership: (assetId: string, ownershipType: OwnershipType) => { success: boolean; message?: string }
-  /** Fleet Profile (Alpha 2.4, Part 7) — Priority drives Mission Control
-   * and Fleet Dashboard sorting; Primary/Secondary Role are descriptive
-   * only, independent of the authoritative Ship Classification. */
-  updateFleetProfile: (assetId: string, updates: { priority?: number; primaryRole?: string; secondaryRole?: string }) => { success: boolean; message?: string }
+  /** Fleet Profile (Alpha 2.4, Part 7) — Primary/Secondary Role are
+   * descriptive only, independent of the authoritative Ship
+   * Classification. Priority is no longer part of this action (EWO-066
+   * Part E) — see `setFleetPriority`, the one path that mutates it, so
+   * the unique-ranking invariant can never be bypassed. */
+  updateFleetProfile: (assetId: string, updates: { primaryRole?: string; secondaryRole?: string }) => { success: boolean; message?: string }
+  /** EWO-066 (Part E) — the sole entry point for changing a ship's Fleet
+   * Priority. `priority: null` means "Unprioritized." Every other ranked
+   * ship is automatically reordered (see src/utils/fleetPriority.ts's
+   * `reorderFleetPriority`) to keep the 1..N sequence unique and
+   * gap-free — this one call can therefore change more than one ship's
+   * stored priority. */
+  setFleetPriority: (shipId: string, priority: number | null) => { success: boolean; message?: string }
 
   // Quartermaster Logistics Engine (Alpha 2.3) — see src/engine/logistics/.
   // Reservations are player data, persisted like everything else. They
@@ -534,7 +544,8 @@ function isValidPersistedFleetAsset(raw: unknown): raw is FleetAsset {
     typeof r.shipDefinitionId === 'string' &&
     (r.ownershipType === 'OWNED' || r.ownershipType === 'PURCHASED' || r.ownershipType === 'LOANER') &&
     typeof r.activeBuildId === 'string' &&
-    typeof r.priority === 'number'
+    // EWO-066 (Part E) — `null` is a valid, first-class "Unprioritized" value.
+    (typeof r.priority === 'number' || r.priority === null)
   )
 }
 
@@ -545,7 +556,7 @@ function isValidSeedAssetOverride(raw: unknown): raw is SeedAssetOverride {
   if (r.status !== undefined && r.status !== 'active' && r.status !== 'removed') return false
   if (r.nickname !== undefined && typeof r.nickname !== 'string') return false
   if (r.ownershipType !== undefined && r.ownershipType !== 'OWNED' && r.ownershipType !== 'PURCHASED' && r.ownershipType !== 'LOANER') return false
-  if (r.priority !== undefined && typeof r.priority !== 'number') return false
+  if (r.priority !== undefined && r.priority !== null && typeof r.priority !== 'number') return false
   return true
 }
 
@@ -758,15 +769,16 @@ export const useFleetStore = create<FleetState>()(
         if (!definition) return { success: false, message: 'Unknown ship definition.' }
 
         const template = shipFactoryTemplates[shipDefinitionId] ?? []
-        const existingPriorities = get().ships.map((s) => s.priority)
-        const resolvedPriority = priority ?? (existingPriorities.length > 0 ? Math.max(...existingPriorities) + 1 : 1)
-
+        // EWO-066 (Part E) — a freshly-added ship defaults to
+        // Unprioritized, never auto-appended to the end of the fleet
+        // ranking; the Commander assigns a real priority explicitly
+        // (Ship Priority panel) if and when they want one.
         const { asset, ship, build, hardpoints } = materializeFleetAsset({
           definition,
           template,
           ownershipType,
           nickname,
-          priority: resolvedPriority,
+          priority: priority ?? null,
           acquisitionSource: 'MANUAL',
         })
 
@@ -795,13 +807,22 @@ export const useFleetStore = create<FleetState>()(
 
         const now = new Date().toISOString()
 
+        // EWO-066 (Part E) — removing a ranked ship closes the gap it
+        // leaves behind, live in this session immediately; a subsequent
+        // reload's own read-path normalization (see `merge` below) keeps
+        // this correct regardless of exactly what's persisted, so no
+        // separate fleetAssets/seedAssetOverrides write is needed here.
+        const priorityByShipId = new Map(closePriorityGapOnRemoval(get().ships, assetId).map((entry) => [entry.id, entry.priority]))
+
         // Soft-delete the asset record (status: 'removed') rather than
         // splicing it out — Ship Definition and every other Fleet Asset
         // referencing it are completely untouched either way, but this
         // keeps a record that the asset existed rather than erasing history.
         set({
           fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, status: 'removed' as const, updatedAt: now } : a)),
-          ships: get().ships.filter((s) => s.id !== assetId),
+          ships: get()
+            .ships.filter((s) => s.id !== assetId)
+            .map((s) => (priorityByShipId.has(s.id) ? { ...s, priority: priorityByShipId.get(s.id)! } : s)),
           builds: get().builds.filter((b) => b.shipId !== assetId),
           hardpoints: get().hardpoints.filter((h) => h.shipId !== assetId),
           installedLoadouts: get().installedLoadouts.filter((e) => e.shipId !== assetId),
@@ -891,27 +912,84 @@ export const useFleetStore = create<FleetState>()(
         const asset = resolvedAssetId ? get().fleetAssets.find((a) => a.id === resolvedAssetId) : undefined
         if (!ship || !asset) return { success: false, message: 'Fleet asset not found.' }
 
-        const nextPriority = updates.priority ?? ship.priority
-        const now = new Date().toISOString()
         set({
           ships: get().ships.map((s) =>
-            s.id === assetId
-              ? { ...s, priority: nextPriority, primaryRole: updates.primaryRole ?? s.primaryRole, secondaryRole: updates.secondaryRole ?? s.secondaryRole }
-              : s
+            s.id === assetId ? { ...s, primaryRole: updates.primaryRole ?? s.primaryRole, secondaryRole: updates.secondaryRole ?? s.secondaryRole } : s
           ),
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, priority: nextPriority, updatedAt: now } : a)),
         })
 
-        if (asset.acquisitionSource === 'SEED_MIGRATION') {
-          set({
-            seedAssetOverrides: {
-              ...get().seedAssetOverrides,
-              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], priority: nextPriority, updatedAt: now },
-            },
-          })
+        get().addLogEntry({ action: 'Fleet Profile updated', shipName: ship.name, details: `Updated Fleet Profile for ${ship.name}` })
+        return { success: true }
+      },
+
+      // EWO-066 (Part E) — the sole entry point for changing Fleet
+      // Priority. `reorderFleetPriority` (src/utils/fleetPriority.ts)
+      // returns every ship whose rank actually changed as a side effect
+      // of this one re-rank — often more than just `shipId` itself — so
+      // this applies the same dual/triple-write persistence pattern
+      // (ships + fleetAssets + seedAssetOverrides for a seed-migrated
+      // asset) that updateFleetAssetNickname/Ownership already use,
+      // across every affected ship, not only the one the Commander
+      // directly edited.
+      setFleetPriority: (shipId, priority) => {
+        const ship = get().ships.find((s) => s.id === shipId)
+        if (!ship) return { success: false, message: 'Fleet asset not found.' }
+        if (priority !== null && (!Number.isInteger(priority) || priority < 1)) {
+          return { success: false, message: 'Priority must be a positive whole number, or Unprioritized.' }
+        }
+        // EWO-066A (Part D) — re-selecting the same position is a no-op:
+        // nothing to reorder, nothing worth a Captain's Log entry.
+        if (priority === ship.priority) return { success: true }
+
+        const previousPriority = ship.priority
+        const updates = reorderFleetPriority(get().ships, shipId, priority)
+        // A raw request can still clamp back to no real change (e.g.
+        // requesting a rank far beyond the fleet size when this ship is
+        // already last) — `reorderFleetPriority` already filters those
+        // out, so an empty result means genuinely nothing to do.
+        if (updates.length === 0) return { success: true }
+        const priorityByShipId = new Map(updates.map((u) => [u.id, u.priority]))
+        // The target's own actual resulting rank, post-clamp — never the
+        // raw `priority` argument, which the Captain's Log must never
+        // show if it didn't actually take effect.
+        const resultingPriority = priorityByShipId.get(shipId) ?? previousPriority
+        const now = new Date().toISOString()
+        const fleetAssets = get().fleetAssets
+
+        const assetIdByShipId = new Map<string, string>()
+        for (const shipIdKey of priorityByShipId.keys()) {
+          const resolved = resolveFleetAssetId(shipIdKey, fleetAssets)
+          if (resolved) assetIdByShipId.set(shipIdKey, resolved)
+        }
+        const shipIdByAssetId = new Map<string, string>()
+        for (const [sid, aid] of assetIdByShipId) shipIdByAssetId.set(aid, sid)
+
+        const nextSeedOverrides = { ...get().seedAssetOverrides }
+        for (const [aid, sid] of shipIdByAssetId) {
+          const asset = fleetAssets.find((a) => a.id === aid)
+          if (asset?.acquisitionSource === 'SEED_MIGRATION') {
+            nextSeedOverrides[aid] = { ...nextSeedOverrides[aid], priority: priorityByShipId.get(sid)!, updatedAt: now }
+          }
         }
 
-        get().addLogEntry({ action: 'Fleet Profile updated', shipName: ship.name, details: `Updated Fleet Profile for ${ship.name}` })
+        set({
+          ships: get().ships.map((s) => (priorityByShipId.has(s.id) ? { ...s, priority: priorityByShipId.get(s.id)! } : s)),
+          fleetAssets: fleetAssets.map((a) => {
+            const sid = shipIdByAssetId.get(a.id)
+            return sid ? { ...a, priority: priorityByShipId.get(sid)!, updatedAt: now } : a
+          }),
+          seedAssetOverrides: nextSeedOverrides,
+        })
+
+        // EWO-066A (Part E) — the log records the actual reorder (a
+        // From → To transition), not just the new value, since a single
+        // Commander choice can shift the whole fleet, not just this ship.
+        const label = (p: number | null) => (p === null ? 'Unprioritized' : `Priority ${p}`)
+        get().addLogEntry({
+          action: 'Fleet Priority Updated',
+          shipName: ship.name,
+          details: `${ship.name}: ${label(previousPriority)} → ${label(resultingPriority)}`,
+        })
         return { success: true }
       },
 
@@ -2343,6 +2421,15 @@ export const useFleetStore = create<FleetState>()(
           if (!activeBuildRecord) return s
           return { ...s, activeBuildId: activeBuildRecord.id, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
         })
+
+        // EWO-066 (Part G) — self-heals Fleet Priority into a clean,
+        // unique 1..N sequence on every hydration, repairing duplicates
+        // (the seed baseline's own MOLE/Vulture both `priority: 2` in
+        // seed.ts included), gaps, and invalid values without a
+        // persisted-schema version bump — see fleetPriority.ts's own doc
+        // comment for why this runs here rather than as a one-time
+        // migration.
+        ships = normalizeFleetPriorities(ships)
 
         return {
           ...currentState,

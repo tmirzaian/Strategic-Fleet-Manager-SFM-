@@ -17,7 +17,6 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
   // honest: the field only shows what the player explicitly typed before.
   const [nickname, setNickname] = useState('')
   const [ownershipType, setOwnershipType] = useState<OwnershipType>(legacyToOwnershipType(ship.ownership))
-  const [priority, setPriority] = useState(String(ship.priority))
   const [primaryRole, setPrimaryRole] = useState(ship.primaryRole ?? '')
   const [secondaryRole, setSecondaryRole] = useState(ship.secondaryRole ?? '')
 
@@ -26,9 +25,7 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
       updateFleetAssetNickname(ship.id, nickname.trim())
     }
     updateFleetAssetOwnership(ship.id, ownershipType)
-    const parsedPriority = Number(priority)
     updateFleetProfile(ship.id, {
-      priority: Number.isFinite(parsedPriority) ? parsedPriority : undefined,
       primaryRole: primaryRole.trim() || undefined,
       secondaryRole: secondaryRole.trim() || undefined,
     })
@@ -69,17 +66,15 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
 
           <div className="scanline-divider" />
 
-          {/* Fleet Profile (Alpha 2.4, Part 7) — Fleet Priority drives
-              Mission Control and Fleet Dashboard sorting; Primary/Secondary
-              Role are descriptive only, independent of the authoritative
-              Ship Classification used for filtering (Part 9). */}
+          {/* Fleet Profile (Alpha 2.4, Part 7) — Primary/Secondary Role
+              are descriptive only, independent of the authoritative Ship
+              Classification used for filtering (Part 9). Fleet Priority
+              moved out of this modal (EWO-066 Part E) — Ship
+              Management's own Ship Priority panel is now the single
+              place it's edited, alongside the ship it actually belongs to. */}
           <div>
             <p className="text-xs uppercase tracking-widest text-cyan/80 mb-3">Fleet Profile</p>
             <div className="space-y-3">
-              <div>
-                <label className="text-xs uppercase tracking-widest text-muted block mb-2">Fleet Priority</label>
-                <input type="number" value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full" />
-              </div>
               <div>
                 <label className="text-xs uppercase tracking-widest text-muted block mb-2">Primary Role</label>
                 <input value={primaryRole} onChange={(e) => setPrimaryRole(e.target.value)} placeholder="e.g. Escort" className="w-full" />

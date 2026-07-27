@@ -54,7 +54,11 @@ export interface FleetAsset {
   acquisitionSource: AcquisitionSource
   activeBuildId: string
   installedLoadoutId: string
-  priority: number
+  /** EWO-066 (Part E) — a unique manual fleet rank (1, 2, 3, …), or `null`
+   * for "Unprioritized." See src/utils/fleetPriority.ts for the one place
+   * ranks are computed (both the Commander-initiated re-rank and the
+   * read-path self-heal) — never assigned ad hoc elsewhere. */
+  priority: number | null
   status: 'active' | 'removed'
   addedAt: string
   updatedAt: string
@@ -75,7 +79,7 @@ export interface SeedAssetOverride {
   status?: 'active' | 'removed'
   nickname?: string
   ownershipType?: OwnershipType
-  priority?: number
+  priority?: number | null
   updatedAt: string
 }
 
@@ -88,7 +92,9 @@ export interface Ship {
   role: string
   activeBuildId: string
   readiness: number
-  priority: number
+  /** EWO-066 (Part E) — see `FleetAsset.priority`'s own doc comment;
+   * `null` is "Unprioritized," never a magic number like `0`. */
+  priority: number | null
   missing: string[]
   // Fleet Profile (Alpha 2.4, Part 7) — player-editable descriptive
   // context, independent of `role` (which currently mirrors the active

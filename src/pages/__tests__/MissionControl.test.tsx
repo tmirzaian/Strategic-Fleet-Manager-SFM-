@@ -7,6 +7,7 @@ import { useFleetStore } from '../../store/useFleetStore'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../../utils/fleetBuildState'
 import { calculateBuildProgress } from '../../utils/buildProgress'
 import { sortProcurementList, type ProcurementLine } from '../../utils/procurement'
+import { comparePriority } from '../../utils/fleetPriority'
 import { SHIP_PLACEHOLDER_URL } from '../../constants/shipImage'
 import { FLEET_REGISTRY_PLACEHOLDER } from '../../config/assets'
 
@@ -205,7 +206,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
   it('Priority Ship section uses live fleet data — the real lowest-priority-number seed ship renders first, never a hard-coded name', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const expectedFirst = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const expectedFirst = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))[0]
     // EWO-032: the "PRIORITY N" label is a sibling above the Fleet Ship
     // Card, not a badge inside it — look up the shared wrapper, not '.panel'.
     const priorityOneCard = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]')
@@ -239,7 +240,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
   it('8/9. EWO-033: exactly the four highest-priority Fleet Assets render when the fleet has 4+ ships — the fifth-highest is excluded', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const sorted = [...ships].sort((a, b) => a.priority - b.priority)
+    const sorted = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))
     expect(sorted.length).toBeGreaterThan(4)
     const top4 = sorted.slice(0, 4)
     const fifth = sorted[4]
@@ -256,7 +257,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
 
   it('11. EWO-033: a small fleet (1-3 ships) renders safely, with no invented filler card', () => {
     const { ships, builds, hardpoints } = useFleetStore.getState()
-    const three = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 3)
+    const three = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 3)
     const ids = new Set(three.map((s) => s.id))
     useFleetStore.setState({
       ships: three,
@@ -270,7 +271,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
 
   it('exactly two eligible fleet assets render exactly two priority records (EWO-012)', () => {
     const { ships, builds, hardpoints } = useFleetStore.getState()
-    const two = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 2)
+    const two = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 2)
     const ids = new Set(two.map((s) => s.id))
     useFleetStore.setState({
       ships: two,
@@ -286,7 +287,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
   it('10. priority ordering remains unchanged — records render in ascending priority order (EWO-033, Task 2/6: Top 4, sort/slice logic untouched)', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
+    const expected = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 4)
     const badges = screen.getAllByText(/^PRIORITY \d$/)
     expect(badges).toHaveLength(expected.length)
     badges.forEach((badge, i) => {
@@ -298,7 +299,7 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
   it('13. EWO-032/EWO-033 (Task 4): the entire card is the navigation target on every rendered priority record — no separate "Ship Detail" hyperlink', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const expected = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
+    const expected = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 4)
     expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
     const wrappers = screen.getAllByTestId('priority-card-wrapper')
     expect(wrappers).toHaveLength(expected.length)
@@ -824,7 +825,7 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
   it("EWO-032 (Task 5): the Fleet Ship Card's info hierarchy lists manufacturer/role before Active Loadout — no information reduction from Fleet Dashboard", () => {
     renderMissionControl()
     const { ships, builds } = useFleetStore.getState()
-    const first = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const first = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))[0]
     const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
     const roleLine = within(wrapper).getByText(`${first.manufacturer} · ${first.role}`)
     const buildName = builds.find((b) => b.id === first.activeBuildId)?.name ?? 'Unknown Loadout'
@@ -835,7 +836,7 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
   it('12. EWO-032 (Task 4): clicking anywhere on the Priority Ship card navigates to Ship Detail — behavior exactly matches Fleet Dashboard, no separate hyperlink', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const first = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const first = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))[0]
     const wrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
     const cardLink = within(wrapper).getByRole('link')
     expect(cardLink).toHaveAttribute('href', `/ship-workspace/${first.id}`)
@@ -879,7 +880,7 @@ describe('<MissionControl /> — EWO-032: canonical Fleet Ship Card parity with 
   it('the same ship renders byte-identical Fleet Ship Card markup on Mission Control and Fleet Dashboard — one canonical component, no visual drift', () => {
     renderMissionControl()
     const { ships } = useFleetStore.getState()
-    const topShip = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const topShip = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))[0]
     const mcWrapper = screen.getByText('PRIORITY 1').closest('[data-testid="priority-card-wrapper"]') as HTMLElement
     const mcCard = mcWrapper.querySelector('.panel') as HTMLElement
     expect(mcCard).not.toBeNull()

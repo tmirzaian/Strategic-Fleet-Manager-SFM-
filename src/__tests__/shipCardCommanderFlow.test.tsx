@@ -3,6 +3,7 @@ import { render, screen, cleanup, fireEvent, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
 import { useFleetStore } from '../store/useFleetStore'
+import { comparePriority } from '../utils/fleetPriority'
 
 const initialState = useFleetStore.getState()
 
@@ -45,7 +46,7 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
 
     // 3/4. Sort by Priority — labels and order agree.
     fireEvent.click(screen.getByRole('button', { name: 'Priority' }))
-    const sortedByPriority = [...ships].sort((a, b) => a.priority - b.priority)
+    const sortedByPriority = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))
     const wrappersAfterPrioritySort = screen.getAllByTestId('priority-card-wrapper')
     wrappersAfterPrioritySort.forEach((wrapper, i) => {
       expect(wrapper).toHaveTextContent(sortedByPriority[i].name)
@@ -94,7 +95,7 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
     // 11/12. Exactly four Priority cards, Priority 1-4 based on current data.
     const mcWrappers = screen.getAllByTestId('priority-card-wrapper')
     expect(mcWrappers).toHaveLength(4)
-    const top4 = [...ships].sort((a, b) => a.priority - b.priority).slice(0, 4)
+    const top4 = [...ships].sort((a, b) => comparePriority(a.priority, b.priority)).slice(0, 4)
     mcWrappers.forEach((wrapper, i) => {
       expect(within(wrapper).getByText(`PRIORITY ${i + 1}`)).toBeInTheDocument()
       expect(wrapper).toHaveTextContent(top4[i].name)

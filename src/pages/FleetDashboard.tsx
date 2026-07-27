@@ -361,8 +361,13 @@ export default function FleetDashboard() {
         // wrapper in Card view, always (not only while Priority sort is
         // selected), showing that ship's own stored `priority` value —
         // never a recomputed positional rank — so the label stays
-        // correct regardless of the active filter/sort mode (Ruling 7:
-        // existing gaps/duplicates render honestly, not repaired here).
+        // correct regardless of the active filter/sort mode. EWO-066
+        // (Part G) supersedes Ruling 7's "gaps/duplicates render
+        // honestly, not repaired here": the store's own read-path
+        // normalization now keeps every ship's stored priority a clean,
+        // unique 1..N sequence (or `null`/"Unprioritized"), so what
+        // renders here is already correct rather than a raw, possibly
+        // inconsistent value.
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch">
           {filtered.map((ship) => (
             <PriorityLabel key={ship.id} rank={ship.priority}>

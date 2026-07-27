@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import App from '../App'
 import { useFleetStore } from '../store/useFleetStore'
 import { SHIP_IMAGE_URLS } from '../data/shipImageRegistry'
+import { comparePriority } from '../utils/fleetPriority'
 
 const initialState = useFleetStore.getState()
 
@@ -66,7 +67,7 @@ describe('EWO-033A (Task 12): Commander flow — ship image coverage and univers
       </MemoryRouter>
     )
     const { ships } = useFleetStore.getState()
-    const topShip = [...ships].sort((a, b) => a.priority - b.priority)[0]
+    const topShip = [...ships].sort((a, b) => comparePriority(a.priority, b.priority))[0]
     const fdCard = screen.getByText(topShip.name).closest('.panel') as HTMLElement
     const fdImg = within(fdCard).getByRole('img') as HTMLImageElement
     const fdImgSrc = fdImg.src

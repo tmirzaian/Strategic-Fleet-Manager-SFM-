@@ -65,7 +65,17 @@ describe('EWO-021A-1: seed FleetAssets resolve runtime imagery through the canon
     const seedRaw = seedShips.find((s) => s.id === 'cutlass-red')!
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'cutlass-red')!
     expect(ship.ownership).toBe(seedRaw.ownership)
-    expect(ship.priority).toBe(seedRaw.priority)
+    // EWO-066 (Part G) — priority is no longer expected to be byte-identical
+    // to the raw seed.ts value: the store's own read-path normalization
+    // repairs the seed baseline's known duplicate (MOLE and Vulture both
+    // hand-authored as `priority: 2`) into a clean, unique 1..N sequence,
+    // which can shift every ship ranked after the duplicate — a real,
+    // deliberate effect of the priority engine, unrelated to (and not
+    // undone by) image resolution. A valid positive integer, unaffected
+    // by whichever registry mock is active, is what this test actually
+    // proves; see fleetProfile.test.ts for the ranking engine itself.
+    expect(Number.isInteger(ship.priority)).toBe(true)
+    expect(ship.priority as number).toBeGreaterThan(0)
     expect(ship.name).toBe(seedRaw.name)
   })
 

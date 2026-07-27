@@ -1,5 +1,6 @@
 import type { Build, FleetBuildState, Ship } from '../types'
 import type { BuildProgressResult } from './buildProgress'
+import { comparePriority } from './fleetPriority'
 
 /**
  * Derives the player-facing ship/build state — never stored as
@@ -68,7 +69,8 @@ export function compareByReadinessRank(
     if (pctDiff !== 0) return pctDiff
   }
 
-  if (a.ship.priority !== b.ship.priority) return a.ship.priority - b.ship.priority
+  const priorityDiff = comparePriority(a.ship.priority, b.ship.priority)
+  if (priorityDiff !== 0) return priorityDiff
   const nameDiff = a.ship.name.localeCompare(b.ship.name)
   if (nameDiff !== 0) return nameDiff
   return a.ship.id.localeCompare(b.ship.id)

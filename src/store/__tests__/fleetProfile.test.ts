@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useFleetStore } from '../useFleetStore'
+import { comparePriority } from '../../utils/fleetPriority'
 
 const initialState = useFleetStore.getState()
 
@@ -8,22 +9,7 @@ beforeEach(() => {
   useFleetStore.setState(initialState, true)
 })
 
-describe('updateFleetProfile (Alpha 2.4, Part 7)', () => {
-  it('updates Fleet Priority, and the new value is reflected on the Ship record that drives dashboard sorting', () => {
-    const result = useFleetStore.getState().updateFleetProfile('ghost', { priority: 1 })
-    expect(result.success).toBe(true)
-    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
-    expect(ship.priority).toBe(1)
-  })
-
-  it("updates the FleetAsset record's priority in lockstep with the Ship record", () => {
-    useFleetStore.getState().updateFleetProfile('ghost', { priority: 2 })
-    // Ghost is a seed-migrated Fleet Asset — its real FleetAsset id is
-    // "ghost-asset-seed", not "ghost" (see resolveFleetAssetId).
-    const asset = useFleetStore.getState().fleetAssets.find((a) => a.id === 'ghost-asset-seed')!
-    expect(asset.priority).toBe(2)
-  })
-
+describe('updateFleetProfile (Alpha 2.4, Part 7) — Primary/Secondary Role only (EWO-066 Part E moved Priority to setFleetPriority)', () => {
   it('sets Primary Role and Secondary Role independently of Ship Classification and existing role text', () => {
     useFleetStore.getState().updateFleetProfile('ghost', { primaryRole: 'Escort', secondaryRole: 'Reconnaissance' })
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
@@ -35,20 +21,71 @@ describe('updateFleetProfile (Alpha 2.4, Part 7)', () => {
 
   it('a partial update only changes the fields provided, leaving the rest intact', () => {
     useFleetStore.getState().updateFleetProfile('ghost', { primaryRole: 'Escort' })
-    useFleetStore.getState().updateFleetProfile('ghost', { priority: 3 })
+    useFleetStore.getState().updateFleetProfile('ghost', { secondaryRole: 'Reconnaissance' })
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     expect(ship.primaryRole).toBe('Escort')
-    expect(ship.priority).toBe(3)
+    expect(ship.secondaryRole).toBe('Reconnaissance')
   })
 
   it('fails cleanly for an unknown Fleet Asset', () => {
-    const result = useFleetStore.getState().updateFleetProfile('does-not-exist', { priority: 1 })
+    const result = useFleetStore.getState().updateFleetProfile('does-not-exist', { primaryRole: 'Escort' })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('setFleetPriority (EWO-066 Part E) — the sole entry point for Fleet Priority', () => {
+  it('sets a ship to a specific rank, reflected on both the Ship and FleetAsset records', () => {
+    const result = useFleetStore.getState().setFleetPriority('ghost', 1)
+    expect(result.success).toBe(true)
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    expect(ship.priority).toBe(1)
+    // Ghost is a seed-migrated Fleet Asset — its real FleetAsset id is
+    // "ghost-asset-seed", not "ghost" (see resolveFleetAssetId).
+    const asset = useFleetStore.getState().fleetAssets.find((a) => a.id === 'ghost-asset-seed')!
+    expect(asset.priority).toBe(1)
+  })
+
+  it('setting a ship to Unprioritized (null) closes the gap it leaves in the rest of the ranking', () => {
+    const before = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!.priority!
+    useFleetStore.getState().setFleetPriority('ghost', null)
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    expect(ship.priority).toBeNull()
+    // Every ship that was ranked below Ghost's old position shifts up by one.
+    const stillRanked = useFleetStore.getState().ships.filter((s) => s.priority !== null)
+    const ranks = stillRanked.map((s) => s.priority).sort((a, b) => a! - b!)
+    expect(ranks).toEqual(Array.from({ length: stillRanked.length }, (_, i) => i + 1))
+    expect(before).toBeGreaterThan(0)
+  })
+
+  it('inserting a ship at an existing rank shifts every ship at or after that position down by one — never a duplicate', () => {
+    useFleetStore.getState().setFleetPriority('vulture', 1)
+    const ships = useFleetStore.getState().ships.filter((s) => s.priority !== null)
+    const ranks = ships.map((s) => s.priority)
+    expect(new Set(ranks).size).toBe(ranks.length) // no duplicates
+    expect(useFleetStore.getState().ships.find((s) => s.id === 'vulture')?.priority).toBe(1)
+  })
+
+  it('requesting a rank beyond the current fleet size clamps to the end rather than leaving a gap', () => {
+    const fleetSize = useFleetStore.getState().ships.filter((s) => s.priority !== null).length
+    useFleetStore.getState().setFleetPriority('ghost', 9999)
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    expect(ship.priority).toBe(fleetSize)
+  })
+
+  it('rejects a non-positive or non-integer priority', () => {
+    expect(useFleetStore.getState().setFleetPriority('ghost', 0).success).toBe(false)
+    expect(useFleetStore.getState().setFleetPriority('ghost', -1).success).toBe(false)
+    expect(useFleetStore.getState().setFleetPriority('ghost', 1.5).success).toBe(false)
+  })
+
+  it('fails cleanly for an unknown Fleet Asset', () => {
+    const result = useFleetStore.getState().setFleetPriority('does-not-exist', 1)
     expect(result.success).toBe(false)
   })
 
   it('Fleet Priority changes affect Fleet Dashboard priority sort order', () => {
-    useFleetStore.getState().updateFleetProfile('vulture', { priority: 0 })
-    const ships = [...useFleetStore.getState().ships].sort((a, b) => a.priority - b.priority)
+    useFleetStore.getState().setFleetPriority('vulture', 1)
+    const ships = [...useFleetStore.getState().ships].sort((a, b) => comparePriority(a.priority, b.priority))
     expect(ships[0].id).toBe('vulture')
   })
 })

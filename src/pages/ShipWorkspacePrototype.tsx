@@ -36,6 +36,7 @@ import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
 import { componentCategoryIcon } from '../utils/componentCategoryIcon'
+import { buildFleetPriorityOptions } from '../utils/fleetPriority'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import { TOP_LEVEL_GROUP_ORDER, legacyPortGroupLabel } from '../utils/commanderSystemTaxonomy'
@@ -160,6 +161,7 @@ export default function ShipWorkspacePrototype() {
   const reservations = useFleetStore((s) => s.reservations)
   const saveMissionConfiguration = useFleetStore((s) => s.saveMissionConfiguration)
   const setActiveBuildStore = useFleetStore((s) => s.setActiveBuild)
+  const setFleetPriorityStore = useFleetStore((s) => s.setFleetPriority)
   // SW-013A (Objective 3) — Remove Installed Component. The same shared
   // installation engine Ship Detail's own LoadoutPortTree already uses
   // (`executeInstallation`/`REMOVE`, via this one store action) — never a
@@ -477,7 +479,14 @@ export default function ShipWorkspacePrototype() {
   }
 
   const shipBuilds = builds.filter((b) => b.shipId === ship?.id)
-  const activeBuild = shipBuilds.find((b) => b.isActive)
+  // EWO-066A (Part A) — `ship.activeBuildId` is the one authoritative
+  // source for "which Loadout is active" (see the `Ship` type); each
+  // Build's own `isActive` boolean is a denormalized mirror that can
+  // drift out of sync with it. Comparing against `activeBuildId`
+  // directly guarantees exactly one build ever reads as active, by
+  // construction, regardless of whether every `isActive` flag elsewhere
+  // is correctly in sync.
+  const activeBuild = shipBuilds.find((b) => b.id === ship?.activeBuildId)
   const reviewedBuild = shipBuilds.find((b) => b.id === reviewedBuildId) ?? activeBuild ?? shipBuilds[0]
 
   // SW-008D (Objective 1) — Save Changes. Objective 4: the exact same
@@ -2136,10 +2145,19 @@ export default function ShipWorkspacePrototype() {
           {/* LOADOUT WORKFLOW — above Commander Intent. Default reviewed
               Loadout is the ship's real Active Loadout; the Commander
               must intentionally pick a different one. ACTIVE and Reviewed
-              are never conflated. */}
+              are never conflated.
+
+              EWO-066 (Part A) — the Safety Capsule splits into two
+              coordinated zones sharing one panel: Loadout (~2/3 width)
+              and Fleet Priority (~1/3 width, right of a vertical
+              divider — renamed from "Ship Priority" in EWO-066A Part B).
+              Loadout keeps every behavior it already had — nothing here
+              changes except where it sits. */}
           <div className="panel p-4">
-            <h3 className="text-xs uppercase tracking-widest text-muted mb-3">Loadout</h3>
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <h3 className="text-xs uppercase tracking-widest text-muted mb-3">Loadout</h3>
+                <div className="flex flex-wrap gap-2 items-center">
               {shipBuilds.map((build) => {
                 const isReviewed = reviewedBuild?.id === build.id
                 // SW-002 Revision B (Part 3) — "Set Active" visually
@@ -2151,7 +2169,14 @@ export default function ShipWorkspacePrototype() {
                 // the pill itself, still never activates it), but "Set
                 // Active" itself genuinely changes the ship's real Active
                 // Loadout.
-                const showSetActive = isReviewed && !build.isActive
+                // EWO-066A (Part A) — compare against `ship.activeBuildId`
+                // directly (the one authoritative field — see `activeBuild`'s
+                // own doc comment above), never the per-build `isActive`
+                // mirror: "One ship. One active Loadout. One ACTIVE badge,"
+                // guaranteed by construction rather than by every build's
+                // own flag happening to stay in sync.
+                const isActiveBuild = build.id === ship?.activeBuildId
+                const showSetActive = isReviewed && !isActiveBuild
                 const accent = isReviewed ? colorFor(reviewedSummary.progress.percentage) : undefined
                 return (
                   <div key={build.id} className="inline-flex items-center">
@@ -2162,9 +2187,16 @@ export default function ShipWorkspacePrototype() {
                         isReviewed ? `border-2 ${showSetActive ? 'border-r-0' : ''}` : 'border border-white/15 text-white/80 hover:text-white hover:border-white/35 hover:bg-white/5'
                       }`}
                     >
-                      {build.name}
-                      {build.kind === 'FACTORY' && <Badge tone="cyan">Factory</Badge>}
-                      {build.isActive && <Badge tone="success">Active</Badge>}
+                      {/* EWO-066 (Part B) — the capsule itself already
+                          communicates this is the factory configuration;
+                          a build named literally "Factory Loadout" plus a
+                          second redundant "Factory" badge read as "Factory
+                          Loadout • Factory." One simplified label instead —
+                          "Factory," plainly, with only the real ACTIVE
+                          badge (never a second Factory badge) when it
+                          applies. Every other build keeps its own real name. */}
+                      {build.kind === 'FACTORY' ? 'Factory' : build.name}
+                      {isActiveBuild && <Badge tone="success">Active</Badge>}
                       {/* SW-013C.1 (Objective 5) — UI Truthfulness: the reviewed
                           pill itself carries the draft-state fact, not just the
                           Save/Discard buttons below the table, so it's visible
@@ -2308,6 +2340,41 @@ export default function ShipWorkspacePrototype() {
                 </div>
               </div>
             )}
+              </div>
+
+              {/* EWO-066A (Part B/C) — Fleet Priority (renamed from "Ship
+                  Priority": this edits the ship's POSITION WITHIN the
+                  fleet, not an intrinsic property of the ship itself).
+                  The dropdown shows the fleet's real current order
+                  ("1 • Corsair," "2 • Ghost Mk II," …) rather than
+                  anonymous numbers — "Priority 1" alone never answers
+                  "relative to what?" (see fleetPriority.ts's own
+                  `buildFleetPriorityOptions` doc comment). Selecting an
+                  occupied position reorders the fleet immediately, no
+                  confirmation — the Commander picked a specific existing
+                  ship's slot, so the outcome is never a surprise (Part D).
+                  Priority is fleet metadata only — selecting a value here
+                  never touches readiness, inventory, reservations, or
+                  component logic. */}
+              <div className="md:border-l md:border-white/10 md:pl-4">
+                <h3 className="text-xs uppercase tracking-widest text-muted mb-3">Fleet Priority</h3>
+                <select
+                  aria-label="Fleet Priority"
+                  value={ship.priority === null ? 'UNPRIORITIZED' : String(ship.priority)}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setFleetPriorityStore(ship.id, value === 'UNPRIORITIZED' ? null : Number(value))
+                  }}
+                  className="w-full text-sm"
+                >
+                  {buildFleetPriorityOptions(ships, ship.id).map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* COMMANDER INTENT — exactly two cards (SW-002 terminology).

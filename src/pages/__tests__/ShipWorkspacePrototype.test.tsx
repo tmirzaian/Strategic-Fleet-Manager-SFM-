@@ -1851,3 +1851,229 @@ describe('<ShipWorkspacePrototype /> — EWO-062A (Part C): Developer Mode absen
     expect(screen.getByLabelText('Ship')).toBeInTheDocument()
   })
 })
+
+describe('<ShipWorkspacePrototype /> — EWO-066: Loadout Safety Capsule & Fleet Priority Refactor', () => {
+  describe('Part A: the Safety Capsule splits into Loadout and Fleet Priority zones inside one panel', () => {
+    it('both zones live inside the same panel, not two separate capsules', () => {
+      renderWorkspace('ghost')
+      const loadoutHeading = screen.getByText('Loadout')
+      const priorityHeading = screen.getByText('Fleet Priority')
+      const capsule = loadoutHeading.closest('.panel') as HTMLElement
+      expect(capsule).not.toBeNull()
+      expect(capsule).toBe(priorityHeading.closest('.panel'))
+      expect(within(capsule).getByRole('combobox', { name: 'Fleet Priority' })).toBeInTheDocument()
+    })
+  })
+
+  describe('Part B: Factory presentation is simplified to "Factory" — no redundant name/badge pair', () => {
+    it('the Factory pill reads "Factory" alone — never "Factory Loadout," never a second Factory badge', () => {
+      renderWorkspace('135c')
+      const factoryButton = screen.getByRole('button', { name: /^Factory/ })
+      expect(within(factoryButton).getAllByText('Factory')).toHaveLength(1)
+      expect(screen.queryByText('Factory Loadout')).not.toBeInTheDocument()
+    })
+
+    it('Factory active shows only the ACTIVE badge — "Factory" then "Active," nothing else', () => {
+      renderWorkspace('135c')
+      const factoryButton = screen.getByRole('button', { name: /^Factory/ })
+      expect(within(factoryButton).getByText('Active')).toBeInTheDocument()
+      expect(factoryButton.textContent).toBe('FactoryActive')
+    })
+
+    it('Factory inactive (Ghost, whose active Loadout is Stealth) shows no ACTIVE badge on the Factory pill', () => {
+      renderWorkspace('ghost')
+      const factoryButton = screen.getByRole('button', { name: 'Factory' })
+      expect(within(factoryButton).queryByText('Active')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Part D: "+ New Loadout" remains the last element of the Loadout group, not part of Fleet Priority', () => {
+    it('New Loadout sits inside the Loadout zone; Fleet Priority never contains it', () => {
+      renderWorkspace('ghost')
+      const newLoadoutButton = screen.getByRole('button', { name: /New Loadout/ })
+      const loadoutZone = screen.getByText('Loadout').parentElement as HTMLElement
+      const priorityZone = screen.getByText('Fleet Priority').parentElement as HTMLElement
+      expect(loadoutZone.contains(newLoadoutButton)).toBe(true)
+      expect(priorityZone.contains(newLoadoutButton)).toBe(false)
+    })
+  })
+
+  describe('Part E: the Fleet Priority panel — a unique manual fleet ranking', () => {
+    it('the selector reflects the current ship\'s real stored rank', () => {
+      renderWorkspace('ghost')
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+      expect(select.value).toBe(String(ship.priority))
+    })
+
+    it('offers exactly Unprioritized plus 1..N (N = the current ranked fleet size), never a stale/invalid option', () => {
+      renderWorkspace('ghost')
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      const rankedCount = useFleetStore.getState().ships.filter((s) => s.priority !== null).length
+      const options = Array.from(select.options).map((o) => o.value)
+      expect(options).toEqual(['UNPRIORITIZED', ...Array.from({ length: rankedCount }, (_, i) => String(i + 1))])
+    })
+
+    it('choosing Unprioritized calls setFleetPriority and closes the gap for the rest of the fleet', () => {
+      renderWorkspace('ghost')
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      fireEvent.change(select, { target: { value: 'UNPRIORITIZED' } })
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.priority).toBeNull()
+      const ranked = useFleetStore.getState().ships.filter((s) => s.priority !== null).map((s) => s.priority)
+      expect(new Set(ranked).size).toBe(ranked.length) // still unique, no gap left behind
+    })
+
+    it('choosing a specific rank re-ranks the ship, reactively updating the selector\'s own value', () => {
+      renderWorkspace('ghost')
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      fireEvent.change(select, { target: { value: '1' } })
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.priority).toBe(1)
+      expect(select.value).toBe('1')
+    })
+
+    it('changing priority never touches readiness, missing components, or the Decision Summary', () => {
+      renderWorkspace('ghost')
+      const readinessBefore = screen.getByText('Readiness').nextElementSibling!.textContent
+      const decisionBefore = screen.getByTestId('decision-summary').textContent
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      fireEvent.change(select, { target: { value: '2' } })
+      expect(screen.getByText('Readiness').nextElementSibling!.textContent).toBe(readinessBefore)
+      expect(screen.getByTestId('decision-summary').textContent).toBe(decisionBefore)
+    })
+  })
+
+  describe('Part H: a Factory-only ship (135c, the canonical reference) shows a clean state — no empty placeholder capsule', () => {
+    it('shows only the Factory ACTIVE pill and New Loadout — nothing else in the Loadout zone', () => {
+      renderWorkspace('135c')
+      const factoryButton = screen.getByRole('button', { name: /^Factory/ })
+      expect(within(factoryButton).getByText('Active')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /New Loadout/ })).toBeInTheDocument()
+      const loadoutZone = screen.getByText('Loadout').parentElement as HTMLElement
+      const pillButtons = within(loadoutZone)
+        .getAllByRole('button')
+        .filter((b) => /^Factory|New Loadout/.test(b.textContent ?? ''))
+      expect(pillButtons).toHaveLength(2)
+    })
+
+    it('still exposes its own Fleet Priority selector — the split panel renders fully even with only a Factory Loadout', () => {
+      renderWorkspace('135c')
+      expect(screen.getByRole('combobox', { name: 'Fleet Priority' })).toBeInTheDocument()
+    })
+  })
+
+  describe('Part I: a ship with custom Loadouts preserves Reviewed vs Active safety, restructured layout notwithstanding', () => {
+    it('selecting a different reviewed Loadout never changes the real Active Loadout', () => {
+      renderWorkspace('ghost')
+      const before = useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId
+      fireEvent.click(screen.getByRole('button', { name: /Escort Build/ }))
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe(before)
+    })
+
+    it('only the reviewed pill is visually selected, and only the real active pill carries the ACTIVE badge', () => {
+      renderWorkspace('ghost')
+      const stealthButton = screen.getByRole('button', { name: /Stealth Build/ })
+      expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
+      const escortButton = screen.getByRole('button', { name: /Escort Build/ })
+      expect(within(escortButton).queryByText('Active')).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe('<ShipWorkspacePrototype /> — EWO-066A: Fleet Priority Behavior Refinement', () => {
+  describe('Part A: exactly one ACTIVE badge per ship, derived from ship.activeBuildId directly', () => {
+    it('Ghost (active Loadout is Stealth): exactly one ACTIVE badge exists, on Stealth, never on Factory', () => {
+      renderWorkspace('ghost')
+      const loadoutZone = screen.getByText('Loadout').parentElement as HTMLElement
+      const activeBadges = within(loadoutZone).getAllByText('Active')
+      expect(activeBadges).toHaveLength(1)
+      const factoryButton = screen.getByRole('button', { name: 'Factory' })
+      expect(within(factoryButton).queryByText('Active')).not.toBeInTheDocument()
+      const stealthButton = screen.getByRole('button', { name: /Stealth Build/ })
+      expect(within(stealthButton).getByText('Active')).toBeInTheDocument()
+    })
+
+    it('135c (Factory-only, active Loadout is Factory itself): exactly one ACTIVE badge exists, on Factory', () => {
+      renderWorkspace('135c')
+      const loadoutZone = screen.getByText('Loadout').parentElement as HTMLElement
+      expect(within(loadoutZone).getAllByText('Active')).toHaveLength(1)
+    })
+  })
+
+  describe('Part B: the panel is labeled "Fleet Priority," never "Ship Priority"', () => {
+    it('renders the "Fleet Priority" heading and accessible name; "Ship Priority" never appears', () => {
+      renderWorkspace('ghost')
+      expect(screen.getByText('Fleet Priority')).toBeInTheDocument()
+      expect(screen.getByRole('combobox', { name: 'Fleet Priority' })).toBeInTheDocument()
+      expect(screen.queryByText('Ship Priority')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Part C: the selector shows the fleet\'s real current order, not anonymous numbers', () => {
+    it('every option (besides Unprioritized) reads "{position} • {ShipName}", with the target ship\'s own row marked "(Current)"', () => {
+      renderWorkspace('ghost')
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+      const rankedShips = useFleetStore
+        .getState()
+        .ships.filter((s) => s.priority !== null)
+        .sort((a, b) => a.priority! - b.priority!)
+      const labels = Array.from(select.options).map((o) => o.textContent)
+      expect(labels[0]).toBe('Unprioritized')
+      rankedShips.forEach((s, i) => {
+        const expectedLabel = s.id === ship.id ? `${i + 1} • ${s.name} (Current)` : `${i + 1} • ${s.name}`
+        expect(labels[i + 1]).toBe(expectedLabel)
+      })
+      expect(screen.queryByText(/^Priority \d/)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Part D: selecting an occupied position reorders the whole fleet immediately, with no confirmation', () => {
+    it('moving MOLE to Priority 1 shifts every ship previously at or after position 1 down by one', () => {
+      renderWorkspace('mole')
+      const before = [...useFleetStore.getState().ships].sort((a, b) => (a.priority ?? Infinity) - (b.priority ?? Infinity))
+      const moleBefore = before.find((s) => s.id === 'mole')!
+      expect(moleBefore.priority).not.toBe(1) // sanity: MOLE isn't already first
+      const displacedShip = before.find((s) => s.priority === 1)!
+
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      // No confirmation dialog/modal of any kind appears before or after this change.
+      fireEvent.change(select, { target: { value: '1' } })
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.queryByText(/[Aa]re you sure/)).not.toBeInTheDocument()
+      expect(useFleetStore.getState().ships.find((s) => s.id === 'mole')?.priority).toBe(1)
+      expect(useFleetStore.getState().ships.find((s) => s.id === displacedShip.id)?.priority).toBe(2)
+      // Still a clean, unique 1..N sequence — nobody lost their priority entirely.
+      const ranked = useFleetStore.getState().ships.filter((s) => s.priority !== null).map((s) => s.priority)
+      expect(new Set(ranked).size).toBe(ranked.length)
+    })
+  })
+
+  describe('Part E: the reorder is recorded in Captain\'s Log as a From → To transition', () => {
+    it('logs "Fleet Priority Updated" with the ship name and its old/new priority', () => {
+      renderWorkspace('mole')
+      const ship = useFleetStore.getState().ships.find((s) => s.id === 'mole')!
+      const previousPriority = ship.priority
+      expect(previousPriority).not.toBe(1) // sanity: this test only proves something if the position genuinely changes
+      const logCountBefore = useFleetStore.getState().log.length
+
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      fireEvent.change(select, { target: { value: '1' } })
+
+      const log = useFleetStore.getState().log
+      expect(log.length).toBe(logCountBefore + 1)
+      expect(log[0].action).toBe('Fleet Priority Updated')
+      expect(log[0].shipName).toBe('MOLE')
+      expect(log[0].details).toBe(`MOLE: Priority ${previousPriority} → Priority 1`)
+    })
+
+    it('selecting the ship\'s own current position again is a no-op — no reorder, no log entry', () => {
+      renderWorkspace('mole')
+      const ship = useFleetStore.getState().ships.find((s) => s.id === 'mole')!
+      const logCountBefore = useFleetStore.getState().log.length
+      const select = screen.getByRole('combobox', { name: 'Fleet Priority' }) as HTMLSelectElement
+      fireEvent.change(select, { target: { value: String(ship.priority) } })
+      expect(useFleetStore.getState().log.length).toBe(logCountBefore)
+    })
+  })
+})

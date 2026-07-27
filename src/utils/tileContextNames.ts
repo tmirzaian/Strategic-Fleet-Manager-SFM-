@@ -1,4 +1,5 @@
 import type { Ship } from '../types'
+import { comparePriority } from './fleetPriority'
 
 export interface TileContextEntry {
   shipId: string
@@ -23,7 +24,7 @@ export interface TileContextResult {
  * here.
  */
 export function buildTileContextNames(ships: Ship[], maxShown = 3): TileContextResult {
-  const sorted = [...ships].sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name) || a.id.localeCompare(b.id))
+  const sorted = [...ships].sort((a, b) => comparePriority(a.priority, b.priority) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id))
   return {
     shown: sorted.slice(0, maxShown).map((s) => ({ shipId: s.id, name: s.name })),
     overflowCount: Math.max(0, sorted.length - maxShown),

@@ -21,7 +21,10 @@ export interface MaterializeAssetParams {
   existingAsset?: FleetAsset
   ownershipType?: OwnershipType
   nickname?: string
-  priority?: number
+  /** EWO-066 (Part E) — `null`/omitted means "Unprioritized," the new
+   * default for a freshly-added ship (no more auto-incrementing to the
+   * end of the ranking — see `addFleetAsset`). */
+  priority?: number | null
   acquisitionSource?: AcquisitionSource
 }
 
@@ -51,7 +54,7 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
   const buildId = existingAsset?.activeBuildId ?? `${assetId}-build-factory`
   const resolvedOwnership = existingAsset?.ownershipType ?? ownershipType ?? 'OWNED'
   const resolvedNickname = existingAsset?.nickname ?? nickname
-  const resolvedPriority = existingAsset?.priority ?? priority ?? 0
+  const resolvedPriority = existingAsset?.priority ?? priority ?? null
   const resolvedSource = existingAsset?.acquisitionSource ?? acquisitionSource ?? 'MANUAL'
   const now = new Date().toISOString()
 
