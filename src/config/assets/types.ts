@@ -145,3 +145,30 @@ export interface WorkflowIllustrationDefinition {
   /** True once a real, approved illustration exists at `src`. */
   enabled: boolean
 }
+
+/**
+ * EWO-062 — Ship Management's own bounded hero illustrations (the
+ * `ship-operational-banner` panel's empty-state background), delivered
+ * under `public/assets/environments/ship-management/`. A distinct
+ * registry from `WorkflowIllustrationId` (Mission Control's card
+ * illustrations) and `EnvironmentId` (whole-page ambient washes) — this
+ * one is a bounded, full-cover hero image inside one specific panel, the
+ * same visual contract `ShipHeroFrame`'s own hero region already uses.
+ *
+ * `quartermaster-bay-empty` is the only id wired in during EWO-062 (no
+ * ship selected). `ship-management-active` (a ship selected) and
+ * `ship-management-engineering` (a future engineering-focused lens) have
+ * real delivered files already but are deliberately reserved —
+ * `enabled: false`, no `src` — for a future mission (the Ship Management
+ * Header redesign this empty state explicitly anticipates).
+ */
+export type ShipManagementIllustrationId = 'quartermaster-bay-empty' | 'ship-management-active' | 'ship-management-engineering'
+
+export interface ShipManagementIllustrationDefinition {
+  id: ShipManagementIllustrationId
+  label: string
+  /** Root-relative public path, or undefined until this specific id is wired in. */
+  src?: string
+  /** True once this id is both delivered and approved for integration. */
+  enabled: boolean
+}

@@ -97,9 +97,56 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.queryByText('Assess readiness, configure loadouts, and manage installed components.')).not.toBeInTheDocument()
   })
 
-  it('shows the blank Select a Ship state when no ship is selected', () => {
+  it('EWO-062: shows the Quartermaster Bay empty state (Maintenance Bay Ready / Select a ship above to begin management.) when no ship is selected', () => {
     renderWorkspace()
-    expect(screen.getByText('Select a Ship')).toBeInTheDocument()
+    const label = screen.getByText('Maintenance Bay Ready')
+    expect(label.tagName).toBe('P')
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Select a ship above to begin management.')
+    expect(screen.queryByText('Select a Ship')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Choose a fleet vessel above/)).not.toBeInTheDocument()
+  })
+
+  it('EWO-062: the Quartermaster Bay illustration renders as the empty state\'s full-bleed background, object-cover, never stretched', () => {
+    renderWorkspace()
+    const banner = screen.getByTestId('ship-operational-banner')
+    const img = banner.querySelector('img') as HTMLImageElement
+    expect(img).not.toBeNull()
+    expect(img.src).toContain('/assets/environments/ship-management/quartermaster-bay-empty.webp')
+    expect(img.alt).toBe('')
+    expect(img.className).toContain('object-cover')
+  })
+
+  it('EWO-062A (Part A): the empty-state hero is sized via the shared SHIP_MANAGEMENT_HERO_HEIGHT_CLASS token, matching the selected-ship header\'s measured desktop footprint (343px)', () => {
+    const { container } = renderWorkspace()
+    const emptyHero = container.querySelector('[data-testid="ship-operational-banner"] > div:last-child') as HTMLElement
+    expect(emptyHero.className).toContain('h-44')
+    expect(emptyHero.className).toContain('sm:h-[343px]')
+  })
+
+  it('EWO-062A (Part A): the empty state\'s overlay copy is vertically centered across the full hero, not bottom-anchored', () => {
+    renderWorkspace()
+    const label = screen.getByText('Maintenance Bay Ready')
+    const overlay = label.parentElement as HTMLElement
+    expect(overlay.className).toContain('items-center')
+    expect(overlay.className).toContain('justify-center')
+    expect(overlay.className).toContain('inset-0')
+  })
+
+  it('EWO-062A (Part C): "View in Ship Detail" no longer renders in the Ship Management header', () => {
+    renderWorkspace('ghost')
+    expect(screen.queryByText('View in Ship Detail')).not.toBeInTheDocument()
+  })
+
+  it('EWO-062A (Part C): Developer Mode renders while the established local-developer flag is on (the test suite\'s own opt-in — see vitest.setup.ts)', () => {
+    renderWorkspace('ghost')
+    expect(screen.getByRole('button', { name: /Developer Mode/ })).toBeInTheDocument()
+  })
+
+  it('EWO-062A (Part D): the Ship selector remains present and functional once Developer Mode/View in Ship Detail are removed', () => {
+    renderWorkspace('ghost')
+    const select = screen.getByLabelText('Ship') as HTMLSelectElement
+    expect(select).toBeInTheDocument()
+    expect(select.value).toBe('ghost')
   })
 
   it('Terminology: exactly two Commander Intent cards use SW-002 naming — Manage Loadout and Change Installed Components', () => {
@@ -1441,5 +1488,50 @@ describe('<ShipWorkspacePrototype /> — SW-013C.2D (Objective 1): Persistent Wo
     expect(screen.getByText(/has 1 unsaved target/)).toBeInTheDocument()
     // The reviewed build has not actually switched yet — still on Stealth Build.
     expect(screen.getByTestId('persistent-save-bar')).toBeInTheDocument()
+  })
+})
+
+/**
+ * EWO-062A (Part C) — Developer Mode must not merely be disabled/dimmed in
+ * a real Commander session, it must not render at all. The whole test
+ * suite globally opts into VITE_SFM_DEV_SEED_FLEET=true (vitest.setup.ts,
+ * CAT-001A) so every other test above — including the ones exercising
+ * Developer Mode's own raw-diagnostics behavior — legitimately sees the
+ * button. This block is the one place that flips the flag off, matching
+ * the exact override pattern newCommanderInitialization.test.ts already
+ * established, to prove the button genuinely disappears in the
+ * production-equivalent case — not just that the test happens to run
+ * with the flag on.
+ */
+describe('<ShipWorkspacePrototype /> — EWO-062A (Part C): Developer Mode absent in a real Commander session', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.stubEnv('VITE_SFM_DEV_SEED_FLEET', 'false')
+    vi.resetModules()
+  })
+  afterEach(() => {
+    localStorage.clear()
+    vi.unstubAllEnvs()
+    vi.resetModules()
+    cleanup()
+  })
+
+  it('Developer Mode does not render, and the header control group contains only the Ship selector', async () => {
+    const { useFleetStore: freshStore } = await import('../../store/useFleetStore')
+    const added = freshStore.getState().addFleetAsset('ghost', 'OWNED', 'Prod Mode Ghost')
+    expect(added.success).toBe(true)
+
+    const { default: FreshShipWorkspacePrototype } = await import('../ShipWorkspacePrototype')
+    render(
+      <MemoryRouter initialEntries={[`/ship-workspace/${added.assetId}`]}>
+        <Routes>
+          <Route path="/ship-workspace/:shipId" element={<FreshShipWorkspacePrototype />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.queryByRole('button', { name: /Developer Mode/ })).not.toBeInTheDocument()
+    expect(screen.queryByText('View in Ship Detail')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Ship')).toBeInTheDocument()
   })
 })

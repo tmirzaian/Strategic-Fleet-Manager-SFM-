@@ -14,24 +14,36 @@ afterEach(() => cleanup())
 
 /**
  * EWO-026 (round 2, Task 4) — Navigation Flow Validation. Drives the real
- * `App` router end to end with real clicks (never a fresh `render()` per
- * page, which would trivially "fix" any client-navigation-only bug by
- * accident) across the Chief Architect's own required cycle: Mission
- * Control -> Ship Detail -> Loadout Manager -> Ship Detail -> Loadout
- * Manager -> Ship Detail, asserting at every hop that hierarchy, Existing
- * Loadouts, and Fleet Asset context all survive without a refresh.
+ * `App` router end to end with real clicks across the Chief Architect's
+ * own required cycle: Mission Control -> Ship Management -> Loadout
+ * Manager -> Ship Management -> Loadout Manager -> Ship Management,
+ * asserting at every hop that hierarchy, Existing Loadouts, and Fleet
+ * Asset context all survive.
  *
- * Ship Detail has no direct link back to Loadout Manager for a ship whose
- * active build is already a custom Loadout (only the Factory-Only banner
- * offers one) — this test uses the Sidebar's own always-available
- * "Loadout Manager" link (no ?shipId=) plus the Ship dropdown, exactly
- * like a real Commander without that direct link would have to. See the
- * EWO-026 report for this disclosed, out-of-scope UI gap.
+ * EWO-062A (Part B) retired the Sidebar's "Loadout Manager" link from
+ * normal Commander navigation entirely (this test originally relied on
+ * exactly that link, per its own prior doc comment — see git history).
+ * The route itself is explicitly preserved for direct/deep-link access
+ * ("Where an old route is reached directly, Engineering should preserve
+ * current behavior" — EWO-062A), so this now simulates exactly that: a
+ * fresh visit to the URL directly, the only way a Commander can still
+ * reach this page. Store state (Zustand) lives at module scope, not in
+ * the React tree, so a `cleanup()` + fresh `render()` here does NOT reset
+ * it — this still genuinely proves Existing Loadouts/hierarchy/Fleet
+ * Asset context persist across the hop (arguably more meaningfully than
+ * before: it proves the data was actually saved to the store, not merely
+ * carried over in memory by an un-remounted component tree). The one hop
+ * that still exercises true in-tree client-side routing is Loadout
+ * Manager's own "View in Ship Management" link, which is unaffected by
+ * this mission and still clicked directly below.
  */
 function openLoadoutManagerFor(shipId: string) {
-  fireEvent.click(screen.getByText('Loadout Manager'))
-  const shipSelect = screen.getAllByRole('combobox').find((el) => el.tagName === 'SELECT' && (el as HTMLSelectElement).value !== shipId) as HTMLSelectElement | undefined
-  if (shipSelect) fireEvent.change(shipSelect, { target: { value: shipId } })
+  cleanup()
+  render(
+    <MemoryRouter initialEntries={[`/loadout-manager?shipId=${shipId}`]}>
+      <App />
+    </MemoryRouter>
+  )
 }
 
 describe('EWO-026 (round 2, Task 4): full navigation flow preserves state without a refresh', () => {

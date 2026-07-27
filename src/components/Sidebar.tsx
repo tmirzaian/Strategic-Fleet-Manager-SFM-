@@ -4,13 +4,10 @@ import { resolveBrandingSrc } from '../config/assets'
 import {
   Radar,
   LayoutGrid,
-  Rocket,
   Package,
-  Zap,
   ScanSearch,
   Map,
   BookText,
-  Sparkles,
   Satellite,
   Wrench,
 } from 'lucide-react'
@@ -39,6 +36,21 @@ import {
 // surface; the internal `/ship-workspace` route name is intentionally
 // left alone (Internal Naming Policy — renaming it would be churn
 // without Commander benefit).
+//
+// EWO-062A (Part B) — Navigation Retirement. Loadout Manager, Quick
+// Update, and Ship Detail are removed from this list — their workflows
+// are now absorbed by Ship Management (Manage Loadout / Change Installed
+// Components, and the ship-context readiness view respectively) and
+// keeping all three as separate primary nav destinations left the
+// Sidebar advertising three retired paths alongside the one the
+// Commander is actually meant to use. This is navigation retirement, not
+// route destruction: `/loadout-manager`, `/quick-update`, and `/ship`
+// (and their page components) are untouched and still reachable by
+// direct URL/deep link/regression test — only their entries in this
+// array (and therefore their Sidebar presence) are gone. `navItems` is a
+// plain array rendered by one `.map()` with no separator elements
+// between entries, so removing entries closes any gap automatically —
+// no dedicated "remove the gap" step was needed.
 const navItems = [
   { to: '/', label: 'Mission Control', icon: Radar, end: true },
   { to: '/fleet', label: 'Fleet Dashboard', icon: LayoutGrid },
@@ -49,13 +61,10 @@ const navItems = [
   // instead of an inferred/hardcoded ship. Unchanged by SW-013B — this
   // reasoning applies equally to the blank `/ship-workspace` entry below.
   { to: '/ship-workspace', label: 'Ship Management', icon: Wrench },
-  { to: '/loadout-manager', label: 'Loadout Manager', icon: Sparkles },
   { to: '/hangar', label: 'Hangar Inventory', icon: Package },
-  { to: '/quick-update', label: 'Quick Update', icon: Zap },
   { to: '/decision-center', label: 'Decision Center', icon: ScanSearch },
   { to: '/roadmap', label: 'Fleet Roadmap', icon: Map },
   { to: '/log', label: "Captain's Log", icon: BookText },
-  { to: '/ship', label: 'Ship Detail', icon: Rocket },
 ]
 
 export default function Sidebar() {

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -95,9 +95,9 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     expect(screen.queryByText(/Update Budget/)).not.toBeInTheDocument()
   })
 
-  it('9. every existing navigation route, label, and link count remains unchanged', () => {
+  it('9. every remaining navigation route, label, and link count remains unchanged (EWO-062A retired Loadout Manager/Quick Update/Ship Detail — see dedicated test below)', () => {
     renderSidebar()
-    const expectedRoutes = ['/', '/fleet', '/ship', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/hangar', '/decision-center', '/roadmap', '/log']
     const links = screen.getAllByRole('link')
     const hrefs = links.map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
@@ -105,7 +105,6 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     }
     expect(screen.getByText('Mission Control')).toBeInTheDocument()
     expect(screen.getByText('Fleet Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Loadout Manager')).toBeInTheDocument()
     expect(screen.getByText("Captain's Log")).toBeInTheDocument()
   })
 
@@ -114,6 +113,31 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     const link = screen.getByText('Ship Management').closest('a')!
     expect(link).toHaveAttribute('href', '/ship-workspace')
     expect(screen.queryByText('Ship Workspace')).not.toBeInTheDocument()
+  })
+
+  it('EWO-062A (Part B): Loadout Manager, Quick Update, and Ship Detail no longer appear in the Sidebar — navigation retirement, not route destruction', () => {
+    renderSidebar()
+    expect(screen.queryByText('Loadout Manager')).not.toBeInTheDocument()
+    expect(screen.queryByText('Quick Update')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ship Detail')).not.toBeInTheDocument()
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((a) => a.getAttribute('href'))
+    expect(hrefs).not.toContain('/loadout-manager')
+    expect(hrefs).not.toContain('/quick-update')
+    expect(hrefs).not.toContain('/ship')
+  })
+
+  it('EWO-062A (Part B): exactly seven navigation links remain, with no leftover gap/divider markup between them', () => {
+    const { container } = renderSidebar()
+    const nav = container.querySelector('nav') as HTMLElement
+    const links = within(nav).getAllByRole('link')
+    expect(links).toHaveLength(7)
+    // The nav rail's own bordered console is a single flat list — one
+    // rounded panel wrapping a `space-y-1` stack of links, no dividers or
+    // spacer elements between individual items.
+    const list = nav.querySelector('.space-y-1') as HTMLElement
+    expect(list.children).toHaveLength(7)
+    expect(Array.from(list.children).every((el) => el.tagName === 'A')).toBe(true)
   })
 
   it('10/11. compactMark and sidebarCommissioningMark remain valid, unrepurposed semantic keys — missing/disabled assets still fail safely via the existing pattern', () => {
@@ -181,7 +205,11 @@ describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
     expect(nav.className).toContain('px-3')
     const navConsole = nav.querySelector('div.rounded-lg') as HTMLElement
     expect(navConsole.className).toContain('p-1.5')
-    const expectedRoutes = ['/', '/fleet', '/ship', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+    // EWO-062A (Part B) retired Loadout Manager/Quick Update/Ship Detail
+    // from the Sidebar (navigation retirement, not route destruction —
+    // see the dedicated EWO-062A tests below); the remaining seven are
+    // what "unchanged" now means for this architecture-protection test.
+    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/hangar', '/decision-center', '/roadmap', '/log']
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
       expect(hrefs).toContain(route)
@@ -237,6 +265,7 @@ describe('<Sidebar /> — EWO-015C optical-fit correction', () => {
     expect(screen.queryByText('SFM')).not.toBeInTheDocument()
     expect(screen.queryByText('Strategic Fleet Manager')).not.toBeInTheDocument()
     expect(screen.getByText('Mission Control')).toBeInTheDocument()
-    expect(screen.getAllByRole('link').length).toBeGreaterThanOrEqual(9)
+    // EWO-062A (Part B) retired three nav entries — seven remain.
+    expect(screen.getAllByRole('link').length).toBeGreaterThanOrEqual(7)
   })
 })

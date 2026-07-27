@@ -95,7 +95,10 @@ function deriveInitialInstalledLoadouts(ships: Ship[], hardpoints: Hardpoint[]):
  * `import.meta.env.DEV` is true for real Commanders too and would not
  * have fixed anything.
  */
-const DEV_SEED_FLEET_ENABLED = import.meta.env.VITE_SFM_DEV_SEED_FLEET === 'true'
+// EWO-062A — exported so other local-developer-only UI (Ship Management's
+// Developer Mode toggle) can gate on this exact same flag rather than
+// `import.meta.env.DEV`, for the identical reason documented above.
+export const DEV_SEED_FLEET_ENABLED = import.meta.env.VITE_SFM_DEV_SEED_FLEET === 'true'
 
 interface SeedFleetBaseline {
   ships: Ship[]

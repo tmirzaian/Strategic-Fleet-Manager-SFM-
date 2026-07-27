@@ -9,3 +9,4 @@ export { ENVIRONMENT_ASSETS, getEnvironmentDefinition, isEnvironmentUsable, reso
 export { BRANDING_ASSETS, getBrandingAsset, resolveBrandingSrc } from './brandingAssets'
 export { resolveFleetRegistryImage, manufacturerSlugForCode, FLEET_REGISTRY_PLACEHOLDER, type ResolveFleetRegistryImageParams } from './fleetRegistryAssets'
 export { WORKFLOW_ILLUSTRATIONS, getWorkflowIllustration, resolveWorkflowIllustration } from './workflowAssets'
+export { SHIP_MANAGEMENT_ILLUSTRATIONS, getShipManagementIllustration, resolveShipManagementIllustration } from './shipManagementAssets'

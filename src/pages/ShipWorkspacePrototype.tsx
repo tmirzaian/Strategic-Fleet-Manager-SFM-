@@ -1,10 +1,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   ShipWheel,
   ChevronDown,
   ChevronRight,
-  Rocket,
   Plus,
   AlertTriangle,
   AlertOctagon,
@@ -23,11 +22,12 @@ import {
   ArrowRightLeft,
   PackagePlus,
 } from 'lucide-react'
-import { useFleetStore, type TargetOverrideInput } from '../store/useFleetStore'
+import { useFleetStore, DEV_SEED_FLEET_ENABLED, type TargetOverrideInput } from '../store/useFleetStore'
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
 import ShipHeroFrame from '../components/ShipHeroFrame'
+import { resolveShipManagementIllustration } from '../config/assets'
 import { resolveShipImage } from '../utils/resolveShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
@@ -49,6 +49,19 @@ import { isComponentSelectableForPort } from '../data/componentCatalog'
 import { fullComponentCatalog } from '../utils/fullComponentCatalog'
 import TargetComponentPicker, { type TargetComponentOption } from '../components/TargetComponentPicker'
 import type { Hardpoint } from '../types'
+
+/**
+ * EWO-062A (Part A) — the operational banner's hero footprint, shared by
+ * both the empty state (Quartermaster Bay artwork) and, conceptually, the
+ * selected-ship state (`ShipHeroFrame`'s own `data-testid="ship-hero-
+ * image-area"` region) — one named token instead of two independently
+ * hard-coded class strings that could silently drift apart again. The
+ * desktop tier (343px) matches the selected-ship header's measured
+ * rendered footprint at the 1320px-wide reference desktop viewport;
+ * `h-44` at narrower widths reuses `ShipHeroFrame`'s own existing mobile
+ * value unchanged.
+ */
+const SHIP_MANAGEMENT_HERO_HEIGHT_CLASS = 'h-44 sm:h-[343px]'
 
 /**
  * Commander Intent — SW-002 replaces the SW-001 prototype terminology.
@@ -571,6 +584,11 @@ export default function ShipWorkspacePrototype() {
   const changeStatusLabel = pendingChangeCount > 0 ? `Pending Changes (${pendingChangeCount})` : 'No Pending Changes'
 
   const imageSrc = ship ? resolveShipImage({ id: ship.id, imageUrl: ship.imageUrl }) : undefined
+  // EWO-062 — resolved once; undefined only if the illustration is ever
+  // disabled again, in which case the empty state falls back to a plain
+  // dark panel rather than a broken image (same contract every other
+  // illustration resolver in this codebase already guarantees).
+  const quartermasterBayEmptySrc = resolveShipManagementIllustration('quartermaster-bay-empty')
   const role = ship ? resolveShipStockRoleFocus(ship.id, fleetAssets) : undefined
   const identitySubtitle = ship ? (role ? `${ship.manufacturer} · ${role}` : ship.manufacturer) : ''
 
@@ -1761,34 +1779,33 @@ export default function ShipWorkspacePrototype() {
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* SW-011A (Objective 4) — Developer Mode: local, unpersisted
-              toggle gating raw Configurable Slot diagnostic detail. Off by
-              default; an ordinary Commander never needs to know it
-              exists. */}
-          <button
-            onClick={() => setDeveloperMode((v) => !v)}
-            title="Developer Mode — show raw Configurable Slot diagnostics"
-            className={`inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest border rounded-lg px-2.5 py-1.5 transition-colors ${
-              developerMode ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'border-white/10 text-muted hover:border-white/25 hover:text-white'
-            }`}
-          >
-            <Code2 size={12} /> Developer Mode
-          </button>
-          {/* SW-013B (Objective 2) — "Preserve Legacy Access." Ship
-              Workspace is now the primary destination, so this is the one
-              place a Commander who arrived here needs a discoverable path
-              back to Ship Detail for familiarity/comparison/regression
-              investigation — replacing Loadout Manager's own former
-              "View in Ship Detail" link, which now points here instead
-              (Objective 4). Only rendered once a real ship is selected;
-              omitted entirely on the blank workspace state. */}
-          {ship && (
-            <Link
-              to={`/ship/${ship.id}`}
-              className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest border border-white/10 text-muted hover:border-white/25 hover:text-white rounded-lg px-2.5 py-1.5 transition-colors"
+              toggle gating raw Configurable Slot diagnostic detail.
+              EWO-062A (Part C) — must not render at all in the ordinary
+              Commander experience, including a packaged Beta launched via
+              "Start Strategic Fleet Manager.bat" (which runs `npm run
+              dev`, so `import.meta.env.DEV` alone would still be true for
+              a real Commander — see DEV_SEED_FLEET_ENABLED's own doc
+              comment in useFleetStore.ts). Gated on that exact same
+              established local-developer flag instead: a real Commander
+              session never mounts this button at all, not merely a
+              disabled/dimmed one. */}
+          {DEV_SEED_FLEET_ENABLED && (
+            <button
+              onClick={() => setDeveloperMode((v) => !v)}
+              title="Developer Mode — show raw Configurable Slot diagnostics"
+              className={`inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest border rounded-lg px-2.5 py-1.5 transition-colors ${
+                developerMode ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'border-white/10 text-muted hover:border-white/25 hover:text-white'
+              }`}
             >
-              <Rocket size={12} /> View in Ship Detail
-            </Link>
+              <Code2 size={12} /> Developer Mode
+            </button>
           )}
+          {/* EWO-062A (Part C) — "View in Ship Detail" is retired from
+              Ship Management's header: the legacy Ship Detail page (and
+              its route) remains internally intact for direct/deep-link
+              access, but Ship Management no longer advertises or routes
+              a Commander back into it (SW-013B's original "Preserve
+              Legacy Access" rationale is superseded by this mission). */}
           {selectShip}
         </div>
       </div>
@@ -1825,15 +1842,32 @@ export default function ShipWorkspacePrototype() {
       {/* SHIP OPERATIONAL BANNER — the true operational header. Answers
           "Is this ship mission ready?" from the ship's real Active
           Loadout alone, and stays the Commander's anchor while the
-          Ship Systems Workspace below adapts to intent. */}
+          Ship Systems Workspace below adapts to intent.
+          EWO-062/EWO-062A — the empty state (no ship selected) is the
+          permanent Quartermaster Bay illustration, not a generic callout:
+          full-bleed background art sized via SHIP_MANAGEMENT_HERO_HEIGHT_
+          CLASS to match the selected-ship header's own rendered footprint
+          (1320x343 at the reference desktop viewport), so selecting a
+          ship causes no layout shift — the hero-sized region already
+          occupies exactly this space before and after. Overlay text is
+          the standardized EWO-061 label/title pair, vertically centered
+          across the full hero, and nothing else (no icon, no
+          description, no controls). */}
       <div data-testid="ship-operational-banner" className="panel overflow-hidden relative">
         <div ref={bannerSentinelRef} />
 
         {!ship ? (
-          <div className="p-10 flex flex-col items-center justify-center text-center gap-2">
-            <ShipWheel size={28} className="text-cyan/50 mb-2" />
-            <h2 className="font-display font-bold text-white text-lg uppercase tracking-widest">Select a Ship</h2>
-            <p className="text-sm text-muted max-w-sm">Choose a fleet vessel above to open its workspace.</p>
+          <div className={`relative overflow-hidden ${SHIP_MANAGEMENT_HERO_HEIGHT_CLASS}`}>
+            {quartermasterBayEmptySrc ? (
+              <img src={quartermasterBayEmptySrc} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+            ) : (
+              <div className="absolute inset-0 bg-black/20" />
+            )}
+            <div className="absolute inset-0 bg-black/50" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+              <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Maintenance Bay Ready</p>
+              <h2 className="text-2xl font-display font-bold text-white">Select a ship above to begin management.</h2>
+            </div>
           </div>
         ) : (
           <>

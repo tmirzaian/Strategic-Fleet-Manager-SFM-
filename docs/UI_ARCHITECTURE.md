@@ -1457,3 +1457,117 @@ line of body text inside the header block itself.
 
 No navigation, routing, or page content below the header changed as part
 of this mission.
+
+## 31. Quartermaster Bay Empty-State (EWO-062, IMPLEMENTED NOW)
+
+Ship Management's `ship-operational-banner` panel — the first thing a
+Commander sees before selecting a ship — previously showed a generic
+callout (icon, "Select a Ship," a one-line instruction). It now shows the
+first piece of environmental artwork this codebase treats as part of the
+*application* rather than the *brand shell* (distinct from Mission
+Control's Operations Wall / `EnvironmentAssets`, which are whole-page
+ambient washes, not a bounded panel illustration):
+
+```tsx
+<div className="relative h-44 sm:h-56 overflow-hidden">
+  <img src={quartermasterBayEmptySrc} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+  <div className="absolute inset-0 bg-black/50" />
+  <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+    <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Maintenance Bay Ready</p>
+    <h2 className="text-2xl font-display font-bold text-white">Select a ship above to begin management.</h2>
+  </div>
+</div>
+```
+
+**Registry.** `src/config/assets/shipManagementAssets.ts` — a new,
+dedicated `ShipManagementIllustrationId` registry (`quartermaster-bay-
+empty` | `ship-management-active` | `ship-management-engineering`),
+sibling to `WorkflowIllustrationId` (Mission Control's card art) and
+`EnvironmentId` (whole-page washes) rather than reusing either — this is
+a bounded, full-cover hero illustration inside one specific panel, the
+same visual contract `ShipHeroFrame`'s own hero region already uses.
+Artwork delivered under `public/assets/environments/ship-management/`.
+Only `quartermaster-bay-empty` is enabled this mission; `ship-management-
+active` (a ship selected) and `ship-management-engineering` (a future
+engineering-focused lens) have real files already delivered as part of
+the same set but are deliberately left disabled/unwired — reserved for
+the future Ship Management Header redesign this empty state explicitly
+anticipates, per this mission's own Commander framing ("the artwork
+remains visible until the Ship Management Header redesign replaces this
+section in the future").
+
+**No layout shift on selection.** The empty state's hero region was
+originally sized `h-44 sm:h-56`, matching `ShipHeroFrame`'s own hero
+*image* region alone — corrected by EWO-062A (§32) to match the
+selected-ship header's actual full rendered footprint instead (image
+region plus, for a fallback/no-photo ship, its metadata band), since
+that combined footprint is what a Commander actually sees change size
+underneath them. Overlay content is exactly the standardized EWO-061
+label/title pair (§30) and nothing else — no icon, no description, no
+controls, no buttons.
+
+## 32. Ship Management Hero Alignment & Navigation Retirement (EWO-062A, IMPLEMENTED NOW)
+
+**Part A — hero footprint corrected.** §31's empty-state hero is resized
+from `h-44 sm:h-56` to `h-44 sm:h-[343px]` — a single named constant,
+`SHIP_MANAGEMENT_HERO_HEIGHT_CLASS` (`ShipWorkspacePrototype.tsx`), used
+at the one call site so the value can't silently drift out of sync with
+itself again. 343px matches the selected-ship header's own measured
+rendered footprint at the 1320px-wide reference desktop viewport — for a
+ship whose image resolves to `ShipHeroFrame`'s fallback ("Data Link
+Pending") presentation, that's the hero image region (`h-44 sm:h-56`)
+*plus* the fallback metadata band beneath it, not the image region
+alone, which is what the original EWO-062 h-56 (224px) value had
+matched. `ShipHeroFrame` itself is unchanged — this mission updates only
+the empty state's own container to match it, not the other way around.
+Width, border radius, outer spacing, and container alignment were
+already shared automatically (both states are children of the same
+`data-testid="ship-operational-banner"` `.panel` element) and needed no
+change. Known limitation, disclosed rather than silently glossed over:
+because `ShipHeroFrame`'s real rendered height still varies by ship
+(224px for a ship with real photography and no metadata band, ~343px for
+one on fallback artwork), the empty state's fixed 343px only achieves
+*true* zero layout shift against the fallback case the Chief Architect
+measured — selecting a ship with real photography still changes height
+by the same amount it always did. Fixing that fully would mean changing
+`ShipHeroFrame`'s own rendered height, which this mission's scope
+explicitly excludes ("Ship Header redesign").
+
+**Part B — Navigation Retirement.** The Sidebar (`Sidebar.tsx`) drops
+Loadout Manager, Quick Update, and Ship Detail from `navItems` — three
+fewer primary destinations, not three deleted features. Every route
+(`/loadout-manager`, `/quick-update`, `/ship`, `/ship/:shipId`) and page
+component in `App.tsx` is untouched and still reachable by direct URL,
+deep link, or regression test; only their Sidebar presence is gone.
+`navItems` is a flat array rendered by one `.map()` with no separator
+elements between entries, so removing three entries closed the gap
+automatically — no dedicated "remove the divider" step existed to do.
+One existing regression test (`navigationFlow.test.tsx`) had relied on
+the now-retired Sidebar "Loadout Manager" link as its only way to reach
+that page — rewritten to simulate a direct URL visit instead (a
+`cleanup()` + fresh `render()` at `/loadout-manager?shipId=...`), which
+this mission's own "preserve current behavior when an old route is
+reached directly" guarantee explicitly keeps working; Zustand store
+state lives at module scope, not the React tree, so this still
+genuinely proves data persists across the hop.
+
+**Part C — developer/legacy controls removed from the Commander
+experience.** Ship Management's Developer Mode toggle now renders only
+when `DEV_SEED_FLEET_ENABLED` is true (exported from `useFleetStore.ts`,
+the same flag §27 already established for gating the demo fleet) — not
+`import.meta.env.DEV`, because the packaged Beta launcher ("Start
+Strategic Fleet Manager.bat") runs `npm run dev`, so `import.meta.env.DEV`
+alone is true for a real Commander too and would not have hidden
+anything (see that flag's own doc comment). This is a real conditional
+render, not a disabled/dimmed button — a Commander session never mounts
+it. "View in Ship Detail" is removed outright (not gated) — SW-013B's
+original "Preserve Legacy Access" rationale for that link is superseded
+by this mission; the legacy Ship Detail page remains reachable, just no
+longer advertised from Ship Management.
+
+**Part D — header control group.** With both controls gone, the
+upper-right group contains only the Ship selector ("SHIP [Select a
+ship…]"). No extra rebalancing markup was needed — the group's existing
+`flex items-center gap-3` wrapper collapses naturally to a single child
+in the ordinary Commander case (Developer Mode still occupies its slot
+correctly on the rare local-developer session where the flag is on).
