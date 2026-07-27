@@ -61,6 +61,9 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
     }
 
     // 7/8. Filter by ownership — labels remain correct.
+    // EWO-059 (Part B) — Fleet Dashboard's filter matrix is collapsed by
+    // default; expand it before interacting with any filter pill.
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Owned' }))
     const owned = ships.filter((s) => s.ownership === 'Owned')
     const wrappersFiltered = screen.getAllByTestId('priority-card-wrapper')

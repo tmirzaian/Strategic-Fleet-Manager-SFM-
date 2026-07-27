@@ -664,14 +664,6 @@ export default function MissionControl() {
           </div>
         </div>
       </div>
-
-      {/* Operational footer — pinned to the bottom edge of the viewport when content is
-          short. CWO-005 (Task 5): version/build identity is no longer shown here —
-          it lives in the Sidebar (SFM build) and Captain's Log (SC certification)
-          only, so the bridge screen never duplicates or drifts from either. */}
-      <div className="mt-8 pt-6 border-t border-white/5 flex items-center text-[10px] uppercase tracking-widest text-muted/70">
-        <div>Update Budget · 2 min</div>
-      </div>
     </div>
   )
 }

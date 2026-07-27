@@ -20,6 +20,13 @@ function renderDashboard() {
   )
 }
 
+// EWO-059 (Part B) — filters render collapsed by default; every existing
+// test that interacts with a filter pill must expand the panel first, the
+// same action a real Commander takes via the "Filters" disclosure toggle.
+function expandFilters() {
+  fireEvent.click(screen.getByRole('button', { name: /^Filters/ }))
+}
+
 describe('<FleetDashboard /> — Mission M-012 empty-state', () => {
   it('8. renders a valid, deliberate empty state with zero ships (not a blank page or crash)', () => {
     useFleetStore.setState({ ships: [] })
@@ -84,6 +91,7 @@ describe('<FleetDashboard /> — EWO-033 (Task 1): Priority presentation', () =>
   it('5. labels remain correct after filtering by ownership', () => {
     renderDashboard()
     const { ships } = useFleetStore.getState()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Owned' }))
     const owned = ships.filter((s) => s.ownership === 'Owned')
     expect(screen.getAllByTestId('priority-card-wrapper')).toHaveLength(owned.length)
@@ -127,14 +135,47 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
   // src/data/seed.ts.
   it('the RSI Role filter alone shows every Industrial ship regardless of manufacturer (Mole, Vulture, Prospector)', () => {
     renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
     expect(screen.getByText('MOLE')).toBeInTheDocument()
     expect(screen.getByText('Vulture')).toBeInTheDocument()
     expect(screen.getByText('Prospector')).toBeInTheDocument()
   })
 
+  // EWO-059 (Part A) — regression coverage beyond Combat/Industrial: Ghost
+  // (Combat), Corsair (Combat/Exploration), and M80 (Competition/Combat)
+  // are all classified Combat and must all match, while a genuinely
+  // non-Combat ship (MOLE) must not.
+  it('the RSI Role filter also correctly matches Combat-classified ships (Ghost, Corsair, M80), not only Industrial', () => {
+    renderDashboard()
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Combat' }))
+    expect(screen.getByText('F7C-S Hornet Ghost Mk II')).toBeInTheDocument()
+    expect(screen.getByText('Corsair')).toBeInTheDocument()
+    expect(screen.getByText('M80')).toBeInTheDocument()
+    expect(screen.queryByText('MOLE')).not.toBeInTheDocument()
+  })
+
+  // EWO-059 (Part A) — root-cause regression: the filter previously read
+  // `shipDefinitionById.get(ship.id)` directly, which only ever happened
+  // to work for the original seed fleet (whose Ship.id is coincidentally
+  // also a valid ShipDefinition id). Any ship added live through "Add
+  // Ship" gets a freshly generated FleetAsset instance id instead
+  // (`materializeFleetAsset`'s `${definitionId}-asset-<suffix>` pattern),
+  // which silently broke the old lookup. Proves the fix resolves through
+  // `resolveShipDefinitionId`/`resolveShipRsiRoles` instead.
+  it('the RSI Role filter also matches a ship added live via "Add Ship" — not only the seed fleet', () => {
+    const added = useFleetStore.getState().addFleetAsset('vulture', 'OWNED', 'Second Vulture')
+    expect(added.success).toBe(true)
+    renderDashboard()
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    expect(screen.getByText('Second Vulture')).toBeInTheDocument()
+  })
+
   it('the Manufacturer filter alone shows every ARGO ship regardless of role', () => {
     renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
     expect(screen.getByText('MOLE')).toBeInTheDocument()
     expect(screen.queryByText('Vulture')).not.toBeInTheDocument()
@@ -143,6 +184,7 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
 
   it('Composable Filters: Industrial + ARGO composes (AND), narrowing to exactly the ships both dimensions agree on — not replacing one filter with the other', () => {
     renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
     fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
     expect(screen.getByText('MOLE')).toBeInTheDocument()
@@ -156,6 +198,7 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
 
   it('Clear Filters resets every dimension at once and disappears once nothing is active', () => {
     renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
     fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
     expect(screen.getByText('Clear Filters')).toBeInTheDocument()
@@ -193,6 +236,7 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
 
   it('a Readiness filter narrows to only Factory-only Loadouts (135c, UTV) when "Factory Only" is selected', () => {
     renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Factory Only' }))
     expect(screen.getByText('135c')).toBeInTheDocument()
     expect(screen.getByText('UTV')).toBeInTheDocument()
@@ -201,6 +245,7 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
 
   it('Persistent View: a filter set before navigating away is still active the next time Fleet Dashboard mounts (session persistence)', () => {
     const { unmount } = renderDashboard()
+    expandFilters()
     fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
     expect(screen.queryByText('Vulture')).toBeInTheDocument()
     expect(screen.queryByText('Prospector')).toBeInTheDocument()
@@ -208,9 +253,107 @@ describe('EWO-053 (Objective B — Fleet Navigation Refactor): composable, indep
 
     renderDashboard()
     // Still filtered to Industrial only — the Commander never has to
-    // re-apply a filter after visiting Ship Detail and coming back.
+    // re-apply a filter after visiting Ship Detail and coming back. The
+    // filter *values* persist across the session; the disclosure panel
+    // itself deliberately does not (EWO-059 Part B: collapsed on every
+    // fresh page load) — expand it again to confirm the pill itself.
     expect(screen.queryByText('135c')).not.toBeInTheDocument()
     expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expandFilters()
     expect(screen.getByRole('button', { name: 'Industrial' })).toHaveClass('bg-cyan/15')
+  })
+})
+
+describe('EWO-059 (Part B): collapsible Quick Filters', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  it('filters render collapsed on initial page load — no filter pill is present until expanded', () => {
+    renderDashboard()
+    expect(screen.queryByRole('button', { name: 'Industrial' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Owned' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filters/ })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('with no active constraints, the compact toolbar reads "All ships"', () => {
+    renderDashboard()
+    expect(screen.getByText('All ships')).toBeInTheDocument()
+  })
+
+  it('selecting Filters expands the matrix directly below the toolbar; selecting it again collapses it', () => {
+    renderDashboard()
+    expandFilters()
+    expect(screen.getByRole('button', { name: 'Industrial' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filters/ })).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/ }))
+    expect(screen.queryByRole('button', { name: 'Industrial' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filters/ })).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('collapsing the panel does not clear selected filters — the active selection remains visible in the compact summary and the results stay filtered', () => {
+    renderDashboard()
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+
+    // Collapse.
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/ }))
+    expect(screen.queryByRole('button', { name: 'Industrial' })).not.toBeInTheDocument()
+    // Summary chip + filtered results both survive the collapse.
+    expect(screen.getByRole('button', { name: 'Remove Industrial filter' })).toBeInTheDocument()
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.queryByText('135c')).not.toBeInTheDocument()
+  })
+
+  it('each active-filter summary chip removes only that one filter, leaving the rest intact', () => {
+    renderDashboard()
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
+    // Narrowed to exactly MOLE by both dimensions together.
+    expect(screen.queryByText('Vulture')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Argo filter' }))
+
+    // Manufacturer constraint is gone; RSI Role (Industrial) alone remains
+    // active — Vulture and Prospector (Industrial, non-ARGO) reappear.
+    expect(screen.getByText('MOLE')).toBeInTheDocument()
+    expect(screen.getByText('Vulture')).toBeInTheDocument()
+    expect(screen.getByText('Prospector')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Remove Argo filter' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Industrial' })).toHaveClass('bg-cyan/15')
+  })
+
+  it('Clear Filters resets every category to All and the toolbar reverts to "All ships"', () => {
+    renderDashboard()
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Argo' }))
+    fireEvent.click(screen.getByText('Clear Filters'))
+    expect(screen.getByText('All ships')).toBeInTheDocument()
+  })
+
+  it('zero-results: an impossible filter combination shows the intentional empty state with a visible Clear Filters action, not a blank area', () => {
+    renderDashboard()
+    expandFilters()
+    // Industrial + Anvil: no seed ship is both — a valid, real zero-result combination.
+    fireEvent.click(screen.getByRole('button', { name: 'Industrial' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Anvil' }))
+    expect(screen.getByText('No ships match these filters.')).toBeInTheDocument()
+    expect(screen.getByText('Adjust the selected filters or clear them to view your fleet.')).toBeInTheDocument()
+    const clearButtons = screen.getAllByText('Clear Filters')
+    expect(clearButtons.length).toBeGreaterThan(0)
+    fireEvent.click(clearButtons[clearButtons.length - 1])
+    expect(screen.queryByText('No ships match these filters.')).not.toBeInTheDocument()
+    expect(screen.getByText('All ships')).toBeInTheDocument()
+  })
+
+  it('sort and view controls keep working while filters are collapsed', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    expect(() => fireEvent.click(screen.getByRole('button', { name: 'Ship Name' }))).not.toThrow()
+    expect(screen.getByText('Ship')).toBeInTheDocument()
   })
 })

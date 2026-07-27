@@ -1,4 +1,4 @@
-import type { FleetAsset, ShipDefinition } from '../types'
+import type { FleetAsset, RsiRole, ShipDefinition } from '../types'
 import { shipDefinitionById } from '../data/shipDefinitions'
 import { importedShipList } from '../generated/importedShips'
 import { shipCatalogRecords } from '../generated/shipCatalog'
@@ -67,6 +67,27 @@ export function resolveShipStockRoleFocus(shipId: string, fleetAssets: FleetAsse
   const definition = shipDefinitionById.get(definitionId)
   if (!definition) return undefined
   return resolveStockRoleFocusForDefinition(definition)
+}
+
+/**
+ * EWO-059 (Part A) — a Fleet Asset's canonical RSI role classification,
+ * resolved the same way every other per-ship lookup in this file already
+ * is: via `resolveShipDefinitionId`, never `shipDefinitionById.get(shipId)`
+ * directly. `Ship.id` is a FleetAsset *instance* id (e.g.
+ * "vulture-asset-<suffix>" for anything materialized through "Add Ship",
+ * per `fleetAssetMaterializer.ts`) — it is a ShipDefinition id only by
+ * coincidence for the original seed fleet (whose FleetAsset carries the
+ * "-asset-seed" suffix while the Ship record itself kept its bare seed id
+ * for backward compatibility). Fleet Dashboard's RSI Role filter used to
+ * look up `shipDefinitionById.get(ship.id)` directly, which silently
+ * returned undefined (and therefore an empty role list — never matching
+ * any role pill) for every ship added after the initial seed fleet.
+ */
+export function resolveShipRsiRoles(shipId: string, fleetAssets: FleetAsset[]): RsiRole[] {
+  const definitionId = resolveShipDefinitionId(shipId, fleetAssets)
+  if (!definitionId) return []
+  const definition = shipDefinitionById.get(definitionId)
+  return definition?.classification.rsiRoles ?? []
 }
 
 /**

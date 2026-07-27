@@ -49,7 +49,7 @@ export default function FleetRoadmap() {
         <div>
           <h3 className="font-display font-semibold text-white">Vision</h3>
           <p className="text-sm text-muted mt-1">
-            StarSim / agent-based economy support, later — well past Sprint 1 scope.
+            StarSim / agent-based economy support, later — a distant future goal, well beyond current fleet priorities.
           </p>
         </div>
       </div>

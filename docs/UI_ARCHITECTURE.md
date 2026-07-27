@@ -25,7 +25,7 @@ in Engineering.
 ## 1. Mission Control operational cadence
 
 Mission Control communicates, top to bottom, in this fixed order (current
-as of UX-001B.5 — see §19-§25 for the full history of how it got here):
+as of EWO-058 — see §19-§27 for the full history of how it got here):
 
 1. Application identity (sidebar, persistent, not part of the page itself)
 2. Mission Control identity — "Mission Control" / "Fleet Operations"
@@ -46,7 +46,10 @@ as of UX-001B.5 — see §19-§25 for the full history of how it got here):
 6. End-of-Briefing Action Center (§11/§24/§26, UX-001B.4/UX-001C) — Loot
    Lookup / Add Inventory / Modify Ship, the transition from assessment
    to execution
-7. Application footer (Update Budget + version identity)
+
+The page ends there — no application footer (§27, EWO-058 retired the
+"Update Budget" footer as a leftover development-era artifact; §9/§10
+below record its retirement).
 
 No explanatory or marketing copy appears between these — the interface
 explains itself. `src/pages/MissionControl.tsx` is the reference
@@ -496,22 +499,26 @@ section.
   Dashboard-specific badges) accordingly. Requires its own authorized
   mission; not started, not scoped further here.
 
-## 9. Update Budget — single-instance rule (IMPLEMENTED NOW)
+## 9. Update Budget — single-instance rule (RETIRED — see §27)
 
-"Update Budget" renders in exactly one place application-wide: the
-Mission Control footer (§10). It no longer appears in the command-console
-rail, and the sidebar's former duplicate status strip has been removed.
-The underlying "2 min" value is an unchanged literal, not a calculation.
+Historical record: "Update Budget · 2 min" was a holdover from an early
+Mission Control iteration — a literal, never a calculation — that
+survived several redesigns as an orphaned single line once the rest of
+the footer's original content (version/build identity) was relocated to
+the Sidebar and Captain's Log by CWO-005. EWO-058 (Quartermaster Release
+Housekeeping) removed it outright as a development-era artifact with no
+remaining operational meaning to a Commander.
 
-## 10. Footer standard (IMPLEMENTED NOW)
+## 10. Footer standard (RETIRED — see §27)
 
-One full-width operational footer at the bottom of Mission Control's
-content, pinned to the viewport's bottom edge when content is short (via
-the page root's `min-h-[calc(100vh-*rem)] flex flex-col` + `flex-1`
-content wrapper) and following content naturally when it overflows.
-Content: left, "Update Budget · 2 min"; right, "Strategic Fleet Manager ·
-Quartermaster Edition · {APP_VERSION_LABEL}". No server status, build ID,
-or network state is invented.
+Historical record: Mission Control previously ended in a full-width
+operational footer, pinned to the viewport's bottom edge when content is
+short. By the time of EWO-058 its only remaining content was the
+orphaned "Update Budget · 2 min" line described in §9 (its original
+right-hand version/build identity content had already been removed by
+CWO-005 — see §1). EWO-058 removed the footer element entirely; Mission
+Control's operational cadence (§1) now ends at the End-of-Briefing Action
+Center.
 
 ## 11. WorkflowDestinationCard standard (IMPLEMENTED NOW / APPROVED FUTURE HARDPOINT)
 
@@ -1288,3 +1295,73 @@ Commander Briefing, Fleet Status, Fleet Readiness, Priority Actions, Top
 Priority Ships, Quartermaster Report, and Execution Actions all read as
 one coherent operational briefing — Observe → Assess → Execute — with no
 further Hero or Quartermaster Report work anticipated before release.
+
+## 27. Quartermaster Release Housekeeping (EWO-058, IMPLEMENTED NOW)
+
+A housekeeping pass, not a feature mission: a sweep of the whole
+application for development-era artifacts a Commander could stumble on —
+placeholder text, abandoned labels, prototype wording, stale internal
+process references — with no new features, redesign, layout changes,
+component refactors, or architecture changes in scope.
+
+**Findings and fixes:**
+
+- **Mission Control's "Update Budget" footer (§9/§10)** — an orphaned
+  single line, left behind once CWO-005 relocated the rest of the
+  footer's original content elsewhere, with no remaining operational
+  meaning. Removed outright; Mission Control's cadence (§1) now ends at
+  the End-of-Briefing Action Center.
+- **Fleet Roadmap's Vision card** — read "well past Sprint 1 scope," an
+  internal development-process term ("Sprint") leaking into Commander-
+  facing copy on a page about the in-universe fleet, not the engineering
+  process building it. Reworded to "a distant future goal, well beyond
+  current fleet priorities."
+
+**Reviewed and confirmed already correct, no action taken:** the
+"Prototype" badge on Ship Workspace (retired earlier, by SW-013B — see
+§19); `ShipWorkspacePrototype` as a source-level module name (never
+rendered to a Commander, and renaming it would be a component refactor,
+explicitly out of this mission's scope); the Developer Mode toggle on
+Ship Workspace (a deliberate, permanently-gated diagnostic feature, off
+by default, not a leftover); the `VITE_SFM_DEV_SEED_FLEET` local-dev seed
+flag (gated behind an explicit, gitignored, opt-in environment variable —
+never on for a real Commander); and the `APP_VERSION` "Beta 1.2" label
+(a genuine, actively-maintained version identity, not placeholder text).
+
+No layout, component, or architectural change accompanied this mission —
+every fix above is a content-only correction or removal.
+
+## 28. Fleet Dashboard — RSI Role Filter Repair & Collapsible Quick Filters (EWO-059, IMPLEMENTED NOW)
+
+Fleet Dashboard sits outside this document's primary Mission Control/
+app-shell scope (see §1's framing), but this mission's disclosure pattern
+is recorded here as a reusable standard for any future filter-heavy list
+page, alongside the bug fix itself.
+
+**Part A — root cause.** The RSI Role filter read
+`shipDefinitionById.get(ship.id)` directly. `Ship.id` is a FleetAsset
+*instance* id — for any ship materialized through "Add Ship"
+(`fleetAssetMaterializer.ts`), that id carries a generated
+`${shipDefinitionId}-asset-<suffix>` form, never the bare ShipDefinition
+id itself. The lookup only ever worked by coincidence for the original
+seed fleet (whose Ship record kept its bare seed id for backward
+compatibility while its FleetAsset carries the id normally). Fixed by
+resolving through the same `resolveShipDefinitionId` indirection every
+other per-ship lookup in `src/utils/shipIdentityLine.ts` already uses,
+exposed as `resolveShipRsiRoles(shipId, fleetAssets)`.
+
+**Part B — collapsible Quick Filters.** Fleet Dashboard's four
+independent filter dimensions (Ownership/RSI Role/Manufacturer/Readiness,
+§EWO-053) are unchanged in behavior, but now start collapsed behind one
+compact toolbar: a "Filters" disclosure toggle, an active-filter summary
+(one removable chip per active dimension, or "All ships" when none are
+active), and a "Clear Filters" action. Expanding reveals the exact same
+matrix that always existed, directly below the toolbar — a pure
+disclosure, never a redesign of the filtering system itself. Collapsing
+never clears a selection; the summary chips and filtered results both
+survive it. A filter combination that legitimately excludes every ship
+renders an intentional empty state ("No ships match these filters." / a
+recovery instruction / a Clear Filters action) rather than a blank
+results area, distinguishing "a working filter with no matches" from
+a broken page — the same principle Mission Control's own zero-result
+states (§21/§25) already establish for the Quartermaster Report.

@@ -758,10 +758,9 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.queryByText(/track your fleet/i)).not.toBeInTheDocument()
   })
 
-  it('3. Update Budget appears exactly once on the page (footer only — the command rail no longer renders it)', () => {
+  it('EWO-058: the obsolete "Update Budget" development-era footer no longer renders', () => {
     renderMissionControl()
-    expect(screen.getAllByText('Update Budget · 2 min')).toHaveLength(1)
-    expect(screen.queryByText('Update Budget')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Update Budget/)).not.toBeInTheDocument()
   })
 
   it('4/5/7. UX-001A: every Hero Fleet Status count shares one critical-metric-tile scale', () => {
@@ -857,11 +856,6 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.getByText('Loot Lookup')).toBeInTheDocument()
     const quickUpdateLinks = Array.from(container.querySelectorAll('a')).filter((a) => a.getAttribute('href') === '/quick-update')
     expect(quickUpdateLinks).toHaveLength(0)
-  })
-
-  it('16. the operational footer renders exactly once', () => {
-    renderMissionControl()
-    expect(screen.getAllByText(/Update Budget/)).toHaveLength(1)
   })
 
   // CWO-005 (Task 5): version/build identity moved out of Mission Control

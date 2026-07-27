@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX } from 'lucide-react'
+import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import ShipCard from '../components/ShipCard'
 import PriorityLabel from '../components/PriorityLabel'
@@ -10,8 +10,7 @@ import AddShipModal from '../components/AddShipModal'
 import { calculateBuildProgress, type BuildProgressResult } from '../utils/buildProgress'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { ALL_RSI_ROLES } from '../data/shipClassification'
-import { shipDefinitionById } from '../data/shipDefinitions'
-import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
+import { resolveShipStockRoleFocus, resolveShipRsiRoles } from '../utils/shipIdentityLine'
 import {
   applyFleetFilters,
   isFleetFilterActive,
@@ -21,6 +20,7 @@ import {
   sortFleetEntries,
   ALL_FLEET_SORT_MODES,
   DEFAULT_FLEET_FILTERS,
+  type FleetFilterState,
   type FleetNavigationEntry,
   type FleetSortMode,
   type FleetViewMode,
@@ -54,6 +54,12 @@ export default function FleetDashboard() {
   const [sortMode, setSortMode] = useState<FleetSortMode>(initialView.sortMode)
   const [viewMode, setViewMode] = useState<FleetViewMode>(initialView.viewMode)
   const [addShipOpen, setAddShipOpen] = useState(false)
+  // EWO-059 (Part B) — collapsed by default every fresh mount; plain
+  // component state, not session-persisted like filters/sort/view above —
+  // "may automatically remain expanded only within the current session...
+  // no new persistence is required" is satisfied by a component that
+  // simply stays expanded for as long as the Commander stays on the page.
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   useEffect(() => {
     savePersistedFleetView({ filters, sortMode, viewMode })
@@ -96,11 +102,11 @@ export default function FleetDashboard() {
     () =>
       ships.map((ship) => ({
         ship,
-        rsiRoles: shipDefinitionById.get(ship.id)?.classification.rsiRoles ?? [],
+        rsiRoles: resolveShipRsiRoles(ship.id, fleetAssets),
         state: stateByShipId.get(ship.id)!,
         progress: progressByShipId.get(ship.id)!,
       })),
-    [ships, stateByShipId, progressByShipId]
+    [ships, fleetAssets, stateByShipId, progressByShipId]
   )
 
   const manufacturerOptions = useMemo(() => manufacturersInFleet(ships), [ships])
@@ -108,6 +114,23 @@ export default function FleetDashboard() {
   const navigatedEntries = useMemo(() => sortFleetEntries(applyFleetFilters(entries, filters), sortMode), [entries, filters, sortMode])
   const filtered = navigatedEntries.map((e) => e.ship)
   const filtersActive = isFleetFilterActive(filters)
+
+  // EWO-059 (Part B) — one summary chip per active dimension, independent
+  // of every other (removing one clears only that dimension back to
+  // 'All', never the whole filter set — Clear Filters remains the only
+  // action that resets all of them at once).
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: keyof FleetFilterState; label: string }[] = []
+    if (filters.ownership !== 'All') chips.push({ key: 'ownership', label: filters.ownership })
+    if (filters.rsiRole !== 'All') chips.push({ key: 'rsiRole', label: filters.rsiRole })
+    if (filters.manufacturer !== 'All') chips.push({ key: 'manufacturer', label: filters.manufacturer })
+    if (filters.readiness !== 'All') chips.push({ key: 'readiness', label: readinessPills.find((p) => p.value === filters.readiness)?.label ?? filters.readiness })
+    return chips
+  }, [filters])
+
+  const clearFilterDimension = (key: keyof FleetFilterState) => {
+    setFilters((f) => ({ ...f, [key]: 'All' }))
+  }
 
   return (
     <div className="space-y-6">
@@ -164,102 +187,133 @@ export default function FleetDashboard() {
           Objective B: each row is now its own independent, composable
           dimension — Ownership AND Manufacturer AND RSI Role AND
           Readiness can all be active at once, e.g. "Industrial -> ARGO ->
-          Ready" — rather than one mutually-exclusive pill selector. */}
+          Ready" — rather than one mutually-exclusive pill selector.
+          EWO-059 (Part B) — collapsed by default, disclosed via one
+          compact toolbar (toggle + active-filter summary + Clear
+          Filters) so the fleet results start substantially higher on the
+          page; the matrix itself is a pure disclosure, not a redesign. */}
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] uppercase tracking-widest text-muted/70">Filters</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <button
+              onClick={() => setFiltersExpanded((v) => !v)}
+              aria-expanded={filtersExpanded}
+              className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium border border-white/10 text-muted hover:text-white hover:border-white/25 rounded-lg px-2.5 py-1.5 transition-colors shrink-0"
+            >
+              <SlidersHorizontal size={12} /> Filters {filtersExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            {activeFilterChips.length === 0 ? (
+              <span className="text-xs text-muted">All ships</span>
+            ) : (
+              activeFilterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  onClick={() => clearFilterDimension(chip.key)}
+                  title={`Remove ${chip.label} filter`}
+                  aria-label={`Remove ${chip.label} filter`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-cyan/40 bg-cyan/15 text-cyan hover:bg-cyan/25 transition-colors"
+                >
+                  {chip.label} <X size={11} />
+                </button>
+              ))
+            )}
+          </div>
           {filtersActive && (
-            <button onClick={() => setFilters(DEFAULT_FLEET_FILTERS)} className="text-[11px] text-cyan/80 hover:text-cyan font-medium">
+            <button onClick={() => setFilters(DEFAULT_FLEET_FILTERS)} className="text-[11px] text-cyan/80 hover:text-cyan font-medium shrink-0">
               Clear Filters
             </button>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Ownership</span>
-          {ownershipPills.map((pill) => (
-            <button
-              key={pill}
-              onClick={() => setFilters((f) => ({ ...f, ownership: pill }))}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filters.ownership === pill
-                  ? 'bg-cyan/15 border-cyan/40 text-cyan'
-                  : 'border-white/10 text-muted hover:text-white hover:border-white/25'
-              }`}
-            >
-              {pill}
-            </button>
-          ))}
-        </div>
+        {filtersExpanded && (
+          <div className="space-y-2.5 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Ownership</span>
+              {ownershipPills.map((pill) => (
+                <button
+                  key={pill}
+                  onClick={() => setFilters((f) => ({ ...f, ownership: pill }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.ownership === pill
+                      ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                      : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {pill}
+                </button>
+              ))}
+            </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">RSI Role</span>
-          <button
-            onClick={() => setFilters((f) => ({ ...f, rsiRole: 'All' }))}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              filters.rsiRole === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
-            }`}
-          >
-            All
-          </button>
-          {ALL_RSI_ROLES.map((role) => (
-            <button
-              key={role}
-              onClick={() => setFilters((f) => ({ ...f, rsiRole: role as RsiRole }))}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filters.rsiRole === role
-                  ? 'bg-cyan/15 border-cyan/40 text-cyan'
-                  : 'border-white/10 text-muted hover:text-white hover:border-white/25'
-              }`}
-            >
-              {role}
-            </button>
-          ))}
-        </div>
-
-        {manufacturerOptions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Manufacturer</span>
-            <button
-              onClick={() => setFilters((f) => ({ ...f, manufacturer: 'All' }))}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filters.manufacturer === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
-              }`}
-            >
-              All
-            </button>
-            {manufacturerOptions.map((name) => (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">RSI Role</span>
               <button
-                key={name}
-                onClick={() => setFilters((f) => ({ ...f, manufacturer: name }))}
+                onClick={() => setFilters((f) => ({ ...f, rsiRole: 'All' }))}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                  filters.manufacturer === name
-                    ? 'bg-cyan/15 border-cyan/40 text-cyan'
-                    : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  filters.rsiRole === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
                 }`}
               >
-                {name}
+                All
               </button>
-            ))}
+              {ALL_RSI_ROLES.map((role) => (
+                <button
+                  key={role}
+                  onClick={() => setFilters((f) => ({ ...f, rsiRole: role as RsiRole }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.rsiRole === role
+                      ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                      : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {role}
+                </button>
+              ))}
+            </div>
+
+            {manufacturerOptions.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Manufacturer</span>
+                <button
+                  onClick={() => setFilters((f) => ({ ...f, manufacturer: 'All' }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.manufacturer === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  All
+                </button>
+                {manufacturerOptions.map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setFilters((f) => ({ ...f, manufacturer: name }))}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      filters.manufacturer === name
+                        ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                        : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                    }`}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Readiness</span>
+              {readinessPills.map((pill) => (
+                <button
+                  key={pill.value}
+                  onClick={() => setFilters((f) => ({ ...f, readiness: pill.value }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.readiness === pill.value
+                      ? 'bg-cyan/15 border-cyan/40 text-cyan'
+                      : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
-
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Readiness</span>
-          {readinessPills.map((pill) => (
-            <button
-              key={pill.value}
-              onClick={() => setFilters((f) => ({ ...f, readiness: pill.value }))}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filters.readiness === pill.value
-                  ? 'bg-cyan/15 border-cyan/40 text-cyan'
-                  : 'border-white/10 text-muted hover:text-white hover:border-white/25'
-              }`}
-            >
-              {pill.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Ships Shown + Sort — grouped together, visually distinct from Filters. */}
@@ -285,7 +339,24 @@ export default function FleetDashboard() {
         </div>
       </div>
 
-      {viewMode === 'Card' ? (
+      {filtered.length === 0 ? (
+        // EWO-059 (Part B, Zero-results state) — a functioning filter
+        // combination that happens to exclude every ship is not the same
+        // thing as an empty fleet (the ships.length === 0 case above) —
+        // it needs its own intentional, recoverable empty state, never a
+        // blank results area that could read as a broken page.
+        <div className="panel p-10 flex flex-col items-center text-center gap-2">
+          <PackageX size={28} className="text-muted/60 mb-1" />
+          <h2 className="font-display font-semibold text-white">No ships match these filters.</h2>
+          <p className="text-sm text-muted max-w-sm">Adjust the selected filters or clear them to view your fleet.</p>
+          <button
+            onClick={() => setFilters(DEFAULT_FLEET_FILTERS)}
+            className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : viewMode === 'Card' ? (
         // EWO-033 (Task 1) — every Fleet Asset gets its own Priority
         // wrapper in Card view, always (not only while Priority sort is
         // selected), showing that ship's own stored `priority` value —
