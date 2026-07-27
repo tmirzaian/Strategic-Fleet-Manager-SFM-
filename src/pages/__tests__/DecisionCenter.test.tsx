@@ -45,6 +45,16 @@ function checkItem(name: string) {
  * resolved name ("SnowBlind") and so would never match here, a pre-existing
  * seed/catalog casing mismatch outside this mission's scope.
  */
+describe('<DecisionCenter /> — EWO-061: standardized operational header', () => {
+  it('renders the standard label-above-title header with no functional-description paragraph', () => {
+    renderDecisionCenter()
+    const label = screen.getByText('Decision Center')
+    expect(label.tagName).toBe('P')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Should I keep this?')
+    expect(screen.queryByText(/Check found loot against your active Loadouts/)).not.toBeInTheDocument()
+  })
+})
+
 describe('<DecisionCenter /> — EWO-031 (Task 4): canonical catalog, not a demo list', () => {
   it('1. suggestions are drawn from the real generated component catalog, not a small demo list', () => {
     if (!catalogComponentsByName.has('Omnisky III Cannon')) return

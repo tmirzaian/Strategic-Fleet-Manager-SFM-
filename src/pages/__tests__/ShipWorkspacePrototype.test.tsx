@@ -82,6 +82,21 @@ function renderWorkspace(shipId?: string) {
 }
 
 describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () => {
+  it('EWO-060/EWO-061: the page identity reads "Ship Management" (section label, per the standardized header pattern) — the retired "Ship Workspace" name never renders', () => {
+    renderWorkspace()
+    expect(screen.getByText('Ship Management')).toBeInTheDocument()
+    expect(screen.queryByText('Ship Workspace')).not.toBeInTheDocument()
+  })
+
+  it('EWO-061: the header follows the standardized pattern — small "Ship Management" label above one large operational title, no functional-description paragraph', () => {
+    renderWorkspace()
+    const label = screen.getByText('Ship Management')
+    expect(label.tagName).toBe('P')
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading).toHaveTextContent('What does this ship need?')
+    expect(screen.queryByText('Assess readiness, configure loadouts, and manage installed components.')).not.toBeInTheDocument()
+  })
+
   it('shows the blank Select a Ship state when no ship is selected', () => {
     renderWorkspace()
     expect(screen.getByText('Select a Ship')).toBeInTheDocument()

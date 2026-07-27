@@ -109,6 +109,13 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     expect(screen.getByText("Captain's Log")).toBeInTheDocument()
   })
 
+  it('EWO-060: the Ship Management nav item reads "Ship Management", not the retired "Ship Workspace" label — same /ship-workspace route', () => {
+    renderSidebar()
+    const link = screen.getByText('Ship Management').closest('a')!
+    expect(link).toHaveAttribute('href', '/ship-workspace')
+    expect(screen.queryByText('Ship Workspace')).not.toBeInTheDocument()
+  })
+
   it('10/11. compactMark and sidebarCommissioningMark remain valid, unrepurposed semantic keys — missing/disabled assets still fail safely via the existing pattern', () => {
     // Exercised indirectly: Sidebar itself never references these keys anymore
     // (see test 3), and the registry-level guarantee that they still resolve

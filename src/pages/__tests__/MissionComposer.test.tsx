@@ -21,6 +21,16 @@ function renderComposer(search = '') {
   )
 }
 
+describe('<MissionComposer /> (Loadout Manager) — EWO-061: standardized operational header', () => {
+  it('renders the standard label-above-title header with no functional-description paragraph', () => {
+    renderComposer()
+    const label = screen.getByText('Loadout Manager')
+    expect(label.tagName).toBe('P')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('How do I configure this ship?')
+    expect(screen.queryByText(/Edit every target equipment decision/)).not.toBeInTheDocument()
+  })
+})
+
 describe('<MissionComposer /> (Loadout Manager)', () => {
   it('renders the required starting-state options using Loadout terminology (Alpha 2.4)', () => {
     // FTB-001A (Workstream D) — Starting-state options only render once a
@@ -512,11 +522,11 @@ describe('EWO-026 (Task 1/2/13): post-save workflow stays inside Loadout Manager
   })
 })
 
-describe('EWO-026 (Task 3/4/13)/SW-013B (Objective 4): explicit "View in Ship Workspace" navigation', () => {
-  it('9/10. renders "View in Ship Workspace" (not "Back to Ship Detail") carrying the exact selected Fleet Asset id', () => {
+describe('EWO-026 (Task 3/4/13)/SW-013B (Objective 4)/EWO-060: explicit "View in Ship Management" navigation', () => {
+  it('9/10. renders "View in Ship Management" (not "Back to Ship Detail") carrying the exact selected Fleet Asset id', () => {
     renderComposer('?shipId=utv')
     expect(screen.queryByText('Back to Ship Detail')).not.toBeInTheDocument()
-    const link = screen.getByText('View in Ship Workspace').closest('a')!
+    const link = screen.getByText('View in Ship Management').closest('a')!
     expect(link.getAttribute('href')).toBe('/ship-workspace/utv')
   })
 
@@ -526,7 +536,7 @@ describe('EWO-026 (Task 3/4/13)/SW-013B (Objective 4): explicit "View in Ship Wo
     expect(a.assetId).not.toBe(b.assetId)
 
     renderComposer(`?shipId=${b.assetId}`)
-    const link = screen.getByText('View in Ship Workspace').closest('a')!
+    const link = screen.getByText('View in Ship Management').closest('a')!
     expect(link.getAttribute('href')).toBe(`/ship-workspace/${b.assetId}`)
     expect(link.getAttribute('href')).not.toBe(`/ship-workspace/${a.assetId}`)
   })

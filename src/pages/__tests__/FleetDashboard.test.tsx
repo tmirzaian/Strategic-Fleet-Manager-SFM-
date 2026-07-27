@@ -357,3 +357,50 @@ describe('EWO-059 (Part B): collapsible Quick Filters', () => {
     expect(screen.getByText('Ship')).toBeInTheDocument()
   })
 })
+
+describe('EWO-060 (Part A/B): Fleet Dashboard Table Cleanup & Ship Management rename', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  function tableHeaders(): string[] {
+    return Array.from(document.querySelectorAll('thead th')).map((th) => th.textContent ?? '')
+  }
+
+  it('Career and Role headers are gone from Table view', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    expect(screen.queryByText('Career')).not.toBeInTheDocument()
+    expect(screen.queryByText('Role')).not.toBeInTheDocument()
+  })
+
+  it('the remaining headers render in the intended order: Ship, Ownership, Active Loadout, Loadout Progress, Missing Items, Action', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    expect(tableHeaders()).toEqual(['Ship', 'Ownership', 'Active Loadout', 'Loadout Progress', 'Missing Items', 'Action'])
+  })
+
+  it('"Manage Ship" appears for every row, and the obsolete "Ship Workspace" table action label never renders', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    const { ships } = useFleetStore.getState()
+    expect(screen.getAllByText('Manage Ship')).toHaveLength(ships.length)
+    expect(screen.queryByText('Ship Workspace')).not.toBeInTheDocument()
+  })
+
+  it('the "Manage Ship" action link still navigates to the existing Ship Management destination (route unchanged)', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Table'))
+    const { ships } = useFleetStore.getState()
+    const first = ships[0]
+    const row = screen.getByText(first.name).closest('tr') as HTMLElement
+    const link = within(row).getByText('Manage Ship').closest('a')!
+    expect(link).toHaveAttribute('href', `/ship-workspace/${first.id}`)
+  })
+
+  it('Card view is unaffected by the table cleanup — Priority wrappers and click-anywhere navigation still work', () => {
+    renderDashboard()
+    const { ships } = useFleetStore.getState()
+    expect(screen.getAllByTestId('priority-card-wrapper')).toHaveLength(ships.length)
+  })
+})

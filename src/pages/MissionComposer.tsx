@@ -732,10 +732,13 @@ export default function MissionComposer() {
     // pages by relying on the same shared container instead of adding its
     // own narrower one.
     <div className="space-y-8">
+      {/* EWO-061 — Operational Header Standardization (§30): the
+          functional-description paragraph is dropped — the Ship/Loadout
+          selectors and Create/Edit actions immediately below already
+          communicate the page's purpose. */}
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Loadout Manager</p>
-        <h1 className="text-2xl font-display font-bold text-white flex items-center gap-2">How do I configure this ship?</h1>
-        <p className="text-sm text-muted mt-1">Edit every target equipment decision for one exact ship, then save it — optionally as the Active Loadout.</p>
+        <h1 className="text-2xl font-display font-bold text-white">How do I configure this ship?</h1>
       </div>
 
       <div className="panel p-5 space-y-4">
@@ -1005,10 +1008,12 @@ export default function MissionComposer() {
             exactly the same way it did to `/ship/:shipId`; no second
             navigation/selection mechanism is introduced here (Ruling 8).
             SW-013B (Objective 4) — this cross-link now lands in Ship
-            Workspace, matching every other primary ship-selection entry
-            point; Ship Detail has no explicit reason to be required here. */}
+            Management, matching every other primary ship-selection entry
+            point; Ship Detail has no explicit reason to be required here.
+            EWO-060 — label renamed "Ship Workspace" -> "Ship Management"
+            (terminology correction only, route unchanged). */}
         <Link to={`/ship-workspace/${ship.id}`} className="inline-flex items-center gap-2 text-muted text-sm px-4 py-2 hover:text-white transition-colors">
-          <Rocket size={15} /> View in Ship Workspace
+          <Rocket size={15} /> View in Ship Management
         </Link>
       </div>
       </>

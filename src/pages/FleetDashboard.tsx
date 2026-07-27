@@ -379,15 +379,29 @@ export default function FleetDashboard() {
       ) : (
         <div className="panel overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            {/* EWO-060 (Part A) — Career/Role removed (low-value, mirrored
+                data already visible via the ship name/Manufacturer
+                elsewhere); the reclaimed width is redistributed via an
+                explicit `<colgroup>` (the same locked-column-width pattern
+                Mission Control's own Procurement Work Queue table already
+                uses) rather than left to auto-layout, so Ship, Active
+                Loadout, and Missing Items genuinely gain room instead of
+                the browser distributing it arbitrarily. */}
+            <table className="w-full text-sm table-fixed">
+              <colgroup>
+                <col className="w-[22%]" />
+                <col className="w-[9%]" />
+                <col className="w-[21%]" />
+                <col className="w-[13%]" />
+                <col className="w-[25%]" />
+                <col className="w-[10%]" />
+              </colgroup>
               <thead>
                 <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
                   <th className="px-5 py-3 font-medium">Ship</th>
                   <th className="px-5 py-3 font-medium">Ownership</th>
-                  <th className="px-5 py-3 font-medium">Career</th>
-                  <th className="px-5 py-3 font-medium">Role</th>
                   <th className="px-5 py-3 font-medium">Active Loadout</th>
-                  <th className="px-5 py-3 font-medium w-40">Loadout Progress</th>
+                  <th className="px-5 py-3 font-medium">Loadout Progress</th>
                   <th className="px-5 py-3 font-medium">Missing Items</th>
                   <th className="px-5 py-3 font-medium text-right">Action</th>
                 </tr>
@@ -398,13 +412,11 @@ export default function FleetDashboard() {
                   const state = stateByShipId.get(ship.id)!
                   return (
                     <tr key={ship.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                      <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{ship.name}</td>
+                      <td className="px-5 py-3 text-white font-medium truncate">{ship.name}</td>
                       <td className="px-5 py-3">
                         <Badge tone={ownershipTone(ship.ownership)}>{ship.ownership}</Badge>
                       </td>
-                      <td className="px-5 py-3 text-muted whitespace-nowrap">{ship.career}</td>
-                      <td className="px-5 py-3 text-muted whitespace-nowrap">{ship.role}</td>
-                      <td className="px-5 py-3 text-cyan/90 whitespace-nowrap">{state === 'FACTORY_ONLY' ? 'Factory Loadout' : buildName(ship.activeBuildId)}</td>
+                      <td className="px-5 py-3 text-cyan/90 truncate">{state === 'FACTORY_ONLY' ? 'Factory Loadout' : buildName(ship.activeBuildId)}</td>
                       <td className="px-5 py-3">
                         {state === 'INVALID_BUILD' ? (
                           <span className="inline-flex items-center gap-1.5 text-danger text-xs font-semibold uppercase tracking-widest">
@@ -429,15 +441,18 @@ export default function FleetDashboard() {
                           <span className="text-success">None</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-right">
+                      <td className="px-5 py-3 text-right whitespace-nowrap">
                         {/* SW-013B (Objective 1) — table view's own per-row
-                            destination is now Ship Workspace, matching the
-                            card view's click-anywhere target above. */}
+                            destination is Ship Management, matching the
+                            card view's click-anywhere target above.
+                            EWO-060 (Part B) — label renamed from "Ship
+                            Workspace" to "Manage Ship"; destination route
+                            is unchanged. */}
                         <Link
                           to={`/ship-workspace/${ship.id}`}
-                          className="inline-flex items-center gap-1 text-cyan text-xs font-medium hover:gap-1.5 transition-all"
+                          className="inline-flex items-center justify-end gap-1 text-cyan text-xs font-medium hover:gap-1.5 transition-all"
                         >
-                          Ship Workspace <ArrowRight size={13} />
+                          Manage Ship <ArrowRight size={13} />
                         </Link>
                       </td>
                     </tr>

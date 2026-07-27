@@ -3,10 +3,12 @@ import { ShipWheel, Target, Telescope, Sparkles } from 'lucide-react'
 export default function FleetRoadmap() {
   return (
     <div className="space-y-6 max-w-2xl">
+      {/* EWO-061 — Operational Header Standardization (§30): the
+          descriptive paragraph is dropped — the four goal cards
+          immediately below already communicate the page's purpose. */}
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Fleet Roadmap</p>
         <h1 className="text-2xl font-display font-bold text-white">Where is the fleet headed?</h1>
-        <p className="text-sm text-muted mt-1">Quality-of-life view. Not required for day-to-day updates.</p>
       </div>
 
       <div className="panel p-5 flex items-start gap-4">

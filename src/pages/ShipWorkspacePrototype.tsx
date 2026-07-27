@@ -1741,17 +1741,23 @@ export default function ShipWorkspacePrototype() {
 
   return (
     <div className="space-y-4">
-      {/* PAGE IDENTITY — deliberately lightweight: title, one-line
-          functional description, and Ship Selection (a workspace-level
-          action, not ship-state). No ship-state of any kind lives here.
-          SW-013B (Objective 1/5) — the "Prototype" badge is removed: this
-          is now the canonical, primary ship-management surface (Ship
-          Workspace Promotion), not an experimental page — the label was
-          no longer accurate. */}
+      {/* PAGE IDENTITY — deliberately lightweight: label, title, and Ship
+          Selection (a workspace-level action, not ship-state). No
+          ship-state of any kind lives here. SW-013B (Objective 1/5) — the
+          "Prototype" badge is removed: this is now the canonical, primary
+          ship-management surface (Ship Workspace Promotion), not an
+          experimental page — the label was no longer accurate.
+          EWO-061 — Operational Header Standardization (§30): the small
+          section label (matching the Sidebar/EWO-060's "Ship Management")
+          sits above one large operational title, the same pattern every
+          other page uses; the prior functional-description paragraph is
+          dropped — the Readiness bar, Decision Summary, and "What do you
+          want to change?" actions immediately below already communicate
+          the page's purpose. */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white">Ship Management</h1>
-          <p className="text-sm text-muted mt-1">Assess readiness, configure loadouts, and manage installed components.</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Ship Management</p>
+          <h1 className="text-2xl font-display font-bold text-white">What does this ship need?</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* SW-011A (Objective 4) — Developer Mode: local, unpersisted

@@ -31,6 +31,16 @@ function renderQuickUpdate() {
  * Cooler 1 slot already targets "SnowBlind" (unfulfilled) — both confirmed
  * directly against src/data/seed.ts rather than assumed.
  */
+describe('<QuickUpdate /> — EWO-061: standardized operational header', () => {
+  it('renders the standard label-above-title header with no reassurance-copy paragraph', () => {
+    renderQuickUpdate()
+    const label = screen.getByText('Quick Update')
+    expect(label.tagName).toBe('P')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('What changed?')
+    expect(screen.queryByText(/Log it in under two minutes/)).not.toBeInTheDocument()
+  })
+})
+
 describe('<QuickUpdate /> — EWO-030 (Task 1): canonical component search renderer', () => {
   it('1. Install Component renders the same search input + listbox + Type/Size fields Hangar Inventory uses, not a free-text search', () => {
     renderQuickUpdate()

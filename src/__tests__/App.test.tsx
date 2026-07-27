@@ -25,3 +25,14 @@ describe('Mission M-011: every existing application route renders without throwi
     ).not.toThrow()
   })
 })
+
+describe('EWO-060: "Ship Workspace" terminology is fully retired from rendered production UI', () => {
+  it.each([...routes, '/ship-workspace', '/ship-workspace/ghost'])('%s never renders the retired "Ship Workspace" string', (route) => {
+    render(
+      <MemoryRouter initialEntries={[route]}>
+        <App />
+      </MemoryRouter>
+    )
+    expect(document.body.textContent).not.toContain('Ship Workspace')
+  })
+})

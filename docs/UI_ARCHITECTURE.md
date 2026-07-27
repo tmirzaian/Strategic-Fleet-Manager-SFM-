@@ -1008,7 +1008,7 @@ record; Mission Control shows only what the fleet can act on today.
 UX-001B's first pass grouped Quartermaster demand using
 `commanderSystemTaxonomy.ts`'s `TOP_LEVEL_GROUP_ORDER` — the taxonomy
 that groups a ship's *ports* into layout sections for Ship Detail's
-Loadout Tree and Ship Workspace's Systems Workspace (Manned Turrets,
+Loadout Tree and Ship Management's Systems Workspace (Manned Turrets,
 Remote Turrets, Modules, and one catch-all "Core Components" bucket
 containing Coolers, Power Plants, Quantum Drives, Shields, and Life
 Support together). Commander review found this wrong for a demand
@@ -1018,7 +1018,7 @@ layout answers a different question than grouping by what you'd actually
 go acquire.
 
 **The corrected authority is `src/utils/componentCategoryIcon.ts`**,
-elevated from a Ship-Workspace-only icon picker into the one canonical
+elevated from a Ship-Management-only icon picker into the one canonical
 component-*system* taxonomy — glyph, label, and display order together,
 not just glyph:
 
@@ -1036,7 +1036,7 @@ not just glyph:
   Coolers, Power Plants, Quantum Drives, Shields, and Weapons lead (the
   WO's own required set), the remaining categories follow in the same
   additive pattern.
-- `componentCategoryIcon(hp)` itself — Ship Workspace's Systems table and
+- `componentCategoryIcon(hp)` itself — Ship Management's Systems table and
   `LoadoutPortTree`'s own per-row icon — is now a one-line composition of
   the key lookup and the icon map, byte-identical behavior to before
   (verified by the existing "SW-007B Rev 2" regression test asserting
@@ -1093,7 +1093,7 @@ table rather than requiring a redesign.
 semantic color system for operational inventory states. The same state
 shall always use the same color throughout the application. State colors
 become part of the user's learned operational vocabulary and shall not
-vary between Mission Control, Hangar Inventory, Ship Workspace,
+vary between Mission Control, Hangar Inventory, Ship Management,
 Procurement, or future Quartermaster modules.*
 
 **Stable Logistics Categories (Deliverable 3/4).** Quartermaster
@@ -1118,8 +1118,8 @@ cards for systems a fleet has no Mining/Salvage/Turret presence in.
 Selecting a category card filters the Work Queue in place — no route
 change, no Hero movement, no column-width shift. State badges remain
 informational, never a navigation target; "Needed By" remains the one
-hyperlink, carrying the Commander to Ship Workspace to actually perform
-the work. Mission Control identifies work; Ship Workspace performs it.
+hyperlink, carrying the Commander to Ship Management to actually perform
+the work. Mission Control identifies work; Ship Management performs it.
 
 ## 24. Commander Acceptance Polish — Locked Columns, Actionable-Only Filtering, Dual Assessment States (UX-001B.4, IMPLEMENTED NOW)
 
@@ -1318,11 +1318,11 @@ component refactors, or architecture changes in scope.
   current fleet priorities."
 
 **Reviewed and confirmed already correct, no action taken:** the
-"Prototype" badge on Ship Workspace (retired earlier, by SW-013B — see
+"Prototype" badge on Ship Management (retired earlier, by SW-013B — see
 §19); `ShipWorkspacePrototype` as a source-level module name (never
 rendered to a Commander, and renaming it would be a component refactor,
 explicitly out of this mission's scope); the Developer Mode toggle on
-Ship Workspace (a deliberate, permanently-gated diagnostic feature, off
+Ship Management (a deliberate, permanently-gated diagnostic feature, off
 by default, not a leftover); the `VITE_SFM_DEV_SEED_FLEET` local-dev seed
 flag (gated behind an explicit, gitignored, opt-in environment variable —
 never on for a real Commander); and the `APP_VERSION` "Beta 1.2" label
@@ -1365,3 +1365,95 @@ recovery instruction / a Clear Filters action) rather than a blank
 results area, distinguishing "a working filter with no matches" from
 a broken page — the same principle Mission Control's own zero-result
 states (§21/§25) already establish for the Quartermaster Report.
+
+## 29. Fleet Dashboard Table Cleanup & Ship Workspace → Ship Management Rename (EWO-060, IMPLEMENTED NOW)
+
+**Part A — dead columns removed.** Fleet Dashboard's Table view dropped
+its Career and Role columns (low-value, near-duplicate of information
+already visible elsewhere) and redistributes the reclaimed width via an
+explicit `<colgroup>` — the same locked-column-width pattern Mission
+Control's own Procurement Work Queue table already established (§21) —
+rather than leaving it to browser auto-layout. Remaining columns, in
+order: Ship, Ownership, Active Loadout, Loadout Progress, Missing Items,
+Action. No replacement columns were introduced.
+
+**Part B — table action renamed.** The per-row action link reads "Manage
+Ship" (was "Ship Workspace"); its destination (`/ship-workspace/:shipId`)
+is unchanged.
+
+**Part C — the terminology rename.** "Ship Workspace" is retired from
+every Commander-facing surface in favor of **Ship Management** (the
+navigation/page name) and **Manage Ship** (the action link/button
+verb) — the Sidebar nav item, the page's own header (read "Ship
+Management" as its `<h1>` since SW-013B; EWO-061/§30 later moved that
+exact text into the header's small section label instead, as part of
+standardizing the header pattern itself — the name is unchanged, only
+which line of the header carries it), and every cross-link into the
+page (Loadout Manager's "View in Ship Management," Mission Control's
+Needed By hyperlinks, the Quartermaster Report's Execute Orders card).
+Per the same Internal Naming Policy EWO-058 established ("user-facing
+terminology is product, internal naming is architecture"), the
+`/ship-workspace` route, the `ShipWorkspacePrototype` component/module
+name, and every internal comment referencing the historical "Ship
+Workspace Promotion" (SW-013B) decision are deliberately left alone —
+renaming them would be churn with no Commander-facing benefit. The
+separate, unrelated Ship Detail page is untouched.
+
+## 30. Operational Header Standard (EWO-061, Design System Amendment, IMPLEMENTED NOW)
+
+**One approved header pattern, now used by every operational page**
+(Mission Control, Fleet Dashboard, Decision Center, Hangar Inventory,
+Ship Management, Captain's Log, Quick Update, Loadout Manager, Fleet
+Roadmap, Ship Detail):
+
+```tsx
+<div>
+  <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">{Section Label}</p>
+  <h1 className="text-2xl font-display font-bold text-white">{Operational Title}</h1>
+</div>
+```
+
+Two lines, nothing more. The **section label** is small, uppercase,
+cyan, and matches the page's own Sidebar nav item verbatim (never a
+different string) — it identifies *where the Commander is*. The
+**operational title** is the one large `<h1>`, always phrased as a short
+Commander-voice question or statement of purpose (never a restatement of
+the label) — it identifies *what this screen is for* ("Should I keep
+this?", "What do I own?", "Which ship needs attention?", "What
+happened?", "Is this ship ready?", "What changed?", "How do I configure
+this ship?", "What does this ship need?", "Where is the fleet headed?").
+A page may place other elements (Add/action buttons, view toggles, Ship
+Selection) beside this block in the same flex row — HangarInventory and
+Fleet Dashboard already did this before this mission — but never a third
+line of body text inside the header block itself.
+
+**What changed to reach this state:**
+
+- **Mission Control** previously inverted the pattern (large uppercase
+  `<h1>Mission Control</h1>` first, a smaller "Fleet Operations" tagline
+  second, its own distinct sizing/tracking) — reordered and retyped to
+  match exactly. Both strings are unchanged; "Mission Control" is now the
+  section label and "Fleet Operations" is now the operational title.
+- **Ship Management** had no section label at all — its `<h1>` carried
+  the page name itself ("Ship Management") followed by a functional-
+  description paragraph. It now carries a "Ship Management" label (same
+  text, demoted to its standard position) and a new operational title,
+  "What does this ship need?", in the same Commander-voice-question style
+  every other page already used. See §29's Part C note on this.
+- **Decision Center, Quick Update, Loadout Manager, and Fleet Roadmap**
+  each had a third-line descriptive/reassurance paragraph explaining how
+  the page works — all four are removed. Every one of these pages already
+  communicates its purpose through its own primary action (a search
+  field, a form, a selector, a set of cards) immediately below the
+  header; retaining explanatory header copy duplicated what the
+  interface itself already shows, which conflicts with the same
+  philosophy Mission Control's own header has held since EWO-011 ("the
+  interface explains itself; no instructional copy") — this mission
+  extends that discipline app-wide rather than leaving it unique to one
+  page.
+- **Fleet Dashboard, Hangar Inventory, Captain's Log, and Ship Detail**
+  already matched the approved pattern exactly and needed no change —
+  they are the pages this standard was extracted from.
+
+No navigation, routing, or page content below the header changed as part
+of this mission.

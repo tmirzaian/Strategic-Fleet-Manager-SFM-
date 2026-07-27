@@ -35,7 +35,7 @@ export const WORKFLOW_ILLUSTRATIONS: Record<WorkflowIllustrationId, WorkflowIllu
     src: assetPath('environments/mission-control/add-inventory-card.webp'),
     enabled: true,
   }),
-  'ship-workspace-modify': definition('ship-workspace-modify', 'Modify Ship — Ship Workspace', {
+  'ship-workspace-modify': definition('ship-workspace-modify', 'Modify Ship — Ship Management', {
     src: assetPath('environments/mission-control/ship-workspace-card.webp'),
     enabled: true,
   }),

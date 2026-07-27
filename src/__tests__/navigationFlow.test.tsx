@@ -60,7 +60,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(screen.getAllByText('Flow Build A').length).toBeGreaterThan(0)
 
     // Explicit navigation to Ship Detail for the exact same Fleet Asset.
-    fireEvent.click(screen.getByText('View in Ship Workspace'))
+    fireEvent.click(screen.getByText('View in Ship Management'))
     expect(screen.getAllByText('Nav Flow Cutty').length).toBeGreaterThan(0)
     // Category hierarchy is intact — the round-2 Task 1 fix.
     expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
@@ -81,7 +81,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(screen.getAllByText('Flow Build A').length).toBeGreaterThan(0)
 
     // Back to Ship Detail one more time — hierarchy still intact, nothing lost.
-    fireEvent.click(screen.getByText('View in Ship Workspace'))
+    fireEvent.click(screen.getByText('View in Ship Management'))
     expect(screen.getByText('Pilot Weapons')).toBeInTheDocument()
     expect(screen.getByText('Core Components')).toBeInTheDocument()
   })
@@ -105,7 +105,7 @@ describe('EWO-026 (round 2, Task 4): full navigation flow preserves state withou
     expect(clone).toBeDefined()
     expect(clone.id).not.toBe(original.id)
 
-    fireEvent.click(screen.getByText('View in Ship Workspace'))
+    fireEvent.click(screen.getByText('View in Ship Management'))
     expect(document.body.textContent).not.toMatch(/undefined|NaN/)
 
     openLoadoutManagerFor(shipId)

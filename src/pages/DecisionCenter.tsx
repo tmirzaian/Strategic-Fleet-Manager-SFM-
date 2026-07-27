@@ -70,11 +70,12 @@ export default function DecisionCenter() {
   return (
     <div className="space-y-6 max-w-xl">
       <div>
+        {/* EWO-061 — Operational Header Standardization (§30): the
+            functional-description paragraph is dropped — the Found Item
+            search field and verdict cards immediately below already
+            communicate the page's purpose. */}
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Decision Center</p>
         <h1 className="text-2xl font-display font-bold text-white">Should I keep this?</h1>
-        <p className="text-sm text-muted mt-1">
-          Check found loot against your active Loadouts. Anything no active Loadout needs is safe to Store — nothing here reserves or installs on its own.
-        </p>
       </div>
 
       <div className="panel p-6 space-y-4">

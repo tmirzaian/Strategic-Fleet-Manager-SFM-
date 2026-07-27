@@ -31,6 +31,14 @@ import {
 // the list, reflecting its new role as a supporting/comparison tool
 // (Objective 2) rather than the default destination — it is not removed,
 // hidden, or demoted in capability, only in position.
+//
+// EWO-060 — the label is renamed again, "Ship Workspace" to "Ship
+// Management" (a terminology correction, not a second promotion — the
+// route, position, and everything SW-013B established above is
+// unchanged). "Ship Workspace" is retired from every Commander-facing
+// surface; the internal `/ship-workspace` route name is intentionally
+// left alone (Internal Naming Policy — renaming it would be churn
+// without Commander benefit).
 const navItems = [
   { to: '/', label: 'Mission Control', icon: Radar, end: true },
   { to: '/fleet', label: 'Fleet Dashboard', icon: LayoutGrid },
@@ -40,7 +48,7 @@ const navItems = [
   // clicked. General navigation now lands on a blank ship selection
   // instead of an inferred/hardcoded ship. Unchanged by SW-013B — this
   // reasoning applies equally to the blank `/ship-workspace` entry below.
-  { to: '/ship-workspace', label: 'Ship Workspace', icon: Wrench },
+  { to: '/ship-workspace', label: 'Ship Management', icon: Wrench },
   { to: '/loadout-manager', label: 'Loadout Manager', icon: Sparkles },
   { to: '/hangar', label: 'Hangar Inventory', icon: Package },
   { to: '/quick-update', label: 'Quick Update', icon: Zap },

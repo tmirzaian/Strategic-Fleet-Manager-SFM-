@@ -204,9 +204,11 @@ export default function QuickUpdate() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
+        {/* EWO-061 — Operational Header Standardization (§30): the
+            reassurance-copy paragraph is dropped — the single-field form
+            immediately below already communicates the page's purpose. */}
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Quick Update</p>
         <h1 className="text-2xl font-display font-bold text-white">What changed?</h1>
-        <p className="text-sm text-muted mt-1">Log it in under two minutes. Nothing here should feel heavy.</p>
       </div>
 
       <div className="panel p-6 space-y-5">

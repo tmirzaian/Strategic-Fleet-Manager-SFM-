@@ -307,10 +307,15 @@ export default function MissionControl() {
   return (
     <div className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] flex flex-col">
       <div className="space-y-8 flex-1">
-        {/* DA-008.1 — the interface explains itself; no instructional copy. */}
-        <div className="py-2">
-          <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-wide text-white uppercase">Mission Control</h1>
-          <p className="text-xs uppercase tracking-[0.15em] sm:tracking-[0.3em] text-cyan/70 mt-2">Fleet Operations</p>
+        {/* DA-008.1 — the interface explains itself; no instructional copy.
+            EWO-061 — Operational Header Standardization: label-above-title,
+            same typography every other operational page already uses
+            (§30). Both text strings are unchanged (still "Mission
+            Control"/"Fleet Operations") — only their order, sizing, and
+            positions were brought in line. */}
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Mission Control</p>
+          <h1 className="text-2xl font-display font-bold text-white">Fleet Operations</h1>
         </div>
 
         {/* UX-001A — Command Briefing Hero. Three columns, one responsibility

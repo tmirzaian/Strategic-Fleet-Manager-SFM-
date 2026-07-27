@@ -758,6 +758,14 @@ describe('<MissionControl /> — EWO-011 Design Freeze', () => {
     expect(screen.queryByText(/track your fleet/i)).not.toBeInTheDocument()
   })
 
+  it('EWO-061: the identity header follows the standardized pattern — small "Mission Control" label above the large "Fleet Operations" title', () => {
+    renderMissionControl()
+    const label = screen.getByText('Mission Control')
+    expect(label.tagName).toBe('P')
+    const heading = screen.getByRole('heading', { level: 1 })
+    expect(heading).toHaveTextContent('Fleet Operations')
+  })
+
   it('EWO-058: the obsolete "Update Budget" development-era footer no longer renders', () => {
     renderMissionControl()
     expect(screen.queryByText(/Update Budget/)).not.toBeInTheDocument()
