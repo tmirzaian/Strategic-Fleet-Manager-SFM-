@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, X, AlertOctagon, PackageX, Pencil, Trash2, Lock, SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import SortableHeader from '../components/SortableHeader'
 import CatalogComponentSearch from '../components/CatalogComponentSearch'
 import type { HangarItem } from '../types'
@@ -52,7 +53,10 @@ function isTrueZero(installedQuantity: number, reservedQuantity: number, availab
 
 export default function HangarInventory() {
   const hangarItems = useFleetStore((s) => s.hangarItems)
-  const ships = useFleetStore((s) => s.ships)
+  // SW-015C (Deliverable 4) — same single-point interception as
+  // DecisionCenter.tsx: every use of `ships` here feeds demand/
+  // dependency/reservation-eligibility computation for the current fleet.
+  const ships = selectActiveShips(useFleetStore((s) => s.ships))
   const builds = useFleetStore((s) => s.builds)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
   const hardpoints = useFleetStore((s) => s.hardpoints)

@@ -111,18 +111,19 @@ describe('EWO-027: custom Loadouts survive a genuine reload', () => {
     expect(reloaded.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId).toBe(save.buildId)
   })
 
-  it('6. a custom Loadout for a ship that was subsequently removed is never resurrected on reload', async () => {
+  it('6. SW-015C: a custom Loadout for a RETIRED ship survives reload — retirement preserves configuration, it does not destroy it', async () => {
     const { useFleetStore } = await import('../useFleetStore')
-    const added = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Removed Ship')
+    const added = useFleetStore.getState().addFleetAsset('cutlass-black-imported', 'OWNED', 'Retired Ship')
     const shipId = added.assetId!
-    useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'Doomed Build', startingState: 'FACTORY', targetOverrides: {}, setActive: true })
-    useFleetStore.getState().removeFleetAsset(shipId)
+    useFleetStore.getState().saveMissionConfiguration({ shipId, name: 'Preserved Build', startingState: 'FACTORY', targetOverrides: {}, setActive: true })
+    useFleetStore.getState().retireFleetAsset(shipId)
 
     vi.resetModules()
     const { useFleetStore: reloaded } = await import('../useFleetStore')
 
-    expect(reloaded.getState().builds.some((b) => b.name === 'Doomed Build')).toBe(false)
-    expect(reloaded.getState().hardpoints.some((h) => h.shipId === shipId)).toBe(false)
+    expect(reloaded.getState().ships.find((s) => s.id === shipId)?.lifecycleStatus).toBe('retired')
+    expect(reloaded.getState().builds.some((b) => b.name === 'Preserved Build')).toBe(true)
+    expect(reloaded.getState().hardpoints.some((h) => h.shipId === shipId)).toBe(true)
   })
 
   it('7. Save Changes (editing an existing custom Loadout) persists the edited assignment across a genuine reload', async () => {

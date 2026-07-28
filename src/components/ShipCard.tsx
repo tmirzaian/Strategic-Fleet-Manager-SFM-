@@ -54,6 +54,11 @@ export default function ShipCard({
   // Mission Control and Fleet Dashboard render, so resolving the custom-
   // image tier here covers both surfaces at once.
   const { src: resolvedSrc } = useResolvedShipImage(ship.id, ship.imageUrl)
+  // SW-015C (Deliverable 7) — read directly off the Ship row rather than
+  // a separate prop; every caller already has the real lifecycle status
+  // on hand, and this keeps the card from needing a second source of
+  // truth for something the Ship type already carries.
+  const isRetired = ship.lifecycleStatus === 'retired'
 
   return (
     // SW-013B (Objective 1) — Ship Workspace Promotion. The canonical
@@ -63,10 +68,12 @@ export default function ShipCard({
     // dropdown, and a new "View in Ship Detail" link inside Ship
     // Workspace itself — Objective 2's "Preserve Legacy Access") but is
     // no longer the default destination a Commander lands on by clicking
-    // a ship.
+    // a ship. SW-015C — a retired vessel still lands here (Ship
+    // Management is exactly where its Fleet Registry "Return to Active
+    // Service" control lives), just visually subdued.
     <Link
       to={`/ship-workspace/${ship.id}`}
-      className="panel p-4 flex flex-col gap-3 h-full hover:shadow-glow hover:border-cyan/30 transition-all group"
+      className={`panel p-4 flex flex-col gap-3 h-full hover:shadow-glow hover:border-cyan/30 transition-all group ${isRetired ? 'opacity-60 hover:opacity-100' : ''}`}
     >
       {/* Region 1 — Image: fixed shared aspect ratio, full card width,
           consistent height regardless of a real photo vs the branded
@@ -92,7 +99,10 @@ export default function ShipCard({
           <h3 className="font-display font-semibold text-white leading-tight truncate">{ship.name}</h3>
           <p className="text-xs text-muted mt-0.5 line-clamp-1">{formatShipIdentityLine(ship.manufacturer, stockRoleFocus)}</p>
         </div>
-        <Badge tone={ownershipTone(ship.ownership)}>{ship.ownership}</Badge>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {isRetired && <Badge tone="muted">Retired</Badge>}
+          <Badge tone={ownershipTone(ship.ownership)}>{ship.ownership}</Badge>
+        </div>
       </div>
 
       {/* Region 3 — Active Loadout: always rendered (even for an Invalid

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useFleetStore } from '../useFleetStore'
 import { useShipImageCacheStore } from '../shipImageCache'
 import { storeShipImage, getShipImageBlob } from '../../utils/shipImageStorage'
@@ -62,8 +62,8 @@ describe('UX-005A: updateFleetAssetCustomImage — seed-migrated asset (Ghost)',
   })
 })
 
-describe('UX-005A (Deliverable 6): removeFleetAsset cleans up the managed image', () => {
-  it('deletes the IndexedDB blob when a vessel with a custom image is removed', async () => {
+describe('SW-015C (Deliverable 5): retireFleetAsset preserves the managed image — never deletes it', () => {
+  it('the IndexedDB blob and the customImageRef both survive retirement', async () => {
     const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
     const added = useFleetStore.getState().addFleetAsset(def.id, 'OWNED')
     const vesselId = added.assetId!
@@ -71,16 +71,17 @@ describe('UX-005A (Deliverable 6): removeFleetAsset cleans up the managed image'
     useFleetStore.getState().updateFleetAssetCustomImage(vesselId, `ships/${vesselId}.png`)
     expect(await getShipImageBlob(vesselId)).toBeDefined()
 
-    useFleetStore.getState().removeFleetAsset(vesselId)
-    await vi.waitFor(async () => {
-      expect(await getShipImageBlob(vesselId)).toBeUndefined()
-    })
+    const result = useFleetStore.getState().retireFleetAsset(vesselId)
+    expect(result.success).toBe(true)
+
+    expect(await getShipImageBlob(vesselId)).toBeDefined()
+    expect(useFleetStore.getState().fleetAssets.find((a) => a.id === vesselId)?.customImageRef).toBe(`ships/${vesselId}.png`)
   })
 
-  it('does not attempt any cleanup (and does not throw) for a vessel with no custom image', () => {
+  it('retiring a vessel with no custom image does not throw', () => {
     const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
     const added = useFleetStore.getState().addFleetAsset(def.id, 'OWNED')
-    expect(() => useFleetStore.getState().removeFleetAsset(added.assetId!)).not.toThrow()
+    expect(() => useFleetStore.getState().retireFleetAsset(added.assetId!)).not.toThrow()
   })
 })
 

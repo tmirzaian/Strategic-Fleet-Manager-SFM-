@@ -12,9 +12,9 @@ function hp(overrides: Partial<Hardpoint> = {}): Hardpoint {
 describe('buildProcurementList — Golden Scenario E (Part 15)', () => {
   it('three Missions requiring six FR-66: 2 installed, 2 reserved, 1 available, 1 missing -> shortage 1, available-to-reserve 1, never "6 needed"', () => {
     const ships: Ship[] = [
-      { id: 's1', name: 'Ship A', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [] },
-      { id: 's2', name: 'Ship B', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b2', readiness: 0, priority: 1, missing: [] },
-      { id: 's3', name: 'Ship C', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b3', readiness: 0, priority: 1, missing: [] },
+      { id: 's1', name: 'Ship A', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' },
+      { id: 's2', name: 'Ship B', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b2', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' },
+      { id: 's3', name: 'Ship C', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b3', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' },
     ]
     const builds: Build[] = [
       { id: 'b1', shipId: 's1', name: 'Mission A', role: 'R', readiness: 0, isActive: true, missing: [], kind: 'MISSION' },
@@ -52,7 +52,7 @@ describe('buildProcurementList — Golden Scenario E (Part 15)', () => {
   })
 
   it('20. a genuinely missing item with no owned quantity at all generates the correct procurement quantity', () => {
-    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [] }]
+    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }]
     const builds: Build[] = [{ id: 'b1', shipId: 's1', name: 'Mission', role: 'R', readiness: 0, isActive: true, missing: [], kind: 'MISSION' }]
     const hardpoints = [hp({ shipId: 's1', buildId: 'b1', targetItem: 'FR-66', status: 'Missing' })]
     const list = buildProcurementList(hardpoints, builds, ships, [], [], [])
@@ -60,7 +60,7 @@ describe('buildProcurementList — Golden Scenario E (Part 15)', () => {
   })
 
   it('21. procurement aggregates across Missions without double counting a single reserved unit', () => {
-    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [] }]
+    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }]
     const builds: Build[] = [{ id: 'b1', shipId: 's1', name: 'Mission', role: 'R', readiness: 0, isActive: true, missing: [], kind: 'MISSION' }]
     const hardpoints = [
       hp({ shipId: 's1', buildId: 'b1', slotLabel: 'Shield 1', targetItem: 'FR-66', status: 'Missing' }),
@@ -74,7 +74,7 @@ describe('buildProcurementList — Golden Scenario E (Part 15)', () => {
   })
 
   it('19. an available-unreserved item does not generate a procurement shortage', () => {
-    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [] }]
+    const ships: Ship[] = [{ id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'R', activeBuildId: 'b1', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }]
     const builds: Build[] = [{ id: 'b1', shipId: 's1', name: 'Mission', role: 'R', readiness: 0, isActive: true, missing: [], kind: 'MISSION' }]
     const hardpoints = [hp({ shipId: 's1', buildId: 'b1', targetItem: 'FR-66', status: 'Missing' })]
     const hangarItems: HangarItem[] = [{ id: 'hi1', name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' }]

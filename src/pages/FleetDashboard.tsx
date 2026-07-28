@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal } from 'lucide-react'
+import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal, Archive } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips, selectRetiredShips } from '../utils/fleetLifecycle'
 import ShipCard from '../components/ShipCard'
 import PriorityLabel from '../components/PriorityLabel'
 import Badge, { ownershipTone } from '../components/Badge'
@@ -39,10 +40,23 @@ const readinessPills: { value: ReadinessFilterValue; label: string }[] = [
 const sortLabels: Record<FleetSortMode, string> = { Priority: 'Priority', Readiness: 'Readiness', Name: 'Ship Name', Manufacturer: 'Manufacturer', RsiRole: 'RSI Role' }
 
 export default function FleetDashboard() {
-  const ships = useFleetStore((s) => s.ships)
+  const allShips = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
+
+  // SW-015C (Deliverable 7) — Active/Retired is a view toggle, not one
+  // more filter chip among ownership/manufacturer/role/readiness: it
+  // selects which BASE population (src/utils/fleetLifecycle.ts's one
+  // canonical active/retired split) the existing filter/sort pipeline
+  // below then runs against, unchanged. Defaults to Active, never
+  // session-persisted like the filter/sort/view choices below — a
+  // Commander should never land back on the Retired view by surprise
+  // after navigating away and back (Deliverable 7: "Retired vessels must
+  // not be mixed into the normal active fleet by default").
+  const [lifecycleView, setLifecycleView] = useState<'active' | 'retired'>('active')
+  const ships = lifecycleView === 'active' ? selectActiveShips(allShips) : selectRetiredShips(allShips)
+  const retiredCount = useMemo(() => selectRetiredShips(allShips).length, [allShips])
 
   // EWO-053 (Objective B) — Required Feature: Persistent View. Loaded once,
   // synchronously, at first mount (not in an effect) so the Commander's
@@ -138,6 +152,15 @@ export default function FleetDashboard() {
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Fleet Dashboard</p>
           <h1 className="text-2xl font-display font-bold text-white">Which ship needs attention?</h1>
+          {/* EWO-073 (Commander's optional recommendation) — reinforces,
+              right where the Commander lands, why a retired vessel isn't
+              affecting readiness/procurement/mission planning, rather
+              than leaving that only implied by the Retired tab itself. */}
+          {lifecycleView === 'retired' && (
+            <p className="text-xs text-muted mt-1 max-w-md">
+              Viewing retired vessels. These assets are preserved but excluded from active fleet operations.
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -146,6 +169,29 @@ export default function FleetDashboard() {
           >
             <Plus size={15} /> Add Ship
           </button>
+          {/* SW-015C (Deliverable 7) — Active/Retired view toggle. Retired
+              only shows a badge/count when there's actually something to
+              find there, so the control doesn't invite a Commander with
+              no retired vessels to go looking for a Retired view that's
+              always empty. */}
+          <div className="flex border border-white/10 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setLifecycleView('active')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+                lifecycleView === 'active' ? 'bg-cyan/15 text-cyan' : 'text-muted hover:text-white'
+              }`}
+            >
+              Active
+            </button>
+            <button
+              onClick={() => setLifecycleView('retired')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-l border-white/10 ${
+                lifecycleView === 'retired' ? 'bg-cyan/15 text-cyan' : 'text-muted hover:text-white'
+              }`}
+            >
+              <Archive size={13} /> Retired{retiredCount > 0 ? ` (${retiredCount})` : ''}
+            </button>
+          </div>
           <div className="flex border border-white/10 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('Card')}
@@ -171,15 +217,40 @@ export default function FleetDashboard() {
 
       {ships.length === 0 ? (
         <div className="panel p-10 flex flex-col items-center text-center gap-2">
-          <PackageX size={28} className="text-muted/60 mb-1" />
-          <h2 className="font-display font-semibold text-white">No Vessels Assigned</h2>
-          <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
-          <button
-            onClick={() => setAddShipOpen(true)}
-            className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
-          >
-            <Plus size={15} /> Add First Ship
-          </button>
+          {lifecycleView === 'retired' ? (
+            <>
+              <Archive size={28} className="text-muted/60 mb-1" />
+              <h2 className="font-display font-semibold text-white">No Retired Vessels</h2>
+              <p className="text-sm text-muted max-w-sm">No vessels have been retired from the Fleet Registry.</p>
+            </>
+          ) : retiredCount > 0 ? (
+            // SW-015C — every vessel is currently retired; this is
+            // distinct from a genuinely empty fleet and shouldn't read
+            // as one (Add First Ship would be the wrong call to action).
+            <>
+              <Archive size={28} className="text-muted/60 mb-1" />
+              <h2 className="font-display font-semibold text-white">No Active Vessels</h2>
+              <p className="text-sm text-muted max-w-sm">Every vessel in your Fleet Registry is currently retired.</p>
+              <button
+                onClick={() => setLifecycleView('retired')}
+                className="mt-2 inline-flex items-center gap-2 border border-white/15 text-white font-medium text-sm px-4 py-2 rounded-lg hover:border-white/35 transition-colors"
+              >
+                <Archive size={15} /> View Retired ({retiredCount})
+              </button>
+            </>
+          ) : (
+            <>
+              <PackageX size={28} className="text-muted/60 mb-1" />
+              <h2 className="font-display font-semibold text-white">No Vessels Assigned</h2>
+              <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
+              <button
+                onClick={() => setAddShipOpen(true)}
+                className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+              >
+                <Plus size={15} /> Add First Ship
+              </button>
+            </>
+          )}
         </div>
       ) : (
       <>
@@ -319,7 +390,12 @@ export default function FleetDashboard() {
       {/* Ships Shown + Sort — grouped together, visually distinct from Filters. */}
       <div className="flex flex-wrap items-center gap-3 border-t border-white/5 pt-3">
         <span className="text-sm text-white font-medium whitespace-nowrap">
-          {filtered.length} Ship{filtered.length !== 1 ? 's' : ''}
+          {/* EWO-073 (Part B) — the Retired view reads "N Retired
+              Vessel(s)," never "N Ships," so the count itself reinforces
+              which operational context the Commander is looking at. */}
+          {lifecycleView === 'retired'
+            ? `${filtered.length} Retired Vessel${filtered.length !== 1 ? 's' : ''}`
+            : `${filtered.length} Ship${filtered.length !== 1 ? 's' : ''}`}
         </span>
         <span className="text-[10px] uppercase tracking-widest text-muted/70">Sort By</span>
         <div className="flex flex-wrap items-center gap-2">
@@ -415,10 +491,12 @@ export default function FleetDashboard() {
                 {filtered.map((ship) => {
                   const progress = progressByShipId.get(ship.id)!
                   const state = stateByShipId.get(ship.id)!
+                  const isRetired = ship.lifecycleStatus === 'retired'
                   return (
-                    <tr key={ship.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+                    <tr key={ship.id} className={`border-b border-white/5 last:border-0 hover:bg-white/[0.02] ${isRetired ? 'opacity-60 hover:opacity-100' : ''}`}>
                       <td className="px-5 py-3 text-white font-medium truncate">{ship.name}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-5 py-3 flex flex-wrap items-center gap-1.5">
+                        {isRetired && <Badge tone="muted">Retired</Badge>}
                         <Badge tone={ownershipTone(ship.ownership)}>{ship.ownership}</Badge>
                       </td>
                       <td className="px-5 py-3 text-cyan/90 truncate">{state === 'FACTORY_ONLY' ? 'Factory Loadout' : buildName(ship.activeBuildId)}</td>

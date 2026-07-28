@@ -70,7 +70,7 @@ describe('runFullValidation (Part 2, test 38)', () => {
 
 describe('validateActiveBuildReference (test 22)', () => {
   it('22. flags a ship whose activeBuildId does not reference a real Build record', () => {
-    const brokenShip: Ship = { id: 's1', name: 'Broken Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'does-not-exist', readiness: 0, priority: 1, missing: [] }
+    const brokenShip: Ship = { id: 's1', name: 'Broken Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'does-not-exist', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }
     const issues = validateActiveBuildReference([brokenShip], [])
     expect(issues).toHaveLength(1)
     expect(issues[0].code).toBe('MISSING_ACTIVE_BUILD')
@@ -79,14 +79,14 @@ describe('validateActiveBuildReference (test 22)', () => {
 
   it('a ship with a real activeBuildId reference produces no issue', () => {
     const realBuild: Build = { id: 'b1', shipId: 's1', name: 'Build', role: 'Role', readiness: 100, isActive: true, missing: [], kind: 'CUSTOM' }
-    const ship: Ship = { id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b1', readiness: 100, priority: 1, missing: [] }
+    const ship: Ship = { id: 's1', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b1', readiness: 100, priority: 1, missing: [], lifecycleStatus: 'active' }
     expect(validateActiveBuildReference([ship], [realBuild])).toEqual([])
   })
 })
 
 describe('validateCatalogIntegrity (duplicate IDs)', () => {
   it('flags duplicate ship ids', () => {
-    const dup: Ship = { id: 'dup', name: 'A', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 1, missing: [] }
+    const dup: Ship = { id: 'dup', name: 'A', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }
     const issues = validateCatalogIntegrity([dup, { ...dup, name: 'B' }], [], [])
     expect(issues.some((i) => i.code === 'DUPLICATE_ID' && i.entityType === 'Ship')).toBe(true)
   })

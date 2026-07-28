@@ -201,6 +201,7 @@ describe('EWO-STAB-004A: ambiguous identity causes no mutation', () => {
       readiness: 0,
       priority: 1,
       missing: [],
+      lifecycleStatus: 'active',
     }
     const build: Build = { id: 'test-build', shipId: 'test-ship', name: 'Test Build', role: 'Role', readiness: 0, isActive: true, missing: [], kind: 'CUSTOM' }
     const hardpoint: Hardpoint = {

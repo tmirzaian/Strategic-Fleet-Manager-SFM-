@@ -3,8 +3,8 @@ import { describeAcquisitionHint } from '../componentAcquisitionHint'
 import type { HangarItem, InstalledLoadoutEntry, MissionReservation, Ship } from '../../types'
 
 const ships: Ship[] = [
-  { id: 'ghost', name: 'Ghost', manufacturer: 'Anvil', ownership: 'Owned', career: '', role: '', activeBuildId: '', readiness: 0, priority: 0, missing: [] },
-  { id: 'corsair', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned', career: '', role: '', activeBuildId: '', readiness: 0, priority: 0, missing: [] },
+  { id: 'ghost', name: 'Ghost', manufacturer: 'Anvil', ownership: 'Owned', career: '', role: '', activeBuildId: '', readiness: 0, priority: 0, missing: [], lifecycleStatus: 'active' },
+  { id: 'corsair', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned', career: '', role: '', activeBuildId: '', readiness: 0, priority: 0, missing: [], lifecycleStatus: 'active' },
 ]
 
 function baseParams(overrides: Partial<Parameters<typeof describeAcquisitionHint>[0]> = {}) {

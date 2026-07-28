@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, Fragment, type ReactNode } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Rocket, Save, CheckCircle2, ChevronDown, ChevronRight, AlertOctagon, Layers, Trash2, Maximize2, Minimize2, Copy, ShipWheel } from 'lucide-react'
 import { useFleetStore, type TargetOverrideValue } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import { validateTargetCompatibility, isComponentSelectableForPort } from '../data/componentCatalog'
 import { findItemCatalog as demoFindItemCatalog } from '../data/seed'
 import { shipFactoryTemplates } from '../data/shipDefinitions'
@@ -79,7 +80,15 @@ type WorkflowMode = 'CREATE' | 'EDIT'
  */
 export default function MissionComposer() {
   const [searchParams] = useSearchParams()
-  const ships = useFleetStore((s) => s.ships)
+  const rawShips = useFleetStore((s) => s.ships)
+  // SW-015C (Deliverable 4) — Loadout Manager is an active-editing
+  // surface ("what should this ship build toward"), not a viewer —
+  // unlike Ship Detail/Ship Management (which still render a retired
+  // vessel so its own Fleet Registry recommission control is reachable),
+  // a retired ship here falls straight through to the same "no ship
+  // selected" empty state a never-selected ship gets, both for the
+  // dropdown and for a direct `?shipId=` deep link.
+  const ships = selectActiveShips(rawShips)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
@@ -557,7 +566,12 @@ export default function MissionComposer() {
     handleSave(setActive, true, resolvedName)
   }
 
-  const shipName = (id: string) => ships.find((s) => s.id === id)?.name ?? 'Unknown Ship'
+  // SW-015C — the Existing Loadouts table below lists every custom Build
+  // fleet-wide, including one belonging to a retired ship (preserved,
+  // per Deliverable 5) — this must resolve its real name from the
+  // unrestricted `rawShips`, not the active-only `ships` this page uses
+  // for its own "which ship am I editing" selector.
+  const shipName = (id: string) => rawShips.find((s) => s.id === id)?.name ?? 'Unknown Ship'
 
   // Recursive, nested render of the shared Port Tree — depth-indented
   // exactly like Ship Detail's LoadoutPortTree, but every row remains

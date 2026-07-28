@@ -19,6 +19,7 @@ import {
   Boxes,
 } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import ShipCard from '../components/ShipCard'
 import PriorityLabel from '../components/PriorityLabel'
 import { resolveShipStockRoleFocus } from '../utils/shipIdentityLine'
@@ -210,7 +211,15 @@ function ReadinessRing({ value }: { value: number }) {
 }
 
 export default function MissionControl() {
-  const ships = useFleetStore((s) => s.ships)
+  // SW-015C (Deliverable 4) — Mission Control is exclusively an active-
+  // operations dashboard (Fleet Status count, readiness, Priority
+  // Actions, Quartermaster demand); every one of this page's own
+  // downstream computations already just consumed whatever `ships`
+  // held, so intercepting once here — the one canonical active-vessel
+  // selector (src/utils/fleetLifecycle.ts) — excludes retired vessels
+  // from all of them at once, rather than adding a scattered filter to
+  // each individual calculation.
+  const ships = selectActiveShips(useFleetStore((s) => s.ships))
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
   const installedLoadouts = useFleetStore((s) => s.installedLoadouts)

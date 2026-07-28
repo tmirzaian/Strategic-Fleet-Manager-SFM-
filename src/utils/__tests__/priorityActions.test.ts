@@ -3,7 +3,7 @@ import { deriveFleetPriorityActions, PRIORITY_ACTION_CATEGORY_ORDER } from '../p
 import type { Hardpoint, HangarItem, InstalledLoadoutEntry, MissionReservation, Ship } from '../../types'
 
 function ship(overrides: Partial<Ship> = {}): Ship {
-  return { id: 's', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 5, missing: [], ...overrides }
+  return { id: 's', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 5, missing: [], lifecycleStatus: 'active', ...overrides }
 }
 
 function hp(overrides: Partial<Hardpoint> = {}): Hardpoint {

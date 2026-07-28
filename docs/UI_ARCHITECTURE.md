@@ -4072,3 +4072,298 @@ Default clears the reference and the official image reappears; a full
 page reload preserves the custom reference; and two vessels of the same
 model retained fully independent images and independent Restore-Default
 outcomes throughout. Zero horizontal overflow, zero console errors.
+
+## 60. Fleet Registry Lifecycle — Retire & Recommission Vessel (SW-015C, IMPLEMENTED NOW)
+
+Replaces destructive "Remove from Fleet" with a reversible Active/Retired
+lifecycle. A vessel is never deleted through a normal Commander
+workflow — it moves out of, and back into, active service, with its
+identity, configuration, and history fully intact throughout.
+
+**Architectural decision — reuse and upgrade, not a parallel field.**
+`FleetAsset` already had a `status: 'active' | 'removed'` field driving
+the old "soft delete." Investigation (this mission's own required pre-
+implementation reconnaissance) found it wasn't actually reversible at
+all: `removeFleetAsset` spliced Build/Hardpoint/InstalledLoadout rows
+out of the live arrays immediately, and `partialize` excluded any
+non-active manual asset from `localStorage` outright — so a "removed"
+manual ship's Loadout was gone even within the same session, and the
+bare FleetAsset record itself didn't survive a reload. `status` is
+replaced outright by `lifecycleStatus: VesselLifecycleStatus` (`'active'
+| 'retired'`) + `retiredAt?: string`, on `FleetAsset`, `Ship` (mirrored
+at materialization time), and `SeedAssetOverride` — one field, one
+meaning, satisfying the Engineering Constraint "no duplicate retired
+vessel creation" / "one canonical active-vessel predicate" by
+construction rather than by convention.
+
+**The single highest-impact design fork, resolved by the Deliverables
+themselves.** Today, a "removed" ship is spliced out of `state.ships`
+entirely — the array itself was the active-fleet boundary. But
+Deliverable 7 (view retired vessels with their name/image/model) and
+Deliverable 5/8 (recommission restores the exact same record, including
+its real saved Loadout, with zero rebuild) are only possible if a
+retired vessel's `Ship`/`Build`/`Hardpoint`/`InstalledLoadout` rows stay
+fully present. `retireFleetAsset`/`recommissionFleetAsset` therefore
+delete nothing — retirement is a pure registry-state change, exactly as
+the Chief Architect Decision states. Exclusion from "the active fleet"
+becomes a read-time filter instead of a data-presence fact.
+
+**The one canonical predicate** (`src/utils/fleetLifecycle.ts`, new):
+```ts
+export function isActiveShip(ship): boolean { return ship.lifecycleStatus !== 'retired' }
+export function selectActiveShips(ships): Ship[] { return ships.filter(isActiveShip) }
+export function selectRetiredShips(ships): Ship[] { return ships.filter(s => s.lifecycleStatus === 'retired') }
+export function activeReservationsForShip(shipId, builds, reservations): MissionReservation[] { ... }
+```
+`activeReservationsForShip` is shared by the real release action and the
+retirement confirmation's own live preview count, so they can never
+drift apart. Every reservation-matching predicate had to account for a
+real naming trap: `MissionReservation.fleetAssetId` actually holds a
+`Ship.id`, not a `FleetAsset.id` — confirmed directly from
+`reserveComponent`'s own call sites before writing this helper.
+
+**Deliverable 4 — centralized, not scattered.** Reconnaissance found
+every existing "active fleet" computation (Fleet Status count, fleet
+readiness, Priority Actions, Quartermaster demand, reservation
+eligibility, install/borrow candidates, Fleet Dashboard's own grid) already
+just consumed whatever `ships` the store gave it — none did its own
+filtering, because `ships` itself used to BE the active fleet by
+construction. Now that retired vessels stay in `ships`, each of those
+pages/utilities' own `const ships = useFleetStore((s) => s.ships)` read
+site is intercepted exactly once with `selectActiveShips(...)`
+(`MissionControl.tsx`, `FleetDashboard.tsx`'s Active tab,
+`DecisionCenter.tsx`, `HangarInventory.tsx`, `QuickUpdate.tsx`) —
+the downstream utility functions themselves (`buildProcurementList`,
+`resolveReservationEligibility`, `deriveInstallCandidates`, etc.) needed
+no changes at all, since they already just take whatever `ships` array
+their caller passes in. `ShipWorkspacePrototype.tsx` and
+`MissionComposer.tsx` (Loadout Manager) each keep a separate
+`activeShips` alongside the unrestricted lookup, since both need "which
+OTHER ship" (donor pool, Fleet Priority ranking, the ship-picker
+dropdown) to exclude retired vessels while still rendering the
+currently-viewed ship even if it's the retired one itself — the
+direct-link/Retired-view path to a retired vessel's own Fleet Registry
+control.
+
+**A genuinely ambiguous rule, resolved deliberately: Loadout Manager
+does NOT render a retired vessel at all**, unlike Ship Detail/Ship
+Management (which still show one, since that's exactly where the Fleet
+Registry recommission control lives). Loadout Manager is an *active-
+editing* surface ("what should this ship build toward") — assigning new
+loadout intent to a vessel that's off the roster doesn't make sense — so
+a retired ship's own id falls straight through to the same "no ship
+selected" empty state a never-selected one gets, both via the dropdown
+and a direct `?shipId=` deep link. Its own *existing* Loadouts still
+list correctly in the "Existing Loadouts" table (resolved from the
+unrestricted `rawShips`, not the page's own active-only `ships`) — the
+data isn't hidden, only new editing intent against a retired vessel is.
+
+**Deliverable 2/3 — Fleet Registry UI** (`src/components/
+EditFleetAssetModal.tsx`, the same "Ship Settings" modal shared by Ship
+Detail and Ship Management). A new "Fleet Registry" section at the
+bottom, below a renamed "Save Changes" button (was "Update Fleet
+Registry" — kept as a separate, pre-existing action but renamed to avoid
+a direct, self-inflicted collision with this mission's own new section
+title). For an active vessel: "Status: Active Service" + "Retire
+Vessel," opening a deliberately-warning-styled (danger icon/border) but
+non-destructive confirmation with the work order's own exact copy,
+including a live "Retiring this vessel will release N component
+reservation(s)" line only when `activeReservationsForShip` finds
+something to release. Retiring closes the modal and navigates to
+`/fleet` (the vessel is no longer where the Commander was looking).
+For a retired vessel: "Status: Retired" + "Return to Active Service,"
+a simple confirmation with no destructive-warning language at all —
+confirming updates the section in place (the modal stays open,
+`onClose` is never called) rather than navigating away, since the
+Commander is now looking at a ship that works again.
+
+**Deliverable 6 — reservation handling.** `retireFleetAsset` computes
+`activeReservationsForShip(shipId, builds, reservations)` once and sets
+every match to `status: 'RELEASED'` in the same `set()` call as the
+lifecycle change — never deleting the underlying Hangar Inventory
+quantity (releasing a reservation returns stock to "available," exactly
+matching the existing `deleteBuild`/stale-target release pattern this
+mission's own reconnaissance found and reused, rather than inventing a
+new one). Installed configuration is untouched — it stays recorded
+against the retired vessel and never becomes free-floating inventory
+merely because the vessel retired (Engineering Constraint: "No automatic
+inventory fabrication from installed configuration"). Recommission never
+recreates a released reservation — only a fresh one against real current
+stock can re-commit inventory (Deliverable 8, explicit).
+
+**Fleet Priority.** `retireFleetAsset` closes the gap in the ACTIVE 1..N
+sequence for every *other* active ship (`closePriorityGapOnRemoval`,
+scoped to `selectActiveShips(ships)` — reused unmodified) but
+deliberately never nulls the retiring ship's own `priority` field,
+preserving it "for potential future restoration" per Deliverable 5's own
+wording. `recommissionFleetAsset` resets priority to `null`
+(Unprioritized) rather than reinstating a rank that may have gone stale
+during the vessel's absence — reinserting at a remembered position could
+silently collide with or displace a ship ranked while it was gone; the
+Commander re-ranks explicitly instead. Hydration's own self-heal
+(`normalizeFleetPriorities`, `merge`) is likewise scoped to active ships
+only, so a retired ship's frozen priority is never folded into the live
+ranking on the next reload.
+
+**Persistence** (`useFleetStore.ts`). `PERSIST_VERSION` bumped 9 → 10.
+`partialize` no longer filters manual `fleetAssets` by lifecycle status
+at all (the exact filter that made the old "removal" silently lossy) —
+active and retired assets now persist identically. `migrate` gained
+`migrateLegacyLifecycleStatus()`, applied to every raw `fleetAssets`/
+`seedAssetOverrides` record before validation: `status: 'removed'` →
+`lifecycleStatus: 'retired'`, `'active'`/absent → `'active'` — so no
+existing vessel (active or already-removed, under the old model) is
+lost or reidentified on upgrade, satisfying Deliverable 1's migration
+requirements exactly. `isValidPersistedFleetAsset`/
+`isValidSeedAssetOverride` validate the new field (permissive optional
+shape, matching every other field's own defensive posture). The seed
+side's own "removed ship" splice logic in `merge` (which filtered
+`ships`/`builds`/`hardpoints`/`installedLoadouts` by a `removedSeedShipIds`
+set) is removed entirely, replaced by simply mirroring `lifecycleStatus`/
+`retiredAt` onto the materialized `Ship` row in the same override-
+application loop nickname/ownership/priority already use — a seed
+ship's retirement is now exactly as non-destructive as a manual ship's.
+
+**Deliverable 9 — Captain's Log.** `retireFleetAsset`/
+`recommissionFleetAsset` each call the existing `addLogEntry` with
+`action: 'Vessel retired'` / `'Vessel recommissioned'` and
+`details: '"{name}" retired from active service.'` /
+`'"{name}" returned to active service.'` — never "Deleted Ship," and
+using the vessel's real name (preserved identity even while retired,
+per Deliverable 9's own requirement).
+
+**Deliverable 10 — future RSI synchronization compatibility (not
+implemented this sprint, per the work order's own explicit exclusion).**
+Recorded here as the identity rule a future sync mission must honor: a
+future Pledge-ID sync may recommend retirement when a known vessel
+disappears from the source fleet, and recommendation recommissioning
+when the same durable identity returns — but it must call the exact
+same `retireFleetAsset`/`recommissionFleetAsset` actions this mission
+introduces, never hard-delete or recreate a vessel record solely because
+its active status changed. Nothing about today's data model would need
+to change shape to honor this later — a future `pledgeId?: string`
+field would sit alongside `lifecycleStatus` on the same per-instance
+`FleetAsset` record, exactly where `customImageRef` (UX-005A) already
+does.
+
+**Regression coverage.** 46 new tests: `fleetLifecycle.test.ts` (8 —
+the shared selectors/predicate in isolation), `fleetRegistryLifecycle.test.ts`
+(19 — retire/recommission actions, reservation release, priority
+gap-closing and preservation, instance isolation, seed-ship overrides,
+persistence survival), 6 new cases in `EditFleetAssetModal.test.tsx`
+(the Fleet Registry section for both active and retired vessels,
+including the exact confirmation copy and the live reservation-count
+preview) plus a router-context fix the new `useNavigate()` call required
+across that whole file, and 6 new cases in `FleetDashboard.test.tsx`
+(the Active/Retired toggle, subdued styling + badge, the empty-state
+copy, and the exact "duplicate hulls" isolation scenario end to end).
+Every pre-existing test that exercised the old destructive
+`removeFleetAsset` was individually reviewed and rewritten to assert the
+new *non-destructive* behavior — not just renamed — since several
+previously asserted the old data-loss behavior directly (e.g. "a custom
+Loadout for a ship that was subsequently removed is never resurrected on
+reload" became "...for a RETIRED ship survives reload"). A repo-wide
+`tsc` pass caught every remaining `Ship`/`FleetAsset` object literal
+across the test suite still missing the now-required `lifecycleStatus`
+field — used as the actual inventory mechanism for that cleanup pass,
+not a manual grep. Full project regression (`tsc --noEmit`, full
+`vitest run`: 198 files / 2536 tests) and a production build pass clean.
+
+**Live-verified** against the running dev server (two "Ghost"-model
+vessels added live, matching UX-005A's own precedent for a session with
+no seed fleet enabled): the retirement confirmation shows the exact
+required copy; retiring closes the modal and lands on Fleet Dashboard;
+the retiring vessel disappears from the Active tab and appears in the
+Retired tab with a "RETIRED" badge and subdued card styling, while the
+second same-model vessel remains untouched in Active — the literal
+"Duplicate Hulls" acceptance scenario, confirmed live, not just in
+tests; Mission Control's Ships Active count correctly excludes the
+retired vessel; Ship Settings correctly shows "Status: Retired" and
+"Return to Active Service"; recommissioning restores active status with
+priority reset to Unprioritized; and a genuine page reload preserves a
+retired vessel's lifecycle state. Zero horizontal overflow, zero
+console errors throughout.
+
+## 61. Fleet Registry UX Polish (EWO-073, IMPLEMENTED NOW)
+
+A small, explicit "no behavioral changes, no data-model changes" pass
+requested immediately after §60, to align the Fleet Registry's *visual
+language* with its own architectural premise — vessels are retired,
+never deleted — before that work lands in a commit. Five parts, audited
+independently before any code was touched.
+
+**Part A (destructive iconography) — audited, already compliant, no
+change.** A repo-wide grep for the trash icon (`Trash`/`Trash2`) found
+exactly four usages, all pre-existing and all unrelated to vessel
+retirement: `LoadoutPortTree.tsx`'s and `ShipWorkspacePrototype.tsx`'s
+"Remove Installed Component," `HangarInventory.tsx`'s item deletion,
+and `MissionComposer.tsx`'s "Delete Loadout." None sit on a Fleet
+Registry surface. `EditFleetAssetModal.tsx`'s Fleet Registry section
+and `FleetDashboard.tsx`'s Retired toggle/empty-states were confirmed
+to already use `Archive` for "Retire Vessel," "Status: Retired," and
+the Retired tab, and `ShieldCheck` for "Status: Active Service" /
+"Return to Active Service" — the canonical iconography §60 already
+established. No icon changes were made.
+
+**Part B (Active/Retired header copy) — implemented.**
+`FleetDashboard.tsx`'s content header previously read "N Ships"
+regardless of which tab was active. It now reads "N Retired Vessel"
+(singular) / "N Retired Vessels" while viewing the Retired tab, and
+keeps "N Ships" unchanged on the Active tab — the count itself now
+reinforces which operational context the Commander is in, distinct
+from the unchanged "Retired (N)" tab label.
+
+**Part C (terminology audit) — one stale doc comment fixed, no other
+change.** A repo-wide grep for `Delete Ship`, `Deleted Ship`, `Remove
+Ship`, `Trash Ship`, `Remove from Fleet` (production code, tests
+excluded) found exactly one hit: an internal doc comment in
+`ShipWorkspacePrototype.tsx` that cited the old "Remove from Fleet"
+confirmation (deleted in §60) as design precedent for the "Remove
+Installed Component" modal. Updated to cite the still-live precedents
+only (Ship Detail's LoadoutPortTree remove modal, Loadout Manager's
+Delete Loadout confirmation) with a note explaining vessel removal is
+now the reversible Fleet Registry flow and isn't part of that
+precedent list. A broader case-insensitive sweep for delete/ship
+phrasing surfaced only genuinely unrelated hits — `deleteShipImage`
+(UX-005A, deletes an image, not a vessel), `deleteDependencies`
+(Hangar Inventory), and a couple of comments using "deleted" to mean
+"a shipId that no longer resolves." Per the work order's own scope
+("presentation-layer audit... do not rename APIs or internal
+implementation unless user-facing text depends on them"), none of
+these were touched.
+
+**Part D (status badge consistency) — audited, already compliant, no
+change.** Confirmed `CaptainsLog.tsx` renders `entry.action` through a
+CSS `uppercase` class, so §60's `'Vessel retired'` log entry already
+displays as "VESSEL RETIRED" with no separate all-caps string
+required. Ship Card, Ship Settings, and Fleet Dashboard were already
+using "Retired" consistently from §60 — one vocabulary, no variants.
+
+**Part E (visual hierarchy) — audited, already compliant, no change.**
+Confirmed `border-danger` styling in `EditFleetAssetModal.tsx` appears
+only on the "Retire Vessel" trigger button and its confirmation dialog
+— the action itself — never on the "Status: Retired" indicator
+(`text-muted`) or anywhere in the recommission flow, which carries no
+danger styling at all. A retired vessel already reads as an
+administrative state, not an error condition.
+
+**Optional recommendation — implemented.** Added a subtitle beneath
+the Fleet Dashboard heading, shown only on the Retired tab: "Viewing
+retired vessels. These assets are preserved but excluded from active
+fleet operations." Explicitly framed by the request as a low-cost,
+not-required-for-Beta-2.0 refinement; implemented as requested since it
+directly reinforces the Fleet Registry concept at negligible cost.
+
+**Regression.** Two new `FleetDashboard.test.tsx` cases lock in the
+Part B pluralization ("1 Retired Vessel" / "2 Retired Vessels," never
+"N Ships" on the Retired tab) and one locks in the subtitle appearing
+only on the Retired tab. Full project regression: `tsc --noEmit`, full
+`vitest run` (198 files / 2539 tests), and a production build all pass
+clean.
+
+**Note on commit sequencing.** EWO-073 is scoped as a direct follow-on
+to §60 (SW-015C), which remains uncommitted pending certification.
+This work order's own priority line ("Immediate, Pre-Commit") reads as
+intent for both to land in the same commit, but that has not been
+confirmed explicitly — flagged for certification alongside the rest of
+this report rather than assumed.

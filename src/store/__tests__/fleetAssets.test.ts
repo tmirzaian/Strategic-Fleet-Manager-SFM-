@@ -112,24 +112,26 @@ describe('Fleet Asset lifecycle (useFleetStore)', () => {
     expect(firstHardpoints.map((h) => h.id)).not.toEqual(secondHardpoints.map((h) => h.id))
   })
 
-  it('13. removing a Fleet Asset does not delete the Ship Definition', () => {
+  it('13. retiring a Fleet Asset does not delete the Ship Definition', () => {
     const def = findDefinitionByName('Gladius')
     const result = useFleetStore.getState().addFleetAsset(def.id, 'OWNED')
-    useFleetStore.getState().removeFleetAsset(result.assetId!)
+    useFleetStore.getState().retireFleetAsset(result.assetId!)
     const stillExists = useFleetStore.getState().shipDefinitions.some((d) => d.id === def.id)
     expect(stillExists).toBe(true)
   })
 
-  it('14. removing one duplicate does not remove another', () => {
+  it('14. SW-015C (Deliverable 5): retiring one duplicate does not retire — or otherwise affect — another instance of the same model', () => {
     const def = findDefinitionByName('Gladius')
     const first = useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Keep Me')
-    const second = useFleetStore.getState().addFleetAsset(def.id, 'LOANER', 'Remove Me')
+    const second = useFleetStore.getState().addFleetAsset(def.id, 'LOANER', 'Retire Me')
 
-    useFleetStore.getState().removeFleetAsset(second.assetId!)
+    useFleetStore.getState().retireFleetAsset(second.assetId!)
 
     const ships = useFleetStore.getState().ships
-    expect(ships.some((s) => s.id === first.assetId)).toBe(true)
-    expect(ships.some((s) => s.id === second.assetId)).toBe(false)
+    // Retirement never deletes the vessel record — both remain present,
+    // only the retired one's lifecycleStatus changes.
+    expect(ships.find((s) => s.id === first.assetId)?.lifecycleStatus).toBe('active')
+    expect(ships.find((s) => s.id === second.assetId)?.lifecycleStatus).toBe('retired')
   })
 
   it('18. the correct Fleet Asset instance is identifiable by id for Ship Detail navigation, even with duplicates', () => {

@@ -684,7 +684,7 @@ describe('<MissionControl /> — UX-001A.4/UX-001A.4A: Action Cards share Fleet 
   })
 
   it('Required Regression Review — overflow state: all five Priority Action categories render simultaneously, each its own card', () => {
-    const ship = { id: 's1', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned' as const, career: 'Combat', role: 'Gunship', activeBuildId: 'b1', readiness: 50, priority: 1, missing: [] }
+    const ship = { id: 's1', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned' as const, career: 'Combat', role: 'Gunship', activeBuildId: 'b1', readiness: 50, priority: 1, missing: [], lifecycleStatus: 'active' as const }
     const build = { id: 'b1', shipId: 's1', name: 'Loadout', role: 'Gunship', readiness: 50, isActive: true, missing: [] }
     const hardpoints = [
       { id: 'hp-reserved', shipId: 's1', buildId: 'b1', slotLabel: 'Slot A', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Mirage', status: 'Missing' as const },
@@ -721,6 +721,7 @@ describe('<MissionControl /> — UX-001A.4/UX-001A.4A: Action Cards share Fleet 
       readiness: 50,
       priority: 1,
       missing: [],
+      lifecycleStatus: 'active' as const,
     }
     const build = { id: 'b1', shipId: 's1', name: 'Loadout', role: 'Fighter', readiness: 50, isActive: true, missing: [] }
     const hardpoints = [
@@ -939,6 +940,7 @@ describe('<MissionControl /> — UX-001B/UX-001B.5: Quartermaster Report', () =>
       readiness: 40,
       priority: 1,
       missing: [],
+      lifecycleStatus: 'active' as const,
     }
     const build = { id: 'qm-build-1', shipId: 'qm-ship-1', name: 'Test Loadout', role: 'Fighter', readiness: 40, isActive: true, missing: [] }
     const hardpoints = [

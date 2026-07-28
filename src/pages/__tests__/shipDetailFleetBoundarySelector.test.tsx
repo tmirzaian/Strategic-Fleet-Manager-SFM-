@@ -79,7 +79,7 @@ describe('<ShipDetail /> — EWO-033A-V1 (Task 7): fleet-boundary selector regre
     expect(selectShipOptionValues()).toContain(added.assetId)
     cleanup()
 
-    useFleetStore.getState().removeFleetAsset(added.assetId!)
+    useFleetStore.getState().retireFleetAsset(added.assetId!)
     renderShipDetail('ghost')
     expect(selectShipOptionValues()).not.toContain(added.assetId)
   })

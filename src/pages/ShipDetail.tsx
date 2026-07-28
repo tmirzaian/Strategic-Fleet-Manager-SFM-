@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   Clock, Zap, ListChecks, ChevronDown, ShipWheel, Layers,
-  AlertOctagon, FlaskConical, ChevronRight, Trash2, AlertTriangle, X, CheckCircle2, Pencil, PackageCheck,
+  AlertOctagon, FlaskConical, ChevronRight, CheckCircle2, Pencil, PackageCheck,
 } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import Badge from '../components/Badge'
 import ShipHeroFrame from '../components/ShipHeroFrame'
 import EditFleetAssetModal from '../components/EditFleetAssetModal'
@@ -53,12 +54,15 @@ export default function ShipDetail() {
   const reservations = useFleetStore((s) => s.reservations)
   const hangarItems = useFleetStore((s) => s.hangarItems)
   const setActiveBuild = useFleetStore((s) => s.setActiveBuild)
-  const removeFleetAsset = useFleetStore((s) => s.removeFleetAsset)
   const removeComponent = useFleetStore((s) => s.removeComponent)
   const addLogEntry = useFleetStore((s) => s.addLogEntry)
-  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
-  const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
+  // SW-015C (Deliverable 4) — the Select Ship dropdown is an "active
+  // fleet selector" (Engineering Constraint) — a retired vessel is still
+  // reachable by direct URL/deep link (the `ships.find` lookup below is
+  // deliberately unrestricted) or from Fleet Dashboard's own Retired
+  // view, just not offered here as a thing to switch to.
+  const sortedShips = [...selectActiveShips(ships)].sort((a, b) => a.name.localeCompare(b.name))
 
   // Shared "Select Ship" control — lists only the Commander's actual live
   // Fleet Assets (EWO-033A-V1). Developer-only imported preview ships
@@ -308,62 +312,23 @@ export default function ShipDetail() {
             >
               <ListChecks size={15} /> Change Disposition
             </Link>
+            {/* SW-015C (Deliverable 2) — the old standalone "Remove from
+                Fleet" destructive action lived here; it's replaced
+                entirely by the Fleet Registry section inside Ship
+                Settings (EditFleetAssetModal) — Retire Vessel / Return
+                to Active Service, both reversible, never a page-level
+                destructive button. */}
             <button
               onClick={() => setEditOpen(true)}
               className="inline-flex items-center gap-2 border border-white/15 text-white font-medium text-sm px-4 py-2 rounded-lg hover:border-white/35 transition-colors"
             >
               <Pencil size={15} /> Edit
             </button>
-            <button
-              onClick={() => setRemoveConfirmOpen(true)}
-              className="ml-auto inline-flex items-center gap-2 border border-danger/30 text-danger font-medium text-sm px-4 py-2 rounded-lg hover:bg-danger/10 hover:border-danger/50 transition-colors"
-            >
-              <Trash2 size={15} /> Remove from Fleet
-            </button>
           </div>
         </div>
       </div>
 
       {editOpen && <EditFleetAssetModal ship={ship} onClose={() => setEditOpen(false)} />}
-
-      {removeConfirmOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setRemoveConfirmOpen(false)}>
-          <div className="panel p-6 max-w-sm w-full border-danger/30" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="text-danger shrink-0 mt-0.5" size={20} />
-                <div>
-                  <h3 className="font-display font-semibold text-white">Remove "{ship.name}" from Fleet?</h3>
-                  <p className="text-sm text-muted mt-1">
-                    This removes your Fleet Asset — its Loadout and installed equipment go with it. The ship model itself (and any other copy you own) is unaffected. This can't be undone.
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => setRemoveConfirmOpen(false)} className="text-muted hover:text-white shrink-0">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => setRemoveConfirmOpen(false)}
-                className="flex-1 border border-white/15 text-white font-medium text-sm py-2 rounded-lg hover:border-white/35 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  removeFleetAsset(ship.id)
-                  setRemoveConfirmOpen(false)
-                  navigate('/fleet')
-                }}
-                className="flex-1 bg-danger text-white font-semibold text-sm py-2 rounded-lg hover:bg-danger/90 transition-colors"
-              >
-                Remove from Fleet
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <LoadoutPortTree
         tree={portTree}

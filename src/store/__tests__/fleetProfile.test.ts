@@ -103,13 +103,14 @@ describe('Alpha 2.4 regression: seed-migrated Fleet Assets can be edited and rem
     expect(useFleetStore.getState().ships.find((s) => s.id === 'corsair')?.ownership).toBe('Loaner')
   })
 
-  it('removeFleetAsset succeeds for a seed ship and actually removes it', () => {
+  it('retireFleetAsset succeeds for a seed ship — the vessel remains present, marked retired', () => {
     const before = useFleetStore.getState().ships.length
-    const result = useFleetStore.getState().removeFleetAsset('mole')
+    const result = useFleetStore.getState().retireFleetAsset('mole')
     expect(result.success).toBe(true)
-    expect(useFleetStore.getState().ships.length).toBe(before - 1)
-    expect(useFleetStore.getState().ships.some((s) => s.id === 'mole')).toBe(false)
+    // Retirement never removes the vessel record from `ships`.
+    expect(useFleetStore.getState().ships.length).toBe(before)
+    expect(useFleetStore.getState().ships.find((s) => s.id === 'mole')?.lifecycleStatus).toBe('retired')
     const asset = useFleetStore.getState().fleetAssets.find((a) => a.id === 'mole-asset-seed')!
-    expect(asset.status).toBe('removed')
+    expect(asset.lifecycleStatus).toBe('retired')
   })
 })

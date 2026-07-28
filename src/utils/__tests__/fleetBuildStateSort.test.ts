@@ -6,7 +6,7 @@ import type { FleetBuildState, Ship } from '../../types'
 function ship(overrides: Partial<Ship> = {}): Ship {
   return {
     id: 's', name: 'Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role',
-    activeBuildId: 'b', readiness: 0, priority: 5, missing: [], ...overrides,
+    activeBuildId: 'b', readiness: 0, priority: 5, missing: [], lifecycleStatus: 'active', ...overrides,
   }
 }
 

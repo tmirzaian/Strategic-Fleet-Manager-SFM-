@@ -52,7 +52,7 @@ function hp(overrides: Partial<Hardpoint> = {}): Hardpoint {
 }
 
 const testBuild: Build = { id: 'build-1', shipId: 'ghost', name: 'Test Build', role: 'Role', readiness: 0, isActive: true, missing: [], kind: 'CUSTOM' }
-const testShip: Ship = { id: 'ghost', name: 'Test Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'build-1', readiness: 0, priority: 1, missing: [] }
+const testShip: Ship = { id: 'ghost', name: 'Test Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'build-1', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }
 
 describe('EWO-STAB-003E: findActiveSlotReservation — the one shared reservation-matching decision', () => {
   it('1. all three former callers (portTree, procurement, missionPackage) agree on the same identity decision', () => {

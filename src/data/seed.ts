@@ -247,62 +247,62 @@ export const ships: Ship[] = [
   {
     id: 'ghost', name: 'F7C-S Hornet Ghost Mk II', manufacturer: 'Anvil', ownership: 'Owned', career: 'Combat',
     role: 'Stealth Fighter', activeBuildId: 'ghost-stealth', readiness: buildFor('ghost').readiness, priority: 1,
-    missing: buildFor('ghost').missing, imageUrl: 'https://media.robertsspaceindustries.com/thvu42fxnagbh/slideshow.jpg', lastUpdated: '2 hours ago',
+    missing: buildFor('ghost').missing, imageUrl: 'https://media.robertsspaceindustries.com/thvu42fxnagbh/slideshow.jpg', lastUpdated: '2 hours ago', lifecycleStatus: 'active',
   },
   {
     id: 'corsair', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned', career: 'Combat / Exploration',
     role: 'Gunship / Ground Support', activeBuildId: 'corsair-gunship', readiness: buildFor('corsair').readiness, priority: 3,
-    missing: buildFor('corsair').missing, imageUrl: 'https://media.robertsspaceindustries.com/9y19hajivybqc/slideshow.jpg', lastUpdated: '3 days ago',
+    missing: buildFor('corsair').missing, imageUrl: 'https://media.robertsspaceindustries.com/9y19hajivybqc/slideshow.jpg', lastUpdated: '3 days ago', lifecycleStatus: 'active',
   },
   {
     id: 'mole', name: 'MOLE', manufacturer: 'Argo', ownership: 'Owned', career: 'Industrial',
     role: 'Mining', activeBuildId: 'mole-mining', readiness: buildFor('mole').readiness, priority: 2,
-    missing: buildFor('mole').missing, imageUrl: 'https://media.robertsspaceindustries.com/wgai60tvwa3vs/slideshow.jpg', lastUpdated: '1 day ago',
+    missing: buildFor('mole').missing, imageUrl: 'https://media.robertsspaceindustries.com/wgai60tvwa3vs/slideshow.jpg', lastUpdated: '1 day ago', lifecycleStatus: 'active',
   },
   {
     id: 'railen', name: 'Railen', manufacturer: 'Gatac', ownership: 'Owned', career: 'Cargo',
     role: 'Cargo Hauler', activeBuildId: 'railen-cargo', readiness: buildFor('railen').readiness, priority: 4,
-    missing: buildFor('railen').missing, imageUrl: 'https://media.robertsspaceindustries.com/3hlrf4bj6k5r7/slideshow.jpg', lastUpdated: '5 days ago',
+    missing: buildFor('railen').missing, imageUrl: 'https://media.robertsspaceindustries.com/3hlrf4bj6k5r7/slideshow.jpg', lastUpdated: '5 days ago', lifecycleStatus: 'active',
   },
   {
     id: '135c', name: '135c', manufacturer: 'Origin', ownership: 'Owned', career: 'Transport',
     role: 'Stealth Shuttle', activeBuildId: '135c-shuttle', readiness: buildFor('135c').readiness, priority: 5,
-    missing: buildFor('135c').missing, imageUrl: 'https://media.robertsspaceindustries.com/ftaf8t452ad1o/slideshow.jpg', lastUpdated: '6 days ago',
+    missing: buildFor('135c').missing, imageUrl: 'https://media.robertsspaceindustries.com/ftaf8t452ad1o/slideshow.jpg', lastUpdated: '6 days ago', lifecycleStatus: 'active',
   },
   {
     id: 'cutlass-black', name: 'Cutlass Black', manufacturer: 'Drake', ownership: 'Owned', career: 'Multi-role',
     role: 'Daily Driver', activeBuildId: 'cutlass-black-utility', readiness: buildFor('cutlass-black').readiness, priority: 6,
-    missing: buildFor('cutlass-black').missing, imageUrl: 'https://media.robertsspaceindustries.com/56iszc92bl9oi/slideshow.jpg', lastUpdated: '1 week ago',
+    missing: buildFor('cutlass-black').missing, imageUrl: 'https://media.robertsspaceindustries.com/56iszc92bl9oi/slideshow.jpg', lastUpdated: '1 week ago', lifecycleStatus: 'active',
   },
   {
     id: 'cutlass-red', name: 'Cutlass Red', manufacturer: 'Drake', ownership: 'Owned', career: 'Medical',
     role: 'Rescue / Medical', activeBuildId: 'cutlass-red-medical', readiness: buildFor('cutlass-red').readiness, priority: 7,
-    missing: buildFor('cutlass-red').missing, imageUrl: 'https://media.robertsspaceindustries.com/wqa6lfco4amc0/slideshow.jpg', lastUpdated: '1 week ago',
+    missing: buildFor('cutlass-red').missing, imageUrl: 'https://media.robertsspaceindustries.com/wqa6lfco4amc0/slideshow.jpg', lastUpdated: '1 week ago', lifecycleStatus: 'active',
   },
   {
     id: 'm80', name: 'M80', manufacturer: 'Mirai', ownership: 'Owned', career: 'Racing / Combat',
     role: 'Fast Interceptor', activeBuildId: 'm80-speed', readiness: buildFor('m80').readiness, priority: 8,
-    missing: buildFor('m80').missing, imageUrl: 'https://media.robertsspaceindustries.com/nledgsyyzmjov/slideshow.jpg', lastUpdated: '2 weeks ago',
+    missing: buildFor('m80').missing, imageUrl: 'https://media.robertsspaceindustries.com/nledgsyyzmjov/slideshow.jpg', lastUpdated: '2 weeks ago', lifecycleStatus: 'active',
   },
   {
     id: 'starlite', name: 'Starlite', manufacturer: 'Crusader', ownership: 'Owned', career: 'Unknown / Future',
     role: 'Future Gameplay', activeBuildId: 'starlite-default', readiness: buildFor('starlite').readiness, priority: 9,
-    missing: buildFor('starlite').missing, imageUrl: 'https://media.robertsspaceindustries.com/6cdv5u7nvigrn/slideshow.jpg', lastUpdated: '3 weeks ago',
+    missing: buildFor('starlite').missing, imageUrl: 'https://media.robertsspaceindustries.com/6cdv5u7nvigrn/slideshow.jpg', lastUpdated: '3 weeks ago', lifecycleStatus: 'active',
   },
   {
     id: 'utv', name: 'UTV', manufacturer: 'Tumbril', ownership: 'Owned', career: 'Ground',
     role: 'Utility Vehicle', activeBuildId: 'utv-default', readiness: buildFor('utv').readiness, priority: 10,
-    missing: buildFor('utv').missing, imageUrl: 'https://media.robertsspaceindustries.com/szj2zc8m5hair/slideshow.jpg', lastUpdated: '1 month ago',
+    missing: buildFor('utv').missing, imageUrl: 'https://media.robertsspaceindustries.com/szj2zc8m5hair/slideshow.jpg', lastUpdated: '1 month ago', lifecycleStatus: 'active',
   },
   {
     id: 'vulture', name: 'Vulture', manufacturer: 'Drake', ownership: 'Purchased', career: 'Salvage',
     role: 'Salvage', activeBuildId: 'vulture-salvage', readiness: buildFor('vulture').readiness, priority: 2,
-    missing: buildFor('vulture').missing, imageUrl: 'https://media.robertsspaceindustries.com/jggtvws2rhu3y/slideshow.jpg', lastUpdated: '4 days ago',
+    missing: buildFor('vulture').missing, imageUrl: 'https://media.robertsspaceindustries.com/jggtvws2rhu3y/slideshow.jpg', lastUpdated: '4 days ago', lifecycleStatus: 'active',
   },
   {
     id: 'prospector', name: 'Prospector', manufacturer: 'MISC', ownership: 'Loaner', career: 'Mining',
     role: 'Solo Mining', activeBuildId: 'prospector-mining', readiness: buildFor('prospector').readiness, priority: 11,
-    missing: buildFor('prospector').missing, imageUrl: 'https://media.robertsspaceindustries.com/7rfmcpg9qcpmm/slideshow.jpg', lastUpdated: '2 weeks ago',
+    missing: buildFor('prospector').missing, imageUrl: 'https://media.robertsspaceindustries.com/7rfmcpg9qcpmm/slideshow.jpg', lastUpdated: '2 weeks ago', lifecycleStatus: 'active',
   },
 ]
 

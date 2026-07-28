@@ -745,7 +745,7 @@ describe('<MissionComposer /> (Loadout Manager) — FTB-001A (Workstream D): exp
     // shipDetailFleetBoundarySelector.test.tsx's own removal test):
     // cleanup + a fresh render, rather than asserting a live in-place
     // re-render outside any `act()` boundary.
-    useFleetStore.getState().removeFleetAsset('ghost')
+    useFleetStore.getState().retireFleetAsset('ghost')
     cleanup()
     renderComposer('?shipId=ghost')
     expect(screen.getByText('Select a Ship')).toBeInTheDocument()

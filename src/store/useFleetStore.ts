@@ -8,7 +8,7 @@ import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
 import { materializeFleetAsset } from '../utils/fleetAssetMaterializer'
 import { reconcileBuildHardpoints } from '../utils/fleetAssetReconciliation'
 import { resolveShipImage } from '../utils/resolveShipImage'
-import { deleteShipImage } from '../utils/shipImageStorage'
+import { selectActiveShips, isActiveShip, activeReservationsForShip } from '../utils/fleetLifecycle'
 import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
@@ -44,7 +44,15 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // field, which `isValidPersistedFleetAsset`/`isValidSeedAssetOverride`
 // below treat as "no custom image ever set" (correct for a save written
 // before this feature existed), not an error.
-const PERSIST_VERSION = 9
+// SW-015C: bumped 9 -> 10 to replace `status: 'active' | 'removed'` with
+// `lifecycleStatus: 'active' | 'retired'` (+ `retiredAt`) on both
+// FleetAsset and SeedAssetOverride. Unlike every prior bump, a pre-10
+// save's old field genuinely needs a VALUE translation, not just "treat
+// as absent" — `migrate` below maps `status: 'removed'` ->
+// `lifecycleStatus: 'retired'` and `'active'`/missing -> `'active'`
+// for both collections before validation runs, so no existing vessel
+// (active or already-removed) is lost or reidentified.
+const PERSIST_VERSION = 10
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -185,7 +193,7 @@ function buildCanonicalSeedFactoryBuilds(): { builds: Build[]; hardpoints: Hardp
       activeBuildId: factoryBuildId,
       installedLoadoutId: `${shipId}-installed`,
       priority: null,
-      status: 'active',
+      lifecycleStatus: 'active',
       addedAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
     }
@@ -412,7 +420,18 @@ interface FleetState {
     nickname?: string,
     priority?: number | null
   ) => { success: boolean; assetId?: string; message?: string }
-  removeFleetAsset: (assetId: string) => { success: boolean; message?: string }
+  /** SW-015C — moves a vessel out of active service (Fleet Registry
+   * lifecycle). Never destructive: no Ship/Build/Hardpoint/
+   * InstalledLoadout row is touched, no custom image is deleted. Closes
+   * the retiring ship's own gap in the active priority sequence and
+   * releases its ACTIVE reservations back to unreserved inventory. See
+   * `recommissionFleetAsset` for the reverse transition. */
+  retireFleetAsset: (assetId: string) => { success: boolean; message?: string; releasedReservationCount?: number }
+  /** SW-015C — the reverse of `retireFleetAsset`. Restores the exact same
+   * vessel record to active service (never a duplicate); resets Priority
+   * to Unprioritized rather than reinstating a possibly-stale rank; never
+   * recreates reservations released at retirement time. */
+  recommissionFleetAsset: (assetId: string) => { success: boolean; message?: string }
   updateFleetAssetNickname: (assetId: string, nickname: string | undefined) => { success: boolean; message?: string }
   updateFleetAssetOwnership: (assetId: string, ownershipType: OwnershipType) => { success: boolean; message?: string }
   /** UX-005A (Deliverable 1/4) — sets or clears this specific vessel's
@@ -564,7 +583,13 @@ function isValidPersistedFleetAsset(raw: unknown): raw is FleetAsset {
     (r.ownershipType === 'OWNED' || r.ownershipType === 'PURCHASED' || r.ownershipType === 'LOANER') &&
     typeof r.activeBuildId === 'string' &&
     // EWO-066 (Part E) — `null` is a valid, first-class "Unprioritized" value.
-    (typeof r.priority === 'number' || r.priority === null)
+    (typeof r.priority === 'number' || r.priority === null) &&
+    // SW-015C — by the time this runs, `migrateLegacyLifecycleStatus`
+    // (called from `migrate` below) has already translated any
+    // pre-existing `status` value into `lifecycleStatus` for every raw
+    // record, active or retired alike — a record that still lacks a
+    // valid value here is genuinely malformed, not just old.
+    (r.lifecycleStatus === 'active' || r.lifecycleStatus === 'retired')
   )
 }
 
@@ -572,13 +597,35 @@ function isValidSeedAssetOverride(raw: unknown): raw is SeedAssetOverride {
   if (!raw || typeof raw !== 'object') return false
   const r = raw as Record<string, unknown>
   if (typeof r.updatedAt !== 'string') return false
-  if (r.status !== undefined && r.status !== 'active' && r.status !== 'removed') return false
+  if (r.lifecycleStatus !== undefined && r.lifecycleStatus !== 'active' && r.lifecycleStatus !== 'retired') return false
+  if (r.retiredAt !== undefined && typeof r.retiredAt !== 'string') return false
   if (r.nickname !== undefined && typeof r.nickname !== 'string') return false
   if (r.ownershipType !== undefined && r.ownershipType !== 'OWNED' && r.ownershipType !== 'PURCHASED' && r.ownershipType !== 'LOANER') return false
   if (r.priority !== undefined && r.priority !== null && typeof r.priority !== 'number') return false
   // UX-005A — same permissive-optional-string shape as `nickname` above.
   if (r.customImageRef !== undefined && typeof r.customImageRef !== 'string') return false
   return true
+}
+
+/**
+ * SW-015C — translates a pre-PERSIST_VERSION-10 record's old
+ * `status: 'active' | 'removed'` field into the new
+ * `lifecycleStatus`/`retiredAt` shape, in place, before validation runs.
+ * Applied to both `fleetAssets` and `seedAssetOverrides` raw records in
+ * `migrate` below. A record that already has `lifecycleStatus` (a
+ * genuinely post-10 save, or one this function already touched) is left
+ * alone. `retiredAt` can't be reconstructed for a legacy 'removed'
+ * record (the original removal timestamp was never recorded under the
+ * old model) — left `undefined`, which is purely administrative/display
+ * metadata and never gates any business rule.
+ */
+function migrateLegacyLifecycleStatus(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw
+  const r = raw as Record<string, unknown>
+  if ('lifecycleStatus' in r) return raw
+  if (!('status' in r)) return raw
+  const { status, ...rest } = r
+  return { ...rest, lifecycleStatus: status === 'removed' ? 'retired' : 'active' }
 }
 
 function isValidPersistedReservation(raw: unknown): raw is MissionReservation {
@@ -820,59 +867,95 @@ export const useFleetStore = create<FleetState>()(
         return { success: true, assetId: asset.id }
       },
 
-      removeFleetAsset: (assetId) => {
+      // SW-015C — replaces the old destructive `removeFleetAsset`
+      // ("soft-delete" in name only — it spliced Build/Hardpoint/
+      // InstalledLoadout data immediately and manual assets were then
+      // excluded from `partialize` outright, so nothing beyond the bare
+      // FleetAsset record actually survived even within the same
+      // session). Retirement is a pure registry-state change: no Ship/
+      // Build/Hardpoint/InstalledLoadout row is touched, no custom image
+      // is deleted, no inventory is fabricated — only `lifecycleStatus`/
+      // `retiredAt` change, the retiring ship's own priority rank is
+      // vacated from the active sequence (its value is left on the
+      // record, never nulled, so it's available "for potential future
+      // restoration" per the work order), and its ACTIVE reservations are
+      // released back to unreserved inventory (Deliverable 6) since a
+      // retired vessel can't hold operational reservations.
+      retireFleetAsset: (assetId) => {
         const resolvedAssetId = resolveFleetAssetId(assetId, get().fleetAssets)
         const asset = resolvedAssetId ? get().fleetAssets.find((a) => a.id === resolvedAssetId) : undefined
         const ship = get().ships.find((s) => s.id === assetId)
         if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
+        if (asset.lifecycleStatus === 'retired') return { success: false, message: 'This vessel is already retired.' }
 
         const now = new Date().toISOString()
 
-        // EWO-066 (Part E) — removing a ranked ship closes the gap it
-        // leaves behind, live in this session immediately; a subsequent
-        // reload's own read-path normalization (see `merge` below) keeps
-        // this correct regardless of exactly what's persisted, so no
-        // separate fleetAssets/seedAssetOverrides write is needed here.
-        const priorityByShipId = new Map(closePriorityGapOnRemoval(get().ships, assetId).map((entry) => [entry.id, entry.priority]))
+        // Close the gap the retiring ship leaves in the ACTIVE priority
+        // sequence for every OTHER active ship — its own entry is
+        // deliberately not in this map, so its own `priority` field is
+        // left completely untouched below (see doc comment above).
+        const priorityByShipId = new Map(
+          closePriorityGapOnRemoval(selectActiveShips(get().ships), assetId).map((entry) => [entry.id, entry.priority])
+        )
 
-        // Soft-delete the asset record (status: 'removed') rather than
-        // splicing it out — Ship Definition and every other Fleet Asset
-        // referencing it are completely untouched either way, but this
-        // keeps a record that the asset existed rather than erasing history.
+        const releasedReservationIds = new Set(activeReservationsForShip(assetId, get().builds, get().reservations).map((r) => r.id))
+
         set({
-          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, status: 'removed' as const, updatedAt: now } : a)),
-          ships: get()
-            .ships.filter((s) => s.id !== assetId)
-            .map((s) => (priorityByShipId.has(s.id) ? { ...s, priority: priorityByShipId.get(s.id)! } : s)),
-          builds: get().builds.filter((b) => b.shipId !== assetId),
-          hardpoints: get().hardpoints.filter((h) => h.shipId !== assetId),
-          installedLoadouts: get().installedLoadouts.filter((e) => e.shipId !== assetId),
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, lifecycleStatus: 'retired' as const, retiredAt: now, updatedAt: now } : a)),
+          ships: get().ships.map((s) => {
+            if (s.id === assetId) return { ...s, lifecycleStatus: 'retired' as const, retiredAt: now }
+            return priorityByShipId.has(s.id) ? { ...s, priority: priorityByShipId.get(s.id)! } : s
+          }),
+          reservations: get().reservations.map((r) => (releasedReservationIds.has(r.id) ? { ...r, status: 'RELEASED' as const, updatedAt: now } : r)),
         })
 
-        // Mission M-012: the seed fleet's ships/builds/hardpoints are
-        // hardcoded and reconstructed fresh on every load — they're never
-        // persisted directly. Recording the removal here is what lets a
-        // seed ship's deletion survive a refresh (see `merge` below).
         if (asset.acquisitionSource === 'SEED_MIGRATION') {
           set({
             seedAssetOverrides: {
               ...get().seedAssetOverrides,
-              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], status: 'removed', updatedAt: now },
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], lifecycleStatus: 'retired', retiredAt: now, updatedAt: now },
             },
           })
         }
 
-        // UX-005A (Deliverable 6) — clean up the managed custom image
-        // (IndexedDB), if any, when its owning vessel is removed. Fire-
-        // and-forget: this is a synchronous store action, IndexedDB is
-        // async, and deleteShipImage() is itself best-effort/never-throws
-        // — a storage failure here must never block or fail the removal
-        // it's attached to.
-        if (asset.customImageRef) {
-          void deleteShipImage(resolvedAssetId!)
+        get().addLogEntry({ action: 'Vessel retired', shipName: ship.name, details: `"${ship.name}" retired from active service.` })
+        return { success: true, releasedReservationCount: releasedReservationIds.size }
+      },
+
+      // SW-015C (Deliverable 8) — the only other lifecycle transition.
+      // Restores the exact same vessel record (never a duplicate):
+      // nothing was ever deleted, so there is nothing to rebuild. Priority
+      // deliberately resets to Unprioritized (`null`) rather than
+      // reinstating its pre-retirement rank — the active 1..N sequence
+      // may have shifted during its absence, and silently reinserting it
+      // at a stale position could collide with or bump a ship the
+      // Commander ranked while this vessel was retired; the Commander can
+      // re-rank it explicitly. Released reservations are never recreated
+      // (explicit work-order requirement) — only a fresh reservation
+      // against real current stock can re-commit inventory.
+      recommissionFleetAsset: (assetId) => {
+        const resolvedAssetId = resolveFleetAssetId(assetId, get().fleetAssets)
+        const asset = resolvedAssetId ? get().fleetAssets.find((a) => a.id === resolvedAssetId) : undefined
+        const ship = get().ships.find((s) => s.id === assetId)
+        if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
+        if (asset.lifecycleStatus !== 'retired') return { success: false, message: 'This vessel is already in active service.' }
+
+        const now = new Date().toISOString()
+        set({
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, lifecycleStatus: 'active' as const, retiredAt: undefined, priority: null, updatedAt: now } : a)),
+          ships: get().ships.map((s) => (s.id === assetId ? { ...s, lifecycleStatus: 'active' as const, retiredAt: undefined, priority: null } : s)),
+        })
+
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], lifecycleStatus: 'active', retiredAt: undefined, priority: null, updatedAt: now },
+            },
+          })
         }
 
-        get().addLogEntry({ action: 'Ship removed from fleet', shipName: ship.name, details: `Removed ${ship.name} from fleet` })
+        get().addLogEntry({ action: 'Vessel recommissioned', shipName: ship.name, details: `"${ship.name}" returned to active service.` })
         return { success: true }
       },
 
@@ -2089,7 +2172,9 @@ export const useFleetStore = create<FleetState>()(
         }
 
         const validAssets: FleetAsset[] = []
-        for (const raw of Array.isArray(state.fleetAssets) ? state.fleetAssets : []) {
+        for (const rawAsset of Array.isArray(state.fleetAssets) ? state.fleetAssets : []) {
+          // SW-015C — translate a pre-10 `status` value before validating.
+          const raw = migrateLegacyLifecycleStatus(rawAsset)
           if (isValidPersistedFleetAsset(raw)) validAssets.push(raw)
           else console.warn('[SFM] Skipping a persisted Fleet Asset record that failed migration validation:', raw)
         }
@@ -2129,7 +2214,9 @@ export const useFleetStore = create<FleetState>()(
         // fact, still fully present and untouched when they were written.
         const validOverrides: Record<string, SeedAssetOverride> = {}
         if (state.seedAssetOverrides && typeof state.seedAssetOverrides === 'object') {
-          for (const [id, raw] of Object.entries(state.seedAssetOverrides as Record<string, unknown>)) {
+          for (const [id, rawOverride] of Object.entries(state.seedAssetOverrides as Record<string, unknown>)) {
+            // SW-015C — translate a pre-10 `status` value before validating.
+            const raw = migrateLegacyLifecycleStatus(rawOverride)
             if (isValidSeedAssetOverride(raw)) validOverrides[id] = raw
             else console.warn('[SFM] Skipping a persisted Seed Asset Override record that failed migration validation:', id, raw)
           }
@@ -2173,7 +2260,16 @@ export const useFleetStore = create<FleetState>()(
       // user can apply to a seed ship. Hangar Inventory, Reservations, and
       // the Installed Loadout persist directly in full.
       partialize: (state) => ({
-        fleetAssets: state.fleetAssets.filter((a) => a.acquisitionSource !== 'SEED_MIGRATION' && a.status === 'active'),
+        // SW-015C — no longer filtered by lifecycle status. A retired
+        // manual asset must persist in full (Deliverable 1: "the state
+        // must survive restart") — the old `status === 'active'` filter
+        // here is exactly what made the prior "soft delete" a silent
+        // hard delete for manual assets (nothing beyond the bare
+        // FleetAsset record even survived a single reload). Retired and
+        // active manual assets now round-trip identically; only the
+        // seed-migration exclusion (handled separately via
+        // seedAssetOverrides) remains.
+        fleetAssets: state.fleetAssets.filter((a) => a.acquisitionSource !== 'SEED_MIGRATION'),
         hangarItems: state.hangarItems,
         reservations: state.reservations,
         installedLoadouts: state.installedLoadouts,
@@ -2271,7 +2367,15 @@ export const useFleetStore = create<FleetState>()(
           if (!override) return a
           return {
             ...a,
-            status: override.status ?? a.status,
+            // SW-015C — replaces the old `status: override.status ?? a.status`.
+            // A retired seed ship's Ship/Build/Hardpoint rows are no
+            // longer spliced out below (see the removed
+            // `removedSeedShipIds` block this replaces) — they stay
+            // fully present, mirrored with `lifecycleStatus`/`retiredAt`
+            // in the override-application loop just below, exactly like
+            // nickname/ownership/priority already are.
+            lifecycleStatus: override.lifecycleStatus ?? a.lifecycleStatus,
+            retiredAt: 'retiredAt' in override ? override.retiredAt : a.retiredAt,
             nickname: 'nickname' in override ? override.nickname : a.nickname,
             ownershipType: override.ownershipType ?? a.ownershipType,
             priority: override.priority ?? a.priority,
@@ -2289,22 +2393,9 @@ export const useFleetStore = create<FleetState>()(
         // same as the ship id its materialized Ship/Build/Hardpoint rows
         // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
         // `seedAssetOverrides` is keyed by the asset id, so it must be
-        // resolved back to the ship id — via shipDefinitionId, which for
-        // every seed-migrated asset equals the plain seed ship id — before
-        // it can be used to filter ships/builds/hardpoints/installedLoadouts.
+        // resolved back to the ship id before it can be applied to `ships`.
         const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
-        const removedSeedShipIds = new Set(
-          Object.entries(seedAssetOverrides)
-            .filter(([, override]) => override.status === 'removed')
-            .map(([assetId]) => seedShipIdByAssetId.get(assetId) ?? assetId)
-        )
-        if (removedSeedShipIds.size > 0) {
-          ships = ships.filter((s) => !removedSeedShipIds.has(s.id))
-          builds = builds.filter((b) => !removedSeedShipIds.has(b.shipId))
-          hardpoints = hardpoints.filter((h) => !removedSeedShipIds.has(h.shipId))
-        }
         for (const [assetId, override] of Object.entries(seedAssetOverrides)) {
-          if (override.status === 'removed') continue
           const shipId = seedShipIdByAssetId.get(assetId)
           if (!shipId) continue
           const asset = fleetAssets.find((a) => a.id === assetId)
@@ -2318,17 +2409,22 @@ export const useFleetStore = create<FleetState>()(
             }
             if (override.ownershipType) next.ownership = ownershipTypeToLegacy(override.ownershipType)
             if (override.priority !== undefined) next.priority = override.priority
+            // SW-015C — mirrors the fleetAssets override above onto the
+            // materialized Ship row every business-logic surface reads.
+            if (override.lifecycleStatus) next.lifecycleStatus = override.lifecycleStatus
+            if ('retiredAt' in override) next.retiredAt = override.retiredAt
             return next
           })
         }
 
         // Persisted Hangar/Reservations/InstalledLoadout replace the fresh
         // defaults outright when present — they're the full authoritative
-        // player record, not something to merge item-by-item.
+        // player record, not something to merge item-by-item. SW-015C —
+        // no longer filtered by a "removed seed ship" set: a retired
+        // seed ship's InstalledLoadout rows stay attached to it (see
+        // FleetAsset.lifecycleStatus's own doc comment on why nothing is
+        // ever spliced for retirement).
         let installedLoadouts = persisted?.installedLoadouts ?? [...seedBaseline.installedLoadouts]
-        if (removedSeedShipIds.size > 0) {
-          installedLoadouts = installedLoadouts.filter((e) => !removedSeedShipIds.has(e.shipId))
-        }
         const hangarItems = persisted?.hangarItems ?? seedBaseline.hangarItems
         const reservations = persisted?.reservations ?? currentState.reservations
 
@@ -2502,7 +2598,15 @@ export const useFleetStore = create<FleetState>()(
         // persisted-schema version bump — see fleetPriority.ts's own doc
         // comment for why this runs here rather than as a one-time
         // migration.
-        ships = normalizeFleetPriorities(ships)
+        //
+        // SW-015C — scoped to ACTIVE ships only. A retired ship's
+        // priority is frozen administrative metadata ("for potential
+        // future restoration," never a live rank — see
+        // `retireFleetAsset`'s own doc comment) and must never be folded
+        // into the active 1..N sequence just because it's still present
+        // in `ships`.
+        const normalizedActivePriorities = new Map(normalizeFleetPriorities(selectActiveShips(ships)).map((s) => [s.id, s.priority]))
+        ships = ships.map((s) => (isActiveShip(s) ? { ...s, priority: normalizedActivePriorities.get(s.id) ?? s.priority } : s))
 
         return {
           ...currentState,

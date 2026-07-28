@@ -23,7 +23,7 @@ export function migrateSeedFleetToAssets(): FleetAsset[] {
     activeBuildId: s.activeBuildId,
     installedLoadoutId: `${s.id}-asset-seed-installed`,
     priority: s.priority,
-    status: 'active',
+    lifecycleStatus: 'active',
     addedAt: migratedAt,
     updatedAt: migratedAt,
   }))

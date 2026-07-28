@@ -22,6 +22,17 @@ export type OwnershipType = 'OWNED' | 'PURCHASED' | 'LOANER'
 
 export type AcquisitionSource = 'MANUAL' | 'RSI_IMPORT' | 'CCUGAME_IMPORT' | 'SEED_MIGRATION'
 
+/**
+ * SW-015C — a vessel's Fleet Registry lifecycle. `'retired'` replaces
+ * the old `status: 'removed'` hard-delete model entirely: a vessel is
+ * never deleted through normal Commander workflows, only moved out of
+ * (and back into) active service. See src/utils/fleetLifecycle.ts for
+ * the one canonical active/retired predicate every business-logic
+ * surface should use, and `retireFleetAsset`/`recommissionFleetAsset`
+ * in src/store/useFleetStore.ts for the only two actions that change it.
+ */
+export type VesselLifecycleStatus = 'active' | 'retired'
+
 export interface ShipDefinitionImage {
   primaryUrl?: string
   source?: string
@@ -59,7 +70,19 @@ export interface FleetAsset {
    * ranks are computed (both the Commander-initiated re-rank and the
    * read-path self-heal) — never assigned ad hoc elsewhere. */
   priority: number | null
-  status: 'active' | 'removed'
+  /** SW-015C — see `VesselLifecycleStatus`'s own doc comment. Replaces
+   * the old `status: 'active' | 'removed'` field (a permanent, one-way
+   * soft-delete with no restore path) — `'retired'` is fully reversible
+   * via `recommissionFleetAsset`. A pre-migration save's old `status`
+   * value is translated to this field once, in `migrate()`
+   * (useFleetStore.ts): `'removed'` -> `'retired'`, `'active'` (or
+   * missing) -> `'active'`. */
+  lifecycleStatus: VesselLifecycleStatus
+  /** ISO timestamp of the most recent retirement — cleared (`undefined`)
+   * on recommission. Administrative metadata only; never used to gate
+   * business logic (`lifecycleStatus` alone is the one source of truth
+   * for "is this vessel active"). */
+  retiredAt?: string
   /** UX-005A — a Commander-supplied custom image for THIS owned vessel
    * instance, never the ship model (`shipDefinitionId`), never a Loadout.
    * A relative managed reference only — e.g. "ships/<vessel-id>.png" —
@@ -88,7 +111,15 @@ export interface FleetAsset {
  * src/store/useFleetStore.ts for how it's applied.
  */
 export interface SeedAssetOverride {
-  status?: 'active' | 'removed'
+  /** SW-015C — mirrors `FleetAsset.lifecycleStatus`; see that field's own
+   * doc comment. Replaces the old `status?: 'active' | 'removed'` field. */
+  lifecycleStatus?: VesselLifecycleStatus
+  /** Mirrors `FleetAsset.retiredAt`. Merged via the same key-presence
+   * check as `nickname`/`customImageRef` below (not `??`) — recommission
+   * clearing it back to `undefined` must win over the seed baseline
+   * (which is always `undefined` too, so `??` alone can't tell "cleared"
+   * from "never set"). */
+  retiredAt?: string
   nickname?: string
   ownershipType?: OwnershipType
   priority?: number | null
@@ -130,6 +161,15 @@ export interface Ship {
   // not modeled here.
   imageUrl?: string
   lastUpdated?: string
+  /** SW-015C — mirrored from `FleetAsset.lifecycleStatus` at
+   * materialization time (fleetAssetMaterializer.ts), so every existing
+   * `Ship[]`-consuming surface can check it without a separate
+   * `fleetAssets` lookup. Use `src/utils/fleetLifecycle.ts`'s
+   * `isActiveShip`/`selectActiveShips` rather than comparing this field
+   * directly, so the "what counts as active" rule stays in one place. */
+  lifecycleStatus: VesselLifecycleStatus
+  /** Mirrored from `FleetAsset.retiredAt` — display-only (the Retired view). */
+  retiredAt?: string
 }
 
 export type BuildKind = 'FACTORY' | 'CUSTOM' | 'MISSION' | 'TEMPLATE'

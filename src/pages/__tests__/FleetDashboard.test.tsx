@@ -404,3 +404,90 @@ describe('EWO-060 (Part A/B): Fleet Dashboard Table Cleanup & Ship Management re
     expect(screen.getAllByTestId('priority-card-wrapper')).toHaveLength(ships.length)
   })
 })
+
+describe('<FleetDashboard /> — SW-015C (Deliverable 7): Active/Retired view', () => {
+  it('defaults to Active — a retired vessel is not mixed into the default view', () => {
+    const before = useFleetStore.getState().ships.length
+    useFleetStore.getState().retireFleetAsset('ghost')
+    renderDashboard()
+    expect(screen.queryByText('F7C-S Hornet Ghost Mk II')).not.toBeInTheDocument()
+    expect(screen.getByText(`${before - 1} Ships`)).toBeInTheDocument()
+  })
+
+  it('the Retired tab lists a retired vessel with subdued styling and a Retired badge, and is not mixed with active ones', () => {
+    useFleetStore.getState().retireFleetAsset('ghost')
+    renderDashboard()
+    fireEvent.click(screen.getByText(/Retired/))
+    expect(screen.getByText('F7C-S Hornet Ghost Mk II')).toBeInTheDocument()
+    expect(screen.getByText('Retired')).toBeInTheDocument()
+    // Ghost's card itself carries the subdued-opacity treatment.
+    const card = screen.getByText('F7C-S Hornet Ghost Mk II').closest('a') as HTMLElement
+    expect(card.className).toContain('opacity-60')
+  })
+
+  it('an active vessel never shows the Retired badge (the view toggle itself is the only "Retired" text present)', () => {
+    renderDashboard()
+    expect(screen.getAllByText('Retired')).toHaveLength(1) // just the Active/Retired toggle tab
+  })
+
+  it('the Retired tab shows the required empty-state copy when nothing has been retired', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByText('Retired'))
+    expect(screen.getByText('No vessels have been retired from the Fleet Registry.')).toBeInTheDocument()
+  })
+
+  it('EWO-073 (Part B): the Retired tab header reads "N Retired Vessel(s)," never "N Ships"', () => {
+    useFleetStore.getState().retireFleetAsset('ghost')
+    renderDashboard()
+    fireEvent.click(screen.getByText(/Retired/))
+    expect(screen.getByText('1 Retired Vessel')).toBeInTheDocument()
+    expect(screen.queryByText(/^1 Ship$/)).not.toBeInTheDocument()
+  })
+
+  it('EWO-073 (Part B): pluralizes the Retired header correctly for more than one retired vessel', () => {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    const b = useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Gladius Retired')
+    useFleetStore.getState().retireFleetAsset('ghost')
+    useFleetStore.getState().retireFleetAsset(b.assetId!)
+    renderDashboard()
+    fireEvent.click(screen.getByText(/Retired/))
+    expect(screen.getByText('2 Retired Vessels')).toBeInTheDocument()
+  })
+
+  it('EWO-073 (optional recommendation): shows the "viewing retired vessels" subtitle only on the Retired tab', () => {
+    renderDashboard()
+    expect(
+      screen.queryByText('Viewing retired vessels. These assets are preserved but excluded from active fleet operations.')
+    ).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText(/Retired/))
+    expect(
+      screen.getByText('Viewing retired vessels. These assets are preserved but excluded from active fleet operations.')
+    ).toBeInTheDocument()
+  })
+
+  it('retiring one vessel does not affect another vessel of the same model in either view', () => {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    const a = useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Gladius Active')
+    const b = useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Gladius Retired')
+    useFleetStore.getState().retireFleetAsset(b.assetId!)
+
+    renderDashboard()
+    expect(screen.getByText('Gladius Active')).toBeInTheDocument()
+    expect(screen.queryByText('Gladius Retired')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText(/Retired/))
+    expect(screen.getByText('Gladius Retired')).toBeInTheDocument()
+    expect(screen.queryByText('Gladius Active')).not.toBeInTheDocument()
+  })
+
+  it('the Retired tab label shows a count once something is retired', () => {
+    renderDashboard()
+    expect(screen.getByText('Retired')).toBeInTheDocument()
+    cleanup()
+
+    useFleetStore.getState().retireFleetAsset('ghost')
+    renderDashboard()
+    expect(screen.getByText('Retired (1)')).toBeInTheDocument()
+  })
+})

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Search, Star, HelpCircle, Lock, CheckCircle2, Plus, ScanLine } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import Badge from '../components/Badge'
 import { catalogComponentsByName } from '../generated/componentCatalog'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
@@ -65,7 +66,11 @@ function recommendationTone(kind: Verdict['kind']): 'success' | 'cyan' | 'danger
 }
 
 export default function DecisionCenter() {
-  const ships = useFleetStore((s) => s.ships)
+  // SW-015C (Deliverable 4) — every use of `ships` on this page feeds
+  // demand/reservation-eligibility computation for the CURRENT fleet;
+  // intercepted once here (the one canonical active-vessel selector,
+  // src/utils/fleetLifecycle.ts) rather than filtering each call site.
+  const ships = selectActiveShips(useFleetStore((s) => s.ships))
   const builds = useFleetStore((s) => s.builds)
   const fleetAssets = useFleetStore((s) => s.fleetAssets)
   const hardpoints = useFleetStore((s) => s.hardpoints)

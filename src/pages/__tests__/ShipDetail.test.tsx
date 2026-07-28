@@ -155,10 +155,10 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
     expect(installedAfter).toEqual(installedBefore)
   })
 
-  it("Edit and Remove from Fleet actions remain present alongside Quick Update", () => {
+  it('SW-015C: Edit remains present alongside Quick Update — the old standalone Remove from Fleet action is gone, replaced by Fleet Registry inside Ship Settings', () => {
     renderShipDetail('ghost')
     expect(screen.getByText('Edit')).toBeInTheDocument()
-    expect(screen.getByText('Remove from Fleet')).toBeInTheDocument()
+    expect(screen.queryByText('Remove from Fleet')).not.toBeInTheDocument()
     expect(screen.getByText('Quick Update')).toBeInTheDocument()
   })
 
@@ -333,11 +333,11 @@ describe('<ShipDetail /> — FTB-001A (Workstream D): explicit ship selection', 
     expect(select.value).toBe('')
   })
 
-  it('no editing action (Quick Update, Change Disposition, Edit, Remove from Fleet) is available before a ship is selected', () => {
+  it('no editing action (Quick Update, Change Disposition, Edit) is available before a ship is selected', () => {
     renderShipDetailBlank()
     expect(screen.queryByText('Quick Update')).not.toBeInTheDocument()
     expect(screen.queryByText('Change Disposition')).not.toBeInTheDocument()
-    expect(screen.queryByText('Remove from Fleet')).not.toBeInTheDocument()
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
   })
 
   it('explicit navigation from a specific ship (a real shipId in the URL) selects exactly that ship — the direct, intentional target the policy allows', () => {

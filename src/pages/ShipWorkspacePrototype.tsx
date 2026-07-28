@@ -21,6 +21,7 @@ import {
   PackagePlus,
 } from 'lucide-react'
 import { useFleetStore, DEV_SEED_FLEET_ENABLED, type TargetOverrideInput } from '../store/useFleetStore'
+import { selectActiveShips, isActiveShip } from '../utils/fleetLifecycle'
 import Badge, { statusTone } from '../components/Badge'
 import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
@@ -194,8 +195,21 @@ export default function ShipWorkspacePrototype() {
   const moveToShipStore = useFleetStore((s) => s.moveToShip)
   const addHangarItemStore = useFleetStore((s) => s.addHangarItem)
 
-  const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
+  // SW-015C (Deliverable 4) — active-only for every "which OTHER ship"
+  // selector (the Select Ship dropdown, the install/borrow donor pool,
+  // the Fleet Priority ranking options below) — but the direct `ship`
+  // lookup just below stays unrestricted, so this page still works for
+  // a retired vessel reached via direct link or the Retired view (that's
+  // exactly where its own Fleet Registry "Return to Active Service"
+  // control lives, inside Ship Settings).
+  const activeShips = selectActiveShips(ships)
   const ship = ships.find((s) => s.id === shipId)
+  // The currently-viewed ship stays in the dropdown even when retired
+  // (labeled distinctly below) so the control never shows a blank/
+  // mismatched selection while the rest of the page clearly renders a
+  // specific vessel — reached via direct link or the Retired view, both
+  // legitimate ways to land here on a retired ship.
+  const sortedShips = [...activeShips, ...(ship && !isActiveShip(ship) ? [ship] : [])].sort((a, b) => a.name.localeCompare(b.name))
 
   // SW-011A (Objective 1) — the real DataCore entity class for the
   // currently viewed ship, when a deep-import record exists (undefined
@@ -409,10 +423,14 @@ export default function ShipWorkspacePrototype() {
   // deliberate exception to this page's own "never a dialog" convention:
   // a real confirm modal, not an inline disclosure, matching the existing
   // precedent for every other destructive/irreversible action already in
-  // this codebase (Ship Detail's own LoadoutPortTree remove modal, its
-  // "Remove from Fleet" confirmation, Loadout Manager's "Delete Loadout"
-  // confirmation) — a Commander should never uninstall a real component
-  // one accidental click away from a silent mutation.
+  // this codebase (Ship Detail's own LoadoutPortTree remove modal,
+  // Loadout Manager's "Delete Loadout" confirmation) — a Commander should
+  // never uninstall a real component one accidental click away from a
+  // silent mutation. (EWO-073 — the old "Remove from Fleet" confirmation
+  // this comment used to also cite no longer exists; vessel removal is
+  // now the reversible Fleet Registry Retire Vessel flow, SW-015C, which
+  // is deliberately NOT irreversible/destructive and so isn't part of
+  // this same precedent list.)
   const [removeTarget, setRemoveTarget] = useState<{ slotLabel: string; itemLabel: string } | null>(null)
   const [returnToHangar, setReturnToHangar] = useState(false)
   const [removeError, setRemoveError] = useState<string | null>(null)
@@ -1511,7 +1529,10 @@ export default function ShipWorkspacePrototype() {
           hangarItems,
           installedLoadouts,
           reservations,
-          ships,
+          // SW-015C (Deliverable 4) — a retired vessel is never offered
+          // as a "borrow from" donor source; its installed configuration
+          // is preserved but not operationally available.
+          ships: activeShips,
           builds,
         })
       : { reserved: [], available: [], upgrade: [], borrowable: [] }
@@ -1891,6 +1912,7 @@ export default function ShipWorkspacePrototype() {
         {sortedShips.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name}
+            {s.lifecycleStatus === 'retired' ? ' (Retired)' : ''}
           </option>
         ))}
       </select>
@@ -2448,14 +2470,20 @@ export default function ShipWorkspacePrototype() {
                     const value = e.target.value
                     setFleetPriorityStore(ship.id, value === 'UNPRIORITIZED' ? null : Number(value))
                   }}
-                  className="w-full text-sm"
+                  disabled={!isActiveShip(ship)}
+                  className="w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {buildFleetPriorityOptions(ships, ship.id).map((option) => (
+                  {buildFleetPriorityOptions(activeShips, ship.id).map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
                   ))}
                 </select>
+                {/* SW-015C (Deliverable 4) — a retired vessel is excluded
+                    from active Priority Actions/ranking entirely; its
+                    last value is preserved on the record (never nulled by
+                    retirement) but not editable here until recommissioned. */}
+                {!isActiveShip(ship) && <p className="text-[11px] text-muted mt-1.5">Retired vessels don't participate in active Fleet Priority.</p>}
               </div>
             </div>
           </div>

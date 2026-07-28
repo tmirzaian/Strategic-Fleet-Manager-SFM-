@@ -18,6 +18,7 @@ const baseShip: Ship = {
   readiness: 82,
   priority: 1,
   missing: [],
+  lifecycleStatus: 'active',
 }
 
 const progress: BuildProgressResult = {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
+import { selectActiveShips } from '../utils/fleetLifecycle'
 import { catalogComponentsByName } from '../generated/componentCatalog'
 import { isComponentSelectableForPort } from '../data/componentCatalog'
 import CatalogComponentSearch from '../components/CatalogComponentSearch'
@@ -28,7 +29,9 @@ const changeTypes: ChangeType[] = ['Add Component to Hangar', 'Install Component
 const slots = ['Weapon 1', 'Weapon 2', 'Power 1', 'Power 2', 'Shield 1', 'Shield 2', 'Cooler 1', 'Cooler 2', 'Quantum Drive', 'Radar', 'Life Support']
 
 export default function QuickUpdate() {
-  const ships = useFleetStore((s) => s.ships)
+  // SW-015C (Deliverable 4) — an install/move/add-component surface
+  // (an "active fleet selector"); a retired vessel isn't offered here.
+  const ships = selectActiveShips(useFleetStore((s) => s.ships))
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
   const addLogEntry = useFleetStore((s) => s.addLogEntry)

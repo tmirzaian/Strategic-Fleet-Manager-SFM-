@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
-import { X, Pencil, ImagePlus, RotateCcw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, Pencil, ImagePlus, RotateCcw, Archive, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useFleetStore, resolveFleetAssetId } from '../store/useFleetStore'
 import { useShipImageCacheStore } from '../store/shipImageCache'
 import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 import { validateShipImageFile, storeShipImage, deleteShipImage } from '../utils/shipImageStorage'
+import { isActiveShip, activeReservationsForShip } from '../utils/fleetLifecycle'
 import type { OwnershipType, Ship } from '../types'
 import { OWNERSHIP_TYPE_LABELS, legacyToOwnershipType } from '../utils/ownership'
 import ShipImage from './ShipImage'
@@ -11,10 +13,43 @@ import ShipImage from './ShipImage'
 const OWNERSHIP_OPTIONS: OwnershipType[] = ['OWNED', 'PURCHASED', 'LOANER']
 
 export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onClose: () => void }) {
+  const navigate = useNavigate()
   const updateFleetAssetNickname = useFleetStore((s) => s.updateFleetAssetNickname)
   const updateFleetAssetOwnership = useFleetStore((s) => s.updateFleetAssetOwnership)
   const updateFleetProfile = useFleetStore((s) => s.updateFleetProfile)
   const updateFleetAssetCustomImage = useFleetStore((s) => s.updateFleetAssetCustomImage)
+  const retireFleetAsset = useFleetStore((s) => s.retireFleetAsset)
+  const recommissionFleetAsset = useFleetStore((s) => s.recommissionFleetAsset)
+  const builds = useFleetStore((s) => s.builds)
+  const reservations = useFleetStore((s) => s.reservations)
+  // SW-015C — read live off the store (not a prop snapshot) so the
+  // section updates in place the instant recommission/retire happens,
+  // without needing the caller to remount this modal.
+  const lifecycleStatus = useFleetStore((s) => {
+    const assetId = resolveFleetAssetId(ship.id, s.fleetAssets)
+    const asset = assetId ? s.fleetAssets.find((a) => a.id === assetId) : undefined
+    return asset?.lifecycleStatus ?? ship.lifecycleStatus
+  })
+  const isActive = isActiveShip({ lifecycleStatus })
+  const [retireConfirmOpen, setRetireConfirmOpen] = useState(false)
+  const [recommissionConfirmOpen, setRecommissionConfirmOpen] = useState(false)
+  // Deliverable 3/6 — computed live so the confirmation dialog's preview
+  // count can never drift from what the real action would actually
+  // release; both read the exact same shared helper
+  // (src/utils/fleetLifecycle.ts).
+  const releasableReservationCount = activeReservationsForShip(ship.id, builds, reservations).length
+
+  function handleRetire() {
+    retireFleetAsset(ship.id)
+    setRetireConfirmOpen(false)
+    onClose()
+    navigate('/fleet')
+  }
+
+  function handleRecommission() {
+    recommissionFleetAsset(ship.id)
+    setRecommissionConfirmOpen(false)
+  }
   // UX-005A (Deliverable 4) — whether THIS vessel currently has a custom
   // image on record (governs whether "Restore Default" is offered at
   // all); read directly from the store rather than local component
@@ -195,10 +230,144 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
             onClick={handleSave}
             className="w-full inline-flex items-center justify-center gap-2 bg-cyan text-bg font-semibold text-sm py-2.5 rounded-lg hover:bg-cyan/90 transition-colors"
           >
-            Update Fleet Registry
+            {/* SW-015C — renamed from "Update Fleet Registry" (unchanged
+                scope: Nickname/Ownership/Fleet Profile) now that a real
+                "Fleet Registry" section exists directly below — the two
+                labels being near-identical while meaning completely
+                different things was a self-inflicted confusion this
+                mission's own new section would otherwise create. */}
+            Save Changes
           </button>
+
+          <div className="scanline-divider" />
+
+          {/* SW-015C (Deliverable 2) — Fleet Registry: the vessel
+              lifecycle, clearly separated from every field above (which
+              batches into "Save Changes"). Retire/Recommission apply
+              immediately through their own confirmation, exactly like
+              the Ship Image actions above — never deferred to the batch
+              save. */}
+          <div>
+            <p className="text-xs uppercase tracking-widest text-cyan/80 mb-3">Fleet Registry</p>
+            {isActive ? (
+              <div className="bg-black/20 border border-white/5 rounded-lg p-3.5 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-white">
+                  <ShieldCheck size={15} className="text-success" /> Status: Active Service
+                </div>
+                <div>
+                  <p className="text-xs text-muted mb-2">
+                    Remove this vessel from current fleet operations while preserving its identity, loadouts, image, and history.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setRetireConfirmOpen(true)}
+                    className="inline-flex items-center gap-1.5 border border-danger/30 text-danger font-medium text-xs px-3 py-2 rounded-lg hover:bg-danger/10 hover:border-danger/50 transition-colors"
+                  >
+                    <Archive size={13} /> Retire Vessel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-black/20 border border-white/5 rounded-lg p-3.5 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-white">
+                  <Archive size={15} className="text-muted" /> Status: Retired
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRecommissionConfirmOpen(true)}
+                  className="inline-flex items-center gap-1.5 bg-cyan text-bg font-semibold text-xs px-3 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+                >
+                  <ShieldCheck size={13} /> Return to Active Service
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Deliverable 3 — retirement confirmation. A deliberate warning
+          treatment (danger-toned icon/border), but never the typed-
+          "DELETE"-to-confirm pattern Ship Detail's old destructive
+          Remove action used — retirement is reversible, not destructive,
+          and must never be presented as permanent deletion. */}
+      {retireConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] px-4" onClick={() => setRetireConfirmOpen(false)}>
+          <div className="panel p-6 max-w-sm w-full border-danger/30" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="text-danger shrink-0 mt-0.5" size={20} />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-danger/80 font-semibold mb-1">Retire Vessel</p>
+                  <h3 className="font-display font-semibold text-white">Retire "{ship.name}" from active service?</h3>
+                  <p className="text-sm text-muted mt-1.5">
+                    This vessel will be removed from active fleet operations, readiness, priority, demand, and reservation planning.
+                  </p>
+                  <p className="text-sm text-muted mt-1.5">
+                    Its vessel record, custom image, loadouts, installed configuration, and history will be preserved for future recommissioning.
+                  </p>
+                  {releasableReservationCount > 0 && (
+                    <p className="text-sm text-warning mt-1.5">
+                      Retiring this vessel will release {releasableReservationCount} component reservation{releasableReservationCount === 1 ? '' : 's'}.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <button onClick={() => setRetireConfirmOpen(false)} className="text-muted hover:text-white shrink-0">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setRetireConfirmOpen(false)}
+                className="flex-1 border border-white/15 text-white font-medium text-sm py-2 rounded-lg hover:border-white/35 transition-colors"
+              >
+                Cancel
+              </button>
+              <button onClick={handleRetire} className="flex-1 bg-danger text-white font-semibold text-sm py-2 rounded-lg hover:bg-danger/90 transition-colors">
+                Retire Vessel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deliverable 8 — recommission confirmation. Simple, no
+          destructive-warning language or styling — this is the opposite
+          of a destructive action. */}
+      {recommissionConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] px-4" onClick={() => setRecommissionConfirmOpen(false)}>
+          <div className="panel p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="text-cyan shrink-0 mt-0.5" size={20} />
+                <div>
+                  <h3 className="font-display font-semibold text-white">Return "{ship.name}" to active service?</h3>
+                  <p className="text-sm text-muted mt-1.5">
+                    Restores its saved configuration and image, and returns it to active fleet operations, readiness, and demand. Previously released reservations are not automatically restored.
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => setRecommissionConfirmOpen(false)} className="text-muted hover:text-white shrink-0">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => setRecommissionConfirmOpen(false)}
+                className="flex-1 border border-white/15 text-white font-medium text-sm py-2 rounded-lg hover:border-white/35 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRecommission}
+                className="flex-1 bg-cyan text-bg font-semibold text-sm py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+              >
+                Return to Active Service
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

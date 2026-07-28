@@ -10,7 +10,7 @@ function hp(overrides: Partial<Hardpoint> = {}): Hardpoint {
   }
 }
 const testBuild: Build = { id: 'b', shipId: 's', name: 'Test Build', role: 'Role', readiness: 0, isActive: true, missing: [], kind: 'CUSTOM' }
-const testShip: Ship = { id: 's', name: 'Test Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 1, missing: [] }
+const testShip: Ship = { id: 's', name: 'Test Ship', manufacturer: 'M', ownership: 'Owned', career: 'Combat', role: 'Role', activeBuildId: 'b', readiness: 0, priority: 1, missing: [], lifecycleStatus: 'active' }
 
 describe('buildProcurementList (Golden Scenario A + Part 3)', () => {
   it('Golden A: an Invalid Target (M80 Atlas) is excluded from the real Procurement List', () => {

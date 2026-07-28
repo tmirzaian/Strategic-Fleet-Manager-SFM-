@@ -56,6 +56,11 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
   const resolvedNickname = existingAsset?.nickname ?? nickname
   const resolvedPriority = existingAsset?.priority ?? priority ?? null
   const resolvedSource = existingAsset?.acquisitionSource ?? acquisitionSource ?? 'MANUAL'
+  // SW-015C — a fresh "Add Ship" asset always starts Active; replaying a
+  // persisted asset on rehydration carries its real lifecycle forward
+  // (a retired vessel must replay as retired, not silently reactivate).
+  const resolvedLifecycleStatus = existingAsset?.lifecycleStatus ?? 'active'
+  const resolvedRetiredAt = existingAsset?.retiredAt
   const now = new Date().toISOString()
 
   const hardpoints: Hardpoint[] = template.map((slot, i) => {
@@ -186,7 +191,7 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     activeBuildId: buildId,
     installedLoadoutId: `${assetId}-installed`,
     priority: resolvedPriority,
-    status: 'active',
+    lifecycleStatus: 'active',
     addedAt: now,
     updatedAt: now,
   }
@@ -204,6 +209,8 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     activeBuildId: buildId,
     readiness,
     priority: resolvedPriority,
+    lifecycleStatus: resolvedLifecycleStatus,
+    retiredAt: resolvedRetiredAt,
     missing,
     // EWO-021A: the canonical registry (src/data/shipImageRegistry.ts)
     // takes precedence over whatever image the ShipDefinition already

@@ -77,7 +77,10 @@ export function validateFleetAsset(fleetAssets: FleetAsset[], shipDefinitions: S
   const issues: ValidationIssue[] = []
   const defIds = new Set(shipDefinitions.map((d) => d.id))
   for (const asset of fleetAssets) {
-    if (asset.status !== 'active') continue
+    // SW-015C — a retired vessel is a fully preserved, recommissionable
+    // record now, not a gone-forever tombstone (the old model's
+    // 'removed'), so a broken ship-definition reference is just as much
+    // a real data-integrity issue for it as for an active vessel.
     if (!defIds.has(asset.shipDefinitionId)) {
       issues.push({
         severity: 'ERROR',

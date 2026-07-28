@@ -12,7 +12,7 @@ import type { Hardpoint, Ship } from '../../../types'
  */
 
 function ship(overrides: Partial<Ship> = {}): Ship {
-  return { id: 'ghost', name: 'Ghost', manufacturer: 'Anvil', ownership: 'Owned', career: 'Combat', role: 'Stealth Fighter', activeBuildId: 'build-1', readiness: 100, priority: 1, missing: [], ...overrides }
+  return { id: 'ghost', name: 'Ghost', manufacturer: 'Anvil', ownership: 'Owned', career: 'Combat', role: 'Stealth Fighter', activeBuildId: 'build-1', readiness: 100, priority: 1, missing: [], lifecycleStatus: 'active', ...overrides }
 }
 
 function hardpoint(overrides: Partial<Hardpoint> = {}): Hardpoint {
