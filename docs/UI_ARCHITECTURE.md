@@ -2640,3 +2640,267 @@ Reserved/Borrow, the reservation via a real `reserveComponent` call):
 correct compact labels, correct tones (cyan/gold/muted verified via
 rendered class names), zero horizontal overflow in both Operational
 Review and Change Installed Components.
+
+## 46. Manage Loadout Table Simplification & Status Consolidation (EWO-069, IMPLEMENTED NOW)
+
+Consolidates Manage Loadout's former separate Availability + Reservations
+columns into one live Status column, consuming the exact same canonical
+`STATUS_PILL` mapping EWO-068B established — "Hero explains. Tables
+classify. Workflows act." Still a target-planning surface only; no
+physical-installation behavior changed (Part A).
+
+**Part B/C/D/H — one live Status column, one shared vocabulary.** The
+former `{n} Available`/`Reservations` badge pair is replaced by a single
+Status cell, computed against whatever the Commander currently has
+SELECTED (`desired`) via a new resolver,
+`resolveNewTargetStatus({hp, desiredTargetItem, desiredTargetEntityClass,
+isEdited, hint})` (`shipManagementSummary.ts`) — never a second,
+independent pill vocabulary. Precedence: an unedited selection whose
+SAVED status is Invalid Target/Unresolved passes through unchanged
+(mirrors §44's own resolver); otherwise, if the selection identity-matches
+what's physically installed (via `computeHardpointStatus`, the same
+identity-aware comparison every other status resolver in this codebase
+already uses), it reads the new `Installed` tier (`STATUS_PILL` gains
+this 8th member — compact "INSTALLED," reusing OK's own `success` tone
+verbatim, never a new color); otherwise a LIVE `AcquisitionHint` — computed
+against `desired`, not the saved `hp.targetItem` — resolves
+Reserved/Available/Upgrade/Borrow/Missing exactly as §44/§45 already do.
+Quantity (Part C) is appended only for the Available tier and only when
+genuinely nonzero (`${qty} AVAILABLE`) — every other tier, including a
+real zero-stock Missing gap, shows its own canonical label alone, never
+"0 AVAILABLE." Reserved deliberately stays quantity-free per Part C's own
+allowance ("unless multiple reserved copies... are a real supported state
+the Commander must distinguish" — not yet true here).
+
+**Part E — redundant Port-row badge retired for this lens only.** The
+inline diagnostic badge beneath the port name (`showInlineDiagnostic`)
+used to render in both Manage Loadout and Change Installed Components,
+since neither had a Status column of its own. Now that Manage Loadout
+has one, duplicating it there is exactly the restatement Part E names by
+example — gated to Change Installed Components only (still no Status
+column there, Explicitly Out of Scope). Structural diagnostics
+independent of fulfillment state (missile-rack `×N` quantity, "Count
+Mismatch," "Inconsistent — Select Missile," the Configurable Slot badge)
+are untouched in every lens — only the fulfillment-state restatement was
+retired, per Part E's own "important distinction."
+
+**Part F — full-value tooltip, no interaction redesign.** `TargetComponentPicker`
+gains one new optional `title` prop (additive; every pre-existing caller
+omits it, byte-for-byte unchanged), passed as `title={desired}` from
+Manage Loadout's own call site — a long selected value clipped by the
+input's own width is still recoverable on hover. The picker's own
+interaction, filtering, and free-text behavior are otherwise untouched.
+
+**Part G — column rebalance, live-measured.** Manage Loadout gains the
+same `table-fixed` + explicit `<colgroup>` treatment §43 established for
+Operational Review (7 columns now that Availability + Reservations
+collapsed into one Status column): Port 18%, Size/Type 8%, Installed 13%,
+Current Target 13%, **New Target 27%** (Part G's own "widest operational
+column" call — the `TargetComponentPicker`'s own `w-full` input naturally
+fills whatever width its cell provides), Status 13% (sized for the
+longest realistic compact pill, "3 AVAILABLE"), Actions 8%. Change
+Installed Components (no Status column, its own Availability/Actions
+machinery untouched) remains Explicitly Out of Scope and keeps its
+pre-existing auto-layout table.
+
+Regression coverage: `shipManagementSummary.test.ts` unit-tests
+`resolveNewTargetStatus`'s full precedence in isolation (the Installed
+tier, the unedited-Invalid/Unresolved passthrough, editing away from a
+stale Invalid Target, and every non-Installed hint tier agreeing with
+§44/§45's own resolver). `TargetComponentPicker.test.tsx` covers the new
+`title` prop, present only when passed. A new EWO-069 block in
+`ShipWorkspacePrototype.test.tsx` proves: Availability/Reservations are
+gone and Status renders in their place, in the approved column order;
+real Ghost fixture data renders "1 AVAILABLE" (SnowBlind, unedited) and
+"MISSING" — never "0 AVAILABLE" — for a real zero-stock target
+(Slipstream, Power Plant); selecting the port's own currently-installed
+component live-reads INSTALLED; a real `reserveComponent` call live-reads
+RESERVED, cyan, quantity-free; changing the New Target selection
+recalculates Status immediately (Available → Missing, real Ghost data,
+zero saves); a synthetic borrow-only fixture renders the neutral
+`BORROW?` pill, visually distinct from Reserved/Available/Upgrade; Missing
+and Invalid keep their established red-intensity distinction; the
+redundant Port-column badge is gone while a genuinely structural
+diagnostic (missile-rack `×N`) remains; and the `<colgroup>` sums to a
+fully-accounted 100% with New Target the widest data column. Full project
+regression (`tsc --noEmit`, full `vitest run`) and a production build
+pass clean. Playwright live-verified at the 1320px reference viewport
+against a real seeded ship with rigged Available/Reserved rows: correct
+compact labels and quantities, zero horizontal overflow across the fully
+expanded table, and a live UI selection change (via the real picker, not
+a mock) flipping the Status pill from "3 AVAILABLE" to "INSTALLED" with
+no save/reload — the exact reactivity Part I requires.
+
+## 47. Remove Orphaned Actions Column & Rejustify Manage Loadout (EWO-069A, IMPLEMENTED NOW)
+
+Retires Manage Loadout's own Actions column outright — previously blank
+for every row except a currently-edited one — and rejustifies the
+remaining six columns; also retires the CONFIGURABLE badge from this
+lens, matching §43's own rule for Operational Review.
+
+**Part A — column removed completely, not hidden.** `lensColumnCount`
+for `MANAGE_LOADOUT` drops from 7 to 6; the header `<th>Actions</th>`,
+the `<colgroup>`'s 7th `<col>`, and the cell itself are all deleted
+outright — every other size (structural rows' `colSpan={lensColumnCount
+- 2}`, group rows' `colSpan={lensColumnCount}`) is already computed
+FROM `lensColumnCount`, so they shrink automatically with no separate
+edit needed. The one action the column used to hold (restore to factory
+target) relocates into the New Target cell itself, directly beneath the
+`TargetComponentPicker` it acts on — same `onClick`, same conditional
+`isEdited` visibility, same icon, only its home changed; no functionality
+was dropped, only the column.
+
+**Part B — rejustified per the Chief Architect's own proportions.** Port
+18%, Size/Type 10%, Installed 14%, Current Target 14%, New Target 29%
+(unchanged from EWO-069's own "widest operational column" call — the
+picker's `w-full` input already fills whatever the cell provides), Status
+15% (still sized for "X AVAILABLE," the longest realistic compact pill).
+Live-verified via Playwright rather than assumed correct from the
+percentages alone.
+
+**Part D — CONFIGURABLE retired from Manage Loadout too.** Both the
+trigger badge and its own stale-state disclosure guard are gated to
+`commanderIntent === 'CHANGE_INSTALLED'` only (previously `!== null`,
+covering both workflow lenses) — the same rule §43 already applied to
+Operational Review: Manage Loadout's own live Status column already
+communicates fulfillment state, so this badge was pure Commander-facing
+developer remnant here as well. Change Installed Components remains the
+one lens where a Commander physically installing a component may
+genuinely need to know a port supports configurable alternatives; the
+underlying `configurableSlot` lookup itself is untouched.
+
+**A pre-existing bug fixed in passing, not merely worked around.**
+§45's own "found, not fixed" disclosure (`Cannot read properties of
+undefined (reading 'ownedQuantity')`, Change Installed Components +
+Expand All) turned out to directly block this mission's own SW-011A
+regression coverage once those tests moved from Manage Loadout to
+Change Installed Components (Part D's own consequence — CONFIGURABLE's
+one remaining home). Root-caused precisely: `draftHardpoints` (this
+component's own `commanderTree` source) additively materializes
+component-owned child-slot rows via `withComponentOwnedChildSlots` —
+genuinely Commander-visible rows (the SW-011A Configurable Slot feature's
+own child ports) that never passed through `reviewedSummary`'s own
+per-hardpoint loop, since that loop only ever iterates
+`reviewedHardpoints`, the pre-materialization array. Both unsafe
+non-null lookups this reaches (`availabilityByHardpointId.get(hp.id)!`
+in the main Change Installed Components row, `hintByHardpointId.get(hp.id)!`
+in its own inline disclosure) now fall back to a live recomputation —
+the exact same `calculateComponentAvailability`/`describeAcquisitionHint`
+calls `reviewedSummary` itself used to build those maps — rather than
+crashing outright. (The Hero's own `actionableDecisions`-driven lookup
+was NOT touched — it's provably safe by construction, since
+`actionableDecisions` is itself derived from the same map it reads.)
+
+Regression coverage: a new EWO-069A block in
+`ShipWorkspacePrototype.test.tsx` proves exactly six headers ending in
+Status, Actions nowhere in the DOM, every leaf row carrying exactly six
+real `<td>` cells, group rows spanning exactly six columns, the relocated
+restore-to-factory action still functioning end-to-end, CONFIGURABLE
+absent even fully expanded, and nested-row indentation surviving the
+column removal untouched. The SW-011A describe block and §43's own
+"configurable metadata remains available" test were moved from Manage
+Loadout to Change Installed Components, which incidentally exercised
+(and proved the fix for) the pre-existing crash above. Full project
+regression (`tsc --noEmit`, full `vitest run`) and a production build
+pass clean. Playwright live-verified at the 1320px reference viewport:
+exactly six headers ending at Status, zero horizontal overflow across
+the fully expanded table, zero Configurable badges, and every row
+carrying either 1 (group) or 6 (leaf) real `<td>` cells — no orphaned
+seventh cell anywhere.
+
+## 48. Manage Loadout Commander Readability & Workspace Containment (EWO-069B, IMPLEMENTED NOW)
+
+The final Commander polish pass for Manage Loadout: Port-column
+terminology cleanup, one more column-width rebalance, and constraining
+the sticky Save/Discard bar to the Ship Workspace's own boundaries. The
+Chief Architect's own framing: "Once these refinements are in, Manage
+Loadout will have the same visual maturity as the Header and Loadout
+sections" — Beta 2.0 quality.
+
+**Part A/B — Port label cleanup, in the one shared formatter.**
+`formatHardpointLabel` (`hardpointLabelPresentation.ts`) is the single
+authority every lens (Operational Review/Manage Loadout/Change Installed
+Components) AND Ship Detail/Loadout Manager already render Port labels
+through — the fix belongs there, not duplicated per-surface. Two
+additions, both verified against real, currently-committed fixture
+data:
+- A new `(Manned Turret)` parenthetical-stripping rule — an explicit,
+  evidenced REVERSAL of EWO-036's own "keep Turret/Remote Turret
+  wording" rule, scoped to exactly the shape this mission names:
+  `quartermasterTemplates.ts`'s real `Front Cab Mining Laser (Manned
+  Turret)` (MOLE) now renders `Front Mining Laser` — the mission's own
+  literal example. `stripEngineeringTokens` also now strips `Cab` (a
+  real raw-data token on the same fixture). `(Remote Turret)` and bare,
+  non-parenthesized `Manned Turret` wording are deliberately untouched —
+  neither was named by this mission, and EWO-036's original protection
+  for both still stands.
+- `"Generator02 Shield"`-style fused-index reformatting was
+  **deliberately not implemented** as a general rule. No such raw string
+  exists anywhere in this repo's own current data to verify a pattern
+  against, and a first-attempt general `"{Word}{NN} {Type}"` regex
+  demonstrably collided with real, differently-meaning data already in
+  the fleet — Vulture's own `SubItem01 Salvage Head`/`SubItem02 Salvage
+  Head` (a positional qualifier, not a repeated-instance type name) was
+  silently mangled to `Salvage Head SubItem 1`. Reverted outright rather
+  than shipped as an unaudited guess; left for a future mission once the
+  actual raw data is available to audit against (the way EWO-036B's own
+  250-ship audit established every other rule in this file).
+
+Part B's own "avoid repeating words already implied by the parent" is
+already satisfied by the module's pre-existing depth-agnostic, leaf-only
+design (each row only ever renders its OWN local name, never an
+ancestor chain) — confirmed against the real MOLE fixture: the turret's
+own child renders `Mining Weapon`, never repeating the parent's newly
+-shortened `Mining Laser`-family name.
+
+**Part C — one more width rebalance, live-measured.** Manage Loadout's
+`<colgroup>` shifts again: Port 18% → 22%, Installed 14% → 16%, Current
+Target 14% → 16%, New Target gives back the difference (29% → 23%),
+Status stays unchanged (15%, "already correctly compact" per the work
+order itself), Size/Type stays compact (10% → 8%, never flagged as an
+issue). New Target still receives more room than any single other
+column, satisfying EWO-069's own "widest operational column" call even
+after giving some back.
+
+**Part D — truncation mechanism unchanged, only its width.** No new
+code: `ComponentAssignmentLabel`'s existing `truncate` + full-value
+`title` (EWO-068 Part D) already satisfies "maintain tooltip behavior,
+preserve accessibility labels" — Part C's extra width is what actually
+reduces how often truncation fires.
+
+**Part E/F/G — sticky footer constrained to the Ship Workspace.** The
+bar previously used `fixed inset-x-0 md:left-64` with no right-edge
+constraint of its own, so its visible background/border spanned all the
+way to the browser's own right edge on a wide viewport — well past
+App.tsx's own `<main className="... max-w-[1400px]">`, the exact
+container Hero/Loadout/Workspace cards/Ship Assessment all render
+inside. Adding `md:max-w-[1400px]` directly to the bar (left-aligned
+from the same `md:left-64` offset, matching Sidebar.tsx's own real
+`w-64`) caps it at the identical box — live-measured via Playwright at a
+1920px viewport: bar right edge and `<main>` right edge both land at
+exactly 1656px (`256px` sidebar + `1400px` cap), leaving the same
+visible gap beyond it that `<main>` itself already has. The now-
+redundant inner `max-w-[1400px] mx-auto` wrapper was dropped in favor of
+matching `<main>`'s own horizontal padding (`px-6 md:px-10`) directly.
+Elevation, shadow, Pending Changes badge, and Save (primary) / Discard
+(secondary) button hierarchy are all untouched — only containment
+changed.
+
+Regression coverage: `hardpointLabelPresentation.test.ts` gains cases
+for the Mining Laser/Turret parenthetical-stripping rule (the mission's
+own literal examples), confirms `(Remote Turret)`/bare `Manned Turret`
+stay untouched, and documents the reverted Generator-index rule via a
+regression guard using the real Vulture `SubItem0N` fixture that ruled
+it out. Every pre-existing test asserting the old `(Manned Turret)`
+-suffixed text (`ShipWorkspacePrototype`, `ShipDetail`, `MissionComposer`,
+`LoadoutPortTree` — confirming this formatter really is shared beyond
+Ship Workspace) was updated to the new stripped text, using real Railen/
+MOLE/Cutlass Black fixtures throughout — genuine, not synthetic. A new
+EWO-069B block in `ShipWorkspacePrototype.test.tsx` proves the exact
+new `<colgroup>` percentages and the sticky bar's `md:max-w-[1400px]`
+containment class. Full project regression (`tsc --noEmit`, full
+`vitest run`) and a production build pass clean. Playwright live-
+verified: zero horizontal overflow at the 1320px reference viewport,
+and — via real `boundingBox()` pixel measurement at a 1920px viewport —
+the sticky bar's right edge lands exactly on `<main>`'s own right edge,
+never the browser's.

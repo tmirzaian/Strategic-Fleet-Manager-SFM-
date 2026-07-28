@@ -3,6 +3,7 @@ import {
   buildShipManagementSummary,
   criticalHardpointsInPriorityOrder,
   resolveOperationalReviewStatus,
+  resolveNewTargetStatus,
   fulfillmentStatusFromHint,
   STATUS_PILL,
   type ShipManagementSummaryContext,
@@ -379,5 +380,72 @@ describe('resolveOperationalReviewStatus / STATUS_PILL — EWO-068A/EWO-068B: ca
   it('a missing hint (defensive fallback) never throws — falls back to the raw status', () => {
     const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'Something' })
     expect(resolveOperationalReviewStatus(target, undefined)).toBe('Missing')
+  })
+})
+
+/**
+ * EWO-069 — Manage Loadout's own live Status resolver: classifies
+ * whatever the Commander currently has SELECTED (`desiredTargetItem`),
+ * not the last-SAVED `hp.targetItem` — the mechanism behind Part I's
+ * "recalculates immediately, no save required." Reuses the exact same
+ * `fulfillmentStatusFromHint`/`STATUS_PILL` EWO-068B established; only
+ * the `Installed` precedence tier and the live-selection input are new.
+ */
+describe('resolveNewTargetStatus — EWO-069: Manage Loadout live Status precedence', () => {
+  const hint = (overrides: Partial<AcquisitionHint>): AcquisitionHint => ({ tone: 'success', label: 'Available in Inventory', detail: '', ...overrides })
+
+  it('Part D item 1: the selected target matching what is physically installed reads Installed, regardless of the hint', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', installedItem: 'Mirage', targetItem: 'SnowBlind' })
+    const result = resolveNewTargetStatus({
+      hp: target,
+      desiredTargetItem: 'Mirage',
+      desiredTargetEntityClass: undefined,
+      isEdited: true,
+      hint: hint({ label: 'Purchase Required' }),
+    })
+    expect(result).toBe('Installed')
+    expect(STATUS_PILL[result].compactLabel).toBe('INSTALLED')
+    expect(STATUS_PILL[result].tone).toBe('success')
+  })
+
+  it('Part I: switching the live selection away from Installed immediately re-resolves via the hint — same hardpoint, only the selection differs', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', installedItem: 'Mirage', targetItem: 'SnowBlind' })
+    const stillInstalled = resolveNewTargetStatus({ hp: target, desiredTargetItem: 'Mirage', desiredTargetEntityClass: undefined, isEdited: true, hint: hint({ label: 'Available in Inventory' }) })
+    expect(stillInstalled).toBe('Installed')
+    const switched = resolveNewTargetStatus({ hp: target, desiredTargetItem: 'Glacier', desiredTargetEntityClass: undefined, isEdited: true, hint: hint({ label: 'Available in Inventory' }) })
+    expect(switched).toBe('Available in Inventory')
+  })
+
+  it('an unedited selection whose saved status is Invalid Target passes that through, never silently reclassified by the hint', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Invalid Target', installedItem: 'Old', targetItem: 'BadFit' })
+    const result = resolveNewTargetStatus({ hp: target, desiredTargetItem: 'BadFit', desiredTargetEntityClass: undefined, isEdited: false, hint: hint({ label: 'Available in Inventory' }) })
+    expect(result).toBe('Invalid Target')
+  })
+
+  it('editing AWAY from a saved Invalid Target to a different (compatible) selection no longer passes through the stale Invalid Target status', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Invalid Target', installedItem: 'Old', targetItem: 'BadFit' })
+    const result = resolveNewTargetStatus({ hp: target, desiredTargetItem: 'GoodFit', desiredTargetEntityClass: undefined, isEdited: true, hint: hint({ label: 'Available in Inventory' }) })
+    expect(result).toBe('Available in Inventory')
+  })
+
+  it('an unedited selection whose saved status is Unresolved (factory placeholder) passes that through', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Unresolved', installedItem: '—', targetItem: '—' })
+    const result = resolveNewTargetStatus({ hp: target, desiredTargetItem: '—', desiredTargetEntityClass: undefined, isEdited: false, hint: hint({ label: 'Purchase Required' }) })
+    expect(result).toBe('Unresolved')
+  })
+
+  it('Part D items 2-6: every non-Installed hint tier resolves identically to the Operational Review resolver — one shared vocabulary, never a duplicate', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', installedItem: 'Old', targetItem: 'Something' })
+    const cases: Array<[Partial<AcquisitionHint>, string]> = [
+      [{ label: 'Reserved For This Port' }, 'Reserved For This Port'],
+      [{ label: 'Available in Inventory' }, 'Available in Inventory'],
+      [{ label: 'Available to Reserve' }, 'Upgrade Available'],
+      [{ label: 'Borrow Available' }, 'Borrow Available'],
+      [{ label: 'Purchase Required' }, 'Missing'],
+    ]
+    for (const [hintOverrides, expected] of cases) {
+      const result = resolveNewTargetStatus({ hp: target, desiredTargetItem: 'Something Else', desiredTargetEntityClass: undefined, isEdited: true, hint: hint(hintOverrides) })
+      expect(result).toBe(expected)
+    }
   })
 })

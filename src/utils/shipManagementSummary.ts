@@ -5,6 +5,7 @@ import { deriveFleetBuildState } from './fleetBuildState'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { describeAcquisitionHint, type AcquisitionHint } from './componentAcquisitionHint'
 import { canonicalComponentCategoryKey, CANONICAL_COMPONENT_CATEGORY_ORDER, CANONICAL_COMPONENT_CATEGORY_LABEL, CANONICAL_COMPONENT_CATEGORY_ICON } from './componentCategoryIcon'
+import { computeHardpointStatus } from './hardpointStatus'
 import type { Tone } from '../components/Badge'
 
 /**
@@ -88,7 +89,7 @@ function acquisitionRank(hint: AcquisitionHint): number {
  * exclusion already keeps Purchase-Required rows out of the Hero's
  * Decision Summary regardless of what this column shows).
  */
-export type OperationalReviewStatus = HardpointStatus | 'Reserved For This Port' | 'Available in Inventory' | 'Borrow Available'
+export type OperationalReviewStatus = HardpointStatus | 'Reserved For This Port' | 'Available in Inventory' | 'Borrow Available' | 'Installed'
 
 /**
  * EWO-068B (Part D) — the acquisition-hint half of the fulfillment-status
@@ -160,6 +161,13 @@ export interface StatusPillPresentation {
 
 export const STATUS_PILL: Record<OperationalReviewStatus, StatusPillPresentation> = {
   OK: { compactLabel: 'OK', longLabel: 'OK', tone: 'success' },
+  // EWO-069 (Part D item 1) — Manage Loadout's own top precedence tier:
+  // the selected New Target already matches what's physically installed.
+  // Conceptually the same "nothing outstanding" state as OK, worded for
+  // an active planning surface rather than a read-only assessment — reuses
+  // OK's own `success` tone verbatim ("the existing canonical tone"),
+  // never a new color.
+  Installed: { compactLabel: 'INSTALLED', longLabel: 'Installed', tone: 'success' },
   'Reserved For This Port': { compactLabel: 'RESERVED', longLabel: 'Reserved For This Port', tone: 'cyan' },
   'Available in Inventory': { compactLabel: 'AVAILABLE', longLabel: 'Available in Inventory', tone: 'success' },
   'Upgrade Available': { compactLabel: 'UPGRADE', longLabel: 'Upgrade Available', tone: 'gold' },
@@ -167,6 +175,52 @@ export const STATUS_PILL: Record<OperationalReviewStatus, StatusPillPresentation
   Missing: { compactLabel: 'MISSING', longLabel: 'Missing', tone: 'danger' },
   'Invalid Target': { compactLabel: 'INVALID', longLabel: 'Invalid Target', tone: 'invalid' },
   Unresolved: { compactLabel: 'UNRESOLVED', longLabel: 'Unresolved', tone: 'muted' },
+}
+
+/**
+ * EWO-069 (Part D/H/I) — Manage Loadout's own live Status resolver: unlike
+ * Operational Review (which classifies the already-SAVED `hp.targetItem`),
+ * this classifies whatever the Commander currently has SELECTED in the
+ * New Target picker (`desiredTargetItem`) — the exact value driving Part
+ * I's "no save/blur/refresh required" reactivity, since it's plain
+ * synchronous derivation from already-reactive component state, not a
+ * second async calculation. Consumes the SAME canonical
+ * `fulfillmentStatusFromHint`/`STATUS_PILL` this file already established
+ * for Operational Review (Part H — "do not define a separate pill
+ * vocabulary"); only the INPUT (a live selection vs. a saved field) and
+ * the added `Installed` precedence tier are new.
+ *
+ * Precedence: an unedited selection (still equal to the saved
+ * `hp.targetItem`) whose SAVED status is Invalid Target/Unresolved passes
+ * that through unchanged — the moment the Commander picks a different,
+ * compatible option (the New Target picker only ever offers compatible
+ * catalog entries), this branch no longer applies and the normal
+ * Installed/hint-based resolution below takes over. Otherwise: if the
+ * selection identity-matches what's physically installed (the same
+ * `computeHardpointStatus` identity comparison every other status
+ * resolver in this codebase already uses — never a raw `===` on display
+ * names alone, so a same-named-but-differently-cataloged part is never
+ * mistaken for a match), it's `Installed`; otherwise the live
+ * `AcquisitionHint` (computed by the caller against the SAME selection,
+ * not the saved target) decides Reserved/Available/Upgrade/Borrow/Missing.
+ */
+export function resolveNewTargetStatus(params: {
+  hp: Hardpoint
+  desiredTargetItem: string
+  desiredTargetEntityClass: string | null | undefined
+  isEdited: boolean
+  hint: AcquisitionHint
+}): OperationalReviewStatus {
+  const { hp, desiredTargetItem, desiredTargetEntityClass, isEdited, hint } = params
+  if (!isEdited && (hp.status === 'Invalid Target' || hp.status === 'Unresolved')) return hp.status
+  const matchesInstalled =
+    computeHardpointStatus(hp.installedItem, desiredTargetItem, hp.factoryItem, {
+      installedEntityClass: hp.installedEntityClass,
+      targetEntityClass: desiredTargetEntityClass,
+      factoryEntityClass: hp.factoryEntityClass,
+    }) === 'OK'
+  if (matchesInstalled) return 'Installed'
+  return fulfillmentStatusFromHint(hint)
 }
 
 /**

@@ -102,18 +102,25 @@ describe('<MissionComposer /> (Loadout Manager)', () => {
     // two tractor beams under structural "Tractor Left/Right (Manned
     // Turret)" mounts, each with one real editable child (rendered leaf
     // label "Left Turret", the same generic leaf on both sides).
+    // EWO-069B (Part A) strips the redundant "(Manned Turret)"
+    // parenthetical from both the Tractor assemblies and the top-level
+    // Left/Right Turret assemblies elsewhere on this same ship — "Left
+    // Turret" now legitimately appears 3 times total (see the dedicated
+    // ShipWorkspacePrototype/ShipDetail fixture tests for the full
+    // breakdown); this test only needs at least the 2 nested children.
     renderComposer('?shipId=railen')
-    expect(screen.getByText('Tractor Left (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Tractor Right (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getAllByText('Left Turret')).toHaveLength(2)
+    expect(screen.getByText('Tractor Left')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Right')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Turret').length).toBeGreaterThanOrEqual(2)
   })
 
   it("Mission M-011: turret child weapons (Railen) render nested, same slot labels Ship Detail shows", () => {
     // MWO-001 (Task 2): Railen's real structure has two Manned Turrets,
     // each a structural mount with its own Left/Right Weapon Mount children.
+    // EWO-069B (Part A) strips "(Manned Turret)" from both.
     renderComposer('?shipId=railen')
-    expect(screen.getByText('Right Turret (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Left Turret (Manned Turret)')).toBeInTheDocument()
+    expect(screen.getByText('Right Turret')).toBeInTheDocument()
+    expect(screen.getAllByText('Left Turret').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Left Weapon Mount')).toHaveLength(2)
     expect(screen.getAllByText('Right Weapon Mount')).toHaveLength(2)
   })

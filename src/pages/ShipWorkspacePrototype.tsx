@@ -32,7 +32,7 @@ import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/ship
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
 import { catalogComponentsByEntityClass, catalogComponentsByName, resolveComponentByEntityClass } from '../generated/componentCatalog'
 import { deriveInstallCandidates, type BorrowInstallCandidate } from '../utils/installCandidates'
-import { buildPortTree, derivePortLogistics, type PortTreeNode } from '../utils/portTree'
+import { buildPortTree, type PortTreeNode } from '../utils/portTree'
 import { groupPortTree } from '../utils/portTreeGrouping'
 import { withMissileRackAggregation, makeMissileAggregateRow, type DisplayHardpoint } from '../utils/missileRackAggregation'
 import { componentCategoryIcon } from '../utils/componentCategoryIcon'
@@ -40,8 +40,8 @@ import { buildFleetPriorityOptions } from '../utils/fleetPriority'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import { TOP_LEVEL_GROUP_ORDER, legacyPortGroupLabel } from '../utils/commanderSystemTaxonomy'
-import { buildShipManagementSummary, resolveOperationalReviewStatus, fulfillmentStatusFromHint, STATUS_PILL, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
-import type { AcquisitionHint } from '../utils/componentAcquisitionHint'
+import { buildShipManagementSummary, resolveOperationalReviewStatus, resolveNewTargetStatus, fulfillmentStatusFromHint, STATUS_PILL, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
+import { describeAcquisitionHint, type AcquisitionHint } from '../utils/componentAcquisitionHint'
 import { prepareCanonicalHardpoints, makeHardpointChildSlotRow } from '../utils/canonicalHardpointPreparation'
 import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
 import { isComponentSelectableForPort } from '../data/componentCatalog'
@@ -988,7 +988,12 @@ export default function ShipWorkspacePrototype() {
   // fields); only which columns render does. Lens 1 (no intent selected)
   // is the read-only default; Lens 2/3 adapt column-for-column to the
   // work order's spec.
-  const lensColumnCount = commanderIntent === 'MANAGE_LOADOUT' ? 8 : commanderIntent === 'CHANGE_INSTALLED' ? 7 : 6
+  // EWO-069 (Part B) — Manage Loadout consolidates its former separate
+  // Availability + Reservations columns into one Status column, dropping
+  // this lens from 8 columns to 7. EWO-069A (Part A) then retires the
+  // Actions column outright (its one action relocates into the New
+  // Target cell — see renderLensCells) — 7 columns down to 6.
+  const lensColumnCount = commanderIntent === 'MANAGE_LOADOUT' ? 6 : commanderIntent === 'CHANGE_INSTALLED' ? 7 : 6
 
   function renderLensHeader() {
     if (commanderIntent === 'MANAGE_LOADOUT') {
@@ -999,9 +1004,7 @@ export default function ShipWorkspacePrototype() {
           <th className="px-4 py-2.5 font-medium">Installed</th>
           <th className="px-4 py-2.5 font-medium">Current Target</th>
           <th className="px-4 py-2.5 font-medium">New Target</th>
-          <th className="px-4 py-2.5 font-medium">Availability</th>
-          <th className="px-4 py-2.5 font-medium">Reservations</th>
-          <th className="px-4 py-2.5 font-medium">Actions</th>
+          <th className="px-4 py-2.5 font-medium">Status</th>
         </tr>
       )
     }
@@ -1078,8 +1081,38 @@ export default function ShipWorkspacePrototype() {
         : aggregateChildLabels
           ? aggregateChildLabels.map((label) => desiredTargetEntityClasses[label]).find((ec) => ec !== undefined)
           : desiredTargetEntityClasses[hp.slotLabel]
+      // EWO-069 (Part B/D/H/I) — replaces the former separate Availability
+      // (`calculateComponentAvailability`) + Reservations (`derivePortLogistics`
+      // — which read only the SAVED `hp.targetItem`, never the live
+      // selection) columns with one live Status pill, computed against
+      // `desired`/`desiredEntityClass` (whatever the Commander currently
+      // has selected, edited or not) so it recalculates immediately on
+      // every New Target change with no save/blur/refresh — the same
+      // `describeAcquisitionHint` authority every other acquisition-tier
+      // surface already reads, never a second one.
       const availability = calculateComponentAvailability(desired, hangarItems, installedLoadouts, reservations, desiredEntityClass)
-      const logistics = derivePortLogistics(hp, reservations, hangarItems, installedLoadouts)
+      const liveHint = ship
+        ? describeAcquisitionHint({
+            componentName: desired,
+            componentEntityClass: desiredEntityClass,
+            currentShipId: ship.id,
+            currentBuildId: reviewedBuildId,
+            currentSlotLabel: hp.slotLabel,
+            hangarItems,
+            installedLoadouts,
+            reservations,
+            ships,
+          })
+        : { tone: 'muted' as const, label: 'Purchase Required' as const, detail: '' }
+      const newTargetStatus = resolveNewTargetStatus({ hp, desiredTargetItem: desired, desiredTargetEntityClass: desiredEntityClass, isEdited, hint: liveHint })
+      const newTargetStatusPill = STATUS_PILL[newTargetStatus]
+      // Part C — quantity belongs only with genuinely available unreserved
+      // inventory; every other tier (including a real 0-available Missing
+      // gap) shows its own canonical label alone, never "0 AVAILABLE."
+      const newTargetStatusLabel =
+        newTargetStatus === 'Available in Inventory' && availability.availableQuantity > 0
+          ? `${availability.availableQuantity} ${newTargetStatusPill.compactLabel}`
+          : newTargetStatusPill.compactLabel
 
       // SW-008A (Objective 6) — a real selection always replaces the slot's
       // entry outright; returning to the port's own Current Target removes
@@ -1149,38 +1182,42 @@ export default function ShipWorkspacePrototype() {
 
       return (
         <>
-          <td className="px-4 py-1.5 text-muted">
+          <td className="px-4 py-1.5 text-muted max-w-0">
             <ComponentAssignmentLabel value={hp.installedItem} />
           </td>
-          <td className="px-4 py-1.5 text-muted/80">
+          <td className="px-4 py-1.5 text-muted/80 max-w-0">
             <ComponentAssignmentLabel value={hp.targetItem} />
           </td>
           <td className="px-4 py-1.5">
-            <TargetComponentPicker
-              id={`new-target-${hp.id}`}
-              value={desired}
-              onChange={commitNewTarget}
-              options={newTargetOptionsFor(hp)}
-              ariaLabel={`New target for ${formatHardpointLabel(hp.slotLabel)}`}
-              showFullIdentity
-            />
+            {/* EWO-069A (Part A) — the former standalone Actions column
+                (only ever populated for an edited row, effectively blank
+                seventh-column real estate the rest of the time) is
+                retired outright; its one action (restore to factory
+                target) relocates here, alongside the control it actually
+                acts on, rather than reserving a whole column for it. */}
+            <div className="space-y-1">
+              <TargetComponentPicker
+                id={`new-target-${hp.id}`}
+                value={desired}
+                onChange={commitNewTarget}
+                options={newTargetOptionsFor(hp)}
+                ariaLabel={`New target for ${formatHardpointLabel(hp.slotLabel)}`}
+                showFullIdentity
+                title={desired}
+              />
+              {isEdited && (
+                <button
+                  onClick={() => commitNewTarget(hp.factoryItem, hp.factoryEntityClass)}
+                  className="inline-flex items-center gap-1 text-xs text-muted hover:text-cyan transition-colors"
+                  title="Restore factory target"
+                >
+                  <RotateCcw size={11} /> Restore Factory Target
+                </button>
+              )}
+            </div>
           </td>
-          <td className="px-4 py-1.5">
-            <Badge tone={availability.availableQuantity > 0 ? 'success' : 'muted'}>{availability.availableQuantity} Available</Badge>
-          </td>
-          <td className="px-4 py-1.5">
-            <Badge tone={logistics === 'Reserved' ? 'cyan' : 'muted'}>{logistics}</Badge>
-          </td>
-          <td className="px-4 py-1.5">
-            {isEdited && (
-              <button
-                onClick={() => commitNewTarget(hp.factoryItem, hp.factoryEntityClass)}
-                className="inline-flex items-center gap-1 text-xs text-muted hover:text-cyan transition-colors"
-                title="Restore factory target"
-              >
-                <RotateCcw size={12} /> Factory
-              </button>
-            )}
+          <td className="px-4 py-1.5 whitespace-nowrap">
+            <Badge tone={newTargetStatusPill.tone}>{newTargetStatusLabel}</Badge>
           </td>
         </>
       )
@@ -1191,7 +1228,24 @@ export default function ShipWorkspacePrototype() {
       // recalculating; `reviewedSummary` always reflects whichever
       // Loadout this table is currently rendering (Active when no
       // different Loadout is under review).
-      const availability = reviewedSummary.availabilityByHardpointId.get(hp.id)!
+      //
+      // EWO-069A — pre-existing bug fix, discovered while re-verifying
+      // this lens for Part D: `draftHardpoints` (this component's own
+      // `commanderTree` source) additively materializes component-owned
+      // child-slot rows via `withComponentOwnedChildSlots` — real,
+      // Commander-visible rows (the SW-011A Configurable Slot feature's
+      // own child ports) that never went through `reviewedSummary`'s own
+      // per-hardpoint loop, since that loop only ever iterates
+      // `reviewedHardpoints` (the pre-materialization array). The
+      // resulting `.get(hp.id)` miss previously crashed this render
+      // outright (`Cannot read properties of undefined`) the moment a
+      // Commander expanded a group containing one and switched to this
+      // lens. Recomputed live for exactly this case — the identical
+      // `calculateComponentAvailability` call `reviewedSummary` itself
+      // used to build the map in the first place, never a second
+      // authority.
+      const availability =
+        reviewedSummary.availabilityByHardpointId.get(hp.id) ?? calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations, hp.targetEntityClass)
       const isRowExpanded = expandedInstallRowId === hp.id
       return (
         <>
@@ -1444,7 +1498,25 @@ export default function ShipWorkspacePrototype() {
   }
 
   function renderInstallDisclosure(hp: Hardpoint): ReactNode {
-    const hint = reviewedSummary.hintByHardpointId.get(hp.id)!
+    // EWO-069A — same materialized-child-slot-row fallback as the main
+    // Change Installed Components row above (see its own comment for the
+    // full root cause); recomputed live via the identical
+    // `describeAcquisitionHint` call `reviewedSummary` itself used.
+    const hint =
+      reviewedSummary.hintByHardpointId.get(hp.id) ??
+      (ship
+        ? describeAcquisitionHint({
+            componentName: hp.targetItem,
+            componentEntityClass: hp.targetEntityClass,
+            currentShipId: ship.id,
+            currentBuildId: hp.buildId,
+            currentSlotLabel: hp.slotLabel,
+            hangarItems,
+            installedLoadouts,
+            reservations,
+            ships,
+          })
+        : { tone: 'muted' as const, label: 'Purchase Required', detail: '' })
     const candidateOptions = newTargetOptionsFor(hp)
     const candidates = ship
       ? deriveInstallCandidates(candidateOptions, {
@@ -1779,11 +1851,17 @@ export default function ShipWorkspacePrototype() {
   function renderLensRows(nodes: PortTreeNode<DisplayHardpoint>[], depth: number): ReactNode[] {
     return nodes.flatMap((node) => {
       const hp = node.hardpoint
-      // Phase 3 — critical diagnostics stay visible in every lens. Lens 1
-      // already has its own dedicated Status column, so this inline badge
-      // only renders in Lens 2/3 (which have no Status column at all),
-      // avoiding a redundant duplicate badge in Lens 1.
-      const showInlineDiagnostic = commanderIntent !== null && !hp.isStructural && hp.status !== 'OK'
+      // Phase 3 — critical diagnostics originally stayed visible in every
+      // lens, since Lens 2/3 had no Status column of their own. EWO-069
+      // (Part E) — now that Manage Loadout has its own live Status column
+      // (reflecting the current New Target selection, not just the saved
+      // `hp.status` this badge reads), duplicating it here beneath the
+      // port name is exactly the redundant restatement Part E names by
+      // example ("Left Cooler / UPGRADE AVAILABLE" when the row already
+      // shows Status). Retired for Manage Loadout only — Change Installed
+      // Components (still no Status column of its own; Explicitly Out of
+      // Scope for this mission) keeps it exactly as before.
+      const showInlineDiagnostic = commanderIntent === 'CHANGE_INSTALLED' && !hp.isStructural && hp.status !== 'OK'
       const CategoryIcon = componentCategoryIcon(hp)
       // SW-011A (Objective 1/2) — additive only: a row with no confident
       // configurable-slot match renders byte-identical to before this
@@ -1813,11 +1891,19 @@ export default function ShipWorkspacePrototype() {
                   identifier, confidence level, source authority): it
                   doesn't help a Commander read Factory/Installed/Target/
                   Status, so it's retired from the read-only Operational
-                  Review lens (commanderIntent === null). The underlying
-                  `configurableSlot` lookup itself is untouched and still
-                  available the moment a Commander enters either workflow
-                  lens — only this trigger's visibility is gated. */}
-              {configurableSlot && commanderIntent !== null && (
+                  Review lens (commanderIntent === null). EWO-069A (Part
+                  D) — the same rule now applies to Manage Loadout too:
+                  its own live Status column already communicates
+                  fulfillment state, so this badge was pure Commander-
+                  facing developer remnant there as well. Change Installed
+                  Components is the one lens that still surfaces it — a
+                  Commander physically installing a component may
+                  genuinely need to know a port supports configurable
+                  alternatives. The underlying `configurableSlot` lookup
+                  itself is untouched and still available to Change
+                  Installed Components' own selector logic — only this
+                  trigger's visibility is gated. */}
+              {configurableSlot && commanderIntent === 'CHANGE_INSTALLED' && (
                 <button
                   onClick={() => setInspectedConfigurableSlotId(isInspectingConfigurableSlot ? null : hp.id)}
                   title={`Configurable Slot — ${configurableSlot.eligibleComponentCount} known alternative(s). Click to ${isInspectingConfigurableSlot ? 'hide' : 'view'} details.`}
@@ -1856,8 +1942,10 @@ export default function ShipWorkspacePrototype() {
       // EWO-068 (Part B) — guards against a stale inspected-slot id leaking
       // the disclosure into Operational Review after a Commander opens it
       // in a workflow lens and then switches back to the read-only
-      // default; the trigger badge above is already gated identically.
-      if (configurableSlot && isInspectingConfigurableSlot && commanderIntent !== null) rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
+      // default. EWO-069A (Part D) — Manage Loadout now gets the same
+      // guard, since its own trigger badge is retired too; the trigger
+      // badge above is already gated identically to this.
+      if (configurableSlot && isInspectingConfigurableSlot && commanderIntent === 'CHANGE_INSTALLED') rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
       rows.push(...renderLensRows(node.children, depth + 1))
       return rows
     })
@@ -2600,22 +2688,37 @@ export default function ShipWorkspacePrototype() {
                 {/* EWO-068 (Part C) — the read-only Operational Review lens
                     (commanderIntent === null, 6 columns) gets a fixed table
                     layout with an explicit <colgroup>, so its own width is
-                    never dictated by content — the requirement this
-                    mission is scoped to. Manage Loadout/Change Installed
-                    Components (8/7 columns, their own Actions/Availability/
-                    Reservations machinery) are Explicitly Out of Scope and
-                    keep the pre-existing auto-layout table untouched.
-                    EWO-068A (Part F) widened Status from 13% to 25% for the
-                    Hero-length labels EWO-068B now replaces with compact
-                    ones ("RESERVED"/"AVAILABLE"/"UPGRADE"/"BORROW?"/
-                    "MISSING"/"INVALID" — none longer than 9 characters).
-                    EWO-068B (Part E) — Status shrinks back to 10%, and the
-                    reclaimed width goes to Port/Size-Type/Target (the
-                    columns Part E names as the intended beneficiaries),
-                    live-measured against the actual rendered "AVAILABLE"
-                    pill (the longest approved compact label) rather than
-                    estimated from character count. */}
-                <table className={`w-full text-sm ${commanderIntent === null ? 'table-fixed' : ''}`}>
+                    never dictated by content. EWO-068A (Part F) widened
+                    Status from 13% to 25% for the Hero-length labels
+                    EWO-068B then replaced with compact ones ("RESERVED"/
+                    "AVAILABLE"/"UPGRADE"/"BORROW?"/"MISSING"/"INVALID" —
+                    none longer than 9 characters), letting EWO-068B (Part
+                    E) shrink Status back to 10% and give Port/Size-Type/
+                    Target the reclaimed width — live-measured against the
+                    actual rendered "AVAILABLE" pill (the longest approved
+                    compact label) rather than estimated from character
+                    count. EWO-069 (Part G) extended the identical
+                    table-fixed + <colgroup> treatment to Manage Loadout
+                    (its own former Availability + Reservations columns
+                    consolidated into one Status column). EWO-069A (Part
+                    A/B) then retired Manage Loadout's own orphaned
+                    Actions column outright (7 columns down to 6 — its one
+                    action relocated into the New Target cell, see
+                    renderLensCells) and rejustified the remaining six.
+                    EWO-069B (Part C) — one final Commander-readability
+                    pass: Port/Installed/Current Target were all truncating
+                    more aggressively than necessary while New Target had
+                    room to spare, so New Target gives back width (29% ->
+                    23%) to Port (18% -> 22%), Installed (14% -> 16%), and
+                    Current Target (14% -> 16%) — Status stays unchanged
+                    (15%, already correctly compact) and Size/Type stays
+                    compact (10% -> 8%, never flagged as an issue) — live-
+                    measured against a real long component name rather
+                    than assumed. Change Installed Components (7 columns,
+                    its own Availability/Actions machinery) remains
+                    Explicitly Out of Scope and keeps the pre-existing
+                    auto-layout table untouched. */}
+                <table className={`w-full text-sm ${commanderIntent !== 'CHANGE_INSTALLED' ? 'table-fixed' : ''}`}>
                   {commanderIntent === null && (
                     <colgroup>
                       <col className="w-[33%]" />
@@ -2624,6 +2727,16 @@ export default function ShipWorkspacePrototype() {
                       <col className="w-[15%]" />
                       <col className="w-[15%]" />
                       <col className="w-[10%]" />
+                    </colgroup>
+                  )}
+                  {commanderIntent === 'MANAGE_LOADOUT' && (
+                    <colgroup>
+                      <col className="w-[22%]" />
+                      <col className="w-[8%]" />
+                      <col className="w-[16%]" />
+                      <col className="w-[16%]" />
+                      <col className="w-[23%]" />
+                      <col className="w-[15%]" />
                     </colgroup>
                   )}
                   <thead>{renderLensHeader()}</thead>
@@ -2733,15 +2846,31 @@ export default function ShipWorkspacePrototype() {
           z-10 — deliberately BELOW TargetComponentPicker's dropdown
           popover (z-20), so a New Target picker opened on a row near the
           bottom of the viewport always renders above this bar, never
-          hidden beneath it. */}
+          hidden beneath it.
+
+          EWO-069B (Part E/F) — this bar previously used `inset-x-0
+          md:left-64` with no right-edge constraint of its own, so on a
+          wide viewport its visible background/border spanned all the
+          way to the browser's own right edge — well past App.tsx's own
+          `<main className="... max-w-[1400px]">`, the exact container
+          Hero/Loadout/Workspace cards/Ship Assessment all render inside.
+          `md:max-w-[1400px]` now caps the bar itself at the identical
+          width, left-aligned from the same `md:left-64` sidebar offset
+          (Sidebar.tsx's own real `w-64`) — so it terminates exactly
+          where the Ship Workspace's own content does, never past it,
+          and the left navigation panel stays visually untouched. The
+          inner wrapper's own `max-w-[1400px] mx-auto` is now redundant
+          (the outer element already caps at that width) and is dropped
+          in favor of matching `<main>`'s own horizontal padding
+          (`px-6 md:px-10`, already present) directly. */}
       {ship && commanderIntent === 'MANAGE_LOADOUT' && pendingChangeCount > 0 && (
         <>
           <div className="h-20" aria-hidden="true" />
           <div
             data-testid="persistent-save-bar"
-            className="fixed inset-x-0 md:left-64 bottom-0 z-10 border-t border-cyan/30 bg-bg/95 backdrop-blur-sm shadow-[0_-4px_16px_rgba(0,0,0,0.35)] px-6 md:px-10 py-3"
+            className="fixed inset-x-0 md:left-64 md:max-w-[1400px] bottom-0 z-10 border-t border-cyan/30 bg-bg/95 backdrop-blur-sm shadow-[0_-4px_16px_rgba(0,0,0,0.35)] px-6 md:px-10 py-3"
           >
-            <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2 text-sm">
                 <Badge tone="warning">
                   {pendingChangeCount} Pending Change{pendingChangeCount === 1 ? '' : 's'}

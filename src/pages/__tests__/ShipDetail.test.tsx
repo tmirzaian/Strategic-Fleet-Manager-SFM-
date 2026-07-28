@@ -64,10 +64,14 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
     fireEvent.click(screen.getByText('Expand All'))
     expect(screen.getByText('Left Weapon 1 Mount')).toBeInTheDocument()
     expect(screen.getByText('Right Weapon 2 Mount')).toBeInTheDocument()
-    expect(screen.getByText('Left Turret (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Right Turret (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Tractor Left (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Tractor Right (Manned Turret)')).toBeInTheDocument()
+    // EWO-069B (Part A) — "(Manned Turret)" is stripped from display;
+    // "Left Turret" also legitimately appears as a distinct nested child
+    // under both real Tractor Left/Right assemblies (real Railen data),
+    // so getAllByText is correct here, not getByText.
+    expect(screen.getAllByText('Left Turret').length).toBeGreaterThan(0)
+    expect(screen.getByText('Right Turret')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Left')).toBeInTheDocument()
+    expect(screen.getByText('Tractor Right')).toBeInTheDocument()
   })
 
   it("12. Railen's turret child weapons are collapsed by default (not rendered until expansion)", () => {
@@ -104,9 +108,11 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
   it('MOLE renders its mining turret hierarchy', () => {
     renderShipDetail('mole')
     fireEvent.click(within(screen.getByText('Manned Turrets').closest('tr')!).getByRole('button'))
-    expect(screen.getByText('Front Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Left Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
-    expect(screen.getByText('Right Cab Mining Laser (Manned Turret)')).toBeInTheDocument()
+    // EWO-069B (Part A) — "Front Cab Mining Laser (Manned Turret)" ->
+    // "Front Mining Laser," the mission's own literal example fixture.
+    expect(screen.getByText('Front Mining Laser')).toBeInTheDocument()
+    expect(screen.getByText('Left Mining Laser')).toBeInTheDocument()
+    expect(screen.getByText('Right Mining Laser')).toBeInTheDocument()
     expect(screen.getAllByText('Mining Weapon')).toHaveLength(3)
   })
 
@@ -123,7 +129,9 @@ describe('<ShipDetail /> (Alpha 2.5C)', () => {
   it('Cutlass Black renders its Turret and Tractor Turret assemblies', () => {
     renderShipDetail('cutlass-black')
     fireEvent.click(within(screen.getByText('Manned Turrets').closest('tr')!).getByRole('button'))
-    expect(screen.getByText('Turret (Manned Turret)')).toBeInTheDocument()
+    // EWO-069B (Part A) — "(Manned Turret)" stripped; "(Remote Turret)"
+    // deliberately untouched (never named by that mission's examples).
+    expect(screen.getByText('Turret')).toBeInTheDocument()
     fireEvent.click(within(screen.getByText('Remote Turrets').closest('tr')!).getByRole('button'))
     expect(screen.getByText('Tractor Turret (Remote Turret)')).toBeInTheDocument()
     expect(screen.getByText('Weapon Turret')).toBeInTheDocument()

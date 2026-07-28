@@ -199,3 +199,66 @@ describe('EWO-036A: formatHardpointLabel — no sibling collisions across every 
     expect(JSON.stringify(template)).toBe(before)
   })
 })
+
+/**
+ * EWO-069B (Part A) — explicit, evidenced reversal of EWO-036's own
+ * "keep Turret/Remote Turret wording" rule, scoped to exactly the
+ * parenthesized "(Manned Turret)" shape this mission names by real
+ * example (quartermasterTemplates.ts's own `Front Cab Mining Laser
+ * (Manned Turret) — Mining Weapon`). "(Remote Turret)" is deliberately
+ * untouched — never named by this mission, and the bare (non-
+ * parenthesized) "Manned Turret" wording from EWO-036A's own test above
+ * is untouched too (a different shape this mission's examples never
+ * covered).
+ */
+describe('EWO-069B (Part A): formatHardpointLabel — "(Manned Turret)" parenthetical retired, "(Remote Turret)" and bare "Manned Turret" untouched', () => {
+  it('Front Cab Mining Laser (Manned Turret) -> Front Mining Laser (the mission\'s own literal example)', () => {
+    expect(formatHardpointLabel('Front Cab Mining Laser (Manned Turret)')).toBe('Front Mining Laser')
+  })
+
+  it('Left Cab Mining Laser (Manned Turret) -> Left Mining Laser', () => {
+    expect(formatHardpointLabel('Left Cab Mining Laser (Manned Turret)')).toBe('Left Mining Laser')
+  })
+
+  it('Right Cab Mining Laser (Manned Turret) -> Right Mining Laser', () => {
+    expect(formatHardpointLabel('Right Cab Mining Laser (Manned Turret)')).toBe('Right Mining Laser')
+  })
+
+  it('a nested child under the now-renamed turret keeps its own distinct name, never repeating the parent (Part B — no visual noise)', () => {
+    const parent = formatHardpointLabel('Front Cab Mining Laser (Manned Turret)')
+    const child = formatHardpointLabel('Front Cab Mining Laser (Manned Turret) — Mining Weapon')
+    expect(parent).toBe('Front Mining Laser')
+    expect(child).toBe('Mining Weapon')
+    expect(child).not.toBe(parent)
+  })
+
+  it('"(Remote Turret)" is untouched — this mission never named it, EWO-036\'s original protection stands', () => {
+    expect(formatHardpointLabel('Tail Turret (Remote Turret)')).toContain('Remote Turret')
+    expect(formatHardpointLabel('Top Remote Turret (Remote Turret)')).toContain('Remote Turret')
+  })
+
+  it('bare, non-parenthesized "Manned Turret" wording (no parens) is untouched — a different shape than this mission\'s own examples', () => {
+    expect(formatHardpointLabel('Left Manned Turret')).toContain('Manned Turret')
+  })
+})
+
+/**
+ * EWO-069B (Part A) — "Generator02 Shield"/"Generator03 Shield" is named
+ * by the mission as an example of preferring an already-established
+ * Commander-friendly convention, but no such raw string exists anywhere
+ * in this repo's own current data to verify a reformatting rule against
+ * — deliberately NOT implemented as a general pattern (see this file's
+ * own module-level doc comment for the full reasoning). This guard
+ * proves why: a first-attempt general "{Word}{NN} {Type}" rule collided
+ * with real, differently-meaning data already in the fleet.
+ */
+describe('EWO-069B (Part A): formatHardpointLabel — a general fused-index reformatting rule was deliberately NOT added (real-data collision)', () => {
+  it('Vulture\'s real "SubItem01 Salvage Head"/"SubItem02 Salvage Head" (a positional qualifier, not a repeated-instance type name) pass through unchanged — the exact real fixture that ruled out a general pattern', () => {
+    expect(formatHardpointLabel('SubItem01 Salvage Head')).toBe('SubItem01 Salvage Head')
+    expect(formatHardpointLabel('SubItem02 Salvage Head')).toBe('SubItem02 Salvage Head')
+  })
+
+  it('a hypothetical "Generator02 Shield" is not reformatted — no rule exists for it (unverified against real data, see module doc comment)', () => {
+    expect(formatHardpointLabel('Generator02 Shield')).toBe('Generator02 Shield')
+  })
+})

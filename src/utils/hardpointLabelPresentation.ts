@@ -56,11 +56,12 @@
 
 const POSITION_PREFIX = /^(Left|Right|Top|Bottom|Nose)\b\s*/i
 
-/** Strips CIG engineering artifacts the mission calls out by name — never touches position/Turret/Remote Turret/Missile Rack wording. */
+/** Strips CIG engineering artifacts the mission calls out by name — never touches position/Turret/Remote Turret/Missile Rack wording. EWO-069B adds "Cab" (a real raw-data token — see `mannedTurretMatch` below — never a load-bearing word on its own). */
 function stripEngineeringTokens(s: string): string {
   return s
     .replace(/\b(Gun\s+)?Class\s*\d+\b/gi, '')
     .replace(/\bHardpoint\b/gi, '')
+    .replace(/\bCab\b/gi, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
 }
@@ -160,12 +161,46 @@ function formatLeaf(leaf: string): string {
     return formatRackLeaf(leaf, positionMatch[0].length, positionMatch[1])
   }
 
-  // Everything else (Manned Turret / Remote Turret / generic Mount rows,
-  // docking/vehicle-attach nodes, seed-authored labels, anything not
-  // matching a known engineering pattern) — conservative cleanup only,
-  // per the mission's explicit instruction to KEEP Turret/Remote
-  // Turret/Missile Rack wording and never blindly restructure text this
-  // module has no evidenced pattern for.
+  // EWO-069B (Part A) — explicit, evidenced reversal of EWO-036's own
+  // "keep Turret/Remote Turret wording" rule, scoped to exactly the one
+  // pattern this mission names: a MANNED turret row whose own hierarchy
+  // (grouping, icon, and now-cleaned name) already communicates it's a
+  // turret without needing the parenthetical spelled out — real data:
+  // "Front Cab Mining Laser (Manned Turret)" -> "Front Mining Laser"
+  // (quartermasterTemplates.ts's own `Front Cab Mining Laser (Manned
+  // Turret) — Mining Weapon`). "Cab" (a real raw-data token on this same
+  // fixture) is stripped by `stripEngineeringTokens` below, not treated
+  // as a position/type word worth preserving. "(Remote Turret)" is
+  // deliberately left untouched — this mission's own examples never
+  // named it, and EWO-036's original protection for it still stands.
+  const mannedTurretMatch = /^(.*?)\s*\(Manned Turret\)\s*$/i.exec(leaf)
+  if (mannedTurretMatch) {
+    const cleaned = stripEngineeringTokens(mannedTurretMatch[1])
+    return cleaned || 'Turret'
+  }
+
+  // EWO-069B (Part A) — "Generator02 Shield"/"Generator03 Shield" (a raw
+  // port index fused directly to its type word) is named by the mission
+  // as an example of a label that should prefer an already-established
+  // Commander-friendly convention ("{Type} Generator N"). Deliberately
+  // NOT implemented as a general "{Word}{NN} {Type}" reformatting rule
+  // here: no such raw string exists anywhere in this repo's own current
+  // data to verify against (unlike every other rule in this file, each
+  // checked against real staged/deep-imported fixtures per EWO-036B's
+  // own audit discipline), and a first attempt at a general pattern
+  // demonstrably collided with real, differently-meaning data already in
+  // the fleet (Vulture's own "SubItem01 Salvage Head"/"SubItem02 Salvage
+  // Head" — a positional qualifier, not a repeated-instance type name —
+  // silently mangled to "Salvage Head SubItem 1"). Left for a future
+  // mission once the actual raw ship/port data is available to audit
+  // against, rather than shipping a speculative rule proven unsafe.
+
+  // Everything else (Remote Turret / generic Mount rows, docking/vehicle-
+  // attach nodes, seed-authored labels, anything not matching a known
+  // engineering pattern) — conservative cleanup only, per the mission's
+  // explicit instruction to KEEP Remote Turret/Missile Rack wording and
+  // never blindly restructure text this module has no evidenced pattern
+  // for.
   return stripEngineeringTokens(leaf)
 }
 

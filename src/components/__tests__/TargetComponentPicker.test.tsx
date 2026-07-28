@@ -113,3 +113,15 @@ describe('EWO-026 (Task 7/13): TargetComponentPicker option presentation — Gra
     expect(screen.getByText('Cirrus').closest('button')).toHaveTextContent('Stealth C')
   })
 })
+
+describe('EWO-069 (Part F): optional full-value tooltip', () => {
+  it('renders the given title on the combobox input, for callers whose surrounding cell may clip a long selected value', () => {
+    render(<TargetComponentPicker id="t3" value="An Unusually Long Selected Component Name" onChange={() => {}} options={options} title="An Unusually Long Selected Component Name" />)
+    expect(screen.getByRole('combobox')).toHaveAttribute('title', 'An Unusually Long Selected Component Name')
+  })
+
+  it('omitting title (every pre-existing caller) renders no title attribute at all — additive only', () => {
+    render(<TargetComponentPicker id="t4" value="DayBreak" onChange={() => {}} options={options} />)
+    expect(screen.getByRole('combobox')).not.toHaveAttribute('title')
+  })
+})

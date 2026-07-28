@@ -52,6 +52,7 @@ export default function TargetComponentPicker({
   id,
   ariaLabel,
   showFullIdentity,
+  title,
 }: {
   value: string
   /** EWO-STAB-004B (ADR-010) — `entityClass` is the chosen option's own
@@ -78,6 +79,12 @@ export default function TargetComponentPicker({
    * for the fuller breakdown (Ship Workspace's Manage Loadout New Target
    * selector) gets it. */
   showFullIdentity?: boolean
+  /** EWO-069 (Part F) — a full-value tooltip for the committed selection,
+   * so a long name that's visually clipped by the input's own width is
+   * still recoverable on hover, without redesigning the picker's own
+   * interaction. Omitted entirely by every existing caller (MissionComposer,
+   * the "Newly Acquired Component" picker), exactly as before. */
+  title?: string
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value)
@@ -202,6 +209,7 @@ export default function TargetComponentPicker({
         aria-expanded={open}
         aria-controls={`${id}-listbox`}
         aria-label={ariaLabel}
+        title={title}
         autoComplete="off"
         value={query}
         onFocus={openList}

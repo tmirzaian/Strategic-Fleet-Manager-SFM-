@@ -412,7 +412,10 @@ describe('LoadoutPortTree — SW-007B: identity iconography', () => {
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
     // formatHardpointLabel presents "Nose Weapon (Gimbal Mount)" as "Nose
     // Weapon Mount" — the mount's canonical slotLabel is unaffected.
-    expect(rowIconClass('Left Turret (Manned Turret)')).not.toBe(rowIconClass('Nose Weapon Mount'))
+    // EWO-069B (Part A) — "Left Turret (Manned Turret)" now displays as
+    // "Left Turret" (the redundant parenthetical stripped); the raw
+    // slotLabel above is untouched.
+    expect(rowIconClass('Left Turret')).not.toBe(rowIconClass('Nose Weapon Mount'))
   })
 
   it('a Remote Turret gets its own distinct icon from a Manned Turret', () => {
@@ -422,7 +425,10 @@ describe('LoadoutPortTree — SW-007B: identity iconography', () => {
     ]
     const tree = buildPortTree(hardpoints)
     render(<LoadoutPortTree tree={tree} reservations={[]} hangarItems={[]} installedLoadouts={[]} />)
-    expect(rowIconClass('Left Turret (Manned Turret)')).not.toBe(rowIconClass('Tail Turret (Remote Turret)'))
+    // EWO-069B (Part A) — "(Manned Turret)" is stripped from display,
+    // "(Remote Turret)" is deliberately untouched (never named by that
+    // mission's own examples).
+    expect(rowIconClass('Left Turret')).not.toBe(rowIconClass('Tail Turret (Remote Turret)'))
   })
 
   it('an unrecognized type falls back to the generic Miscellaneous icon rather than rendering nothing', () => {
