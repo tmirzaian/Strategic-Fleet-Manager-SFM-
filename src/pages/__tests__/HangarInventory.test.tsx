@@ -28,11 +28,12 @@ describe('<HangarInventory /> — Mission M-011 column cleanup', () => {
     expect(screen.queryByText('Owned')).not.toBeInTheDocument()
   })
 
-  it('EWO-029: keeps Item, Type, Size, Hangar Qty, Installed, Reserved, Available, Needed By in that exact order — no Disposition column', () => {
+  it('EWO-072 (Part C/D): Hangar Qty is gone — Item, Type, Size, Installed, Reserved, Available, Needed By, Actions render in that exact approved order', () => {
     renderHangar()
     const headerRow = screen.getAllByRole('columnheader')
     const labels = headerRow.map((h) => h.textContent?.trim())
-    const expectedInOrder = ['Item', 'Type', 'Size', 'Hangar Qty', 'Installed', 'Reserved', 'Available', 'Needed By']
+    expect(labels).not.toContain('Hangar Qty')
+    const expectedInOrder = ['Item', 'Type', 'Size', 'Installed', 'Reserved', 'Available', 'Needed By', 'Actions']
     const indices = expectedInOrder.map((label) => labels.findIndex((l) => l === label))
     expect(indices.every((i) => i !== -1)).toBe(true)
     expect(indices).toEqual([...indices].sort((a, b) => a - b))
@@ -47,14 +48,9 @@ describe('<HangarInventory /> — Mission M-011 column cleanup', () => {
     expect(table.textContent).toMatch(/\d/)
   })
 
-  it('EWO-STAB-002: Move to Ship is visibly present but disabled during Beta stabilization, with a message pointing to Quick Update', () => {
+  it('EWO-072 (Part I): Move to Ship is retired from Hangar Inventory — a permanently-disabled shortcut with no working destination picker is obsolete now that Quick Update → Install Component is the real path', () => {
     renderHangar()
-    const buttons = screen.getAllByText('Move to Ship').map((el) => el.closest('button')!)
-    expect(buttons.length).toBeGreaterThan(0)
-    for (const button of buttons) {
-      expect(button).toBeDisabled()
-      expect(button).toHaveAttribute('title', 'Temporarily unavailable during Beta stabilization. Use Quick Update → Install Component.')
-    }
+    expect(screen.queryByText('Move to Ship')).not.toBeInTheDocument()
   })
 })
 
@@ -186,8 +182,12 @@ describe('EWO-028 (Task 2/12): catalog-driven Add New Item', () => {
     const select = document.querySelector('select[size="6"]') as HTMLSelectElement
     const name = (select.querySelector('option') as HTMLOptionElement).value
     fireEvent.change(select, { target: { value: name } })
-    // Only the search input and the Quantity input remain real <input> elements.
-    const inputs = document.querySelectorAll('input')
+    // Only the search input and the Quantity input remain real <input>
+    // elements inside the Add New Item modal itself — scoped to the modal
+    // since EWO-072 (Part E) adds its own "Hide zero-balance items"
+    // checkbox input to the page, outside this modal.
+    const modal = select.closest('.panel') as HTMLElement
+    const inputs = modal.querySelectorAll('input')
     expect(inputs.length).toBe(2)
   })
 
@@ -309,15 +309,29 @@ describe('EWO-029 (Task 2/16): Disposition removed from the Beta UI', () => {
   })
 })
 
-describe('EWO-029 (Task 4/16): Reserve workflow', () => {
-  it('11. the Reserve action appears only when Available > 0', () => {
+describe('EWO-029 (Task 4/16) / EWO-072 (Part B): Reserve workflow', () => {
+  it('EWO-072 (Part B): Reserve does NOT appear for a component with Available stock but no matching, unresolved target requirement anywhere', () => {
+    // "Reservable Widget" is a fictitious name no seed Loadout ever
+    // targets — real available stock, zero real demand. The old rule
+    // (Available > 0 alone) wrongly showed Reserve here; the canonical
+    // resolver (Part B) requires a real unresolved match too.
     useFleetStore.getState().addHangarItem({ name: 'Reservable Widget', type: 'Cooler', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
     renderHangar()
     const row = screen.getByText('Reservable Widget').closest('tr')!
+    expect(within(row).queryByText('Reserve')).not.toBeInTheDocument()
+    expect(within(row).getByText('—')).toBeInTheDocument() // Needed By is genuinely empty
+  })
+
+  it('Reserve appears when Available stock AND a real unresolved target requirement both exist', () => {
+    // FR-66 is a real S1 Shield with a genuine unresolved Ghost-Escort
+    // requirement in the seed fixture (see other tests in this file).
+    useFleetStore.getState().addHangarItem({ name: 'FR-66', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
+    renderHangar()
+    const row = screen.getByText('FR-66').closest('tr')!
     expect(within(row).getByText('Reserve')).toBeInTheDocument()
   })
 
-  it('a zero-Available item never shows a Reserve action', () => {
+  it('a zero-Available item never shows a Reserve action (and is itself hidden by the default "Hide zero-balance items" toggle until disabled)', () => {
     useFleetStore.getState().addHangarItem({ name: 'Zero Stock Widget', type: 'Cooler', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' })
     const item = useFleetStore.getState().hangarItems.find((h) => h.name === 'Zero Stock Widget')!
     // addHangarItem itself requires a positive quantity (EWO-028) — a
@@ -326,6 +340,9 @@ describe('EWO-029 (Task 4/16): Reserve workflow', () => {
     // choice describes.
     useFleetStore.getState().updateHangarItemQuantity(item.id, 0)
     renderHangar()
+    // EWO-072 (Part G) — Installed=Reserved=Available=0 is a true-zero
+    // record, hidden by default; disable the toggle to inspect it directly.
+    fireEvent.click(screen.getByLabelText('Hide zero-balance items'))
     const row = screen.getByText('Zero Stock Widget').closest('tr')!
     expect(within(row).queryByText('Reserve')).not.toBeInTheDocument()
   })

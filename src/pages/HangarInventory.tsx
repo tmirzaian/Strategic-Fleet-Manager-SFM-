@@ -1,20 +1,54 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, Send, X, AlertOctagon, PackageX, Pencil, Trash2, Lock, Sparkles } from 'lucide-react'
+import { Plus, X, AlertOctagon, PackageX, Pencil, Trash2, Lock, SlidersHorizontal, ChevronDown, ChevronUp } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import SortableHeader from '../components/SortableHeader'
 import CatalogComponentSearch from '../components/CatalogComponentSearch'
 import type { HangarItem } from '../types'
-import { sortHangarItems, type HangarSortColumn, type SortDirection } from '../utils/hangarSort'
-import { calculateComponentAvailability } from '../engine/logistics/availability'
+import { sortHangarEntries, type HangarSortColumn, type SortDirection } from '../utils/hangarSort'
+import {
+  applyHangarFilters,
+  hangarFilterChips,
+  isHangarFilterActive,
+  sizesInHangar,
+  typesInHangar,
+  DEFAULT_HANGAR_FILTERS,
+  type AvailabilityFilterValue,
+  type HangarFilterState,
+  type ReservationFilterValue,
+} from '../utils/hangarFilters'
+import { resolveReservationEligibility } from '../utils/hangarReservationEligibility'
 import { catalogComponentsByName } from '../generated/componentCatalog'
 import {
   resolveInventoryDependencies,
   formatDependencyLabel,
   totalClaimedQuantity,
-  resolveNeededByBuilds,
   type InventoryDependency,
   type NeededByEntry,
 } from '../utils/inventoryDependencies'
+
+/** EWO-072 (Part H) — the compact, always-visible ship/build summary line
+ * ("Ghost Stealth · Corsair Gunship"), deduplicated per (ship, build) pair
+ * since one Build can have more than one unresolved requirement for the
+ * same component (e.g. twin mounts). */
+function neededBySummary(neededBy: NeededByEntry[]): string {
+  const unique = new Map<string, string>()
+  for (const e of neededBy) unique.set(`${e.shipId}:${e.buildId}`, `${e.fleetAssetLabel} ${e.buildName}`)
+  return Array.from(unique.values()).join(' · ')
+}
+
+function neededByTooltip(neededBy: NeededByEntry[]): string {
+  return neededBy.map((e) => `${e.fleetAssetLabel} — ${e.buildName} (${e.slotLabel})${e.reserved ? ' — Reserved' : ' — Unreserved'}`).join('\n')
+}
+
+/** EWO-072 (Part G) — a true-zero historical record: nothing installed,
+ * nothing reserved, nothing available. Fleet-wide demand (Needed By) is
+ * deliberately NOT part of this check — the Chief Architect's own ruling
+ * treats an unowned-but-needed component as procurement demand, not owned
+ * inventory, so it still hides under the default view; it remains fully
+ * visible the moment the Commander disables the toggle. */
+function isTrueZero(installedQuantity: number, reservedQuantity: number, availableQuantity: number): boolean {
+  return installedQuantity === 0 && reservedQuantity === 0 && availableQuantity === 0
+}
 
 export default function HangarInventory() {
   const hangarItems = useFleetStore((s) => s.hangarItems)
@@ -31,51 +65,37 @@ export default function HangarInventory() {
   const releaseReservation = useFleetStore((s) => s.releaseReservation)
 
   const [addOpen, setAddOpen] = useState(false)
-  // EWO-028 (Task 2) — catalog-driven Add: `selectedName` is set
-  // exclusively by CatalogComponentSearch picking a real catalog match,
-  // never by typing — "Add to Hangar" stays disabled until a real
-  // selection exists (Design Authority Ruling 3). EWO-030 (Task 1)
-  // extracted the search/select renderer itself into the shared
-  // CatalogComponentSearch component (also used by Quick Update), so this
-  // page no longer owns the search-query or auto-select logic directly.
   const [selectedName, setSelectedName] = useState('')
   const [addQtyInput, setAddQtyInput] = useState('1')
   const [addResult, setAddResult] = useState<{ success: boolean; message: string } | null>(null)
   const [sortColumn, setSortColumn] = useState<HangarSortColumn>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
-  // EWO-028 (Task 4/6) — Edit Quantity. `editStep` gates the Task 6
-  // below-allocation safeguard: 'input' is the normal editable form,
-  // 'confirm-reduction' is the explicit warning step a Commander must
-  // pass through before a reduction below claimed stock is allowed to save.
+  // EWO-072 (Part E) — collapsed by default, same disclosure pattern Fleet
+  // Dashboard's own filter toolbar established; filter selections
+  // themselves live in plain component state (not persisted — this
+  // mission's Regression Requirements only ask that a selection survives
+  // collapsing the panel, not surviving a reload) so collapsing never
+  // clears anything.
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+  const [filters, setFilters] = useState<HangarFilterState>(DEFAULT_HANGAR_FILTERS)
+  // EWO-072 (Part G) — hidden by default; true-zero historical records are
+  // not deleted, merely excluded from the operational "what do I own?" view.
+  const [hideZeroBalance, setHideZeroBalance] = useState(true)
+
   const [editItemId, setEditItemId] = useState<string | null>(null)
   const [editQtyInput, setEditQtyInput] = useState('')
   const [editStep, setEditStep] = useState<'input' | 'confirm-reduction'>('input')
   const [editError, setEditError] = useState<string | null>(null)
 
-  // EWO-028 (Task 5) — Delete. Dependencies are resolved once when the
-  // modal opens (resolveInventoryDependencies — the one shared resolver,
-  // Task 7) so the warning and the eventual delete act on the same
-  // snapshot the Commander actually read.
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
 
-  // EWO-029 (Task 4) — Reserve. `reserveShipId`/`reserveBuildId`/
-  // `reserveSlotLabel` narrow step by step — each selection filters the
-  // next, exactly like the mission's own required flow (exact Fleet
-  // Asset -> exact Build -> exact target requirement).
   const [reserveItemId, setReserveItemId] = useState<string | null>(null)
   const [reserveShipId, setReserveShipId] = useState('')
   const [reserveBuildId, setReserveBuildId] = useState('')
   const [reserveSlotLabel, setReserveSlotLabel] = useState('')
   const [reserveQtyInput, setReserveQtyInput] = useState('1')
   const [reserveResult, setReserveResult] = useState<{ success: boolean; message: string } | null>(null)
-  // FTB-001C — holds the pending "auto-close the Reserve modal" timeout
-  // (see confirmReserve below) so it can be cancelled: on unmount (the
-  // effect cleanup), and before starting a new one (a second confirm
-  // while one is already pending must never leave two timers racing).
-  // Without this, a Commander who navigates away (or a test that unmounts)
-  // within the 900ms window left the timeout to fire against a torn-down
-  // component, calling setReserveItemId on an unmounted instance.
   const reserveCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
@@ -84,10 +104,58 @@ export default function HangarInventory() {
     }
   }, [])
 
-  // EWO-029 (Task 6) — Manage/Release Reservations for one component.
   const [manageItemId, setManageItemId] = useState<string | null>(null)
 
-  const sortedItems = sortHangarItems(hangarItems, sortColumn, sortDirection)
+  // EWO-072 (Part B/K) — one decoration pass per render, one canonical
+  // resolver call per row (`resolveReservationEligibility`) feeding
+  // display, filtering, sorting, and Reserve-eligibility alike — no
+  // surface below independently recomputes Installed/Reserved/Available
+  // or re-derives its own idea of "does this row have somewhere to go."
+  const decoratedItems = useMemo(
+    () =>
+      hangarItems.map((item) => {
+        const { availability, neededBy, unreservedNeededBy, eligible } = resolveReservationEligibility(
+          item.name,
+          item.entityClass,
+          ships,
+          builds,
+          fleetAssets,
+          hardpoints,
+          hangarItems,
+          installedLoadouts,
+          reservations
+        )
+        return {
+          item,
+          installedQuantity: availability.installedQuantity,
+          reservedQuantity: availability.reservedQuantity,
+          availableQuantity: availability.availableQuantity,
+          neededBy,
+          neededByCount: neededBy.length,
+          unreservedNeededBy,
+          eligible,
+        }
+      }),
+    [hangarItems, ships, builds, fleetAssets, hardpoints, installedLoadouts, reservations]
+  )
+
+  const typeOptions = useMemo(() => typesInHangar(hangarItems), [hangarItems])
+  const sizeOptions = useMemo(() => sizesInHangar(hangarItems), [hangarItems])
+
+  const explicitlyFilteredItems = useMemo(() => applyHangarFilters(decoratedItems, filters), [decoratedItems, filters])
+  const visibleItems = useMemo(
+    () => (hideZeroBalance ? explicitlyFilteredItems.filter((row) => !isTrueZero(row.installedQuantity, row.reservedQuantity, row.availableQuantity)) : explicitlyFilteredItems),
+    [explicitlyFilteredItems, hideZeroBalance]
+  )
+  const sortedItems = useMemo(() => sortHangarEntries(visibleItems, sortColumn, sortDirection), [visibleItems, sortColumn, sortDirection])
+
+  const filtersActive = isHangarFilterActive(filters)
+  const filterChips = hangarFilterChips(filters)
+  // EWO-072 (Part J) — distinguishes "a real filter combination excludes
+  // everything" from "everything remaining is a true-zero record the
+  // Commander has chosen to hide" — each gets its own intentional,
+  // recoverable empty state rather than one generic blank-table message.
+  const hiddenSolelyByZeroBalanceToggle = hangarItems.length > 0 && !filtersActive && explicitlyFilteredItems.length > 0 && visibleItems.length === 0
 
   const selectedCatalogEntry = selectedName ? catalogComponentsByName.get(selectedName) : undefined
   const parsedAddQty = Number(addQtyInput)
@@ -137,16 +205,18 @@ export default function HangarInventory() {
     }
   }
 
-  // EWO-029 (Task 4) — Reserve workflow. `reserveNeededBy` is this exact
-  // component's own unresolved-and-unreserved requirements fleet-wide
-  // (the shared resolver, Task 7's own EWO-028 principle extended) —
-  // narrowed by chosen ship, then by chosen Build, to the exact target
-  // slot list Design Authority Ruling 11 requires ("compatible Build
-  // requirements only").
+  function clearFilterDimension(key: keyof HangarFilterState) {
+    setFilters((f) => ({ ...f, [key]: 'All' }))
+  }
+
+  // EWO-072 (Part B/K) — the Reserve modal's own Fleet Asset/Build/Target
+  // options are the SAME `resolveReservationEligibility` call every row
+  // already uses, never a second derivation.
   const reserveItem = reserveItemId ? hangarItems.find((i) => i.id === reserveItemId) ?? null : null
-  const reserveAvailability = reserveItem ? calculateComponentAvailability(reserveItem.name, hangarItems, installedLoadouts, reservations, reserveItem.entityClass) : null
-  const reserveNeededBy: NeededByEntry[] = reserveItem ? resolveNeededByBuilds(reserveItem.name, ships, builds, fleetAssets, hardpoints, reservations) : []
-  const reserveUnreservedNeededBy = reserveNeededBy.filter((e) => !e.reserved)
+  const reserveEligibility = reserveItem
+    ? resolveReservationEligibility(reserveItem.name, reserveItem.entityClass, ships, builds, fleetAssets, hardpoints, hangarItems, installedLoadouts, reservations)
+    : null
+  const reserveUnreservedNeededBy = reserveEligibility?.unreservedNeededBy ?? []
   const reserveShipOptions = useMemo(() => {
     const shipIds = new Set(reserveUnreservedNeededBy.map((e) => e.shipId))
     return ships.filter((s) => shipIds.has(s.id))
@@ -154,7 +224,7 @@ export default function HangarInventory() {
   const reserveBuildOptions = reserveUnreservedNeededBy.filter((e) => e.shipId === reserveShipId)
   const reserveSlotOptions = reserveBuildOptions.filter((e) => e.buildId === reserveBuildId)
   const parsedReserveQty = Number(reserveQtyInput)
-  const isReserveQtyValid = Number.isInteger(parsedReserveQty) && parsedReserveQty > 0 && Boolean(reserveAvailability) && parsedReserveQty <= (reserveAvailability?.availableQuantity ?? 0)
+  const isReserveQtyValid = Number.isInteger(parsedReserveQty) && parsedReserveQty > 0 && Boolean(reserveEligibility) && parsedReserveQty <= (reserveEligibility?.availability.availableQuantity ?? 0)
 
   useEffect(() => {
     if (reserveShipOptions.length === 1) setReserveShipId(reserveShipOptions[0].id)
@@ -201,7 +271,6 @@ export default function HangarInventory() {
     }
   }
 
-  // EWO-029 (Task 6) — Manage/Release Reservations.
   const manageItem = manageItemId ? hangarItems.find((i) => i.id === manageItemId) ?? null : null
   const manageReservations: InventoryDependency[] = manageItem
     ? resolveInventoryDependencies(manageItem.name, ships, builds, fleetAssets, installedLoadouts, reservations).filter((d) => d.kind === 'RESERVED')
@@ -236,110 +305,248 @@ export default function HangarInventory() {
           <p className="text-sm text-muted max-w-sm">Quartermaster has no components recorded for this command.</p>
         </div>
       ) : (
+      <>
+      {/* EWO-072 (Part E) — compact, collapsible, composable filters,
+          mirroring Fleet Dashboard's own established toolbar pattern. */}
+      <div className="space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <button
+              onClick={() => setFiltersExpanded((v) => !v)}
+              aria-expanded={filtersExpanded}
+              className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-medium border border-white/10 text-muted hover:text-white hover:border-white/25 rounded-lg px-2.5 py-1.5 transition-colors shrink-0"
+            >
+              <SlidersHorizontal size={12} /> Filters {filtersExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            {filterChips.length === 0 ? (
+              <span className="text-xs text-muted">All inventory</span>
+            ) : (
+              filterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  onClick={() => clearFilterDimension(chip.key)}
+                  title={`Remove ${chip.label} filter`}
+                  aria-label={`Remove ${chip.label} filter`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-cyan/40 bg-cyan/15 text-cyan hover:bg-cyan/25 transition-colors"
+                >
+                  {chip.label} <X size={11} />
+                </button>
+              ))
+            )}
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <label className="inline-flex items-center gap-1.5 text-xs text-muted cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hideZeroBalance}
+                onChange={(e) => setHideZeroBalance(e.target.checked)}
+                className="rounded border-white/20 bg-black/30 text-cyan focus:ring-cyan/50"
+              />
+              Hide zero-balance items
+            </label>
+            {filtersActive && (
+              <button onClick={() => setFilters(DEFAULT_HANGAR_FILTERS)} className="text-[11px] text-cyan/80 hover:text-cyan font-medium">
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {filtersExpanded && (
+          <div className="space-y-2.5 pt-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Type</span>
+              <button
+                onClick={() => setFilters((f) => ({ ...f, type: 'All' }))}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  filters.type === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                }`}
+              >
+                All
+              </button>
+              {typeOptions.map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilters((f) => ({ ...f, type }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.type === type ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Size</span>
+              <button
+                onClick={() => setFilters((f) => ({ ...f, size: 'All' }))}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  filters.size === 'All' ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                }`}
+              >
+                All
+              </button>
+              {sizeOptions.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setFilters((f) => ({ ...f, size }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.size === size ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Reservation State</span>
+              {(['All', 'Reserved', 'Unreserved'] as ReservationFilterValue[]).map((value) => (
+                <button
+                  key={value}
+                  onClick={() => setFilters((f) => ({ ...f, reservation: value }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.reservation === value ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-muted/50 w-24 shrink-0">Availability State</span>
+              {(['All', 'Available', 'Unavailable'] as AvailabilityFilterValue[]).map((value) => (
+                <button
+                  key={value}
+                  onClick={() => setFilters((f) => ({ ...f, availability: value }))}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    filters.availability === value ? 'bg-cyan/15 border-cyan/40 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-white/25'
+                  }`}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {sortedItems.length === 0 ? (
+        // EWO-072 (Part J) — a functioning filter/toggle combination that
+        // happens to exclude every row is not the same thing as an empty
+        // Hangar (the hangarItems.length === 0 case above); each
+        // exclusion reason gets its own intentional, recoverable state.
+        <div className="panel p-10 flex flex-col items-center text-center gap-2">
+          <PackageX size={28} className="text-muted/60 mb-1" />
+          {filtersActive ? (
+            <>
+              <h2 className="font-display font-semibold text-white">No inventory items match these filters.</h2>
+              <button
+                onClick={() => setFilters(DEFAULT_HANGAR_FILTERS)}
+                className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </>
+          ) : hiddenSolelyByZeroBalanceToggle ? (
+            <>
+              <h2 className="font-display font-semibold text-white">No owned inventory is currently recorded.</h2>
+              <button
+                onClick={() => {
+                  setSelectedName('')
+                  setAddQtyInput('1')
+                  setAddResult(null)
+                  setAddOpen(true)
+                }}
+                className="mt-2 inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+              >
+                <Plus size={15} /> Add New Item
+              </button>
+            </>
+          ) : (
+            <h2 className="font-display font-semibold text-white">No inventory items match these filters.</h2>
+          )}
+        </div>
+      ) : (
       <div className="panel overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          {/* EWO-072 (Part C/D) — Hangar Qty removed outright (Available
+              already communicates free Hangar stock); the reclaimed width
+              is redistributed via an explicit <colgroup> so Needed By
+              genuinely gains room (Part H) rather than the browser
+              distributing it arbitrarily. */}
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col className="w-[20%]" />
+              <col className="w-[12%]" />
+              <col className="w-[7%]" />
+              <col className="w-[9%]" />
+              <col className="w-[9%]" />
+              <col className="w-[9%]" />
+              <col className="w-[24%]" />
+              <col className="w-[10%]" />
+            </colgroup>
             <thead>
-              {/* EWO-029 (Task 2/3) — the row-wide Disposition column is
-                  removed for Beta (Design Authority Rulings 3/9/10):
-                  Available/Reserved/Installed are the only authoritative,
-                  calculated allocation states now shown. Hangar Quantity
-                  is added so the raw owned-and-not-installed stock a
-                  Commander is editing is never ambiguous relative to the
-                  calculated columns beside it. */}
               <tr className="text-left text-[11px] uppercase tracking-widest text-muted border-b border-white/5">
                 <SortableHeader label="Item" column="name" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Type" column="type" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <SortableHeader label="Size" column="size" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
-                <th className="px-3 py-3 font-medium" title="Total units recorded in Hangar Inventory, before Installed is subtracted — Available + Reserved.">
-                  Hangar Qty
-                </th>
-                <th className="px-3 py-3 font-medium">Installed</th>
-                <th className="px-3 py-3 font-medium">Reserved</th>
-                <th className="px-3 py-3 font-medium">Available</th>
-                <th className="px-3 py-3 font-medium">Needed By</th>
+                <SortableHeader label="Installed" column="installed" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                <SortableHeader label="Reserved" column="reserved" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                <SortableHeader label="Available" column="available" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
+                <SortableHeader label="Needed By" column="neededBy" activeColumn={sortColumn} direction={sortDirection} onSort={handleSort} />
                 <th className="px-3 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {sortedItems.map((item) => {
-                const availability = calculateComponentAvailability(item.name, hangarItems, installedLoadouts, reservations, item.entityClass)
-                const neededBy = resolveNeededByBuilds(item.name, ships, builds, fleetAssets, hardpoints, reservations)
-                const unreservedNeededBy = neededBy.filter((e) => !e.reserved)
-                // EWO-029 (Task 8/9/10) — an Available, unreserved match:
-                // real fleet demand exists AND stock is free to cover it.
-                // Never auto-reserved, never marked Installed — only surfaced.
-                const upgradeOpportunityCount = Math.min(unreservedNeededBy.length, availability.availableQuantity)
+              {sortedItems.map((row) => {
+                const { item, installedQuantity, reservedQuantity, availableQuantity, neededBy, unreservedNeededBy, eligible } = row
                 return (
                 <tr key={item.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-                  <td className="px-5 py-3 text-white font-medium whitespace-nowrap">{item.name}</td>
-                  <td className="px-5 py-3 text-muted whitespace-nowrap">{item.type}</td>
+                  <td className="px-5 py-3 text-white font-medium truncate" title={item.name}>{item.name}</td>
+                  <td className="px-5 py-3 text-muted truncate" title={item.type}>{item.type}</td>
                   <td className="px-5 py-3 text-muted">{item.size}</td>
-                  <td className="px-3 py-3 font-mono text-muted/80">{item.qty}</td>
-                  <td className="px-3 py-3 font-mono text-muted">{availability.installedQuantity}</td>
+                  <td className="px-3 py-3 font-mono text-muted">{installedQuantity}</td>
                   <td className="px-3 py-3 font-mono">
-                    {availability.reservedQuantity > 0 ? (
+                    {reservedQuantity > 0 ? (
                       <button
                         onClick={() => setManageItemId(item.id)}
                         className="text-cyan hover:underline"
                         title="Manage reservations for this component"
                       >
-                        {availability.reservedQuantity}
+                        {reservedQuantity}
                       </button>
                     ) : (
                       <span className="text-muted/50">0</span>
                     )}
                   </td>
-                  <td className="px-3 py-3 font-mono text-success">{availability.availableQuantity}</td>
+                  <td className="px-3 py-3 font-mono text-success">{availableQuantity}</td>
                   <td className="px-3 py-3 text-muted">
                     {neededBy.length === 0 ? (
                       <span className="text-muted/50">—</span>
                     ) : (
-                      <div
-                        className="max-w-[190px]"
-                        title={neededBy.map((e) => `${formatDependencyLabel({ kind: 'RESERVED', fleetAssetId: e.shipId, fleetAssetLabel: e.fleetAssetLabel, hullName: e.hullName, buildId: e.buildId, buildName: e.buildName, quantity: 1 })}${e.reserved ? ' (Reserved)' : ' (Unreserved)'} — ${e.slotLabel}`).join('\n')}
-                      >
-                        <span className="block truncate">
+                      <div title={neededByTooltip(neededBy)}>
+                        <div className="text-white text-xs font-medium truncate">
                           Needed by {neededBy.length} Build{neededBy.length === 1 ? '' : 's'}
-                        </span>
-                        {upgradeOpportunityCount > 0 && (
-                          <button
-                            onClick={() => openReserve(item)}
-                            className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-cyan hover:underline"
-                          >
-                            <Sparkles size={11} /> {upgradeOpportunityCount} unreserved match{upgradeOpportunityCount === 1 ? '' : 'es'} — Reserve
-                          </button>
+                        </div>
+                        <div className="text-[11px] text-muted/70 truncate">{neededBySummary(neededBy)}</div>
+                        {eligible && (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-[11px] text-cyan/80 whitespace-nowrap">
+                              {unreservedNeededBy.length} unreserved match{unreservedNeededBy.length === 1 ? '' : 'es'}
+                            </span>
+                            <button onClick={() => openReserve(item)} className="inline-flex items-center gap-1 text-[11px] font-medium text-cyan hover:underline">
+                              <Lock size={11} /> Reserve
+                            </button>
+                          </div>
                         )}
                       </div>
                     )}
                   </td>
                   <td className="px-3 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-3">
-                      {availability.availableQuantity > 0 && (
-                        <button
-                          onClick={() => openReserve(item)}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
-                        >
-                          <Lock size={13} /> Reserve
-                        </button>
-                      )}
-                      {/* EWO-STAB-002 — Move to Ship disabled during Beta
-                          stabilization: its underlying store path
-                          (moveToShip -> installComponent with no explicit
-                          slot) let a component land in the first open slot
-                          on a ship regardless of type/size compatibility.
-                          Use Quick Update -> Install Component instead,
-                          which always requires an explicit, compatible
-                          slot. Kept visible (not removed) so this reads as
-                          a known, intentional, temporary restriction. */}
-                      <button
-                        type="button"
-                        disabled
-                        title="Temporarily unavailable during Beta stabilization. Use Quick Update → Install Component."
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted/40 cursor-not-allowed"
-                      >
-                        <Send size={13} /> Move to Ship
-                      </button>
                       <button
                         onClick={() => openEdit(item)}
                         className="inline-flex items-center gap-1 text-xs font-medium text-muted hover:text-white transition-colors"
@@ -363,6 +570,8 @@ export default function HangarInventory() {
           </table>
         </div>
       </div>
+      )}
+      </>
       )}
 
       {/* Add New Item modal — EWO-028 (Task 2): catalog-driven. The
@@ -553,8 +762,10 @@ export default function HangarInventory() {
         </div>
       )}
 
-      {/* Reserve modal — EWO-029 (Task 4/5): exact Fleet Asset -> exact
-          Build -> exact target requirement -> quantity, never automatic. */}
+      {/* Reserve modal — EWO-029 (Task 4/5), EWO-072 (Part A/B/K): exact
+          Fleet Asset -> exact Build -> exact target requirement ->
+          quantity, never automatic, and never independently derived from
+          the row's own eligibility check. */}
       {reserveItem && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4" onClick={() => setReserveItemId(null)}>
           <div className="panel p-6 max-w-sm w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -568,7 +779,7 @@ export default function HangarInventory() {
               <p className="text-sm text-muted">No saved Loadout currently has an unresolved, unreserved requirement for "{reserveItem.name}".</p>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-muted">{reserveAvailability?.availableQuantity ?? 0} available to reserve.</p>
+                <p className="text-xs text-muted">{reserveEligibility?.availability.availableQuantity ?? 0} available to reserve.</p>
                 <div>
                   <label className="text-xs uppercase tracking-widest text-muted block mb-1.5">Fleet Asset</label>
                   <select
@@ -631,7 +842,7 @@ export default function HangarInventory() {
                     <input
                       type="number"
                       min={1}
-                      max={reserveAvailability?.availableQuantity ?? 1}
+                      max={reserveEligibility?.availability.availableQuantity ?? 1}
                       step={1}
                       value={reserveQtyInput}
                       onChange={(e) => setReserveQtyInput(e.target.value)}

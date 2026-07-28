@@ -3307,3 +3307,132 @@ in that exact order, with NEW rendering its own cyan pill and the "Install
 New Component / Looted, purchased, or crafted. / Install →" card —
 screenshot-verified matching the work order's own worked example
 precisely. Zero horizontal overflow at the 1320px reference viewport.
+
+## 53. Hangar Inventory Confidence Pass (EWO-072, IMPLEMENTED NOW)
+
+An incremental usability and data-integrity pass over Hangar Inventory —
+explicitly not the future full Inventory redesign. Six changes: a
+canonical Reserve-eligibility resolver (fixing a real bug where Reserve
+could render with nowhere real to go), the redundant Hangar Qty column
+removed, compact composable filters, full column sorting, a default-on
+toggle to hide true-zero historical records, and an expanded Needed By
+column with real ship/loadout context.
+
+**Part A/B/K — one canonical reservation-eligibility resolver.** New
+`hangarReservationEligibility.ts` exports `resolveReservationEligibility`,
+combining the two authorities that already existed independently
+(`calculateComponentAvailability` — Part K's own
+`ownedQuantity = availableQuantity + reservedQuantity + installedQuantity`
+equation, unchanged — and `resolveNeededByBuilds`, EWO-029's existing
+"what does the fleet still need" resolver) into one `eligible` boolean: a
+Reserve action is only ever meaningful when genuinely free stock AND a
+real, unresolved, unreserved target requirement both exist at once.
+Before this mission, the Actions column's own Reserve button checked
+`availableQuantity > 0` alone — a component with owned stock but no real
+Loadout ever targeting it could show Reserve with nowhere real to point,
+exactly the defect the work order's own screenshot named. Every surface
+that needs this answer (the row's own Reserve trigger, the Needed By
+count, the Reserve modal's Fleet Asset/Build/Target cascading options)
+now calls this one function — the modal in particular was quietly
+re-deriving its own `reserveNeededBy`/`reserveAvailability` before this
+mission; it now reads the exact same `ReservationEligibility` result the
+row itself computed.
+
+**Part H — the redundant Reserve trigger is consolidated into Needed
+By, never duplicated in Actions.** The work order explicitly allowed
+either location but forbade both; Needed By's own worked example
+embeds Reserve directly, so Actions keeps only Edit/Delete now.
+
+**Part C/D — Hangar Qty removed outright.** Approved final column order
+(`ITEM/TYPE/SIZE/INSTALLED/RESERVED/AVAILABLE/NEEDED BY/ACTIONS`) is
+exactly what remains once it's gone — no reordering needed. The table
+gains the same `table-fixed`+`<colgroup>` containment treatment already
+established elsewhere in this app, with the reclaimed width going to
+Needed By (24%, the widest data column).
+
+**Part E — compact, composable filters,** mirroring Fleet Dashboard's
+own established disclosure pattern exactly (`FILTERS ▾` toggle, chip
+row, "Clear Filters"). New `hangarFilters.ts`: Type and Size options are
+derived dynamically from what's actually present in the Commander's own
+Hangar (`typesInHangar`/`sizesInHangar`, the same "narrow among what you
+actually have" principle `manufacturersInFleet` already established —
+never a hard-coded universal list); Reservation State
+(`reservedQuantity > 0` / `= 0`) and Availability State
+(`availableQuantity > 0` / `= 0`) read the same decorated-row shape the
+table itself renders from. All four dimensions combine with AND logic.
+Filter row labels are deliberately "Reservation State"/"Availability
+State" (matching the work order's own section headers verbatim) rather
+than the shorter "Reserved"/"Available" — those exact words are already
+spoken for by the column headers and the filter pills themselves.
+
+**Part F — sorting extended to every approved column.** `hangarSort.ts`
+is rewritten from a raw-`HangarItem`-field sorter (`name`/`type`/`size`/
+`quantity`) to `sortHangarEntries`, operating on a decorated entry
+(`installedQuantity`/`reservedQuantity`/`availableQuantity`/
+`neededByCount`) the page builds once per row from the same
+`resolveReservationEligibility` call already in hand — Installed/
+Reserved/Available/Needed By are all derived values with no business
+living in a sort utility of their own. The removed Hangar Qty column
+takes its old `'quantity'` sort key with it. Size still sorts by real
+numeric rank (S1, S2, S10), never lexically. Filter and sort state are
+fully independent component state — applying one never resets the other.
+
+**Part G — "Hide zero-balance items," enabled by default.** A true-zero
+record (`Installed = Reserved = Available = 0`) is filtered from the
+default view but never deleted — still a real row in `hangarItems`,
+inspectable the instant the toggle is unchecked. Per the Chief
+Architect's own explicit resolution: a component with real fleet demand
+but zero owned quantity is *procurement demand, not owned inventory*, so
+it hides under the default toggle-on view exactly like any other
+true-zero record — Needed By is deliberately NOT part of the hide check.
+
+**Part J — two distinct empty states,** never a blank table: an active
+filter combination that excludes everything reads "No inventory items
+match these filters." with Clear Filters; every remaining record hidden
+solely by the zero-balance toggle (no filter active) reads "No owned
+inventory is currently recorded." with Add New Item — genuinely
+different situations, genuinely different recovery actions.
+
+**Part I — Move to Ship retired.** Investigated rather than assumed:
+the underlying `moveToShip` store action already routes through the
+shared installation engine (`executeInstallation`) and is genuinely
+compatibility-checked — EWO-STAB-002's original wrong-slot defect no
+longer applies to the *action itself*. But this page's own button never
+grew a real destination-slot picker; it has stayed permanently disabled
+with a static tooltip since EWO-STAB-002, and this work order explicitly
+forbids expanding it here. A permanently-disabled control with no path
+to ever becoming reachable, when a working equivalent (Quick Update →
+Install Component) already exists, is the "obsolete" case the work
+order's own Part I names — removed outright rather than left as a dead
+button.
+
+Regression coverage: `HangarInventory.test.tsx`'s own baseline suite
+(Add/Edit/Delete/Reserve mechanics) updated for the new column set and
+Reserve consolidation, including a rewritten pair of tests proving
+Reserve now correctly requires BOTH Available stock and a real
+unresolved match — the exact defect this mission fixes, caught by the
+old test's own prior assertion having encoded the bug as intended
+behavior. New `hangarFilters.test.ts`/`hangarReservationEligibility.test.ts`
+unit-test the two new resolvers directly. A new dedicated
+`ewo072HangarInventoryConfidencePass.test.tsx` covers the work order's
+own itemized Regression Requirements list: independent and AND-combined
+filters, chip removal, Clear Filters, filter persistence across
+collapse, numeric/size sorting, sort-filter independence in both
+directions, true-zero hide/reveal with store persistence confirmed,
+Needed By's visible (not hover-only) ship/build summary, and the
+Installed+Reserved+Available invariant read directly from rendered
+cells. Full project regression (`tsc --noEmit`, full `vitest run`: 189
+files / 2405 tests) and a production build pass clean.
+
+Playwright live-verified against the running dev server with all seven
+required scenarios in one injected fixture: an Available component with
+exactly one real unreserved requirement (Reserve renders, modal
+auto-resolves to the correct ship/Build/target), an Available component
+with no requirements anywhere (Needed By reads "—", no Reserve), a
+component already fully committed to its own one requirement (Available
+0, no Reserve), an installed-only component (Installed 1, everything
+else 0), a true-zero historical record (hidden by default, reappears
+when the toggle is disabled, reconfirmed hidden again on re-enable), and
+a combined Type + Size + Availability filter narrowing to exactly the
+two genuinely matching rows — screenshot-verified throughout, zero
+horizontal overflow at the 1320px reference viewport.
