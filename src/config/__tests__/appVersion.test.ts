@@ -3,12 +3,12 @@ import { APP_VERSION, APP_VERSION_LABEL } from '../appVersion'
 
 describe('APP_VERSION (Part 1, test 1)', () => {
   it('1. exposes a single central version constant used by the header', () => {
-    expect(APP_VERSION.productVersion).toBe('Beta 2.0 Dev')
+    expect(APP_VERSION.productVersion).toBe('Beta 2.0 RC1')
     expect(APP_VERSION_LABEL).toBe(APP_VERSION.productVersion)
   })
 
-  it('ENG-001A: the active-development string uses the approved "Dev" suffix, never "Preview" or "In Development"', () => {
-    expect(APP_VERSION.productVersion).toMatch(/ Dev$/)
+  it('RC-001: the release-candidate string follows the approved "Beta X.Y RCn" shape, never "Preview" or "In Development"', () => {
+    expect(APP_VERSION.productVersion).toMatch(/^Beta \d+\.\d+ RC\d+$/)
     expect(APP_VERSION.productVersion).not.toMatch(/Preview|In Development/)
   })
 

@@ -20,6 +20,11 @@
  * certified release package, then — immediately, same day — bump the
  * development branch straight to "Beta X.(Y+1) Dev". Never leave the dev
  * branch sitting on a released or RC string after cutting a release.
+ *
+ * RC-001 — if more than one RC build is needed for the same target
+ * version, append the iteration number directly to "RC" with no space
+ * ("Beta X.Y RC1", "Beta X.Y RC2", ...) so each packaged artifact
+ * self-identifies exactly which rehearsal it corresponds to.
  */
 export interface AppVersionInfo {
   productVersion: string
@@ -28,7 +33,7 @@ export interface AppVersionInfo {
 }
 
 export const APP_VERSION: AppVersionInfo = {
-  productVersion: 'Beta 2.0 Dev',
+  productVersion: 'Beta 2.0 RC1',
   dataPackVersion: undefined,
   buildId: undefined,
 }
