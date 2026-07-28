@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import ShipWorkspacePrototype from '../ShipWorkspacePrototype'
 import { useFleetStore } from '../../store/useFleetStore'
 import { catalogComponentsByName } from '../../generated/componentCatalog'
-import type { HangarItem, MissionReservation, InstalledLoadoutEntry } from '../../types'
+import type { Hardpoint, HangarItem, MissionReservation, InstalledLoadoutEntry } from '../../types'
 
 const initialState = useFleetStore.getState()
 
@@ -33,10 +33,6 @@ function renderWorkspace(shipId: string) {
 
 function getPortRow(slotLabel: string): HTMLElement {
   const matches = screen.getAllByText(slotLabel)
-  // EWO-068 (Part D) — the port label now lives inside a wrapping
-  // <span className="break-words">, not directly inside the row's outer
-  // div; match any element genuinely inside a table row instead of
-  // asserting a specific tag name.
   const rowLabel = matches.find((el) => el.closest('tr') !== null)
   if (!rowLabel) throw new Error(`No port row found for "${slotLabel}"`)
   return rowLabel.closest('tr') as HTMLElement
@@ -54,79 +50,57 @@ function expandInstall(slotLabel: string): HTMLElement {
   return row.nextElementSibling as HTMLElement
 }
 
-// "Right Shield Generator" ships factory/installed with "Shimmer" — Mirage
-// (a real, compatible S1 Shield) is genuinely NOT already installed there,
-// unlike "Left Shield Generator" where the Ghost's own seed data already
-// has Mirage installed (confirmed via direct inspection) — using that port
-// instead would make Mirage invisible in every tier by this mission's own
-// design (the currently-installed item is never re-offered as a candidate).
+function patchHardpoint(buildId: string, slotLabel: string, patch: Partial<Hardpoint>) {
+  useFleetStore.setState((s) => ({
+    hardpoints: s.hardpoints.map((h) => (h.buildId === buildId && h.slotLabel === slotLabel ? { ...h, ...patch } : h)),
+  }))
+}
+
+// "Right Shield Generator" ships factory/installed/target all as
+// "Shimmer" (Grade C, status 'OK') — a real, compatible, currently-
+// UNINSTALLED alternate Target ("FR-66", Grade A) and a real, compatible,
+// currently-uninstalled, genuinely BETTER-graded candidate than Shimmer
+// ("Mirage", Grade A) are both used below, matching EWO-070's own
+// established substitute-name precedent for this exact port.
 const SLOT = 'Right Shield Generator'
-const CANDIDATE = 'Mirage'
+const FACTORY_INSTALLED = 'Shimmer'
+const ALT_TARGET = 'FR-66'
+const UPGRADE_CANDIDATE = 'Mirage'
 
 /**
- * SW-014A — Inline Installed Component Workflow. Every scenario here
- * exercises the SAME store actions (`installComponent`/`removeComponent`/
- * `addHangarItem`/`releaseReservation`/`saveMissionConfiguration`) Quick
- * Update, Hangar Inventory, and Manage Loadout already use — this suite
- * verifies Ship Workspace's own inline UI wiring onto them, never a
- * second transaction implementation.
+ * SW-014A — Inline Installed Component Workflow, refactored by EWO-071
+ * ("Install/Change Source Ladder Refactor") onto four canonical,
+ * priority-ordered groups — RESERVED > AVAILABLE > UPGRADE > BORROW —
+ * plus the always-reachable Install New Component action. Every
+ * scenario here still exercises the SAME store actions
+ * (`installComponent`/`removeComponent`/`addHangarItem`/
+ * `releaseReservation`) Quick Update, Hangar Inventory, and Manage
+ * Loadout already use — this suite verifies Ship Workspace's own inline
+ * UI wiring onto them, never a second transaction implementation.
  *
- * Root constraint: the installation engine's own `resolveDestinationHardpoint`
- * (unmodified — see `installationEngine.ts`) refuses to target a port
- * whose status is already 'OK'. "Right Shield Generator" starts 'OK'
- * (Shimmer fully satisfied). EWO-070 (Part A/B) — CRITICAL FIX: every
- * Install action below used to clear that gate by silently RETARGETING
- * the port to the chosen candidate first (via `saveMissionConfiguration`),
- * destroying the Commander's own saved Target in the process. That
- * retarget is now deleted outright — `performInstall` clears the gate by
- * REMOVING the port's current occupant instead (an ordinary REMOVE,
- * returned to Hangar), which changes `installedItem` without ever
- * touching `targetItem`. Every test below now explicitly asserts
- * `targetItem` stays exactly 'Shimmer' — the Commander's real saved
- * plan, never silently overwritten by what got physically installed.
+ * Root constraint carried over from EWO-070: the installation engine's
+ * own `resolveDestinationHardpoint` refuses to target a port whose status
+ * is already 'OK'. "Right Shield Generator" starts 'OK' — every scenario
+ * below that installs while the port is still fully satisfied is also,
+ * incidentally, exercising EWO-070's own remove-then-install fix; every
+ * one explicitly asserts `targetItem` is never silently rewritten by
+ * whatever gets physically installed.
  */
-describe('SW-014A: Tier 1 — Available Inventory', () => {
-  it('a compatible, owned, free component appears under Available Inventory and Install commits it immediately (no separate Save step)', () => {
+describe('SW-014A / EWO-071: RESERVED group', () => {
+  it('the exact Target, reserved for this port, shows under RESERVED and installs directly — Target preserved', () => {
     if (catalogComponentsByName.size === 0) return
-    const entry = catalogComponentsByName.get(CANDIDATE)!
-    useFleetStore.setState({
-      hangarItems: [{ id: 'test-hangar-1', name: CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 2, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
-    })
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    const disclosure = within(expandInstall(SLOT))
-
-    expect(disclosure.getByText('Available Inventory')).toBeInTheDocument()
-    const candidateRow = disclosure.getByText(CANDIDATE).closest('div')!.parentElement!
-    expect(candidateRow.textContent).toContain('2 Available')
-
-    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
-
-    expect(disclosure.getByText(/Installed Mirage on/)).toBeInTheDocument()
-    const build = useFleetStore.getState().builds.find((b) => b.id === useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId)!
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === build.id && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part A) — CRITICAL: the port's own real saved Target
-    // (Shimmer) must never be silently overwritten by what just got
-    // physically installed (Mirage) — Manage Loadout, not this workflow,
-    // owns desired configuration.
-    expect(hp.targetItem).toBe('Shimmer')
-    expect(useFleetStore.getState().hangarItems.find((h) => h.id === 'test-hangar-1')?.qty).toBe(1)
-  })
-
-  it('a unit already reserved for THIS exact port installs directly with no reassignment step', () => {
-    if (catalogComponentsByName.size === 0) return
-    const entry = catalogComponentsByName.get(CANDIDATE)!
+    const entry = catalogComponentsByName.get(ALT_TARGET)!
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    patchHardpoint(ship.activeBuildId, SLOT, { targetItem: ALT_TARGET, targetEntityClass: entry.entityClass })
     useFleetStore.setState({
-      hangarItems: [{ id: 'test-hangar-2', name: CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+      hangarItems: [{ id: 'r1', name: ALT_TARGET, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
       reservations: [
         {
-          id: 'test-res-own',
+          id: 'res-own',
           missionConfigurationId: ship.activeBuildId,
           fleetAssetId: 'ghost',
           targetSlotLabel: SLOT,
-          componentName: CANDIDATE,
+          componentName: ALT_TARGET,
           componentEntityClass: entry.entityClass,
           quantity: 1,
           status: 'ACTIVE',
@@ -139,29 +113,31 @@ describe('SW-014A: Tier 1 — Available Inventory', () => {
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
 
-    expect(disclosure.getByText('Available Inventory')).toBeInTheDocument()
+    expect(disclosure.getByText('RESERVED')).toBeInTheDocument()
+    expect(disclosure.getByText(ALT_TARGET)).toBeInTheDocument()
     expect(disclosure.getByText('Reserved for this port')).toBeInTheDocument()
-    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part A) — Target preserved.
-    expect(hp.targetItem).toBe('Shimmer')
-  })
-})
 
-describe('SW-014A: Tier 2 — Reserved Components', () => {
-  it('a component fully committed to a different Loadout shows under Reserved Components, and Reassign releases that reservation then installs', () => {
+    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
+
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
+    expect(hp.installedItem).toBe(ALT_TARGET)
+    expect(hp.targetItem).toBe(ALT_TARGET)
+  })
+
+  it('a reservation belonging to a DIFFERENT Loadout no longer appears anywhere in this disclosure (EWO-071 drops the cross-Loadout reassign tier)', () => {
     if (catalogComponentsByName.size === 0) return
-    const entry = catalogComponentsByName.get(CANDIDATE)!
+    const entry = catalogComponentsByName.get(ALT_TARGET)!
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    patchHardpoint(ship.activeBuildId, SLOT, { targetItem: ALT_TARGET, targetEntityClass: entry.entityClass })
     useFleetStore.setState({
-      hangarItems: [{ id: 'test-hangar-3', name: CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+      hangarItems: [{ id: 'r2', name: ALT_TARGET, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
       reservations: [
         {
-          id: 'test-res-elsewhere',
+          id: 'res-elsewhere',
           missionConfigurationId: 'ghost-escort',
           fleetAssetId: 'ghost',
           targetSlotLabel: SLOT,
-          componentName: CANDIDATE,
+          componentName: ALT_TARGET,
           componentEntityClass: entry.entityClass,
           quantity: 1,
           status: 'ACTIVE',
@@ -174,43 +150,127 @@ describe('SW-014A: Tier 2 — Reserved Components', () => {
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
 
-    expect(disclosure.getByText('Reserved Components')).toBeInTheDocument()
-    expect(disclosure.getByText(/Reserved for .*Escort Build/)).toBeInTheDocument()
-
-    fireEvent.click(disclosure.getByRole('button', { name: /Reassign/ }))
-    expect(disclosure.getByText(/Reassigning releases the reservation/)).toBeInTheDocument()
-    fireEvent.click(disclosure.getByRole('button', { name: 'Confirm' }))
-
-    expect(useFleetStore.getState().reservations.find((r) => r.id === 'test-res-elsewhere')?.status).toBe('RELEASED')
-    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
-    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part A) — Target preserved even through a reassign-then-install.
-    expect(hp.targetItem).toBe('Shimmer')
+    expect(disclosure.queryByText('RESERVED')).not.toBeInTheDocument()
+    expect(disclosure.queryByText('AVAILABLE')).not.toBeInTheDocument()
+    expect(disclosure.queryByText(ALT_TARGET)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Reassign/)).not.toBeInTheDocument()
   })
 })
 
-describe('SW-014A: Tier 3 — Borrow From Another Ship', () => {
-  it('a component installed on a different ship shows under Borrow From Another Ship with its context, and Confirm Transfer removes it there and installs it here', () => {
+describe('SW-014A / EWO-071: AVAILABLE group', () => {
+  it('the exact Target, genuinely free in Hangar, shows under AVAILABLE with its quantity — Target preserved', () => {
     if (catalogComponentsByName.size === 0) return
-    const entry = catalogComponentsByName.get(CANDIDATE)!
+    const entry = catalogComponentsByName.get(ALT_TARGET)!
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    patchHardpoint(ship.activeBuildId, SLOT, { targetItem: ALT_TARGET, targetEntityClass: entry.entityClass })
+    useFleetStore.setState({
+      hangarItems: [{ id: 'a1', name: ALT_TARGET, type: entry.category, size: `S${entry.size}`, qty: 2, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+    })
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const disclosure = within(expandInstall(SLOT))
+
+    expect(disclosure.queryByText('RESERVED')).not.toBeInTheDocument()
+    expect(disclosure.getByText('AVAILABLE')).toBeInTheDocument()
+    expect(disclosure.getByText(ALT_TARGET)).toBeInTheDocument()
+    expect(disclosure.getByText('2 Available')).toBeInTheDocument()
+
+    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
+    expect(hp.installedItem).toBe(ALT_TARGET)
+    expect(hp.targetItem).toBe(ALT_TARGET)
+  })
+
+  it('EWO-071A (Part A): a committed unit and a separate genuinely free unit of the exact Target fold into ONE Reserved row — never a competing Available group', () => {
+    if (catalogComponentsByName.size === 0) return
+    const entry = catalogComponentsByName.get(ALT_TARGET)!
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    patchHardpoint(ship.activeBuildId, SLOT, { targetItem: ALT_TARGET, targetEntityClass: entry.entityClass })
+    useFleetStore.setState({
+      hangarItems: [{ id: 'a2', name: ALT_TARGET, type: entry.category, size: `S${entry.size}`, qty: 2, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+      reservations: [
+        {
+          id: 'res-own-2',
+          missionConfigurationId: ship.activeBuildId,
+          fleetAssetId: 'ghost',
+          targetSlotLabel: SLOT,
+          componentName: ALT_TARGET,
+          componentEntityClass: entry.entityClass,
+          quantity: 1,
+          status: 'ACTIVE',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        } as MissionReservation,
+      ],
+    })
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const disclosure = within(expandInstall(SLOT))
+
+    expect(disclosure.getByText('RESERVED')).toBeInTheDocument()
+    expect(disclosure.queryByText('AVAILABLE')).not.toBeInTheDocument()
+    expect(disclosure.getByText('Reserved for this port')).toBeInTheDocument()
+    expect(disclosure.getByText('+1 additional available')).toBeInTheDocument()
+    expect(disclosure.getAllByText(ALT_TARGET)).toHaveLength(1)
+  })
+})
+
+describe('SW-014A / EWO-071: UPGRADE group', () => {
+  it('an owned, genuinely-better-graded compatible candidate (not the Target) shows under UPGRADE with its classification and quantity — Target preserved', () => {
+    if (catalogComponentsByName.size === 0) return
+    const entry = catalogComponentsByName.get(UPGRADE_CANDIDATE)!
+    useFleetStore.setState({
+      hangarItems: [{ id: 'u1', name: UPGRADE_CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+    })
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const disclosure = within(expandInstall(SLOT))
+
+    expect(disclosure.getByText('UPGRADE')).toBeInTheDocument()
+    expect(disclosure.getByText(UPGRADE_CANDIDATE)).toBeInTheDocument()
+    expect(disclosure.getByText(/1 Available/)).toBeInTheDocument()
+
+    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
+    const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
+    const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
+    expect(hp.installedItem).toBe(UPGRADE_CANDIDATE)
+    // EWO-070 (Part A) — Target preserved even through the OK-slot
+    // remove-then-install path this UPGRADE install exercises.
+    expect(hp.targetItem).toBe(FACTORY_INSTALLED)
+  })
+
+  it('a compatible candidate that is NOT a genuine improvement over Installed does not render at all (no UPGRADE, no stray group)', () => {
+    if (catalogComponentsByName.size === 0) return
+    // Debilitator is a real, compatible S1 Shield (per src/data/componentCatalog.ts)
+    // with no confirmed Grade in the generated catalog — an unconfirmed
+    // improvement must never render as one.
+    const lowerOrUnknown = 'Debilitator'
+    const entry = catalogComponentsByName.get(lowerOrUnknown)
+    if (!entry) return
+    useFleetStore.setState({
+      hangarItems: [{ id: 'u2', name: lowerOrUnknown, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+    })
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const disclosure = within(expandInstall(SLOT))
+    expect(disclosure.queryByText('UPGRADE')).not.toBeInTheDocument()
+    expect(disclosure.queryByText(lowerOrUnknown)).not.toBeInTheDocument()
+  })
+})
+
+describe('SW-014A / EWO-071: BORROW group', () => {
+  it('a compatible component installed on a different ship shows collapsed under BORROW?, expands with its context, and Confirm Transfer removes it there and installs it here — Target preserved', () => {
+    if (catalogComponentsByName.size === 0) return
+    const entry = catalogComponentsByName.get(UPGRADE_CANDIDATE)!
     const corsair = useFleetStore.getState().ships.find((s) => s.id === 'corsair')!
     const donorSlotLabel = 'A Shield Generator' // Corsair's real, existing Shield hardpoint.
-    // Explicitly cleared, not just left at seed defaults — the seed fleet
-    // already owns a real Mirage unit (Hangar item "item-3", qty 1), which
-    // would otherwise put this candidate in Tier 1 (Available Inventory)
-    // instead of Tier 3, masking the scenario this test exists to prove.
-    // The donor-side Hardpoint row (not just the flat `installedLoadouts`
-    // record) is also patched to match — the REMOVE half of the borrow
-    // action operates on a real Hardpoint row, exactly like production
-    // data (installedLoadouts entries only ever exist alongside one).
     useFleetStore.setState({
       hangarItems: [],
       reservations: [],
-      installedLoadouts: [{ shipId: 'corsair', slotLabel: donorSlotLabel, installedItem: CANDIDATE, entityClass: entry.entityClass } as InstalledLoadoutEntry],
+      installedLoadouts: [{ shipId: 'corsair', slotLabel: donorSlotLabel, installedItem: UPGRADE_CANDIDATE, entityClass: entry.entityClass } as InstalledLoadoutEntry],
       hardpoints: useFleetStore.getState().hardpoints.map((h) =>
         h.buildId === corsair.activeBuildId && h.slotLabel === donorSlotLabel
-          ? { ...h, installedItem: CANDIDATE, installedEntityClass: entry.entityClass, status: 'Upgrade Available' as const }
+          ? { ...h, installedItem: UPGRADE_CANDIDATE, installedEntityClass: entry.entityClass, status: 'Upgrade Available' as const }
           : h
       ),
     })
@@ -218,84 +278,49 @@ describe('SW-014A: Tier 3 — Borrow From Another Ship', () => {
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
 
-    // EWO-064 (Part G) — Borrow From Another Ship is collapsed by default;
-    // the toggle itself carries the count, the donor details only render once expanded.
-    expect(disclosure.getByText(/Borrow From Another Ship \(\d+\)/)).toBeInTheDocument()
-    fireEvent.click(disclosure.getByRole('button', { name: /Borrow From Another Ship/ }))
-    expect(disclosure.getByText(new RegExp(`Installed On: Corsair — ${donorSlotLabel}`))).toBeInTheDocument()
+    expect(disclosure.getByText('BORROW?')).toBeInTheDocument()
+    expect(disclosure.getByText('1 ship available')).toBeInTheDocument()
+    expect(disclosure.queryByText(new RegExp(`Installed on Corsair`))).not.toBeInTheDocument()
+
+    fireEvent.click(disclosure.getByRole('button', { name: /BORROW\?.*1 ship available/ }))
+    expect(disclosure.getByText(new RegExp(`Installed on Corsair — ${donorSlotLabel}`))).toBeInTheDocument()
 
     fireEvent.click(disclosure.getByRole('button', { name: /Transfer\?/ }))
     expect(disclosure.getByText(/this removes it there and installs it here/)).toBeInTheDocument()
     fireEvent.click(disclosure.getByRole('button', { name: /Confirm Transfer/ }))
 
-    // An InstalledLoadoutEntry row is never deleted by a REMOVE — its own
-    // `installedItem` becomes the empty sentinel "—", exactly like every
-    // other cleared port (confirmed directly: the row itself persists).
     expect(useFleetStore.getState().installedLoadouts.find((e) => e.shipId === 'corsair' && e.slotLabel === donorSlotLabel)?.installedItem).toBe('—')
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part A) — Target preserved even through a cross-ship transfer.
-    expect(hp.targetItem).toBe('Shimmer')
+    expect(hp.installedItem).toBe(UPGRADE_CANDIDATE)
+    expect(hp.targetItem).toBe(FACTORY_INSTALLED)
   })
 })
 
-describe('SW-014A: Tier 4 — Newly Acquired Component', () => {
-  it('Record New Component opens an inline picker (never a dialog); Record & Install adds it to Hangar and installs it in one action', () => {
+describe('SW-014A / EWO-071 / EWO-071B: Install New Component (NEW)', () => {
+  it('opens an inline picker (never a dialog), always reachable, and Install adds it to Hangar and installs it in one action — Target preserved', () => {
     if (catalogComponentsByName.size === 0) return
-    // Cleared so the resulting Hangar quantity below is unambiguous — the
-    // seed fleet already owns a real Mirage unit (item-3, qty 1).
     useFleetStore.setState({ hangarItems: [] })
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const disclosure = within(expandInstall(SLOT))
 
-    fireEvent.click(disclosure.getByRole('button', { name: /Record New Component/ }))
+    fireEvent.click(disclosure.getByRole('button', { name: /Install New Component/ }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     const picker = disclosure.getByLabelText(`New acquired component for ${SLOT}`) as HTMLInputElement
     fireEvent.click(picker)
-    fireEvent.change(picker, { target: { value: CANDIDATE } })
+    fireEvent.change(picker, { target: { value: UPGRADE_CANDIDATE } })
     const listboxId = picker.getAttribute('aria-controls')
     fireEvent.click(document.querySelector(`#${listboxId} li button`) as HTMLButtonElement)
 
-    fireEvent.click(disclosure.getByRole('button', { name: /Record & Install/ }))
+    fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
 
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part A) — Target preserved through Record & Install too.
-    expect(hp.targetItem).toBe('Shimmer')
-    // Recorded (qty 1) then immediately consumed by the install — no
-    // phantom leftover Hangar unit. Confirms the same `moveToShip`-based
-    // bookkeeping fix Tiers 1-3 rely on also applies here: recording then
-    // installing must not silently leave the newly-added unit sitting in
-    // Hangar as if never installed.
-    const remaining = useFleetStore.getState().hangarItems.filter((h) => h.name === CANDIDATE).reduce((sum, h) => sum + h.qty, 0)
+    expect(hp.installedItem).toBe(UPGRADE_CANDIDATE)
+    expect(hp.targetItem).toBe(FACTORY_INSTALLED)
+    const remaining = useFleetStore.getState().hangarItems.filter((h) => h.name === UPGRADE_CANDIDATE).reduce((sum, h) => sum + h.qty, 0)
     expect(remaining).toBe(0)
-  })
-})
-
-describe('SW-014A: Tier 5 — Remaining Compatible Components', () => {
-  it('a compatible component with no acquisition path anywhere is listed for reference only', () => {
-    if (catalogComponentsByName.size === 0) return
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    const disclosure = within(expandInstall(SLOT))
-    // EWO-064 (Part G) — collapsed by default; the toggle carries the count.
-    expect(disclosure.getByText(/Remaining Compatible Components \(\d+\)/)).toBeInTheDocument()
-  })
-})
-
-describe('SW-014A: Preserve Existing Intelligence', () => {
-  it('the acquisition hint badge and the original reference tier list both remain visible alongside the new actionable sections', () => {
-    if (catalogComponentsByName.size === 0) return
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    const disclosure = within(expandInstall(SLOT))
-    // EWO-064 (Part G) reworded the reference tier list's own wording — still present, just reordered/rephrased.
-    expect(disclosure.getByText(/Available Inventory — genuinely free stock/)).toBeInTheDocument()
-    expect(disclosure.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })
 
@@ -313,9 +338,9 @@ describe('SW-014A: Regression — Remove Installed Component still works unchang
 describe('SW-014A: Persistence', () => {
   it('an install performed through the inline workflow survives a genuine reload', async () => {
     if (catalogComponentsByName.size === 0) return
-    const entry = catalogComponentsByName.get(CANDIDATE)!
+    const entry = catalogComponentsByName.get(UPGRADE_CANDIDATE)!
     useFleetStore.setState({
-      hangarItems: [{ id: 'test-hangar-persist', name: CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
+      hangarItems: [{ id: 'test-hangar-persist', name: UPGRADE_CANDIDATE, type: entry.category, size: `S${entry.size}`, qty: 1, neededBy: 'None', disposition: 'Store', entityClass: entry.entityClass } as HangarItem],
     })
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
@@ -326,11 +351,8 @@ describe('SW-014A: Persistence', () => {
     const { useFleetStore: reloaded } = await import('../../store/useFleetStore')
     const ship = reloaded.getState().ships.find((s) => s.id === 'ghost')!
     const hp = reloaded.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
-    expect(hp.installedItem).toBe(CANDIDATE)
-    expect(reloaded.getState().installedLoadouts.find((e) => e.shipId === 'ghost' && e.slotLabel === SLOT)?.installedItem).toBe(CANDIDATE)
-    // EWO-070 (Part I) — the Installed/Target distinction survives a
-    // genuine reload/rehydration, never silently collapsing during
-    // serialization or migration.
-    expect(hp.targetItem).toBe('Shimmer')
+    expect(hp.installedItem).toBe(UPGRADE_CANDIDATE)
+    expect(reloaded.getState().installedLoadouts.find((e) => e.shipId === 'ghost' && e.slotLabel === SLOT)?.installedItem).toBe(UPGRADE_CANDIDATE)
+    expect(hp.targetItem).toBe(FACTORY_INSTALLED)
   })
 })

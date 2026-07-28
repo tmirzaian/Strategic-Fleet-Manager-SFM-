@@ -3039,3 +3039,271 @@ Asset" pipeline) doesn't round-trip through the live app's
 `fleetAssets`-normalized persistence shape, so this script's own
 injection method — not the fix — is the limiting factor for that one
 leg live; disclosed rather than silently skipped.
+
+## 50. Install/Change Source Ladder Refactor (EWO-071, IMPLEMENTED NOW)
+
+Refactors the Install/Change disclosure (Change Installed Components'
+own inline "what can I put here" panel) from SW-014A's original five
+loosely-ordered tiers into exactly four canonical, priority-ordered
+groups — RESERVED > AVAILABLE > UPGRADE > BORROW — plus one always-
+reachable secondary action, Record Newly Acquired Component. "The
+Commander should see only realistic choices for satisfying or improving
+the selected port": every remaining piece of development-era
+instructional copy is gone, and the open-ended "browse the whole
+catalog" tier is retired outright.
+
+**Part A — instructional copy removed.** The numbered "SW-002 Component
+Selection Priority" reference block (Reserved Components/Available
+Inventory/Add Newly Acquired Component/Installed On Other Ships/
+Remaining Compatible Components) and the redundant "Compatible Upgrade
+Opportunity — {Installed} is installed; {Target} is the current Target"
+callout are both deleted outright, no replacement paragraph — the
+Installed/Target columns and each group's own canonical pill already
+communicate exactly that.
+
+**Part B/H — `installCandidates.ts` rewritten onto the new four-group
+model.** Supersedes the old `{availableInventory, reserved, borrowable,
+remainingCompatible}` shape (where "reserved" meant "committed to a
+*different* Loadout, needs Reassign," and "availableInventory" mixed
+together every owned compatible candidate regardless of whether it
+matched the Target) with `{reserved, available, upgrade, borrowable}`,
+each restricted to real qualification rules:
+- **Reserved/Available** — the exact Target only, split by whether a
+  specific unit is already committed to this port/reviewed Loadout
+  (Reserved) or genuinely free Hangar stock (Available). Both can
+  legitimately render at once for the exact same component when they
+  represent distinct physical units (Part H's own example) — computed
+  independently rather than the old first-match-wins bucketing.
+- **Upgrade** — an owned, genuinely-free candidate *other than* the
+  Target whose real Grade (the same numeric `catalogComponentsByName`/
+  `catalogComponentsByEntityClass` field `componentPresentation.ts`
+  already resolves for the Class+Grade subtitle everywhere else) is
+  strictly better than what's currently Installed. Unconfirmed Grade on
+  either side never qualifies — an unverified improvement is never shown
+  as one. This is new qualification logic; no such comparison existed
+  before this mission.
+- **Borrow** — a compatible candidate (the Target itself included, when
+  no owned copy exists anywhere) physically installed on another ship —
+  functionally unchanged from SW-014A's own Tier 3.
+- A cross-group `seenItems` dedup enforces Reserved > Available > Upgrade
+  > Borrow priority — a component already rendered in a higher group
+  never repeats in a lower one.
+
+**Disclosed scope decision:** the old "reserved for a *different*
+Loadout, Reassign releases it" tier is dropped from this disclosure
+entirely — not merged into any of the four canonical groups, not kept as
+a fifth. Part H's own group definitions are an exhaustive, closed list,
+"Reassign" is never named anywhere in the work order, and Part C's own
+RESERVED example is a plain one-click Install with no confirm step,
+unlike the old two-step "releasing this disrupts another Loadout, are
+you sure" flow. Releasing another Loadout's own commitment is a bigger
+decision than this simplified ladder is meant to carry; the underlying
+`releaseReservation` store action is untouched (still used elsewhere),
+only this disclosure's own UI path to it is gone — verified live (a
+reservation belonging to a different Build no longer renders anywhere in
+the panel, and no "Reassign" text remains).
+
+**Part C/D/E/F — canonical pill headings, reusing EWO-068B's own
+`STATUS_PILL` map directly** (`STATUS_PILL['Reserved For This Port']` /
+`['Available in Inventory']` / `['Upgrade Available']` /
+`['Borrow Available']`) rather than inventing new colors — RESERVED is
+cyan, AVAILABLE is green, UPGRADE is Quartermaster Gold, BORROW? is
+neutral muted (deliberately never green/cyan/gold — "a potentially
+disruptive fleet decision, not a recommendation"). One shared compact
+row component (`candidateRow`) renders Reserved/Available/Upgrade alike
+— component identity left, a small context line beneath (quantity, or
+quantity + the real Class+Grade subtitle for Upgrade, e.g. "Military
+B · 1 Available" — the mission's own worked example, verified live with
+real data as "Stealth A · 1 Available"), Install aligned right. Record
+Newly Acquired Component is always reachable regardless of whether any
+owned Upgrade candidate exists, but stays a small, visually subordinate
+link — never rendered as its own pilled group, never a false UPGRADE
+candidate. Borrow keeps its own distinct two-step Transfer?/Confirm
+Transfer flow (a genuinely bigger decision than a plain Install),
+collapsed by default behind a `BORROW? · N ship(s) available ›` toggle,
+recolored from its old cyan treatment to neutral.
+
+**Part G — Remaining Compatible Components removed outright,** header,
+collapsed toggle, and reference list all deleted along with the dead
+`remainingSectionOpen` state — no lower-grade catalog browsing, no
+"+N more — see Loadout Manager" text, anywhere in this disclosure.
+Open-ended component discovery is explicitly deferred to a future Hangar
+Inventory refactor; the underlying compatible-candidate list itself
+(`newTargetOptionsFor`) is untouched and still feeds Upgrade/Borrow/
+Record Newly Acquired.
+
+**Part J — reactive, no second action.** Installing from any group
+recalculates the disclosure immediately (a consumed Hangar unit's own
+group empties out and stops rendering on the very next paint, live-
+verified: installing the last free Available unit made both RESERVED and
+AVAILABLE disappear from the still-open disclosure with no re-click),
+the Installed cell and Status pill update, and Hero Readiness/Decision
+Summary recalculate from the store's one shared `ShipManagementSummary`
+— live-verified jumping from a partial percentage straight to 100%/"No
+Immediate Decisions" the instant the Target's own last gap closed.
+
+Regression coverage: `sw014aInlineInstalledComponentWorkflow.test.tsx`
+rewritten per-group (Reserved/Available/Upgrade/Borrow/Record Newly
+Acquired), each still asserting EWO-070's own Target-preservation
+guarantee through the OK-slot remove-then-install path, plus a new test
+proving a different-Loadout reservation no longer renders anywhere. A
+new dedicated `ewo071InstallChangeSourceLadder.test.tsx` covers the
+work order's own itemized list directly: absence of every retired
+instructional string and the redundant callout, exact DOM group order,
+empty groups rendering nothing, each group's real canonical CSS tone,
+Borrow's collapsed-by-default state, a confirmed real lower-grade
+candidate never appearing anywhere, Remaining Compatible Components'
+total absence, and reactive quantity/group recalculation immediately
+after an install with no second action. Full project regression
+(`tsc --noEmit`, full `vitest run`: 184 files / 2354 tests) and a
+production build pass clean.
+
+Playwright live-verified against the running dev server: a synthetic
+Corsair-equivalent ship was injected exercising all four groups plus
+Record Newly Acquired at once (RESERVED/AVAILABLE FR-66, UPGRADE Mirage,
+BORROW Veil from a donor ship) — screenshot-verified matching the exact
+canonical order/colors/copy this section describes, zero horizontal
+overflow at the 1320px reference viewport, then installed the free
+AVAILABLE unit and confirmed live: Target unchanged, Status flipped
+straight to `OK`, RESERVED/AVAILABLE/UPGRADE all correctly emptied out
+with the disclosure still open, Readiness jumped to 100%, Decision
+Summary read "No Immediate Decisions," and the success message ("Installed
+FR-66 on Right Shield Generator.") carried no target-implying language.
+
+## 51. Install Candidate Hierarchy & Acquisition Card Refinement (EWO-071A, IMPLEMENTED NOW)
+
+A direct refinement of EWO-071's own four-group ladder, from Commander
+testing: "the Commander is forced to inspect both [Reserved and
+Available] before discovering the reserved copy." Two changes — a strict
+fulfillment hierarchy so Reserved always wins outright, and a first-class
+card treatment for Record Newly Acquired Component.
+
+**Part A — Reserved always wins.** EWO-071 originally let a Reserved row
+and an Available row render side by side for the same exact Target when
+both a committed unit and separate genuinely-free stock existed (its own
+Part H explicitly allowed this "distinct physical assets" case). EWO-071A
+reverses that: whenever a Reserved candidate exists for the Target, the
+Available group never independently renders for it at all — any
+additional genuinely-free stock folds into that SAME Reserved row instead,
+as a compact secondary line ("+N additional available"), never a second
+competing group. `installCandidates.ts`'s target-resolution block now
+computes availability first, then branches: a reservation present ->
+one Reserved candidate carrying an optional `additionalAvailableQuantity`;
+no reservation -> the ordinary Available candidate, unchanged from
+EWO-071. A structural consequence worth naming: since Reserved and
+Available are both strictly scoped to the one exact Target (EWO-071 Part
+D), and a Target can have at most one reservation state, **Reserved and
+Available can now never coexist as two groups for the same port** —
+verified directly (a scenario with 3 owned units, 1 reserved, renders
+one Reserved row reading "Reserved for this port" / "+2 additional
+available," with no Available pill anywhere).
+
+**Part B/D — Record Newly Acquired Component becomes a first-class
+acquisition card.** Previously a small `text-[11px]` hyperlink beneath
+the Upgrade section; now a full-width button reusing the exact same
+container language as an ordinary candidate row (`bg-black/20`,
+`rounded-md`, `px-2.5 py-1.5`, `hover:bg-white/5 transition-colors`) with
+a cyan `PackagePlus` icon, headline, a one-line description ("Record
+newly looted, purchased, or crafted — install it immediately."), and a
+right-aligned "Record →" action — "another acquisition option," not
+unrelated helper text. Still never wrapped in its own pilled group
+header (would read as a false UPGRADE recommendation) and still opens
+the exact same pre-existing inline picker/Record & Install form
+unchanged. `candidateRow` (the shared Reserved/Available/Upgrade row
+renderer) gained the same `hover:bg-white/5 transition-colors` so every
+row in the stack — including the new card — shares one hover language.
+
+Regression coverage: `sw014aInlineInstalledComponentWorkflow.test.tsx`'s
+own former "Reserved + Available render as distinct rows" test is
+rewritten to assert the new merge (single Reserved row, no Available
+pill, `+1 additional available`, exactly one occurrence of the Target's
+own name in the disclosure). `ewo071InstallChangeSourceLadder.test.tsx`'s
+group-order and color-treatment tests are split into a Reserved-present
+scenario (Reserved → Upgrade → Borrow, Available absent) and a
+Reserved-absent scenario (Available → Upgrade → Borrow), since the two
+can no longer coexist. A new dedicated
+`ewo071aCandidateHierarchyAndAcquisitionCard.test.tsx` covers the work
+order's own Part E checklist directly: Reserved-before-Available with no
+duplicate rendering, the secondary-indicator text appearing only when
+real extra stock exists (absent otherwise), the acquisition card's own
+container classes matching an ordinary candidate row's exactly
+(`rounded-md`/`px-2.5`/`py-1.5`/`hover:bg-white/5`/`transition-colors`),
+and its absence from any UPGRADE grouping. Full project regression
+(`tsc --noEmit`, full `vitest run`: 185 files / 2360 tests) and a
+production build pass clean.
+
+Playwright live-verified against the running dev server: a Target with 3
+owned units (1 reserved, 2 free) rendered exactly one Reserved row
+reading "FR-66 / Reserved for this port / +2 additional available,"
+zero competing Available pill, alongside a real Upgrade candidate and
+the new Record Newly Acquired Component card — screenshot-verified
+matching the work order's own worked example precisely, including a
+close-up hover screenshot of the acquisition card confirming its
+elevation state. Zero horizontal overflow at the 1320px reference
+viewport.
+
+## 52. Candidate Hierarchy Enforcement & Acquisition Action Promotion (EWO-071B, IMPLEMENTED NOW)
+
+Closes the one gap EWO-071A's own hierarchy fix left open, and finishes
+promoting the acquisition card to a true peer of the fulfillment groups.
+Chief Architect framing: "A browser asks 'here are all your options.' A
+Quartermaster says 'here's the one you should use first.'"
+
+**Part A — Status now agrees with the disclosure's own highest-priority
+group.** Root cause: `componentAcquisitionHint.ts`'s `describeAcquisitionHint`
+— the single shared authority the Status column, Hero, and Decision
+Summary all read — checked genuinely-free stock (`availableQuantity > 0`)
+*before* checking whether this exact port already has the component
+reserved. EWO-071A already fixed the disclosure's own Reserved/Available
+rendering (Part A there), but this OTHER, older priority check was left
+untouched — so a component reserved for this port with extra free stock
+sitting alongside it could show the Status column reading "1 AVAILABLE"
+directly above a disclosure whose own top row read RESERVED: two
+contradictory statements about the same physical asset. Fixed by moving
+the "reserved for this exact port" check to the very top of the
+function, checked unconditionally before the availability check — every
+caller (Status column, Hero, Decision Summary) gets the corrected
+priority for free, since there is only ever the one shared authority.
+The "reserved for a *different* Loadout" tier (`Available to Reserve` /
+`Upgrade Available` pill) is untouched and still meaningful for those
+other surfaces, even though EWO-071 already dropped its own Reassign
+action from the Install/Change disclosure specifically.
+
+**Parts C/D/E — Install New Component promoted to a full peer group.**
+Renamed from "Record Newly Acquired Component" (and its form's own
+"Record & Install" submit button renamed to "Install") — "the Commander
+is not recording something, they're installing something they just
+looted, crafted, or purchased." Given its own cyan `NEW` pill header,
+pulled out of the Upgrade section's wrapping `<div>` into an independent
+sibling group with the exact same header/color/spacing/rhythm every
+other group already has ("nothing appears as an orphaned hyperlink
+anymore") — and, unlike Upgrade/Available/Reserved/Borrow, NEW always
+renders regardless of what else exists, preserving "always reachable."
+Final disclosure order: RESERVED (or AVAILABLE, when nothing is
+reserved) → UPGRADE → NEW → BORROW?, matching the work order's own Part
+E ordering exactly — verified live and via `sw014a`'s Persistence/Remove
+regressions, which exercise this exact DOM position unchanged.
+
+Regression coverage: a new `componentAcquisitionHint.test.ts` case
+proves the exact contradiction scenario the work order named (2 owned, 1
+reserved, 1 genuinely free) now resolves to `Reserved For This Port`,
+not `Available in Inventory`. A new dedicated
+`ewo071bStatusPriorityAndNewGroup.test.tsx` verifies the Status column
+itself (not just the disclosure) reads `RESERVED` — never `AVAILABLE` —
+in that same scenario, reads the correct `1 AVAILABLE` when nothing is
+reserved, confirms the exact `RESERVED → UPGRADE → NEW → BORROW?` and
+`AVAILABLE → UPGRADE → NEW → BORROW?` DOM orders, and confirms NEW
+renders even when every other group is empty. Every prior EWO-071/071A
+test referencing the old "Record Newly Acquired Component"/"Record &
+Install" text was updated to the new naming. Full project regression
+(`tsc --noEmit`, full `vitest run`: 186 files / 2366 tests) and a
+production build pass clean.
+
+Playwright live-verified against the running dev server, reusing
+EWO-071A's own Reserved-plus-extra-stock-plus-Upgrade-plus-Borrow
+scenario: the row's own Status column reads exactly `RESERVED` (not "1
+AVAILABLE"), and the disclosure shows RESERVED → UPGRADE → NEW → BORROW?
+in that exact order, with NEW rendering its own cyan pill and the "Install
+New Component / Looted, purchased, or crafted. / Install →" card —
+screenshot-verified matching the work order's own worked example
+precisely. Zero horizontal overflow at the 1320px reference viewport.

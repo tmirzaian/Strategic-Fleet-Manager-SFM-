@@ -3,69 +3,92 @@ import type { TargetComponentOption } from '../components/TargetComponentPicker'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { findActiveSlotReservation } from '../engine/logistics/reservationLookup'
 import { identitiesMatch, type ResolvedComponentIdentity } from '../engine/installation/componentIdentityService'
+import { catalogComponentsByEntityClass, catalogComponentsByName } from '../generated/componentCatalog'
+import { resolveComponentLabel } from './componentPresentation'
 
 /**
- * SW-014A — Inline Installed Component Workflow.
+ * EWO-071 — "Install/Change Source Ladder Refactor." Supersedes SW-014A's
+ * original five-bucket model (Reserved-elsewhere/Available/Borrow/
+ * Remaining Compatible) with exactly four canonical, priority-ordered
+ * groups a Commander physically installing a component actually needs:
+ * RESERVED > AVAILABLE > UPGRADE > BORROW. "The Commander should see only
+ * realistic choices for satisfying or improving the selected port" — an
+ * open-ended catalog browse (the old "Remaining Compatible Components")
+ * is gone outright (deferred to a future Hangar Inventory refactor); a
+ * component reserved for a DIFFERENT Loadout (the old "reassign" tier) no
+ * longer renders here either — releasing another Loadout's own commitment
+ * is a bigger decision than this simplified ladder is meant to carry, and
+ * every one of Part H's four groups is an exhaustive, closed list.
  *
- * Buckets an already-computed, already-compatibility-filtered candidate
- * list (the SAME `TargetComponentOption[]` `newTargetOptionsFor()` already
- * produces for the Manage Loadout picker — no second compatibility
- * authority) into the acquisition tiers `describeAcquisitionHint` already
- * names, but for EVERY compatible candidate at once rather than just the
- * current target. This is read/presentation-only: every actual mutation
- * still goes through the existing `installComponent`/`removeComponent`
- * store actions (the one shared installation engine) — this module never
- * touches inventory, reservations, or hardpoints itself.
+ * EWO-071A (Part A) — refines the Reserved/Available relationship for the
+ * exact Target: EWO-071 originally let a Reserved row and an Available
+ * row render side by side when the Target had both a committed unit and
+ * separate genuinely-free stock. Commander testing found this made the
+ * Commander inspect both sections before discovering the reserved copy
+ * was there at all. Reserved now always wins outright whenever it
+ * applies — the Available group never independently renders for the same
+ * Target a Reserved row already covers; any additional genuinely-free
+ * stock instead folds into that SAME Reserved row as a compact secondary
+ * line ("+N additional available"), never a second competing group.
+ *
+ * This is read/presentation-only: every actual mutation still goes
+ * through the existing `installComponent`/`removeComponent` store actions
+ * (the one shared installation engine) — this module never touches
+ * inventory, reservations, or hardpoints itself.
  */
 
 function identityFor(item: string, entityClass?: string): ResolvedComponentIdentity {
   return { displayName: item, entityClass: entityClass ?? null, category: null, size: null }
 }
 
-export interface OwnedInstallCandidate {
-  item: string
-  entityClass?: string
-  label: string
-  /** Immediately installable quantity — either genuinely free stock, or a
-   * unit already reserved for this exact port (installing it just
-   * fulfills that reservation, per `installComponent`'s own behavior). */
-  quantity: number
-  /** True when this candidate's own availability comes from a reservation
-   * already committed to this exact port (Tier 1's "no further action
-   * needed" case, per `describeAcquisitionHint`) rather than genuinely
-   * free Hangar stock. */
-  reservedForThisPort: boolean
-  /** SW-014A — the specific real HangarItem row to consume, when one
-   * exists. Installing by `hangarItemId` (via the store's own `moveToShip`)
-   * rather than by display name alone (`installComponent`) is required for
-   * correct inventory bookkeeping here: `installComponent`'s own
-   * `planHangarDecrement` only decrements Hangar stock when a matching
-   * ACTIVE reservation exists for this exact port — its own "no
-   * reservation, no hangarItemId" branch is a deliberate no-inventory-
-   * bookkeeping no-op (EWO-029, the free-text Quick Update case, which
-   * never references a specific owned row). Undefined only when no real
-   * HangarItem row backs this candidate at all. */
-  hangarItemId?: string
-}
-
-export interface BlockingReservation {
-  id: string
-  shipName: string
-  buildName: string
-  slotLabel: string
+/** Lower is better (1 = Grade A ... 4 = Grade D) — the same numeric
+ * convention `componentPresentation.ts`'s `GRADE_LETTERS` already
+ * establishes app-wide. Prefers the entityClass-keyed catalog record (more
+ * specific) over the display-name-keyed one, same precedence
+ * `resolveComponentLabel` already uses elsewhere for this exact field. */
+function resolveGrade(item: string, entityClass?: string): number | null {
+  if (entityClass) {
+    const byEntityClass = catalogComponentsByEntityClass.get(entityClass)
+    if (byEntityClass && byEntityClass.grade !== null && byEntityClass.grade !== undefined) return byEntityClass.grade
+  }
+  return catalogComponentsByName.get(item)?.grade ?? null
 }
 
 export interface ReservedInstallCandidate {
   item: string
   entityClass?: string
   label: string
-  blockingReservations: BlockingReservation[]
-  /** Same real HangarItem row a Tier 1 candidate would carry — the row
-   * already exists (a reservation commits against existing Hangar stock,
-   * it doesn't create a separate record); releasing the blocking
-   * reservation(s) frees it, at which point installing by this id keeps
-   * bookkeeping correct exactly like Tier 1. */
+  /** The reservation's own committed quantity — installing it just
+   * fulfills that commitment, per `installComponent`'s own behavior. */
+  quantity: number
   hangarItemId?: string
+  /** EWO-071A (Part A) — genuinely free stock of this SAME exact Target,
+   * beyond what's already committed by this reservation. Never a second
+   * Available row/group — folded into this row as a compact secondary
+   * indicator ("+N additional available") instead. Zero/undefined when no
+   * such extra stock exists. */
+  additionalAvailableQuantity?: number
+}
+
+export interface AvailableInstallCandidate {
+  item: string
+  entityClass?: string
+  label: string
+  /** Genuinely free stock, separate from anything already reserved. */
+  quantity: number
+  hangarItemId?: string
+}
+
+export interface UpgradeInstallCandidate {
+  item: string
+  entityClass?: string
+  label: string
+  quantity: number
+  hangarItemId?: string
+  /** Compact "{Class} {Grade}" subtitle (e.g. "Military B"), the same
+   * `resolveComponentLabel().classificationLabel` every other component
+   * presentation surface already renders — null when neither is known. */
+  classificationLabel: string | null
 }
 
 export interface BorrowInstallCandidate {
@@ -78,17 +101,11 @@ export interface BorrowInstallCandidate {
   buildName: string
 }
 
-export interface PlainInstallCandidate {
-  item: string
-  entityClass?: string
-  label: string
-}
-
 export interface InstallCandidateSet {
-  availableInventory: OwnedInstallCandidate[]
   reserved: ReservedInstallCandidate[]
+  available: AvailableInstallCandidate[]
+  upgrade: UpgradeInstallCandidate[]
   borrowable: BorrowInstallCandidate[]
-  remainingCompatible: PlainInstallCandidate[]
 }
 
 export function deriveInstallCandidates(
@@ -97,9 +114,12 @@ export function deriveInstallCandidates(
     currentShipId: string
     currentBuildId: string
     currentSlotLabel: string
-    /** Excluded from every tier — re-offering the port's own current
+    targetItem?: string
+    targetEntityClass?: string
+    /** Excluded from every group — re-offering the port's own current
      * installed component as something to "install" is never useful. */
     currentlyInstalledItem?: string
+    currentlyInstalledEntityClass?: string
     hangarItems: HangarItem[]
     installedLoadouts: InstalledLoadoutEntry[]
     reservations: MissionReservation[]
@@ -107,77 +127,127 @@ export function deriveInstallCandidates(
     builds: Build[]
   }
 ): InstallCandidateSet {
-  const { currentShipId, currentBuildId, currentSlotLabel, currentlyInstalledItem, hangarItems, installedLoadouts, reservations, ships, builds } = params
+  const {
+    currentShipId,
+    currentBuildId,
+    currentSlotLabel,
+    targetItem,
+    targetEntityClass,
+    currentlyInstalledItem,
+    currentlyInstalledEntityClass,
+    hangarItems,
+    installedLoadouts,
+    reservations,
+    ships,
+    builds,
+  } = params
 
-  const availableInventory: OwnedInstallCandidate[] = []
   const reserved: ReservedInstallCandidate[] = []
+  const available: AvailableInstallCandidate[] = []
+  const upgrade: UpgradeInstallCandidate[] = []
   const borrowable: BorrowInstallCandidate[] = []
-  const remainingCompatible: PlainInstallCandidate[] = []
 
+  // Cross-group dedup (EWO-071 Part H, refined by EWO-071A Part A): a
+  // component that already renders in a higher-priority group
+  // (Reserved > Available > Upgrade > Borrow) never renders again in a
+  // lower one — including the exact Target's own Reserved/Available
+  // relationship, which EWO-071A now collapses into a single Reserved row
+  // (see this module's own leading doc comment) rather than two
+  // competing groups.
   const seenItems = new Set<string>()
-  for (const candidate of candidates) {
-    if (candidate.item === '—') continue
-    if (currentlyInstalledItem && currentlyInstalledItem !== '—' && candidate.item === currentlyInstalledItem) continue
-    if (seenItems.has(candidate.item)) continue
-    seenItems.add(candidate.item)
 
-    const label = candidate.label ?? candidate.item
-    const availability = calculateComponentAvailability(candidate.item, hangarItems, installedLoadouts, reservations, candidate.entityClass)
-    const candidateIdentity = identityFor(candidate.item, candidate.entityClass)
-    const matchingHangarItemId = hangarItems.find((h) => h.qty > 0 && identitiesMatch(candidateIdentity, identityFor(h.name, h.entityClass)))?.id
-
-    if (availability.availableQuantity > 0) {
-      availableInventory.push({ item: candidate.item, entityClass: candidate.entityClass, label, quantity: availability.availableQuantity, reservedForThisPort: false, hangarItemId: matchingHangarItemId })
-      continue
-    }
+  const hasRealTarget = !!targetItem && targetItem !== '—' && targetItem !== currentlyInstalledItem
+  if (hasRealTarget) {
+    const targetOption = candidates.find((c) => c.item === targetItem)
+    const label = targetOption?.label ?? targetItem!
+    const targetIdentity = identityFor(targetItem!, targetEntityClass)
+    const matchingHangarItemId = hangarItems.find((h) => h.qty > 0 && identitiesMatch(targetIdentity, identityFor(h.name, h.entityClass)))?.id
 
     const ownReservation = findActiveSlotReservation(reservations, {
       missionConfigurationId: currentBuildId,
       targetSlotLabel: currentSlotLabel,
-      componentName: candidate.item,
-      componentEntityClass: candidate.entityClass,
+      componentName: targetItem!,
+      componentEntityClass: targetEntityClass,
     })
+    const availability = calculateComponentAvailability(targetItem!, hangarItems, installedLoadouts, reservations, targetEntityClass)
     if (ownReservation) {
-      availableInventory.push({ item: candidate.item, entityClass: candidate.entityClass, label, quantity: ownReservation.quantity, reservedForThisPort: true, hangarItemId: matchingHangarItemId })
-      continue
+      // EWO-071A (Part A) — Reserved wins outright: any additional
+      // genuinely-free stock of this same Target folds into THIS row,
+      // never a separate Available group.
+      reserved.push({
+        item: targetItem!,
+        entityClass: targetEntityClass,
+        label,
+        quantity: ownReservation.quantity,
+        hangarItemId: matchingHangarItemId,
+        additionalAvailableQuantity: availability.availableQuantity > 0 ? availability.availableQuantity : undefined,
+      })
+      seenItems.add(targetItem!)
+    } else if (availability.availableQuantity > 0) {
+      available.push({ item: targetItem!, entityClass: targetEntityClass, label, quantity: availability.availableQuantity, hangarItemId: matchingHangarItemId })
+      seenItems.add(targetItem!)
     }
+  }
 
-    if (availability.reservedQuantity > 0) {
-      const identity = identityFor(candidate.item, candidate.entityClass)
-      const blockingReservations: BlockingReservation[] = reservations
-        .filter((r) => r.status === 'ACTIVE' && identitiesMatch(identity, identityFor(r.componentName, r.componentEntityClass ?? undefined)))
-        .map((r) => ({
-          id: r.id,
-          shipName: ships.find((s) => builds.find((b) => b.id === r.missionConfigurationId)?.shipId === s.id)?.name ?? 'Unknown Ship',
-          buildName: builds.find((b) => b.id === r.missionConfigurationId)?.name ?? 'Unknown Loadout',
-          slotLabel: r.targetSlotLabel,
-        }))
-      reserved.push({ item: candidate.item, entityClass: candidate.entityClass, label, blockingReservations, hangarItemId: matchingHangarItemId })
-      continue
-    }
+  // Upgrade — an owned, genuinely-free candidate other than the Target
+  // itself whose real Grade is strictly better than what's currently
+  // Installed (lower number; see `resolveGrade`'s own doc comment). A
+  // candidate with unknown Grade, or Installed with unknown Grade, never
+  // qualifies — an unconfirmed improvement is not shown as one.
+  const installedGrade = currentlyInstalledItem ? resolveGrade(currentlyInstalledItem, currentlyInstalledEntityClass) : null
+  for (const candidate of candidates) {
+    if (candidate.item === '—') continue
+    if (currentlyInstalledItem && candidate.item === currentlyInstalledItem) continue
+    if (candidate.item === targetItem) continue
+    if (seenItems.has(candidate.item)) continue
+
+    const availability = calculateComponentAvailability(candidate.item, hangarItems, installedLoadouts, reservations, candidate.entityClass)
+    if (availability.availableQuantity <= 0) continue
+
+    const candidateGrade = resolveGrade(candidate.item, candidate.entityClass)
+    if (installedGrade === null || candidateGrade === null || candidateGrade >= installedGrade) continue
+
+    const candidateIdentity = identityFor(candidate.item, candidate.entityClass)
+    const matchingHangarItemId = hangarItems.find((h) => h.qty > 0 && identitiesMatch(candidateIdentity, identityFor(h.name, h.entityClass)))?.id
+    upgrade.push({
+      item: candidate.item,
+      entityClass: candidate.entityClass,
+      label: candidate.label ?? candidate.item,
+      quantity: availability.availableQuantity,
+      hangarItemId: matchingHangarItemId,
+      classificationLabel: resolveComponentLabel(candidate.item).classificationLabel,
+    })
+    seenItems.add(candidate.item)
+  }
+
+  // Borrow — last resort, whatever remains: a compatible candidate
+  // (including the Target itself, when no owned copy exists anywhere)
+  // physically installed on another ship.
+  for (const candidate of candidates) {
+    if (candidate.item === '—') continue
+    if (currentlyInstalledItem && candidate.item === currentlyInstalledItem) continue
+    if (seenItems.has(candidate.item)) continue
 
     const installedElsewhere = installedLoadouts.filter(
       (e) => e.shipId !== currentShipId && identitiesMatch(identityFor(candidate.item, candidate.entityClass), identityFor(e.installedItem, e.entityClass))
     )
-    if (installedElsewhere.length > 0) {
-      for (const entry of installedElsewhere) {
-        const donorShip = ships.find((s) => s.id === entry.shipId)
-        const donorBuild = builds.find((b) => b.id === donorShip?.activeBuildId)
-        borrowable.push({
-          item: candidate.item,
-          entityClass: candidate.entityClass,
-          label,
-          shipId: entry.shipId,
-          shipName: donorShip?.name ?? 'Unknown Ship',
-          slotLabel: entry.slotLabel,
-          buildName: donorBuild?.name ?? 'Active Loadout',
-        })
-      }
-      continue
-    }
+    if (installedElsewhere.length === 0) continue
 
-    remainingCompatible.push({ item: candidate.item, entityClass: candidate.entityClass, label })
+    const label = candidate.label ?? candidate.item
+    for (const entry of installedElsewhere) {
+      const donorShip = ships.find((s) => s.id === entry.shipId)
+      const donorBuild = builds.find((b) => b.id === donorShip?.activeBuildId)
+      borrowable.push({
+        item: candidate.item,
+        entityClass: candidate.entityClass,
+        label,
+        shipId: entry.shipId,
+        shipName: donorShip?.name ?? 'Unknown Ship',
+        slotLabel: entry.slotLabel,
+        buildName: donorBuild?.name ?? 'Active Loadout',
+      })
+    }
   }
 
-  return { availableInventory, reserved, borrowable, remainingCompatible }
+  return { reserved, available, upgrade, borrowable }
 }

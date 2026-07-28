@@ -40,7 +40,7 @@ import { buildFleetPriorityOptions } from '../utils/fleetPriority'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import { TOP_LEVEL_GROUP_ORDER, legacyPortGroupLabel } from '../utils/commanderSystemTaxonomy'
-import { buildShipManagementSummary, resolveOperationalReviewStatus, resolveNewTargetStatus, fulfillmentStatusFromHint, STATUS_PILL, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
+import { buildShipManagementSummary, resolveOperationalReviewStatus, resolveNewTargetStatus, STATUS_PILL, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
 import { describeAcquisitionHint, type AcquisitionHint } from '../utils/componentAcquisitionHint'
 import { prepareCanonicalHardpoints, makeHardpointChildSlotRow } from '../utils/canonicalHardpointPreparation'
 import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
@@ -106,21 +106,13 @@ const COMMANDER_INTENT_WORKSTATION_LABEL: Record<CommanderIntent, string> = {
  * on a still-short list. */
 const MISSING_SUMMARY_VISIBLE_LIMIT = 6
 
-/** SW-002's Component Selection Priority — reference-only text; every
- * tier is backed by real data (`describeAcquisitionHint`/
- * `deriveInstallCandidates`), never a fabricated placeholder. EWO-064
- * (Part G) reorders this to the Commander-approved priority: resolving
- * an existing Reserved commitment first, then genuinely free Available
- * stock, then recording a newly acquired component, with the two
- * biggest-decision tiers (Borrow, Remaining Compatible) collapsed by
- * default below the disclosure — see `renderInstallDisclosure`. */
-const COMPONENT_SELECTION_TIERS = [
-  'Reserved Components — already committed to another Loadout; reassigning it resolves that commitment',
-  'Available Inventory — genuinely free stock, immediately installable',
-  'Add Newly Acquired Component — looted, purchased, crafted, or NPC acquired',
-  'Installed On Other Ships — Borrow Intelligence, collapsed by default; a cross-ship transfer, Commander chooses whether to proceed',
-  'Remaining Compatible Components — reference list, collapsed by default (see Loadout Manager for the full catalog)',
-] as const
+// EWO-071 (Part A) — the numbered "SW-002 Component Selection Priority"
+// instructional block that used to render here (Reserved Components /
+// Available Inventory / Add Newly Acquired Component / Installed On Other
+// Ships / Remaining Compatible Components) documented implementation
+// behavior rather than helping the Commander make the immediate decision.
+// Removed outright, no replacement paragraph — the four canonical group
+// headings in `renderInstallDisclosure` now carry that meaning directly.
 
 /** EWO-064 (Part C) — the Commander-facing verb for a Decision Summary
  * row, matched to the same acquisition tone `acquisitionRank` (in
@@ -201,7 +193,6 @@ export default function ShipWorkspacePrototype() {
   const installComponentStore = useFleetStore((s) => s.installComponent)
   const moveToShipStore = useFleetStore((s) => s.moveToShip)
   const addHangarItemStore = useFleetStore((s) => s.addHangarItem)
-  const releaseReservationStore = useFleetStore((s) => s.releaseReservation)
 
   const sortedShips = [...ships].sort((a, b) => a.name.localeCompare(b.name))
   const ship = ships.find((s) => s.id === shipId)
@@ -354,13 +345,9 @@ export default function ShipWorkspacePrototype() {
   // one. Never a toast/modal — inline, matching this page's own
   // established "never a dialog" convention.
   const [installNotice, setInstallNotice] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
-  // Tier 2 (Reserved Components) — which candidate's "reassign" confirm
-  // step is currently showing, keyed by `${hp.id}:${item}` so two
-  // different candidates (or two different rows) never share state.
-  const [reassignConfirmKey, setReassignConfirmKey] = useState<string | null>(null)
-  // Tier 3 (Borrow From Another Ship) — same per-candidate confirm-step
-  // pattern, keyed by `${hp.id}:${item}:${donorShipId}` (the same
-  // component can be borrowable from more than one ship at once).
+  // Borrow group — same per-candidate confirm-step pattern, keyed by
+  // `${hp.id}:${item}:${donorShipId}` (the same component can be
+  // borrowable from more than one ship at once).
   const [borrowConfirmKey, setBorrowConfirmKey] = useState<string | null>(null)
   // Tier 4 (Newly Acquired Component) — the inline "record a new
   // component" form's own open/selection state, keyed per row.
@@ -378,15 +365,13 @@ export default function ShipWorkspacePrototype() {
   const [inspectedConfigurableSlotId, setInspectedConfigurableSlotId] = useState<string | null>(null)
   const [developerMode, setDeveloperMode] = useState(false)
 
-  // EWO-064 (Part G) — Borrow From Another Ship and Remaining Compatible
-  // Components are collapsed by default within the Install/Change
-  // disclosure (a cross-ship transfer and a full open-ended catalog
-  // browse are both bigger decisions than the tiers above them); only
-  // one install disclosure is ever open at a time, so a single shared
-  // toggle per section (not a per-row map) is sufficient — reset
-  // whenever a different row's disclosure opens, below.
+  // EWO-064 (Part G) / EWO-071 (Part F) — the Borrow group is collapsed
+  // by default within the Install/Change disclosure (a cross-ship
+  // transfer is the biggest decision the ladder offers); only one install
+  // disclosure is ever open at a time, so a single shared toggle (not a
+  // per-row map) is sufficient — reset whenever a different row's
+  // disclosure opens, below.
   const [borrowSectionOpen, setBorrowSectionOpen] = useState(false)
-  const [remainingSectionOpen, setRemainingSectionOpen] = useState(false)
 
   // EWO-065 (Part A) — Ship Settings entry point, opened from the Hero's
   // top-left control; reuses the existing EditFleetAssetModal verbatim
@@ -404,23 +389,20 @@ export default function ShipWorkspacePrototype() {
   useEffect(() => {
     setExpandedInstallRowId(null)
     setInstallNotice(null)
-    setReassignConfirmKey(null)
     setBorrowConfirmKey(null)
     setNewComponentFormHpId(null)
     setNewComponentSelection({ item: '' })
     setInspectedConfigurableSlotId(null)
     setBorrowSectionOpen(false)
-    setRemainingSectionOpen(false)
     setEditOpen(false)
   }, [shipId])
 
-  // EWO-064 (Part G) — a freshly-opened (or closed) Install/Change
-  // disclosure always starts with Borrow/Remaining Compatible collapsed,
-  // never carrying over whichever section happened to be expanded on a
+  // EWO-064 (Part G) / EWO-071 (Part F) — a freshly-opened (or closed)
+  // Install/Change disclosure always starts with Borrow collapsed, never
+  // carrying over whichever state happened to be expanded on a
   // previously-reviewed row.
   useEffect(() => {
     setBorrowSectionOpen(false)
-    setRemainingSectionOpen(false)
   }, [expandedInstallRowId])
 
   // SW-013A (Objective 3) — Remove Installed Component. The one
@@ -1285,7 +1267,6 @@ export default function ShipWorkspacePrototype() {
                   onClick={() => {
                     setExpandedInstallRowId(isRowExpanded ? null : hp.id)
                     setInstallNotice(null)
-                    setReassignConfirmKey(null)
                     setBorrowConfirmKey(null)
                     setNewComponentFormHpId(null)
                     setNewComponentSelection({ item: '' })
@@ -1430,7 +1411,6 @@ export default function ShipWorkspacePrototype() {
         details: `Installed ${item} on ${ship.name} (${formatHardpointLabel(hp.slotLabel)})`,
       })
       setInstallNotice({ tone: 'success', message: `Installed ${item} on ${formatHardpointLabel(hp.slotLabel)}.` })
-      setReassignConfirmKey(null)
       setBorrowConfirmKey(null)
       setNewComponentFormHpId(null)
       setNewComponentSelection({ item: '' })
@@ -1457,17 +1437,7 @@ export default function ShipWorkspacePrototype() {
     )
   }
 
-  // Tier 2 — releases exactly the one blocking reservation the Commander
-  // confirmed against, then attempts the install. If another blocking
-  // reservation still exists (a component reserved by more than one other
-  // Build), the candidate simply re-renders with that one still listed —
-  // never a silent mass-release of every competing reservation at once.
-  function performReassign(hp: Hardpoint, item: string, entityClass: string | undefined, reservationId: string, hangarItemId: string | undefined) {
-    releaseReservationStore(reservationId)
-    performInstall(hp, item, entityClass, hangarItemId)
-  }
-
-  // Tier 3 — composed from the two already-certified REMOVE/INSTALL
+  // Borrow — composed from the two already-certified REMOVE/INSTALL
   // operations (never the separate, still-deferred TRANSFER/moveComponentBetweenShips
   // path — see docs/SW-014A-Inline-Installed-Component-Workflow-Report.md
   // for why): returning the donor's component to Hangar first means the
@@ -1523,166 +1493,120 @@ export default function ShipWorkspacePrototype() {
   }
 
   function renderInstallDisclosure(hp: Hardpoint): ReactNode {
-    // EWO-069A — same materialized-child-slot-row fallback as the main
-    // Change Installed Components row above (see its own comment for the
-    // full root cause); recomputed live via the identical
-    // `describeAcquisitionHint` call `reviewedSummary` itself used.
-    const hint =
-      reviewedSummary.hintByHardpointId.get(hp.id) ??
-      (ship
-        ? describeAcquisitionHint({
-            componentName: hp.targetItem,
-            componentEntityClass: hp.targetEntityClass,
-            currentShipId: ship.id,
-            currentBuildId: hp.buildId,
-            currentSlotLabel: hp.slotLabel,
-            hangarItems,
-            installedLoadouts,
-            reservations,
-            ships,
-          })
-        : { tone: 'muted' as const, label: 'Purchase Required', detail: '' })
     const candidateOptions = newTargetOptionsFor(hp)
     const candidates = ship
       ? deriveInstallCandidates(candidateOptions, {
           currentShipId: ship.id,
           currentBuildId: reviewedBuildId,
           currentSlotLabel: hp.slotLabel,
+          targetItem: hp.targetItem,
+          targetEntityClass: hp.targetEntityClass,
           currentlyInstalledItem: hp.installedItem,
+          currentlyInstalledEntityClass: hp.installedEntityClass,
           hangarItems,
           installedLoadouts,
           reservations,
           ships,
           builds,
         })
-      : { availableInventory: [], reserved: [], borrowable: [], remainingCompatible: [] }
+      : { reserved: [], available: [], upgrade: [], borrowable: [] }
     const newComponentOptions = candidateOptions.filter((o) => o.item !== '—')
+    const borrowShipCount = new Set(candidates.borrowable.map((c) => c.shipId)).size
+
+    // EWO-071 (Part I) / EWO-071A (Part D) — one shared compact row:
+    // identity on the left, a small context line beneath (optionally a
+    // second, dimmer line — EWO-071A's own "+N additional available"
+    // secondary indicator for a Reserved row that also has extra free
+    // stock), the Install action aligned right. Used by
+    // Reserved/Available/Upgrade alike, and by the Record Newly Acquired
+    // Component card below (same padding/corners/hover so it reads as
+    // another acquisition option, not unrelated helper text); only the
+    // accent color and context text differ per group.
+    function candidateRow(c: { item: string; entityClass?: string; label: string; hangarItemId?: string }, context: string, borderClass: string, actionClass: string, secondaryContext?: string) {
+      return (
+        <div key={c.item} className={`flex items-center justify-between gap-2 bg-black/20 border ${borderClass} rounded-md px-2.5 py-1.5 hover:bg-white/5 transition-colors`}>
+          <div className="min-w-0">
+            <div className="text-xs text-white truncate">{c.label}</div>
+            <div className="text-[10px] text-muted/60 truncate">{context}</div>
+            {secondaryContext && <div className="text-[10px] text-muted/40 truncate">{secondaryContext}</div>}
+          </div>
+          <button onClick={() => performInstall(hp, c.item, c.entityClass, c.hangarItemId)} className={`shrink-0 inline-flex items-center gap-1 text-xs font-medium ${actionClass} hover:underline`}>
+            <Package size={12} /> Install
+          </button>
+        </div>
+      )
+    }
 
     return (
       <tr key={`${hp.id}-install-detail`} className="bg-black/20">
         <td colSpan={lensColumnCount} className="px-5 py-3">
-          {/* Preserved existing intelligence — the acquisition hint badge
-              and the reference tier list stay exactly as before (SW-014A's
-              own explicit "Information + Actions, not a replacement"
-              requirement). Everything from here down is new.
-              EWO-068B (Part D/G) — this disclosure is part of Change
-              Installed Components' own tree table, so it renders the same
-              compact `STATUS_PILL` label/tone Operational Review uses
-              (never the raw `hint.tone`/`hint.label` long wording) — the
-              exact "AVAILABLE" vs. "AVAILABLE IN INVENTORY" drift Part D
-              calls out by name. `hint.detail`'s own sentence already
-              carries the fuller explanation. */}
-          <div className="flex items-start gap-2 text-xs">
-            <Badge tone={STATUS_PILL[fulfillmentStatusFromHint(hint)].tone}>{STATUS_PILL[fulfillmentStatusFromHint(hint)].compactLabel}</Badge>
-            <span className="text-muted">{hint.detail}</span>
-          </div>
-          <div className="mt-2 text-[11px] text-muted/60 space-y-0.5">
-            {COMPONENT_SELECTION_TIERS.map((tier, i) => (
-              <div key={i}>
-                {i + 1}. {tier}
-              </div>
-            ))}
-          </div>
-
           {installNotice && (
-            <div className={`mt-3 text-xs rounded-md px-3 py-2 border ${installNotice.tone === 'success' ? 'border-success/30 bg-success/10 text-success' : 'border-danger/30 bg-danger/10 text-danger'}`}>
+            <div className={`mb-3 text-xs rounded-md px-3 py-2 border ${installNotice.tone === 'success' ? 'border-success/30 bg-success/10 text-success' : 'border-danger/30 bg-danger/10 text-danger'}`}>
               {installNotice.message}
             </div>
           )}
 
-          {/* EWO-064 (Part G) — reordered to the Commander-approved
-              priority: Reserved Target Component (resolving an existing
-              commitment) > Available Inventory Target Component > a
-              Compatible Upgrade Opportunity callout, when this exact row
-              already has a real (non-empty) component installed and the
-              swap is simply pending > Record Newly Acquired Component >
-              Borrow From Another Ship (collapsed by default — a
-              cross-ship transfer) > Remaining Compatible Components
-              (collapsed by default — the open-ended catalog). */}
-          <div className="mt-3 space-y-3">
-            {/* Tier 1 — Reserved Components (already committed to another Loadout). */}
+          {/* EWO-071 (Part B/H) — the smallest useful decision tree, in
+              canonical priority order: RESERVED (already committed) >
+              AVAILABLE (exact Target, genuinely free) > UPGRADE (a real
+              incremental improvement over what's installed, moving toward
+              the Target) > BORROW (a compatible unit on another ship,
+              last resort — collapsed by default). A group with no
+              candidates renders nothing at all, no reserved space. */}
+          <div className="space-y-3">
             {candidates.reserved.length > 0 && (
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Reserved Components</div>
+                <div className="mb-1">
+                  <Badge tone={STATUS_PILL['Reserved For This Port'].tone}>{STATUS_PILL['Reserved For This Port'].compactLabel}</Badge>
+                </div>
                 <div className="space-y-1">
                   {candidates.reserved.map((c) =>
-                    c.blockingReservations.map((r) => {
-                      const key = `${hp.id}:${c.item}:${r.id}`
-                      const confirming = reassignConfirmKey === key
-                      return (
-                        <div key={key} className="bg-black/20 border border-warning/20 rounded-md px-2.5 py-1.5">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="text-xs text-white truncate">{c.label}</div>
-                              <div className="text-[10px] text-muted/60">Reserved for {r.shipName} — {r.buildName} ({formatHardpointLabel(r.slotLabel)})</div>
-                            </div>
-                            {!confirming && (
-                              <button onClick={() => setReassignConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-warning hover:underline">
-                                <RotateCcw size={12} /> Reassign
-                              </button>
-                            )}
-                          </div>
-                          {confirming && (
-                            <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
-                              <span className="text-warning/90">Reassigning releases the reservation for {r.shipName} — {r.buildName}. Continue?</span>
-                              <div className="shrink-0 flex items-center gap-2">
-                                <button onClick={() => setReassignConfirmKey(null)} className="text-muted hover:text-white">
-                                  Cancel
-                                </button>
-                                <button onClick={() => performReassign(hp, c.item, c.entityClass, r.id, c.hangarItemId)} className="text-warning font-medium hover:underline">
-                                  Confirm
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })
+                    candidateRow(
+                      c,
+                      'Reserved for this port',
+                      'border-cyan/20',
+                      'text-cyan',
+                      c.additionalAvailableQuantity ? `+${c.additionalAvailableQuantity} additional available` : undefined
+                    )
                   )}
                 </div>
               </div>
             )}
 
-            {/* Tier 2 — Available Inventory (genuinely free stock, or stock already reserved for this exact port). */}
-            {candidates.availableInventory.length > 0 && (
+            {candidates.available.length > 0 && (
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Available Inventory</div>
+                <div className="mb-1">
+                  <Badge tone={STATUS_PILL['Available in Inventory'].tone}>{STATUS_PILL['Available in Inventory'].compactLabel}</Badge>
+                </div>
+                <div className="space-y-1">{candidates.available.map((c) => candidateRow(c, `${c.quantity} Available`, 'border-success/20', 'text-success'))}</div>
+              </div>
+            )}
+
+            {/* EWO-071 (Part E) — the UPGRADE pill/header renders only when
+                a genuine owned incremental improvement exists. */}
+            {candidates.upgrade.length > 0 && (
+              <div>
+                <div className="mb-1">
+                  <Badge tone={STATUS_PILL['Upgrade Available'].tone}>{STATUS_PILL['Upgrade Available'].compactLabel}</Badge>
+                </div>
                 <div className="space-y-1">
-                  {candidates.availableInventory.map((c) => (
-                    <div key={c.item} className="flex items-center justify-between gap-2 bg-black/20 border border-white/10 rounded-md px-2.5 py-1.5">
-                      <div className="min-w-0">
-                        <div className="text-xs text-white truncate">{c.label}</div>
-                        <div className="text-[10px] text-muted/60">{c.reservedForThisPort ? 'Reserved for this port' : `${c.quantity} Available`}</div>
-                      </div>
-                      <button
-                        onClick={() => performInstall(hp, c.item, c.entityClass, c.hangarItemId)}
-                        className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-success hover:underline"
-                      >
-                        <Package size={12} /> Install
-                      </button>
-                    </div>
-                  ))}
+                  {candidates.upgrade.map((c) => candidateRow(c, [c.classificationLabel, `${c.quantity} Available`].filter(Boolean).join(' · '), 'border-gold/20', 'text-gold'))}
                 </div>
               </div>
             )}
 
-            {/* Tier 3 — Compatible Upgrade Opportunity. Informational only
-                — this row already has a real component installed and a
-                different, compatible Target is pending; the acquisition
-                tiers above/below still resolve HOW to source that Target,
-                this just names what's actually happening on this row. */}
-            {hp.status === 'Upgrade Available' && (
-              <div className="flex items-center gap-2 bg-cyan/5 border border-cyan/20 rounded-md px-2.5 py-1.5 text-xs">
-                <ArrowRightLeft size={12} className="text-cyan shrink-0" />
-                <span className="text-white">
-                  Compatible Upgrade Opportunity — <span className="text-muted">{hp.installedItem}</span> is installed; <span className="text-cyan">{hp.targetItem}</span> is the current Target.
-                </span>
-              </div>
-            )}
-
-            {/* Tier 4 — Newly Acquired Component. */}
+            {/* EWO-071B (Part C/D/E) — "Install New Component" is promoted
+                to a first-class acquisition group of its own, NEW (cyan),
+                with the exact same header/color/spacing/rhythm every other
+                group has — "nothing appears as an orphaned hyperlink
+                anymore." Always reachable regardless of what owned/
+                reserved/borrowable data exists (renaming away from
+                "Record" — the Commander is installing something they just
+                looted, crafted, or purchased, not filing a record of it). */}
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-muted/60 mb-1">Newly Acquired Component</div>
+              <div className="mb-1">
+                <Badge tone="cyan">NEW</Badge>
+              </div>
               {newComponentFormHpId === hp.id ? (
                 <div className="bg-black/20 border border-white/10 rounded-md px-2.5 py-2 space-y-2">
                   <TargetComponentPicker
@@ -1705,7 +1629,7 @@ export default function ShipWorkspacePrototype() {
                       onClick={() => performRecordAndInstall(hp, newComponentSelection.item, newComponentSelection.entityClass)}
                       className="flex-1 bg-cyan text-black font-semibold text-xs py-1.5 rounded-md hover:bg-cyan/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      Record &amp; Install
+                      Install
                     </button>
                   </div>
                 </div>
@@ -1715,25 +1639,39 @@ export default function ShipWorkspacePrototype() {
                     setNewComponentFormHpId(hp.id)
                     setNewComponentSelection({ item: '' })
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline"
+                  className="w-full flex items-center justify-between gap-2 bg-black/20 border border-cyan/20 rounded-md px-2.5 py-1.5 hover:bg-white/5 transition-colors text-left"
                 >
-                  <PackagePlus size={12} /> Record New Component
+                  <div className="flex items-center gap-2 min-w-0">
+                    <PackagePlus size={14} className="text-cyan shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs text-white truncate">Install New Component</div>
+                      <div className="text-[10px] text-muted/60 truncate">Looted, purchased, or crafted.</div>
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs font-medium text-cyan">Install →</span>
                 </button>
               )}
             </div>
 
-            {/* Tier 5 — Borrow From Another Ship. Collapsed by default — a cross-ship transfer is a bigger decision than the tiers above it. */}
+            {/* EWO-071 (Part F) — Borrow is the last resort and renders
+                last, collapsed by default; deliberately neutral — never
+                green/cyan/gold emphasis — since it represents a
+                potentially disruptive fleet decision, not a
+                recommendation. */}
             {candidates.borrowable.length > 0 && (
               <div>
                 <button
                   onClick={() => setBorrowSectionOpen((v) => !v)}
-                  className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted/60 hover:text-white transition-colors"
+                  className="w-full flex items-center gap-2 text-xs hover:text-white transition-colors"
                 >
-                  {borrowSectionOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-                  Borrow From Another Ship ({candidates.borrowable.length})
+                  <Badge tone={STATUS_PILL['Borrow Available'].tone}>{STATUS_PILL['Borrow Available'].compactLabel}</Badge>
+                  <span className="text-muted/70">
+                    {borrowShipCount} ship{borrowShipCount === 1 ? '' : 's'} available
+                  </span>
+                  <span className="ml-auto text-muted/50">{borrowSectionOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}</span>
                 </button>
                 {borrowSectionOpen && (
-                  <div className="space-y-1 mt-1">
+                  <div className="space-y-1 mt-1.5">
                     {candidates.borrowable.map((c) => {
                       // Keyed by donor slotLabel too — the same component can
                       // legitimately be borrowable from more than one port on
@@ -1741,28 +1679,28 @@ export default function ShipWorkspacePrototype() {
                       const key = `${hp.id}:${c.item}:${c.shipId}:${c.slotLabel}`
                       const confirming = borrowConfirmKey === key
                       return (
-                        <div key={key} className="bg-black/20 border border-cyan/20 rounded-md px-2.5 py-1.5">
+                        <div key={key} className="bg-black/20 border border-white/10 rounded-md px-2.5 py-1.5">
                           <div className="flex items-center justify-between gap-2">
                             <div className="min-w-0">
                               <div className="text-xs text-white truncate">{c.label}</div>
                               <div className="text-[10px] text-muted/60">
-                                Installed On: {c.shipName} — {formatHardpointLabel(c.slotLabel)} ({c.buildName})
+                                Installed on {c.shipName} — {formatHardpointLabel(c.slotLabel)}
                               </div>
                             </div>
                             {!confirming && (
-                              <button onClick={() => setBorrowConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-cyan hover:underline">
+                              <button onClick={() => setBorrowConfirmKey(key)} className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-white hover:underline">
                                 <ArrowRightLeft size={12} /> Transfer?
                               </button>
                             )}
                           </div>
                           {confirming && (
                             <div className="mt-1.5 flex items-center justify-between gap-2 text-[11px]">
-                              <span className="text-cyan/90">Transfer from {c.shipName} — this removes it there and installs it here.</span>
+                              <span className="text-muted">Transfer from {c.shipName} — this removes it there and installs it here.</span>
                               <div className="shrink-0 flex items-center gap-2">
                                 <button onClick={() => setBorrowConfirmKey(null)} className="text-muted hover:text-white">
                                   Cancel
                                 </button>
-                                <button onClick={() => performBorrow(hp, c)} className="text-cyan font-medium hover:underline">
+                                <button onClick={() => performBorrow(hp, c)} className="text-white font-medium hover:underline">
                                   Confirm Transfer
                                 </button>
                               </div>
@@ -1771,31 +1709,6 @@ export default function ShipWorkspacePrototype() {
                         </div>
                       )
                     })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Tier 6 — Remaining Compatible Components (reference only). Collapsed by default — the open-ended catalog. */}
-            {candidates.remainingCompatible.length > 0 && (
-              <div>
-                <button
-                  onClick={() => setRemainingSectionOpen((v) => !v)}
-                  className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted/60 hover:text-white transition-colors"
-                >
-                  {remainingSectionOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-                  Remaining Compatible Components ({candidates.remainingCompatible.length})
-                </button>
-                {remainingSectionOpen && (
-                  <div className="text-[11px] text-muted/70 space-y-0.5 mt-1">
-                    {candidates.remainingCompatible.slice(0, 8).map((c) => (
-                      <div key={c.item} className="truncate">
-                        {c.label}
-                      </div>
-                    ))}
-                    {candidates.remainingCompatible.length > 8 && (
-                      <div className="text-muted/50">+{candidates.remainingCompatible.length - 8} more — see Loadout Manager for the full catalog.</div>
-                    )}
                   </div>
                 )}
               </div>

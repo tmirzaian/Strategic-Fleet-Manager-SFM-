@@ -36,6 +36,22 @@ import { findActiveSlotReservation } from '../engine/logistics/reservationLookup
  * fourth is explicitly future acquisition, never dressed up as equally
  * actionable. Underlying computation is unchanged — this is a wording
  * pass, not a new authority.
+ *
+ * EWO-071B (Part A) — "Reserved For This Port" now wins outright over
+ * "Available in Inventory," checked first regardless of whether
+ * genuinely-free stock ALSO exists. Before this, a component with BOTH a
+ * reservation on this exact port AND separate free stock returned
+ * "Available in Inventory" (the old Tier 1 check ran before the
+ * reservation check), so the Status column — which reads this same hint
+ * — could show "1 AVAILABLE" while the Install/Change disclosure right
+ * below it (EWO-071A) already displays a RESERVED row for the identical
+ * component: two contradictory statements about the same physical asset.
+ * "The Quartermaster would never recommend consuming free inventory
+ * before consuming the asset already committed to this loadout." Every
+ * other caller of this function (Hero, Decision Summary, Operational
+ * Review's own Status column) gets the corrected priority automatically
+ * — there is only ever one shared authority, never a second one specific
+ * to Change Installed Components.
  */
 export type AcquisitionTone = 'success' | 'warning' | 'cyan' | 'muted'
 
@@ -65,21 +81,29 @@ export function describeAcquisitionHint(params: {
   const { componentName, componentEntityClass, currentShipId, currentBuildId, currentSlotLabel, hangarItems, installedLoadouts, reservations, ships } = params
   const availability = calculateComponentAvailability(componentName, hangarItems, installedLoadouts, reservations, componentEntityClass)
 
-  // Tier 1 — Available Inventory: highest priority, immediately actionable.
+  // Tier 0 (EWO-071B, Part A) — Reserved For This Port: the highest
+  // actionable priority, checked before genuinely-free stock so this
+  // never contradicts a RESERVED row the Install/Change disclosure is
+  // already showing for the identical committed asset.
+  const ownReservation =
+    currentBuildId && currentSlotLabel
+      ? findActiveSlotReservation(reservations, { missionConfigurationId: currentBuildId, targetSlotLabel: currentSlotLabel, componentName, componentEntityClass })
+      : undefined
+  if (ownReservation) {
+    return { tone: 'success', label: 'Reserved For This Port', detail: 'Already committed to this exact port — no further action needed' }
+  }
+
+  // Tier 1 — Available Inventory: genuinely free stock, immediately actionable.
   if (availability.availableQuantity > 0) {
     return { tone: 'success', label: 'Available in Inventory', detail: `${availability.availableQuantity} in Hangar, ready to install` }
   }
 
-  // Tier 2 — Reserved Components: available, but reassigning it releases
-  // whatever it's currently committed to.
+  // Tier 2 — Reserved Components (elsewhere): owned, but committed to a
+  // DIFFERENT Loadout than this one — still a distinct, useful signal for
+  // the Hero/Decision Summary/Status column, even though the Install/
+  // Change disclosure itself no longer offers a Reassign action for it
+  // (EWO-071 dropped that tier from this one surface only).
   if (availability.reservedQuantity > 0) {
-    const ownReservation =
-      currentBuildId && currentSlotLabel
-        ? findActiveSlotReservation(reservations, { missionConfigurationId: currentBuildId, targetSlotLabel: currentSlotLabel, componentName, componentEntityClass })
-        : undefined
-    if (ownReservation) {
-      return { tone: 'success', label: 'Reserved For This Port', detail: 'Already committed to this exact port — no further action needed' }
-    }
     return { tone: 'warning', label: 'Available to Reserve', detail: 'Owned, but committed to another Loadout — reassigning it releases that reservation' }
   }
 

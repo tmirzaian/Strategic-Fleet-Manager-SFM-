@@ -555,13 +555,11 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     fireEvent.click(installButtons[0])
-    // Reference tiers (the preserved existing intelligence — SW-014A keeps
-    // this exact text) are visible in the inline disclosure.
-    expect(screen.getByText(/Add Newly Acquired Component/)).toBeInTheDocument()
-    // SW-014A — the tier list is now actionable: a "Record New Component"
-    // entry point is always present (Tier 4 never depends on existing
-    // ownership/reservation data to be reachable).
-    expect(screen.getByText('Record New Component')).toBeInTheDocument()
+    // EWO-071 (Part E) / EWO-071B (Part C) — Install New Component (its
+    // own NEW group) is always reachable, regardless of what owned/
+    // reserved/borrowable data exists for this row.
+    expect(screen.getByText('NEW')).toBeInTheDocument()
+    expect(screen.getByText('Install New Component')).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 

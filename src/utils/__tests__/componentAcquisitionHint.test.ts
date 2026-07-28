@@ -88,6 +88,21 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
     expect(hint.detail).toMatch(/looted|purchased|crafted/i)
   })
 
+  it('EWO-071B (Part A): Reserved For This Port wins outright over Available in Inventory, even when genuinely free stock ALSO exists for the same component', () => {
+    const reservations: MissionReservation[] = [
+      { id: 'r1', missionConfigurationId: 'ghost-stealth', fleetAssetId: 'ghost', targetSlotLabel: 'Cooler 1', componentName: 'SnowBlind', quantity: 1, status: 'ACTIVE', createdAt: '', updatedAt: '' },
+    ]
+    // 2 owned, only 1 reserved — 1 unit is genuinely free too. Before
+    // EWO-071B this returned 'Available in Inventory' (the old Tier 1
+    // check ran before the reservation check), contradicting a RESERVED
+    // row the Install/Change disclosure already shows for this exact
+    // component (EWO-071A).
+    const hangarItems: HangarItem[] = [{ id: '1', name: 'SnowBlind', type: 'Cooler', size: 'S1', qty: 2, disposition: 'Install', neededBy: '' }]
+    const hint = describeAcquisitionHint(baseParams({ hangarItems, reservations, currentBuildId: 'ghost-stealth', currentSlotLabel: 'Cooler 1' }))
+    expect(hint.label).toBe('Reserved For This Port')
+    expect(hint.tone).toBe('success')
+  })
+
   it('never fabricates a projected post-swap readiness number (Scope Protection: no Recommendation engine)', () => {
     const hint = describeAcquisitionHint(baseParams({ installedLoadouts: [{ shipId: 'corsair', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' }] }))
     expect(hint.detail).not.toMatch(/\d+%/)
