@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { buildShipManagementSummary, criticalHardpointsInPriorityOrder, type ShipManagementSummaryContext } from '../shipManagementSummary'
+import {
+  buildShipManagementSummary,
+  criticalHardpointsInPriorityOrder,
+  resolveOperationalReviewStatus,
+  fulfillmentStatusFromHint,
+  STATUS_PILL,
+  type ShipManagementSummaryContext,
+} from '../shipManagementSummary'
+import type { AcquisitionHint } from '../componentAcquisitionHint'
 import type { Hardpoint, HangarItem, InstalledLoadoutEntry, MissionReservation, Ship, Build } from '../../types'
 
 function hp(overrides: Partial<Hardpoint> & Pick<Hardpoint, 'id' | 'slotLabel' | 'status'>): Hardpoint {
@@ -247,5 +255,129 @@ describe('buildShipManagementSummary — EWO-063/EWO-064: the one authoritative 
       const summary = buildShipManagementSummary(hardpoints, noBuildContext)
       expect(summary.isFullyCompletedCustomLoadout).toBe(false)
     })
+  })
+})
+
+/**
+ * EWO-068A — the canonical fulfillment-state precedence used by
+ * Operational Review's Status column. `hp.status` (installed/target/
+ * factory identity comparison, computed by `computeHardpointStatus`) is
+ * never sufficient on its own — this resolver combines it with the same
+ * `AcquisitionHint` every other surface (`hintByHardpointId`) already
+ * reads, so a genuinely reserved/available exact target is never
+ * demoted to a lesser label just because the raw grade/match comparison
+ * also disagrees (Part E's own worked examples).
+ *
+ * EWO-068B — `STATUS_PILL[status]` is now the one canonical
+ * compactLabel/tone source (Part D); Reserved gets its OWN `cyan` tone
+ * (Mission Control's own canonical reserved-state color), deliberately
+ * split from Available's `success` green even though both used to read
+ * identically via the old `operationalReviewStatusTone` (retired this
+ * mission).
+ */
+describe('resolveOperationalReviewStatus / STATUS_PILL — EWO-068A/EWO-068B: canonical fulfillment-state precedence and compact pill mapping', () => {
+  const hint = (overrides: Partial<AcquisitionHint>): AcquisitionHint => ({ tone: 'success', label: 'Available in Inventory', detail: '', ...overrides })
+
+  it('Installed equals Target (OK) passes through unchanged, regardless of any hint — a satisfied target is never re-litigated', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'OK', installedItem: 'Mirage', targetItem: 'Mirage' })
+    expect(resolveOperationalReviewStatus(target, hint({ label: 'Purchase Required', tone: 'muted' }))).toBe('OK')
+    expect(STATUS_PILL.OK.tone).toBe('success')
+    expect(STATUS_PILL.OK.compactLabel).toBe('OK')
+  })
+
+  it('an exact target reserved for this port reads Reserved For This Port, compact RESERVED in cyan — and outranks the old grade-only Upgrade Available status', () => {
+    // installed !== factory and installed !== target — the exact shape that
+    // used to unconditionally read 'Upgrade Available' from grade math alone.
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Upgrade Available', installedItem: 'Bracer', targetItem: 'SnowBlind' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Reserved For This Port', tone: 'success' }))
+    expect(result).toBe('Reserved For This Port')
+    expect(STATUS_PILL[result].tone).toBe('cyan')
+    expect(STATUS_PILL[result].compactLabel).toBe('RESERVED')
+    // Deliberately distinct from Available — the two must never share a tone.
+    expect(STATUS_PILL[result].tone).not.toBe(STATUS_PILL['Available in Inventory'].tone)
+  })
+
+  it('an exact target available in unreserved inventory reads Available in Inventory, compact AVAILABLE in green — and outranks the old grade-only Upgrade Available status', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Upgrade Available', installedItem: 'SonicLite', targetItem: 'Slipstream' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Available in Inventory', tone: 'success' }))
+    expect(result).toBe('Available in Inventory')
+    expect(STATUS_PILL[result].tone).toBe('success')
+    expect(STATUS_PILL[result].compactLabel).toBe('AVAILABLE')
+  })
+
+  it('a never-touched Missing target that is genuinely reserved for this port also reads Reserved For This Port, not Missing', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'SnowBlind' })
+    expect(resolveOperationalReviewStatus(target, hint({ label: 'Reserved For This Port', tone: 'success' }))).toBe('Reserved For This Port')
+  })
+
+  it('the hint\'s "Available to Reserve" tier (owned, but committed to a different port) becomes the narrower Upgrade Available, compact UPGRADE in Quartermaster Gold — never fabricated from grade math alone', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'FR-66' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Available to Reserve', tone: 'warning' }))
+    expect(result).toBe('Upgrade Available')
+    expect(STATUS_PILL[result].tone).toBe('gold')
+    expect(STATUS_PILL[result].compactLabel).toBe('UPGRADE')
+  })
+
+  it('Upgrade Available only appears when the exact target is not reserved or available — the same underlying hardpoint, only the hint changes', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Upgrade Available', installedItem: 'Old', targetItem: 'FR-66' })
+    expect(resolveOperationalReviewStatus(target, hint({ label: 'Available in Inventory', tone: 'success' }))).toBe('Available in Inventory')
+    expect(resolveOperationalReviewStatus(target, hint({ label: 'Reserved For This Port', tone: 'success' }))).toBe('Reserved For This Port')
+    expect(resolveOperationalReviewStatus(target, hint({ label: 'Available to Reserve', tone: 'warning' }))).toBe('Upgrade Available')
+  })
+
+  it('a borrow-only target reads Borrow Available, compact BORROW? in a neutral muted tone — never competing visually with Reserved/Available/Upgrade', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'RareThing' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Borrow Available', tone: 'cyan' }))
+    expect(result).toBe('Borrow Available')
+    expect(STATUS_PILL[result].tone).toBe('muted')
+    expect(STATUS_PILL[result].compactLabel).toBe('BORROW?')
+    expect(STATUS_PILL[result].tone).not.toBe(STATUS_PILL['Reserved For This Port'].tone)
+    expect(STATUS_PILL[result].tone).not.toBe(STATUS_PILL['Available in Inventory'].tone)
+    expect(STATUS_PILL[result].tone).not.toBe(STATUS_PILL['Upgrade Available'].tone)
+  })
+
+  it('a procurement-only unresolved target (Purchase Required) reads Missing, compact MISSING in red — a real gap, but never fabricated as an upgrade/borrow state', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'Slipstream' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Purchase Required', tone: 'muted' }))
+    expect(result).toBe('Missing')
+    expect(STATUS_PILL[result].tone).toBe('danger')
+    expect(STATUS_PILL[result].compactLabel).toBe('MISSING')
+  })
+
+  it('an Invalid Target retains its invalid/error status regardless of any hint, compact INVALID — always actionable, never treated as an inventory question, and visually distinct from a routine Missing gap', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Invalid Target', targetItem: 'Bad Fit' })
+    const result = resolveOperationalReviewStatus(target, hint({ label: 'Available in Inventory', tone: 'success' }))
+    expect(result).toBe('Invalid Target')
+    expect(STATUS_PILL[result].tone).toBe('invalid')
+    expect(STATUS_PILL[result].compactLabel).toBe('INVALID')
+    // Both read red, but Invalid keeps its own more intense Badge tone —
+    // the established procurement-gap vs. data-problem distinction.
+    expect(STATUS_PILL[result].tone).not.toBe(STATUS_PILL.Missing.tone)
+  })
+
+  it('Unresolved (factory-data placeholder) passes through unchanged', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Unresolved', targetItem: '—' })
+    expect(resolveOperationalReviewStatus(target, undefined)).toBe('Unresolved')
+    expect(STATUS_PILL.Unresolved.tone).toBe('muted')
+  })
+
+  it('fulfillmentStatusFromHint resolves a raw AcquisitionHint to the same canonical status the Hardpoint-aware resolver produces — the exact shared function Change Installed Components\' own inline badge calls', () => {
+    expect(fulfillmentStatusFromHint(hint({ label: 'Reserved For This Port' }))).toBe('Reserved For This Port')
+    expect(fulfillmentStatusFromHint(hint({ label: 'Available in Inventory' }))).toBe('Available in Inventory')
+    expect(fulfillmentStatusFromHint(hint({ label: 'Available to Reserve' }))).toBe('Upgrade Available')
+    expect(fulfillmentStatusFromHint(hint({ label: 'Borrow Available' }))).toBe('Borrow Available')
+    expect(fulfillmentStatusFromHint(hint({ label: 'Purchase Required' }))).toBe('Missing')
+  })
+
+  it('every compact label is short enough to read as a single word, never a miniature sentence', () => {
+    for (const status of Object.keys(STATUS_PILL) as (keyof typeof STATUS_PILL)[]) {
+      expect(STATUS_PILL[status].compactLabel.length).toBeLessThanOrEqual(10)
+      expect(STATUS_PILL[status].compactLabel).not.toContain(' ')
+    }
+  })
+
+  it('a missing hint (defensive fallback) never throws — falls back to the raw status', () => {
+    const target = hp({ id: 'hp-1', slotLabel: 'A', status: 'Missing', targetItem: 'Something' })
+    expect(resolveOperationalReviewStatus(target, undefined)).toBe('Missing')
   })
 })

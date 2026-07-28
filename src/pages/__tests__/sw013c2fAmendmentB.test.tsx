@@ -61,7 +61,7 @@ function selectFirstOption(ariaLabel: string, query: string) {
  * which collides whenever a ship has more than one rack. */
 function aggregateRowInputFor(rackSlotLabel: string): HTMLInputElement {
   const matches = screen.getAllByText(rackSlotLabel)
-  const rackRowLabel = matches.find((el) => el.tagName === 'DIV')
+  const rackRowLabel = matches.find((el) => el.closest('tr') !== null)
   const rackRow = rackRowLabel!.closest('tr') as HTMLElement
   const aggregateRow = rackRow.nextElementSibling as HTMLElement
   return within(aggregateRow).getByRole('combobox') as HTMLInputElement
@@ -221,13 +221,13 @@ describe('SW-013C.2F Amendment B: parent rack replacement cleanly regenerates an
     fireEvent.click(listbox.querySelector('button') as HTMLButtonElement)
     expect(bombInput.value).toBe('Thunderball Bomb')
 
-    const rackRowBefore = screen.getAllByText('Torpedorack').find((el) => el.tagName === 'DIV')!.closest('tr') as HTMLElement
+    const rackRowBefore = screen.getAllByText('Torpedorack').find((el) => el.closest('tr') !== null)!.closest('tr') as HTMLElement
     const aggregateRowBefore = rackRowBefore.nextElementSibling as HTMLElement
     expect(aggregateRowBefore.textContent).toContain('×20')
 
     // Parent swap to the 1xS10 rack — old S3 children must not survive.
     selectFirstOption('New target for Torpedorack', '1xS10')
-    const rackRowAfter = screen.getAllByText('Torpedorack').find((el) => el.tagName === 'DIV')!.closest('tr') as HTMLElement
+    const rackRowAfter = screen.getAllByText('Torpedorack').find((el) => el.closest('tr') !== null)!.closest('tr') as HTMLElement
     const aggregateRowAfter = rackRowAfter.nextElementSibling as HTMLElement
     expect(aggregateRowAfter.textContent).toContain('×1')
     expect(aggregateRowAfter.textContent).not.toContain('×20')
@@ -299,8 +299,8 @@ describe('SW-013C.2F Amendment B: negative controls', () => {
     fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     for (const btn of screen.getAllByText('Expand All')) fireEvent.click(btn)
 
-    const leftMountRow = screen.getAllByText('Left Wing Weapon Mount').find((el) => el.tagName === 'DIV')!.closest('tr') as HTMLElement
-    const rightMountRow = screen.getAllByText('Right Wing Weapon Mount').find((el) => el.tagName === 'DIV')!.closest('tr') as HTMLElement
+    const leftMountRow = screen.getAllByText('Left Wing Weapon Mount').find((el) => el.closest('tr') !== null)!.closest('tr') as HTMLElement
+    const rightMountRow = screen.getAllByText('Right Wing Weapon Mount').find((el) => el.closest('tr') !== null)!.closest('tr') as HTMLElement
     const leftChildRow = leftMountRow.nextElementSibling as HTMLElement
     const rightChildRow = rightMountRow.nextElementSibling as HTMLElement
 

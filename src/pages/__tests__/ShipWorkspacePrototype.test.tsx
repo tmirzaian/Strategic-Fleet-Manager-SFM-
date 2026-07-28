@@ -33,7 +33,12 @@ function simulateBannerScrolledPast(scrolledPast: boolean) {
 // label always sits in a <div>, never the subgroup header <td>.
 function getPortRow(slotLabel: string): HTMLElement {
   const matches = screen.getAllByText(slotLabel)
-  const rowLabel = matches.find((el) => el.tagName === 'DIV')
+  // EWO-068 (Part D) — the port label text now lives inside a wrapping
+  // <span className="break-words"> (to permit sensible wrapping without
+  // widening the Port column), not directly inside the row's outer div —
+  // match any element that's actually inside a table row, regardless of
+  // its own tag name.
+  const rowLabel = matches.find((el) => el.closest('tr') !== null)
   if (!rowLabel) throw new Error(`No port row found for "${slotLabel}"`)
   return rowLabel.closest('tr') as HTMLElement
 }
@@ -911,10 +916,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
   })
 
   describe('Diagnostic truth in every lens (Phase 3) — M80, real Invalid Target + Unresolved Factory Data', () => {
-    it('Invalid Target (Quantum Drive) is visible in Ship Assessment (Lens 1)', () => {
+    it('Invalid Target (Quantum Drive) is visible in Ship Assessment (Lens 1) — EWO-068B compact label INVALID', () => {
       renderWorkspace('m80')
       const row = getPortRow('Quantum Drive')
-      expect(within(row).getByText('Invalid Target')).toBeInTheDocument()
+      expect(within(row).getByText('INVALID')).toBeInTheDocument()
     })
 
     it('Invalid Target (Quantum Drive) remains visible in Manage Loadout (Lens 2)', () => {
@@ -938,7 +943,10 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       // Components is expanded on first render).
       fireEvent.click(screen.getByText('Pilot Weapons'))
       const rowLens1 = getPortRow('Weapon 1')
-      expect(within(rowLens1).getByText('Unresolved')).toBeInTheDocument()
+      // EWO-068B — Lens 1's compact pill reads UNRESOLVED; Lens 2/3's own
+      // inline diagnostic badge (unaffected by this mission) still renders
+      // the raw hp.status literal.
+      expect(within(rowLens1).getByText('UNRESOLVED')).toBeInTheDocument()
 
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
       const rowLens2 = getPortRow('Weapon 1')
@@ -1654,9 +1662,20 @@ describe('<ShipWorkspacePrototype /> — EWO-065B: Actionable Decision Qualifica
  * slots at all in the real committed catalog — the Objective 5 negative
  * case.
  */
+// EWO-068 (Part B) retires the Configurable Slot badge from the
+// read-only Operational Review lens (commanderIntent === null) — it's
+// workflow-facing implementation metadata, not something a Commander
+// needs to assess Factory/Installed/Target/Status. The feature itself
+// is untouched and still fully available the moment a Commander enters
+// either workflow lens, so every test below now enters Manage Loadout
+// first (any workflow lens genuinely intersecting 'ghost' would do —
+// SW-011A's own fixture note already covers why 'ghost' is used).
+// Objective 5's negative-case tests are unaffected either way (they
+// assert absence) and are left on the default lens.
 describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Experience (Phase I)', () => {
   it('Objective 1/2: a real configurable port shows a Configurable Slot badge once its group is expanded', () => {
     renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     const badges = screen.getAllByTitle(/Configurable Slot —/)
     expect(badges.length).toBeGreaterThan(0)
@@ -1664,6 +1683,7 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
 
   it('Objective 3: clicking the badge reveals all 7 required read-only fields with real values, and hides them again on a second click', () => {
     renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     const badge = screen.getAllByTitle(/Configurable Slot —/)[0]
 
@@ -1684,6 +1704,7 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
 
   it('Objective 3: Current Installed Component reflects the live Hardpoint row, not a stale catalog snapshot', () => {
     renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
     // Every real match on 'ghost' (hardpoint_class_2, missile_0X_attach)
@@ -1694,6 +1715,7 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
 
   it('Explicit Non-Goals: the inspection panel contains no editing control of any kind', () => {
     renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
     const panel = screen.getByText('Slot Name').closest('tr') as HTMLElement
@@ -1704,6 +1726,7 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
 
   it('Objective 4: a Category C (review-required) slot shows "Needs Review", never a raw diagnostic, with Developer Mode off (the default)', () => {
     renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     // Real data: every one of ghost's intersecting slots (hardpoint_class_2,
     // missile_0X_attach) is Category C in the live-certified catalog.
@@ -1716,6 +1739,7 @@ describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Ex
   it('Objective 4: enabling Developer Mode reveals the raw diagnostics for an inspected slot', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Developer Mode/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
     expect(screen.getByText(/Developer Mode — Raw Diagnostics/)).toBeInTheDocument()
@@ -2132,5 +2156,226 @@ describe('<ShipWorkspacePrototype /> — EWO-067: Operations Workspace Visual En
       expect(loadoutButton).toHaveAttribute('aria-pressed', 'false')
       expect(screen.getByText('Operational Review')).toBeInTheDocument()
     })
+  })
+})
+
+/**
+ * EWO-068 — Operational Review Table Cleanup & Containment. The read-only
+ * default lens (commanderIntent === null) must expose exactly the six
+ * approved columns, no editing/workflow controls, and no CONFIGURABLE
+ * development badge — plus a fixed-layout <colgroup> so the table's own
+ * width is never dictated by content (Part C). Overflow/measured-pixel
+ * containment (deep nesting, long names, scrollWidth <= clientWidth) is
+ * verified live via Playwright per the work order's own split — jsdom has
+ * no real layout engine, so those checks can't live here.
+ */
+describe('<ShipWorkspacePrototype /> — EWO-068: Operational Review Table Cleanup & Containment', () => {
+  it('Part A: renders no editable inputs, selects, or install/remove workflow controls', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    const table = screen.getByRole('table')
+    expect(within(table).queryAllByRole('textbox')).toHaveLength(0)
+    expect(within(table).queryAllByRole('combobox')).toHaveLength(0)
+    expect(within(table).queryByText(/Install \/ Change/)).not.toBeInTheDocument()
+    expect(within(table).queryByText('Remove')).not.toBeInTheDocument()
+    expect(within(table).queryByText('New Target')).not.toBeInTheDocument()
+  })
+
+  it('Part B: CONFIGURABLE never renders in Operational Review, even after Expand All', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    expect(screen.queryByText('Configurable')).not.toBeInTheDocument()
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+  })
+
+  it('Part B: the underlying configurable metadata remains available the moment a Commander enters a workflow lens', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    expect(screen.getAllByTitle(/Configurable Slot —/).length).toBeGreaterThan(0)
+  })
+
+  it('Part C: all six approved columns render, in order', () => {
+    renderWorkspace('ghost')
+    const headerRow = screen.getByRole('table').querySelector('thead tr') as HTMLElement
+    const headers = within(headerRow)
+      .getAllByRole('columnheader')
+      .map((h) => h.textContent)
+    expect(headers).toEqual(['Port', 'Size / Type', 'Factory', 'Installed', 'Target', 'Status'])
+  })
+
+  it('Part C: the table uses a fixed layout with an explicit six-column <colgroup>', () => {
+    renderWorkspace('ghost')
+    const table = screen.getByRole('table')
+    expect(table.className).toContain('table-fixed')
+    const cols = table.querySelectorAll('colgroup > col')
+    expect(cols).toHaveLength(6)
+  })
+
+  it('Part C: the fixed-layout <colgroup> and Status truncation are scoped to Operational Review only — Manage Loadout keeps its own untouched auto-layout table', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    const table = screen.getByRole('table')
+    expect(table.className).not.toContain('table-fixed')
+    expect(table.querySelectorAll('colgroup > col')).toHaveLength(0)
+  })
+
+  it('Part D: Status stays on one line and the column is wide enough for the longest approved label (superseded by EWO-068B\'s own compact-label test below)', () => {
+    renderWorkspace('m80')
+    // M80's own real fixture carries an Invalid Target row (SW-002
+    // Revision A's own Phase 3 fixture) — Status renders here unconditionally.
+    // EWO-068B (Part A) replaced the Hero-length labels with compact
+    // tree-table ones ("OK"/"RESERVED"/"AVAILABLE"/"UPGRADE"/"BORROW?"/
+    // "MISSING"/"INVALID"/"UNRESOLVED").
+    const statusBadges = screen.getAllByText(/^(OK|MISSING|UPGRADE|INVALID|UNRESOLVED|RESERVED|AVAILABLE|BORROW\?)$/)
+    expect(statusBadges.length).toBeGreaterThan(0)
+    statusBadges.forEach((badge) => {
+      expect(badge.closest('td')?.className).toContain('whitespace-nowrap')
+    })
+  })
+})
+
+/**
+ * EWO-068A — Operational Review Status Alignment. The Status column must
+ * show the same canonical per-hardpoint fulfillment classification the
+ * Hero's own Decision Summary already computes
+ * (`reviewedSummary.hintByHardpointId`), never a second, independent
+ * grade/match comparison. Exercised end-to-end against Ghost's own real
+ * fixture data (SW-011A's own note: 'ghost' is this suite's real,
+ * live-certified configurable ship) rather than synthetic hardpoints —
+ * `shipManagementSummary.test.ts` already covers the resolver's full
+ * precedence table in isolation; this block proves the wiring.
+ */
+describe('<ShipWorkspacePrototype /> — EWO-068A: Operational Review Status Alignment', () => {
+  it('an unreserved, available exact target reads compact AVAILABLE in the table — matching the Hero\'s own descriptive "Available in Inventory" Decision Summary for the same hardpoint (SnowBlind, Left Cooler) — EWO-068B compacted the table wording only', () => {
+    renderWorkspace('ghost')
+    const row = getPortRow('Left Cooler')
+    expect(within(row).getByText('AVAILABLE')).toBeInTheDocument()
+    expect(within(row).queryByText('MISSING')).not.toBeInTheDocument()
+    expect(within(row).queryByText('UPGRADE')).not.toBeInTheDocument()
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(within(decisionBox).getByText('Available in Inventory')).toBeInTheDocument()
+  })
+
+  it('once the exact target is genuinely reserved for this exact port, the Status column reads compact RESERVED — a real store reservation, not a mock; the Hero keeps its own descriptive "Reserved For This Port" wording', () => {
+    renderWorkspace('ghost')
+    let reservation: { success: boolean; message?: string } = { success: false }
+    act(() => {
+      reservation = useFleetStore.getState().reserveComponent({
+        missionConfigurationId: 'ghost-stealth',
+        fleetAssetId: 'ghost',
+        targetSlotLabel: 'Left Cooler',
+        componentName: 'SnowBlind',
+      })
+    })
+    expect(reservation.success).toBe(true)
+    const row = getPortRow('Left Cooler')
+    expect(within(row).getByText('RESERVED')).toBeInTheDocument()
+    expect(within(row).queryByText('AVAILABLE')).not.toBeInTheDocument()
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(within(decisionBox).getByText('Reserved For This Port')).toBeInTheDocument()
+  })
+
+  it('a Purchase-Required exact target (Slipstream, zero Hangar stock) reads compact MISSING in Operational Review, even though EWO-065B excludes it from the Hero\'s own Immediate Decisions', () => {
+    renderWorkspace('ghost')
+    const row = getPortRow('Power Plant')
+    expect(within(row).getByText('MISSING')).toBeInTheDocument()
+    const decisionBox = screen.getByTestId('decision-summary')
+    expect(decisionBox.textContent).not.toContain('Slipstream')
+  })
+
+  it('an Invalid Target row is unaffected — still reads compact INVALID regardless of any inventory fact', () => {
+    renderWorkspace('m80')
+    const invalidBadge = screen.getByText('INVALID')
+    expect(invalidBadge).toBeInTheDocument()
+    expect(invalidBadge.closest('td')?.className).toContain('whitespace-nowrap')
+  })
+
+  it('the compact canonical labels stay on one line with no horizontal overflow, inside the Status column established by EWO-068/refined by EWO-068B', () => {
+    renderWorkspace('ghost')
+    const row = getPortRow('Left Cooler')
+    const statusCell = within(row).getByText('AVAILABLE').closest('td') as HTMLElement
+    expect(statusCell.className).toContain('whitespace-nowrap')
+    const table = screen.getByRole('table')
+    expect(table.className).toContain('table-fixed')
+    expect(table.querySelectorAll('colgroup > col')).toHaveLength(6)
+  })
+})
+
+/**
+ * EWO-068B — Canonical Status Pills & Column Rebalance. Standardizes
+ * compact wording/color across all three Ship Management tree layouts —
+ * "Hero explains. Tables classify." The Hero/Decision Summary keep their
+ * own longer wording (Explicitly Out of Scope: "Hero pill wording"); only
+ * the tree/table surfaces (Operational Review's Status column, Change
+ * Installed Components' inline acquisition-hint badge) compact.
+ */
+describe('<ShipWorkspacePrototype /> — EWO-068B: Canonical Status Pills & Column Rebalance', () => {
+  it('Part A/D: the same hardpoint reads the identical compact label in both Operational Review and Change Installed Components\' own inline disclosure — never AVAILABLE in one and AVAILABLE IN INVENTORY in another', () => {
+    renderWorkspace('ghost')
+    const reviewRow = getPortRow('Left Cooler')
+    expect(within(reviewRow).getByText('AVAILABLE')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const changeRow = getPortRow('Left Cooler')
+    fireEvent.click(within(changeRow).getByRole('button', { name: /Install \/ Change/ }))
+    const disclosure = changeRow.nextElementSibling as HTMLElement
+    expect(within(disclosure).getByText('AVAILABLE')).toBeInTheDocument()
+    expect(within(disclosure).queryByText('Available in Inventory')).not.toBeInTheDocument()
+  })
+
+  it('Part B: a borrow-only target renders the neutral BORROW? pill, distinct from Reserved/Available/Upgrade, in both Operational Review and the Change Installed Components disclosure', () => {
+    const extra: Hardpoint = {
+      id: 'test-borrow-hp', shipId: 'ghost', buildId: 'ghost-stealth', slotLabel: 'Test Borrow Slot',
+      type: 'Shield', size: 'S1', factoryItem: 'BorrowTestItem', installedItem: '—', targetItem: 'BorrowTestItem', status: 'Missing',
+    }
+    useFleetStore.setState({
+      hardpoints: [...useFleetStore.getState().hardpoints, extra],
+      hangarItems: [],
+      installedLoadouts: [...useFleetStore.getState().installedLoadouts, { shipId: 'corsair', slotLabel: 'A Shield Generator', installedItem: 'BorrowTestItem' } as InstalledLoadoutEntry],
+    })
+    renderWorkspace('ghost')
+    const reviewRow = getPortRow('Test Borrow Slot')
+    const reviewBadge = within(reviewRow).getByText('BORROW?')
+    expect(reviewBadge).toBeInTheDocument()
+    expect(reviewBadge.className).not.toContain('bg-success')
+    expect(reviewBadge.className).not.toContain('bg-cyan')
+    expect(reviewBadge.className).not.toContain('bg-gold')
+
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    const changeRow = getPortRow('Test Borrow Slot')
+    fireEvent.click(within(changeRow).getByRole('button', { name: /Install \/ Change/ }))
+    const disclosure = changeRow.nextElementSibling as HTMLElement
+    expect(within(disclosure).getByText('BORROW?')).toBeInTheDocument()
+  })
+
+  it('Part E: the Status column narrows and Port widens once pills compact — colgroup widths were rebalanced, not just the pill text', () => {
+    renderWorkspace('ghost')
+    const table = screen.getByRole('table')
+    const cols = Array.from(table.querySelectorAll('colgroup > col')) as HTMLElement[]
+    expect(cols).toHaveLength(6)
+    const portWidth = parseInt(cols[0].className.match(/w-\[(\d+)%\]/)![1], 10)
+    const statusWidth = parseInt(cols[5].className.match(/w-\[(\d+)%\]/)![1], 10)
+    // Status must stay wide enough for "AVAILABLE" (9 characters, the
+    // longest compact label) but Port must now be the largest share.
+    expect(statusWidth).toBeLessThan(20)
+    expect(portWidth).toBeGreaterThan(statusWidth)
+  })
+
+  it('Part G: every compact label observed live across a real ship\'s Operational Review is drawn from the approved 7-word vocabulary, never a Hero-length sentence', () => {
+    renderWorkspace('m80')
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    const table = screen.getByRole('table')
+    // Real leaf rows carry exactly the 6 approved columns (Port/Size-Type/
+    // Factory/Installed/Target/Status) — group-header rows (1 colSpan-ed
+    // td) and structural rows (a 2nd colSpan-ed "—" td) are excluded so
+    // neither is mistaken for a Status cell.
+    const leafRows = Array.from(table.querySelectorAll('tbody tr')).filter((row) => row.querySelectorAll('td').length === 6)
+    expect(leafRows.length).toBeGreaterThan(0)
+    const statusCells = leafRows.map((row) => row.querySelector('td:last-child')?.textContent?.trim())
+    const approved = new Set(['OK', 'RESERVED', 'AVAILABLE', 'UPGRADE', 'BORROW?', 'MISSING', 'INVALID', 'UNRESOLVED'])
+    for (const text of statusCells) {
+      expect(approved.has(text ?? '')).toBe(true)
+    }
   })
 })

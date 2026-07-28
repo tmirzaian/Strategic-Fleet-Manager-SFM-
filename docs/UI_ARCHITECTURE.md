@@ -2370,3 +2370,273 @@ retires that treatment outright; the workstation-label, hover-glow,
 and Part H behavioral-preservation tests are unchanged and still pass.
 Full project regression (`tsc --noEmit`, full `vitest run`) and a
 production build pass clean.
+
+## 43. Operational Review Table Cleanup & Containment (EWO-068, IMPLEMENTED NOW)
+
+Finalizes the Ship Assessment Operational Review table (Lens 1,
+`commanderIntent === null`) as a clean, non-editable, fully contained
+assessment surface — the stable reference view the two editable
+workstations (Manage Loadout, Change Installed Components) are now
+evaluated against. Scoped strictly to Lens 1's own 6-column table;
+Lens 2 (8 columns)/Lens 3 (7 columns) keep their pre-existing
+auto-layout table entirely untouched.
+
+**Part A — confirmed already read-only.** Lens 1's own cell renderer
+was already read-only (`ComponentAssignmentLabel` + a `Badge`, no
+inputs/selects/workflow buttons) — no change required beyond Part B.
+
+**Part B — CONFIGURABLE retired from Operational Review.** The
+Configurable Slot badge (`renderLensRows`) and its click-to-inspect
+disclosure (`renderConfigurableSlotDisclosure`) are workflow-facing
+implementation metadata (swap-group identifier, confidence level,
+source authority) — they don't help a Commander read Factory/Installed/
+Target/Status. Both are now gated to `commanderIntent !== null`,
+including the disclosure's own render guard (so a slot inspected inside
+a workflow lens doesn't leak into view if the Commander switches back
+to Operational Review without closing it first). The underlying
+`configurableSlotFor` lookup is untouched — still available the instant
+a Commander enters either workstation.
+
+**Part C — fixed layout, explicit `<colgroup>`, scoped to Lens 1 only.**
+The table gets `table-fixed` plus a 6-column `<colgroup>`
+(Port 30%, Size/Type 12%, Factory 15%, Installed 15%, Target 15%,
+Status 13%) only when `commanderIntent === null`; Lens 2/3 render the
+same `<table>` element without either, preserving their own existing
+auto-layout untouched (Explicitly Out of Scope).
+
+**Part D — wrap vs. truncate, split by column.** Port permits wrapping
+(`flex-wrap`, `break-words`) rather than truncation — a Commander needs
+the full port name — with indentation capped at 4 levels
+(`Math.min(depth, 4) * 16`) so a single deep branch can't keep eating
+into the column's own fixed width. Factory/Installed/Target keep
+`ComponentAssignmentLabel`'s existing two-line name/classification
+treatment (already `truncate`-based) constrained against the new fixed
+column width via `max-w-0`; both its name and classification lines now
+carry their own `title` with the FULL value (not the outer diagnostic
+internal identifier), so a truncated cell's real content is always one
+hover away. Status keeps `whitespace-nowrap` in a column sized for the
+longest approved label ("Upgrade Available").
+
+**Part E — nested containment.** Covered by Part D's capped
+indentation plus Part C's fixed column width — hierarchy depth can no
+longer widen the Port column or the table, regardless of how deep a
+missile-rack/turret/gimbal branch goes.
+
+**Part F — not separately implemented.** Part C/D's fixed-width,
+truncate/wrap-based containment already holds at the 1320px reference
+desktop viewport (live-verified — see below); the pre-existing
+`overflow-x-auto` wrapper remains only as the last-resort fallback Part
+F itself permits below the supported breakpoint, never triggered at
+standard desktop width.
+
+**Part G — no new decoration.** Factory muted, Installed neutral,
+Target cyan, Status semantic badge tones all unchanged.
+
+Regression coverage: a new EWO-068 describe block in
+`ShipWorkspacePrototype.test.tsx` covers no editable controls in
+Operational Review, CONFIGURABLE's absence there (and continued
+presence the moment a workflow lens is entered), all six columns
+rendering in order, the `table-fixed`/`<colgroup>` scoping (present in
+Lens 1, absent in Lens 2), and Status's one-line containment; a new
+EWO-068 block in `ComponentAssignmentLabel.test.tsx` covers the
+full-value title on both truncatable lines. Three existing test files
+(`sw013c2dEclipseCompatibility`, `sw013c2fAmendmentB`,
+`sw014aInlineInstalledComponentWorkflow`) had their own local
+`.tagName === 'DIV'` port-row lookup helper — a testing convenience
+that assumed the port label was the outer `<div>`'s own direct text —
+broken by Part D's new wrapping `<span>`; all were widened to match any
+element inside a `<tr>` regardless of tag, not a functional change.
+Full project regression (`tsc --noEmit`, full `vitest run`) and a
+production build pass clean. Playwright live-verified at the 1320px
+reference desktop viewport against a real seeded combat ship (missile
+racks, gimbal mounts, and a manned turret with nested weapon/missile
+children — genuine multi-level nesting) plus a synthetic
+deliberately-long target name: collapsed and fully-expanded assessment,
+`scrollWidth <= clientWidth` for both the page and the table/panel
+container (confirmed equal, zero overflow), the Status column's right
+edge inside the viewport, the long name truncating to an ellipsis with
+its full value recoverable via `title`, and no CONFIGURABLE text
+anywhere in the DOM.
+
+## 44. Operational Review Status Alignment (EWO-068A, IMPLEMENTED NOW)
+
+The Status column now shows the same highest-priority fulfillment state
+the Hero's own Decision Summary already computes, instead of an
+independent grade/match comparison — "One port. One target. One
+authoritative operational status."
+
+**Part A/E — match state vs. fulfillment state.** `hp.status`
+(`computeHardpointStatus` — a pure installed/target/factory identity
+comparison) is untouched and still drives readiness/internal-logic
+calculations exactly as before. A new pure derivation,
+`resolveOperationalReviewStatus(hp, hint)`
+(`src/utils/shipManagementSummary.ts`), sits on top of it for display
+only: OK, Invalid Target, and Unresolved pass `hp.status` straight
+through (a data problem or a satisfied target is never re-litigated by
+an inventory fact); for every other unresolved target (`hp.status` is
+'Missing' or the old grade-only 'Upgrade Available'), the resolver
+defers entirely to the hardpoint's own `AcquisitionHint` — the exact
+same per-hardpoint classification `hintByHardpointId` already produces
+for the Hero, never a second calculation (Part D).
+
+**Part B — canonical precedence.** `hint.label` maps to the column's
+new vocabulary: 'Reserved For This Port' and 'Available in Inventory'
+pass through verbatim (green, `success` tone — literally the same
+strings the Hero's own Decision Summary renders, so the two surfaces
+can never contradict each other on the same hardpoint); 'Available to
+Reserve' (owned, but committed to a different port — a real,
+inventory-backed fact) becomes the column's own narrower 'Upgrade
+Available', now in a new `gold` Badge tone (Quartermaster Gold, never
+`warning`/Caution Yellow — the same EWO-065A §37/38 distinction) rather
+than the old grade-only trigger; 'Borrow Available' passes through
+(cyan); 'Purchase Required' (no reserved/available/upgrade/borrow
+option exists) reads as 'Missing' — a real gap, but never fabricated as
+something more specific.
+
+**Part F — pill containment.** The Status `<colgroup>` share
+(established EWO-068 §43) grew from 13% to 25% (Port trimmed from 30%
+to 25%, Size/Type from 12% to 8%) and the cell's own horizontal padding
+was reduced (`px-2`, was `px-4`) — both tuned against the actual
+rendered "Reserved For This Port" pill (the longest approved label) at
+the 1320px reference viewport, not estimated from character count; a
+first pass at 16%/`px-2` still overflowed by 21px, caught by Playwright
+measurement before landing.
+
+**A real discrepancy, disclosed rather than silently resolved:** the
+work order's own "Ghost Reference State" (Part C) names three specific
+labels for Ghost's Stealth Build — SnowBlind → Reserved For This Port,
+Slipstream → Available in Inventory, Mirage (Left Shield Generator) →
+Available in Inventory. Tracing the actual committed fixture
+(`src/data/seed.ts`) shows: SnowBlind is owned (qty 1) and **unreserved**
+(no `MissionReservation` exists anywhere in seed data by default — this
+is also independently confirmed by an existing, already-certified test:
+`ShipWorkspacePrototype.test.tsx`'s "Immediate Decision Intelligence" —
+'SnowBlind is owned (qty 1) and unreserved in the seed Hangar'), so it
+correctly resolves to Available in Inventory, not Reserved; Slipstream's
+seed hangar entry is `qty: 0`, so it correctly resolves to Missing
+(Purchase Required), not Available; and Left Shield Generator's target
+on Ghost's Stealth Build is already `Mirage` with `installedItem: 'Mirage'`
+— i.e. already OK, not unresolved at all. Rather than silently forcing
+these three labels to match the work order's prose (which would require
+either fabricating seed reservation/inventory data — "Inventory
+reservation behavior" is Explicitly Out of Scope — or asserting
+incorrect values), the regression suite proves the SnowBlind/Slipstream
+cases against their real, verified current values, and separately
+proves the Reserved-For-This-Port path end-to-end with a genuine
+`reserveComponent` call against the real SnowBlind/Left-Cooler fixture
+(`ShipWorkspacePrototype.test.tsx`) — which does produce exactly
+'Reserved For This Port', matching the work order's own claimed label
+once that real reservation actually exists. The likely explanation:
+the Chief Architect's own live "Commander inspection" session had
+already reserved SnowBlind through some prior action before observing
+this state — a transient in-session fact, not a static seed.ts value.
+
+Regression coverage: `shipManagementSummary.test.ts` proves
+`resolveOperationalReviewStatus`/`operationalReviewStatusTone`'s full
+precedence table in isolation (all 7 tiers, plus "exact-target
+availability outranks the old grade-only Upgrade Available" using the
+identical underlying hardpoint with only the hint varying). A new
+EWO-068A block in `ShipWorkspacePrototype.test.tsx` proves the wiring
+end-to-end against real Ghost fixture data and a real store reservation
+(not a mock), and confirms Table/Hero agreement on the same hardpoint.
+`Badge.tsx` gains an exported `Tone` type and a `gold` tone (reused
+verbatim, no new color). Full project regression (`tsc --noEmit`, full
+`vitest run`) and a production build pass clean. Playwright live-verified
+at the 1320px reference viewport against a real seeded ship with a
+rigged Missing → Available in Inventory → Reserved For This Port
+transition (the exact same code path the Ghost fixture exercises,
+reproducible without the dev-only seed flag this isolated browser
+doesn't have): both states render correctly, Table and Hero agree
+verbatim, and — after the colgroup fix — zero horizontal overflow.
+
+## 45. Canonical Status Pills & Column Rebalance (EWO-068B, IMPLEMENTED NOW)
+
+Standardizes status-pill wording, sizing, and semantic color across all
+three Ship Management tree layouts — "Hero explains. Tables classify.
+Workflows act." §44's own `OperationalReviewStatus`/`hint`-derived
+classification is unchanged; only how it's PRESENTED in a tree/table
+cell changes.
+
+**Part A/D — one canonical mapping, two vocabularies.**
+`STATUS_PILL: Record<OperationalReviewStatus, {compactLabel, longLabel,
+tone}>` (`shipManagementSummary.ts`) is now the single source every
+tree/table pill reads from — Operational Review's Status column and
+Change Installed Components' inline acquisition-hint badge
+(`renderInstallDisclosure`, via the newly-exported
+`fulfillmentStatusFromHint(hint)`, the hint-only half of §44's own
+resolver, pulled out so a raw `AcquisitionHint` — not just a
+`Hardpoint` — can resolve the same classification). Both render
+`compactLabel` ("OK"/"RESERVED"/"AVAILABLE"/"UPGRADE"/"BORROW?"/
+"MISSING"/"INVALID"/"UNRESOLVED"), never the longer Hero wording. The
+Hero/Decision Summary are explicitly untouched (Explicitly Out of
+Scope: "Hero pill wording") — they still render `AcquisitionHint.label`/
+`.tone` directly, an intentionally separate, established path from
+EWO-064/065B this mission does not consume or alter. `longLabel` is
+recorded on `STATUS_PILL` anyway (Part D's own suggested shape) so the
+relationship between the two vocabularies is documented in one place.
+
+**Part B — retuned tone, mirroring Mission Control.** Reserved gets its
+OWN `cyan` tone — Badge.tsx's pre-existing Mission Control
+`procurementRowStateTone('RESERVED')` already uses cyan for the
+identical concept — deliberately split from Available's `success`
+green, even though both previously rendered identically via the raw
+`AcquisitionHint.tone` (EWO-068A's own `operationalReviewStatusTone`,
+retired this mission in favor of `STATUS_PILL`). Upgrade keeps
+`gold` (EWO-068A). Borrow becomes `muted` — neutral gray, "must not
+visually compete with Reserved/Available/Upgrade" — instead of the
+Hero's own cyan informational treatment; the "?" in "BORROW?" alone
+signals "an option exists, evaluate the consequences." Missing/Invalid
+keep their pre-existing `danger`/`invalid` distinction (a routine
+procurement gap vs. a genuine data problem) unchanged.
+
+**Part E — column rebalance, live-measured.** Operational Review's
+`<colgroup>` (§43) shrinks Status from 25% back to 10% now that no
+compact label exceeds 9 characters, redistributing the reclaimed width
+to Port (25% → 33%), Size/Type (8% → 12%), and Target (14% → 15%) — the
+columns Part E names as the intended beneficiaries. Verified against
+the actual rendered "AVAILABLE" pill (the longest compact label) via
+Playwright measurement, not estimated from character count. Manage
+Loadout/Change Installed Components' own Availability/Reservations
+badges (`{n} Available`, a live quantity count — genuinely different
+information from the state-classification vocabulary this mission
+standardizes) were already using the correct canonical colors
+(`success`/`muted` for availability, `cyan` for Reserved) before this
+mission and needed no change — verified, not modified, consistent with
+"No availability, reservation... logic changes are authorized."
+
+**A pre-existing bug found, not fixed (out of scope).** Live
+verification surfaced a genuine, PRE-EXISTING crash in Change Installed
+Components — `Cannot read properties of undefined (reading
+'ownedQuantity')` at its own main-row rendering
+(`availabilityByHardpointId.get(hp.id)!` in `renderLensCells`),
+triggered by clicking "Expand All" and then switching into Change
+Installed Components on certain ships. Confirmed via bisection to
+reproduce on a completely vanilla, freshly-added ship with none of this
+mission's own rigging involved, and confirmed the crash site is
+untouched by this mission's own edit (a different function,
+`renderInstallDisclosure`) — a real bug worth its own dedicated work
+order, not something EWO-068B's scope covers or this fix touches.
+
+Regression coverage: `shipManagementSummary.test.ts`'s EWO-068A/EWO-068B
+describe block now asserts `STATUS_PILL`'s full compactLabel/tone table
+directly (including "Reserved and Available must never share a tone"
+and "every compact label ≤10 characters, no spaces") and
+`fulfillmentStatusFromHint`'s standalone hint-to-status mapping. A new
+EWO-068B block in `ShipWorkspacePrototype.test.tsx` proves: the same
+hardpoint reads the identical compact label in both Operational Review
+and Change Installed Components' own disclosure (Part D, real
+end-to-end, not a mock); a real borrow-only fixture renders the neutral
+`BORROW?` pill in both surfaces; the colgroup's Status share shrank
+below 20% while Port grew larger than Status (Part E); and every
+Status-column label observed across a real ship's fully-expanded
+Operational Review is drawn from the approved 8-word vocabulary. Every
+pre-existing test asserting the old long labels in a tree/table cell
+was updated to the new compact ones; Hero-facing assertions
+(`decision-summary`) were left on the long wording. Full project
+regression (`tsc --noEmit`, full `vitest run`) and a production build
+pass clean. Playwright live-verified at the 1320px reference viewport
+against a real seeded ship with three rigged states (Available/
+Reserved/Borrow, the reservation via a real `reserveComponent` call):
+correct compact labels, correct tones (cyan/gold/muted verified via
+rendered class names), zero horizontal overflow in both Operational
+Review and Change Installed Components.

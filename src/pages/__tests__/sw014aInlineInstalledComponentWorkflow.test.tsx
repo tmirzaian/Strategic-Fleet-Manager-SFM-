@@ -33,7 +33,11 @@ function renderWorkspace(shipId: string) {
 
 function getPortRow(slotLabel: string): HTMLElement {
   const matches = screen.getAllByText(slotLabel)
-  const rowLabel = matches.find((el) => el.tagName === 'DIV')
+  // EWO-068 (Part D) — the port label now lives inside a wrapping
+  // <span className="break-words">, not directly inside the row's outer
+  // div; match any element genuinely inside a table row instead of
+  // asserting a specific tag name.
+  const rowLabel = matches.find((el) => el.closest('tr') !== null)
   if (!rowLabel) throw new Error(`No port row found for "${slotLabel}"`)
   return rowLabel.closest('tr') as HTMLElement
 }

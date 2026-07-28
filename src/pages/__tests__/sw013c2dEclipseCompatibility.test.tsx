@@ -101,7 +101,11 @@ describe('SW-013C.2D (Objective 3): Eclipse rack compatibility is scoped to its 
     fireEvent.click(screen.getAllByText(/Manage Loadout/)[0])
     for (const btn of screen.getAllByText('Expand All')) fireEvent.click(btn)
 
-    const bombRow = screen.getAllByText('Bomb').find((el) => el.tagName === 'DIV')
+    // EWO-068 (Part D) — the port label now lives inside a wrapping
+    // <span className="break-words">, not directly inside the row's
+    // outer div; match any element genuinely inside a table row instead
+    // of asserting a specific tag name.
+    const bombRow = screen.getAllByText('Bomb').find((el) => el.closest('tr') !== null)
     expect(bombRow).toBeDefined()
     const aggregateRow = bombRow!.closest('tr') as HTMLElement
     expect(aggregateRow.textContent).toContain('×20')

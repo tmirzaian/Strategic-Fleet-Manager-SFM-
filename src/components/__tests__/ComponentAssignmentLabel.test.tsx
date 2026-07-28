@@ -51,3 +51,32 @@ describe('EWO-026 (Task 6/13): ComponentAssignmentLabel static presentation cont
     expect(lines).toEqual(['—'])
   })
 })
+
+describe('EWO-068 (Part D): full-value tooltips on truncatable lines', () => {
+  it('the primary name line carries its own title with the full value, not the outer diagnostic identifier', async () => {
+    vi.doMock('../../utils/componentPresentation', () => ({
+      resolveComponentLabel: () => ({
+        primaryLabel: 'An Unusually Long Component Name That Would Truncate',
+        identityLine: 'Military A',
+        diagnosticInternalName: 'RSI_SomeRawInternalId_01',
+      }),
+    }))
+    const { default: MockedLabel } = await import('../ComponentAssignmentLabel')
+    render(<MockedLabel value="whatever" />)
+    const nameLine = screen.getByText('An Unusually Long Component Name That Would Truncate')
+    expect(nameLine).toHaveAttribute('title', 'An Unusually Long Component Name That Would Truncate')
+  })
+
+  it('the classification line carries its own title with its full value too', async () => {
+    vi.doMock('../../utils/componentPresentation', () => ({
+      resolveComponentLabel: () => ({
+        primaryLabel: 'Avalanche',
+        identityLine: 'Military A',
+        diagnosticInternalName: null,
+      }),
+    }))
+    const { default: MockedLabel } = await import('../ComponentAssignmentLabel')
+    render(<MockedLabel value="whatever" />)
+    expect(screen.getByText('Military A')).toHaveAttribute('title', 'Military A')
+  })
+})

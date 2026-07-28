@@ -1,10 +1,11 @@
 import type { LucideIcon } from 'lucide-react'
-import type { Hardpoint, Ship, HangarItem, InstalledLoadoutEntry, MissionReservation, Build, FleetBuildState, ComponentAvailability } from '../types'
+import type { Hardpoint, Ship, HangarItem, InstalledLoadoutEntry, MissionReservation, Build, FleetBuildState, ComponentAvailability, HardpointStatus } from '../types'
 import { calculateBuildProgress, type BuildProgressResult } from './buildProgress'
 import { deriveFleetBuildState } from './fleetBuildState'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { describeAcquisitionHint, type AcquisitionHint } from './componentAcquisitionHint'
 import { canonicalComponentCategoryKey, CANONICAL_COMPONENT_CATEGORY_ORDER, CANONICAL_COMPONENT_CATEGORY_LABEL, CANONICAL_COMPONENT_CATEGORY_ICON } from './componentCategoryIcon'
+import type { Tone } from '../components/Badge'
 
 /**
  * EWO-063 (Part C) — moved here from ShipWorkspacePrototype.tsx as part of
@@ -50,6 +51,122 @@ function acquisitionRank(hint: AcquisitionHint): number {
     default:
       return 3
   }
+}
+
+/**
+ * EWO-068A — the single canonical resolver for "what fulfillment state
+ * should a Commander-facing Status pill show for this hardpoint," used by
+ * every read-only status surface (Operational Review's Status column is
+ * the first consumer; the Hero's own Decision Summary already renders
+ * `hint.label` directly and doesn't need this wrapper). `hp.status`
+ * (`computeHardpointStatus` — a pure installed/target/factory identity
+ * comparison) stays exactly as-is for readiness/internal-logic purposes
+ * (Part E) — this is a pure display derivation layered on top, never a
+ * replacement, and it is NEVER computed independently by a table or any
+ * other consumer (Part D — "do not maintain a second status resolver").
+ *
+ * Precedence (Part B): OK, Invalid Target, and Unresolved all pass
+ * through `hp.status` unchanged — a genuine data problem (or a target
+ * that's already satisfied) is never demoted by an inventory fact (items
+ * 1/6 — Invalid Target "remains actionable regardless of inventory").
+ * For every other unresolved target (`hp.status` is 'Missing' or the old
+ * grade-only 'Upgrade Available'), the acquisition hint — already the one
+ * canonical per-hardpoint classification every other surface
+ * (`hintByHardpointId`) reads — decides the label instead: Reserved For
+ * This Port and Available in Inventory both outrank the old blind grade
+ * comparison (Part E's own worked examples — a genuinely reserved or
+ * available exact target is never demoted to a lesser label just because
+ * Installed also happens to differ from Target); the hint's own "Available
+ * to Reserve" tier (owned, but currently committed to a different
+ * port/build — reassigning it is a real, inventory-backed action) becomes
+ * this column's narrower 'Upgrade Available' — never fabricated from
+ * grade math alone (Part B item 4's explicit requirement); Borrow
+ * Available passes through unchanged; Purchase Required — no current
+ * fulfillment action exists — reads as Missing (Part B item 7, "may
+ * represent a procurement gap but must not create an Immediate
+ * Decision" — unaffected here, since EWO-065B's own actionableDecisions
+ * exclusion already keeps Purchase-Required rows out of the Hero's
+ * Decision Summary regardless of what this column shows).
+ */
+export type OperationalReviewStatus = HardpointStatus | 'Reserved For This Port' | 'Available in Inventory' | 'Borrow Available'
+
+/**
+ * EWO-068B (Part D) — the acquisition-hint half of the fulfillment-status
+ * derivation, pulled out to its own named function so any tree/table
+ * surface holding a raw `AcquisitionHint` (not just a Hardpoint with a
+ * `.status`) can resolve the SAME canonical classification —
+ * `resolveOperationalReviewStatus` below is one caller; Change Installed
+ * Components' own inline acquisition-hint badge (ShipWorkspacePrototype.tsx)
+ * is the other, so the two never drift into rendering different labels
+ * for what is provably the same underlying tier.
+ */
+export function fulfillmentStatusFromHint(hint: AcquisitionHint): OperationalReviewStatus {
+  switch (hint.label) {
+    case 'Reserved For This Port':
+      return 'Reserved For This Port'
+    case 'Available in Inventory':
+      return 'Available in Inventory'
+    case 'Available to Reserve':
+      return 'Upgrade Available'
+    case 'Borrow Available':
+      return 'Borrow Available'
+    default:
+      // Purchase Required — no reserved, available, upgrade, or borrow
+      // option currently exists; a real gap, but not one this column can
+      // present as anything more specific than Missing.
+      return 'Missing'
+  }
+}
+
+export function resolveOperationalReviewStatus(hp: Hardpoint, hint: AcquisitionHint | undefined): OperationalReviewStatus {
+  if (hp.status !== 'Missing' && hp.status !== 'Upgrade Available') return hp.status
+  if (!hint) return hp.status
+  return fulfillmentStatusFromHint(hint)
+}
+
+/**
+ * EWO-068B — "Canonical Status Pills & Column Rebalance." The one shared
+ * status -> {compactLabel, longLabel, tone} mapping for every Ship
+ * Management tree/table surface (Operational Review's Status column,
+ * Change Installed Components' inline acquisition-hint badge) — Part D's
+ * explicit requirement that the same underlying state never renders as
+ * "AVAILABLE" in one table and "AVAILABLE IN INVENTORY" in another.
+ * `compactLabel` is what a tree/table cell renders; `longLabel` documents
+ * the wording the Hero/Decision Summary independently render via
+ * `AcquisitionHint.label` (Part A explicitly keeps "Hero pill wording"
+ * out of scope, so the Hero does NOT consume this map — its own
+ * established tone/label path from EWO-064/065B is untouched) — recorded
+ * here anyway so the relationship between the two vocabularies is
+ * explicit in one place rather than duplicated tribal knowledge.
+ *
+ * Tone (Part B, "mirror the established Mission Control palette"):
+ * OK/Available both read as the same immediately-actionable green;
+ * Reserved gets its OWN cyan tone (Mission Control's own canonical
+ * `procurementRowStateTone('RESERVED')` — Badge.tsx — already uses cyan
+ * for the identical concept), deliberately distinct from Available's
+ * green even though both used to render identically via `hint.tone`;
+ * Upgrade is Quartermaster Gold — "a recommendation, not a warning,"
+ * never `warning`/Caution Yellow; Borrow is `muted` neutral gray — "must
+ * not visually compete with Reserved/Available/Upgrade," the question
+ * mark alone communicates "evaluate the consequences"; Missing/Invalid
+ * both stay red, preserving the existing `danger`/`invalid` intensity
+ * distinction between a procurement gap and a genuine data problem.
+ */
+export interface StatusPillPresentation {
+  compactLabel: string
+  longLabel: string
+  tone: Tone
+}
+
+export const STATUS_PILL: Record<OperationalReviewStatus, StatusPillPresentation> = {
+  OK: { compactLabel: 'OK', longLabel: 'OK', tone: 'success' },
+  'Reserved For This Port': { compactLabel: 'RESERVED', longLabel: 'Reserved For This Port', tone: 'cyan' },
+  'Available in Inventory': { compactLabel: 'AVAILABLE', longLabel: 'Available in Inventory', tone: 'success' },
+  'Upgrade Available': { compactLabel: 'UPGRADE', longLabel: 'Upgrade Available', tone: 'gold' },
+  'Borrow Available': { compactLabel: 'BORROW?', longLabel: 'Borrow Available', tone: 'muted' },
+  Missing: { compactLabel: 'MISSING', longLabel: 'Missing', tone: 'danger' },
+  'Invalid Target': { compactLabel: 'INVALID', longLabel: 'Invalid Target', tone: 'invalid' },
+  Unresolved: { compactLabel: 'UNRESOLVED', longLabel: 'Unresolved', tone: 'muted' },
 }
 
 /**

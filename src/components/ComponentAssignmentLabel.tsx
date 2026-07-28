@@ -21,8 +21,18 @@ export default function ComponentAssignmentLabel({ value, className }: { value: 
   const { primaryLabel, identityLine, diagnosticInternalName } = resolveComponentLabel(value)
   return (
     <span title={diagnosticInternalName ?? undefined} className={className}>
-      <span className="block truncate">{primaryLabel}</span>
-      {identityLine && <span className="block text-[11px] text-muted/70 truncate">{identityLine}</span>}
+      {/* EWO-068 (Part D) — each truncatable line carries its own full-
+          value title so a Commander hovering directly over ellipsized
+          text (e.g. inside Ship Assessment's constrained columns) reads
+          its real value, not the outer diagnostic identifier above. */}
+      <span className="block truncate" title={primaryLabel}>
+        {primaryLabel}
+      </span>
+      {identityLine && (
+        <span className="block text-[11px] text-muted/70 truncate" title={identityLine}>
+          {identityLine}
+        </span>
+      )}
     </span>
   )
 }

@@ -1,4 +1,12 @@
-type Tone = 'cyan' | 'success' | 'warning' | 'danger' | 'muted' | 'invalid'
+// EWO-068A — 'gold' added: the established Quartermaster Gold accent
+// (tailwind.config.js's `gold` token, EWO-065A §37/38 — "restricted
+// command/advisory authority only," deliberately distinct from `warning`/
+// Caution Yellow) had no Badge tone of its own before this mission; every
+// prior gold usage applied its utility classes by hand. Exported so
+// shipManagementSummary.ts's status-tone resolver can reference the same
+// Tone union the Badge component itself uses, rather than a parallel
+// hand-typed string literal list that could drift out of sync.
+export type Tone = 'cyan' | 'success' | 'warning' | 'danger' | 'muted' | 'invalid' | 'gold'
 
 const toneStyles: Record<Tone, string> = {
   cyan: 'bg-cyan/10 text-cyan ring-1 ring-inset ring-cyan/30',
@@ -9,6 +17,7 @@ const toneStyles: Record<Tone, string> = {
   // Deliberately more intense than 'danger' — Invalid Target is a data
   // problem, not a routine Missing state, and should read as one at a glance.
   invalid: 'bg-danger/30 text-white ring-1 ring-inset ring-danger font-bold',
+  gold: 'bg-gold/10 text-gold ring-1 ring-inset ring-gold/30',
 }
 
 export default function Badge({ children, tone = 'muted', wrap = false }: { children: React.ReactNode; tone?: Tone; wrap?: boolean }) {

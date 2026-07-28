@@ -40,7 +40,7 @@ import { buildFleetPriorityOptions } from '../utils/fleetPriority'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { formatHardpointLabel } from '../utils/hardpointLabelPresentation'
 import { TOP_LEVEL_GROUP_ORDER, legacyPortGroupLabel } from '../utils/commanderSystemTaxonomy'
-import { buildShipManagementSummary, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
+import { buildShipManagementSummary, resolveOperationalReviewStatus, fulfillmentStatusFromHint, STATUS_PILL, type ShipManagementSummaryContext } from '../utils/shipManagementSummary'
 import type { AcquisitionHint } from '../utils/componentAcquisitionHint'
 import { prepareCanonicalHardpoints, makeHardpointChildSlotRow } from '../utils/canonicalHardpointPreparation'
 import { withComponentOwnedChildSlots } from '../utils/componentOwnedSlots'
@@ -1246,20 +1246,38 @@ export default function ShipWorkspacePrototype() {
       )
     }
 
-    // Lens 1 — Ship Assessment (default), read-only.
+    // Lens 1 — Ship Assessment (default), read-only. EWO-068 (Part D) —
+    // Factory/Installed/Target are constrained to their <colgroup> width
+    // (Part C); ComponentAssignmentLabel already truncates its own
+    // two-line name/classification treatment, it just needed a bounded
+    // column to truncate against.
+    //
+    // EWO-068A (Part D) — the Status pill reads the SAME canonical
+    // per-hardpoint fulfillment classification the Hero's own Decision
+    // Summary already computes (`reviewedSummary.hintByHardpointId`),
+    // never a second, independent grade/match resolver — `hp.status`
+    // alone (installed-vs-target/factory identity) is never sufficient
+    // on its own to decide the Commander-facing label.
+    //
+    // EWO-068B (Part A/D) — renders the COMPACT tree-table label/tone
+    // from the one shared `STATUS_PILL` map ("OK"/"RESERVED"/"AVAILABLE"/
+    // "UPGRADE"/"BORROW?"/"MISSING"/"INVALID"), never the Hero's own
+    // longer wording — "Hero explains, Tables classify."
+    const operationalStatus = resolveOperationalReviewStatus(hp, reviewedSummary.hintByHardpointId.get(hp.id))
+    const statusPill = STATUS_PILL[operationalStatus]
     return (
       <>
-        <td className="px-4 py-1.5 text-muted/70">
+        <td className="px-4 py-1.5 text-muted/70 max-w-0">
           <ComponentAssignmentLabel value={hp.factoryItem} />
         </td>
-        <td className="px-4 py-1.5 text-muted">
+        <td className="px-4 py-1.5 text-muted max-w-0">
           <ComponentAssignmentLabel value={hp.installedItem} />
         </td>
-        <td className="px-4 py-1.5 text-cyan/90">
+        <td className="px-4 py-1.5 text-cyan/90 max-w-0">
           <ComponentAssignmentLabel value={hp.targetItem} />
         </td>
-        <td className="px-4 py-1.5">
-          <Badge tone={statusTone(hp.status)}>{hp.status}</Badge>
+        <td className="px-2 py-1.5 whitespace-nowrap">
+          <Badge tone={statusPill.tone}>{statusPill.compactLabel}</Badge>
         </td>
       </>
     )
@@ -1449,9 +1467,16 @@ export default function ShipWorkspacePrototype() {
           {/* Preserved existing intelligence — the acquisition hint badge
               and the reference tier list stay exactly as before (SW-014A's
               own explicit "Information + Actions, not a replacement"
-              requirement). Everything from here down is new. */}
+              requirement). Everything from here down is new.
+              EWO-068B (Part D/G) — this disclosure is part of Change
+              Installed Components' own tree table, so it renders the same
+              compact `STATUS_PILL` label/tone Operational Review uses
+              (never the raw `hint.tone`/`hint.label` long wording) — the
+              exact "AVAILABLE" vs. "AVAILABLE IN INVENTORY" drift Part D
+              calls out by name. `hint.detail`'s own sentence already
+              carries the fuller explanation. */}
           <div className="flex items-start gap-2 text-xs">
-            <Badge tone={hint.tone}>{hint.label}</Badge>
+            <Badge tone={STATUS_PILL[fulfillmentStatusFromHint(hint)].tone}>{STATUS_PILL[fulfillmentStatusFromHint(hint)].compactLabel}</Badge>
             <span className="text-muted">{hint.detail}</span>
           </div>
           <div className="mt-2 text-[11px] text-muted/60 space-y-0.5">
@@ -1768,16 +1793,31 @@ export default function ShipWorkspacePrototype() {
       const dormantTopologyNotice = hp.isStructural ? undefined : dormantTopologyNoticeFor(hp)
       const rows: ReactNode[] = [
         <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
-          <td className={`px-4 py-1.5 whitespace-nowrap ${hp.isStructural ? 'text-white/70 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
-            <div style={{ paddingLeft: depth * 18 }} className="flex items-center gap-1.5">
+          <td className={`px-4 py-1.5 ${hp.isStructural ? 'text-white/70 font-semibold uppercase tracking-wide text-xs' : 'text-white font-medium'}`}>
+            {/* EWO-068 (Part D/E) — Port permits wrapping rather than
+                truncation (a Commander needs the full port name), so
+                indentation is capped at 4 levels rather than growing
+                without bound: hierarchy beyond that depth still reads via
+                the same icon/connector language, but never keeps eating
+                into the column's own fixed width (Part C's <colgroup>). */}
+            <div style={{ paddingLeft: Math.min(depth, 4) * 16 }} className="flex flex-wrap items-center gap-1.5">
               <CategoryIcon size={13} className="text-muted/50 shrink-0" aria-hidden="true" />
-              {formatHardpointLabel(hp.slotLabel)}
+              <span className="break-words">{formatHardpointLabel(hp.slotLabel)}</span>
               {dormantTopologyNotice && (
                 <span title={dormantTopologyNotice}>
                   <Badge tone="cyan">Additional Topology Pending</Badge>
                 </span>
               )}
-              {configurableSlot && (
+              {/* EWO-068 (Part B) — the Configurable Slot badge is
+                  workflow-facing implementation metadata (swap-group
+                  identifier, confidence level, source authority): it
+                  doesn't help a Commander read Factory/Installed/Target/
+                  Status, so it's retired from the read-only Operational
+                  Review lens (commanderIntent === null). The underlying
+                  `configurableSlot` lookup itself is untouched and still
+                  available the moment a Commander enters either workflow
+                  lens — only this trigger's visibility is gated. */}
+              {configurableSlot && commanderIntent !== null && (
                 <button
                   onClick={() => setInspectedConfigurableSlotId(isInspectingConfigurableSlot ? null : hp.id)}
                   title={`Configurable Slot — ${configurableSlot.eligibleComponentCount} known alternative(s). Click to ${isInspectingConfigurableSlot ? 'hide' : 'view'} details.`}
@@ -1806,14 +1846,18 @@ export default function ShipWorkspacePrototype() {
               )}
             </div>
           </td>
-          <td className="px-4 py-1.5 text-muted whitespace-nowrap">
+          <td className="px-4 py-1.5 text-muted truncate" title={`${hp.size} ${hp.type}`}>
             {hp.size} {hp.type}
           </td>
           {renderLensCells(hp)}
         </tr>,
       ]
       if (commanderIntent === 'CHANGE_INSTALLED' && expandedInstallRowId === hp.id) rows.push(renderInstallDisclosure(hp))
-      if (configurableSlot && isInspectingConfigurableSlot) rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
+      // EWO-068 (Part B) — guards against a stale inspected-slot id leaking
+      // the disclosure into Operational Review after a Commander opens it
+      // in a workflow lens and then switches back to the read-only
+      // default; the trigger badge above is already gated identically.
+      if (configurableSlot && isInspectingConfigurableSlot && commanderIntent !== null) rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
       rows.push(...renderLensRows(node.children, depth + 1))
       return rows
     })
@@ -2553,7 +2597,35 @@ export default function ShipWorkspacePrototype() {
               <div className="px-5 py-6 text-sm text-muted">No port data configured for this Loadout yet.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                {/* EWO-068 (Part C) — the read-only Operational Review lens
+                    (commanderIntent === null, 6 columns) gets a fixed table
+                    layout with an explicit <colgroup>, so its own width is
+                    never dictated by content — the requirement this
+                    mission is scoped to. Manage Loadout/Change Installed
+                    Components (8/7 columns, their own Actions/Availability/
+                    Reservations machinery) are Explicitly Out of Scope and
+                    keep the pre-existing auto-layout table untouched.
+                    EWO-068A (Part F) widened Status from 13% to 25% for the
+                    Hero-length labels EWO-068B now replaces with compact
+                    ones ("RESERVED"/"AVAILABLE"/"UPGRADE"/"BORROW?"/
+                    "MISSING"/"INVALID" — none longer than 9 characters).
+                    EWO-068B (Part E) — Status shrinks back to 10%, and the
+                    reclaimed width goes to Port/Size-Type/Target (the
+                    columns Part E names as the intended beneficiaries),
+                    live-measured against the actual rendered "AVAILABLE"
+                    pill (the longest approved compact label) rather than
+                    estimated from character count. */}
+                <table className={`w-full text-sm ${commanderIntent === null ? 'table-fixed' : ''}`}>
+                  {commanderIntent === null && (
+                    <colgroup>
+                      <col className="w-[33%]" />
+                      <col className="w-[12%]" />
+                      <col className="w-[15%]" />
+                      <col className="w-[15%]" />
+                      <col className="w-[15%]" />
+                      <col className="w-[10%]" />
+                    </colgroup>
+                  )}
                   <thead>{renderLensHeader()}</thead>
                   <tbody>
                     {TOP_LEVEL_GROUP_ORDER.map((group) => {
