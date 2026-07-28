@@ -2904,3 +2904,138 @@ verified: zero horizontal overflow at the 1320px reference viewport,
 and — via real `boundingBox()` pixel measurement at a 1920px viewport —
 the sticky bar's right edge lands exactly on `<main>`'s own right edge,
 never the browser's.
+
+## 49. Maintenance Bay Table Cleanup & Target-Mutation Blocker (EWO-070, IMPLEMENTED NOW)
+
+A critical, **release-blocking** functional correction paired with the
+same table-cleanup polish EWO-068/069/069A/069B already gave the other
+two lenses. Governing rule, stated verbatim in the work order: "Manage
+Loadout owns desired configuration. Change Installed Components owns
+physical ship state."
+
+**Part A/B — the critical fix.** Reproduction: reviewed Loadout has a
+Target saved via Manage Loadout (e.g. "Quantum Drive → Hemera"); the
+Commander then installs a *different* physical component via Change
+Installed Components. The bug: both `installedItem` **and**
+`targetItem` silently became the newly-installed component — the
+Commander's own saved plan was destroyed by a physical-installation
+action that should never have touched it.
+
+Root cause, confirmed by direct reading: the shared installation
+*engine* (`installationEngine.ts`) never writes `targetItem` — the bug
+lived entirely in `ShipWorkspacePrototype.tsx`'s own `performInstall`
+wrapper, which called `saveMissionConfiguration` (a retarget) as a
+workaround for the engine's own deliberate, tested
+`resolveDestinationHardpoint` gate: it refuses to target a port whose
+status is already `'OK'` (installed already matches target — nothing
+outstanding to install into), the same gate every other installation
+surface (Ship Detail, Loadout Manager) shares and this mission does not
+touch. The retarget is deleted outright. The fix clears the gate
+instead by **removing** the port's current occupant first — an
+ordinary, already-certified REMOVE (returned to Hangar) — whenever
+`hp.status === 'OK'` and something is genuinely installed; once
+removed, `installedItem` no longer matches the unchanged `targetItem`,
+so the gate no longer applies and the install proceeds normally.
+`performInstall` is the single funnel every install path (Available
+Inventory, Reserved/Reassign, Borrow/Transfer, Newly Acquired) already
+uses, so one fix in one function corrects all of them at once. One
+accepted, disclosed behavior change: a port with **no** Target at all
+and nothing installed can no longer be "installed into" by picking a
+component (there is nothing to legitimately work around) — the
+Commander must set a Target in Manage Loadout first, which is the
+correct consequence of this mission's own governing rule, not a
+regression.
+
+**Part C — mismatch is intelligence, never auto-resolved.** Installing
+a component that differs from the saved Target is a real, valuable
+signal (e.g. "borrowed a stopgap, still owe the real part") — the
+Status column (EWO-068B's `resolveOperationalReviewStatus`/
+`STATUS_PILL`) reads it plainly (MISSING/UPGRADE/etc, never a false
+`OK`) and the disclosure surfaces it directly ("Compatible Upgrade
+Opportunity — Mirage is installed; FR-66 is the current Target,"
+confirmed live). No auto-resolve, no follow-up prompt — explicitly out
+of scope for Beta 2.0.
+
+**Part D — Commander-facing port names, and the CONFIGURABLE reversal.**
+Change Installed Components now renders port labels through the exact
+same `formatHardpointLabel` every other lens already uses — nothing new
+to build, just confirming no lens-local wording ever diverged. More
+consequential: the Configurable Slot badge, which EWO-069A had
+*deliberately kept* in this one lens ("a Commander physically installing
+a component may genuinely need to know a port supports configurable
+alternatives"), is retired here too — a direct, explicit reversal of
+that decision. No lens renders it any longer. The underlying
+`configurableSlotFor` lookup stays real, load-bearing infrastructure
+(still consumed by New Target's own compatible-options resolution); only
+every Commander-facing trigger is gone. `renderConfigurableSlotDisclosure`
+itself is now unreachable and was deliberately left in place rather than
+deleted outright — rewriting its own large, established SW-011A test
+suite wholesale was a bigger blast radius than this mission needed;
+that suite was instead rewritten to prove absence in all three lenses
+(see Regression coverage below).
+
+**Part E/F — Inventory column removed, six-column final layout.** The
+former separate Inventory (raw owned quantity) + Availability
+("N Available") columns are gone entirely — header, colgroup, cells, all
+of it — replaced by the one canonical Status column Operational Review
+and Manage Loadout already established. Final column set, matching the
+work order's own recommended proportions exactly: Port 22% / Size·Type
+12% / Installed 18% / Target 18% / Status 13% / Actions 17%. Change
+Installed Components is also the last of the three lenses to gain the
+`table-fixed` + `<colgroup>` containment treatment (EWO-068 → 069 →
+069B → now here) — the table's own className simplifies from a
+per-lens conditional to one unconditional `table-fixed`, and
+`lensColumnCount` collapses from a three-way branch to a flat `6`.
+
+**Part G/H — success wording and reactive state.** The install success
+message already read "Installed {item} on {port}." with no
+target-implying language — confirmed, not changed. Installed updates
+immediately in the row; Target and its Status pill recalculate from the
+**unchanged** Target, never miscounted as satisfied just because
+*something* got installed (live-verified: readiness stayed numerically
+identical immediately before and immediately after an install that
+left the real mismatch unresolved). Switching lenses away and back
+preserves the distinction with no refresh required.
+
+Regression coverage: `sw014aInlineInstalledComponentWorkflow.test.tsx`
+(SW-014A's own suite, which already exercises every install tier —
+Available Inventory, Reserved-for-this-port, Reserved-elsewhere/
+Reassign, Borrow/Transfer, Newly Acquired, Persistence — against a real
+`'OK'`-status port) gained an explicit `targetItem` preservation
+assertion in every one of those tiers, catching that the suite's own
+prior doc comment and one assertion had encoded the *old, buggy*
+behavior as intended design. A new dedicated
+`ewo070TargetMutationRegression.test.tsx` drives the full Corsair-
+equivalent scenario end-to-end through real UI interaction — Manage
+Loadout sets and **saves** a Target, Change Installed Components
+installs a different real component, asserting Target preservation,
+Status-pill mismatch (never `OK`), unmoved readiness, target-neutral
+success wording, and survival across a genuine module-level reload
+(real `localStorage` read, not in-memory carryover) — using real,
+catalog-backed substitute names (Shimmer/FR-66/Mirage) since "Hemera"/
+"Crossfield" don't exist in this repo's own catalog data, matching this
+session's established substitution precedent. The SW-011A Configurable
+Slot suite (`ShipWorkspacePrototype.test.tsx`) was rewritten from
+exercising the (now nonexistent) badge trigger to proving its absence
+across all three lenses on a ship with genuine underlying configurable
+ports. Full project regression (`tsc --noEmit`, full `vitest run`: 183
+files / 2344 tests) and a production build pass clean.
+
+Playwright live-verified end to end against the running dev server: a
+real Corsair-equivalent ship/build/hardpoint was injected directly into
+the live store (the demo seed fleet is intentionally disabled by
+default per CAT-001A), then driven entirely through real clicks —
+Manage Loadout set-and-save Target (FR-66), confirmed the port stayed
+`Missing`/`Shimmer` installed (never silently retargeted), switched to
+Change Installed Components, installed Mirage, and confirmed live:
+Installed → Mirage, Target still FR-66, Status pill `MISSING` →
+`UPGRADE` (never `OK`), success message "Installed Mirage on Right
+Shield Generator." with no target language, and the disclosure's own
+"Compatible Upgrade Opportunity" line surfacing the intentional
+mismatch — screenshot-verified. Full-page-reload persistence is instead
+certified at the vitest level (see above): a hand-injected synthetic
+ship (built by direct `setState`, bypassing the real "add a Fleet
+Asset" pipeline) doesn't round-trip through the live app's
+`fleetAssets`-normalized persistence shape, so this script's own
+injection method — not the fix — is the limiting factor for that one
+leg live; disclosed rather than silently skipped.

@@ -992,8 +992,12 @@ export default function ShipWorkspacePrototype() {
   // Availability + Reservations columns into one Status column, dropping
   // this lens from 8 columns to 7. EWO-069A (Part A) then retires the
   // Actions column outright (its one action relocates into the New
-  // Target cell — see renderLensCells) — 7 columns down to 6.
-  const lensColumnCount = commanderIntent === 'MANAGE_LOADOUT' ? 6 : commanderIntent === 'CHANGE_INSTALLED' ? 7 : 6
+  // Target cell — see renderLensCells) — 7 columns down to 6. EWO-070
+  // (Part E/F) — Change Installed Components' own former Inventory +
+  // Availability columns are consolidated into one canonical Status
+  // column (7 columns down to 6), the same treatment Manage Loadout
+  // already received — all three lenses now share the same column count.
+  const lensColumnCount = 6
 
   function renderLensHeader() {
     if (commanderIntent === 'MANAGE_LOADOUT') {
@@ -1015,8 +1019,7 @@ export default function ShipWorkspacePrototype() {
           <th className="px-4 py-2.5 font-medium">Size / Type</th>
           <th className="px-4 py-2.5 font-medium">Installed</th>
           <th className="px-4 py-2.5 font-medium">Target</th>
-          <th className="px-4 py-2.5 font-medium">Inventory</th>
-          <th className="px-4 py-2.5 font-medium">Availability</th>
+          <th className="px-4 py-2.5 font-medium">Status</th>
           <th className="px-4 py-2.5 font-medium">Actions</th>
         </tr>
       )
@@ -1246,21 +1249,37 @@ export default function ShipWorkspacePrototype() {
       // authority.
       const availability =
         reviewedSummary.availabilityByHardpointId.get(hp.id) ?? calculateComponentAvailability(hp.targetItem, hangarItems, installedLoadouts, reservations, hp.targetEntityClass)
+      // EWO-070 (Part E/F) — the former separate Inventory (raw owned
+      // quantity) + Availability ("N Available"/"—") columns are
+      // consolidated into one canonical Status pill — the exact same
+      // `resolveOperationalReviewStatus`/`STATUS_PILL` vocabulary
+      // Operational Review already established (Part D — "the same
+      // Commander-facing name/state for the same port," never a second,
+      // lens-specific classification). Unlike Manage Loadout's own live
+      // "New Target" status, this reads the SAVED `hp.targetItem` — there
+      // is no pending, unsaved selection concept in this lens. Same
+      // materialized-child-slot-row fallback as `availability` above.
+      const hint = reviewedSummary.hintByHardpointId.get(hp.id)
+      const changeInstalledStatus = resolveOperationalReviewStatus(hp, hint)
+      const changeInstalledStatusPill = STATUS_PILL[changeInstalledStatus]
+      const changeInstalledStatusLabel =
+        changeInstalledStatus === 'Available in Inventory' && availability.availableQuantity > 0
+          ? `${availability.availableQuantity} ${changeInstalledStatusPill.compactLabel}`
+          : changeInstalledStatusPill.compactLabel
       const isRowExpanded = expandedInstallRowId === hp.id
       return (
         <>
-          <td className="px-4 py-1.5 text-muted">
+          <td className="px-4 py-1.5 text-muted max-w-0">
             <ComponentAssignmentLabel value={hp.installedItem} />
           </td>
-          <td className="px-4 py-1.5 text-cyan/90">
+          <td className="px-4 py-1.5 text-cyan/90 max-w-0">
             <ComponentAssignmentLabel value={hp.targetItem} />
           </td>
-          <td className="px-4 py-1.5 text-muted">{availability.ownedQuantity}</td>
-          <td className="px-4 py-1.5">
-            <Badge tone={availability.availableQuantity > 0 ? 'success' : 'muted'}>{availability.availableQuantity} Available</Badge>
+          <td className="px-4 py-1.5 whitespace-nowrap">
+            <Badge tone={changeInstalledStatusPill.tone}>{changeInstalledStatusLabel}</Badge>
           </td>
           <td className="px-4 py-1.5">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {hp.targetItem && hp.targetItem !== '—' && (
                 <button
                   onClick={() => {
@@ -1346,19 +1365,33 @@ export default function ShipWorkspacePrototype() {
   // `installNotice` feedback this page's own "never a dialog" convention
   // requires.
   //
+  // EWO-070 (Part A/B) — CRITICAL FIX. "Manage Loadout owns desired
+  // configuration. Change Installed Components owns physical ship
+  // state." This function previously retargeted the reviewed Loadout to
+  // whatever component was being installed (via `saveMissionConfiguration`)
+  // whenever it differed from the current Target, silently overwriting the
+  // Commander's own saved plan (real repro: Target Hemera, install
+  // Crossfield -> Target silently became Crossfield too). That retarget
+  // is deleted outright — this function must never call
+  // `saveMissionConfiguration`/mutate `targetItem` under any circumstance.
+  //
   // `resolveDestinationHardpoint` (the engine's own, unmodified gate —
-  // src/engine/installation/installationEngine.ts) refuses to target a
-  // port whose status is already 'OK' (installed === target === factory,
-  // nothing outstanding) — a deliberate, pre-existing constraint this
-  // mission does not touch. "Replace: Installed -> Different Component"
-  // (a required certification scenario) therefore needs the port's own
-  // TARGET updated to the newly chosen component FIRST — via the exact
-  // same `saveMissionConfiguration` single-slot override Manage Loadout's
-  // own Save already uses — so status becomes 'Missing'/'Upgrade
-  // Available' and the install below is accepted. Skipped entirely when
-  // the chosen item already matches the current target (the common "just
-  // acquire what Manage Loadout already asked for" case), so this never
-  // performs a redundant save.
+  // src/engine/installation/installationEngine.ts, test 5: "an already-OK
+  // slot (nothing to install into) is rejected") refuses to target a port
+  // whose status is already 'OK' (installed === target, nothing
+  // outstanding) — a deliberate, tested engine invariant this mission
+  // does not touch, since it's shared by every other installation surface
+  // (Ship Detail, Loadout Manager). "Replace: Installed -> Different
+  // Component" (a required certification scenario) still needs to clear
+  // that gate, but does so by REMOVING the port's current occupant first
+  // (an ordinary, already-certified REMOVE — the same operation the
+  // explicit Remove action already performs, returning the displaced
+  // unit to Hangar so it is never lost) rather than retargeting: once
+  // removed, `installedItem` no longer matches the UNCHANGED target, so
+  // status is no longer 'OK' and the install below proceeds normally.
+  // Skipped entirely when nothing is currently installed (nothing to
+  // remove) or the port isn't currently 'OK' (the ordinary Missing/
+  // Upgrade-Available case, which the gate already accepts).
   //
   // `hangarItemId`, when known (every real, owned candidate this page's
   // own tiers produce carries one — see `deriveInstallCandidates`), routes
@@ -1376,18 +1409,10 @@ export default function ShipWorkspacePrototype() {
   // even for the "reserved for this port" case.
   function performInstall(hp: Hardpoint, item: string, entityClass?: string, hangarItemId?: string) {
     if (!ship) return
-    if (item !== hp.targetItem) {
-      const retarget = saveMissionConfiguration({
-        shipId: ship.id,
-        name: reviewedBuild?.name ?? 'Loadout',
-        startingState: 'EXISTING',
-        existingBuildId: reviewedBuildId,
-        targetOverrides: { [hp.slotLabel]: { targetItem: item, targetEntityClass: entityClass } },
-        setActive: true,
-        saveAsNew: false,
-      })
-      if (!retarget.success) {
-        setInstallNotice({ tone: 'error', message: `Could not set ${item} as the target for ${formatHardpointLabel(hp.slotLabel)} — nothing was changed.` })
+    if (hp.status === 'OK' && hp.installedItem && hp.installedItem !== '—') {
+      const clearResult = removeComponentStore(ship.id, hp.slotLabel, true, reviewedBuildId)
+      if (!clearResult.matched) {
+        setInstallNotice({ tone: 'error', message: `Could not remove ${hp.installedItem} from ${formatHardpointLabel(hp.slotLabel)} — nothing was changed.` })
         return
       }
     }
@@ -1853,21 +1878,16 @@ export default function ShipWorkspacePrototype() {
       const hp = node.hardpoint
       // Phase 3 — critical diagnostics originally stayed visible in every
       // lens, since Lens 2/3 had no Status column of their own. EWO-069
-      // (Part E) — now that Manage Loadout has its own live Status column
-      // (reflecting the current New Target selection, not just the saved
-      // `hp.status` this badge reads), duplicating it here beneath the
-      // port name is exactly the redundant restatement Part E names by
-      // example ("Left Cooler / UPGRADE AVAILABLE" when the row already
-      // shows Status). Retired for Manage Loadout only — Change Installed
-      // Components (still no Status column of its own; Explicitly Out of
-      // Scope for this mission) keeps it exactly as before.
-      const showInlineDiagnostic = commanderIntent === 'CHANGE_INSTALLED' && !hp.isStructural && hp.status !== 'OK'
+      // (Part E) retired this inline badge for Manage Loadout once it
+      // gained a live Status column (the exact redundant restatement Part
+      // E named by example — "Left Cooler / UPGRADE AVAILABLE" when the
+      // row already shows Status). EWO-070 (Part E/F) — Change Installed
+      // Components now has the identical canonical Status column, so the
+      // same reasoning retires this badge there too; no lens still shows
+      // it (kept as a named constant, not deleted, in case a future lens
+      // genuinely lacks its own Status column again).
+      const showInlineDiagnostic = false
       const CategoryIcon = componentCategoryIcon(hp)
-      // SW-011A (Objective 1/2) — additive only: a row with no confident
-      // configurable-slot match renders byte-identical to before this
-      // sprint (Objective 5's non-configurable-ship regression guarantee).
-      const configurableSlot = hp.isStructural ? undefined : configurableSlotFor(hp)
-      const isInspectingConfigurableSlot = inspectedConfigurableSlotId === hp.id
       const dormantTopologyNotice = hp.isStructural ? undefined : dormantTopologyNoticeFor(hp)
       const rows: ReactNode[] = [
         <tr key={hp.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
@@ -1892,28 +1912,15 @@ export default function ShipWorkspacePrototype() {
                   doesn't help a Commander read Factory/Installed/Target/
                   Status, so it's retired from the read-only Operational
                   Review lens (commanderIntent === null). EWO-069A (Part
-                  D) — the same rule now applies to Manage Loadout too:
-                  its own live Status column already communicates
-                  fulfillment state, so this badge was pure Commander-
-                  facing developer remnant there as well. Change Installed
-                  Components is the one lens that still surfaces it — a
-                  Commander physically installing a component may
-                  genuinely need to know a port supports configurable
-                  alternatives. The underlying `configurableSlot` lookup
-                  itself is untouched and still available to Change
-                  Installed Components' own selector logic — only this
-                  trigger's visibility is gated. */}
-              {configurableSlot && commanderIntent === 'CHANGE_INSTALLED' && (
-                <button
-                  onClick={() => setInspectedConfigurableSlotId(isInspectingConfigurableSlot ? null : hp.id)}
-                  title={`Configurable Slot — ${configurableSlot.eligibleComponentCount} known alternative(s). Click to ${isInspectingConfigurableSlot ? 'hide' : 'view'} details.`}
-                  className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide border transition-colors ${
-                    isInspectingConfigurableSlot ? 'border-cyan/60 bg-cyan/15 text-cyan' : 'border-cyan/30 text-cyan/80 hover:border-cyan/60 hover:text-cyan'
-                  }`}
-                >
-                  <Layers size={11} aria-hidden="true" /> Configurable
-                </button>
-              )}
+                  D) then retired it from Manage Loadout too, once that
+                  lens gained its own live Status column. EWO-070 (Part D)
+                  — explicit, direct reversal of EWO-069A's own decision
+                  to keep it in Change Installed Components: "Do not
+                  render CONFIGURABLE or other capability metadata," full
+                  stop, no lens carve-out. Never rendered in any lens now.
+                  The underlying `configurableSlot` lookup (`configurableSlotFor`)
+                  itself is untouched and still available to selector
+                  logic — only every trigger's visibility is retired. */}
               {hp.missileAggregate && <Badge tone="cyan">×{hp.missileAggregate.quantity}</Badge>}
               {hp.missileAggregate?.inconsistent && (
                 <span title={hp.invalidMessage}>
@@ -1939,13 +1946,13 @@ export default function ShipWorkspacePrototype() {
         </tr>,
       ]
       if (commanderIntent === 'CHANGE_INSTALLED' && expandedInstallRowId === hp.id) rows.push(renderInstallDisclosure(hp))
-      // EWO-068 (Part B) — guards against a stale inspected-slot id leaking
-      // the disclosure into Operational Review after a Commander opens it
-      // in a workflow lens and then switches back to the read-only
-      // default. EWO-069A (Part D) — Manage Loadout now gets the same
-      // guard, since its own trigger badge is retired too; the trigger
-      // badge above is already gated identically to this.
-      if (configurableSlot && isInspectingConfigurableSlot && commanderIntent === 'CHANGE_INSTALLED') rows.push(renderConfigurableSlotDisclosure(hp, configurableSlot))
+      // EWO-070 (Part D) — the Configurable Slot disclosure's own trigger
+      // badge is retired in every lens now (no lens carve-out remains —
+      // see the badge's own comment above), so `isInspectingConfigurableSlot`
+      // can never become true and this disclosure is unreachable. Left
+      // deliberately unrendered rather than deleted outright — the
+      // underlying inspection panel itself is untouched infrastructure a
+      // future mission could re-surface elsewhere.
       rows.push(...renderLensRows(node.children, depth + 1))
       return rows
     })
@@ -2714,11 +2721,14 @@ export default function ShipWorkspacePrototype() {
                     (15%, already correctly compact) and Size/Type stays
                     compact (10% -> 8%, never flagged as an issue) — live-
                     measured against a real long component name rather
-                    than assumed. Change Installed Components (7 columns,
-                    its own Availability/Actions machinery) remains
-                    Explicitly Out of Scope and keeps the pre-existing
-                    auto-layout table untouched. */}
-                <table className={`w-full text-sm ${commanderIntent !== 'CHANGE_INSTALLED' ? 'table-fixed' : ''}`}>
+                    than assumed. EWO-070 (Part E/F) — Change Installed
+                    Components gets the identical table-fixed + <colgroup>
+                    treatment last: its own former Inventory + Availability
+                    columns consolidated into one canonical Status column
+                    (7 columns down to 6), Actions retained (this is the
+                    physical-work lens). All three lenses now share one
+                    six-column layout philosophy. */}
+                <table className="w-full text-sm table-fixed">
                   {commanderIntent === null && (
                     <colgroup>
                       <col className="w-[33%]" />
@@ -2737,6 +2747,16 @@ export default function ShipWorkspacePrototype() {
                       <col className="w-[16%]" />
                       <col className="w-[23%]" />
                       <col className="w-[15%]" />
+                    </colgroup>
+                  )}
+                  {commanderIntent === 'CHANGE_INSTALLED' && (
+                    <colgroup>
+                      <col className="w-[22%]" />
+                      <col className="w-[12%]" />
+                      <col className="w-[18%]" />
+                      <col className="w-[18%]" />
+                      <col className="w-[13%]" />
+                      <col className="w-[17%]" />
                     </colgroup>
                   )}
                   <thead>{renderLensHeader()}</thead>

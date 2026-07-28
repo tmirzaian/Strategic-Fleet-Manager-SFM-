@@ -240,13 +240,14 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(within(headerRow).queryByText('Actions')).not.toBeInTheDocument()
   })
 
-  it('Lens 3 (Change Installed Components): columns become Installed / Target / Inventory / Availability / Actions — Factory intentionally removed', () => {
+  it('Lens 3 (Change Installed Components): columns become Installed / Target / Status / Actions — Factory intentionally removed, Inventory/Availability consolidated into Status (EWO-070)', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const headerRow = screen.getByText('Port').closest('tr') as HTMLElement
     expect(within(headerRow).queryByText('Factory')).not.toBeInTheDocument()
-    expect(within(headerRow).getByText('Inventory')).toBeInTheDocument()
-    expect(within(headerRow).getByText('Availability')).toBeInTheDocument()
+    expect(within(headerRow).queryByText('Inventory')).not.toBeInTheDocument()
+    expect(within(headerRow).queryByText('Availability')).not.toBeInTheDocument()
+    expect(within(headerRow).getByText('Status')).toBeInTheDocument()
     expect(within(headerRow).getByText('Actions')).toBeInTheDocument()
     expect(within(headerRow).queryByText('Current Target')).not.toBeInTheDocument()
   })
@@ -939,35 +940,29 @@ describe('<ShipWorkspacePrototype /> — SW-002 Revision A (canonical pipeline, 
       expect(within(row).getByText('INVALID')).toBeInTheDocument()
     })
 
-    it('Invalid Target (Quantum Drive) remains visible in Change Installed Components (Lens 3)', () => {
+    it('Invalid Target (Quantum Drive) remains visible in Change Installed Components (Lens 3) — EWO-070 compact Status column, INVALID', () => {
       renderWorkspace('m80')
       fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
       const row = getPortRow('Quantum Drive')
-      expect(within(row).getByText('Invalid Target')).toBeInTheDocument()
+      expect(within(row).getByText('INVALID')).toBeInTheDocument()
     })
 
-    it('Unresolved Factory Data is visible in all three lenses', () => {
+    it('Unresolved Factory Data is visible in all three lenses, each with its own compact UNRESOLVED Status pill (EWO-070 gives Lens 3 the same canonical Status column Lens 1/2 already had)', () => {
       renderWorkspace('m80')
       // M80 has no "Nose Mount" — its Weapon 1/2 are top-level Pilot-
       // Weapons-family ports, which start collapsed by default (only Core
       // Components is expanded on first render).
       fireEvent.click(screen.getByText('Pilot Weapons'))
       const rowLens1 = getPortRow('Weapon 1')
-      // EWO-068B — Lens 1's compact pill reads UNRESOLVED; Lens 2/3's own
-      // inline diagnostic badge (unaffected by this mission) still renders
-      // the raw hp.status literal.
       expect(within(rowLens1).getByText('UNRESOLVED')).toBeInTheDocument()
 
-      // EWO-069 — Manage Loadout's own Status column now carries this
-      // (compact UNRESOLVED), replacing the retired inline diagnostic
-      // badge that used to duplicate it beneath the port name.
       fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
       const rowLens2 = getPortRow('Weapon 1')
       expect(within(rowLens2).getByText('UNRESOLVED')).toBeInTheDocument()
 
       fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
       const rowLens3 = getPortRow('Weapon 1')
-      expect(within(rowLens3).getByText('Unresolved')).toBeInTheDocument()
+      expect(within(rowLens3).getByText('UNRESOLVED')).toBeInTheDocument()
     })
 
     it('unknown/unresolved data never renders as "Not Required" (NOT REQUIRED / UNKNOWN DATA RULE)', () => {
@@ -1675,97 +1670,38 @@ describe('<ShipWorkspacePrototype /> — EWO-065B: Actionable Decision Qualifica
  * slots at all in the real committed catalog — the Objective 5 negative
  * case.
  */
-// EWO-068 (Part B) retires the Configurable Slot badge from the
+// EWO-068 (Part B) retired the Configurable Slot badge from the
 // read-only Operational Review lens (commanderIntent === null) — it's
 // workflow-facing implementation metadata, not something a Commander
 // needs to assess Factory/Installed/Target/Status. EWO-069A (Part D)
-// retired it from Manage Loadout too (its own live Status column already
-// communicates fulfillment state), leaving Change Installed Components
-// as the one lens where a Commander physically installing a component
-// may still need to know a port supports configurable alternatives — so
-// every test below now enters Change Installed Components first.
-// Objective 5's negative-case tests are unaffected either way (they
-// assert absence) and are left on the default lens.
-describe('<ShipWorkspacePrototype /> — SW-011A: Commander Configurable Slot Experience (Phase I)', () => {
-  it('Objective 1/2: a real configurable port shows a Configurable Slot badge once its group is expanded', () => {
+// retired it from Manage Loadout too. EWO-070 (Part D) — "Do not render
+// CONFIGURABLE or other capability metadata," full stop, no lens
+// carve-out — explicitly reversing EWO-069A's own decision to keep it in
+// Change Installed Components. The badge's trigger no longer renders in
+// ANY lens; the underlying `configurableSlotFor` lookup remains real,
+// tested infrastructure (still consumed by New Target's own compatible-
+// options resolution — see ShipWorkspacePrototype.tsx), just with no
+// remaining Commander-facing surface. This suite now proves absence
+// everywhere on 'ghost' (a real ship with genuine configurable ports
+// underneath, per SW-011A's own original fixture note above), rather
+// than exercising a click path that no longer exists.
+describe('<ShipWorkspacePrototype /> — SW-011A/EWO-070: Configurable Slot badge retired from every lens', () => {
+  it('never renders in Operational Review, Manage Loadout, or Change Installed Components, even fully expanded, on a ship with real underlying configurable ports', () => {
     renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    const badges = screen.getAllByTitle(/Configurable Slot —/)
-    expect(badges.length).toBeGreaterThan(0)
-  })
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+    expect(screen.queryByText('Configurable')).not.toBeInTheDocument()
 
-  it('Objective 3: clicking the badge reveals all 7 required read-only fields with real values, and hides them again on a second click', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    const badge = screen.getAllByTitle(/Configurable Slot —/)[0]
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
 
-    expect(screen.queryByText('Slot Name')).not.toBeInTheDocument()
-    fireEvent.click(badge)
-
-    expect(screen.getByText('Slot Name')).toBeInTheDocument()
-    expect(screen.getByText('Default Component')).toBeInTheDocument()
-    expect(screen.getByText('Current Installed Component')).toBeInTheDocument()
-    expect(screen.getByText('Eligible Component Count')).toBeInTheDocument()
-    expect(screen.getByText('Swap Group Identifier')).toBeInTheDocument()
-    expect(screen.getByText('Confidence Level')).toBeInTheDocument()
-    expect(screen.getByText('Source Authority')).toBeInTheDocument()
-
-    fireEvent.click(badge)
-    expect(screen.queryByText('Slot Name')).not.toBeInTheDocument()
-  })
-
-  it('Objective 3: Current Installed Component reflects the live Hardpoint row, not a stale catalog snapshot', () => {
-    renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
-    // Every real match on 'ghost' (hardpoint_class_2, missile_0X_attach)
-    // has a real installed component in the seed fixture — "None" would
-    // indicate the wrong field was read.
-    expect(screen.queryByText('None')).not.toBeInTheDocument()
-  })
-
-  it('Explicit Non-Goals: the inspection panel contains no editing control of any kind', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
-    const panel = screen.getByText('Slot Name').closest('tr') as HTMLElement
-    expect(within(panel).queryAllByRole('button')).toHaveLength(0)
-    expect(within(panel).queryAllByRole('textbox')).toHaveLength(0)
-    expect(within(panel).queryAllByRole('combobox')).toHaveLength(0)
-  })
-
-  it('Objective 4: a Category C (review-required) slot shows "Needs Review", never a raw diagnostic, with Developer Mode off (the default)', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    // Real data: every one of ghost's intersecting slots (hardpoint_class_2,
-    // missile_0X_attach) is Category C in the live-certified catalog.
-    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
-    expect(screen.getByText('Needs Review')).toBeInTheDocument()
-    expect(screen.queryByText(/Developer Mode — Raw Diagnostics/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/global members, exceeding the plausible swap-group ceiling/)).not.toBeInTheDocument()
-  })
-
-  it('Objective 4: enabling Developer Mode reveals the raw diagnostics for an inspected slot', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Developer Mode/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    fireEvent.click(screen.getAllByTitle(/Configurable Slot —/)[0])
-    expect(screen.getByText(/Developer Mode — Raw Diagnostics/)).toBeInTheDocument()
-  })
-
-  it('Objective 5: a ship with zero Commander-visible configurable slots (GRIN_UTV) renders with no Configurable badges at all', () => {
-    renderWorkspace('utv')
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
   })
 
-  it('Objective 5: the rest of a non-configurable ship (GRIN_UTV) still renders normally — real ship data, no regression from this sprint', () => {
+  it('a ship with zero Commander-visible configurable slots (GRIN_UTV) still renders normally — real ship data, no regression', () => {
     renderWorkspace('utv')
     expect(screen.getAllByText('UTV').length).toBeGreaterThan(0)
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
@@ -2211,16 +2147,17 @@ describe('<ShipWorkspacePrototype /> — EWO-068: Operational Review Table Clean
     expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
   })
 
-  it('Part B: the underlying configurable metadata remains available in Change Installed Components — EWO-069A (Part D) retired the trigger from Manage Loadout too, so only that one workflow lens still surfaces it', () => {
-    renderWorkspace('ghost')
-    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
-    expect(screen.getAllByTitle(/Configurable Slot —/).length).toBeGreaterThan(0)
-  })
-
   it('EWO-069A (Part D): CONFIGURABLE no longer renders in Manage Loadout — the same read-only-Commander-facing-copy rule already applied to Operational Review', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Manage Loadout/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
+    expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
+    expect(screen.queryByText('Configurable')).not.toBeInTheDocument()
+  })
+
+  it('EWO-070 (Part D): CONFIGURABLE no longer renders in Change Installed Components either — no lens carve-out remains, reversing EWO-069A\'s own decision to keep it there', () => {
+    renderWorkspace('ghost')
+    fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     fireEvent.click(screen.getByRole('button', { name: /Expand All/ }))
     expect(screen.queryAllByTitle(/Configurable Slot —/)).toHaveLength(0)
     expect(screen.queryByText('Configurable')).not.toBeInTheDocument()
@@ -2243,12 +2180,12 @@ describe('<ShipWorkspacePrototype /> — EWO-068: Operational Review Table Clean
     expect(cols).toHaveLength(6)
   })
 
-  it('Part C: the fixed-layout <colgroup> is scoped to Operational Review and (as of EWO-069) Manage Loadout — Change Installed Components keeps its own untouched auto-layout table', () => {
+  it('Part C: the fixed-layout <colgroup> treatment now covers all three lenses — Operational Review, Manage Loadout (EWO-069), and Change Installed Components (EWO-070)', () => {
     renderWorkspace('ghost')
     fireEvent.click(screen.getByRole('button', { name: /Change Installed Components/ }))
     const table = screen.getByRole('table')
-    expect(table.className).not.toContain('table-fixed')
-    expect(table.querySelectorAll('colgroup > col')).toHaveLength(0)
+    expect(table.className).toContain('table-fixed')
+    expect(table.querySelectorAll('colgroup > col')).toHaveLength(6)
   })
 
   it('Part D: Status stays on one line and the column is wide enough for the longest approved label (superseded by EWO-068B\'s own compact-label test below)', () => {

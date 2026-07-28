@@ -71,15 +71,19 @@ const CANDIDATE = 'Mirage'
  * verifies Ship Workspace's own inline UI wiring onto them, never a
  * second transaction implementation.
  *
- * Root constraint discovered while building this suite: the installation
- * engine's own `resolveDestinationHardpoint` (unmodified — see
- * `installationEngine.ts`) refuses to target a port whose status is
- * already 'OK'. "Right Shield Generator" starts 'OK' (Shimmer fully
- * satisfied), so every Install action below first re-targets the port to
- * the chosen candidate (the same `saveMissionConfiguration` single-slot
- * override Manage Loadout's own Save already performs) before the
- * install — see `performInstall`'s own doc comment in
- * ShipWorkspacePrototype.tsx.
+ * Root constraint: the installation engine's own `resolveDestinationHardpoint`
+ * (unmodified — see `installationEngine.ts`) refuses to target a port
+ * whose status is already 'OK'. "Right Shield Generator" starts 'OK'
+ * (Shimmer fully satisfied). EWO-070 (Part A/B) — CRITICAL FIX: every
+ * Install action below used to clear that gate by silently RETARGETING
+ * the port to the chosen candidate first (via `saveMissionConfiguration`),
+ * destroying the Commander's own saved Target in the process. That
+ * retarget is now deleted outright — `performInstall` clears the gate by
+ * REMOVING the port's current occupant instead (an ordinary REMOVE,
+ * returned to Hangar), which changes `installedItem` without ever
+ * touching `targetItem`. Every test below now explicitly asserts
+ * `targetItem` stays exactly 'Shimmer' — the Commander's real saved
+ * plan, never silently overwritten by what got physically installed.
  */
 describe('SW-014A: Tier 1 — Available Inventory', () => {
   it('a compatible, owned, free component appears under Available Inventory and Install commits it immediately (no separate Save step)', () => {
@@ -102,7 +106,11 @@ describe('SW-014A: Tier 1 — Available Inventory', () => {
     const build = useFleetStore.getState().builds.find((b) => b.id === useFleetStore.getState().ships.find((s) => s.id === 'ghost')?.activeBuildId)!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === build.id && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
-    expect(hp.targetItem).toBe(CANDIDATE)
+    // EWO-070 (Part A) — CRITICAL: the port's own real saved Target
+    // (Shimmer) must never be silently overwritten by what just got
+    // physically installed (Mirage) — Manage Loadout, not this workflow,
+    // owns desired configuration.
+    expect(hp.targetItem).toBe('Shimmer')
     expect(useFleetStore.getState().hangarItems.find((h) => h.id === 'test-hangar-1')?.qty).toBe(1)
   })
 
@@ -136,6 +144,8 @@ describe('SW-014A: Tier 1 — Available Inventory', () => {
     fireEvent.click(disclosure.getByRole('button', { name: /^Install$/ }))
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
+    // EWO-070 (Part A) — Target preserved.
+    expect(hp.targetItem).toBe('Shimmer')
   })
 })
 
@@ -175,6 +185,8 @@ describe('SW-014A: Tier 2 — Reserved Components', () => {
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
+    // EWO-070 (Part A) — Target preserved even through a reassign-then-install.
+    expect(hp.targetItem).toBe('Shimmer')
   })
 })
 
@@ -223,6 +235,8 @@ describe('SW-014A: Tier 3 — Borrow From Another Ship', () => {
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
+    // EWO-070 (Part A) — Target preserved even through a cross-ship transfer.
+    expect(hp.targetItem).toBe('Shimmer')
   })
 })
 
@@ -249,6 +263,8 @@ describe('SW-014A: Tier 4 — Newly Acquired Component', () => {
     const ship = useFleetStore.getState().ships.find((s) => s.id === 'ghost')!
     const hp = useFleetStore.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
+    // EWO-070 (Part A) — Target preserved through Record & Install too.
+    expect(hp.targetItem).toBe('Shimmer')
     // Recorded (qty 1) then immediately consumed by the install — no
     // phantom leftover Hangar unit. Confirms the same `moveToShip`-based
     // bookkeeping fix Tiers 1-3 rely on also applies here: recording then
@@ -312,5 +328,9 @@ describe('SW-014A: Persistence', () => {
     const hp = reloaded.getState().hardpoints.find((h) => h.buildId === ship.activeBuildId && h.slotLabel === SLOT)!
     expect(hp.installedItem).toBe(CANDIDATE)
     expect(reloaded.getState().installedLoadouts.find((e) => e.shipId === 'ghost' && e.slotLabel === SLOT)?.installedItem).toBe(CANDIDATE)
+    // EWO-070 (Part I) — the Installed/Target distinction survives a
+    // genuine reload/rehydration, never silently collapsing during
+    // serialization or migration.
+    expect(hp.targetItem).toBe('Shimmer')
   })
 })
