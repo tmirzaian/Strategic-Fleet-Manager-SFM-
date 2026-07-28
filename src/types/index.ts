@@ -60,6 +60,18 @@ export interface FleetAsset {
    * read-path self-heal) — never assigned ad hoc elsewhere. */
   priority: number | null
   status: 'active' | 'removed'
+  /** UX-005A — a Commander-supplied custom image for THIS owned vessel
+   * instance, never the ship model (`shipDefinitionId`), never a Loadout.
+   * A relative managed reference only — e.g. "ships/<vessel-id>.png" —
+   * never an absolute path and never the image bytes themselves (those
+   * live in the browser's IndexedDB-backed managed store, see
+   * src/utils/shipImageStorage.ts; this field is a pointer, not a blob).
+   * `undefined` means "no custom image" — resolution falls through to the
+   * existing official/override/fallback chain (src/utils/resolveShipImage.ts)
+   * unchanged. Two FleetAssets referencing the same `shipDefinitionId`
+   * (two Cutlass Blacks) have fully independent values here by
+   * construction — nothing about this field is keyed by ship model. */
+  customImageRef?: string
   addedAt: string
   updatedAt: string
 }
@@ -80,6 +92,16 @@ export interface SeedAssetOverride {
   nickname?: string
   ownershipType?: OwnershipType
   priority?: number | null
+  /** UX-005A — mirrors `FleetAsset.customImageRef` for a seed-migrated
+   * ship, which (like nickname/ownership/priority) is never persisted as
+   * a full `FleetAsset` object — only this diff survives a reload, then
+   * gets layered onto the fresh seed bake-in (see `merge` in
+   * src/store/useFleetStore.ts). Merged via the same `'customImageRef' in
+   * override` key-presence check `nickname` already uses (not `??`) —
+   * "Commander restored the default image" (an explicit `undefined`
+   * override) must win over the baseline, which `??` cannot distinguish
+   * from "no override recorded at all" when both sides are `undefined`. */
+  customImageRef?: string
   updatedAt: string
 }
 

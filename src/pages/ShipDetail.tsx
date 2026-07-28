@@ -15,6 +15,7 @@ import { calculateMissionPackage } from '../engine/logistics/missionPackage'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { buildPortTree } from '../utils/portTree'
 import { resolveShipImage } from '../utils/resolveShipImage'
+import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 import { prepareCanonicalHardpoints } from '../utils/canonicalHardpointPreparation'
 
 function SummaryTile({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string | number; accent?: string }) {
@@ -111,6 +112,11 @@ export default function ShipDetail() {
   // an inferred first-ship default; a deleted/unavailable selected ship
   // clears back to the same empty state rather than falling back.
   const ship = ships.find((s) => s.id === shipId)
+  // UX-005A (Deliverable 8) — called unconditionally (before the early
+  // return below) per the Rules of Hooks; `ship?.id ?? ''` is a safe
+  // no-op input when nothing is selected yet (resolveFleetAssetId simply
+  // finds no match for an empty id).
+  const { src: resolvedImageSrc } = useResolvedShipImage(ship?.id ?? '', ship?.imageUrl)
   if (!ship) {
     return (
       <div className="space-y-6">
@@ -177,7 +183,7 @@ export default function ShipDetail() {
 
       <div className="panel overflow-hidden">
         <ShipHeroFrame
-          imageSrc={ship.imageUrl}
+          imageSrc={resolvedImageSrc}
           name={ship.name}
           manufacturer={ship.manufacturer}
           ownership={ship.ownership}

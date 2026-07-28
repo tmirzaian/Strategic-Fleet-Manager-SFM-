@@ -8,6 +8,7 @@ import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
 import { materializeFleetAsset } from '../utils/fleetAssetMaterializer'
 import { reconcileBuildHardpoints } from '../utils/fleetAssetReconciliation'
 import { resolveShipImage } from '../utils/resolveShipImage'
+import { deleteShipImage } from '../utils/shipImageStorage'
 import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
@@ -38,7 +39,12 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // any version <= 7 be recognized, exactly once, as a genuinely
 // pre-existing installation whose Commander legitimately already had the
 // demo fleet — see `seedFleetLegacyInstall` below.
-const PERSIST_VERSION = 8
+// UX-005A: bumped 8 -> 9 to add FleetAsset.customImageRef /
+// SeedAssetOverride.customImageRef — a pre-9 save simply has neither
+// field, which `isValidPersistedFleetAsset`/`isValidSeedAssetOverride`
+// below treat as "no custom image ever set" (correct for a save written
+// before this feature existed), not an error.
+const PERSIST_VERSION = 9
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -409,6 +415,14 @@ interface FleetState {
   removeFleetAsset: (assetId: string) => { success: boolean; message?: string }
   updateFleetAssetNickname: (assetId: string, nickname: string | undefined) => { success: boolean; message?: string }
   updateFleetAssetOwnership: (assetId: string, ownershipType: OwnershipType) => { success: boolean; message?: string }
+  /** UX-005A (Deliverable 1/4) — sets or clears this specific vessel's
+   * custom image reference (`undefined` = Restore Default). Never touches
+   * `shipDefinitionId`-level or Loadout-level data — two FleetAssets
+   * sharing a model are unaffected by each other's calls to this action.
+   * Does not itself write to managed storage (see
+   * src/utils/shipImageStorage.ts) — callers store/delete the blob first,
+   * then call this to persist the reference. */
+  updateFleetAssetCustomImage: (assetId: string, customImageRef: string | undefined) => { success: boolean; message?: string }
   /** Fleet Profile (Alpha 2.4, Part 7) — Primary/Secondary Role are
    * descriptive only, independent of the authoritative Ship
    * Classification. Priority is no longer part of this action (EWO-066
@@ -529,7 +543,12 @@ interface FleetState {
  * same id passed in as the ship id. This checks both conventions rather
  * than assuming either one.
  */
-function resolveFleetAssetId(shipId: string, fleetAssets: FleetAsset[]): string | undefined {
+/** Exported (UX-005A) so the shared ship-image resolver hook
+ * (src/utils/useResolvedShipImage.ts) can go from a rendered `Ship.id` to
+ * its owning `FleetAsset.id` the same way every other per-asset store
+ * action already does, rather than re-deriving the `-asset-seed` suffix
+ * convention itself. */
+export function resolveFleetAssetId(shipId: string, fleetAssets: FleetAsset[]): string | undefined {
   if (fleetAssets.some((a) => a.id === shipId)) return shipId
   const seedAssetId = `${shipId}-asset-seed`
   if (fleetAssets.some((a) => a.id === seedAssetId)) return seedAssetId
@@ -557,6 +576,8 @@ function isValidSeedAssetOverride(raw: unknown): raw is SeedAssetOverride {
   if (r.nickname !== undefined && typeof r.nickname !== 'string') return false
   if (r.ownershipType !== undefined && r.ownershipType !== 'OWNED' && r.ownershipType !== 'PURCHASED' && r.ownershipType !== 'LOANER') return false
   if (r.priority !== undefined && r.priority !== null && typeof r.priority !== 'number') return false
+  // UX-005A — same permissive-optional-string shape as `nickname` above.
+  if (r.customImageRef !== undefined && typeof r.customImageRef !== 'string') return false
   return true
 }
 
@@ -841,6 +862,16 @@ export const useFleetStore = create<FleetState>()(
           })
         }
 
+        // UX-005A (Deliverable 6) — clean up the managed custom image
+        // (IndexedDB), if any, when its owning vessel is removed. Fire-
+        // and-forget: this is a synchronous store action, IndexedDB is
+        // async, and deleteShipImage() is itself best-effort/never-throws
+        // — a storage failure here must never block or fail the removal
+        // it's attached to.
+        if (asset.customImageRef) {
+          void deleteShipImage(resolvedAssetId!)
+        }
+
         get().addLogEntry({ action: 'Ship removed from fleet', shipName: ship.name, details: `Removed ${ship.name} from fleet` })
         return { success: true }
       },
@@ -903,6 +934,42 @@ export const useFleetStore = create<FleetState>()(
         }
 
         get().addLogEntry({ action: 'Ownership changed', shipName: ship.name, details: `${ship.name} ownership set to ${ownershipType}` })
+        return { success: true }
+      },
+
+      // UX-005A (Deliverable 1/4/5) — identical shape to
+      // updateFleetAssetOwnership above: resolve by id, mutate the
+      // FleetAsset record, and for a seed-migrated ship also stamp the
+      // persisted override diff. No `ships` array mutation — unlike
+      // ownership/nickname, the resolved image is never materialized onto
+      // `Ship` (it's async/session-scoped, see shipImageCache.ts), so
+      // every consumer reads `customImageRef` from `fleetAssets` directly
+      // via the shared resolver hook instead.
+      updateFleetAssetCustomImage: (assetId, customImageRef) => {
+        const resolvedAssetId = resolveFleetAssetId(assetId, get().fleetAssets)
+        const asset = resolvedAssetId ? get().fleetAssets.find((a) => a.id === resolvedAssetId) : undefined
+        const ship = get().ships.find((s) => s.id === assetId)
+        if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
+
+        const now = new Date().toISOString()
+        set({
+          fleetAssets: get().fleetAssets.map((a) => (a.id === resolvedAssetId ? { ...a, customImageRef, updatedAt: now } : a)),
+        })
+
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          set({
+            seedAssetOverrides: {
+              ...get().seedAssetOverrides,
+              [resolvedAssetId!]: { ...get().seedAssetOverrides[resolvedAssetId!], customImageRef, updatedAt: now },
+            },
+          })
+        }
+
+        get().addLogEntry({
+          action: customImageRef ? 'Custom ship image set' : 'Custom ship image removed',
+          shipName: ship.name,
+          details: customImageRef ? `${ship.name} now uses a custom image` : `${ship.name} reverted to the default image`,
+        })
         return { success: true }
       },
 
@@ -2208,6 +2275,12 @@ export const useFleetStore = create<FleetState>()(
             nickname: 'nickname' in override ? override.nickname : a.nickname,
             ownershipType: override.ownershipType ?? a.ownershipType,
             priority: override.priority ?? a.priority,
+            // UX-005A — same key-presence check as nickname (not `??`):
+            // an explicit `undefined` override (Restore Default) must win
+            // over the seed baseline, which is always `undefined` too
+            // (no seed ship ships with a hardcoded custom image) and so
+            // couldn't otherwise be distinguished from "never overridden."
+            customImageRef: 'customImageRef' in override ? override.customImageRef : a.customImageRef,
             updatedAt: override.updatedAt,
           }
         })

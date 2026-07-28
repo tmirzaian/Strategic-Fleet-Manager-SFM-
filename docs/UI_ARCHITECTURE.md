@@ -3873,3 +3873,202 @@ per the work order's own explicit instruction), and the universal
 footer renders "SFM Beta 2.0 Dev" (Deliverable 2) — both driven by the
 same single constant, confirmed via direct page-content evaluation, not
 just visually.
+
+## 59. Per-Vessel Custom Ship Images (UX-005A, IMPLEMENTED NOW)
+
+A Commander-supplied image now attaches to the owned vessel instance,
+never the ship model and never a Loadout — two Fleet Assets referencing
+the same `shipDefinitionId` (two Ghosts) can carry fully independent
+custom liveries, live-verified end to end (see below).
+
+**Architectural translation — the work order's own "Application-Managed
+Storage" doesn't literally apply to this app's runtime.** Strategic
+Fleet Manager is a pure browser SPA (Vite/React/Zustand, no Electron, no
+backend server, no Node filesystem access) — there is no `<SFM
+data>/images/ships/` directory a web page can write to. IndexedDB is the
+direct browser equivalent: a large-quota (hundreds of MB+, vs.
+`localStorage`'s ~5-10MB), origin-scoped store that accepts binary data
+natively. This satisfies the Engineering Constraint "No base64 image
+blobs in core JSON/state" exactly — the image bytes live entirely
+outside the small, frequently-rewritten `localStorage` blob the core
+Zustand state persists through, and only a *relative managed reference*
+string (`ships/<vessel-id>.<ext>`, informational — see below) lives in
+persisted fleet data, never an absolute path and never the bytes
+themselves. This translation is called out explicitly here, and again
+at its point of use (`src/utils/shipImageStorage.ts`'s own doc comment),
+rather than silently reinterpreted.
+
+**Deliverable 1 — Data Model** (`src/types/index.ts`). `FleetAsset`
+gains `customImageRef?: string`; `SeedAssetOverride` gains the same
+field, mirroring `nickname`'s own "diff layered onto the fresh seed
+bake-in" pattern (a seed ship's ships/builds/hardpoints are hardcoded in
+`src/data/seed.ts` and never persisted directly — only this override
+diff is). Neither the catalog `ShipDefinition`, nor any override table,
+nor `Build`/Hardpoint records were touched — exactly the "not: Ship
+Model → One Shared Image" the work order's own diagram forbids.
+
+**Deliverable 2 — Storage** (`src/utils/shipImageStorage.ts`). One
+IndexedDB object store, `images`, keyed directly by vessel instance id
+(`FleetAsset.id` == `Ship.id` for a manual asset; a rendered `Ship.id`
+for a seed ship — see `resolveFleetAssetId`'s own doc comment for why
+the two ids diverge there). A stored record is `{ buffer: ArrayBuffer,
+type: string }`, not a raw `Blob`/`File` — `ArrayBuffer` structured-
+clones reliably everywhere IndexedDB is implemented, while `Blob`/`File`
+storage support is historically inconsistent (confirmed directly in this
+project's own test environment: jsdom + fake-indexeddb returns an empty
+plain object for a stored `File`, not a `Blob` — this was caught by the
+project's own new tests, not assumed). The public API still speaks
+`File`/`Blob` at its boundary (`storeShipImage`/`getShipImageBlob`),
+converting internally. `validateShipImageFile()` checks MIME type
+(PNG/JPG/WebP per Deliverable 4), a judgment-call 8MB size ceiling (not
+specified by the work order — chosen to prevent a multi-minute write for
+an accidentally-selected RAW photo, documented at its declaration), and
+attempts `createImageBitmap()` to catch a renamed non-image or corrupt
+file, not just a bad extension. `deleteShipImage()` is best-effort/never
+throws. WebP standardization (Deliverable 2's "Engineering may
+standardize... if a safe existing image-processing path is available")
+is deliberately deferred, as the work order explicitly permits — `sharp`
+(already a devDependency) is Node-only and cannot run at the point a
+Commander picks a file in the browser; a Canvas-based conversion is a
+real future option but adds real risk this sprint didn't need to take.
+
+**Deliverable 3 — Shared Resolver.** Two pieces, together forming the
+"one canonical resolver": `resolveShipImage()` (`src/utils/
+resolveShipImage.ts`, pre-existing, unchanged in behavior) still owns
+the synchronous registry/existing-image/fallback chain; the new
+`useResolvedShipImage(vesselId, fallbackSrc)` hook (`src/utils/
+useResolvedShipImage.ts`) is the actual public entry point every
+consumer calls, layering the async custom-image tier on top via a small
+ephemeral cache store (`src/store/shipImageCache.ts` — ordinary Zustand
+`create`, no `persist` middleware; a `blob:` object URL is only valid
+for the current page session and must never touch `localStorage`).
+Resolution order matches the work order exactly: (1) this vessel's own
+valid custom image, resolved from cache or triggered on first render;
+(2) `fallbackSrc`, whatever the caller already resolved via the
+unchanged existing chain; (3) `undefined`, so `<ShipImage
+fallbackSrc=...>` renders the standard placeholder exactly as before. A
+vessel with no matching `FleetAsset` at all (e.g. a deep-import preview
+ship with no ownership yet) simply never has a `customImageRef` to find
+— the hook is a safe no-op passthrough by construction, not a special
+case, which is also why "existing fleets without customImageRef load
+unchanged" holds automatically. `customUnavailable` (true when a ref is
+recorded but the managed file can't be loaded) is exposed for exactly
+the one caller the work order names — Ship Management Settings.
+
+**Deliverable 4 — Ship Management Settings**
+(`src/components/EditFleetAssetModal.tsx`, the same modal Ship Detail's
+own "Edit" button already opens, so this surfaces on both without a
+second settings surface). A new "Ship Image" section between Ownership
+and Fleet Profile: a small preview (via `<ShipImage>`, the same
+presentation component every other surface uses — never a bespoke
+`<img>`), "Choose Custom Image" (hidden `<input type="file">`,
+`accept="image/png,image/jpeg,image/webp"`), and "Restore Default"
+(rendered only when this vessel currently has a custom image on
+record). Unlike Nickname/Ownership/Fleet Profile in the same modal —
+which stay local draft state until "Update Fleet Registry" is clicked —
+image actions apply immediately, matching the work order's own explicit
+behavior description ("Preview updates immediately") and sidestepping
+any inconsistent partial-save story a file picker has no natural
+"cancel" affordance for anyway. An unsupported or undecodable file shows
+a clear inline message (`validateShipImageFile`'s own `reason` string)
+and never touches the store.
+
+**Deliverable 5 — Instance Isolation.** `customImageRef` lives on the
+per-instance `FleetAsset`/`SeedAssetOverride` record, keyed by vessel
+id, full stop — nothing in the write path (`updateFleetAssetCustomImage`)
+or read path (the resolver hook) ever branches on `shipDefinitionId`.
+Live-verified with two real "Ghost"-model vessels added in the same
+session: Ghost A got a red custom livery, Ghost B independently got a
+white one, and a Fleet Dashboard screenshot taken *between* the two
+operations shows one card with the custom red livery and the other
+still on its official image side by side — the exact "Ghost A → black
+livery, Ghost B → white livery" scenario the work order names, captured
+naturally rather than staged. Restoring Ghost A's default afterward left
+Ghost B's own reference untouched (asserted directly against store
+state, not just visually).
+
+**Deliverable 6 — Persistence.** `PERSIST_VERSION` bumped 8 → 9
+(`src/store/useFleetStore.ts`) — a pre-9 save simply has neither new
+field, treated as "no custom image ever set," not an error, following
+every prior version bump's own established pattern. `customImageRef` is
+merged from `seedAssetOverrides` via the same `'customImageRef' in
+override` key-presence check `nickname` already uses (not `??`) —
+necessary because "Commander restored the default image" is an explicit
+`undefined` override that must still win over a baseline that's *also*
+always `undefined` (no seed ship ships with a hardcoded custom image),
+which `??` alone can't distinguish from "never overridden." Deleting a
+vessel (`removeFleetAsset`) fires a best-effort, fire-and-forget
+`deleteShipImage()` for its managed file when one exists — synchronous
+store action, async storage layer, and `deleteShipImage` itself never
+throws, so a storage failure can never block or fail the removal it's
+attached to. Live/test-verified: a manual asset's and a seed ship's
+`customImageRef` both survive a genuine store reload (`vi.resetModules()`
++ re-import, the project's own established persistence-test pattern);
+an old save missing the field entirely loads with it simply absent.
+
+**Deliverable 7 — Future Pledge-ID Compatibility.** Not implemented this
+sprint, per the work order's own explicit exclusion — recorded here as
+the identity rule a future RSI-sync mission must honor: a future Pledge
+ID identifies the same owned vessel *record*, migrating or matching the
+local `FleetAsset` to that upstream identity; it must never move
+`customImageRef` onto the ship model, and two vessels must never have
+their images merged merely because they share a model, even after
+Pledge IDs exist. Nothing in today's data model (`customImageRef` on
+`FleetAsset`, never on `ShipDefinition`) would need to change shape to
+honor this later — a future `pledgeId?: string` field would sit
+alongside it on the same per-instance record.
+
+**Deliverable 8 — Scope of Display.** `ShipCard.tsx` — the one canonical
+card both Mission Control's Top Priority section and Fleet Dashboard's
+grid already render (no separate implementations to update) — now calls
+`useResolvedShipImage`, covering both named surfaces with one change.
+Ship Management (`ShipWorkspacePrototype.tsx`) and Ship Detail's own
+hero (`ShipDetail.tsx`'s default-export/owned branch) do too. Left
+deliberately unconverted: `ImportedShipDetail` (the deep-import preview
+branch), which has no corresponding `FleetAsset` and therefore can never
+have a custom image — converting it would be inert, not "low-risk
+coverage." No page-specific custom-image toggle exists anywhere; every
+surface either calls the shared hook or doesn't touch ship-image
+resolution at all.
+
+**A small, positive side effect.** `ShipWorkspacePrototype.tsx` had
+been redundantly re-calling `resolveShipImage({ id: ship.id, imageUrl:
+ship.imageUrl })` — a no-op in practice, since the registry is keyed by
+ship *definition* id, not instance id, so this only ever returned
+`ship.imageUrl` back unchanged. Replacing it with the shared hook
+(which takes `ship.imageUrl` directly as `fallbackSrc`, never
+re-deriving it) removes that redundant call as a byproduct of the
+rollout, not a separate cleanup pass.
+
+**Testing.** New: `shipImageStorage.test.ts` (11, validation + IndexedDB
+round-trip + independent-blob isolation), `shipImageCache.test.ts` (6,
+loading/ready/missing transitions + invalidate), `useResolvedShipImage.
+test.tsx` (5, including a dedicated Deliverable-5 instance-isolation
+case), `fleetAssetCustomImage.test.ts` (12, the store action, seed-
+override merge, removal cleanup, and four persistence-survival cases),
+`EditFleetAssetModal.test.tsx` (7, the Settings UI end to end including
+the unsupported/undecodable-file inline-message cases and immediate-
+apply-without-Save behavior) — 41 new tests. `vitest.setup.ts` gained
+two test-environment polyfills jsdom lacks entirely: `fake-indexeddb/
+auto` (a spec-compliant in-memory IndexedDB, confirmed necessary since
+jsdom has none at all) and a minimal `URL.createObjectURL`/
+`revokeObjectURL` stub (confirmed via direct inspection that jsdom
+implements neither). `fake-indexeddb` was added as a devDependency for
+this. Full project regression (`tsc --noEmit`, full `vitest run`: 196
+files / 2494 tests, up from 191/2453 before this mission — the
+difference is exactly this section's own 5 new files / 41 new tests, no
+existing test needed a single change) and a production build pass
+clean.
+
+**Live-verified** against the running dev server (which has no seed
+fleet enabled in this session — two real "Ghost"-model vessels were
+added via the live store instead, a closer approximation of a genuinely
+new Commander's fleet than the seed data would have been anyway):
+choosing a valid image applies immediately and appears on both the Ship
+Management hero and the Fleet Dashboard card without a page reload;
+choosing an unsupported `.txt` file shows "Unsupported file type. Choose
+a PNG, JPG, or WebP image." inline without touching the store; Restore
+Default clears the reference and the official image reappears; a full
+page reload preserves the custom reference; and two vessels of the same
+model retained fully independent images and independent Restore-Default
+outcomes throughout. Zero horizontal overflow, zero console errors.

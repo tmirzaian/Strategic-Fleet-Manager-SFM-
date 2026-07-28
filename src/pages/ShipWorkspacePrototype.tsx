@@ -27,7 +27,7 @@ import ReadinessBar, { colorFor } from '../components/ReadinessBar'
 import ShipHeroFrame from '../components/ShipHeroFrame'
 import EditFleetAssetModal from '../components/EditFleetAssetModal'
 import { resolveShipManagementIllustration } from '../config/assets'
-import { resolveShipImage } from '../utils/resolveShipImage'
+import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
 import { catalogComponentsByEntityClass, catalogComponentsByName, resolveComponentByEntityClass } from '../generated/componentCatalog'
@@ -655,7 +655,12 @@ export default function ShipWorkspacePrototype() {
   }, 0)
   const changeStatusLabel = pendingChangeCount > 0 ? `Pending Changes (${pendingChangeCount})` : 'No Pending Changes'
 
-  const imageSrc = ship ? resolveShipImage({ id: ship.id, imageUrl: ship.imageUrl }) : undefined
+  // UX-005A (Deliverable 8) — layers the per-vessel custom-image tier on
+  // top of `ship.imageUrl` (already the fully-resolved official/fallback
+  // chain from materialization — see fleetAssetMaterializer.ts). Called
+  // unconditionally per the Rules of Hooks; `ship?.id ?? ''` is a safe
+  // no-op input when no ship is selected.
+  const { src: imageSrc } = useResolvedShipImage(ship?.id ?? '', ship?.imageUrl)
   // EWO-062 — resolved once; undefined only if the illustration is ever
   // disabled again, in which case the empty state falls back to a plain
   // dark panel rather than a broken image (same contract every other

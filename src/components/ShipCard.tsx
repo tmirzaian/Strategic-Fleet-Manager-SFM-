@@ -7,6 +7,7 @@ import ReadinessBar from './ReadinessBar'
 import Badge, { ownershipTone } from './Badge'
 import ShipImage, { type ShipImagePresentationMode } from './ShipImage'
 import { formatShipIdentityLine } from '../utils/shipIdentityLine'
+import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 
 /**
  * EWO-032 — THE CANONICAL SHIP CARD for Strategic Fleet Manager (Beta
@@ -49,6 +50,10 @@ export default function ShipCard({
   stockRoleFocus: string | undefined
 }) {
   const [mode, setMode] = useState<ShipImagePresentationMode>('cover')
+  // UX-005A (Deliverable 8) — ShipCard is the one canonical card both
+  // Mission Control and Fleet Dashboard render, so resolving the custom-
+  // image tier here covers both surfaces at once.
+  const { src: resolvedSrc } = useResolvedShipImage(ship.id, ship.imageUrl)
 
   return (
     // SW-013B (Objective 1) — Ship Workspace Promotion. The canonical
@@ -69,7 +74,7 @@ export default function ShipCard({
           — both a real photo and the fallback now fill this frame via a
           centered object-cover crop; only the hover-zoom is real-photo-only. */}
       <ShipImage
-        src={ship.imageUrl}
+        src={resolvedSrc}
         alt={ship.name}
         className="aspect-video rounded-lg bg-black/40 border border-white/5 overflow-hidden relative"
         imageClassName={mode === 'contain' ? 'block w-full h-full object-cover animate-ship-image-fade-in' : 'block w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'}

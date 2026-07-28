@@ -1,5 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import { vi } from 'vitest'
+// UX-005A — jsdom has no IndexedDB implementation at all; fake-indexeddb
+// provides a spec-compliant in-memory implementation so
+// shipImageStorage.ts (and anything that transitively touches it) can be
+// exercised for real in the test environment, not mocked function-by-
+// function. `/auto` installs it onto the global scope exactly where
+// browser code expects to find `indexedDB`.
+import 'fake-indexeddb/auto'
 
 // CAT-001A — the entire pre-existing test suite was written against the
 // seed/demo fleet (src/data/seed.ts) as its baseline fixture, long before
@@ -27,4 +34,17 @@ if (typeof global.IntersectionObserver === 'undefined') {
   }
   // @ts-expect-error — test-only global stub, not a real IntersectionObserver
   global.IntersectionObserver = NoopIntersectionObserver
+}
+
+// UX-005A — jsdom has no URL.createObjectURL/revokeObjectURL at all
+// (confirmed directly: calling it throws "not a function"), which
+// src/store/shipImageCache.ts relies on to turn a stored image Blob into
+// an <img>-usable string. A minimal deterministic stub — a unique
+// `blob:test-N` string per call — is enough for every test that checks
+// "does the cache produce *a* src distinct per blob," without pulling in
+// a real object-URL polyfill.
+if (typeof global.URL.createObjectURL === 'undefined') {
+  let counter = 0
+  global.URL.createObjectURL = vi.fn(() => `blob:test-${++counter}`)
+  global.URL.revokeObjectURL = vi.fn()
 }
