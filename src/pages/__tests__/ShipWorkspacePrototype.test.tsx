@@ -2077,3 +2077,60 @@ describe('<ShipWorkspacePrototype /> — EWO-066A: Fleet Priority Behavior Refin
     })
   })
 })
+
+describe('<ShipWorkspacePrototype /> — EWO-067: Operations Workspace Visual Enhancement', () => {
+  describe('Part D/E: typography hierarchy and workstation labels', () => {
+    it('each workstation shows a title, a concise operational statement, and a smaller supporting description', () => {
+      renderWorkspace('ghost')
+      const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+      expect(within(loadoutButton).getByText('Manage Loadout')).toBeInTheDocument()
+      expect(within(loadoutButton).getByText("Configure this ship's preferred configuration.")).toBeInTheDocument()
+      expect(within(loadoutButton).getByText(/Target loadout/)).toBeInTheDocument()
+
+      const installedButton = screen.getByRole('button', { name: /Change Installed Components/ })
+      expect(within(installedButton).getByText('Change Installed Components')).toBeInTheDocument()
+      expect(within(installedButton).getByText('Modify the physical ship.')).toBeInTheDocument()
+      expect(within(installedButton).getByText(/Install, replace, remove/)).toBeInTheDocument()
+    })
+
+    it('each workstation carries its own small, low-emphasis identifier in the upper-right corner', () => {
+      renderWorkspace('ghost')
+      const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+      expect(within(loadoutButton).getByText('Loadout Workstation')).toBeInTheDocument()
+      const installedButton = screen.getByRole('button', { name: /Change Installed Components/ })
+      expect(within(installedButton).getByText('Maintenance Bay')).toBeInTheDocument()
+    })
+  })
+
+  describe('Part F: premium hover treatment', () => {
+    it('hover styling reuses the app\'s existing cyan glow language (the same treatment Fleet Dashboard\'s ShipCard already uses), never a new color', () => {
+      renderWorkspace('ghost')
+      const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+      expect(loadoutButton.className).toContain('hover:shadow-glow')
+      expect(loadoutButton.className).toContain('hover:border-cyan/30')
+      expect(loadoutButton.className).toMatch(/duration-(150|200)/)
+    })
+  })
+
+  describe('Part H: strictly visual — no functional/behavioral changes', () => {
+    it('clicking a workstation still selects it via the exact same aria-pressed/onClick contract, switching the Systems Workspace lens', () => {
+      renderWorkspace('ghost')
+      const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+      expect(loadoutButton).toHaveAttribute('aria-pressed', 'false')
+      fireEvent.click(loadoutButton)
+      expect(loadoutButton).toHaveAttribute('aria-pressed', 'true')
+      // Lens 2 (Manage Loadout) columns — unchanged behavior, still real.
+      const headerRow = screen.getByText('Port').closest('tr') as HTMLElement
+      expect(within(headerRow).getByText('New Target')).toBeInTheDocument()
+    })
+
+    it('clicking the same workstation again deselects it, returning to Operational Review', () => {
+      renderWorkspace('ghost')
+      const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+      fireEvent.click(loadoutButton)
+      fireEvent.click(loadoutButton)
+      expect(loadoutButton).toHaveAttribute('aria-pressed', 'false')
+      expect(screen.getByText('Operational Review')).toBeInTheDocument()
+    })
+  })
+})

@@ -2226,3 +2226,147 @@ confirmation UI present, and the Captain's Log transition message
 (including the no-op-produces-no-log-entry case). Full project
 regression (`tsc --noEmit`, 182 test files / 2275 tests) and a
 production build both pass clean.
+
+## 41. Operations Workspace Visual Enhancement (EWO-067, IMPLEMENTED NOW)
+
+Visual enhancement only — the "What do you want to change?" pair
+(`ShipWorkspacePrototype.tsx`) is still the exact same two real
+`<button>`s, same `onClick`/`aria-pressed`/keyboard contract, same
+underlying Commander Intent state machine. Only what's layered on top
+changed.
+
+**Design Principle (Engineering note, carried forward from the work
+order itself):** these are no longer "buttons" — they're operational
+workstations. Every future Ship Management workflow should begin by
+entering one of the two, and their visual treatment should reinforce
+that mental model (a dedicated console a Commander steps into) rather
+than merely inviting a click.
+
+**Part B/C — distinct workstation identity, same palette.** Manage
+Loadout (`WORKSTATION_BLUEPRINT_PATTERN`) gets a faint grid — the
+"planning console" language — while Change Installed Components
+(`WORKSTATION_PANEL_PATTERN`) gets a diagonal panel-seam hatch — the
+"maintenance bay" language. Both are CSS gradients built from the exact
+`cyan` token (`#35D0FF` = `rgb(53,208,255)`) at very low alpha via
+inline `style`, since a multi-stop gradient has no concise Tailwind
+utility form — deliberately no new color, per the work order's own
+explicit constraint. Each card also gets a large (104px), low-opacity,
+`aria-hidden` glyph watermark (the same canonical icon already used for
+that workstation's small inline title icon — `ListChecks`/`WrenchIcon`,
+never a new icon) and a soft radial "internal lighting" glow in the
+top-left corner, same cyan token again.
+
+**Part D — typography re-tiered, not rewritten.** The old single
+paragraph-heavy description is split into three tiers with no
+information lost: the large existing title, a new concise one-line
+operational statement (`COMMANDER_INTENT_STATEMENT`), and a smaller
+supporting description carrying the original detail
+(`COMMANDER_INTENT_DESCRIPTION`) — content preserved, only its
+presentation re-tiered.
+
+**Part E — workstation labels.** A small, letter-spaced, low-emphasis
+identifier in each card's upper-right corner ("Loadout Workstation" /
+"Maintenance Bay"), styled consistently with this page's own existing
+section-label language (the same treatment the page's `h3` eyebrows
+already use).
+
+**Part F — premium hover, reusing an existing pattern.** `hover:
+-translate-y-0.5 hover:border-cyan/30 hover:shadow-glow`, `transition-
+all duration-200` — the exact same hover language Fleet Dashboard's own
+`ShipCard.tsx` already established (`hover:shadow-glow hover:border-
+cyan/30`), including reusing the pre-existing `shadow-glow` box-shadow
+token from `tailwind.config.js` rather than inventing a new glow value.
+The watermark glyph and title also brighten on hover
+(`group-hover:text-cyan/[0.12]`, `group-hover:text-cyan/90`) via the
+same `group`/`group-hover` mechanism already idiomatic in this
+codebase. 200ms sits inside the requested 150–200ms window; deliberately
+no scale/bounce — "premium rather than flashy."
+
+**Part G — consistency, not a new visual language.** Every new value
+(the `cyan` token, the `shadow-glow` shadow, the `group`/`group-hover`
+hover mechanism, the small-uppercase-letter-spaced label treatment) is
+reused verbatim from an existing SFM surface (Fleet Dashboard, Mission
+Control, or this page's own established section-label pattern) — no
+net-new design token was introduced.
+
+**Part H — verified structurally unchanged.** A dedicated regression
+block confirms `aria-pressed` still toggles correctly, the Systems
+Workspace lens still switches (Manage Loadout's own "New Target"
+column still appears), and re-clicking still deselects back to
+Operational Review — the exact same behavior as before this mission,
+now underneath the new visual treatment.
+
+Regression coverage: a new EWO-067 describe block in
+`ShipWorkspacePrototype.test.tsx` covers the three-tier typography
+content, the workstation labels, the presence of `aria-hidden` watermark
+glyphs, the two cards' distinct (never identical) background patterns,
+the reused `hover:shadow-glow`/`hover:border-cyan/30` hover classes and
+transition duration, and the Part H behavioral-preservation checks. Full
+project regression (`tsc --noEmit`, 182 test files / 2282 tests) and a
+production build both pass clean.
+
+## 42. Operations Workspace Premium Refinement (EWO-067A, IMPLEMENTED NOW — supersedes §41's own artwork)
+
+EWO-067A explicitly reverses §41's own decorative treatment. The Chief
+Architect's own framing: "Less artwork. More confidence. The Ship
+Header is the cinematic hero of the page. Every section beneath it
+should become progressively quieter, allowing typography, spacing, and
+refined materials to communicate quality." Still visual-only — the
+same two real `<button>`s, same `onClick`/`aria-pressed`/keyboard
+contract, same Commander Intent state machine, byte-for-byte unchanged
+(Part H, both missions).
+
+**Part A — background artwork removed.** `WORKSTATION_BLUEPRINT_PATTERN`
+and `WORKSTATION_PANEL_PATTERN` (§41's inline-`style` CSS gradients),
+the 104px low-opacity watermark glyph, and the radial "internal
+lighting" glow are all deleted outright — no blueprint grid, no
+diagonal hatch, no oversized icon, on either card.
+
+**Part B — premium materials replace decoration.** A darker internal
+surface (`bg-black/20`) and a soft inner-shadow edge
+(`shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]`) carry the "premium"
+read that the background artwork used to — restrained material cues
+instead of visible texture.
+
+**Part C — typography is now the primary visual feature.** The middle
+and bottom copy tiers (`COMMANDER_INTENT_STATEMENT`/
+`COMMANDER_INTENT_DESCRIPTION`) are rewritten to the work order's own
+example copy, tightened to fragment-style phrasing rather than full
+sentences: Manage Loadout reads "Configure this ship's preferred
+configuration." / "Target loadout • doctrine • mission builds"; Change
+Installed Components reads "Modify the physical ship." / "Install,
+replace, remove or borrow physical components." Same variable names
+and structure as §41 — only the values changed.
+
+**Part D — one restrained accent, Engineering's call.** In place of
+§41's watermark and internal-lighting wash: a single thin holographic
+line (`bg-gradient-to-r from-cyan/60 via-cyan/20 to-transparent`)
+along each card's top edge, at low opacity at rest and brightening on
+hover/selection (`opacity-40 group-hover:opacity-90`, `opacity-100`
+when selected) — still the same `cyan` token, still no new color.
+
+**Part E — workstation labels unchanged.** "Loadout Workstation" /
+"Maintenance Bay" render exactly as in §41 — already doing their job,
+explicitly retained.
+
+**Part F — premium hover retained.** `hover:-translate-y-0.5
+hover:border-cyan/30 hover:shadow-glow`, `duration-200`, title
+brightening on hover/selection — all carried forward from §41
+unchanged; smooth and confident, never flashy.
+
+**Part G/H — quieter by construction, timeless placeholder.** With the
+background artwork gone, these cards no longer compete visually with
+the Ship Header above them or risk clashing with a future cinematic
+Quartermaster Edition workstation treatment — refined typography,
+spacing, and materials read as a deliberately restrained placeholder
+rather than a finished decorative system.
+
+Regression coverage: the EWO-067 describe block in
+`ShipWorkspacePrototype.test.tsx` was updated in place — the
+typography test now asserts the new copy; the old "watermark glyph"
+and "distinct background patterns" tests (whose premise §41's own
+artwork no longer exists to satisfy) were removed, since Part A
+retires that treatment outright; the workstation-label, hover-glow,
+and Part H behavioral-preservation tests are unchanged and still pass.
+Full project regression (`tsc --noEmit`, full `vitest run`) and a
+production build pass clean.

@@ -73,6 +73,32 @@ const COMMANDER_INTENT_LABEL: Record<CommanderIntent, string> = {
   CHANGE_INSTALLED: 'Change Installed Components',
 }
 
+/** EWO-067 (Part D) / EWO-067A (Part C) — one concise operational
+ * statement per workstation (the middle typography tier, between the
+ * large title and the smaller supporting description) plus a compact
+ * supporting description. EWO-067A tightens both to read as fragments
+ * ("Target loadout • doctrine • mission builds") rather than full
+ * sentences — "Typography should become the primary visual feature,"
+ * so the copy itself now carries more of the premium feel that EWO-067's
+ * background artwork used to. */
+const COMMANDER_INTENT_STATEMENT: Record<CommanderIntent, string> = {
+  MANAGE_LOADOUT: "Configure this ship's preferred configuration.",
+  CHANGE_INSTALLED: 'Modify the physical ship.',
+}
+const COMMANDER_INTENT_DESCRIPTION: Record<CommanderIntent, string> = {
+  MANAGE_LOADOUT: 'Target loadout • doctrine • mission builds',
+  CHANGE_INSTALLED: 'Install, replace, remove or borrow physical components.',
+}
+/** EWO-067 (Part E) — a subtle workstation identifier in each card's
+ * upper-right corner, consistent with this app's existing small
+ * uppercase/letter-spaced section-label language (e.g. the page's own
+ * "SHIP MANAGEMENT" header eyebrow). EWO-067A (Part E) explicitly
+ * retains this unchanged — it already does its job. */
+const COMMANDER_INTENT_WORKSTATION_LABEL: Record<CommanderIntent, string> = {
+  MANAGE_LOADOUT: 'Loadout Workstation',
+  CHANGE_INSTALLED: 'Maintenance Bay',
+}
+
 /** EWO-065 (Part C) — the Hero's "Missing: …" text shows exact component
  * names up to this count before falling back to an inline "View All" text
  * link; chosen to comfortably fit the Hero's own two-line clamp at this
@@ -2381,30 +2407,81 @@ export default function ShipWorkspacePrototype() {
               Operational Review is the page's own default state, not a
               selectable option. Borrow Intelligence has no top-level
               presence — it surfaces contextually inside Change Installed
-              Components' Install/Change disclosure only. */}
+              Components' Install/Change disclosure only.
+
+              EWO-067 — "Operational Workstations," not buttons: the
+              Design Principle this mission asks Engineering to carry
+              forward is that every future Ship Management workflow
+              should begin by entering one of these two, so their visual
+              treatment reinforces that mental model (a dedicated console
+              a Commander steps into) rather than merely inviting a
+              click.
+
+              EWO-067A — supersedes EWO-067's own background artwork
+              (blueprint grid, diagonal hatch, large watermark glyphs):
+              "Premium through typography, spacing, lighting, and
+              materials — not decorative graphics." A darker internal
+              surface, a thin top accent line, and the restrained
+              existing `shadow-glow` hover language now carry the
+              premium feel copy and spacing used to share with busy
+              artwork — quieter, so the Ship Header stays the page's one
+              cinematic moment (Part G/H: these are timeless placeholders
+              until the future Quartermaster Edition's own cinematic
+              workstation artwork arrives, not a competing visual system).
+              Visual enhancement only (Part H, both missions) — the
+              underlying element is still exactly the same real <button>,
+              onClick/aria-pressed/keyboard behavior byte-for-byte
+              unchanged; only what's layered on top of it changed. */}
           <div className="panel p-4">
             <h3 className="text-xs uppercase tracking-widest text-muted mb-3">What do you want to change?</h3>
             <div className="grid sm:grid-cols-2 gap-3">
               {(
                 [
-                  { key: 'MANAGE_LOADOUT' as const, icon: ListChecks, description: 'Modify the desired configuration — target shield, weapons, doctrine, intentional empty slots, future build, restore factory target.' },
-                  { key: 'CHANGE_INSTALLED' as const, icon: WrenchIcon, description: 'Modify the physical ship — install, replace, remove, restore target, install an upgrade, looted, purchased, or crafted component.' },
+                  { key: 'MANAGE_LOADOUT' as const, icon: ListChecks },
+                  { key: 'CHANGE_INSTALLED' as const, icon: WrenchIcon },
                 ] as const
-              ).map(({ key, icon: Icon, description }) => {
+              ).map(({ key, icon: Icon }) => {
                 const isSelected = commanderIntent === key
                 return (
                   <button
                     key={key}
                     onClick={() => setCommanderIntent(isSelected ? null : key)}
                     aria-pressed={isSelected}
-                    className={`text-left rounded-lg border px-4 py-3.5 transition-colors ${
-                      isSelected ? 'bg-cyan/15 border-cyan/40' : 'border-white/10 hover:border-white/25 hover:bg-white/5'
+                    className={`group relative overflow-hidden text-left rounded-lg border px-4 py-3.5 bg-black/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-200 ${
+                      isSelected ? 'border-cyan/40 shadow-glow' : 'border-white/10 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-glow'
                     }`}
                   >
-                    <div className={`flex items-center gap-2 font-display font-bold ${isSelected ? 'text-cyan' : 'text-white'}`}>
-                      <Icon size={16} /> {COMMANDER_INTENT_LABEL[key]}
+                    {/* Part D — the one restrained accent: a thin
+                        holographic line along the top edge, brightening
+                        on hover/selection — replaces EWO-067's own
+                        radial "internal lighting" wash and large
+                        watermark glyph with a single quiet detail. */}
+                    <div
+                      className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-cyan/60 via-cyan/20 to-transparent transition-opacity duration-200 ${
+                        isSelected ? 'opacity-100' : 'opacity-40 group-hover:opacity-90'
+                      }`}
+                    />
+                    {/* Part E — the workstation identifier, small/letter-
+                        spaced/low-emphasis, consistent with this page's
+                        own section-label language (the h3 above it).
+                        Explicitly retained unchanged from EWO-067. */}
+                    <span className="absolute top-3 right-3.5 text-[9px] uppercase tracking-[0.15em] text-muted/50 font-mono">
+                      {COMMANDER_INTENT_WORKSTATION_LABEL[key]}
+                    </span>
+
+                    {/* Part C — typography-first hierarchy: large title,
+                        one concise operational statement, smaller
+                        supporting description. No background artwork —
+                        the copy itself is now the primary visual feature. */}
+                    <div
+                      className={`flex items-center gap-2 font-display font-bold text-base transition-colors duration-200 ${
+                        isSelected ? 'text-cyan' : 'text-white group-hover:text-cyan/90'
+                      }`}
+                    >
+                      <Icon size={18} aria-hidden="true" /> {COMMANDER_INTENT_LABEL[key]}
                     </div>
-                    <p className="text-xs text-muted mt-1.5">{description}</p>
+                    <p className="text-xs text-white/80 font-medium mt-1.5">{COMMANDER_INTENT_STATEMENT[key]}</p>
+                    <p className="text-[11px] text-muted mt-1">{COMMANDER_INTENT_DESCRIPTION[key]}</p>
                   </button>
                 )
               })}
