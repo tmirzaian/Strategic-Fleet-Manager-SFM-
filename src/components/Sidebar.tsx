@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom'
-import { APP_VERSION_LABEL } from '../config/appVersion'
 import { resolveBrandingSrc } from '../config/assets'
 import {
   Radar,
@@ -72,21 +71,30 @@ export default function Sidebar() {
   // wordmark, "Strategic Fleet Manager" title, and motto — is one
   // Design-Authority-owned commissioned image, resolved through its own
   // semantic key. It deliberately does not include the application
-  // version (see APP_VERSION_LABEL below) or any panel/background —
-  // never a hard-coded asset path here.
+  // version or any panel/background — never a hard-coded asset path here.
+  // UX-004A (Deliverable 4) — the version is no longer rendered anywhere
+  // in the Sidebar at all; AppFooter (src/components/layout/AppFooter.tsx)
+  // is now the sole live-text version display in the application.
   const brandLockupSrc = resolveBrandingSrc('sidebarBrandLockup')
 
   return (
     <aside className="w-64 shrink-0 h-screen sticky top-0 flex flex-col border-r border-white/5 bg-panel/60 backdrop-blur-sm">
-      {/* Brand lockup — EWO-015, density-tuned EWO-015B: reads as a floating
-          operational console mounted in the compartment, matching the nav
-          console's bordered-panel treatment below. The commissioned image is
-          the sole identity content; no second panel is nested inside this
-          console around the image itself. Internal padding is intentionally
-          tight (px-2.5/py-3.5, down from px-4/py-6) so the artwork reads as
-          the dominant element while still never touching the console's own
-          border. */}
-      <div className="mx-3 mt-3 mb-1 rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-3.5 flex flex-col items-center text-center">
+      {/* Brand lockup — EWO-015, density-tuned EWO-015B, further tightened
+          UX-004A (Deliverable 5): reads as a floating operational console
+          mounted in the compartment, matching the nav console's
+          bordered-panel treatment below. The commissioned image is the
+          sole identity content; no second panel is nested inside this
+          console around the image itself. Internal padding is
+          intentionally tight (px-2.5/py-2, down from px-2.5/py-3.5) now
+          that the live version label beneath the image is gone
+          (Deliverable 4 — it moved to AppFooter, the sole remaining
+          version display) — the cell is fitted to the branding itself
+          rather than the branding floating inside a larger container,
+          while still leaving real clearance around the image (never
+          touching the console's own border). Hardpoint sizing, image
+          asset, and aspect ratio are all untouched — only the console's
+          own vertical padding changed. */}
+      <div className="mx-3 mt-3 mb-1 rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-2 flex flex-col items-center text-center">
         {brandLockupSrc ? (
           // EWO-015C — optical-fit correction. The console/hardpoint CSS was
           // already verified to match the EWO-015B spec exactly (no residual
@@ -112,11 +120,6 @@ export default function Sidebar() {
         ) : (
           <Satellite className="text-cyan" size={62} />
         )}
-        {/* Live application version — never baked into the brand-lockup
-            artwork, so a future release only requires updating this text,
-            not regenerating or replacing the image. Tightened to mt-2
-            (EWO-015B) so it reads as belonging to the lockup above it. */}
-        <div className="text-[8px] uppercase tracking-[0.15em] text-muted/40 mt-2">{APP_VERSION_LABEL}</div>
       </div>
       {/* Navigation reads as a floating operational panel — a restrained bordered
           surface set inside the rail, not a generic full-height web menu. */}

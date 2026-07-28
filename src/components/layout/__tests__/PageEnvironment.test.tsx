@@ -10,10 +10,10 @@ describe('Mission M-022: <PageEnvironment />', () => {
   })
 
   it('5. renders nothing for every still-disabled environment ID in the registry', () => {
-    // mission-control is intentionally excluded — EWO-035 enabled it with
-    // real Beta artwork; see the dedicated "renders the enabled
-    // mission-control environment" test below.
-    const ids = ['fleet-dashboard', 'ship-detail', 'hangar-inventory', 'loadout-manager', 'decision-center', 'captain-log'] as const
+    // mission-control and decision-center are intentionally excluded —
+    // EWO-035 and UX-003B enabled them with real artwork; see the
+    // dedicated "renders the enabled ... environment" tests below.
+    const ids = ['fleet-dashboard', 'ship-detail', 'hangar-inventory', 'loadout-manager', 'captain-log'] as const
     for (const id of ids) {
       const { container } = render(<PageEnvironment id={id} />)
       expect(container).toBeEmptyDOMElement()
@@ -27,6 +27,15 @@ describe('Mission M-022: <PageEnvironment />', () => {
     const layer = container.querySelector('[data-environment-id="mission-control"]')
     expect(layer).not.toBeNull()
     expect(layer!.querySelector('[style*="mission-control-operations-wall.webp"]')).not.toBeNull()
+    cleanup()
+  })
+
+  it('UX-003B: renders the enabled decision-center environment with its real artwork background, without throwing', () => {
+    const { container } = render(<PageEnvironment id="decision-center" />)
+    expect(container).not.toBeEmptyDOMElement()
+    const layer = container.querySelector('[data-environment-id="decision-center"]')
+    expect(layer).not.toBeNull()
+    expect(layer!.querySelector('[style*="decision-center.webp"]')).not.toBeNull()
     cleanup()
   })
 

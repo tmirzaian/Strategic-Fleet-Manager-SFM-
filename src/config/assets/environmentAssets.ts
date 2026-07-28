@@ -65,7 +65,21 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   'ship-detail': definition('ship-detail', 'Ship Detail'),
   'hangar-inventory': definition('hangar-inventory', 'Hangar Inventory'),
   'loadout-manager': definition('loadout-manager', 'Loadout Manager'),
-  'decision-center': definition('decision-center', 'Decision Center'),
+  // UX-003B Amendment A — Commander-supplied "Technical Evaluation"
+  // forensic-lab artwork (robotic inspection arms, holographic
+  // diagnostics, blue/amber lighting, deliberately clean center aisle),
+  // mounted inside its own bounded Technical Evaluation Bay
+  // (`EnvironmentBay`, see DecisionCenter.tsx) rather than as a page-wide
+  // backdrop. Because legibility is now handled by the bay's own glass
+  // panels and edge vignette — not by low opacity alone — this reads
+  // brighter/more vivid than the Amendment-0 full-page value (0.28/0.8);
+  // a slight blur (`blurPx: 1`) adds the same "subtle atmospheric haze"
+  // the work order's Lighting section asks for.
+  'decision-center': definition('decision-center', 'Decision Center', {
+    sources: { desktop: assetPath('environments/decision-center/decision-center.webp') },
+    enabled: true,
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 1 },
+  }),
   'captain-log': definition('captain-log', "Captain's Log"),
 }
 

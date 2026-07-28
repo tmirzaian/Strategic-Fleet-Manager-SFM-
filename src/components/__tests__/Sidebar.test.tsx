@@ -56,9 +56,9 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     expect(screen.queryByText('Succeed')).not.toBeInTheDocument()
   })
 
-  it('7. APP_VERSION_LABEL renders exactly once in the branding console, as live text beneath the image', () => {
+  it('UX-004A (Deliverable 4): the branding console no longer renders APP_VERSION_LABEL — the version now lives exclusively in AppFooter', () => {
     renderSidebar()
-    expect(screen.getAllByText(APP_VERSION_LABEL)).toHaveLength(1)
+    expect(screen.queryByText(APP_VERSION_LABEL)).not.toBeInTheDocument()
   })
 
   it('8. the image uses contain behavior and preserves aspect ratio — sized within a capped hardpoint, never stretched', () => {
@@ -152,14 +152,15 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
 })
 
 describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
-  it('reduces the branding console internal padding ~35-45% from EWO-015 (px-4/py-6 -> px-2.5/py-3.5)', () => {
+  it('reduces the branding console internal padding ~35-45% from EWO-015 (px-4/py-6 -> px-2.5/py-3.5), further tightened to py-2 by UX-004A (Deliverable 5) once the version label was removed', () => {
     renderSidebar()
     const logo = screen.getByAltText('Strategic Fleet Manager')
     const console_ = logo.closest('div.rounded-lg') as HTMLElement
     expect(console_.className).toContain('px-2.5')
-    expect(console_.className).toContain('py-3.5')
+    expect(console_.className).toContain('py-2')
     expect(console_.className).not.toContain('px-4')
     expect(console_.className).not.toContain('py-6')
+    expect(console_.className).not.toContain('py-3.5')
   })
 
   it('enlarges the image hardpoint container (not the artwork itself) while preserving contain/center and the 2:3 source aspect ratio', () => {
@@ -176,11 +177,9 @@ describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
     expect(180 / 270).toBeCloseTo(2 / 3, 5)
   })
 
-  it('tightens the gap between the brand-lockup image and the live version label (mt-4 -> mt-2)', () => {
+  it('UX-004A superseded the image-to-version gap tuning entirely — there is no version label left in the console to tune a gap for', () => {
     renderSidebar()
-    const versionEl = screen.getByText(APP_VERSION_LABEL)
-    expect(versionEl.className).toContain('mt-2')
-    expect(versionEl.className).not.toContain('mt-4')
+    expect(screen.queryByText(APP_VERSION_LABEL)).not.toBeInTheDocument()
   })
 
   it('does not hard-code branding paths and does not recreate branding in JSX after the density tuning', () => {
@@ -227,14 +226,11 @@ describe('<Sidebar /> — EWO-015C optical-fit correction', () => {
     expect(hardpoint.className).toContain('overflow-hidden')
   })
 
-  it('the console padding and image-to-version gap from EWO-015B are untouched — no further wrapper spacing changes', () => {
+  it('the console horizontal padding from EWO-015B is untouched (UX-004A only retuned vertical padding, per Deliverable 5)', () => {
     renderSidebar()
     const logo = screen.getByAltText('Strategic Fleet Manager')
     const console_ = logo.closest('div.rounded-lg') as HTMLElement
     expect(console_.className).toContain('px-2.5')
-    expect(console_.className).toContain('py-3.5')
-    const versionEl = screen.getByText(APP_VERSION_LABEL)
-    expect(versionEl.className).toContain('mt-2')
   })
 
   it('applies a uniform, non-distorting scale to the image — same factor on both axes, object-fit/object-position preserved', () => {
@@ -267,5 +263,39 @@ describe('<Sidebar /> — EWO-015C optical-fit correction', () => {
     expect(screen.getByText('Mission Control')).toBeInTheDocument()
     // EWO-062A (Part B) retired three nav entries — seven remain.
     expect(screen.getAllByRole('link').length).toBeGreaterThanOrEqual(7)
+  })
+})
+
+describe('<Sidebar /> — UX-004A Universal Footer & Branding Cell Fitment', () => {
+  it('Deliverable 4: the branding cell no longer imports or renders APP_VERSION_LABEL at all — not even indirectly', () => {
+    const sourcePath = resolve(process.cwd(), 'src/components/Sidebar.tsx')
+    const source = readFileSync(sourcePath, 'utf-8')
+    expect(source).not.toContain('APP_VERSION_LABEL')
+    expect(source).not.toContain('appVersion')
+    renderSidebar()
+    expect(screen.queryByText(APP_VERSION_LABEL)).not.toBeInTheDocument()
+  })
+
+  it('Deliverable 5: the branding console is fitted tighter (py-2) than EWO-015B/C\'s py-3.5, without touching the hardpoint, sidebar width, or logo asset', () => {
+    const { container } = renderSidebar()
+    const logo = screen.getByAltText('Strategic Fleet Manager')
+    const console_ = logo.closest('div.rounded-lg') as HTMLElement
+    expect(console_.className).toContain('py-2')
+    expect(console_.className).not.toContain('py-3.5')
+    // Hardpoint, sidebar width, and image asset are all untouched.
+    const hardpoint = logo.parentElement as HTMLElement
+    expect(hardpoint.className).toContain('w-[180px]')
+    expect(hardpoint.className).toContain('h-[270px]')
+    const aside = container.querySelector('aside') as HTMLElement
+    expect(aside.className).toContain('w-64')
+    expect(logo.getAttribute('src')).toBe('/assets/generated/branding/sidebar-branding-512.png')
+  })
+
+  it('Deliverable 6: the branding hardpoint sizing is still driven entirely by the generic semantic registry, not a page/version-specific assumption — future org branding can resolve through the same fixed hardpoint', () => {
+    const sourcePath = resolve(process.cwd(), 'src/components/Sidebar.tsx')
+    const source = readFileSync(sourcePath, 'utf-8')
+    expect(source).toContain("resolveBrandingSrc('sidebarBrandLockup')")
+    // No conditional sizing keyed off a specific version string or org name.
+    expect(source).not.toMatch(/Beta \d/)
   })
 })

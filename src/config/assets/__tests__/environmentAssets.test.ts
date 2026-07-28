@@ -29,9 +29,9 @@ describe('Mission M-022: environment registry', () => {
     expect(isValidPresentation({ ...base, position: '' })).toBe(false)
   })
 
-  it('every definition except mission-control ships disabled with no artwork referenced (Mission M-022 is infrastructure only; EWO-035 enabled Mission Control alone)', () => {
+  it('every definition except mission-control and decision-center ships disabled with no artwork referenced (Mission M-022 is infrastructure only; EWO-035 enabled Mission Control, UX-003B enabled Decision Center)', () => {
     for (const id of ENVIRONMENT_IDS) {
-      if (id === 'mission-control') continue
+      if (id === 'mission-control' || id === 'decision-center') continue
       const def = getEnvironmentDefinition(id)
       expect(def.enabled).toBe(false)
       expect(isEnvironmentUsable(def)).toBe(false)
@@ -43,6 +43,13 @@ describe('Mission M-022: environment registry', () => {
     expect(def.enabled).toBe(true)
     expect(isEnvironmentUsable(def)).toBe(true)
     expect(def.sources.desktop).toBe('/assets/environments/mission-control/mission-control-operations-wall.webp')
+  })
+
+  it('UX-003B: decision-center is enabled with a real, usable Commander-supplied artwork source', () => {
+    const def = getEnvironmentDefinition('decision-center')
+    expect(def.enabled).toBe(true)
+    expect(isEnvironmentUsable(def)).toBe(true)
+    expect(def.sources.desktop).toBe('/assets/environments/decision-center/decision-center.webp')
   })
 
   it('EWO-035A: mission-control presentation is tuned brighter/more visible than the shared dormant default, and still validates', () => {

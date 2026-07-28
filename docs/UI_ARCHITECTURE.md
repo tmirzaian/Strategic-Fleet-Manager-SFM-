@@ -3436,3 +3436,440 @@ when the toggle is disabled, reconfirmed hidden again on re-enable), and
 a combined Type + Size + Availability filter narrowing to exactly the
 two genuinely matching rows — screenshot-verified throughout, zero
 horizontal overflow at the 1320px reference viewport.
+
+## 54. Decision Center Loot Intake — Lookup-to-Inventory Workflow & Visual Refactor (UX-003A, IMPLEMENTED NOW)
+
+Refactors Decision Center from a single-verdict search utility into a
+compact intake-and-judgment workspace: Recovered Item → Look Up →
+Evaluate → Keep → Add to Inventory, entirely on one page. Chief
+Architect framing: "Decision Center becomes the intake and judgment
+surface for recovered items" — Hangar Inventory stays the ledger ("What
+do I own?"), Ship Management stays the execution surface ("Where should
+it go?"), Decision Center now owns "Should I keep it?" end to end,
+including the keep decision's own immediate next action.
+
+**Deliverable 1 — Loot Lookup preserved verbatim.** The search input,
+catalog-driven suggestion dropdown, Check Item button, and Enter-to-check
+keyboard behavior (EWO-031's own canonical-catalog rewrite) are
+byte-for-byte unchanged — only the surrounding chrome and the code past
+a successful lookup changed.
+
+**Deliverable 4/6 — the old ad-hoc, verdict-colored panels become one
+consistent Item Assessment panel.** Previously REQUIRED/SATISFIED/
+UNKNOWN each rendered as an entire differently-bordered/colored panel;
+now there is exactly one panel, and only a `Badge` (KEEP/ALREADY
+SATISFIED/NO CATALOG MATCH, reusing the exact success/cyan/danger tone
+vocabulary Deliverable 8 specifies — Readiness Green, Quartermaster
+Blue, Red-only-for-invalid) carries the verdict. Layout matches the
+work order's own recommended hierarchy: Component Name / Type·Size,
+then Fleet Demand and Inventory Position as two side-by-side facts
+(Fleet Demand reuses EWO-031's own unchanged "unresolved requirement on
+an *active* Loadout" business rule; Inventory Position is new — the
+component's real current Installed/Reserved/Available via
+`calculateComponentAvailability`, the same Part K equation every other
+surface already uses), then Applicable Target Loadouts (the real
+per-entry list, each showing Already Reserved / Reserve / Not yet owned
+based on genuinely live state), then the Add to Inventory action.
+Deliverable 5's future-disposal space is preserved structurally — the
+`Verdict` union and its own doc comment note where a future disposal
+case would join — without a placeholder button (explicitly optional,
+and none exists elsewhere in the app to reuse cleanly).
+
+**Deliverable 2 — Add to Inventory calls the canonical ledger action
+directly.** `addHangarItem`, the exact same store call Hangar
+Inventory's own Add New Item modal makes, with the same quantity
+validation (positive integer). No second, divergent inventory-entry
+implementation — Decision Center already resolved a specific, real
+catalog entry through its own preserved lookup, so it never needed the
+catalog-search half of Hangar's own modal, only the ledger write itself.
+
+**Deliverable 3 — the post-add reservation step, canonically gated.**
+New `hangarReservationEligibility.ts`'s `resolveReservationEligibility`
+(EWO-072) is called live, off the current store state — so Reserve
+eligibility reflects the stock Add to Inventory *just* created, never a
+stale pre-add snapshot. "Item added to Hangar Inventory. Reserve for a
+target loadout?" renders only when `eligible` is true (genuinely free
+stock AND a real unresolved, unreserved match); when there's exactly one
+match, a single-click "Reserve Now" appears; with more than one, no
+ambiguous single button auto-guesses which target — the Commander uses
+the Applicable Target Loadouts list's own already-visible per-entry
+Reserve buttons instead (kept live/reactive to real stock throughout,
+not gated behind "was Add clicked this session," so pre-existing owned
+stock is just as reservable as freshly-added stock). "Leave Unreserved"
+is always available and ends the prompt without creating a reservation.
+Both terminal states ("Reserved for X." / "Left unreserved...") replace
+the prompt so it can't be actioned twice.
+
+**Deliverable 9 — no navigation away.** The old REQUIRED verdict's
+`<Link to="/hangar">` Reserve action (the actual "go somewhere else to
+finish this" the whole mission exists to remove) is gone; reservation
+now happens in place through the same `reserveComponent` store action
+Hangar Inventory itself calls. No optional Ship Management continuation
+was added — explicitly out of scope for this sprint.
+
+Regression coverage: `DecisionCenter.test.tsx`'s own baseline suite
+(header, canonical-catalog lookup, REQUIRED/SATISFIED verdict
+classification, already-reserved suppression) updated for the new panel
+structure and badge text, plus new cases proving the full Add ledger
+write, the gated Reserve Now flow, Leave Unreserved, no reservation step
+when ineligible, and a clean reset on repeated lookup. A new dedicated
+`ux003aDecisionCenterLootIntake.test.tsx` covers quantity validation,
+the multiple-applicable-target case (no ambiguous single Reserve Now;
+independent per-entry reservation, remaining eligibility recalculated
+after the first), unknown-item handling, and confirms no link to Hangar
+Inventory renders anywhere in the lookup → add → reserve sequence. Full
+project regression (`tsc --noEmit`, full `vitest run`: 190 files / 2418
+tests) and a production build pass clean.
+
+Playwright live-verified against the running dev server: the empty
+state before lookup, a real KEEP assessment (Fleet Demand, zeroed
+Inventory Position, Applicable Target Loadouts, "Not yet owned"), Add to
+Inventory reactively updating Available and unlocking the list's own
+Reserve button, the gated single-match "Reserve Now" prompt, the final
+"Reserved for Corsair — Gunship Build." confirmation, and the NO
+CATALOG MATCH state for an unrecognized name — screenshot-verified
+throughout, confirmed no link to `/hangar` renders within the page's own
+`<main>` content (the sidebar's own always-present navigation is
+unrelated and untouched), zero horizontal overflow.
+
+## 55. Decision Center Environmental Background (UX-003B, IMPLEMENTED NOW — superseded by Amendment A, §56)
+
+Gives Decision Center the same environmental-artwork treatment Mission
+Control received under EWO-035/EWO-035A-R2, completing the visual
+identity established for the "Technical Evaluation" station: Mission
+Control = Operations, Ship Management = Maintenance, Quartermaster
+Report = Logistics, Decision Center = a dedicated inspection/analysis
+bay where recovered technology is scanned and evaluated before entering
+fleet inventory. Purely a presentation layer — no workflow, interaction,
+or informational change to the UX-003A page underneath it.
+
+**Artwork provenance.** Commander-supplied, matching the same
+human-delivered-artwork precedent as Mission Control's own "Operations
+Wall" (EWO-035) rather than agent-generated — the agent's own toolset
+has no capability to produce photorealistic cinematic art, and this was
+disclosed rather than substituted with a lower-fidelity placeholder (see
+`AskUserQuestion` decision: wire up infrastructure only vs. a coded
+placeholder vs. wait for a real file — the Commander chose to supply the
+file directly). Delivered to
+`public/assets/environments/decision-center/decision-center.webp`: a
+forensic-engineering-lab corridor with articulated robotic inspection
+arms suspending blue holographic diagnostic schematics over cylindrical
+drive/engine components on illuminated cradles, amber-lit technical
+crates, dark titanium flooring, and a deliberately clear, symmetrical
+center aisle — satisfying every hard constraint in the brief (no people,
+no text, no UI, no watermark, no copyrighted ships, no game HUD).
+
+**Initial mounting (this section, superseded).** The first pass mounted
+`<PageEnvironment id="decision-center" />` full-bleed behind the entire
+page — an unconstrained `relative` wrapper spanning the full `<main>`
+content width, with the page header and both `.panel` cards sitting
+directly on top of it, opacity kept low (`0.28`) so the artwork read as
+ambient wallpaper behind everything, including the header. Commander
+feedback (Amendment A) identified this as reading like "wallpaper"
+rather than "architectural space," inconsistent with Mission Control's
+own bounded-hero treatment. §56 records the corrected composition and
+the registry/mounting as they exist today — this section is retained
+only for the historical record of what shipped first.
+
+## 56. Decision Center Technical Evaluation Bay & the Global Environmental Composition Standard (UX-003B Amendment A, IMPLEMENTED NOW)
+
+Corrects §55's full-page background into a bounded "room" composition —
+and, per the Commander's own explicit request, formalizes that
+composition as a reusable standard every future environment-backed page
+should follow, rather than an ad hoc pattern rediscovered per page.
+
+**The Global Environmental Composition Standard.** Four rules, verbatim
+from the Commander's own framing:
+1. Headers always live outside the environment.
+2. Environment artwork always belongs to a dedicated content panel —
+   never stretched across the page.
+3. Operational cards float within the environment as glass panels,
+   never sitting on the bare page background.
+4. Every department has its own "room," but all rooms share the same
+   architectural language (bounded container, edge-vignetted artwork,
+   floating glass content).
+
+**`EnvironmentBay`** (`src/components/layout/EnvironmentBay.tsx`) — the
+new shared component that encodes the standard so a future page adopts
+it by wrapping its content, not by re-deriving the composition:
+```tsx
+<EnvironmentBay id="decision-center">
+  {/* floating glass panels — the bay supplies width, centering, and
+      vertical spacing (space-y-6) between them */}
+</EnvironmentBay>
+```
+It renders `<PageEnvironment id={id} />` inside a bounded, bordered,
+rounded container (`lg:border lg:border-white/15 lg:min-h-[560px]`,
+mirroring Mission Control's own hero-card shape from EWO-035), a
+radial-gradient vignette layer (`rgba(7,16,22,0.92)` at the edges,
+transparent through the center 40%) that fades the artwork toward the
+container's own border rather than letting it cut off hard (Deliverable
+5 — the container's bordered-rounded-rect *shape* still matches Mission
+Control exactly; it's the image content inside that dissolves at the
+edges, not the container outline itself), and a centered content slot
+(default `max-w-2xl`, overridable via `contentClassName` for a future
+department with a different natural content width). Below the `lg`
+breakpoint the bay reverts to a plain unbordered wrapper with no glass
+treatment — `children` fall back to their own base styling — the same
+mobile simplification Mission Control's hero already uses (EWO-035A-R2:
+an environment image fighting a stacked-narrow layout was never worth
+it), so no separate mobile design was needed.
+
+**Decision Center's own use of it** (`src/pages/DecisionCenter.tsx`) —
+the page header ("Decision Center" / "Should I keep this?") now renders
+*before* `<EnvironmentBay id="decision-center">`, entirely outside it
+(Deliverable 4 — no artwork behind the header, exactly like Mission
+Control). Both the Loot Lookup and Item Assessment panels moved inside
+the bay as its `children`, each gaining `lg:bg-panel/55
+lg:backdrop-blur-md` on top of their existing `panel` base class — the
+identical glass-panel utility combination Mission Control's own Fleet
+Status/Priority Actions columns use, confirmed (via a live computed-
+style check against the running Mission Control page) to genuinely win
+the cascade over `.panel`'s opaque `background-color` despite being a
+plain custom CSS class declared later in `index.css` — Tailwind's
+generated utility output takes cascade priority over hand-written
+component CSS in this build regardless of literal file order, so the
+override is reliable, not accidental.
+
+**Presentation retuned for the bounded context**
+(`src/config/assets/environmentAssets.ts`) — `opacity: 0.28` → `0.55`,
+`brightness: 0.8` → `0.95`, plus a new `blurPx: 1` for a touch of
+atmospheric haze (the original work order's own "subtle atmospheric
+haze" language). §55's low values existed to keep a full-page backdrop
+from fighting page content it had no boundary against; now that the
+bay's own vignette and the panels' own glass legibility handle contrast,
+a lower opacity was actively working against the goal of feeling like a
+real room rather than a wash of color — the brighter value was chosen by
+live screenshot comparison, not computed from a formula.
+
+**Why "~15-20% environment visible around the panels" wasn't hit via a
+precise formula.** The bay's own width is unconstrained (matches
+Mission Control's own full-`<main>`-width hero), while the floating
+content column stays at `max-w-2xl`; at very wide viewports this leaves
+more open margin than a strict 15-20% figure, but the qualitative goal
+— "the Commander can understand the room without the artwork competing
+with the workflow" — was verified directly against live screenshots at
+both a standard desktop width (1440px) and the sub-`lg` fallback, not
+derived algebraically. If a future pass wants a tighter numeric bound,
+`EnvironmentBay`'s own `contentClassName` prop or an added `bayMaxWidth`
+prop would be the extension point, not a one-off change in
+`DecisionCenter.tsx`.
+
+Regression coverage unchanged from §55 (the registry/`PageEnvironment`
+test updates already cover `decision-center` being enabled with a real
+source; no new tests were needed for `EnvironmentBay` itself since it
+has no conditional logic beyond what `PageEnvironment`'s own suite
+already covers — it is pure composition). Full project regression
+(`tsc --noEmit`, full `vitest run`: 190 files / 2420 tests) and a
+production build pass clean after the restructure.
+
+Playwright live-verified at 1440px width (empty-lookup and populated-
+Mirage-assessment states) and at 800px width (sub-`lg` fallback): the
+bay renders as a large bordered room with the environment's robotic
+inspection arms and floor equipment visible on both sides of the
+floating glass panels, the vignette keeps the panel-covered center
+legible without any additional darkening from the panels themselves
+being needed, the header sits cleanly outside and above the bay with no
+artwork behind it, and the sub-`lg` view confirms the plain-stacked-
+opaque-panel fallback matches Mission Control's own mobile behavior.
+Zero horizontal overflow at either width.
+
+## 57. Universal Footer & Branding Cell Fitment (UX-004A, IMPLEMENTED NOW)
+
+Gives every primary page the same visual close: one shared footer
+(version bottom-left, the POPS slogan bottom-right) mounted once in the
+shell, and a tightened Sidebar branding cell now that its own live
+version text moved into that footer. Visual consistency pass only — no
+navigation, routing, or page-content changes.
+
+**`AppFooter`** (`src/components/layout/AppFooter.tsx`) — new shared
+component, mounted exactly once in `App.tsx`'s shell (Deliverable 7),
+never duplicated per page. Left side renders `SFM {APP_VERSION_LABEL}`
+— the same canonical constant the Sidebar used to render
+(`src/config/appVersion.ts`), never a second hardcoded string. Right
+side renders the exact "Plan • Outfit • Prepare • Succeed" wording and
+order, unchanged from the established motto. Deliberately a visual
+boundary, not a content panel (Deliverable 2): a `border-t
+border-white/5` divider, no `.panel` card background, no environmental
+layer, compact `py-3` padding, small (`text-[10px]`/`text-[11px]`)
+restrained typography.
+
+**Color treatment matches the commissioned Sidebar brand-lockup artwork
+exactly**, not an invented scheme: the master
+(`public/assets/branding/sidebar/sidebar-branding-master-1024.png`)
+already bakes in the same four-word motto with Plan and Succeed both in
+Quartermaster Blue (the artwork bookends the phrase in the same hue),
+Outfit in Readiness Green, and Prepare in Quartermaster Gold — direct
+pixel inspection of the master confirmed this before any token was
+chosen. All three Tailwind tokens used (`cyan`, `success`, `gold`)
+already existed; no new color was introduced, and `Succeed` deliberately
+reuses `cyan` rather than inventing a fourth token for a shade the
+design-token system has never separately named.
+
+**Shell restructuring** (`src/App.tsx`) — `<main>` is now a `flex
+flex-col` container: a `flex-1` wrapper holds the existing `<Routes>`
+(with its pre-existing `px-6 py-8 md:px-10 md:py-10` padding completely
+unchanged — page content itself was not touched), and `<AppFooter />`
+renders as the last child. This is exactly the work order's own
+"Header/Content flex-grow / Footer" shape (Deliverable 3): because the
+outer shell (`<div className="flex min-h-screen">`) stretches `<main>`
+to at least the full viewport height via default flexbox `align-items:
+stretch`, the content wrapper's `flex-1` absorbs all the slack on short
+pages — pinning the footer to the viewport bottom — and simply cedes
+space back to it on long/scrolling pages, without any JS or
+per-page layout work. Verified live: Decision Center (short page)
+places the footer flush at the viewport bottom with no overlap of the
+Technical Evaluation Bay; Mission Control (tall page) lets the footer
+follow content well past the first viewport, confirmed via computed
+`footer.getBoundingClientRect().bottom` matching
+`document.documentElement.scrollHeight` exactly. Because the footer
+lives inside `<main>` (a flex sibling of `<Sidebar>`, never beneath it),
+it naturally spans only the primary content width, matching the
+existing shell standard without extra work (Responsive Requirements —
+"not beneath the fixed sidebar unless that is already the application
+shell standard": it already is).
+
+**Branding cell fitment** (`src/components/Sidebar.tsx`, Deliverables
+4–6) — the live `{APP_VERSION_LABEL}` line beneath the brand-lockup
+image is removed entirely; `AppFooter` is now the application's only
+version display. With that text (and its `mt-2` gap) gone, the
+console's own vertical padding is tightened from `py-3.5` to `py-2`
+(Deliverable 5) — the hardpoint (`180×270`), the image asset, its
+`scale-125`/`object-contain` treatment, and the console's horizontal
+`px-2.5` padding are all byte-for-byte unchanged, so the logo is never
+enlarged, distorted, or re-cropped, and the sidebar's `w-64` width never
+moves. Live-measured: the branding console's total rendered height
+dropped from the prior padding+version-text sum to a `288px` bounding
+box (padding-only change, not a hardpoint or asset change). This
+supersedes the EWO-015C "DESIGN FROZEN, pending Commander approval"
+notice in §2 — UX-004A is itself the new Engineering Work Order that
+notice required for any further modification, scoped narrowly to
+"remove the version line, tighten vertical padding," never touching the
+frozen composition, hardpoint sizing, or approved master image.
+**Deliverable 6 (future organization-logo compatibility)** required no
+new code: the hardpoint was already sized generically (a fixed
+`180×270` box, `object-contain`, driven only by
+`resolveBrandingSrc('sidebarBrandLockup')`'s semantic registry lookup,
+never by any page- or version-specific assumption), so it already
+accommodates a future organization emblem through the same registry
+entry without further fitment work — confirmed by a dedicated regression
+test rather than by adding unused machinery this sprint (no
+organization-logo selection was implemented, per the work order's own
+explicit exclusion).
+
+**One deliberate scope boundary — Captain's Log's own build/certification
+panel.** That page's pre-existing panel ("Strategic Fleet Manager
+{APP_VERSION_LABEL} / Certified for Star Citizen LIVE …") still shows
+the version, now alongside the new footer's own copy. This is not the
+duplication Deliverable 4 prohibits — that deliverable scopes "do not
+display the same version in both locations" to the branding cell vs.
+the footer specifically, and Captain's Log's panel is substantive page
+content (build/certification information, the actual reason that panel
+exists), not decorative branding chrome. Changing or removing it would
+violate the Engineering Constraint "No changes to page content," so it
+was left untouched; regression coverage (`App.test.tsx`) scopes its
+"no duplicate version" assertion to the Sidebar's own `<aside>` element
+specifically, not the whole document, so it does not conflict with this
+page's legitimate content.
+
+**A known, pre-existing, out-of-scope overflow.** At true phone widths
+(~375px) Decision Center's own "Check Item" button does not shrink
+below its content width, producing horizontal overflow — confirmed via
+direct measurement (`widest` element attribution) that this is caused
+by pre-existing page content, not the footer (the footer itself
+measured zero overflow contribution at every tested width, including
+375px, and correctly stacks into two centered lines at any width below
+the `sm` breakpoint, matching the Responsive Requirements exactly). The
+Engineering Constraints explicitly forbid both page-content changes and
+responsive navigation redesign this sprint, so this pre-existing
+condition is documented here rather than fixed. Every width the
+application already supports without overflow (640px and up, confirmed
+by direct measurement at 1440/1024/900/768/640px) remains overflow-free
+with the footer in place.
+
+Regression coverage: `Sidebar.test.tsx` updated — the old "APP_VERSION_LABEL
+renders exactly once in the branding console" and "tightens the gap...
+to the version label" tests (EWO-015B/C) are replaced with UX-004A
+assertions that the version renders nowhere in the Sidebar at all, that
+the console padding is `py-2` (not `py-3.5`), and that the hardpoint/
+sidebar-width/asset path remain untouched. New `AppFooter.test.tsx`
+covers the canonical version text, exact slogan wording/order, the
+four-color treatment, and the "boundary not a panel" styling contract.
+`App.test.tsx` gained route-parameterized coverage (`it.each`) across
+every scoped page **and every remaining legacy route**
+(`/loadout-manager`, `/quick-update`, `/ship`, `/ship-workspace`) —
+exactly one `<footer>` per route with the correct version and slogan
+text, and no version text inside the Sidebar's own `<aside>` on any
+route. `appVersion.test.ts` updated: its old assertion that Sidebar's
+source contains `APP_VERSION_LABEL` is now the opposite (Sidebar must
+NOT reference it), with a new assertion that `AppFooter.tsx` is the
+sole consumer. Full project regression (`tsc --noEmit`, full `vitest
+run`: 191 files / 2452 tests) and a production build pass clean.
+
+Playwright live-verified against the running dev server across all
+seven scoped pages plus three legacy routes (`/ship`,
+`/loadout-manager`, `/quick-update`) at 1440px: every route renders
+exactly one footer with the correct text, the Sidebar stays `256px`
+(`w-64`) wide on every route, zero horizontal overflow, and the footer
+sits at the viewport bottom on short pages while following content on
+tall ones (measured directly, not just visually). Footer stacking was
+additionally verified at 900/700/500px — side-by-side above the `sm`
+breakpoint, two centered lines below it, slogan order and color
+treatment preserved at every width, zero clipping.
+
+## 58. Development Version Discipline (ENG-001 / ENG-001A, IMPLEMENTED NOW)
+
+Establishes a permanent versioning rule — not a one-off bump — so the
+dev branch's version string always identifies which stream is actually
+running: screenshots and bug reports self-identify without anyone
+having to ask "which build is this?".
+
+**The rule, recorded at its source** (`src/config/appVersion.ts`'s own
+doc comment, the canonical place a future engineer or agent bumping the
+version will actually look): four states, one active at a time —
+`"Beta X.Y Dev"` while in active development, `"Beta X.Y RC"` during
+release-candidate validation, plain `"Beta X.Y"` for the certified
+release package, then immediately (same day) `"Beta X.(Y+1) Dev"` once
+that release ships. "Dev" is the one approved suffix — ENG-001A
+explicitly rejected "Preview" and "In Development" as too long/
+ambiguous for internal builds and screenshots. The dev branch must never
+sit on a released or RC string after a release is actually cut.
+
+**This session's own bump.** No "Beta 2.0" has actually been tagged or
+released — UX-003A, UX-003B (Amendment A), and UX-004A are all still
+uncommitted, awaiting certification. `APP_VERSION.productVersion` moves
+from `'Beta 1.2'` directly to `'Beta 2.0 Dev'` (not plain `'Beta 2.0'`)
+precisely because development toward that release is still in progress
+in this same repository — applying ENG-001A's own state machine to the
+repo's actual current state, not skipping ahead to a released label
+that wouldn't yet be true.
+
+**Every version-bearing surface already resolved from the single
+canonical constant before this mission — no page-specific hardcoding
+existed anywhere to fix.** `AppFooter` (UX-004A, §57) and Captain's
+Log's own certification panel (`Strategic Fleet Manager
+{APP_VERSION_LABEL}`, pre-existing) both already read
+`APP_VERSION_LABEL`; bumping the one constant in `appVersion.ts` was
+the entire code change these two deliverables required — confirmed live
+(both surfaces immediately showed "Beta 2.0 Dev" without touching
+`AppFooter.tsx` or `CaptainsLog.tsx`). A repo-wide grep for the old
+`"Beta 1.2"` string, before the bump, found exactly three matches:
+`appVersion.ts` itself, its own test, and one historical §27 doc
+sentence recording that "Beta 1.2" was correct *at that time* — left
+untouched as a historical record, the same treatment past superseded
+sections in this document already receive (see §55's own note).
+
+Regression coverage: `appVersion.test.ts` updated to expect `'Beta 2.0
+Dev'`, plus a new assertion that the string always ends in `" Dev"` and
+never contains `"Preview"` or `"In Development"` — locking in ENG-001A's
+own suffix decision so a future casual edit can't silently drift from
+it. Full project regression (`tsc --noEmit`, full `vitest run`: 191
+files / 2453 tests) and a production build pass clean.
+
+Playwright live-verified against the running dev server: Captain's Log
+renders "Strategic Fleet Manager Beta 2.0 Dev" (Deliverable 3, with the
+"Certified for Star Citizen LIVE …" line beneath it exactly unchanged,
+per the work order's own explicit instruction), and the universal
+footer renders "SFM Beta 2.0 Dev" (Deliverable 2) — both driven by the
+same single constant, confirmed via direct page-content evaluation, not
+just visually.
