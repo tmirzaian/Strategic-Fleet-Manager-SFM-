@@ -1,48 +1,114 @@
+<p align="center">
+  <img src="docs/images/hero/sfm-beta2-hero.png" alt="Strategic Fleet Manager Beta 2.0">
+</p>
+
 # Strategic Fleet Manager
 
-**Status: Beta 2.0** — Certified for Star Citizen **LIVE 4.9.186.42610**.
-Strategic Fleet Manager is Beta software. Core fleet-management workflows are
-functional and certified against real Star Citizen data, but the project is
-still under active development and has not yet reached a stable 1.0 release.
+### Fleet Operations Platform for Star Citizen
 
-Strategic Fleet Manager (SFM) is a local-first companion app for Star
-Citizen pilots who manage more than a couple of ships. It tracks your fleet,
-their loadouts, and your component inventory, and tells you what's missing,
-what's mismatched, and what to do next — instead of leaving you to maintain
-a spreadsheet by hand.
+**Current Release:** Beta 2.0
 
-<!-- README hero image placeholder — see docs/images/README.md for the
-     expected asset. Rendered once a hero banner is commissioned. -->
-<p align="center">
-  <img src="docs/images/hero/mission-control-banner.png" width="100%">
-</p>
+Strategic Fleet Manager (SFM) is a local-first Fleet Operations Platform built
+for Star Citizen Commanders who manage growing fleets, complex ship loadouts,
+and large component inventories.
+
+Instead of relying on spreadsheets or manually comparing ship configurations,
+SFM provides a unified Quartermaster workspace for fleet readiness, inventory
+management, procurement planning, and operational decision support.
+
+Strategic Fleet Manager transforms Star Citizen fleet management from
+spreadsheets into a professional Quartermaster workflow.
+
+## Why Strategic Fleet Manager?
+
+| Capability | Purpose |
+|---|---|
+| 🚀 Fleet Registry | Persistent lifecycle management for every ship. |
+| ⚙️ Quartermaster | Track inventory, reservations, shortages, and procurement. |
+| 🎯 Decision Center | Receive actionable recommendations instead of raw inventory lists. |
+| 📊 Mission Control | Monitor overall fleet readiness from a single operational dashboard. |
+
+## Beta 2.0 Highlights
+
+### Mission Control
+
+![Mission Control](docs/images/screenshots/beta2/01-Mission-Control.png)
+
+Monitor fleet readiness, procurement priorities, and operational status from one command dashboard.
+
+### Ship Management
+
+![Ship Management](docs/images/screenshots/beta2/02-Ship-Management-Ghost.png)
+
+Manage ships, loadouts, readiness, and Fleet Registry lifecycle from a unified workspace.
+
+### Fleet Dashboard
+
+![Fleet Dashboard](docs/images/screenshots/beta2/03-Fleet-Dashboard-Cards.png)
+
+Browse your entire fleet using rich visual cards with operational status at a glance.
+
+### Hangar Inventory
+
+![Hangar Inventory](docs/images/screenshots/beta2/05-Hangar-Inventory.png)
+
+Track every component across inventory, reservations, and installed ships.
+
+## Additional Features
+
+| Fleet Registry | Decision Center |
+|---|---|
+| ![Fleet Registry](docs/images/screenshots/beta2/fleet-registry.png) | ![Decision Center](docs/images/screenshots/beta2/decision-center.png) |
+
+| Captain's Log | Fleet Dashboard (Table) |
+|---|---|
+| ![Captain's Log](docs/images/screenshots/beta2/captains-log.png) | ![Fleet Dashboard (Table)](docs/images/screenshots/beta2/fleet-dashboard-table.png) |
 
 ## Current Capabilities
 
-- Fleet registry and prioritization
-- Factory and custom loadout management
-- Component inventory tracking
-- Installed, target, and missing-component comparison
-- Multiple ship roles and builds
-- Fleet readiness reporting
-- Quick Update workflow
-- Golden Fleet data generated from Star Citizen LIVE data
-- Commander-maintained ship imagery
-- Local-first browser persistence
+- Fleet Registry lifecycle management
+- Mission Control
+- Decision Center
+- Hangar Inventory
+- Ship Management
+- Component reservations
+- Procurement planning
+- Captain's Log
+- Commander-managed ship imagery
+- Local-first persistence
 
-## Screenshots
+## Roadmap
 
-<!-- Screenshot gallery placeholders — see docs/images/screenshots/README.md
-     for the expected set. Populated once real captures are available. -->
-| Fleet Dashboard | Ship Detail | Mission Control |
-|---|---|---|
-| ![Fleet Dashboard (placeholder)](docs/images/screenshots/fleet-dashboard.png) | ![Ship Detail (placeholder)](docs/images/screenshots/ship-detail.png) | ![Mission Control (placeholder)](docs/images/screenshots/mission-control.png) |
+**Beta 2.1**
+- Backup / Restore
+- Fleet Registry Purge
+- Import / Export
 
-## Supported Star Citizen Version
+**Beta 2.2**
+- Organization reservations
+- Shared logistics
 
-Strategic Fleet Manager's Golden Fleet ship and component data is certified
-against **Star Citizen LIVE 4.9.186.42610**. Data generated against other
-patches or channels (PTU/EPTU) is not currently supported.
+**Beta 2.3**
+- RSI synchronization
+
+**Beta 3.0**
+- Quartermaster Edition
+
+See [docs/Roadmap.md](docs/Roadmap.md) for the full detailed roadmap.
+
+## Compatibility
+
+Certified for **Star Citizen LIVE 4.9.186.42610**. Data generated against
+other patches or channels (PTU/EPTU) is not currently supported.
+
+## Documentation
+
+- [Architecture](docs/Architecture.md)
+- [Architecture Decision Records (ADRs)](docs/ADR/)
+- [Roadmap](docs/Roadmap.md)
+- [Testing](docs/Testing.md)
+- [Release Notes](CHANGELOG.md)
+- [Engineering Change Log](docs/UI_ARCHITECTURE.md) — the full feature-by-feature engineering record behind every Beta 2.0 change
 
 ## Installation Requirements
 
@@ -108,13 +174,6 @@ channel during Beta.
 - Some fleet-wide component-name ambiguities remain under investigation
 - No telemetry or automatic update service
 - Some ship images may use the SFM fallback artwork instead of real imagery
-
-## Roadmap Summary
-
-Near-term work focuses on Beta stabilization, GitHub presentation, and
-launch experience polish. Longer-term, planned work includes a Windows
-installer, RSI/CCUGame fleet synchronization, richer search, and a
-dedicated support/about experience.
 
 ## Credits
 
