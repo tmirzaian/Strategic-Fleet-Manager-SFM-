@@ -41,7 +41,7 @@ afterEach(() => {
 })
 
 describe('EWO-STAB-003C: required regression coverage', () => {
-  it('1. a legacy save containing only component names (no entityClass anywhere) still loads and functions', async () => {
+  it('1. a legacy save containing only component names (no entityClass anywhere) still loads and functions — EWO-084 now reconciles a resolvable one', async () => {
     localStorage.setItem(
       'sfm-fleet-store',
       JSON.stringify({
@@ -57,13 +57,42 @@ describe('EWO-STAB-003C: required regression coverage', () => {
     const { useFleetStore: reloaded } = await import('../../../store/useFleetStore')
     const state = reloaded.getState()
     expect(state.hasPersistedState).toBe(true)
-    expect(state.hangarItems.some((h) => h.name === 'FR-66' && h.entityClass === undefined)).toBe(true)
-    // Still fully functional: a legacy, entityClass-less component can
-    // still be installed via the same engine (first vacating Shield 1,
-    // which starts factory-satisfied).
+    // EWO-084 (R-004) — "FR-66" genuinely resolves, unambiguously, in the
+    // real generated catalog (SHLD_GODI_S01_FR66_SCItem); this legacy
+    // record's absent entityClass is exactly the drift R-004 exists to
+    // close, so hydration now reconciles it. The display name itself
+    // (Commander-facing) stays untouched — only the hidden entityClass
+    // linkage is populated.
+    const legacyItem = state.hangarItems.find((h) => h.name === 'FR-66')
+    expect(legacyItem?.entityClass).toBe('SHLD_GODI_S01_FR66_SCItem')
+    // Still fully functional: a (now identity-reconciled) legacy
+    // component can still be installed via the same engine (first
+    // vacating Shield 1, which starts factory-satisfied).
     reloaded.getState().removeComponent('ghost', 'Left Shield Generator')
     const result = reloaded.getState().installComponent('ghost', 'FR-66', 'Left Shield Generator')
     expect(result.matched).toBe(true)
+  })
+
+  it('1b. a legacy save containing a genuinely uncataloged component name still loads and functions, with no entityClass ever fabricated (EWO-084)', async () => {
+    localStorage.setItem(
+      'sfm-fleet-store',
+      JSON.stringify({
+        state: {
+          fleetAssets: [],
+          hangarItems: [
+            { id: 'legacy-2', name: 'Not A Real Catalog Component XYZ', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' },
+          ],
+          reservations: [],
+          installedLoadouts: [],
+        },
+        version: 8,
+      })
+    )
+    const { useFleetStore: reloaded } = await import('../../../store/useFleetStore')
+    const state = reloaded.getState()
+    expect(state.hasPersistedState).toBe(true)
+    const legacyItem = state.hangarItems.find((h) => h.name === 'Not A Real Catalog Component XYZ')
+    expect(legacyItem?.entityClass).toBeUndefined()
   })
 
   it('2. a newly installed cataloged component persists both display name and entityClass', async () => {

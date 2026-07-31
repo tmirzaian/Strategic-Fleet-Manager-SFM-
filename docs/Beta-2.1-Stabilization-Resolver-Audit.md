@@ -21,7 +21,7 @@ written; `git status` was clean.
 | Recommendation (§4/§5) | Status |
 |---|---|
 | Consolidate the four catalog name-lookup chains | ✅ **Implemented and certified** — EWO-083, commit `fd49099`. See the note in §1.4 below. |
-| Persisted-identity reconciliation at hydration (closes R-004) | Not started — explicitly out of scope for EWO-083 |
+| Persisted-identity reconciliation at hydration (closes R-004) | ✅ **Implemented and certified** — EWO-084. `src/store/persistedComponentIdentityReconciliation.ts`, wired into `useFleetStore.ts`'s `merge`. See §1.5 below and `docs/EngineeringRiskRegister.md`'s now-resolved R-004 entry. |
 | Reconcile the two divergent readiness-cache formulas | Not started |
 | Retire the `ImportedShipDetail` dev-only readiness duplicate | Not started |
 | Low-priority polish batch (readiness colors, test rename, `componentsMatch` promotion) | Not started |
@@ -139,6 +139,20 @@ below) and remains fully capable of producing another, silently, from
 any future hand-authored data.
 
 ### 1.5 Persistence reconciliation logic — R-004
+
+> ✅ **Implemented and certified — EWO-084.**
+> `src/store/persistedComponentIdentityReconciliation.ts`, wired into
+> `useFleetStore.ts`'s `merge` at each genuinely-persisted array's own
+> read site (installedLoadouts, hangarItems, reservations, and the
+> reconciled custom-Build hardpoint rows) — deliberately never at the
+> fresh seed-baseline construction, which is regenerated from
+> `src/data/seed.ts` every load and isn't "persisted state that can
+> drift" in R-004's sense. Uses EWO-083's canonical resolver with a new
+> `skipCatalogOverride` option (the hand-authored CATALOG table carries
+> no grade/manufacturerCode/classification/entityClass and would
+> otherwise shadow real catalog metadata for any name matching an
+> override key — the same regression class EWO-083 already found and
+> fixed for `resolveGrade`). See section 2 below for the full deep dive.
 
 See dedicated section 2 below.
 

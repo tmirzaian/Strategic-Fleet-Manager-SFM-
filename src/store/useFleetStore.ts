@@ -22,6 +22,13 @@ import { resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { swapGroupEligibleEntityClassesFor } from '../generated/configurableSlots'
 import type { FactoryHardpointTemplate } from '../data/shipDefinitions'
 import { normalizeFleetPriorities, reorderFleetPriority, closePriorityGapOnRemoval } from '../utils/fleetPriority'
+import {
+  reconcileArray,
+  reconcileHardpointComponentIdentity,
+  reconcileInstalledLoadoutEntryIdentity,
+  reconcileHangarItemIdentity,
+  reconcileReservationIdentity,
+} from './persistedComponentIdentityReconciliation'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -2424,9 +2431,24 @@ export const useFleetStore = create<FleetState>()(
         // seed ship's InstalledLoadout rows stay attached to it (see
         // FleetAsset.lifecycleStatus's own doc comment on why nothing is
         // ever spliced for retirement).
-        let installedLoadouts = persisted?.installedLoadouts ?? [...seedBaseline.installedLoadouts]
-        const hangarItems = persisted?.hangarItems ?? seedBaseline.hangarItems
-        const reservations = persisted?.reservations ?? currentState.reservations
+        // EWO-084 (R-004) — each array below is reconciled ONLY in the
+        // branch where it's genuinely persisted data, never the seed
+        // baseline/currentState fallback: the seed baseline is rebuilt
+        // fresh from src/data/seed.ts every load (not persisted state that
+        // can drift), and reconciling it anyway was confirmed during this
+        // mission's own test pass to cause a real regression —
+        // `addHangarItem`'s merge precedence treats "exactly one side
+        // carries entityClass" as "never the same record," so retroactively
+        // giving a previously-entityClass-less seed item a fresh
+        // entityClass changes how a same-session addition of that exact
+        // item merges against it. See
+        // src/store/persistedComponentIdentityReconciliation.ts for the
+        // full contract.
+        let installedLoadouts = persisted?.installedLoadouts
+          ? reconcileArray(persisted.installedLoadouts, reconcileInstalledLoadoutEntryIdentity)
+          : [...seedBaseline.installedLoadouts]
+        const hangarItems = persisted?.hangarItems ? reconcileArray(persisted.hangarItems, reconcileHangarItemIdentity) : seedBaseline.hangarItems
+        const reservations = persisted?.reservations ? reconcileArray(persisted.reservations, reconcileReservationIdentity) : currentState.reservations
 
         for (const existingAsset of persistedAssets) {
           if (fleetAssets.some((a) => a.id === existingAsset.id)) continue // already present, don't duplicate
@@ -2509,7 +2531,15 @@ export const useFleetStore = create<FleetState>()(
           }
         }
         builds = [...builds.filter((b) => !customBuildIds.has(b.id)), ...customBuilds]
-        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...reconciledCustomHardpoints]
+        // EWO-084 (R-004) — `reconciledCustomHardpoints` is genuinely
+        // Commander-persisted data (sourced from `persisted.customBuildHardpoints`,
+        // reconciled against the current port template above by
+        // `reconcileBuildHardpoints`) — safe and correct to identity-reconcile
+        // here, unlike the seed-baseline factory rows already in `hardpoints`
+        // (see the installedLoadouts/hangarItems/reservations comment above
+        // for why those stay separate).
+        const identityReconciledCustomHardpoints = reconcileArray(reconciledCustomHardpoints, reconcileHardpointComponentIdentity)
+        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...identityReconciledCustomHardpoints]
 
         // Migrate the shared, slotLabel-keyed installedLoadouts record for
         // any port a reconciliation above renamed (Scenario D) — otherwise

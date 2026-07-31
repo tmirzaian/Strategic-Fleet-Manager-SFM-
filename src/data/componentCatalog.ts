@@ -292,6 +292,20 @@ export interface ComponentResolutionOptions {
    * "first entry wins" outcome and must keep doing so to stay
    * behavior-preserving. */
   onAmbiguous?: 'strict' | 'permissive'
+  /** EWO-084 — off by default (every pre-existing caller keeps consulting
+   * the override table first, unchanged). When true, step 1 below is
+   * skipped entirely: resolution goes straight to entityClass/name
+   * against the canonical generated catalog. For a caller whose question
+   * isn't a compatibility decision (the override table's whole purpose)
+   * but a plain "does this identity still exist in the catalog" check —
+   * `CATALOG` entries carry no `grade`/`manufacturerCode`/`classification`
+   * by construction, so routing such a caller through the override first
+   * would silently blank out real catalog metadata for any name that
+   * happens to match an override key. This is the same reasoning
+   * `installCandidates.ts`'s `resolveGrade` (EWO-083) already applies by
+   * calling the base layer directly; this flag lets a caller get the same
+   * safety through this one shared function instead of a second bypass. */
+  skipCatalogOverride?: boolean
 }
 
 /** EWO-083 — lazily built, computed once on first use: every cataloged
@@ -346,12 +360,16 @@ function caseInsensitiveNameIndex(): Map<string, CanonicalComponentRecord[]> {
  *   4. EWO-083 — only when `options.caseInsensitiveFallback` is true and
  *      step 3 found nothing at all: one case-insensitive attempt against
  *      the full canonical catalog. Off by default.
+ *
+ * EWO-084 — `options.skipCatalogOverride` skips step 1 entirely for a
+ * caller that isn't making a compatibility decision (see
+ * ComponentResolutionOptions's own doc comment). Off by default.
  */
 function resolveCandidate(item: string, entityClass?: string | null, options?: ComponentResolutionOptions): CandidateResolution {
   const trimmed = item.trim()
   const lookupName = options?.aliasMap?.get(trimmed) ?? trimmed
 
-  const override = CATALOG[lookupName]
+  const override = options?.skipCatalogOverride ? undefined : CATALOG[lookupName]
   if (override) return { status: 'resolved', entry: override }
 
   if (entityClass) {
