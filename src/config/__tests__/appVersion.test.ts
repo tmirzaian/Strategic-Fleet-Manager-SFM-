@@ -3,13 +3,13 @@ import { APP_VERSION, APP_VERSION_LABEL } from '../appVersion'
 
 describe('APP_VERSION (Part 1, test 1)', () => {
   it('1. exposes a single central version constant used by the header', () => {
-    expect(APP_VERSION.productVersion).toBe('Beta 2.0')
+    expect(APP_VERSION.productVersion).toBe('Beta 2.1 Dev')
     expect(APP_VERSION_LABEL).toBe(APP_VERSION.productVersion)
   })
 
-  it('Beta 2.0 Promotion: the certified released-build string uses the plain "Beta X.Y" form, never a Dev/RC/Preview suffix', () => {
-    expect(APP_VERSION.productVersion).toMatch(/^Beta \d+\.\d+$/)
-    expect(APP_VERSION.productVersion).not.toMatch(/Dev|RC\d*|Preview|In Development/)
+  it('Beta 2.1 Initialization: the active-development string uses the approved "Dev" suffix, never "Preview" or "In Development"', () => {
+    expect(APP_VERSION.productVersion).toMatch(/^Beta \d+\.\d+ Dev$/)
+    expect(APP_VERSION.productVersion).not.toMatch(/Preview|In Development/)
   })
 
   it('no hardcoded "Sprint 1" string remains in the Sidebar source', async () => {

@@ -33,7 +33,7 @@ export interface AppVersionInfo {
 }
 
 export const APP_VERSION: AppVersionInfo = {
-  productVersion: 'Beta 2.0',
+  productVersion: 'Beta 2.1 Dev',
   dataPackVersion: undefined,
   buildId: undefined,
 }
