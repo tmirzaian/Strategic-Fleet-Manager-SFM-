@@ -23,7 +23,7 @@ written; `git status` was clean.
 | Consolidate the four catalog name-lookup chains | ✅ **Implemented and certified** — EWO-083, commit `fd49099`. See the note in §1.4 below. |
 | Persisted-identity reconciliation at hydration (closes R-004) | ✅ **Implemented and certified** — EWO-084. `src/store/persistedComponentIdentityReconciliation.ts`, wired into `useFleetStore.ts`'s `merge`. See §1.5 below and `docs/EngineeringRiskRegister.md`'s now-resolved R-004 entry. |
 | Reconcile the two divergent readiness-cache formulas | ✅ **Implemented and certified** — EWO-085. `fleetAssetMaterializer.ts` and `useFleetStore.ts`'s `buildCanonicalSeedCustomBuilds` now both call `calculateBuildProgress` directly instead of an independent formula. See §1.1 below. |
-| Retire the `ImportedShipDetail` dev-only readiness duplicate | Not started — reserved for EWO-086 |
+| Retire the `ImportedShipDetail` dev-only readiness duplicate | ✅ **Implemented and certified** — EWO-086. `ShipDetail.tsx`'s hand-rolled `matchedCount / equipmentAssignments.length` formula replaced by a call to `calculateBuildProgress` against the same Hardpoint-shaped rows already built for the port-tree render (extracted into the named, exported `buildImportedShipHardpoints` adapter for testability). See §1.1 below. **The Beta 2.1 readiness-consolidation line item (audit §1.1/§3) is now fully closed** — no independent readiness formula remains anywhere in the app. |
 | Low-priority polish batch (readiness colors, test rename, `componentsMatch` promotion) | Not started |
 
 The rest of this document is preserved as originally written — the
@@ -83,6 +83,19 @@ nine parallel problems.
 > more importantly, was a latent consistency/fragility risk regardless of
 > current visibility. `ShipDetail.tsx`'s separate `ImportedShipDetail`
 > dev-only duplicate remains unaddressed, reserved for EWO-086.
+>
+> ✅ **`ImportedShipDetail` duplicate implemented and certified — EWO-086.**
+> Its hand-rolled `matchedCount / equipmentAssignments.length` formula
+> (a THIRD, independent readiness calculation, using a different data
+> source than the Hardpoint-shaped rows this same component already
+> built for its own port-tree render) never excluded Unresolved or
+> genuinely-untargeted rows the way `calculateBuildProgress` does. Now
+> calls `calculateBuildProgress` directly against those same rows — the
+> row-construction logic itself was extracted, unchanged, into a named,
+> exported `buildImportedShipHardpoints` adapter purely for direct
+> testability. **With this, no independent readiness formula remains
+> anywhere in the codebase — the audit's readiness-consolidation line
+> item is fully closed.**
 
 ### 1.2 Decision calculations (Decision Center)
 

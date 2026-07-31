@@ -12,6 +12,7 @@ import EditFleetAssetModal from '../components/EditFleetAssetModal'
 import LoadoutPortTree from '../components/LoadoutPortTree'
 import { importedShipList, type ImportedShipView } from '../generated/importedShips'
 import { calculateBuildProgress } from '../utils/buildProgress'
+import type { Hardpoint } from '../types'
 import { calculateMissionPackage } from '../engine/logistics/missionPackage'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { buildPortTree } from '../utils/portTree'
@@ -369,19 +370,25 @@ export default function ShipDetail() {
  * translating the engine's real Port graph into the same Hardpoint shape
  * the tree already knows how to render — one tree component for every ship.
  */
-function ImportedShipDetail({ view, selectShip }: { view: ImportedShipView; selectShip: React.ReactNode }) {
-  const { ship, componentById, equipmentAssignments } = view
-
+/**
+ * EWO-086 — the "smallest safe adapter" from `ImportedShipView`'s engine
+ * Port/Component data to the real `Hardpoint` shape `calculateBuildProgress`
+ * (and `LoadoutPortTree`) already consume. Extracted from what used to be
+ * an inline `.map()` inside `ImportedShipDetail` purely so it's directly
+ * testable — no behavior changed by the extraction itself; this is the
+ * exact same row-construction logic, unchanged. Status is derived with a
+ * deliberately simple, pre-existing rule specific to this developer-only
+ * preview (Unresolved when factory data itself never resolved, OK when
+ * Installed matches Target or Target is empty, Missing otherwise) — this
+ * status derivation is NOT part of EWO-086's scope and is preserved
+ * exactly as it already was; only the readiness AGGREGATION downstream of
+ * it (in `ImportedShipDetail` below) changes.
+ */
+export function buildImportedShipHardpoints(view: ImportedShipView): Hardpoint[] {
+  const { ship, componentById } = view
   const nameFor = (componentId: string | null | undefined) => (componentId ? componentById.get(componentId)?.displayName ?? componentId : '—')
 
-  const matchedCount = equipmentAssignments.filter((a) => a.resolvedItemId !== null).length
-  const readiness = equipmentAssignments.length > 0 ? Math.round((matchedCount / equipmentAssignments.length) * 100) : 100
-  const isMissionReady = readiness === 100 && equipmentAssignments.every((a) => !a.mixedChildItems)
-
-  // Translate engine Port/Component data into the same Hardpoint shape
-  // LoadoutPortTree already renders, preserving mount hierarchy via
-  // parentSlotLabel exactly like the legacy-model ships do.
-  const importedHardpoints = view.ports.map((p) => {
+  return view.ports.map((p) => {
     const parent = p.parentPortId ? view.ports.find((parentPort) => parentPort.id === p.parentPortId) : undefined
     const installedName = nameFor(p.installedItemId)
     const targetName = nameFor(p.targetItemId)
@@ -401,6 +408,28 @@ function ImportedShipDetail({ view, selectShip }: { view: ImportedShipView; sele
       parentSlotLabel: parent?.displayName,
     }
   })
+}
+
+function ImportedShipDetail({ view, selectShip }: { view: ImportedShipView; selectShip: React.ReactNode }) {
+  const { ship, equipmentAssignments } = view
+
+  // EWO-086 — previously a second, independent readiness formula
+  // (matchedCount / equipmentAssignments.length, from a different data
+  // source than the Hardpoint rows this same component already builds for
+  // its own port-tree render) that never excluded Unresolved or
+  // genuinely-untargeted rows the way the canonical engine does. Now
+  // calls `calculateBuildProgress` directly against the exact same
+  // Hardpoint rows `LoadoutPortTree` renders below — one readiness
+  // calculation for this preview, not two.
+  const importedHardpoints = buildImportedShipHardpoints(view)
+  const importedProgress = calculateBuildProgress(importedHardpoints)
+  const readiness = importedProgress.percentage
+  // `mixedChildItems` is a separate, additional guard (a swap-group child
+  // mismatch signal from the import pipeline's own equipmentAssignments,
+  // not a readiness concept `calculateBuildProgress` knows about) —
+  // preserved exactly as it already was, layered on top of the now-
+  // canonical completeness check rather than the old hand-rolled one.
+  const isMissionReady = importedProgress.isComplete && equipmentAssignments.every((a) => !a.mixedChildItems)
 
   return (
     <div className="space-y-6">
