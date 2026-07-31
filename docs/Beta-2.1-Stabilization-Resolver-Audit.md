@@ -10,10 +10,26 @@ sharing one ID in the historical record. Recommend the Chief Architect
 assign this audit a fresh number (e.g. EWO-074 or an EWO-STAB-0xx
 continuation, see below) the next time it's referenced.
 
-**Status: audit only.** No source file under `src/` was modified to
-produce this report — every finding below comes from direct code
-reading (via `Read`/`Grep`) plus three focused research passes. No
-application behavior changed; `git status` is clean.
+**Status: audit only as originally filed.** No source file under `src/`
+was modified to produce this report — every finding below comes from
+direct code reading (via `Read`/`Grep`) plus three focused research
+passes. No application behavior changed at the time this document was
+written; `git status` was clean.
+
+**Implementation status (updated after the audit):**
+
+| Recommendation (§4/§5) | Status |
+|---|---|
+| Consolidate the four catalog name-lookup chains | ✅ **Implemented and certified** — EWO-083, commit `fd49099`. See the note in §1.4 below. |
+| Persisted-identity reconciliation at hydration (closes R-004) | Not started — explicitly out of scope for EWO-083 |
+| Reconcile the two divergent readiness-cache formulas | Not started |
+| Retire the `ImportedShipDetail` dev-only readiness duplicate | Not started |
+| Low-priority polish batch (readiness colors, test rename, `componentsMatch` promotion) | Not started |
+
+The rest of this document is preserved as originally written — the
+point-in-time audit findings — with status notes added inline rather
+than rewritten, so it stays an accurate record of what was found *and*
+what's since been done about it.
 
 ---
 
@@ -80,6 +96,23 @@ mode (ship-to-ship transfers) skips the catalog and does verbatim
 type/size string equality — documented as intentional, not a gap.
 
 ### 1.4 Component catalog lookup logic — **the audit's main finding**
+
+> ✅ **Implemented and certified — EWO-083, commit `fd49099`.**
+> `resolveComponentCatalogEntryDetailed` (row 1 below) was widened in
+> place into the one shared resolver, rather than replaced by a new
+> parallel one: it now carries `grade`/`manufacturerCode`/`classification`
+> and accepts optional normalization/case-insensitive-fallback/alias-hook/
+> ambiguity-mode behavior, defaulting to exactly its pre-existing
+> resolution. `resolveGrade` (row 4) was migrated onto the same
+> base-layer functions the canonical resolver itself uses. Rows 2 and 3
+> were audited and deliberately left unchanged — `fullComponentCatalog`
+> already delegated to the base layer with no independent chain to
+> remove, and migrating `resolveComponentLabel` was confirmed (via a real
+> caught-and-fixed regression during EWO-083's own test pass) to risk
+> silently dropping real grade/entityClass data for any name matching a
+> CATALOG override key, since the override table was never meant to
+> shadow presentation data. Full detail: EWO-083's own commit message and
+> the "Deliverable" report given to the Chief Architect at certification.
 
 | Resolver | File | Purpose |
 |---|---|---|
