@@ -4,6 +4,7 @@ import { computeHardpointStatusWithValidation } from './hardpointStatus'
 import { ownershipTypeToLegacy } from './ownership'
 import { resolveShipImage } from './resolveShipImage'
 import { resolveComponentIdentity } from '../engine/installation'
+import { calculateBuildProgress } from './buildProgress'
 
 let counter = 0
 function uniqueSuffix(): string {
@@ -155,16 +156,22 @@ export function materializeFleetAsset({ definition, template, existingAsset, own
     }
   })
 
-  // EWO-020 (Task 4/13): structural rows never count toward readiness —
-  // they have no configurable component, so including them would either
-  // silently inflate readiness (counted as trivially "OK") or misreport
-  // a physically-fine ship as incomplete. Only real, configurable rows
-  // enter the denominator, same as before this mission for every ship
-  // that has no structural rows at all.
-  const configurableHardpoints = hardpoints.filter((h) => !h.isStructural)
-  const missing = configurableHardpoints.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
-  const okCount = configurableHardpoints.filter((h) => h.status === 'OK').length
-  const readiness = configurableHardpoints.length > 0 ? Math.round((okCount / configurableHardpoints.length) * 100) : 100
+  // EWO-085 — previously a second, independent readiness formula (denominator
+  // = every non-structural row, regardless of whether it actually had a
+  // Target, or whether its factory data was Unresolved) that diverged from
+  // the canonical Build Progress engine (buildProgress.ts's own required-set
+  // rule: exclude Unresolved status AND exclude rows with no real Target,
+  // not just structural ones). `calculateBuildProgress` already excludes a
+  // structural row on its own (its target/installed/factory are always the
+  // '—' sentinel by construction, see below), so calling it directly here
+  // reproduces the old exclusion AND closes the Unresolved-factory-data gap
+  // the old formula missed. `missing` keeps deriving straight from the row
+  // filter (not `progress.missingAssignments`/`upgradeOpportunities`) to
+  // preserve this array's existing row-order convention, matching every
+  // other correct call site in this codebase (e.g. useFleetStore.ts's own
+  // per-Build recompute).
+  const missing = hardpoints.filter((h) => h.status === 'Missing' || h.status === 'Upgrade Available').map((h) => h.targetItem)
+  const readiness = calculateBuildProgress(hardpoints).percentage
 
   const build: Build = {
     id: buildId,

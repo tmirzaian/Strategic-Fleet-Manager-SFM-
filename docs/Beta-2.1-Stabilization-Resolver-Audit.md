@@ -22,8 +22,8 @@ written; `git status` was clean.
 |---|---|
 | Consolidate the four catalog name-lookup chains | ✅ **Implemented and certified** — EWO-083, commit `fd49099`. See the note in §1.4 below. |
 | Persisted-identity reconciliation at hydration (closes R-004) | ✅ **Implemented and certified** — EWO-084. `src/store/persistedComponentIdentityReconciliation.ts`, wired into `useFleetStore.ts`'s `merge`. See §1.5 below and `docs/EngineeringRiskRegister.md`'s now-resolved R-004 entry. |
-| Reconcile the two divergent readiness-cache formulas | Not started |
-| Retire the `ImportedShipDetail` dev-only readiness duplicate | Not started |
+| Reconcile the two divergent readiness-cache formulas | ✅ **Implemented and certified** — EWO-085. `fleetAssetMaterializer.ts` and `useFleetStore.ts`'s `buildCanonicalSeedCustomBuilds` now both call `calculateBuildProgress` directly instead of an independent formula. See §1.1 below. |
+| Retire the `ImportedShipDetail` dev-only readiness duplicate | Not started — reserved for EWO-086 |
 | Low-priority polish batch (readiness colors, test rename, `componentsMatch` promotion) | Not started |
 
 The rest of this document is preserved as originally written — the
@@ -67,6 +67,22 @@ nine parallel problems.
 | `calculateMissionPackage` | `src/engine/logistics/missionPackage.ts:24` | A *different* metric (Package Readiness — "do I own/commit everything") — not a duplicate, deliberately separate | `ShipDetail.tsx` |
 
 **Canonical.** One engine, layered correctly, wide reuse.
+
+> ✅ **Cache-formula duplication implemented and certified — EWO-085.**
+> The audit's original finding also flagged two independent
+> readiness-cache formulas outside this table — `fleetAssetMaterializer.ts`
+> and `useFleetStore.ts`'s `buildCanonicalSeedCustomBuilds` — that
+> populated `Build.readiness`/`Ship.readiness` via their own denominator
+> logic rather than calling `calculateBuildProgress`. Both now call it
+> directly. Root-cause note from EWO-085's own investigation: live
+> operational screens (Fleet Dashboard, Mission Control, Ship Management)
+> were already fully canonical/live and never read the cache for their
+> primary readiness display — the divergence was only externally visible
+> via two direct cache reads (`QuickUpdate.tsx`'s Captain's Log
+> before/after entry, `ShipDetail.tsx`'s stale "before" comparison) and,
+> more importantly, was a latent consistency/fragility risk regardless of
+> current visibility. `ShipDetail.tsx`'s separate `ImportedShipDetail`
+> dev-only duplicate remains unaddressed, reserved for EWO-086.
 
 ### 1.2 Decision calculations (Decision Center)
 

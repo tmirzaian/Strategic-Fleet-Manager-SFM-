@@ -311,10 +311,16 @@ function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpo
         targetMode: assignment?.targetItem ? ('EXPLICIT_TARGET' as const) : ('FOLLOW_FACTORY' as const),
       }
     })
-    const configurableRows = rows.filter((r) => !r.isStructural)
-    const missing = configurableRows.filter((r) => r.status === 'Missing' || r.status === 'Upgrade Available').map((r) => r.targetItem)
-    const okCount = configurableRows.filter((r) => r.status === 'OK').length
-    const readiness = configurableRows.length > 0 ? Math.round((okCount / configurableRows.length) * 100) : 100
+    // EWO-085 — previously a second, independent readiness formula
+    // (denominator = every non-structural row, missing the canonical
+    // engine's own exclusion of Unresolved-status and truly-untargeted
+    // rows). Calling `calculateBuildProgress` directly reproduces the old
+    // structural exclusion for free (a structural row's target/installed/
+    // factory are always the '—' sentinel by construction) and closes the
+    // gap the old formula missed. See fleetAssetMaterializer.ts's own
+    // EWO-085 comment for the identical fix applied there.
+    const missing = rows.filter((r) => r.status === 'Missing' || r.status === 'Upgrade Available').map((r) => r.targetItem)
+    const readiness = calculateBuildProgress(rows).percentage
     builds.push({ id: overlay.buildId, shipId: overlay.shipId, name: overlay.name, role: overlay.role, readiness, isActive: overlay.isActive, missing, kind: 'CUSTOM' })
     hardpoints.push(...rows)
   }
