@@ -3,7 +3,7 @@ import type { TargetComponentOption } from '../components/TargetComponentPicker'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { findActiveSlotReservation } from '../engine/logistics/reservationLookup'
 import { identitiesMatch, type ResolvedComponentIdentity } from '../engine/installation/componentIdentityService'
-import { catalogComponentsByEntityClass, catalogComponentsByName } from '../generated/componentCatalog'
+import { resolveComponentByEntityClass, resolveComponentByName } from '../generated/componentCatalog'
 import { resolveComponentLabel } from './componentPresentation'
 
 /**
@@ -45,13 +45,37 @@ function identityFor(item: string, entityClass?: string): ResolvedComponentIdent
  * convention `componentPresentation.ts`'s `GRADE_LETTERS` already
  * establishes app-wide. Prefers the entityClass-keyed catalog record (more
  * specific) over the display-name-keyed one, same precedence
- * `resolveComponentLabel` already uses elsewhere for this exact field. */
+ * `resolveComponentLabel` already uses elsewhere for this exact field.
+ *
+ * EWO-083 — previously a fourth, independent reimplementation of the
+ * entityClass-then-name catalog lookup, reading the LEGACY, player-
+ * selectable-restricted maps (`catalogComponentsByEntityClass`/
+ * `catalogComponentsByName`) directly. Migrated to call the same base
+ * generated-layer functions (`resolveComponentByEntityClass`/
+ * `resolveComponentByName`) `src/data/componentCatalog.ts`'s own
+ * canonical `resolveCandidate` is built on — genuinely one shared
+ * resolution path now, not a fourth reimplementation.
+ *
+ * Deliberately does NOT route through
+ * `resolveComponentCatalogEntryDetailed` (componentCatalog.ts's full
+ * compatibility-oriented resolver): that function checks the
+ * hand-authored `CATALOG` override table first, and override entries
+ * never carry a `grade` (confirmed — they predate that tracking).
+ * Routing grade lookups through it would silently null out the grade for
+ * any component whose name happens to match an override key, a real
+ * regression found and reverted during this mission's own test pass
+ * (`sw014aInlineInstalledComponentWorkflow.test.tsx`'s UPGRADE-group
+ * cases). Grade is a presentation attribute the override table was never
+ * meant to shadow, so this stays on the base layer only. */
 function resolveGrade(item: string, entityClass?: string): number | null {
   if (entityClass) {
-    const byEntityClass = catalogComponentsByEntityClass.get(entityClass)
-    if (byEntityClass && byEntityClass.grade !== null && byEntityClass.grade !== undefined) return byEntityClass.grade
+    const byEntityClass = resolveComponentByEntityClass(entityClass)
+    if (byEntityClass.status === 'resolved' && byEntityClass.record.grade !== null) return byEntityClass.record.grade
   }
-  return catalogComponentsByName.get(item)?.grade ?? null
+  const byName = resolveComponentByName(item)
+  if (byName.status === 'resolved') return byName.record.grade
+  if (byName.status === 'ambiguous') return byName.candidates[0]?.grade ?? null
+  return null
 }
 
 export interface ReservedInstallCandidate {

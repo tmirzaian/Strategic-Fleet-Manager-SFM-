@@ -2,6 +2,7 @@ import { isCompatible } from '../engine/compatibility'
 import type { Component, CompatibilityRule } from '../engine/types'
 import {
   compatibilityPortTypeFor,
+  componentsByEntityClass,
   resolveComponentByEntityClass,
   resolveComponentByName,
   type CanonicalComponentRecord,
@@ -53,6 +54,16 @@ interface CatalogEntry {
    * `checkCompatibility`/`validateTargetCompatibility` (the save-time path
    * stays exactly as permissive as before). */
   requiredTags?: string[]
+  // EWO-083 — carried through from the generated catalog's own
+  // CanonicalComponentRecord whenever resolution came from there, so a
+  // caller that only needs a field this entry already implies (grade,
+  // manufacturer, classification) can stop maintaining its own second
+  // lookup against the generated maps. Undefined for a hand-authored
+  // CATALOG override entry, which predates this tracking and carries no
+  // such data — never fabricated.
+  grade?: number | null
+  manufacturerCode?: string | null
+  classification?: string | null
 }
 
 const CATALOG: Record<string, CatalogEntry> = {
@@ -224,6 +235,10 @@ function toCandidateResolution(record: CanonicalComponentRecord): CandidateResol
       entityClass: record.entityClass,
       subtype: record.subtype,
       requiredTags: record.vesselBoundTags,
+      // EWO-083 — see CatalogEntry's own doc comment.
+      grade: record.grade,
+      manufacturerCode: record.manufacturerCode,
+      classification: record.classification,
     },
   }
 }
@@ -251,12 +266,65 @@ export type CandidateResolution =
   | { status: 'unresolved' }
 
 /**
+ * EWO-083 — optional behavior toggles for `resolveComponentCatalogEntryDetailed`
+ * (Beta 2.1 Stabilization Sprint, docs/Beta-2.1-Stabilization-Resolver-Audit.md),
+ * consolidating what used to be four independent catalog lookup chains
+ * behind this one resolver. Every field defaults to exactly the
+ * resolution this function already performed before this mission — a
+ * caller that passes no `options` at all sees zero behavior change.
+ */
+export interface ComponentResolutionOptions {
+  /** Architectural hook only — no alias table is populated by this
+   * mission (explicitly out of scope, see EWO-083's own work order).
+   * When supplied, a name is remapped through this table BEFORE lookup;
+   * absent by default, so no current caller is affected. */
+  aliasMap?: ReadonlyMap<string, string>
+  /** Off by default, matching every pre-existing caller's exact current
+   * behavior. When true, a name that misses every exact-match step below
+   * gets one additional case-insensitive attempt (against the full
+   * canonical catalog, not just the hand-authored override table) before
+   * resolving 'unresolved'. */
+  caseInsensitiveFallback?: boolean
+  /** 'strict' (default) matches this resolver's pre-existing
+   * ambiguous-name behavior — refuse, `status: 'ambiguous'`. 'permissive'
+   * returns the first real candidate instead, for a caller migrating onto
+   * this shared resolver whose own prior behavior already tolerated a
+   * "first entry wins" outcome and must keep doing so to stay
+   * behavior-preserving. */
+  onAmbiguous?: 'strict' | 'permissive'
+}
+
+/** EWO-083 — lazily built, computed once on first use: every cataloged
+ * component grouped by lowercased display name. Only ever consulted when
+ * a caller explicitly opts into `caseInsensitiveFallback` — building it
+ * eagerly for every module load would cost real work no exact-match-only
+ * caller (still the overwhelming majority) needs. */
+let caseInsensitiveIndex: Map<string, CanonicalComponentRecord[]> | undefined
+function caseInsensitiveNameIndex(): Map<string, CanonicalComponentRecord[]> {
+  if (!caseInsensitiveIndex) {
+    caseInsensitiveIndex = new Map()
+    for (const record of componentsByEntityClass.values()) {
+      const key = record.displayName.toLowerCase()
+      const group = caseInsensitiveIndex.get(key)
+      if (group) group.push(record)
+      else caseInsensitiveIndex.set(key, [record])
+    }
+  }
+  return caseInsensitiveIndex
+}
+
+/**
  * The one shared candidate-resolution decision (EWO-STAB-004A, Assignments
  * 2/3/6) — every compatibility- and identity-sensitive caller in this
  * codebase resolves a component through this function, never by reading
  * the generated catalog maps directly.
  *
  * Precedence:
+ *   0. EWO-083 — the raw input is trimmed before anything else (an
+ *      always-on normalization step; every existing caller already
+ *      supplies a clean value, so this only ever widens a match, never
+ *      narrows one — and, when `options.aliasMap` is supplied, the
+ *      trimmed name is remapped through it before lookup).
  *   1. The hand-authored CATALOG override table, by name, REGARDLESS of
  *      whether an entityClass was also supplied. Every key here is a
  *      specifically-reviewed correction for a known bulk-catalog problem
@@ -272,10 +340,18 @@ export type CandidateResolution =
  *      missed is exactly what CAT-003 found causing the Polaris PDC bug.
  *   3. Without an entityClass either: the ambiguity-aware bulk catalog
  *      (`resolveComponentByName`). A name shared by two or more distinct
- *      entityClasses resolves `ambiguous`, never "first entry wins".
+ *      entityClasses resolves `ambiguous` (or, in `onAmbiguous: 'permissive'`
+ *      mode, the first candidate) — never silent "first entry wins" by
+ *      default.
+ *   4. EWO-083 — only when `options.caseInsensitiveFallback` is true and
+ *      step 3 found nothing at all: one case-insensitive attempt against
+ *      the full canonical catalog. Off by default.
  */
-function resolveCandidate(item: string, entityClass?: string | null): CandidateResolution {
-  const override = CATALOG[item]
+function resolveCandidate(item: string, entityClass?: string | null, options?: ComponentResolutionOptions): CandidateResolution {
+  const trimmed = item.trim()
+  const lookupName = options?.aliasMap?.get(trimmed) ?? trimmed
+
+  const override = CATALOG[lookupName]
   if (override) return { status: 'resolved', entry: override }
 
   if (entityClass) {
@@ -283,9 +359,20 @@ function resolveCandidate(item: string, entityClass?: string | null): CandidateR
     return resolution.status === 'resolved' ? toCandidateResolution(resolution.record) : { status: 'unresolved' }
   }
 
-  const resolution = resolveComponentByName(item)
-  if (resolution.status === 'ambiguous') return { status: 'ambiguous' }
+  const resolution = resolveComponentByName(lookupName)
+  if (resolution.status === 'ambiguous') {
+    return options?.onAmbiguous === 'permissive' ? toCandidateResolution(resolution.candidates[0]) : { status: 'ambiguous' }
+  }
   if (resolution.status === 'resolved') return toCandidateResolution(resolution.record)
+
+  if (options?.caseInsensitiveFallback) {
+    const candidates = caseInsensitiveNameIndex().get(lookupName.toLowerCase())
+    if (candidates && candidates.length > 0) {
+      if (candidates.length === 1) return toCandidateResolution(candidates[0])
+      return options.onAmbiguous === 'permissive' ? toCandidateResolution(candidates[0]) : { status: 'ambiguous' }
+    }
+  }
+
   return { status: 'unresolved' }
 }
 
@@ -312,9 +399,19 @@ export function resolveComponentCatalogEntry(item: string): CatalogEntry | undef
 /** EWO-STAB-004A — the detailed form of the above, preserving the
  * ambiguous/unresolved distinction `CatalogEntry | undefined` can't
  * express. Used by componentIdentityService.ts's own name-based
- * resolution branch. */
-export function resolveComponentCatalogEntryDetailed(item: string, entityClass?: string | null): CandidateResolution {
-  return resolveCandidate(item, entityClass)
+ * resolution branch.
+ *
+ * EWO-083 — `options` is new and optional; omitting it (every pre-EWO-083
+ * caller) reproduces the exact resolution this function already
+ * performed. This is now the one canonical entry point the Beta 2.1
+ * Stabilization Sprint's resolver audit calls for — see
+ * docs/Beta-2.1-Stabilization-Resolver-Audit.md §1.4. */
+export function resolveComponentCatalogEntryDetailed(
+  item: string,
+  entityClass?: string | null,
+  options?: ComponentResolutionOptions
+): CandidateResolution {
+  return resolveCandidate(item, entityClass, options)
 }
 
 export type DestinationCapability = 'PDC_TURRET' | null
