@@ -330,7 +330,8 @@ orders for Chief Architect review and prioritization.
 
 ## 7. Recommended Remediation Work Orders (priority order)
 
-**EWO-088 — Borrow-Tier Retired-Ship Leakage Fix.** Scope `installCandidates.ts`'s
+**EWO-088 — Borrow-Tier Retired-Ship Leakage Fix. ✅ Implemented and certified.**
+Scope `installCandidates.ts`'s
 `installedElsewhere` filter (Borrow tier, lines 250–274) to
 `selectActiveShips`-scoped ships, matching the guarantee already
 documented at `ShipWorkspacePrototype.tsx:1532-1534`. Also address the
@@ -338,8 +339,24 @@ same unscoped-`ships` pattern at `ShipWorkspacePrototype.tsx:1112`
 and `shipManagementSummary.ts:416` (Tier-3 hint labels). **Highest
 priority** — confirmed live, Commander-visible contradiction of a
 documented product guarantee.
+> Implemented: both resolvers now exclude a donor absent from the
+> caller's `ships` array outright (never a placeholder "Unknown Ship"
+> row), and both `ShipWorkspacePrototype.tsx` call sites that were
+> still passing the raw fleet now pass `activeShips`. Covered by 4 new
+> unit tests (`installCandidatesBorrowLeakage.test.ts`,
+> `componentAcquisitionHint.test.ts`) and a 2-test live-rendered
+> integration suite (`ewo088BorrowTierRetiredShipLeakage.test.tsx`).
+> Live-verified on port 5176 through the real Commander UI flow —
+> installed a component on Cutlass Black via "Install New Component,"
+> confirmed Cutlass Red's Borrow tier correctly named it as a donor,
+> retired Cutlass Black via the real Ship Settings → Retire Vessel
+> flow, and confirmed the donor and its component vanished from Cutlass
+> Red's Borrow section entirely (no "Unknown Ship" placeholder), while
+> other genuinely active donors (Corsair, Prospector) remained
+> correctly visible for unrelated candidates.
 
-**EWO-089 — Mission Control / Fleet Dashboard Hardpoint Reconciliation.**
+**EWO-089 — Mission Control / Fleet Dashboard Hardpoint Reconciliation.
+✅ Implemented and certified.**
 Route Mission Control's and Fleet Dashboard's readiness hardpoint
 input through `prepareCanonicalHardpoints`, matching Ship
 Management/Ship Detail, closing the gap the utility's own doc comment
@@ -347,6 +364,25 @@ already calls for. Not currently manifesting for any real fleet data,
 but directly closes the amendment's "Level 2 — Commander Consistency"
 concern at the structural level rather than relying on no ship ever
 drifting from its template.
+> Implemented: both pages now call `prepareCanonicalHardpoints(ship.id,
+> rawHardpoints, fleetAssets)` before `calculateBuildProgress`, exactly
+> as Ship Management/Ship Detail already do. Investigation during
+> implementation found `calculateBuildProgress` itself never reads the
+> structural fields `overlayCanonicalHierarchy` corrects (`isStructural`,
+> `parentSlotLabel`, etc.) — the one path that actually changes a
+> computed percentage is `withComponentOwnedChildSlots` discarding a
+> STALE component-owned child assignment (e.g. a mining head's module
+> slot) left behind when its parent component was swapped away from its
+> factory identity. Proved with a constructed regression fixture (a
+> Mining Head swapped from Arbor to Lancet with a real, stale Missing
+> child assignment): raw input read 50%, reconciled correctly reads
+> 100% — and Mission Control/Fleet Dashboard now render the reconciled
+> value (`ewo089CanonicalHardpointReconciliation.test.tsx`, 3 tests).
+> Live-verified on port 5176: the real seed fleet (no ship currently has
+> this drift) renders byte-identical values before and after (Ghost 93%,
+> MOLE 95%, Vulture 95%, Corsair Mission Ready), confirming zero
+> regression while the structural gap is now closed for any ship that
+> does drift.
 
 **EWO-090 — `isStructural` Exclusion Guard for Procurement/Needed-By.**
 Add an explicit `if (hp.isStructural) continue` (or equivalent) to

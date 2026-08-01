@@ -44,6 +44,7 @@ import {
 } from '../utils/quartermasterBriefing'
 import { CANONICAL_COMPONENT_CATEGORY_ORDER, CANONICAL_COMPONENT_CATEGORY_LABEL, CANONICAL_COMPONENT_CATEGORY_ICON } from '../utils/componentCategoryIcon'
 import { calculateBuildProgress } from '../utils/buildProgress'
+import { prepareCanonicalHardpoints } from '../utils/canonicalHardpointPreparation'
 import { deriveFleetBuildState, classifyFleetStatusTile } from '../utils/fleetBuildState'
 import { buildTileContextNames, type TileContextResult } from '../utils/tileContextNames'
 import { deriveFleetPriorityActions, type PriorityActionCategory } from '../utils/priorityActions'
@@ -235,7 +236,14 @@ export default function MissionControl() {
   // keeping both would repeat one fact under two different numbers
   // (Engineering Constraint: "Do not add additional metrics simply
   // because space exists").
-  const progressByShipId = new Map(ships.map((s) => [s.id, calculateBuildProgress(hardpoints.filter((h) => h.buildId === s.activeBuildId))]))
+  // EWO-089 — routed through prepareCanonicalHardpoints, the same
+  // canonical-template reconciliation Ship Management/Ship Detail already
+  // apply, so a ship whose saved Build has drifted from its current
+  // canonical port structure can never show a different readiness % here
+  // than it does on those two surfaces (EWO-087 §0.3 finding).
+  const progressByShipId = new Map(
+    ships.map((s) => [s.id, calculateBuildProgress(prepareCanonicalHardpoints(s.id, hardpoints.filter((h) => h.buildId === s.activeBuildId), fleetAssets))])
+  )
   const overallReadiness = ships.length > 0 ? Math.round(ships.reduce((sum, s) => sum + (progressByShipId.get(s.id)?.percentage ?? 0), 0) / ships.length) : 0
   // EWO-012: the Priority Ship section is sized for up to four records —
   // never invents a filler ship when fewer exist. EWO-033 (Task 2) raised

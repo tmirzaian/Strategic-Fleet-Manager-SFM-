@@ -350,6 +350,9 @@ export interface ShipManagementSummaryContext {
   hangarItems: HangarItem[]
   installedLoadouts: InstalledLoadoutEntry[]
   reservations: MissionReservation[]
+  /** EWO-088 — must be active-fleet-scoped (`selectActiveShips`); passed
+   * straight through to `describeAcquisitionHint`'s own Tier 3 Borrow
+   * check below, which relies on this to exclude retired donors. */
   ships: Ship[]
 }
 

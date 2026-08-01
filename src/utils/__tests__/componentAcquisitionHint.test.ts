@@ -71,6 +71,19 @@ describe('describeAcquisitionHint (SW-002 Immediate Decision Intelligence)', () 
     expect(hint.detail).toContain('Corsair')
   })
 
+  it('EWO-088 — Tier 3 excludes a donor not present in `ships` (retired), falling through to Purchase Required instead of a placeholder', () => {
+    const hint = describeAcquisitionHint(
+      baseParams({
+        // 'railen' deliberately absent from `ships` (the base fixture only
+        // has 'ghost'/'corsair'), mirroring a real caller passing
+        // selectActiveShips-scoped ships while a retired vessel's
+        // InstalledLoadoutEntry is still present (retirement never prunes it).
+        installedLoadouts: [{ shipId: 'railen', slotLabel: 'Cooler 1', installedItem: 'SnowBlind' }],
+      })
+    )
+    expect(hint.label).toBe('Purchase Required')
+  })
+
   it('never suggests borrowing from the same ship the Commander is already reviewing', () => {
     const hint = describeAcquisitionHint(
       baseParams({

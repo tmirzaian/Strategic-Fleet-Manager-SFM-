@@ -9,6 +9,7 @@ import Badge, { ownershipTone } from '../components/Badge'
 import ReadinessBar from '../components/ReadinessBar'
 import AddShipModal from '../components/AddShipModal'
 import { calculateBuildProgress, type BuildProgressResult } from '../utils/buildProgress'
+import { prepareCanonicalHardpoints } from '../utils/canonicalHardpointPreparation'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
 import { ALL_RSI_ROLES } from '../data/shipClassification'
 import { resolveShipStockRoleFocus, resolveShipRsiRoles } from '../utils/shipIdentityLine'
@@ -88,13 +89,20 @@ export default function FleetDashboard() {
   // Ship Detail or Mission Control about the same ship. FleetBuildState
   // rides alongside it — Factory-only and completed-custom read the same
   // progress numbers but are never the same state (Part 7/9).
+  //
+  // EWO-089 — routed through prepareCanonicalHardpoints (the same
+  // canonical-template reconciliation Ship Management/Ship Detail already
+  // apply) rather than the raw saved rows, so a ship whose Build has
+  // drifted from its current canonical port structure can never disagree
+  // with those two surfaces either (EWO-087 §0.3 finding).
   const progressByShipId = useMemo(() => {
     const map = new Map<string, BuildProgressResult>()
     for (const ship of ships) {
-      map.set(ship.id, calculateBuildProgress(hardpoints.filter((h) => h.buildId === ship.activeBuildId)))
+      const rawHardpoints = hardpoints.filter((h) => h.buildId === ship.activeBuildId)
+      map.set(ship.id, calculateBuildProgress(prepareCanonicalHardpoints(ship.id, rawHardpoints, fleetAssets)))
     }
     return map
-  }, [ships, hardpoints])
+  }, [ships, hardpoints, fleetAssets])
 
   const stateByShipId = useMemo(() => {
     const map = new Map<string, FleetBuildState>()

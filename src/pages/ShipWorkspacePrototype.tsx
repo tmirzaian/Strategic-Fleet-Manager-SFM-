@@ -659,7 +659,10 @@ export default function ShipWorkspacePrototype() {
   // common case) — literally the same object, never a second,
   // independently-recomputed pass over identical data — and is otherwise
   // unused directly by this page.
-  const summaryContext: ShipManagementSummaryContext = { shipId: ship?.id ?? '', build: activeBuild, hangarItems, installedLoadouts, reservations, ships }
+  // EWO-088 — activeShips (SW-015C), not the raw fleet: the Tier-3 Borrow
+  // hint this context feeds (via describeAcquisitionHint) must never treat
+  // a retired ship as a real donor source.
+  const summaryContext: ShipManagementSummaryContext = { shipId: ship?.id ?? '', build: activeBuild, hangarItems, installedLoadouts, reservations, ships: activeShips }
   const activeSummary = buildShipManagementSummary(activeHardpoints, summaryContext)
   const reviewedSummary = reviewedBuild?.id === activeBuild?.id ? activeSummary : buildShipManagementSummary(reviewedHardpoints, { ...summaryContext, build: reviewedBuild })
 
@@ -1109,7 +1112,10 @@ export default function ShipWorkspacePrototype() {
             hangarItems,
             installedLoadouts,
             reservations,
-            ships,
+            // EWO-088 — activeShips (SW-015C): a retired donor is never a
+            // real Borrow Available source, same contract as the Hero/
+            // Decision Summary's shared summaryContext just above.
+            ships: activeShips,
           })
         : { tone: 'muted' as const, label: 'Purchase Required' as const, detail: '' }
       const newTargetStatus = resolveNewTargetStatus({ hp, desiredTargetItem: desired, desiredTargetEntityClass: desiredEntityClass, isEdited, hint: liveHint })

@@ -76,6 +76,11 @@ export function describeAcquisitionHint(params: {
   hangarItems: HangarItem[]
   installedLoadouts: InstalledLoadoutEntry[]
   reservations: MissionReservation[]
+  /** EWO-088 — must be active-fleet-scoped (`selectActiveShips`, SW-015C
+   * convention). Tier 3 below treats a donor not present in this array as
+   * not a real borrow source at all, never as a same-tier match with a
+   * placeholder name — a retired ship's installed component is not an
+   * offer a Commander can actually act on. */
   ships: Ship[]
 }): AcquisitionHint {
   const { componentName, componentEntityClass, currentShipId, currentBuildId, currentSlotLabel, hangarItems, installedLoadouts, reservations, ships } = params
@@ -110,10 +115,17 @@ export function describeAcquisitionHint(params: {
   // Tier 3 — Installed On Other Ships: Borrow Intelligence. Names the real
   // source ship (existing InstalledLoadoutEntry data); never claims a
   // specific outcome for either ship.
-  const installedElsewhere = installedLoadouts.find((e) => e.shipId !== currentShipId && e.installedItem === componentName)
+  //
+  // EWO-088 — a donor whose ship isn't in `ships` (i.e. retired) is
+  // excluded here, not just mislabeled: falling through to Tier 4 is the
+  // honest signal, since a Commander cannot actually transfer a component
+  // off a retired vessel from this workflow.
+  const installedElsewhere = installedLoadouts.find(
+    (e) => e.shipId !== currentShipId && e.installedItem === componentName && ships.some((s) => s.id === e.shipId)
+  )
   if (installedElsewhere) {
-    const sourceShip = ships.find((s) => s.id === installedElsewhere.shipId)
-    return { tone: 'cyan', label: 'Borrow Available', detail: `Installed on ${sourceShip?.name ?? 'another ship'} — Commander chooses whether to transfer it` }
+    const sourceShip = ships.find((s) => s.id === installedElsewhere.shipId)!
+    return { tone: 'cyan', label: 'Borrow Available', detail: `Installed on ${sourceShip.name} — Commander chooses whether to transfer it` }
   }
 
   // Tier 4 — Purchase Required: the honest "you don't have this yet"

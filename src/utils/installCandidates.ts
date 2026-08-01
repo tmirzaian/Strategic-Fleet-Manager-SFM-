@@ -147,6 +147,9 @@ export function deriveInstallCandidates(
     hangarItems: HangarItem[]
     installedLoadouts: InstalledLoadoutEntry[]
     reservations: MissionReservation[]
+    /** EWO-088 — must be active-fleet-scoped (`selectActiveShips`, SW-015C
+     * convention). The Borrow tier below treats a donor not present in
+     * this array as excluded, never as a match with a placeholder name. */
     ships: Ship[]
     builds: Build[]
   }
@@ -247,26 +250,38 @@ export function deriveInstallCandidates(
   // Borrow — last resort, whatever remains: a compatible candidate
   // (including the Target itself, when no owned copy exists anywhere)
   // physically installed on another ship.
+  //
+  // EWO-088 — `installedElsewhere` is scoped to donors present in `ships`
+  // (active-fleet-only, per this function's own param doc). Before this,
+  // a donor NOT in `ships` still produced a borrowable row labeled
+  // "Unknown Ship" instead of being excluded — silently offering to
+  // borrow a component that only exists on a retired vessel, which
+  // contradicts the documented guarantee every caller relies on
+  // (see ShipWorkspacePrototype.tsx's own SW-015C comment at its
+  // `deriveInstallCandidates` call site).
   for (const candidate of candidates) {
     if (candidate.item === '—') continue
     if (currentlyInstalledItem && candidate.item === currentlyInstalledItem) continue
     if (seenItems.has(candidate.item)) continue
 
     const installedElsewhere = installedLoadouts.filter(
-      (e) => e.shipId !== currentShipId && identitiesMatch(identityFor(candidate.item, candidate.entityClass), identityFor(e.installedItem, e.entityClass))
+      (e) =>
+        e.shipId !== currentShipId &&
+        identitiesMatch(identityFor(candidate.item, candidate.entityClass), identityFor(e.installedItem, e.entityClass)) &&
+        ships.some((s) => s.id === e.shipId)
     )
     if (installedElsewhere.length === 0) continue
 
     const label = candidate.label ?? candidate.item
     for (const entry of installedElsewhere) {
-      const donorShip = ships.find((s) => s.id === entry.shipId)
-      const donorBuild = builds.find((b) => b.id === donorShip?.activeBuildId)
+      const donorShip = ships.find((s) => s.id === entry.shipId)!
+      const donorBuild = builds.find((b) => b.id === donorShip.activeBuildId)
       borrowable.push({
         item: candidate.item,
         entityClass: candidate.entityClass,
         label,
         shipId: entry.shipId,
-        shipName: donorShip?.name ?? 'Unknown Ship',
+        shipName: donorShip.name,
         slotLabel: entry.slotLabel,
         buildName: donorBuild?.name ?? 'Active Loadout',
       })
