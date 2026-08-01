@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import CaptainsLog from '../CaptainsLog'
-import { useFleetStore } from '../../store/useFleetStore'
+import { useFleetStore, buildFleetExportSnapshot } from '../../store/useFleetStore'
+import { serializeFleetExportEnvelope } from '../../utils/fleetSerialization'
 import { shipCatalogSource } from '../../generated/shipCatalog'
 import { APP_VERSION_LABEL } from '../../config/appVersion'
 
@@ -110,5 +111,96 @@ describe('EWO-093: Fleet Export button', () => {
     expect(envelope.payload.fleetAssets.some((a: { addedAt?: string; ownershipType: string }) => a.ownershipType === 'OWNED')).toBe(true)
 
     clickSpy.mockRestore()
+  })
+})
+
+/**
+ * EWO-094 — "Fleet Import Preview & Replace Workflow." Store-level
+ * pipeline behavior (envelope/schema failures, migration, safety
+ * guarantees) is already proven in
+ * src/utils/__tests__/fleetImport.test.ts and
+ * src/store/__tests__/fleetImportPreview.test.ts. This suite proves the
+ * actual Commander-facing flow: selecting a file drives a real File
+ * object through the real component, the Preview renders real computed
+ * counts, Cancel performs zero writes, and Replace commits and shows the
+ * completion summary.
+ */
+function selectImportFile(fileContents: string, filename = 'fleet-export.json') {
+  const input = document.querySelector('input[type="file"]') as HTMLInputElement
+  const file = new File([fileContents], filename, { type: 'application/json' })
+  Object.defineProperty(input, 'files', { value: [file], configurable: true })
+  fireEvent.change(input)
+}
+
+describe('EWO-094: Fleet Import — file selection, Preview, Cancel, Replace', () => {
+  it('a well-formed exported file produces a Preview with real, current counts and metadata', async () => {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Import Preview Test Titan')
+    const envelope = buildFleetExportSnapshot(useFleetStore.getState())
+    const fileText = serializeFleetExportEnvelope(envelope)
+
+    renderCaptainsLog()
+    selectImportFile(fileText)
+
+    await waitFor(() => expect(screen.getByText('Import Preview')).toBeInTheDocument())
+    expect(screen.getByText(String(useFleetStore.getState().ships.length))).toBeInTheDocument()
+    expect(screen.getByText(envelope.appVersion)).toBeInTheDocument()
+    expect(screen.getByText(String(envelope.schemaVersion))).toBeInTheDocument()
+    expect(screen.getByText(/Compatible/)).toBeInTheDocument()
+  })
+
+  it('a corrupt file shows an inline error, never a Preview, and performs zero writes', async () => {
+    const before = localStorage.getItem('sfm-fleet-store')
+    renderCaptainsLog()
+    selectImportFile('{ not valid json')
+
+    await waitFor(() => expect(screen.getByText(/Import failed/)).toBeInTheDocument())
+    expect(screen.queryByText('Import Preview')).not.toBeInTheDocument()
+    expect(localStorage.getItem('sfm-fleet-store')).toBe(before)
+  })
+
+  it('Cancel dismisses the Preview and performs zero writes — the store is untouched', async () => {
+    const envelope = buildFleetExportSnapshot(useFleetStore.getState())
+    renderCaptainsLog()
+    selectImportFile(serializeFleetExportEnvelope(envelope))
+    await waitFor(() => expect(screen.getByText('Import Preview')).toBeInTheDocument())
+
+    const shipsBefore = useFleetStore.getState().ships.length
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(screen.queryByText('Import Preview')).not.toBeInTheDocument()
+    expect(useFleetStore.getState().ships.length).toBe(shipsBefore)
+  })
+
+  it('Replace Current Fleet commits the previewed state (a real replacement, not a no-op merge) and shows the completion summary', async () => {
+    // Capture a snapshot BEFORE adding a ship, then add one live — Replace
+    // with the older file must make the added ship disappear, proving
+    // this is a genuine replacement of the live state, not an additive merge.
+    const fileTextBeforeAdd = serializeFleetExportEnvelope(buildFleetExportSnapshot(useFleetStore.getState()))
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    const addResult = useFleetStore.getState().addFleetAsset(def.id, 'PURCHASED', 'Replace UI Test Titan')
+    expect(useFleetStore.getState().ships.some((s) => s.id === addResult.assetId)).toBe(true)
+
+    renderCaptainsLog()
+    selectImportFile(fileTextBeforeAdd)
+    await waitFor(() => expect(screen.getByText('Import Preview')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: /Replace Current Fleet/ }))
+
+    expect(screen.queryByText('Import Preview')).not.toBeInTheDocument()
+    expect(screen.getByText(/Fleet imported successfully/)).toBeInTheDocument()
+    expect(useFleetStore.getState().ships.some((s) => s.id === addResult.assetId)).toBe(false)
+    expect(useFleetStore.getState().log.some((e) => e.action === 'Fleet imported')).toBe(true)
+  })
+
+  it('a schema version newer than this build supports is rejected with a clear message, no Preview, zero writes', async () => {
+    const before = localStorage.getItem('sfm-fleet-store')
+    renderCaptainsLog()
+    selectImportFile(JSON.stringify({ schemaVersion: 999999, appVersion: 'Future', exportedAt: '', payload: {} }))
+
+    await waitFor(() => expect(screen.getByText(/Import failed/)).toBeInTheDocument())
+    expect(screen.getByText(/newer version/i)).toBeInTheDocument()
+    expect(screen.queryByText('Import Preview')).not.toBeInTheDocument()
+    expect(localStorage.getItem('sfm-fleet-store')).toBe(before)
   })
 })

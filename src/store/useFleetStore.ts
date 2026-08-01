@@ -30,6 +30,7 @@ import {
   reconcileReservationIdentity,
 } from './persistedComponentIdentityReconciliation'
 import { buildFleetPersistencePayload, buildFleetExportEnvelope, type FleetPersistenceSource, type FleetExportEnvelope } from '../utils/fleetSerialization'
+import { parseFleetImportFile, buildFleetImportSummary, computeFleetImportWarnings, type FleetImportSummary } from '../utils/fleetImport'
 import { APP_VERSION } from '../config/appVersion'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
@@ -389,7 +390,10 @@ export interface TargetOverrideValue {
  * EWO-STAB-004B) or the richer `TargetOverrideValue` shape. */
 export type TargetOverrideInput = string | TargetOverrideValue
 
-interface FleetState {
+// EWO-094 — exported so Fleet Import's preview pipeline (buildFleetImportPreview,
+// replaceFleetFromImport, both below) can be typed against the real store
+// shape rather than a duplicated one.
+export interface FleetState {
   ships: Ship[]
   builds: Build[]
   hardpoints: Hardpoint[]
@@ -577,6 +581,17 @@ interface FleetState {
     toSlotLabel?: string
   ) => { matched: boolean; itemName?: string; message?: string }
   addLogEntry: (entry: Omit<LogEntry, 'id' | 'timestamp'>) => void
+  /** EWO-094 — Replace step of the Fleet Import workflow. `mergedState` is
+   * the exact already-validated, already-migrated, already-merged state
+   * `buildFleetImportPreview` computed for the Preview — this action never
+   * re-derives or re-validates anything, it only commits it (Step 6/7:
+   * capture an in-memory recovery snapshot of the CURRENT state via the
+   * same canonical export mechanism, then replace). `set()` triggers the
+   * existing `persist` middleware's own `partialize`/storage write
+   * automatically, exactly like every other mutation — Import never
+   * touches `localStorage` directly. Returns the recovery snapshot so the
+   * caller can hold it in memory for the rest of the session. */
+  replaceFleetFromImport: (mergedState: FleetState) => FleetExportEnvelope
 }
 
 /**
@@ -839,6 +854,559 @@ function buildInstallationContext(get: () => FleetState, set: (partial: Partial<
       },
     },
   }
+}
+
+/** The exact return shape `migrateFleetPersistedState` produces — every
+ * field always present, though `hangarItems`/`installedLoadouts` may be
+ * `undefined` (meaning "no persisted value at all; let `merge` keep its
+ * own fresh defaults" — see that field's own comment inside the function
+ * below). EWO-094 — named so Fleet Import can call the exact same
+ * function `persist()`'s own `migrate` option calls, rather than a
+ * second, parallel migration implementation. */
+interface FleetMigratedPersistedState {
+  fleetAssets: FleetAsset[]
+  hangarItems: HangarItem[] | undefined
+  reservations: MissionReservation[]
+  installedLoadouts: InstalledLoadoutEntry[] | undefined
+  seedAssetOverrides: Record<string, SeedAssetOverride>
+  customBuilds: Build[]
+  customBuildHardpoints: Hardpoint[]
+  activeBuildByShipId: Record<string, string>
+  quarantinedAssignments: QuarantinedAssignment[]
+  seedFleetLegacyInstall: boolean
+}
+
+/**
+ * EWO-094 — extracted verbatim (unchanged logic) from `persist()`'s own
+ * `migrate` option below, so Fleet Import's preview pipeline can call the
+ * EXACT SAME validation/migration logic a real browser reload already
+ * runs, in memory, without touching `localStorage`. See that option's own
+ * doc comment for the full field-by-field migration history — nothing
+ * about the logic itself changed, only that it is now reachable by name.
+ */
+function migrateFleetPersistedState(persistedState: unknown, version: number): FleetMigratedPersistedState {
+  const state = persistedState as
+    | {
+        fleetAssets?: unknown
+        hangarItems?: unknown
+        reservations?: unknown
+        installedLoadouts?: unknown
+        seedAssetOverrides?: unknown
+        customBuilds?: unknown
+        customBuildHardpoints?: unknown
+        activeBuildByShipId?: unknown
+        quarantinedAssignments?: unknown
+      }
+    | null
+    | undefined
+  // CAT-001A — `migrate` only ever runs for a save whose OWN stored
+  // version predates the current PERSIST_VERSION (8) — reaching this
+  // function at all is therefore itself proof this installation
+  // already existed before this fix shipped, and its Commander
+  // legitimately had the demo fleet as their real baseline. `version`
+  // is intentionally unused beyond this check — every prior field
+  // migration below already treats "field absent" as the correct
+  // description of an old save, not something to branch on by
+  // number.
+  const isLegacyInstall = version < PERSIST_VERSION
+  if (!state) {
+    return {
+      fleetAssets: [],
+      hangarItems: undefined,
+      reservations: [],
+      installedLoadouts: undefined,
+      seedAssetOverrides: {},
+      customBuilds: [],
+      customBuildHardpoints: [],
+      activeBuildByShipId: {},
+      quarantinedAssignments: [],
+      seedFleetLegacyInstall: isLegacyInstall,
+    }
+  }
+
+  const validAssets: FleetAsset[] = []
+  for (const rawAsset of Array.isArray(state.fleetAssets) ? state.fleetAssets : []) {
+    // SW-015C — translate a pre-10 `status` value before validating.
+    const raw = migrateLegacyLifecycleStatus(rawAsset)
+    if (isValidPersistedFleetAsset(raw)) validAssets.push(raw)
+    else console.warn('[SFM] Skipping a persisted Fleet Asset record that failed migration validation:', raw)
+  }
+
+  const validReservations: MissionReservation[] = []
+  for (const raw of Array.isArray(state.reservations) ? state.reservations : []) {
+    if (isValidPersistedReservation(raw)) validReservations.push(raw)
+    else console.warn('[SFM] Skipping a persisted Reservation record that failed migration validation:', raw)
+  }
+
+  // EWO-027 — a pre-6 save has neither field at all (custom
+  // Loadouts were never persisted in the first place) — an empty
+  // array/object is the honest, correct description of that save,
+  // not a data-loss event to warn about.
+  const validCustomBuilds: Build[] = []
+  for (const raw of Array.isArray(state.customBuilds) ? state.customBuilds : []) {
+    if (isValidPersistedBuild(raw)) validCustomBuilds.push(raw)
+    else console.warn('[SFM] Skipping a persisted custom Build record that failed migration validation:', raw)
+  }
+  const validCustomBuildIds = new Set(validCustomBuilds.map((b) => b.id))
+  const validCustomBuildHardpoints: Hardpoint[] = []
+  for (const raw of Array.isArray(state.customBuildHardpoints) ? state.customBuildHardpoints : []) {
+    if (isValidPersistedHardpoint(raw) && validCustomBuildIds.has(raw.buildId)) validCustomBuildHardpoints.push(raw)
+    else console.warn('[SFM] Skipping a persisted custom Build Hardpoint record that failed migration validation:', raw)
+  }
+  const validActiveBuildByShipId: Record<string, string> = {}
+  if (state.activeBuildByShipId && typeof state.activeBuildByShipId === 'object') {
+    for (const [shipId, buildId] of Object.entries(state.activeBuildByShipId as Record<string, unknown>)) {
+      if (typeof buildId === 'string') validActiveBuildByShipId[shipId] = buildId
+      else console.warn('[SFM] Skipping a persisted Active Build reference that failed migration validation:', shipId, buildId)
+    }
+  }
+
+  // Mission M-012 (schemaVersion 5): pre-existing saves have no
+  // seedAssetOverrides field at all — an empty object is the
+  // correct default for those, since the full seed fleet was, in
+  // fact, still fully present and untouched when they were written.
+  const validOverrides: Record<string, SeedAssetOverride> = {}
+  if (state.seedAssetOverrides && typeof state.seedAssetOverrides === 'object') {
+    for (const [id, rawOverride] of Object.entries(state.seedAssetOverrides as Record<string, unknown>)) {
+      // SW-015C — translate a pre-10 `status` value before validating.
+      const raw = migrateLegacyLifecycleStatus(rawOverride)
+      if (isValidSeedAssetOverride(raw)) validOverrides[id] = raw
+      else console.warn('[SFM] Skipping a persisted Seed Asset Override record that failed migration validation:', id, raw)
+    }
+  }
+
+  // EWO-043: a pre-7 save has no quarantinedAssignments field at all —
+  // an empty array is the honest, correct description of that save
+  // (nothing had ever been quarantined yet), not an error.
+  const validQuarantined: QuarantinedAssignment[] = []
+  for (const raw of Array.isArray(state.quarantinedAssignments) ? state.quarantinedAssignments : []) {
+    if (isValidPersistedQuarantinedAssignment(raw)) validQuarantined.push(raw)
+    else console.warn('[SFM] Skipping a persisted Quarantined Assignment record that failed migration validation:', raw)
+  }
+
+  // Pre-Alpha-2.3 saves have no hangarItems/installedLoadouts field
+  // at all — `undefined` here tells `merge` to keep the freshly
+  // constructed defaults rather than overwriting them with nothing
+  // (Part 24 migration rule: "existing Hangar Inventory becomes
+  // AVAILABLE unless Installed elsewhere" / "existing Installed
+  // Loadouts remain Installed" — the fresh defaults already satisfy
+  // both, so there's nothing to transform for an old save).
+  return {
+    fleetAssets: validAssets,
+    hangarItems: Array.isArray(state.hangarItems) ? state.hangarItems : undefined,
+    reservations: validReservations,
+    installedLoadouts: Array.isArray(state.installedLoadouts) ? state.installedLoadouts : undefined,
+    seedAssetOverrides: validOverrides,
+    customBuilds: validCustomBuilds,
+    customBuildHardpoints: validCustomBuildHardpoints,
+    activeBuildByShipId: validActiveBuildByShipId,
+    quarantinedAssignments: validQuarantined,
+    seedFleetLegacyInstall: isLegacyInstall,
+  }
+}
+
+/**
+ * EWO-094 — extracted verbatim (unchanged logic) from `persist()`'s own
+ * `merge` option below, for the exact same reason as
+ * `migrateFleetPersistedState` above: Fleet Import's preview pipeline
+ * calls this directly, in memory, to compute the would-be hydrated
+ * `FleetState` a Replace would actually produce — without ever calling
+ * `set()` or touching `localStorage`. See that option's own doc comment
+ * for the full reconciliation history.
+ */
+function mergeFleetPersistedState(persistedState: unknown, currentState: FleetState): FleetState {
+  const persisted = persistedState as
+    | {
+        fleetAssets?: FleetAsset[]
+        hangarItems?: HangarItem[]
+        reservations?: MissionReservation[]
+        installedLoadouts?: InstalledLoadoutEntry[]
+        seedAssetOverrides?: Record<string, SeedAssetOverride>
+        customBuilds?: Build[]
+        customBuildHardpoints?: Hardpoint[]
+        activeBuildByShipId?: Record<string, string>
+        quarantinedAssignments?: QuarantinedAssignment[]
+        seedFleetLegacyInstall?: boolean
+      }
+    | null
+    | undefined
+  // zustand's persist middleware calls `merge` unconditionally —
+  // even on a true first-ever load, with `persistedState` itself
+  // `undefined` (there was nothing in storage to migrate). That is
+  // the actual "no persisted state yet" signal (Mission M-012,
+  // `hasPersistedState`) — not whether this function ran at all.
+  const hadPersistedState = persistedState !== null && persistedState !== undefined
+  const persistedAssets = persisted?.fleetAssets ?? []
+  const seedAssetOverrides = persisted?.seedAssetOverrides ?? {}
+
+  // CAT-001A — the demo fleet is only ever a valid baseline for an
+  // installation that already existed BEFORE this fix
+  // (`seedFleetLegacyInstall`, set once by `migrate` and carried
+  // forward by `partialize` from then on) or an opted-in developer
+  // (DEV_SEED_FLEET_ENABLED). Deliberately NOT `hadPersistedState`:
+  // a brand-new Commander's very first Add Ship action also makes
+  // `hadPersistedState` true on their NEXT load, but must never
+  // bring the demo fleet back for them — `hadPersistedState` only
+  // ever answers "is this a true first-ever load," not "did this
+  // installation predate the fix." Never falls back to
+  // `currentState`, which is empty-by-default in a real build (see
+  // the store initializer above) and would otherwise leave a
+  // legacy Commander's seed-ship overrides with nothing to apply
+  // against.
+  const includeSeedBaseline = Boolean(persisted?.seedFleetLegacyInstall) || DEV_SEED_FLEET_ENABLED
+  const seedBaseline = includeSeedBaseline ? buildSeedFleetBaseline() : EMPTY_FLEET_BASELINE
+
+  // Mission M-012: apply the persisted seed-fleet diff on top of the
+  // fresh seed bake-in BEFORE replaying manual assets. The seed
+  // ships/builds/hardpoints themselves always come from
+  // src/data/seed.ts verbatim — only presence (removed) and a few
+  // player-editable fields (nickname/ownership/priority) are
+  // overridden here, mirroring what removeFleetAsset/
+  // updateFleetAssetNickname/updateFleetAssetOwnership/
+  // updateFleetProfile already do live.
+  let ships = [...seedBaseline.ships]
+  let builds = [...seedBaseline.builds]
+  let hardpoints = [...seedBaseline.hardpoints]
+  const fleetAssets = seedBaseline.fleetAssets.map((a) => {
+    const override = seedAssetOverrides[a.id]
+    if (!override) return a
+    return {
+      ...a,
+      // SW-015C — replaces the old `status: override.status ?? a.status`.
+      // A retired seed ship's Ship/Build/Hardpoint rows are no
+      // longer spliced out below (see the removed
+      // `removedSeedShipIds` block this replaces) — they stay
+      // fully present, mirrored with `lifecycleStatus`/`retiredAt`
+      // in the override-application loop just below, exactly like
+      // nickname/ownership/priority already are.
+      lifecycleStatus: override.lifecycleStatus ?? a.lifecycleStatus,
+      retiredAt: 'retiredAt' in override ? override.retiredAt : a.retiredAt,
+      nickname: 'nickname' in override ? override.nickname : a.nickname,
+      ownershipType: override.ownershipType ?? a.ownershipType,
+      priority: override.priority ?? a.priority,
+      // UX-005A — same key-presence check as nickname (not `??`):
+      // an explicit `undefined` override (Restore Default) must win
+      // over the seed baseline, which is always `undefined` too
+      // (no seed ship ships with a hardcoded custom image) and so
+      // couldn't otherwise be distinguished from "never overridden."
+      customImageRef: 'customImageRef' in override ? override.customImageRef : a.customImageRef,
+      updatedAt: override.updatedAt,
+    }
+  })
+
+  // A seed FleetAsset's own `id` (e.g. "ghost-asset-seed") is NOT the
+  // same as the ship id its materialized Ship/Build/Hardpoint rows
+  // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
+  // `seedAssetOverrides` is keyed by the asset id, so it must be
+  // resolved back to the ship id before it can be applied to `ships`.
+  const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+  for (const [assetId, override] of Object.entries(seedAssetOverrides)) {
+    const shipId = seedShipIdByAssetId.get(assetId)
+    if (!shipId) continue
+    const asset = fleetAssets.find((a) => a.id === assetId)
+    const definition = asset ? shipDefinitionById.get(asset.shipDefinitionId) : undefined
+    ships = ships.map((s) => {
+      if (s.id !== shipId) return s
+      const next = { ...s }
+      if ('nickname' in override) {
+        next.name = override.nickname ?? definition?.displayName ?? s.name
+        next.role = override.nickname && definition ? `${definition.displayName} · ${definition.role}` : definition?.role ?? s.role
+      }
+      if (override.ownershipType) next.ownership = ownershipTypeToLegacy(override.ownershipType)
+      if (override.priority !== undefined) next.priority = override.priority
+      // SW-015C — mirrors the fleetAssets override above onto the
+      // materialized Ship row every business-logic surface reads.
+      if (override.lifecycleStatus) next.lifecycleStatus = override.lifecycleStatus
+      if ('retiredAt' in override) next.retiredAt = override.retiredAt
+      return next
+    })
+  }
+
+  // Persisted Hangar/Reservations/InstalledLoadout replace the fresh
+  // defaults outright when present — they're the full authoritative
+  // player record, not something to merge item-by-item. SW-015C —
+  // no longer filtered by a "removed seed ship" set: a retired
+  // seed ship's InstalledLoadout rows stay attached to it (see
+  // FleetAsset.lifecycleStatus's own doc comment on why nothing is
+  // ever spliced for retirement).
+  // EWO-084 (R-004) — each array below is reconciled ONLY in the
+  // branch where it's genuinely persisted data, never the seed
+  // baseline/currentState fallback: the seed baseline is rebuilt
+  // fresh from src/data/seed.ts every load (not persisted state that
+  // can drift), and reconciling it anyway was confirmed during this
+  // mission's own test pass to cause a real regression —
+  // `addHangarItem`'s merge precedence treats "exactly one side
+  // carries entityClass" as "never the same record," so retroactively
+  // giving a previously-entityClass-less seed item a fresh
+  // entityClass changes how a same-session addition of that exact
+  // item merges against it. See
+  // src/store/persistedComponentIdentityReconciliation.ts for the
+  // full contract.
+  let installedLoadouts = persisted?.installedLoadouts
+    ? reconcileArray(persisted.installedLoadouts, reconcileInstalledLoadoutEntryIdentity)
+    : [...seedBaseline.installedLoadouts]
+  const hangarItems = persisted?.hangarItems ? reconcileArray(persisted.hangarItems, reconcileHangarItemIdentity) : seedBaseline.hangarItems
+  const reservations = persisted?.reservations ? reconcileArray(persisted.reservations, reconcileReservationIdentity) : currentState.reservations
+
+  for (const existingAsset of persistedAssets) {
+    if (fleetAssets.some((a) => a.id === existingAsset.id)) continue // already present, don't duplicate
+    const definition = shipDefinitionById.get(existingAsset.shipDefinitionId)
+    if (!definition) continue // ship definition no longer exists — skip rather than crash
+    const template = shipFactoryTemplates[existingAsset.shipDefinitionId] ?? []
+    const { asset, ship, build, hardpoints: hp } = materializeFleetAsset({ definition, template, existingAsset })
+    fleetAssets.push(asset)
+    ships.push(ship)
+    builds.push(build)
+    hardpoints.push(...hp)
+    // Only seed a fresh InstalledLoadout entry for this replayed
+    // ship if the persisted logistics blob didn't already cover it
+    // (an older save might predate this asset's InstalledLoadout
+    // rows; a newer one already carries them via `persisted.installedLoadouts`).
+    if (!installedLoadouts.some((e) => e.shipId === ship.id)) {
+      installedLoadouts = [...installedLoadouts, ...hp.map((row) => ({ shipId: ship.id, slotLabel: row.slotLabel, installedItem: row.installedItem }))]
+    }
+  }
+
+  // EWO-027 — restore the Commander's actual custom Loadouts. The
+  // replay loop above (and the fresh seed bake-in before it) only
+  // ever knows how to reconstruct each ship's canonical Factory
+  // Loadout — a real saved Build (kind !== 'FACTORY') is never
+  // rebuilt that way. Filtered to ships that still exist after the
+  // seed-removal/replay steps above, so a Loadout for a ship
+  // that's since been removed is never resurrected. A persisted
+  // custom Build's id can collide with a placeholder FACTORY-kind
+  // build the replay above minted under the same id (when a
+  // manually-added asset's own `activeBuildId` already pointed at
+  // a custom build, since `materializeFleetAsset` always labels
+  // whatever it builds `kind: 'FACTORY'`) — the real, persisted
+  // record always wins over that placeholder.
+  //
+  // EWO-043 — a custom Build's rows are no longer spliced back in
+  // verbatim. Each one is reconciled against the CURRENT
+  // authoritative template for its ship (see
+  // src/utils/fleetAssetReconciliation.ts): Factory data always
+  // comes from the current template (Task 2); Installed/Target are
+  // carried over from the Commander's saved row (Tasks 3/4); a row
+  // whose port no longer exists is pulled into `quarantinedAssignments`
+  // rather than silently disappearing (Task 7); a genuinely new port
+  // is appended fresh (Task 6). A ship whose current template is
+  // unavailable (e.g. its ShipDefinition no longer resolves at all)
+  // falls back to the old verbatim rows rather than losing them.
+  const survivingShipIds = new Set(ships.map((s) => s.id))
+  const customBuilds = (persisted?.customBuilds ?? []).filter((b) => survivingShipIds.has(b.shipId))
+  const customBuildIds = new Set(customBuilds.map((b) => b.id))
+  const shipIdByAssetShipDefinitionId = new Map(fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+  const persistedCustomBuildHardpoints = (persisted?.customBuildHardpoints ?? []).filter((h) => customBuildIds.has(h.buildId))
+
+  const quarantinedAssignments: QuarantinedAssignment[] = [...(persisted?.quarantinedAssignments ?? [])]
+  const slotLabelMigrationsByShipId = new Map<string, Array<{ oldSlotLabel: string; newSlotLabel: string }>>()
+  const reconciledCustomHardpoints: Hardpoint[] = []
+  for (const build of customBuilds) {
+    const oldRowsForBuild = persistedCustomBuildHardpoints.filter((h) => h.buildId === build.id)
+    const template = shipFactoryTemplates[shipIdByAssetShipDefinitionId.get(build.shipId) ?? ''] ?? shipFactoryTemplates[build.shipId]
+    if (!template) {
+      // No current authoritative template resolves for this ship at
+      // all (as opposed to one that legitimately resolves to zero
+      // ports) — preserve the Commander's rows exactly as before
+      // rather than discarding them; there is nothing safe to
+      // reconcile against.
+      reconciledCustomHardpoints.push(...oldRowsForBuild)
+      continue
+    }
+    const { hardpoints: reconciled, quarantined, slotLabelMigrations } = reconcileBuildHardpoints(
+      build.shipId,
+      build.id,
+      oldRowsForBuild,
+      template,
+      resolveShipEntityClass(build.shipId, fleetAssets)
+    )
+    reconciledCustomHardpoints.push(...reconciled)
+    quarantinedAssignments.push(...quarantined)
+    if (slotLabelMigrations.length > 0) {
+      const list = slotLabelMigrationsByShipId.get(build.shipId) ?? []
+      list.push(...slotLabelMigrations)
+      slotLabelMigrationsByShipId.set(build.shipId, list)
+    }
+  }
+  builds = [...builds.filter((b) => !customBuildIds.has(b.id)), ...customBuilds]
+  // EWO-084 (R-004) — `reconciledCustomHardpoints` is genuinely
+  // Commander-persisted data (sourced from `persisted.customBuildHardpoints`,
+  // reconciled against the current port template above by
+  // `reconcileBuildHardpoints`) — safe and correct to identity-reconcile
+  // here, unlike the seed-baseline factory rows already in `hardpoints`
+  // (see the installedLoadouts/hangarItems/reservations comment above
+  // for why those stay separate).
+  const identityReconciledCustomHardpoints = reconcileArray(reconciledCustomHardpoints, reconcileHardpointComponentIdentity)
+  hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...identityReconciledCustomHardpoints]
+
+  // Migrate the shared, slotLabel-keyed installedLoadouts record for
+  // any port a reconciliation above renamed (Scenario D) — otherwise
+  // the Commander's real installed state would orphan under the old
+  // label the instant its port's name/hierarchy changes upstream.
+  for (const [shipId, migrations] of slotLabelMigrationsByShipId.entries()) {
+    for (const { oldSlotLabel, newSlotLabel } of migrations) {
+      installedLoadouts = installedLoadouts.map((e) => (e.shipId === shipId && e.slotLabel === oldSlotLabel ? { ...e, slotLabel: newSlotLabel } : e))
+    }
+  }
+
+  // EWO-043 (Task 3) — installedLoadouts is the single authoritative
+  // record of what's physically installed; every rendered Hardpoint
+  // row's own installedItem is kept in sync FROM it here, exactly
+  // once, for every ship (Factory rows included). Before this fix, a
+  // Factory-kind build's hardpoints were always fresh-materialized
+  // with installedItem reset to the current factory default, which
+  // silently discarded whatever the Commander had actually installed
+  // the moment that factory item wasn't already a plain factory-fresh
+  // match (CWO-003, Task 2 baseline finding).
+  //
+  // SW-005 Phase 2 — this overlay assumes `shipId::slotLabel` is a
+  // stable cross-build port identity, which only holds when every
+  // build for that ship shares one construction vocabulary (true for
+  // a manually-added asset, whose every Build always derives from
+  // the same canonical template). A seed ship's `installedLoadouts`
+  // is derived from its own CUSTOM build's old, hand-authored
+  // slotLabels (deriveInitialInstalledLoadouts); its Factory
+  // Loadout's slotLabels are the real canonical vocabulary
+  // (buildCanonicalSeedFactoryBuilds, above) — a different
+  // namespace that only coincidentally shares a generic label like
+  // "Radar" or "Quantum Drive" with the old one. Applying the
+  // overlay there would silently contaminate a freshly-canonical,
+  // always-factory-fresh row with an unrelated port's stale value —
+  // exactly the class of bug this mission exists to eliminate.
+  // Excluded here; a seed ship's Factory Loadout has no "Commander
+  // installed something different" concept to protect in the first
+  // place (see SEED_CANONICAL_FACTORY_BUILD_IDS's own comment).
+  const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, { installedItem: e.installedItem, entityClass: e.entityClass }]))
+  hardpoints = hardpoints.map((h) => {
+    if (h.isStructural || SEED_CANONICAL_FACTORY_BUILD_IDS.has(h.buildId)) return h
+    const authoritative = installedByShipAndSlot.get(`${h.shipId}::${h.slotLabel}`)
+    if (authoritative === undefined || authoritative.installedItem === h.installedItem) return h
+    // EWO-STAB-003D (ADR-010) — the overlay's own entityClass (when
+    // recorded) replaces the row's stale installedEntityClass, since
+    // the installedItem itself is changing here; target/factory
+    // identity are this row's own and unaffected by the overlay.
+    const { status, invalidMessage } = computeHardpointStatusWithValidation(authoritative.installedItem, h.targetItem, h.factoryItem, h.type, h.size, {
+      installedEntityClass: authoritative.entityClass,
+      targetEntityClass: h.targetEntityClass,
+      factoryEntityClass: h.factoryEntityClass,
+    })
+    return { ...h, installedItem: authoritative.installedItem, installedEntityClass: authoritative.entityClass, status, invalidMessage }
+  })
+
+  // Recompute every affected Build's readiness/missing — reconciled
+  // row counts/status can genuinely change (new ports, quarantined
+  // ports, re-validated targets, the installedLoadouts overlay above).
+  const affectedBuildIds = new Set([...customBuildIds, ...builds.filter((b) => survivingShipIds.has(b.shipId)).map((b) => b.id)])
+  builds = builds.map((b) => {
+    if (!affectedBuildIds.has(b.id)) return b
+    const progress = calculateBuildProgress(hardpoints.filter((h) => h.buildId === b.id))
+    const missing = hardpoints.filter((h) => h.buildId === b.id && (h.status === 'Missing' || h.status === 'Upgrade Available')).map((h) => h.targetItem)
+    return { ...b, missing, readiness: progress.percentage }
+  })
+
+  // Restore each ship's actual selected Active Build. For a
+  // replayed manually-added asset this is already correct (
+  // materializeFleetAsset used existingAsset.activeBuildId), but a
+  // seed ship's Ship object is baked in fresh every session and had
+  // no other mechanism to remember a live setActiveBuild() choice.
+  // Only applied when the referenced build genuinely exists for
+  // this ship after the restoration above — never left dangling.
+  const activeBuildByShipId = persisted?.activeBuildByShipId ?? {}
+  ships = ships.map((s) => {
+    const activeId = activeBuildByShipId[s.id]
+    const activeBuildRecord = builds.find((b) => b.id === (activeId ?? s.activeBuildId) && b.shipId === s.id)
+    if (!activeBuildRecord) return s
+    return { ...s, activeBuildId: activeBuildRecord.id, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
+  })
+
+  // EWO-066 (Part G) — self-heals Fleet Priority into a clean,
+  // unique 1..N sequence on every hydration, repairing duplicates
+  // (the seed baseline's own MOLE/Vulture both `priority: 2` in
+  // seed.ts included), gaps, and invalid values without a
+  // persisted-schema version bump — see fleetPriority.ts's own doc
+  // comment for why this runs here rather than as a one-time
+  // migration.
+  //
+  // SW-015C — scoped to ACTIVE ships only. A retired ship's
+  // priority is frozen administrative metadata ("for potential
+  // future restoration," never a live rank — see
+  // `retireFleetAsset`'s own doc comment) and must never be folded
+  // into the active 1..N sequence just because it's still present
+  // in `ships`.
+  const normalizedActivePriorities = new Map(normalizeFleetPriorities(selectActiveShips(ships)).map((s) => [s.id, s.priority]))
+  ships = ships.map((s) => (isActiveShip(s) ? { ...s, priority: normalizedActivePriorities.get(s.id) ?? s.priority } : s))
+
+  return {
+    ...currentState,
+    ships,
+    builds,
+    hardpoints,
+    fleetAssets,
+    installedLoadouts,
+    hangarItems,
+    reservations,
+    seedAssetOverrides,
+    hasPersistedState: hadPersistedState,
+    // CAT-001A — carries forward only the actual legacy-install fact
+    // (set once by `migrate`), never re-derived from
+    // DEV_SEED_FLEET_ENABLED — a developer's local opt-in must not
+    // permanently stick to a save the moment it's used once.
+    seedFleetLegacyInstall: Boolean(persisted?.seedFleetLegacyInstall),
+    quarantinedAssignments,
+    // CAT-001A — the demo Captain's Log narrates the demo fleet by
+    // name; it must never outlive the fleet it describes for a
+    // genuinely new Commander. Never persisted either way (see
+    // partialize below), so this only ever affects what's shown
+    // immediately after a reload, not anything a Commander wrote
+    // during the live session via addLogEntry.
+    log: seedBaseline.log,
+  }
+}
+
+/**
+ * EWO-094 — "Fleet Import Preview & Replace Workflow." One import
+ * pipeline, per the work order's own architectural principle: envelope
+ * validation (`parseFleetImportFile`, pure/store-agnostic) → schema
+ * version compatibility (the one PERSIST_VERSION-aware check that must
+ * live here) → `migrateFleetPersistedState` → `mergeFleetPersistedState`
+ * — the EXACT SAME two functions `persist()`'s own `migrate`/`merge`
+ * options call for a real browser reload — all in memory, `localStorage`
+ * never touched. The returned Preview IS the already-validated,
+ * already-hydrated state; there is no separate preview-only validator.
+ */
+export type FleetImportOutcome =
+  | { ok: false; stage: 'ENVELOPE' | 'SCHEMA_VERSION'; message: string; migrationAttempted: false }
+  | { ok: true; envelope: FleetExportEnvelope; mergedState: FleetState; summary: FleetImportSummary; warnings: string[]; wasMigrated: boolean }
+
+export function buildFleetImportPreview(rawFileText: string, currentState: FleetState): FleetImportOutcome {
+  const parsed = parseFleetImportFile(rawFileText)
+  if (!parsed.valid) {
+    return { ok: false, stage: 'ENVELOPE', message: parsed.error.message, migrationAttempted: false }
+  }
+  const { envelope } = parsed
+  if (envelope.schemaVersion > PERSIST_VERSION) {
+    return {
+      ok: false,
+      stage: 'SCHEMA_VERSION',
+      message: `This file requires a newer version of SFM (file schema ${envelope.schemaVersion}; this build supports up to schema ${PERSIST_VERSION}). Update SFM before importing it.`,
+      migrationAttempted: false,
+    }
+  }
+
+  const migrated = migrateFleetPersistedState(envelope.payload, envelope.schemaVersion)
+  const mergedState = mergeFleetPersistedState(migrated, currentState)
+
+  const summary = buildFleetImportSummary(mergedState)
+  const warnings = computeFleetImportWarnings(envelope.payload, {
+    fleetAssets: migrated.fleetAssets.length,
+    reservations: migrated.reservations.length,
+    customBuilds: migrated.customBuilds.length,
+    customBuildHardpoints: migrated.customBuildHardpoints.length,
+    quarantinedAssignments: migrated.quarantinedAssignments.length,
+    seedAssetOverrideKeys: Object.keys(migrated.seedAssetOverrides).length,
+  })
+
+  return { ok: true, envelope, mergedState, summary, warnings, wasMigrated: envelope.schemaVersion < PERSIST_VERSION }
 }
 
 export const useFleetStore = create<FleetState>()(
@@ -2140,6 +2708,14 @@ export const useFleetStore = create<FleetState>()(
         const newEntry: LogEntry = { ...entry, id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, timestamp: 'Just now' }
         set({ log: [newEntry, ...get().log] })
       },
+
+      // EWO-094 — see this action's own interface doc comment above.
+      replaceFleetFromImport: (mergedState) => {
+        const recoverySnapshot = buildFleetExportEnvelope(buildFleetPersistencePayload(get()), PERSIST_VERSION, APP_VERSION.productVersion)
+        set(mergedState)
+        get().addLogEntry({ action: 'Fleet imported', details: `Replaced the current fleet from an imported file — ${mergedState.ships.length} ships, ${mergedState.hangarItems.length} hangar items.` })
+        return recoverySnapshot
+      },
     }),
     {
       name: PERSIST_STORAGE_KEY,
@@ -2159,126 +2735,14 @@ export const useFleetStore = create<FleetState>()(
       // always recomputed fresh from the authoritative records above
       // (Part 24: "Do not persist derived... Derive those from
       // authoritative player state").
-      migrate: (persistedState, version) => {
-        const state = persistedState as
-          | {
-              fleetAssets?: unknown
-              hangarItems?: unknown
-              reservations?: unknown
-              installedLoadouts?: unknown
-              seedAssetOverrides?: unknown
-              customBuilds?: unknown
-              customBuildHardpoints?: unknown
-              activeBuildByShipId?: unknown
-              quarantinedAssignments?: unknown
-            }
-          | null
-          | undefined
-        // CAT-001A — `migrate` only ever runs for a save whose OWN stored
-        // version predates the current PERSIST_VERSION (8) — reaching this
-        // function at all is therefore itself proof this installation
-        // already existed before this fix shipped, and its Commander
-        // legitimately had the demo fleet as their real baseline. `version`
-        // is intentionally unused beyond this check — every prior field
-        // migration below already treats "field absent" as the correct
-        // description of an old save, not something to branch on by
-        // number.
-        const isLegacyInstall = version < PERSIST_VERSION
-        if (!state) {
-          return {
-            fleetAssets: [],
-            hangarItems: undefined,
-            reservations: [],
-            installedLoadouts: undefined,
-            seedAssetOverrides: {},
-            customBuilds: [],
-            customBuildHardpoints: [],
-            activeBuildByShipId: {},
-            quarantinedAssignments: [],
-            seedFleetLegacyInstall: isLegacyInstall,
-          }
-        }
-
-        const validAssets: FleetAsset[] = []
-        for (const rawAsset of Array.isArray(state.fleetAssets) ? state.fleetAssets : []) {
-          // SW-015C — translate a pre-10 `status` value before validating.
-          const raw = migrateLegacyLifecycleStatus(rawAsset)
-          if (isValidPersistedFleetAsset(raw)) validAssets.push(raw)
-          else console.warn('[SFM] Skipping a persisted Fleet Asset record that failed migration validation:', raw)
-        }
-
-        const validReservations: MissionReservation[] = []
-        for (const raw of Array.isArray(state.reservations) ? state.reservations : []) {
-          if (isValidPersistedReservation(raw)) validReservations.push(raw)
-          else console.warn('[SFM] Skipping a persisted Reservation record that failed migration validation:', raw)
-        }
-
-        // EWO-027 — a pre-6 save has neither field at all (custom
-        // Loadouts were never persisted in the first place) — an empty
-        // array/object is the honest, correct description of that save,
-        // not a data-loss event to warn about.
-        const validCustomBuilds: Build[] = []
-        for (const raw of Array.isArray(state.customBuilds) ? state.customBuilds : []) {
-          if (isValidPersistedBuild(raw)) validCustomBuilds.push(raw)
-          else console.warn('[SFM] Skipping a persisted custom Build record that failed migration validation:', raw)
-        }
-        const validCustomBuildIds = new Set(validCustomBuilds.map((b) => b.id))
-        const validCustomBuildHardpoints: Hardpoint[] = []
-        for (const raw of Array.isArray(state.customBuildHardpoints) ? state.customBuildHardpoints : []) {
-          if (isValidPersistedHardpoint(raw) && validCustomBuildIds.has(raw.buildId)) validCustomBuildHardpoints.push(raw)
-          else console.warn('[SFM] Skipping a persisted custom Build Hardpoint record that failed migration validation:', raw)
-        }
-        const validActiveBuildByShipId: Record<string, string> = {}
-        if (state.activeBuildByShipId && typeof state.activeBuildByShipId === 'object') {
-          for (const [shipId, buildId] of Object.entries(state.activeBuildByShipId as Record<string, unknown>)) {
-            if (typeof buildId === 'string') validActiveBuildByShipId[shipId] = buildId
-            else console.warn('[SFM] Skipping a persisted Active Build reference that failed migration validation:', shipId, buildId)
-          }
-        }
-
-        // Mission M-012 (schemaVersion 5): pre-existing saves have no
-        // seedAssetOverrides field at all — an empty object is the
-        // correct default for those, since the full seed fleet was, in
-        // fact, still fully present and untouched when they were written.
-        const validOverrides: Record<string, SeedAssetOverride> = {}
-        if (state.seedAssetOverrides && typeof state.seedAssetOverrides === 'object') {
-          for (const [id, rawOverride] of Object.entries(state.seedAssetOverrides as Record<string, unknown>)) {
-            // SW-015C — translate a pre-10 `status` value before validating.
-            const raw = migrateLegacyLifecycleStatus(rawOverride)
-            if (isValidSeedAssetOverride(raw)) validOverrides[id] = raw
-            else console.warn('[SFM] Skipping a persisted Seed Asset Override record that failed migration validation:', id, raw)
-          }
-        }
-
-        // EWO-043: a pre-7 save has no quarantinedAssignments field at all —
-        // an empty array is the honest, correct description of that save
-        // (nothing had ever been quarantined yet), not an error.
-        const validQuarantined: QuarantinedAssignment[] = []
-        for (const raw of Array.isArray(state.quarantinedAssignments) ? state.quarantinedAssignments : []) {
-          if (isValidPersistedQuarantinedAssignment(raw)) validQuarantined.push(raw)
-          else console.warn('[SFM] Skipping a persisted Quarantined Assignment record that failed migration validation:', raw)
-        }
-
-        // Pre-Alpha-2.3 saves have no hangarItems/installedLoadouts field
-        // at all — `undefined` here tells `merge` to keep the freshly
-        // constructed defaults rather than overwriting them with nothing
-        // (Part 24 migration rule: "existing Hangar Inventory becomes
-        // AVAILABLE unless Installed elsewhere" / "existing Installed
-        // Loadouts remain Installed" — the fresh defaults already satisfy
-        // both, so there's nothing to transform for an old save).
-        return {
-          fleetAssets: validAssets,
-          hangarItems: Array.isArray(state.hangarItems) ? state.hangarItems : undefined,
-          reservations: validReservations,
-          installedLoadouts: Array.isArray(state.installedLoadouts) ? state.installedLoadouts : undefined,
-          seedAssetOverrides: validOverrides,
-          customBuilds: validCustomBuilds,
-          customBuildHardpoints: validCustomBuildHardpoints,
-          activeBuildByShipId: validActiveBuildByShipId,
-          quarantinedAssignments: validQuarantined,
-          seedFleetLegacyInstall: isLegacyInstall,
-        }
-      },
+      //
+      // EWO-094 — the logic itself now lives in migrateFleetPersistedState
+      // (defined above, right before this store's creation), so Fleet
+      // Import's preview pipeline can call the exact same function this
+      // option calls, in memory, rather than a second, parallel migration
+      // implementation. See that function's own doc comment for the full
+      // field-by-field migration history — unchanged.
+      migrate: (persistedState, version) => migrateFleetPersistedState(persistedState, version),
       // Fleet Assets added via "Add Ship" (or any future non-seed source)
       // still round-trip via replay (see merge below). The hardcoded seed
       // fleet is never replayed this way — replaying it through
@@ -2302,354 +2766,15 @@ export const useFleetStore = create<FleetState>()(
       // storage (zustand skips it entirely on a true first-ever load) —
       // so reaching this function at all is itself the "persisted user
       // state exists" signal (Mission M-012, `hasPersistedState`).
-      merge: (persistedState, currentState) => {
-        const persisted = persistedState as
-          | {
-              fleetAssets?: FleetAsset[]
-              hangarItems?: HangarItem[]
-              reservations?: MissionReservation[]
-              installedLoadouts?: InstalledLoadoutEntry[]
-              seedAssetOverrides?: Record<string, SeedAssetOverride>
-              customBuilds?: Build[]
-              customBuildHardpoints?: Hardpoint[]
-              activeBuildByShipId?: Record<string, string>
-              quarantinedAssignments?: QuarantinedAssignment[]
-              seedFleetLegacyInstall?: boolean
-            }
-          | null
-          | undefined
-        // zustand's persist middleware calls `merge` unconditionally —
-        // even on a true first-ever load, with `persistedState` itself
-        // `undefined` (there was nothing in storage to migrate). That is
-        // the actual "no persisted state yet" signal (Mission M-012,
-        // `hasPersistedState`) — not whether this function ran at all.
-        const hadPersistedState = persistedState !== null && persistedState !== undefined
-        const persistedAssets = persisted?.fleetAssets ?? []
-        const seedAssetOverrides = persisted?.seedAssetOverrides ?? {}
-
-        // CAT-001A — the demo fleet is only ever a valid baseline for an
-        // installation that already existed BEFORE this fix
-        // (`seedFleetLegacyInstall`, set once by `migrate` and carried
-        // forward by `partialize` from then on) or an opted-in developer
-        // (DEV_SEED_FLEET_ENABLED). Deliberately NOT `hadPersistedState`:
-        // a brand-new Commander's very first Add Ship action also makes
-        // `hadPersistedState` true on their NEXT load, but must never
-        // bring the demo fleet back for them — `hadPersistedState` only
-        // ever answers "is this a true first-ever load," not "did this
-        // installation predate the fix." Never falls back to
-        // `currentState`, which is empty-by-default in a real build (see
-        // the store initializer above) and would otherwise leave a
-        // legacy Commander's seed-ship overrides with nothing to apply
-        // against.
-        const includeSeedBaseline = Boolean(persisted?.seedFleetLegacyInstall) || DEV_SEED_FLEET_ENABLED
-        const seedBaseline = includeSeedBaseline ? buildSeedFleetBaseline() : EMPTY_FLEET_BASELINE
-
-        // Mission M-012: apply the persisted seed-fleet diff on top of the
-        // fresh seed bake-in BEFORE replaying manual assets. The seed
-        // ships/builds/hardpoints themselves always come from
-        // src/data/seed.ts verbatim — only presence (removed) and a few
-        // player-editable fields (nickname/ownership/priority) are
-        // overridden here, mirroring what removeFleetAsset/
-        // updateFleetAssetNickname/updateFleetAssetOwnership/
-        // updateFleetProfile already do live.
-        let ships = [...seedBaseline.ships]
-        let builds = [...seedBaseline.builds]
-        let hardpoints = [...seedBaseline.hardpoints]
-        const fleetAssets = seedBaseline.fleetAssets.map((a) => {
-          const override = seedAssetOverrides[a.id]
-          if (!override) return a
-          return {
-            ...a,
-            // SW-015C — replaces the old `status: override.status ?? a.status`.
-            // A retired seed ship's Ship/Build/Hardpoint rows are no
-            // longer spliced out below (see the removed
-            // `removedSeedShipIds` block this replaces) — they stay
-            // fully present, mirrored with `lifecycleStatus`/`retiredAt`
-            // in the override-application loop just below, exactly like
-            // nickname/ownership/priority already are.
-            lifecycleStatus: override.lifecycleStatus ?? a.lifecycleStatus,
-            retiredAt: 'retiredAt' in override ? override.retiredAt : a.retiredAt,
-            nickname: 'nickname' in override ? override.nickname : a.nickname,
-            ownershipType: override.ownershipType ?? a.ownershipType,
-            priority: override.priority ?? a.priority,
-            // UX-005A — same key-presence check as nickname (not `??`):
-            // an explicit `undefined` override (Restore Default) must win
-            // over the seed baseline, which is always `undefined` too
-            // (no seed ship ships with a hardcoded custom image) and so
-            // couldn't otherwise be distinguished from "never overridden."
-            customImageRef: 'customImageRef' in override ? override.customImageRef : a.customImageRef,
-            updatedAt: override.updatedAt,
-          }
-        })
-
-        // A seed FleetAsset's own `id` (e.g. "ghost-asset-seed") is NOT the
-        // same as the ship id its materialized Ship/Build/Hardpoint rows
-        // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
-        // `seedAssetOverrides` is keyed by the asset id, so it must be
-        // resolved back to the ship id before it can be applied to `ships`.
-        const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
-        for (const [assetId, override] of Object.entries(seedAssetOverrides)) {
-          const shipId = seedShipIdByAssetId.get(assetId)
-          if (!shipId) continue
-          const asset = fleetAssets.find((a) => a.id === assetId)
-          const definition = asset ? shipDefinitionById.get(asset.shipDefinitionId) : undefined
-          ships = ships.map((s) => {
-            if (s.id !== shipId) return s
-            const next = { ...s }
-            if ('nickname' in override) {
-              next.name = override.nickname ?? definition?.displayName ?? s.name
-              next.role = override.nickname && definition ? `${definition.displayName} · ${definition.role}` : definition?.role ?? s.role
-            }
-            if (override.ownershipType) next.ownership = ownershipTypeToLegacy(override.ownershipType)
-            if (override.priority !== undefined) next.priority = override.priority
-            // SW-015C — mirrors the fleetAssets override above onto the
-            // materialized Ship row every business-logic surface reads.
-            if (override.lifecycleStatus) next.lifecycleStatus = override.lifecycleStatus
-            if ('retiredAt' in override) next.retiredAt = override.retiredAt
-            return next
-          })
-        }
-
-        // Persisted Hangar/Reservations/InstalledLoadout replace the fresh
-        // defaults outright when present — they're the full authoritative
-        // player record, not something to merge item-by-item. SW-015C —
-        // no longer filtered by a "removed seed ship" set: a retired
-        // seed ship's InstalledLoadout rows stay attached to it (see
-        // FleetAsset.lifecycleStatus's own doc comment on why nothing is
-        // ever spliced for retirement).
-        // EWO-084 (R-004) — each array below is reconciled ONLY in the
-        // branch where it's genuinely persisted data, never the seed
-        // baseline/currentState fallback: the seed baseline is rebuilt
-        // fresh from src/data/seed.ts every load (not persisted state that
-        // can drift), and reconciling it anyway was confirmed during this
-        // mission's own test pass to cause a real regression —
-        // `addHangarItem`'s merge precedence treats "exactly one side
-        // carries entityClass" as "never the same record," so retroactively
-        // giving a previously-entityClass-less seed item a fresh
-        // entityClass changes how a same-session addition of that exact
-        // item merges against it. See
-        // src/store/persistedComponentIdentityReconciliation.ts for the
-        // full contract.
-        let installedLoadouts = persisted?.installedLoadouts
-          ? reconcileArray(persisted.installedLoadouts, reconcileInstalledLoadoutEntryIdentity)
-          : [...seedBaseline.installedLoadouts]
-        const hangarItems = persisted?.hangarItems ? reconcileArray(persisted.hangarItems, reconcileHangarItemIdentity) : seedBaseline.hangarItems
-        const reservations = persisted?.reservations ? reconcileArray(persisted.reservations, reconcileReservationIdentity) : currentState.reservations
-
-        for (const existingAsset of persistedAssets) {
-          if (fleetAssets.some((a) => a.id === existingAsset.id)) continue // already present, don't duplicate
-          const definition = shipDefinitionById.get(existingAsset.shipDefinitionId)
-          if (!definition) continue // ship definition no longer exists — skip rather than crash
-          const template = shipFactoryTemplates[existingAsset.shipDefinitionId] ?? []
-          const { asset, ship, build, hardpoints: hp } = materializeFleetAsset({ definition, template, existingAsset })
-          fleetAssets.push(asset)
-          ships.push(ship)
-          builds.push(build)
-          hardpoints.push(...hp)
-          // Only seed a fresh InstalledLoadout entry for this replayed
-          // ship if the persisted logistics blob didn't already cover it
-          // (an older save might predate this asset's InstalledLoadout
-          // rows; a newer one already carries them via `persisted.installedLoadouts`).
-          if (!installedLoadouts.some((e) => e.shipId === ship.id)) {
-            installedLoadouts = [...installedLoadouts, ...hp.map((row) => ({ shipId: ship.id, slotLabel: row.slotLabel, installedItem: row.installedItem }))]
-          }
-        }
-
-        // EWO-027 — restore the Commander's actual custom Loadouts. The
-        // replay loop above (and the fresh seed bake-in before it) only
-        // ever knows how to reconstruct each ship's canonical Factory
-        // Loadout — a real saved Build (kind !== 'FACTORY') is never
-        // rebuilt that way. Filtered to ships that still exist after the
-        // seed-removal/replay steps above, so a Loadout for a ship
-        // that's since been removed is never resurrected. A persisted
-        // custom Build's id can collide with a placeholder FACTORY-kind
-        // build the replay above minted under the same id (when a
-        // manually-added asset's own `activeBuildId` already pointed at
-        // a custom build, since `materializeFleetAsset` always labels
-        // whatever it builds `kind: 'FACTORY'`) — the real, persisted
-        // record always wins over that placeholder.
-        //
-        // EWO-043 — a custom Build's rows are no longer spliced back in
-        // verbatim. Each one is reconciled against the CURRENT
-        // authoritative template for its ship (see
-        // src/utils/fleetAssetReconciliation.ts): Factory data always
-        // comes from the current template (Task 2); Installed/Target are
-        // carried over from the Commander's saved row (Tasks 3/4); a row
-        // whose port no longer exists is pulled into `quarantinedAssignments`
-        // rather than silently disappearing (Task 7); a genuinely new port
-        // is appended fresh (Task 6). A ship whose current template is
-        // unavailable (e.g. its ShipDefinition no longer resolves at all)
-        // falls back to the old verbatim rows rather than losing them.
-        const survivingShipIds = new Set(ships.map((s) => s.id))
-        const customBuilds = (persisted?.customBuilds ?? []).filter((b) => survivingShipIds.has(b.shipId))
-        const customBuildIds = new Set(customBuilds.map((b) => b.id))
-        const shipIdByAssetShipDefinitionId = new Map(fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
-        const persistedCustomBuildHardpoints = (persisted?.customBuildHardpoints ?? []).filter((h) => customBuildIds.has(h.buildId))
-
-        const quarantinedAssignments: QuarantinedAssignment[] = [...(persisted?.quarantinedAssignments ?? [])]
-        const slotLabelMigrationsByShipId = new Map<string, Array<{ oldSlotLabel: string; newSlotLabel: string }>>()
-        const reconciledCustomHardpoints: Hardpoint[] = []
-        for (const build of customBuilds) {
-          const oldRowsForBuild = persistedCustomBuildHardpoints.filter((h) => h.buildId === build.id)
-          const template = shipFactoryTemplates[shipIdByAssetShipDefinitionId.get(build.shipId) ?? ''] ?? shipFactoryTemplates[build.shipId]
-          if (!template) {
-            // No current authoritative template resolves for this ship at
-            // all (as opposed to one that legitimately resolves to zero
-            // ports) — preserve the Commander's rows exactly as before
-            // rather than discarding them; there is nothing safe to
-            // reconcile against.
-            reconciledCustomHardpoints.push(...oldRowsForBuild)
-            continue
-          }
-          const { hardpoints: reconciled, quarantined, slotLabelMigrations } = reconcileBuildHardpoints(
-            build.shipId,
-            build.id,
-            oldRowsForBuild,
-            template,
-            resolveShipEntityClass(build.shipId, fleetAssets)
-          )
-          reconciledCustomHardpoints.push(...reconciled)
-          quarantinedAssignments.push(...quarantined)
-          if (slotLabelMigrations.length > 0) {
-            const list = slotLabelMigrationsByShipId.get(build.shipId) ?? []
-            list.push(...slotLabelMigrations)
-            slotLabelMigrationsByShipId.set(build.shipId, list)
-          }
-        }
-        builds = [...builds.filter((b) => !customBuildIds.has(b.id)), ...customBuilds]
-        // EWO-084 (R-004) — `reconciledCustomHardpoints` is genuinely
-        // Commander-persisted data (sourced from `persisted.customBuildHardpoints`,
-        // reconciled against the current port template above by
-        // `reconcileBuildHardpoints`) — safe and correct to identity-reconcile
-        // here, unlike the seed-baseline factory rows already in `hardpoints`
-        // (see the installedLoadouts/hangarItems/reservations comment above
-        // for why those stay separate).
-        const identityReconciledCustomHardpoints = reconcileArray(reconciledCustomHardpoints, reconcileHardpointComponentIdentity)
-        hardpoints = [...hardpoints.filter((h) => !customBuildIds.has(h.buildId)), ...identityReconciledCustomHardpoints]
-
-        // Migrate the shared, slotLabel-keyed installedLoadouts record for
-        // any port a reconciliation above renamed (Scenario D) — otherwise
-        // the Commander's real installed state would orphan under the old
-        // label the instant its port's name/hierarchy changes upstream.
-        for (const [shipId, migrations] of slotLabelMigrationsByShipId.entries()) {
-          for (const { oldSlotLabel, newSlotLabel } of migrations) {
-            installedLoadouts = installedLoadouts.map((e) => (e.shipId === shipId && e.slotLabel === oldSlotLabel ? { ...e, slotLabel: newSlotLabel } : e))
-          }
-        }
-
-        // EWO-043 (Task 3) — installedLoadouts is the single authoritative
-        // record of what's physically installed; every rendered Hardpoint
-        // row's own installedItem is kept in sync FROM it here, exactly
-        // once, for every ship (Factory rows included). Before this fix, a
-        // Factory-kind build's hardpoints were always fresh-materialized
-        // with installedItem reset to the current factory default, which
-        // silently discarded whatever the Commander had actually installed
-        // the moment that factory item wasn't already a plain factory-fresh
-        // match (CWO-003, Task 2 baseline finding).
-        //
-        // SW-005 Phase 2 — this overlay assumes `shipId::slotLabel` is a
-        // stable cross-build port identity, which only holds when every
-        // build for that ship shares one construction vocabulary (true for
-        // a manually-added asset, whose every Build always derives from
-        // the same canonical template). A seed ship's `installedLoadouts`
-        // is derived from its own CUSTOM build's old, hand-authored
-        // slotLabels (deriveInitialInstalledLoadouts); its Factory
-        // Loadout's slotLabels are the real canonical vocabulary
-        // (buildCanonicalSeedFactoryBuilds, above) — a different
-        // namespace that only coincidentally shares a generic label like
-        // "Radar" or "Quantum Drive" with the old one. Applying the
-        // overlay there would silently contaminate a freshly-canonical,
-        // always-factory-fresh row with an unrelated port's stale value —
-        // exactly the class of bug this mission exists to eliminate.
-        // Excluded here; a seed ship's Factory Loadout has no "Commander
-        // installed something different" concept to protect in the first
-        // place (see SEED_CANONICAL_FACTORY_BUILD_IDS's own comment).
-        const installedByShipAndSlot = new Map(installedLoadouts.map((e) => [`${e.shipId}::${e.slotLabel}`, { installedItem: e.installedItem, entityClass: e.entityClass }]))
-        hardpoints = hardpoints.map((h) => {
-          if (h.isStructural || SEED_CANONICAL_FACTORY_BUILD_IDS.has(h.buildId)) return h
-          const authoritative = installedByShipAndSlot.get(`${h.shipId}::${h.slotLabel}`)
-          if (authoritative === undefined || authoritative.installedItem === h.installedItem) return h
-          // EWO-STAB-003D (ADR-010) — the overlay's own entityClass (when
-          // recorded) replaces the row's stale installedEntityClass, since
-          // the installedItem itself is changing here; target/factory
-          // identity are this row's own and unaffected by the overlay.
-          const { status, invalidMessage } = computeHardpointStatusWithValidation(authoritative.installedItem, h.targetItem, h.factoryItem, h.type, h.size, {
-            installedEntityClass: authoritative.entityClass,
-            targetEntityClass: h.targetEntityClass,
-            factoryEntityClass: h.factoryEntityClass,
-          })
-          return { ...h, installedItem: authoritative.installedItem, installedEntityClass: authoritative.entityClass, status, invalidMessage }
-        })
-
-        // Recompute every affected Build's readiness/missing — reconciled
-        // row counts/status can genuinely change (new ports, quarantined
-        // ports, re-validated targets, the installedLoadouts overlay above).
-        const affectedBuildIds = new Set([...customBuildIds, ...builds.filter((b) => survivingShipIds.has(b.shipId)).map((b) => b.id)])
-        builds = builds.map((b) => {
-          if (!affectedBuildIds.has(b.id)) return b
-          const progress = calculateBuildProgress(hardpoints.filter((h) => h.buildId === b.id))
-          const missing = hardpoints.filter((h) => h.buildId === b.id && (h.status === 'Missing' || h.status === 'Upgrade Available')).map((h) => h.targetItem)
-          return { ...b, missing, readiness: progress.percentage }
-        })
-
-        // Restore each ship's actual selected Active Build. For a
-        // replayed manually-added asset this is already correct (
-        // materializeFleetAsset used existingAsset.activeBuildId), but a
-        // seed ship's Ship object is baked in fresh every session and had
-        // no other mechanism to remember a live setActiveBuild() choice.
-        // Only applied when the referenced build genuinely exists for
-        // this ship after the restoration above — never left dangling.
-        const activeBuildByShipId = persisted?.activeBuildByShipId ?? {}
-        ships = ships.map((s) => {
-          const activeId = activeBuildByShipId[s.id]
-          const activeBuildRecord = builds.find((b) => b.id === (activeId ?? s.activeBuildId) && b.shipId === s.id)
-          if (!activeBuildRecord) return s
-          return { ...s, activeBuildId: activeBuildRecord.id, missing: activeBuildRecord.missing, readiness: activeBuildRecord.readiness }
-        })
-
-        // EWO-066 (Part G) — self-heals Fleet Priority into a clean,
-        // unique 1..N sequence on every hydration, repairing duplicates
-        // (the seed baseline's own MOLE/Vulture both `priority: 2` in
-        // seed.ts included), gaps, and invalid values without a
-        // persisted-schema version bump — see fleetPriority.ts's own doc
-        // comment for why this runs here rather than as a one-time
-        // migration.
-        //
-        // SW-015C — scoped to ACTIVE ships only. A retired ship's
-        // priority is frozen administrative metadata ("for potential
-        // future restoration," never a live rank — see
-        // `retireFleetAsset`'s own doc comment) and must never be folded
-        // into the active 1..N sequence just because it's still present
-        // in `ships`.
-        const normalizedActivePriorities = new Map(normalizeFleetPriorities(selectActiveShips(ships)).map((s) => [s.id, s.priority]))
-        ships = ships.map((s) => (isActiveShip(s) ? { ...s, priority: normalizedActivePriorities.get(s.id) ?? s.priority } : s))
-
-        return {
-          ...currentState,
-          ships,
-          builds,
-          hardpoints,
-          fleetAssets,
-          installedLoadouts,
-          hangarItems,
-          reservations,
-          seedAssetOverrides,
-          hasPersistedState: hadPersistedState,
-          // CAT-001A — carries forward only the actual legacy-install fact
-          // (set once by `migrate`), never re-derived from
-          // DEV_SEED_FLEET_ENABLED — a developer's local opt-in must not
-          // permanently stick to a save the moment it's used once.
-          seedFleetLegacyInstall: Boolean(persisted?.seedFleetLegacyInstall),
-          quarantinedAssignments,
-          // CAT-001A — the demo Captain's Log narrates the demo fleet by
-          // name; it must never outlive the fleet it describes for a
-          // genuinely new Commander. Never persisted either way (see
-          // partialize below), so this only ever affects what's shown
-          // immediately after a reload, not anything a Commander wrote
-          // during the live session via addLogEntry.
-          log: seedBaseline.log,
-        }
-      },
+      //
+      // EWO-094 — the logic itself now lives in mergeFleetPersistedState
+      // (defined above, right before this store's creation), so Fleet
+      // Import's preview pipeline can call the exact same function this
+      // option calls, in memory, to compute the would-be hydrated state a
+      // Replace would actually produce — without ever calling `set()` or
+      // touching `localStorage`. See that function's own doc comment for
+      // the full reconciliation history — unchanged.
+      merge: (persistedState, currentState) => mergeFleetPersistedState(persistedState, currentState),
     }
   )
 )
