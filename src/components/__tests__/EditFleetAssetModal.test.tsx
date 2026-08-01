@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import EditFleetAssetModal from '../EditFleetAssetModal'
 import { useFleetStore } from '../../store/useFleetStore'
@@ -221,7 +221,12 @@ describe('SW-015C (Deliverable 8): EditFleetAssetModal — Fleet Registry sectio
   it('the confirmation uses no destructive-warning language', () => {
     renderRetiredModal()
     fireEvent.click(screen.getByText('Return to Active Service'))
-    expect(screen.queryByText(/permanently|cannot be undone|destructive/i)).not.toBeInTheDocument()
+    // Scoped to the recommission confirmation dialog itself — the always-
+    // visible Danger Zone section (EWO-097) legitimately uses this exact
+    // language elsewhere on the same page, behind this dialog.
+    const dialogHeading = screen.getByText(/to active service\?/)
+    const dialog = dialogHeading.closest('.panel') as HTMLElement
+    expect(within(dialog).queryByText(/permanently|cannot be undone|destructive/i)).not.toBeInTheDocument()
   })
 
   it('confirming recommissions the vessel and the section updates in place (modal stays open)', () => {
@@ -231,5 +236,166 @@ describe('SW-015C (Deliverable 8): EditFleetAssetModal — Fleet Registry sectio
     expect(useFleetStore.getState().fleetAssets.find((a) => a.id === ship.id)?.lifecycleStatus).toBe('active')
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByText('Status: Active Service')).toBeInTheDocument()
+  })
+})
+
+/**
+ * EWO-097 — "Retired Fleet Asset Permanent Purge," Danger Zone UI. Store-
+ * level purge semantics are covered exhaustively in
+ * src/store/__tests__/fleetAssetPurge.test.ts — this file covers only
+ * what's specific to the UI: visibility gating (19), the typed-name
+ * safeguard (17), Cancel performing zero writes (16), and a successful
+ * purge closing the modal.
+ */
+describe('EWO-097: EditFleetAssetModal — Danger Zone', () => {
+  function addGladius(nickname?: string) {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    return useFleetStore.getState().addFleetAsset(def.id, 'OWNED', nickname).assetId!
+  }
+  function renderRetiredModal(nickname?: string) {
+    const id = addGladius(nickname)
+    useFleetStore.getState().retireFleetAsset(id)
+    const ship = useFleetStore.getState().ships.find((s) => s.id === id)!
+    const onClose = vi.fn()
+    render(
+      <MemoryRouter>
+        <EditFleetAssetModal ship={ship} onClose={onClose} />
+      </MemoryRouter>
+    )
+    return { ship, onClose }
+  }
+
+  it('19. never renders the Danger Zone or a Purge control for an active vessel', () => {
+    renderModalFor('Gladius')
+    expect(screen.queryByText('Danger Zone')).not.toBeInTheDocument()
+    expect(screen.queryByText('Purge Fleet Asset')).not.toBeInTheDocument()
+  })
+
+  it('19. renders the Danger Zone and Purge Fleet Asset control for a retired vessel', () => {
+    renderRetiredModal()
+    expect(screen.getByText('Danger Zone')).toBeInTheDocument()
+    expect(screen.getByText('Purge Fleet Asset')).toBeInTheDocument()
+  })
+
+  it('opens a confirmation with the required copy: ship name, permanence, component-return, and recovery-via-snapshot language', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    expect(screen.getByText(`Permanently purge "${ship.name}"?`)).toBeInTheDocument()
+    expect(screen.getByText(/This cannot be undone/)).toBeInTheDocument()
+    expect(screen.getByText(/installed owned component.*returned to Hangar Inventory/)).toBeInTheDocument()
+    expect(screen.getByText(/Recovery requires importing or restoring an earlier fleet snapshot/)).toBeInTheDocument()
+  })
+
+  it('16. Cancel in the purge confirmation performs zero writes and leaves the vessel fully intact', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    fireEvent.change(screen.getByPlaceholderText('Type the ship name to confirm'), { target: { value: ship.name } })
+    fireEvent.click(screen.getByText('Cancel'))
+
+    expect(useFleetStore.getState().fleetAssets.some((a) => a.id === ship.id)).toBe(true)
+    expect(useFleetStore.getState().ships.some((s) => s.id === ship.id)).toBe(true)
+  })
+
+  it("17. the confirm button stays disabled — and a click performs zero writes — until the typed text exactly matches the ship's name", () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    const confirmButton = confirmButtons[confirmButtons.length - 1]
+    expect(confirmButton).toBeDisabled()
+
+    fireEvent.change(screen.getByPlaceholderText('Type the ship name to confirm'), { target: { value: ship.name.slice(0, -1) } })
+    expect(confirmButton).toBeDisabled()
+    fireEvent.click(confirmButton)
+    expect(useFleetStore.getState().fleetAssets.some((a) => a.id === ship.id)).toBe(true)
+
+    fireEvent.change(screen.getByPlaceholderText('Type the ship name to confirm'), { target: { value: ship.name } })
+    expect(confirmButton).not.toBeDisabled()
+  })
+
+  /**
+   * EWO-097 Amendment — "Canonical Purge Confirmation Phrase." Commander
+   * field testing found typing the visually-displayed text (uppercased
+   * by CSS inheritance) did not match the underlying, case-sensitive
+   * comparison. These tests cover the fix: natural-case display (no CSS
+   * `uppercase` reaching the phrase itself), case-insensitive
+   * acceptance, and nickname-vs-canonical-name precedence.
+   */
+  it('1. no nickname: the phrase span is exempted from the label\'s uppercase styling (natural capitalization preserved)', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    const phraseSpan = screen.getByText(ship.name, { selector: 'span' })
+    expect(phraseSpan.className).toContain('normal-case')
+  })
+
+  it('1. no nickname: SABRE-style all-caps and all-lowercase entries are both accepted (case-insensitive against the true, un-transformed name)', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    const confirmButton = confirmButtons[confirmButtons.length - 1]
+    const input = screen.getByPlaceholderText('Type the ship name to confirm')
+
+    fireEvent.change(input, { target: { value: ship.name.toUpperCase() } })
+    expect(confirmButton).not.toBeDisabled()
+    fireEvent.change(input, { target: { value: ship.name.toLowerCase() } })
+    expect(confirmButton).not.toBeDisabled()
+  })
+
+  it('2. a nickname is used as the confirmation phrase instead of the canonical model name, case-insensitively, and the canonical name no longer satisfies it', () => {
+    const { ship } = renderRetiredModal('test1')
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    expect(screen.getByText(`Permanently purge "test1"?`)).toBeInTheDocument()
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    const confirmButton = confirmButtons[confirmButtons.length - 1]
+    const input = screen.getByPlaceholderText('Type the ship name to confirm')
+
+    fireEvent.change(input, { target: { value: 'TEST1' } })
+    expect(confirmButton).not.toBeDisabled()
+
+    // The canonical model name ("Gladius") no longer satisfies
+    // confirmation once a nickname is the displayed/expected phrase.
+    fireEvent.change(input, { target: { value: 'Gladius' } })
+    expect(confirmButton).toBeDisabled()
+    void ship
+  })
+
+  it('3. leading/trailing whitespace in the typed value is ignored', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    const confirmButton = confirmButtons[confirmButtons.length - 1]
+    fireEvent.change(screen.getByPlaceholderText('Type the ship name to confirm'), { target: { value: `  ${ship.name}  ` } })
+    expect(confirmButton).not.toBeDisabled()
+  })
+
+  it('4. a partial or extended match is rejected, even case-insensitively', () => {
+    const { ship } = renderRetiredModal()
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    const confirmButton = confirmButtons[confirmButtons.length - 1]
+    const input = screen.getByPlaceholderText('Type the ship name to confirm')
+
+    fireEvent.change(input, { target: { value: ship.name.slice(0, 3) } })
+    expect(confirmButton).toBeDisabled()
+    fireEvent.change(input, { target: { value: `${ship.name}1` } })
+    expect(confirmButton).toBeDisabled()
+  })
+
+  it('6/7. button enablement and the store action\'s own validation never disagree — a directly-invoked purge with a mismatched phrase is refused just like the UI would refuse it', () => {
+    const { ship } = renderRetiredModal()
+    const result = useFleetStore.getState().purgeFleetAsset(ship.id, ship.name.slice(0, 3))
+    expect(result.success).toBe(false)
+    expect(useFleetStore.getState().ships.some((s) => s.id === ship.id)).toBe(true)
+  })
+
+  it('a completed purge (typed name matches) removes the vessel and closes the modal', async () => {
+    const { ship, onClose } = renderRetiredModal('Purge Target')
+    fireEvent.click(screen.getByText('Purge Fleet Asset'))
+    fireEvent.change(screen.getByPlaceholderText('Type the ship name to confirm'), { target: { value: ship.name } })
+    const confirmButtons = screen.getAllByRole('button', { name: /Purge Fleet Asset/ })
+    fireEvent.click(confirmButtons[confirmButtons.length - 1])
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled())
+    expect(useFleetStore.getState().fleetAssets.some((a) => a.id === ship.id)).toBe(false)
+    expect(useFleetStore.getState().ships.some((s) => s.id === ship.id)).toBe(false)
   })
 })

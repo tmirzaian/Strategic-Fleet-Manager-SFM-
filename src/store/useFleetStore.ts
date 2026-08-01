@@ -8,7 +8,7 @@ import { migrateSeedFleetToAssets } from '../data/fleetAssetMigration'
 import { materializeFleetAsset } from '../utils/fleetAssetMaterializer'
 import { reconcileBuildHardpoints } from '../utils/fleetAssetReconciliation'
 import { resolveShipImage } from '../utils/resolveShipImage'
-import { selectActiveShips, isActiveShip, activeReservationsForShip } from '../utils/fleetLifecycle'
+import { selectActiveShips, isActiveShip, activeReservationsForShip, resolvePurgeConfirmationPhrase, matchesPurgeConfirmationPhrase } from '../utils/fleetLifecycle'
 import { ownershipTypeToLegacy } from '../utils/ownership'
 import { seedQuartermasterTemplates } from '../data/quartermasterTemplates'
 import { calculateBuildProgress } from '../utils/buildProgress'
@@ -62,7 +62,13 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // `lifecycleStatus: 'retired'` and `'active'`/missing -> `'active'`
 // for both collections before validation runs, so no existing vessel
 // (active or already-removed) is lost or reidentified.
-const PERSIST_VERSION = 10
+// EWO-097: bumped 10 -> 11 to add SeedAssetOverride.purged — a pre-11
+// save simply has none, which `isValidSeedAssetOverride` below and
+// `mergeFleetPersistedState`'s purge-exclusion filter both treat as
+// "never purged" (correct for a save written before this feature
+// existed), not an error. Purely additive, like customImageRef before
+// it — no value translation required.
+const PERSIST_VERSION = 11
 
 /**
  * EWO-093 — Fleet Export. `PERSIST_VERSION` is deliberately kept private
@@ -464,6 +470,32 @@ export interface FleetState {
    * to Unprioritized rather than reinstating a possibly-stale rank; never
    * recreates reservations released at retirement time. */
   recommissionFleetAsset: (assetId: string) => { success: boolean; message?: string }
+  /** EWO-097 — Fleet Registry Lifecycle's third and only destructive
+   * transition. Permanently removes a RETIRED vessel's own Fleet
+   * Asset/Ship/Build/Hardpoint/InstalledLoadout/reservation/quarantine
+   * records, returning any genuinely installed owned component to Hangar
+   * Inventory first via the existing canonical installation engine
+   * (never a parallel inventory mutation). Captures a pre-purge recovery
+   * snapshot (the same EWO-093 export mechanism) before any mutation —
+   * returned to the caller, held in memory only for the remainder of the
+   * session (no download, no in-app restore UI; both explicitly out of
+   * scope). Refuses an active vessel outright — retire first. A future
+   * acquisition of the same ship model is an entirely new Fleet Asset;
+   * nothing about this purge is keyed by `shipDefinitionId`, so it can
+   * never implicitly revive or collide with the purged record.
+   *
+   * EWO-097 Amendment (Canonical Purge Confirmation Phrase) —
+   * `confirmationInput` is required and independently validated here via
+   * the same `resolvePurgeConfirmationPhrase`/`matchesPurgeConfirmationPhrase`
+   * helpers the UI's own button-enablement predicate uses (Requirement 7:
+   * "Do not rely only on disabled-button protection"). A mismatched or
+   * missing confirmation fails cleanly with zero mutation, exactly like
+   * calling this against an active vessel already does — a caller can
+   * never bypass the typed-confirmation safeguard by skipping the UI. */
+  purgeFleetAsset: (
+    assetId: string,
+    confirmationInput: string
+  ) => { success: boolean; message?: string; returnedComponentCount?: number; recoverySnapshot?: FleetExportEnvelope }
   updateFleetAssetNickname: (assetId: string, nickname: string | undefined) => { success: boolean; message?: string }
   updateFleetAssetOwnership: (assetId: string, ownershipType: OwnershipType) => { success: boolean; message?: string }
   /** UX-005A (Deliverable 1/4) — sets or clears this specific vessel's
@@ -647,6 +679,8 @@ function isValidSeedAssetOverride(raw: unknown): raw is SeedAssetOverride {
   if (r.priority !== undefined && r.priority !== null && typeof r.priority !== 'number') return false
   // UX-005A — same permissive-optional-string shape as `nickname` above.
   if (r.customImageRef !== undefined && typeof r.customImageRef !== 'string') return false
+  // EWO-097 — a purged override's own field.
+  if (r.purged !== undefined && typeof r.purged !== 'boolean') return false
   return true
 }
 
@@ -1056,6 +1090,35 @@ function mergeFleetPersistedState(persistedState: unknown, currentState: FleetSt
   const includeSeedBaseline = Boolean(persisted?.seedFleetLegacyInstall) || DEV_SEED_FLEET_ENABLED
   const seedBaseline = includeSeedBaseline ? buildSeedFleetBaseline() : EMPTY_FLEET_BASELINE
 
+  // A seed FleetAsset's own `id` (e.g. "ghost-asset-seed") is NOT the
+  // same as the ship id its materialized Ship/Build/Hardpoint rows
+  // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
+  // `seedAssetOverrides` is keyed by the asset id, so it must be
+  // resolved back to the ship id before it can be applied to `ships`.
+  // Computed once, up front, so both the purge-exclusion filter below
+  // and the existing per-field override loop can share it.
+  const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
+
+  // EWO-097 — a purged seed-migrated asset is the one override that
+  // does NOT stay "fully present" like every other field below. Every
+  // other override (retired/nickname/ownership/priority/customImage)
+  // is deliberately non-destructive (SW-015C removed the old "splice
+  // the seed ship out" path entirely for exactly that reason — see the
+  // comment this replaces). Purge is the one intentionally destructive
+  // exception the Fleet Registry lifecycle now has: `purged: true`
+  // means this seed ship's Ship/Build/Hardpoint/FleetAsset rows must
+  // never be re-baked in on a future load, exactly as if it had never
+  // shipped as part of the demo fleet. Filtered out here, before
+  // anything else touches `fleetAssets`/`ships`/`builds`/`hardpoints`,
+  // so a purged seed asset can never accidentally receive (or need) any
+  // of the other override fields.
+  const purgedSeedShipIds = new Set(
+    Object.entries(seedAssetOverrides)
+      .filter(([, o]) => o.purged)
+      .map(([assetId]) => seedShipIdByAssetId.get(assetId))
+      .filter((id): id is string => Boolean(id))
+  )
+
   // Mission M-012: apply the persisted seed-fleet diff on top of the
   // fresh seed bake-in BEFORE replaying manual assets. The seed
   // ships/builds/hardpoints themselves always come from
@@ -1064,43 +1127,42 @@ function mergeFleetPersistedState(persistedState: unknown, currentState: FleetSt
   // overridden here, mirroring what removeFleetAsset/
   // updateFleetAssetNickname/updateFleetAssetOwnership/
   // updateFleetProfile already do live.
-  let ships = [...seedBaseline.ships]
-  let builds = [...seedBaseline.builds]
-  let hardpoints = [...seedBaseline.hardpoints]
-  const fleetAssets = seedBaseline.fleetAssets.map((a) => {
-    const override = seedAssetOverrides[a.id]
-    if (!override) return a
-    return {
-      ...a,
-      // SW-015C — replaces the old `status: override.status ?? a.status`.
-      // A retired seed ship's Ship/Build/Hardpoint rows are no
-      // longer spliced out below (see the removed
-      // `removedSeedShipIds` block this replaces) — they stay
-      // fully present, mirrored with `lifecycleStatus`/`retiredAt`
-      // in the override-application loop just below, exactly like
-      // nickname/ownership/priority already are.
-      lifecycleStatus: override.lifecycleStatus ?? a.lifecycleStatus,
-      retiredAt: 'retiredAt' in override ? override.retiredAt : a.retiredAt,
-      nickname: 'nickname' in override ? override.nickname : a.nickname,
-      ownershipType: override.ownershipType ?? a.ownershipType,
-      priority: override.priority ?? a.priority,
-      // UX-005A — same key-presence check as nickname (not `??`):
-      // an explicit `undefined` override (Restore Default) must win
-      // over the seed baseline, which is always `undefined` too
-      // (no seed ship ships with a hardcoded custom image) and so
-      // couldn't otherwise be distinguished from "never overridden."
-      customImageRef: 'customImageRef' in override ? override.customImageRef : a.customImageRef,
-      updatedAt: override.updatedAt,
-    }
-  })
+  let ships = seedBaseline.ships.filter((s) => !purgedSeedShipIds.has(s.id))
+  let builds = seedBaseline.builds.filter((b) => !purgedSeedShipIds.has(b.shipId))
+  let hardpoints = seedBaseline.hardpoints.filter((h) => !purgedSeedShipIds.has(h.shipId))
+  const fleetAssets = seedBaseline.fleetAssets
+    .filter((a) => !seedAssetOverrides[a.id]?.purged)
+    .map((a) => {
+      const override = seedAssetOverrides[a.id]
+      if (!override) return a
+      return {
+        ...a,
+        // SW-015C — replaces the old `status: override.status ?? a.status`.
+        // A retired seed ship's Ship/Build/Hardpoint rows are no
+        // longer spliced out below (see the removed
+        // `removedSeedShipIds` block this replaces) — they stay
+        // fully present, mirrored with `lifecycleStatus`/`retiredAt`
+        // in the override-application loop just below, exactly like
+        // nickname/ownership/priority already are. (A `purged`
+        // override is the one exception — filtered out above, before
+        // this map runs at all.)
+        lifecycleStatus: override.lifecycleStatus ?? a.lifecycleStatus,
+        retiredAt: 'retiredAt' in override ? override.retiredAt : a.retiredAt,
+        nickname: 'nickname' in override ? override.nickname : a.nickname,
+        ownershipType: override.ownershipType ?? a.ownershipType,
+        priority: override.priority ?? a.priority,
+        // UX-005A — same key-presence check as nickname (not `??`):
+        // an explicit `undefined` override (Restore Default) must win
+        // over the seed baseline, which is always `undefined` too
+        // (no seed ship ships with a hardcoded custom image) and so
+        // couldn't otherwise be distinguished from "never overridden."
+        customImageRef: 'customImageRef' in override ? override.customImageRef : a.customImageRef,
+        updatedAt: override.updatedAt,
+      }
+    })
 
-  // A seed FleetAsset's own `id` (e.g. "ghost-asset-seed") is NOT the
-  // same as the ship id its materialized Ship/Build/Hardpoint rows
-  // use (e.g. "ghost" — see resolveFleetAssetId's doc comment above).
-  // `seedAssetOverrides` is keyed by the asset id, so it must be
-  // resolved back to the ship id before it can be applied to `ships`.
-  const seedShipIdByAssetId = new Map(seedBaseline.fleetAssets.map((a) => [a.id, a.shipDefinitionId]))
   for (const [assetId, override] of Object.entries(seedAssetOverrides)) {
+    if (override.purged) continue // already excluded above — no per-field override to apply
     const shipId = seedShipIdByAssetId.get(assetId)
     if (!shipId) continue
     const asset = fleetAssets.find((a) => a.id === assetId)
@@ -1553,6 +1615,108 @@ export const useFleetStore = create<FleetState>()(
 
         get().addLogEntry({ action: 'Vessel recommissioned', shipName: ship.name, details: `"${ship.name}" returned to active service.` })
         return { success: true }
+      },
+
+      // EWO-097 — see the interface's own doc comment for the full
+      // contract. Sequencing matters: every genuinely installed
+      // component is returned to Hangar Inventory (Step 2) WHILE the
+      // hull's own Ship/Build/Hardpoint rows still exist, since
+      // `removeComponent` (the canonical installation engine) needs them
+      // to resolve the slot it's returning. Only after that is the hull
+      // itself deleted (Step 4) — never the other order.
+      purgeFleetAsset: (assetId, confirmationInput) => {
+        const resolvedAssetId = resolveFleetAssetId(assetId, get().fleetAssets)
+        const asset = resolvedAssetId ? get().fleetAssets.find((a) => a.id === resolvedAssetId) : undefined
+        const ship = get().ships.find((s) => s.id === assetId)
+        if (!asset || !ship) return { success: false, message: 'Fleet asset not found.' }
+        if (asset.lifecycleStatus !== 'retired') return { success: false, message: 'Only a retired vessel can be purged. Retire it first.' }
+
+        // EWO-097 Amendment — validated here independently of whatever
+        // the UI's own button-enablement check already did (Requirement
+        // 7), using the exact same canonical phrase/comparison helpers.
+        const expectedPhrase = resolvePurgeConfirmationPhrase(asset)
+        if (!matchesPurgeConfirmationPhrase(confirmationInput ?? '', expectedPhrase)) {
+          return { success: false, message: 'Confirmation text does not match. Purge was not performed.' }
+        }
+
+        const shipId = ship.id
+        const shipName = ship.name
+
+        // Step 2 (EWO-093) — captured before any mutation below. Held in
+        // memory only by the caller; no download, no in-app restore UI.
+        const recoverySnapshot = buildFleetExportSnapshot(get())
+
+        // Step 3/Installed Component Policy — `installedLoadouts` is the
+        // single per-ship-per-slot physical truth (unlike `hardpoints`,
+        // which has one row per Build sharing that same slot) — iterating
+        // it, rather than hardpoints, returns each physically-occupied
+        // slot exactly once regardless of how many Builds this hull has.
+        // A composite/child-vehicle sub-slot (Hardpoint.parentSlotLabel)
+        // is just another row in this same flat list — no cascade logic
+        // is needed, it's returned independently like any other slot.
+        // `removeComponent` itself already refuses a slot with nothing
+        // physically installed (factory-only/target-only/missing never
+        // reach here), and delegates the actual inventory write to the
+        // existing `addHangarItem` merge/dedup rules — never a parallel
+        // inventory mutation.
+        const occupiedSlots = get().installedLoadouts.filter((e) => e.shipId === shipId && e.installedItem && e.installedItem !== '—')
+        let returnedComponentCount = 0
+        for (const entry of occupiedSlots) {
+          const result = get().removeComponent(shipId, entry.slotLabel, true)
+          if (result.matched) returnedComponentCount += 1
+        }
+
+        // Reservations tied exclusively to this hull or one of its own
+        // Builds (never any other hull's — see activeReservationsForShip's
+        // own doc comment: `fleetAssetId` holds a Ship.id, not a
+        // FleetAsset.id). Every status is removed here, not just ACTIVE —
+        // purge is permanent, so a RELEASED/FULFILLED row that still
+        // names this hull would itself be the exact orphaned reference
+        // Required Behavior 8 forbids, not a preserved historical record.
+        const purgedBuildIds = new Set(get().builds.filter((b) => b.shipId === shipId).map((b) => b.id))
+
+        const now = new Date().toISOString()
+        set({
+          fleetAssets: get().fleetAssets.filter((a) => a.id !== resolvedAssetId),
+          ships: get().ships.filter((s) => s.id !== shipId),
+          builds: get().builds.filter((b) => b.shipId !== shipId),
+          hardpoints: get().hardpoints.filter((h) => h.shipId !== shipId),
+          installedLoadouts: get().installedLoadouts.filter((e) => e.shipId !== shipId),
+          reservations: get().reservations.filter((r) => r.fleetAssetId !== shipId && !purgedBuildIds.has(r.missionConfigurationId)),
+          // EWO-097 (Quarantine and Historical Data) — treated as
+          // ship-owned planning data, not immutable historical evidence:
+          // a QuarantinedAssignment exists solely so the Commander can
+          // one day resolve a port that disappeared out from under a
+          // still-existing hull (its own doc comment: "no UI/workflow for
+          // that resolution exists yet"). Once the hull itself is gone,
+          // that resolution is permanently impossible — keeping the row
+          // would only be a guaranteed-orphaned shipId/buildId reference,
+          // not evidence of anything. Captain's Log is the system's real
+          // immutable history and is deliberately untouched (its entries
+          // carry only a free-text `shipName` snapshot, never a live id).
+          quarantinedAssignments: get().quarantinedAssignments.filter((q) => q.shipId !== shipId),
+        })
+
+        if (asset.acquisitionSource === 'SEED_MIGRATION') {
+          // EWO-097 — see mergeFleetPersistedState's own comment on
+          // `purgedSeedShipIds` for why this is the one override field
+          // that replaces the whole record rather than merging into it:
+          // every other override describes a live, still-present seed
+          // ship; a purged one no longer exists to have any other field
+          // meaningfully apply to.
+          set({ seedAssetOverrides: { ...get().seedAssetOverrides, [resolvedAssetId!]: { purged: true, updatedAt: now } } })
+        }
+
+        get().addLogEntry({
+          action: 'Vessel purged',
+          shipName,
+          details:
+            returnedComponentCount > 0
+              ? `"${shipName}" was permanently removed from the Fleet Registry. ${returnedComponentCount} installed component${returnedComponentCount === 1 ? '' : 's'} returned to Hangar Inventory.`
+              : `"${shipName}" was permanently removed from the Fleet Registry.`,
+        })
+
+        return { success: true, returnedComponentCount, recoverySnapshot }
       },
 
       updateFleetAssetNickname: (assetId, nickname) => {

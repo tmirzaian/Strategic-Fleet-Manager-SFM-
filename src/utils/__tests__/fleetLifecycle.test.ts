@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest'
-import { isActiveShip, selectActiveShips, selectRetiredShips, activeReservationsForShip } from '../fleetLifecycle'
-import type { Ship, Build, MissionReservation } from '../../types'
+import { describe, it, expect, vi } from 'vitest'
+import { isActiveShip, selectActiveShips, selectRetiredShips, activeReservationsForShip, resolvePurgeConfirmationPhrase, matchesPurgeConfirmationPhrase } from '../fleetLifecycle'
+import type { Ship, Build, MissionReservation, FleetAsset } from '../../types'
+
+// EWO-097 Amendment — a deterministic, mocked catalog so
+// resolvePurgeConfirmationPhrase's fallback tier is tested against a
+// known display name, independent of whatever ships the real generated
+// catalog happens to contain. 'sabre' mirrors the exact Commander field
+// report (a mixed-case model name: "Sabre").
+vi.mock('../../data/shipDefinitions', () => ({
+  shipDefinitionById: new Map([['sabre', { displayName: 'Sabre' }]]),
+}))
 
 function ship(overrides: Partial<Ship> = {}): Ship {
   return {
@@ -71,5 +80,70 @@ describe('SW-015C: fleetLifecycle — activeReservationsForShip', () => {
   it('never double-counts a reservation matching both fleetAssetId and a build id for the same ship', () => {
     const reservations = [reservation({ id: 'r7', fleetAssetId: 'ghost', missionConfigurationId: 'b1' })]
     expect(activeReservationsForShip('ghost', builds, reservations)).toHaveLength(1)
+  })
+})
+
+/**
+ * EWO-097 Amendment — "Canonical Purge Confirmation Phrase." Commander
+ * field testing found the modal's CSS uppercase styling visually
+ * transformed the phrase (e.g. "Sabre" rendered as "SABRE") while the
+ * comparison stayed case-sensitive against the real, un-transformed
+ * string — a real presentation/validation mismatch. These tests cover
+ * the two shared helpers now used everywhere (heading, instruction,
+ * accessible label, button enablement, and the store action's own
+ * validation) so that gap can't reopen.
+ */
+describe('EWO-097 Amendment: resolvePurgeConfirmationPhrase', () => {
+  function asset(overrides: Partial<FleetAsset> = {}): Pick<FleetAsset, 'nickname' | 'shipDefinitionId'> {
+    return { shipDefinitionId: 'sabre', nickname: undefined, ...overrides }
+  }
+
+  it('1/5. no nickname: resolves to the canonical ship display name, trimmed', () => {
+    expect(resolvePurgeConfirmationPhrase(asset())).toBe('Sabre')
+    expect(resolvePurgeConfirmationPhrase(asset({ nickname: '' }))).toBe('Sabre')
+    expect(resolvePurgeConfirmationPhrase(asset({ nickname: '   ' }))).toBe('Sabre')
+  })
+
+  it('2. a non-empty nickname takes precedence over the canonical display name', () => {
+    expect(resolvePurgeConfirmationPhrase(asset({ nickname: 'TEST1' }))).toBe('TEST1')
+  })
+
+  it('3. the resolved phrase is trimmed', () => {
+    expect(resolvePurgeConfirmationPhrase(asset({ nickname: '  TEST1  ' }))).toBe('TEST1')
+  })
+
+  it('never returns an empty string, even if the ship definition cannot be resolved', () => {
+    expect(resolvePurgeConfirmationPhrase(asset({ shipDefinitionId: 'unknown-model', nickname: undefined }))).toBe('unknown-model')
+  })
+})
+
+describe('EWO-097 Amendment: matchesPurgeConfirmationPhrase', () => {
+  it('1. accepts the phrase in any case — natural, all-caps, or all-lowercase', () => {
+    expect(matchesPurgeConfirmationPhrase('Sabre', 'Sabre')).toBe(true)
+    expect(matchesPurgeConfirmationPhrase('SABRE', 'Sabre')).toBe(true)
+    expect(matchesPurgeConfirmationPhrase('sabre', 'Sabre')).toBe(true)
+  })
+
+  it('2. accepts a nickname phrase case-insensitively too', () => {
+    expect(matchesPurgeConfirmationPhrase('TEST1', 'TEST1')).toBe(true)
+    expect(matchesPurgeConfirmationPhrase('test1', 'TEST1')).toBe(true)
+  })
+
+  it('3. ignores leading/trailing whitespace on the entered value', () => {
+    expect(matchesPurgeConfirmationPhrase('  Sabre  ', 'Sabre')).toBe(true)
+  })
+
+  it('4. rejects a partial match or extra text — case-insensitivity is not substring matching', () => {
+    expect(matchesPurgeConfirmationPhrase('Sab', 'Sabre')).toBe(false)
+    expect(matchesPurgeConfirmationPhrase('Sabre1', 'Sabre')).toBe(false)
+    expect(matchesPurgeConfirmationPhrase('Sabre extra', 'Sabre')).toBe(false)
+  })
+
+  it('2. rejects the canonical model name when a nickname is the expected phrase', () => {
+    expect(matchesPurgeConfirmationPhrase('Sabre', 'TEST1')).toBe(false)
+  })
+
+  it('rejects an empty entered value', () => {
+    expect(matchesPurgeConfirmationPhrase('', 'Sabre')).toBe(false)
   })
 })

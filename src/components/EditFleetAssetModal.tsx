@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Pencil, ImagePlus, RotateCcw, Archive, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { X, Pencil, ImagePlus, RotateCcw, Archive, ShieldCheck, AlertTriangle, Trash2 } from 'lucide-react'
 import { useFleetStore, resolveFleetAssetId } from '../store/useFleetStore'
 import { useShipImageCacheStore } from '../store/shipImageCache'
 import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 import { validateShipImageFile, storeShipImage, deleteShipImage } from '../utils/shipImageStorage'
-import { isActiveShip, activeReservationsForShip } from '../utils/fleetLifecycle'
+import { isActiveShip, activeReservationsForShip, resolvePurgeConfirmationPhrase, matchesPurgeConfirmationPhrase } from '../utils/fleetLifecycle'
 import type { OwnershipType, Ship } from '../types'
 import { OWNERSHIP_TYPE_LABELS, legacyToOwnershipType } from '../utils/ownership'
 import ShipImage from './ShipImage'
@@ -20,8 +20,10 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
   const updateFleetAssetCustomImage = useFleetStore((s) => s.updateFleetAssetCustomImage)
   const retireFleetAsset = useFleetStore((s) => s.retireFleetAsset)
   const recommissionFleetAsset = useFleetStore((s) => s.recommissionFleetAsset)
+  const purgeFleetAsset = useFleetStore((s) => s.purgeFleetAsset)
   const builds = useFleetStore((s) => s.builds)
   const reservations = useFleetStore((s) => s.reservations)
+  const installedLoadouts = useFleetStore((s) => s.installedLoadouts)
   // SW-015C — read live off the store (not a prop snapshot) so the
   // section updates in place the instant recommission/retire happens,
   // without needing the caller to remount this modal.
@@ -49,6 +51,62 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
   function handleRecommission() {
     recommissionFleetAsset(ship.id)
     setRecommissionConfirmOpen(false)
+  }
+
+  // EWO-097 — Danger Zone / Purge Fleet Asset. Only ever offered when
+  // `!isActive` (Eligibility rule 2/3 — an active vessel must be retired
+  // first, and this control simply doesn't render for one at all, so
+  // there is no separate "disabled" state to test around).
+  const [purgeConfirmOpen, setPurgeConfirmOpen] = useState(false)
+  const [purgeTypedName, setPurgeTypedName] = useState('')
+  const [purgeBusy, setPurgeBusy] = useState(false)
+  // EWO-097 Amendment — the one canonical confirmation phrase (nickname,
+  // else the canonical ship-model display name), read live off the real
+  // FleetAsset rather than the materialized `Ship.name` prop, and shared
+  // by the heading, the "Type ___ to confirm" instruction, the input's
+  // accessible label, and button enablement below — never re-derived
+  // per call site.
+  const purgePhrase = useFleetStore((s) => {
+    const assetId = resolveFleetAssetId(ship.id, s.fleetAssets)
+    const asset = assetId ? s.fleetAssets.find((a) => a.id === assetId) : undefined
+    return asset ? resolvePurgeConfirmationPhrase(asset) : ship.name
+  })
+  // Same live-preview discipline as `releasableReservationCount` above —
+  // reads the exact same field (`installedLoadouts`) the store action
+  // itself iterates, so the confirmation copy can never drift from what
+  // the real purge would actually return.
+  const installedOwnedComponentCount = installedLoadouts.filter((e) => e.shipId === ship.id && e.installedItem && e.installedItem !== '—').length
+  const purgeNameMatches = matchesPurgeConfirmationPhrase(purgeTypedName, purgePhrase)
+
+  function closePurgeConfirm() {
+    setPurgeConfirmOpen(false)
+    setPurgeTypedName('')
+  }
+
+  async function handlePurge() {
+    if (!purgeNameMatches || purgeBusy) return
+    setPurgeBusy(true)
+    try {
+      // EWO-097 Amendment (Requirement 7) — the store action independently
+      // re-validates `purgeTypedName` against the same canonical phrase;
+      // this call never relies on the disabled-button state alone.
+      const result = purgeFleetAsset(ship.id, purgeTypedName)
+      if (!result.success) {
+        setPurgeBusy(false)
+        return
+      }
+      // The stored image blob lives in IndexedDB, a separate storage
+      // system from the Zustand-persisted fleet state the store action
+      // above already fully cleaned up — deleted here via the exact same
+      // established call site pattern `handleRestoreDefaultImage` already
+      // uses, never a bespoke second deletion path.
+      await deleteShipImage(ship.id)
+      closePurgeConfirm()
+      onClose()
+      navigate('/fleet', { state: { purgedShipName: ship.name } })
+    } finally {
+      setPurgeBusy(false)
+    }
   }
   // UX-005A (Deliverable 4) — whether THIS vessel currently has a custom
   // image on record (governs whether "Restore Default" is offered at
@@ -282,6 +340,29 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
               </div>
             )}
           </div>
+
+          {/* EWO-097 — Danger Zone. Rendered when, and only when, this
+              asset is retired (Eligibility rules 2/3) — never offered as
+              a disabled control on an active vessel, never reachable from
+              any active-ship workflow at all. */}
+          {!isActive && (
+            <>
+              <div className="scanline-divider" />
+              <div>
+                <p className="text-xs uppercase tracking-widest text-danger/80 mb-3">Danger Zone</p>
+                <div className="bg-danger/5 border border-danger/30 rounded-lg p-3.5 space-y-3">
+                  <p className="text-xs text-muted">Permanently remove this fleet asset and its ship-specific planning data.</p>
+                  <button
+                    type="button"
+                    onClick={() => setPurgeConfirmOpen(true)}
+                    className="inline-flex items-center gap-1.5 bg-danger text-white font-semibold text-xs px-3 py-2 rounded-lg hover:bg-danger/90 transition-colors"
+                  >
+                    <Trash2 size={13} /> Purge Fleet Asset
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -363,6 +444,78 @@ export default function EditFleetAssetModal({ ship, onClose }: { ship: Ship; onC
                 className="flex-1 bg-cyan text-bg font-semibold text-sm py-2 rounded-lg hover:bg-cyan/90 transition-colors"
               >
                 Return to Active Service
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EWO-097 — Purge confirmation. Unlike Retire's warning-toned but
+          single-click confirmation, this is genuinely permanent — the
+          typed-name safeguard (Recommended safeguard, EWO-097) is the one
+          destructive-confirmation pattern this app uses anywhere, exactly
+          because this is the one genuinely destructive action it has. */}
+      {purgeConfirmOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] px-4" onClick={closePurgeConfirm}>
+          <div className="panel p-6 max-w-sm w-full border-danger/30" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-start gap-3">
+                <Trash2 className="text-danger shrink-0 mt-0.5" size={20} />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-danger/80 font-semibold mb-1">Purge Fleet Asset</p>
+                  <h3 className="font-display font-semibold text-white">Permanently purge "{purgePhrase}"?</h3>
+                  <p className="text-sm text-muted mt-1.5">
+                    This permanently removes this fleet asset and its ship-specific planning data — Loadouts, installed configuration, reservations, and Fleet Registry metadata. This cannot be undone.
+                  </p>
+                  {installedOwnedComponentCount > 0 && (
+                    <p className="text-sm text-muted mt-1.5">
+                      {installedOwnedComponentCount} installed owned component{installedOwnedComponentCount === 1 ? '' : 's'} will be returned to Hangar Inventory first.
+                    </p>
+                  )}
+                  <p className="text-sm text-muted mt-1.5">Recovery requires importing or restoring an earlier fleet snapshot — there is no in-app undo.</p>
+                  <label className="block mt-3">
+                    {/* EWO-097 Amendment — `normal-case` explicitly resets
+                        the parent's `uppercase` text-transform for the
+                        phrase itself: CSS text-transform is inherited by
+                        descendants, so without this override the phrase
+                        rendered visually differently (e.g. "SABRE") from
+                        the literal string a Commander had to type
+                        ("Sabre") — a real, confirmed presentation/
+                        validation mismatch. Never uppercase the phrase
+                        through string transformation either — only this
+                        one CSS reset, applied once, here. */}
+                    <span className="text-xs uppercase tracking-widest text-muted block mb-1.5">
+                      Type <span className="normal-case text-white font-medium">{purgePhrase}</span> to confirm
+                    </span>
+                    <input
+                      value={purgeTypedName}
+                      onChange={(e) => setPurgeTypedName(e.target.value)}
+                      placeholder="Type the ship name to confirm"
+                      aria-label={`Type ${purgePhrase} to confirm`}
+                      className="w-full"
+                      autoComplete="off"
+                      autoFocus
+                    />
+                  </label>
+                </div>
+              </div>
+              <button onClick={closePurgeConfirm} className="text-muted hover:text-white shrink-0">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={closePurgeConfirm}
+                className="flex-1 border border-white/15 text-white font-medium text-sm py-2 rounded-lg hover:border-white/35 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePurge}
+                disabled={!purgeNameMatches || purgeBusy}
+                className="flex-1 bg-danger text-white font-semibold text-sm py-2 rounded-lg hover:bg-danger/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-danger"
+              >
+                {purgeBusy ? 'Purging…' : 'Purge Fleet Asset'}
               </button>
             </div>
           </div>

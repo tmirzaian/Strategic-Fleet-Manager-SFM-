@@ -133,6 +133,16 @@ export interface SeedAssetOverride {
    * override) must win over the baseline, which `??` cannot distinguish
    * from "no override recorded at all" when both sides are `undefined`. */
   customImageRef?: string
+  /** EWO-097 — the one destructive override this shape supports. See
+   * `mergeFleetPersistedState` (useFleetStore.ts) for how this is
+   * applied: unlike every other field above (all non-destructive diffs
+   * against a seed ship that always stays fully present), `purged: true`
+   * excludes this seed-migrated asset's Ship/Build/Hardpoint/FleetAsset
+   * rows entirely from the fresh seed bake-in on every future load —
+   * permanent, by design, mirroring `purgeFleetAsset`'s effect on a
+   * manually-added asset. Never set alongside any other override field
+   * changing (a purge overwrites the whole override record). */
+  purged?: boolean
   updatedAt: string
 }
 

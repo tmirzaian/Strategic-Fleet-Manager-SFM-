@@ -176,7 +176,11 @@ describe('EWO-094: Fleet Import — file selection, Preview, Cancel, Replace', (
     await waitFor(() => expect(screen.getByText('Import Preview')).toBeInTheDocument())
     expect(screen.getByText(String(useFleetStore.getState().ships.length))).toBeInTheDocument()
     expect(screen.getByText(envelope.appVersion)).toBeInTheDocument()
-    expect(screen.getByText(String(envelope.schemaVersion))).toBeInTheDocument()
+    // Scoped via its own "Schema version:" label rather than a bare
+    // getByText(String(schemaVersion)) — the raw number can coincidentally
+    // collide with an unrelated summary count (e.g. ship count) rendered
+    // elsewhere in the same Preview.
+    expect(screen.getByText('Schema version:').closest('p')).toHaveTextContent(`Schema version: ${envelope.schemaVersion}`)
     expect(screen.getByText(/Compatible/)).toBeInTheDocument()
   })
 

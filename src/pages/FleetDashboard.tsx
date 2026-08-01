@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal, Archive } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import { selectActiveShips, selectRetiredShips } from '../utils/fleetLifecycle'
@@ -42,6 +42,26 @@ const readinessPills: { value: ReadinessFilterValue; label: string }[] = [
 const sortLabels: Record<FleetSortMode, string> = { Priority: 'Priority', Readiness: 'Readiness', Name: 'Ship Name', Manufacturer: 'Manufacturer', RsiRole: 'RSI Role' }
 
 export default function FleetDashboard() {
+  // EWO-097 — the purge success notification. EditFleetAssetModal
+  // navigates here with `state: { purgedShipName }` after a successful
+  // purge (there is no global toast system in this app to hook into
+  // instead); read once, then cleared from history immediately via
+  // `replace` so a later back-navigation or refresh never re-shows a
+  // stale banner. Every other "refresh affected surfaces" requirement is
+  // satisfied for free by ordinary Zustand reactivity — nothing here
+  // re-fetches or re-derives anything the store doesn't already own.
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [purgedShipName, setPurgedShipName] = useState<string | null>(null)
+  useEffect(() => {
+    const state = location.state as { purgedShipName?: string } | null
+    if (state?.purgedShipName) {
+      setPurgedShipName(state.purgedShipName)
+      navigate(location.pathname, { replace: true, state: null })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
+
   const allShips = useFleetStore((s) => s.ships)
   const builds = useFleetStore((s) => s.builds)
   const hardpoints = useFleetStore((s) => s.hardpoints)
@@ -157,6 +177,17 @@ export default function FleetDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* EWO-097 — self-dismissing purge success notification. */}
+      {purgedShipName && (
+        <div className="flex items-center justify-between gap-3 bg-success/10 border border-success/30 rounded-lg px-4 py-2.5 text-sm text-success">
+          <span className="flex items-center gap-2">
+            <CheckCircle2 size={15} /> "{purgedShipName}" was permanently purged from the Fleet Registry.
+          </span>
+          <button onClick={() => setPurgedShipName(null)} className="text-success/70 hover:text-success">
+            <X size={15} />
+          </button>
+        </div>
+      )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Fleet Dashboard</p>
