@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent, within, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import FleetDashboard from '../FleetDashboard'
 import { useFleetStore } from '../../store/useFleetStore'
@@ -489,5 +489,127 @@ describe('<FleetDashboard /> — SW-015C (Deliverable 7): Active/Retired view', 
     useFleetStore.getState().retireFleetAsset('ghost')
     renderDashboard()
     expect(screen.getByText('Retired (1)')).toBeInTheDocument()
+  })
+})
+
+/**
+ * EWO-099A Amendment 1 — "Fleet Dashboard Active/Retired Tab
+ * Consistency." Presentation-only: the Active tab now matches Retired's
+ * own icon-first, live-count treatment. Store-level lifecycle behavior
+ * (retire/recommission/purge) is already covered exhaustively elsewhere
+ * (fleetRegistryLifecycle.test.ts, fleetAssetPurge.test.ts) — these tests
+ * cover only what's specific to this tab: the live count staying
+ * correct through every lifecycle transition, and both tabs sharing
+ * identical visual treatment.
+ */
+describe('<FleetDashboard /> — EWO-099A Amendment 1: Active/Retired tab consistency', () => {
+  function addGladius(nickname?: string) {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    return useFleetStore.getState().addFleetAsset(def.id, 'OWNED', nickname).assetId!
+  }
+
+  it('the Active tab renders an icon-first "Active (N)" label with the live canonical active count', () => {
+    renderDashboard()
+    const activeCount = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    const activeTab = screen.getByText(`Active (${activeCount})`)
+    expect(activeTab).toBeInTheDocument()
+    expect(activeTab.closest('button')?.querySelector('svg')).not.toBeNull()
+  })
+
+  it('the Retired tab is visually and functionally unchanged (icon-first, count hidden at zero)', () => {
+    renderDashboard()
+    const retiredTab = screen.getByText('Retired')
+    expect(retiredTab.closest('button')?.querySelector('svg')).not.toBeNull()
+  })
+
+  it('both tab buttons share identical base classes and the identical selected-state treatment', () => {
+    renderDashboard()
+    const activeButton = screen.getByText(/^Active \(/).closest('button') as HTMLElement
+    const retiredButton = screen.getByText('Retired').closest('button') as HTMLElement
+    // Selected (Active, by default): the same bg-cyan/15 text-cyan classes Retired uses when IT is selected.
+    expect(activeButton.className).toContain('bg-cyan/15')
+    expect(activeButton.className).toContain('text-cyan')
+    // Shared base treatment (padding/spacing/typography/hover), differing only in the border-l divider.
+    const stripBorder = (cls: string) => cls.replace(/\bborder-l\b\s*/, '').replace(/\bborder-white\/10\b\s*/, '').trim()
+    expect(stripBorder(activeButton.className.replace(/bg-cyan\/15|text-cyan/g, '').trim())).toBe(
+      stripBorder(retiredButton.className.replace(/text-muted|hover:text-white/g, '').trim())
+    )
+
+    fireEvent.click(retiredButton)
+    expect(retiredButton.className).toContain('bg-cyan/15')
+    expect(retiredButton.className).toContain('text-cyan')
+  })
+
+  it('the count increases immediately when a ship is added', () => {
+    renderDashboard()
+    const before = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    expect(screen.getByText(`Active (${before})`)).toBeInTheDocument()
+    act(() => {
+      addGladius('New Arrival')
+    })
+    expect(screen.getByText(`Active (${before + 1})`)).toBeInTheDocument()
+  })
+
+  it('the count decreases immediately when a ship is retired, and Retired\'s own count increases to match', () => {
+    renderDashboard()
+    const before = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    act(() => {
+      useFleetStore.getState().retireFleetAsset('ghost')
+    })
+    expect(screen.getByText(`Active (${before - 1})`)).toBeInTheDocument()
+    expect(screen.getByText('Retired (1)')).toBeInTheDocument()
+  })
+
+  it('the count increases again when a retired ship returns to active service', () => {
+    renderDashboard()
+    const before = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    act(() => {
+      useFleetStore.getState().retireFleetAsset('ghost')
+    })
+    expect(screen.getByText(`Active (${before - 1})`)).toBeInTheDocument()
+    act(() => {
+      useFleetStore.getState().recommissionFleetAsset('ghost')
+    })
+    expect(screen.getByText(`Active (${before})`)).toBeInTheDocument()
+  })
+
+  it('purging a retired ship does not affect the Active count, and Retired\'s own count decreases', () => {
+    const id = addGladius('Purge Target')
+    renderDashboard()
+    const activeBefore = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    act(() => {
+      useFleetStore.getState().retireFleetAsset(id)
+    })
+    expect(screen.getByText(`Active (${activeBefore - 1})`)).toBeInTheDocument()
+    expect(screen.getByText('Retired (1)')).toBeInTheDocument()
+
+    act(() => {
+      useFleetStore.getState().purgeFleetAsset(id, 'Purge Target')
+    })
+    // The purged hull was already excluded from the Active count while
+    // retired — purge itself must not change the Active count further.
+    expect(screen.getByText(`Active (${activeBefore - 1})`)).toBeInTheDocument()
+    expect(screen.queryByText(/^Retired \(/)).not.toBeInTheDocument()
+    expect(screen.getByText('Retired')).toBeInTheDocument()
+  })
+
+  it('Active/Retired switching behavior is unaffected — clicking each tab still swaps the rendered fleet', () => {
+    useFleetStore.getState().retireFleetAsset('ghost')
+    renderDashboard()
+    expect(screen.queryByText('F7C-S Hornet Ghost Mk II')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Retired (1)'))
+    expect(screen.getByText('F7C-S Hornet Ghost Mk II')).toBeInTheDocument()
+    fireEvent.click(screen.getByText(/^Active \(/))
+    expect(screen.queryByText('F7C-S Hornet Ghost Mk II')).not.toBeInTheDocument()
+  })
+
+  it('the Active count is never derived from the currently-applied ownership/manufacturer/role/readiness filters', () => {
+    renderDashboard()
+    const activeCount = useFleetStore.getState().ships.filter((s) => s.lifecycleStatus === 'active').length
+    expandFilters()
+    fireEvent.click(screen.getByRole('button', { name: 'Owned' }))
+    // Filtering narrows the rendered grid, but the tab's own live count
+    // must still reflect the true canonical total, not the filtered one.
+    expect(screen.getByText(`Active (${activeCount})`)).toBeInTheDocument()
   })
 })

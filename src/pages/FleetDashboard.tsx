@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal, Archive } from 'lucide-react'
+import { LayoutGrid, Table2, ArrowRight, Plus, CheckCircle2, AlertOctagon, PackageX, ChevronDown, ChevronUp, X, SlidersHorizontal, Archive, ShieldCheck } from 'lucide-react'
 import { useFleetStore } from '../store/useFleetStore'
 import { selectActiveShips, selectRetiredShips } from '../utils/fleetLifecycle'
 import ShipCard from '../components/ShipCard'
@@ -79,6 +79,17 @@ export default function FleetDashboard() {
   const [lifecycleView, setLifecycleView] = useState<'active' | 'retired'>('active')
   const ships = lifecycleView === 'active' ? selectActiveShips(allShips) : selectRetiredShips(allShips)
   const retiredCount = useMemo(() => selectRetiredShips(allShips).length, [allShips])
+  // EWO-099A Amendment 1 — the Active tab's own live count, mirroring
+  // retiredCount's exact pattern: the same canonical `selectActiveShips`
+  // selector (fleetLifecycle.ts) every other active/retired distinction
+  // in the app already uses, computed once, independent of `ships`
+  // (which reflects whichever tab is currently selected) and independent
+  // of `filtered` (the header's own count below, which additionally
+  // narrows by the ownership/manufacturer/role/readiness filter pills).
+  // Never a second counting mechanism — this and `ships` can never
+  // disagree, by construction, since both derive from the identical
+  // `selectActiveShips(allShips)` call.
+  const activeCount = useMemo(() => selectActiveShips(allShips).length, [allShips])
 
   // EWO-053 (Objective B) — Required Feature: Persistent View. Loaded once,
   // synchronously, at first mount (not in an effect) so the Commander's
@@ -209,11 +220,15 @@ export default function FleetDashboard() {
           >
             <Plus size={15} /> Add Ship
           </button>
-          {/* SW-015C (Deliverable 7) — Active/Retired view toggle. Retired
-              only shows a badge/count when there's actually something to
-              find there, so the control doesn't invite a Commander with
-              no retired vessels to go looking for a Retired view that's
-              always empty. */}
+          {/* SW-015C (Deliverable 7) — Active/Retired view toggle.
+              EWO-099A Amendment 1 — Active now matches Retired's own
+              icon-first, live-count presentation exactly (same button
+              classes, same icon size, same "{Icon} {Label} (N)" shape);
+              only Retired keeps its own established behavior of hiding
+              the count entirely at zero (Retired is often genuinely
+              empty, and the control shouldn't invite a Commander to go
+              looking for a Retired view with nothing in it — Active is
+              never empty in practice, so it always shows its count). */}
           <div className="flex border border-white/10 rounded-lg overflow-hidden">
             <button
               onClick={() => setLifecycleView('active')}
@@ -221,7 +236,7 @@ export default function FleetDashboard() {
                 lifecycleView === 'active' ? 'bg-cyan/15 text-cyan' : 'text-muted hover:text-white'
               }`}
             >
-              Active
+              <ShieldCheck size={13} /> Active {`(${activeCount})`}
             </button>
             <button
               onClick={() => setLifecycleView('retired')}
