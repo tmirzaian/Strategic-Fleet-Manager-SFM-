@@ -79,7 +79,12 @@ export default function ShipCard({
           consistent height regardless of a real photo vs the branded
           fallback (ShipImage handles that internally). EWO-033A (Task 4/6)
           — both a real photo and the fallback now fill this frame via a
-          centered object-cover crop; only the hover-zoom is real-photo-only. */}
+          centered object-cover crop; only the hover-zoom is real-photo-only.
+          EWO-095A — `overlay={false}`: Region 2 (name/badges) always
+          renders BELOW the image, never on top of it, so the dark
+          gradient `ShipImage` would otherwise apply by default has no
+          text to protect here — it was pure unnecessary darkening of the
+          artwork ("broad vignette/shading that suppresses the artwork"). */}
       <ShipImage
         src={resolvedSrc}
         alt={ship.name}
@@ -87,6 +92,7 @@ export default function ShipCard({
         imageClassName={mode === 'contain' ? 'block w-full h-full object-cover animate-ship-image-fade-in' : 'block w-full h-full object-cover group-hover:scale-105 transition-transform duration-300'}
         presentation="auto"
         onPresentationChange={setMode}
+        overlay={false}
       />
 
       {/* Region 2 — Identity: name, ownership badge, manufacturer + stock

@@ -68,6 +68,22 @@ describe('<ShipHeroFrame /> adaptive layout', () => {
     expect(screen.queryByTestId('ship-hero-metadata-band')).not.toBeInTheDocument()
   })
 
+  it('EWO-095A: the text-legibility gradient is localized to the bottom half of the hero, not the full image — only the text-overlay region darkens', () => {
+    const { container } = render(
+      <ShipHeroFrame
+        imageSrc="https://example.com/real-ship.jpg"
+        name="Ghost"
+        manufacturer="Anvil"
+        ownership="Owned"
+        activeBuildLabel="Stealth Build"
+      />
+    )
+    const gradient = container.querySelector('.bg-gradient-to-t') as HTMLElement
+    expect(gradient).not.toBeNull()
+    expect(gradient.className).toContain('h-1/2')
+    expect(gradient.className).not.toContain('inset-0')
+  })
+
   it('EWO-033A (Task 5): the hero uses the exact same fixed height for fallback artwork and real photography — no height change based on image availability', () => {
     const { unmount } = render(
       <ShipHeroFrame name="Gladius" manufacturer="Aegis" ownership="Owned" activeBuildLabel="Factory Build" />

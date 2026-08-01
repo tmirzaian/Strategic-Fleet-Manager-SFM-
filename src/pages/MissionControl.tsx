@@ -472,14 +472,11 @@ export default function MissionControl() {
             // only (this whole branch already only reaches here when
             // ships.length === 0). Compact bounded room, not the standard
             // 560px department room — this is a sub-panel of Mission
-            // Control, not its own department.
-            // Revision 2 — vignetteOpacity reduced from EnvironmentBay's
-            // 0.92 default (Decision Center's own tuned value, left
-            // unchanged) to 0.45: reviewed live against the new
-            // higher-resolution master, "reduce substantially" per Chief
-            // Architect direction, while still keeping the artwork
-            // secondary to the "No Vessels Assigned" messaging.
-            <EnvironmentBay id="mission-control-empty-priority" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+            // Control, not its own department. EWO-095A — no explicit
+            // vignetteOpacity override needed; EnvironmentBay's own
+            // reduced default (0.15) already satisfies the canonical
+            // "crisp plate, panel carries legibility" rule.
+            <EnvironmentBay id="mission-control-empty-priority" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md">
               <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-8 flex flex-col items-center text-center gap-2">
                 <PackageX size={24} className="text-muted/60 mb-1" />
                 <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>

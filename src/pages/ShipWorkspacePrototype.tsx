@@ -2027,10 +2027,16 @@ export default function ShipWorkspacePrototype() {
           CLASS to match the selected-ship header's own rendered footprint
           (1320x343 at the reference desktop viewport), so selecting a
           ship causes no layout shift — the hero-sized region already
-          occupies exactly this space before and after. Overlay text is
-          the standardized EWO-061 label/title pair, vertically centered
-          across the full hero, and nothing else (no icon, no
-          description, no controls). */}
+          occupies exactly this space before and after.
+          EWO-095A — the label/title pair now renders inside the same
+          glyph/card treatment every other empty state uses (Mission
+          Control/Fleet Dashboard/Hangar Inventory's "No Vessels
+          Assigned"/"No Inventory Recorded" cards), still vertically
+          centered across the full hero. The old full-plate `bg-black/50`
+          wash is gone — legibility now comes from the card's own
+          semi-opaque graphite background + backdrop-blur, exactly like
+          those other empty states, so the Quartermaster Bay artwork
+          itself renders crisp and unobscured behind it. */}
       <div data-testid="ship-operational-banner" className="panel overflow-hidden relative">
         <div ref={bannerSentinelRef} />
 
@@ -2041,10 +2047,12 @@ export default function ShipWorkspacePrototype() {
             ) : (
               <div className="absolute inset-0 bg-black/20" />
             )}
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-              <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Maintenance Bay Ready</p>
-              <h2 className="text-2xl font-display font-bold text-white">Select a ship above to begin management.</h2>
+            <div className="absolute inset-0 flex items-center justify-center px-6">
+              <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-8 flex flex-col items-center text-center gap-2 max-w-md">
+                <WrenchIcon size={24} className="text-muted/60 mb-1" />
+                <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Maintenance Bay Ready</p>
+                <h2 className="text-2xl font-display font-bold text-white">Select a ship above to begin management.</h2>
+              </div>
             </div>
           </div>
         ) : (

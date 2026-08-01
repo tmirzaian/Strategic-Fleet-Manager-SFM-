@@ -70,15 +70,23 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   // diagnostics, blue/amber lighting, deliberately clean center aisle),
   // mounted inside its own bounded Technical Evaluation Bay
   // (`EnvironmentBay`, see DecisionCenter.tsx) rather than as a page-wide
-  // backdrop. Because legibility is now handled by the bay's own glass
-  // panels and edge vignette — not by low opacity alone — this reads
-  // brighter/more vivid than the Amendment-0 full-page value (0.28/0.8);
-  // a slight blur (`blurPx: 1`) adds the same "subtle atmospheric haze"
-  // the work order's Lighting section asks for.
+  // backdrop.
+  //
+  // EWO-095A — "Canonical Image Presentation & Environmental Clarity."
+  // The 0.55/0.95/1.05/1.05/blurPx:1 values above were tuned when
+  // legibility depended partly on dimming the plate itself; the canonical
+  // rule is now "environment plate: crisp, unblurred, visible at intended
+  // fidelity" — legibility is the foreground panels' job (semi-opaque
+  // graphite + backdrop-blur, see DecisionCenter.tsx's own panel classes),
+  // not the artwork's. blurPx -> 0 (no atmospheric-haze blur on the plate
+  // itself anymore); opacity/brightness/contrast/saturation -> a very
+  // light, deliberately near-imperceptible uniform wash (0.95/1/1/1)
+  // rather than the heavier 0.55 — "preserve a configurable wash only
+  // where needed," not remove the mechanism outright.
   'decision-center': definition('decision-center', 'Decision Center', {
     sources: { desktop: assetPath('environments/decision-center/decision-center.webp') },
     enabled: true,
-    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 1 },
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),
   'captain-log': definition('captain-log', "Captain's Log"),
 
@@ -95,22 +103,21 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   // 2560 without upscaling (explicit product scope, see
   // scripts/generateEnvironmentAssets.ts's own comment).
   //
-  // Presentation tuned against the new, higher-resolution masters
-  // (Chief Architect direction — "use the new masters as the visual
-  // reference," not the values tuned for the old low-res artwork):
-  // blurPx 1 -> 0 (crisp goal; the new masters don't need softening),
-  // opacity/brightness/contrast/saturation unchanged from Revision 1's
-  // 'decision-center'-derived values (not flagged for review). The bay's
-  // own edge vignette (separate from this presentation block — see
-  // EnvironmentBay's `vignetteOpacity` prop) is reduced per-usage at
-  // each page's own EnvironmentBay call site.
+  // Presentation tuned against the new, higher-resolution masters, then
+  // retuned again under EWO-095A's canonical rule (crisp/unblurred plate,
+  // legibility from the foreground card, not from dimming the artwork):
+  // opacity/brightness/contrast/saturation now match 'decision-center'
+  // exactly (0.95/1/1/1, a very light wash) instead of the heavier
+  // 0.55/0.95/1.05/1.05. The bay's own edge vignette (separate from this
+  // presentation block — see EnvironmentBay's `vignetteOpacity` prop) now
+  // just uses the bay's own reduced default; no per-call override needed.
   'mission-control-empty-priority': definition('mission-control-empty-priority', 'Mission Control — Empty Top Priority Ship', {
     sources: {
       tablet: assetPath('environments/mission-control-empty-priority/mission-control-empty-priority-background-1920.webp'),
       mobile: assetPath('environments/mission-control-empty-priority/mission-control-empty-priority-background-1280.webp'),
     },
     enabled: true,
-    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),
   'fleet-dashboard-empty': definition('fleet-dashboard-empty', 'Fleet Dashboard — Empty Fleet', {
     sources: {
@@ -118,7 +125,7 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
       mobile: assetPath('environments/fleet-dashboard-empty/fleet-dashboard-empty-background-1280.webp'),
     },
     enabled: true,
-    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),
   'hangar-inventory-empty': definition('hangar-inventory-empty', 'Hangar Inventory — Empty Inventory', {
     sources: {
@@ -126,7 +133,7 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
       mobile: assetPath('environments/hangar-inventory-empty/hangar-inventory-empty-background-1280.webp'),
     },
     enabled: true,
-    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),
 }
 

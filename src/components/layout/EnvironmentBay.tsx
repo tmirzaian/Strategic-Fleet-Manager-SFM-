@@ -18,15 +18,18 @@ export interface EnvironmentBayProps {
    * that height — pass a smaller value (e.g. `lg:min-h-[300px]`) rather
    * than forcing every future compact use to fight the 560px default. */
   minHeightClassName?: string
-  /** Chief Architect Asset Handoff (Revision 2) — 0-1 opacity for the
-   * bay's own edge vignette (the `rgba(7,16,22,X)` end-stop of its radial
-   * gradient below). Defaults to `0.92`, Decision Center's own tuned
-   * value, unchanged. A caller with higher-resolution, already-legible
-   * artwork (e.g. a compact empty-state bay reviewed against its own
-   * new masters) can pass a smaller value — or `0` to remove the
-   * vignette outright — without touching Decision Center's presentation.
-   * `0` skips rendering the vignette layer entirely rather than rendering
-   * a fully-transparent no-op div. */
+  /** EWO-095A — "Canonical Image Presentation & Environmental Clarity."
+   * 0-1 opacity for the bay's own edge vignette (the `rgba(7,16,22,X)`
+   * end-stop of its radial gradient below). Defaults to `0.15` — a
+   * substantial reduction from the pre-EWO-095A default of `0.92`
+   * (Decision Center's own original tuned value): the canonical rule is
+   * now that environment plates render crisp and visible at intended
+   * fidelity, with legibility coming from the foreground panels'
+   * semi-opaque graphite + backdrop-blur treatment, not from darkening
+   * the artwork. `0` skips rendering the vignette layer entirely rather
+   * than rendering a fully-transparent no-op div; a future page that
+   * genuinely needs stronger edge darkening can still pass a larger
+   * value explicitly. */
   vignetteOpacity?: number
 }
 
@@ -50,7 +53,7 @@ export interface EnvironmentBayProps {
  * mobile simplification (EWO-035A-R2) rather than fighting a background
  * image at narrow widths.
  */
-export default function EnvironmentBay({ id, children, contentClassName = 'max-w-2xl', minHeightClassName = 'lg:min-h-[560px]', vignetteOpacity = 0.92 }: EnvironmentBayProps) {
+export default function EnvironmentBay({ id, children, contentClassName = 'max-w-2xl', minHeightClassName = 'lg:min-h-[560px]', vignetteOpacity = 0.15 }: EnvironmentBayProps) {
   return (
     <div className={`relative overflow-hidden rounded-xl lg:border lg:border-white/15 ${minHeightClassName} lg:flex lg:items-center lg:justify-center lg:py-16 lg:px-10`}>
       <PageEnvironment id={id} />

@@ -222,4 +222,9 @@ describe('<ShipCard /> — EWO-033 (Task 4): canonical dimension contract', () =
     expect(screen.queryByText(/PRIORITY/)).not.toBeInTheDocument()
     expect(screen.queryByTestId('priority-card-wrapper')).not.toBeInTheDocument()
   })
+
+  it('EWO-095A: renders no dark gradient overlay on the ship image — Region 2 (name/badges) always sits below the image, never on top of it, so there is no text to protect', () => {
+    const { container } = renderCard(baseShip)
+    expect(container.querySelector('.bg-gradient-to-t')).toBeNull()
+  })
 })

@@ -183,7 +183,14 @@ export default function ShipHeroFrame({
 
         {!isFallback && (
           <>
-            <div className="absolute inset-0 bg-gradient-to-t from-panel via-panel/40 to-transparent" />
+            {/* EWO-095A — localized to the bottom half only (where the
+                name/badges/subtitle actually sit), not the full `inset-0`
+                hero: the gradient starts from `transparent` at its own top
+                edge, exactly matching the (also transparent) unshaded
+                upper half above it, so there is no visible seam — only the
+                text-overlay region is ever darkened, never the whole
+                image. */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-panel via-panel/40 to-transparent" />
             <div data-testid="ship-hero-overlay-info" className="absolute bottom-4 left-5 right-5">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-xl font-display font-bold text-white drop-shadow">{name}</h2>

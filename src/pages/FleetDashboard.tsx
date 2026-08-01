@@ -252,8 +252,11 @@ export default function FleetDashboard() {
         ) : (
           // Chief Architect Asset Handoff — the one genuine empty-fleet
           // case: ships.length === 0, not retired-view, and no retired
-          // vessels exist to explain the zero either.
-          <EnvironmentBay id="fleet-dashboard-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+          // vessels exist to explain the zero either. EWO-095A — no
+          // explicit vignetteOpacity override needed; EnvironmentBay's
+          // own reduced default (0.15) already satisfies the canonical
+          // "crisp plate, panel carries legibility" rule.
+          <EnvironmentBay id="fleet-dashboard-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md">
             <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-10 flex flex-col items-center text-center gap-2">
               <PackageX size={28} className="text-muted/60 mb-1" />
               <h2 className="font-display font-semibold text-white">No Vessels Assigned</h2>

@@ -131,10 +131,32 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
   it('EWO-062A (Part A): the empty state\'s overlay copy is vertically centered across the full hero, not bottom-anchored', () => {
     renderWorkspace()
     const label = screen.getByText('Maintenance Bay Ready')
-    const overlay = label.parentElement as HTMLElement
+    // EWO-095A — the label now sits inside a glyph/card treatment (see
+    // the next test); the card's own OUTER wrapper is what carries the
+    // full-hero centering, not the card itself.
+    const card = label.parentElement as HTMLElement
+    const overlay = card.parentElement as HTMLElement
     expect(overlay.className).toContain('items-center')
     expect(overlay.className).toContain('justify-center')
     expect(overlay.className).toContain('inset-0')
+  })
+
+  it('EWO-095A: the empty state\'s text renders inside the same glyph/card treatment every other empty state uses (Mission Control/Fleet Dashboard/Hangar Inventory) — a semi-opaque, backdrop-blurred panel, not floating text over a full-plate dark wash', () => {
+    renderWorkspace()
+    const label = screen.getByText('Maintenance Bay Ready')
+    const card = label.parentElement as HTMLElement
+    expect(card.className).toContain('panel')
+    expect(card.className).toContain('lg:bg-panel/55')
+    expect(card.className).toContain('lg:backdrop-blur-md')
+    // A glyph (icon) renders above the label, matching the other empty
+    // states' PackageX-icon-card pattern.
+    expect(card.querySelector('svg')).not.toBeNull()
+  })
+
+  it('EWO-095A: the old full-plate bg-black/50 wash is gone — legibility comes from the card, the Quartermaster Bay artwork itself is unobscured', () => {
+    const { container } = renderWorkspace()
+    const emptyHero = container.querySelector('[data-testid="ship-operational-banner"] > div:last-child') as HTMLElement
+    expect(emptyHero.querySelector('.bg-black\\/50')).toBeNull()
   })
 
   it('EWO-062A (Part C): "View in Ship Detail" no longer renders in the Ship Management header', () => {

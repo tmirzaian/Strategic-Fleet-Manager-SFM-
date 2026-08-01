@@ -306,8 +306,11 @@ export default function HangarInventory() {
       {hangarItems.length === 0 ? (
         // Chief Architect Asset Handoff — genuine zero-recorded-inventory
         // only; the separate filtered-to-zero branch below (line ~445)
-        // deliberately stays plain/compact, no artwork.
-        <EnvironmentBay id="hangar-inventory-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+        // deliberately stays plain/compact, no artwork. EWO-095A — no
+        // explicit vignetteOpacity override needed; EnvironmentBay's own
+        // reduced default (0.15) already satisfies the canonical "crisp
+        // plate, panel carries legibility" rule.
+        <EnvironmentBay id="hangar-inventory-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md">
           <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-10 flex flex-col items-center text-center gap-2">
             <PackageX size={28} className="text-muted/60 mb-1" />
             <h2 className="font-display font-semibold text-white">No Inventory Recorded</h2>

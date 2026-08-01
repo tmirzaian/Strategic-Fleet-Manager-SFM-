@@ -46,17 +46,21 @@ describe('EnvironmentBay — minHeightClassName (Chief Architect Asset Handoff)'
 })
 
 /**
- * Chief Architect Asset Handoff (Revision 2) — `vignetteOpacity` lets a
- * caller reduce or remove the bay's own edge-darkening radial gradient
- * (reviewed against the higher-resolution masters) without touching
- * Decision Center's own already-approved 0.92 value.
+ * EWO-095A — "Canonical Image Presentation & Environmental Clarity."
+ * `vignetteOpacity` lets a caller reduce or remove the bay's own
+ * edge-darkening radial gradient. The canonical rule is now "environment
+ * plate: crisp, unblurred, visible at intended fidelity" — legibility
+ * comes from the foreground panel, not from darkening the artwork — so
+ * the shared default itself was reduced from 0.92 to 0.15 (a
+ * substantial, not just per-page, reduction; Decision Center inherits it
+ * automatically since it never passed an explicit override).
  */
-describe('EnvironmentBay — vignetteOpacity (Chief Architect Asset Handoff, Revision 2)', () => {
+describe('EnvironmentBay — vignetteOpacity (EWO-095A)', () => {
   function vignetteLayer(container: HTMLElement): HTMLElement | null {
     return container.querySelector('[style*="radial-gradient"]')
   }
 
-  it('defaults to 0.92 (Decision Center\'s own unchanged value) when omitted', () => {
+  it('defaults to 0.15 (a very light wash, substantially reduced from the pre-EWO-095A 0.92) when omitted — Decision Center included, since it never overrides this prop', () => {
     const { container } = render(
       <EnvironmentBay id="decision-center">
         <div>content</div>
@@ -64,10 +68,10 @@ describe('EnvironmentBay — vignetteOpacity (Chief Architect Asset Handoff, Rev
     )
     const layer = vignetteLayer(container)
     expect(layer).not.toBeNull()
-    expect(layer!.style.background).toMatch(/rgba\(7,\s*16,\s*22,\s*0\.92\)/)
+    expect(layer!.style.background).toMatch(/rgba\(7,\s*16,\s*22,\s*0\.15\)/)
   })
 
-  it('uses a reduced opacity when a caller supplies one', () => {
+  it('uses a caller-supplied opacity when one is explicitly passed', () => {
     const { container } = render(
       <EnvironmentBay id="mission-control-empty-priority" vignetteOpacity={0.45}>
         <div>content</div>

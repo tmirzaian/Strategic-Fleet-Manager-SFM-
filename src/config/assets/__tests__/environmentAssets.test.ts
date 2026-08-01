@@ -54,13 +54,6 @@ describe('Mission M-022: environment registry', () => {
     }
   )
 
-  it.each(['mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'] as const)(
-    'Chief Architect Asset Handoff (Revision 2): %s presentation has zero blur — tuned crisp against the new higher-resolution master, no softening needed',
-    (id) => {
-      expect(getEnvironmentDefinition(id).presentation.blurPx).toBe(0)
-    }
-  )
-
   it('resolveResponsiveSource prefers the new tablet (1920) tier over mobile (1280) for the empty-state environments', () => {
     const def = getEnvironmentDefinition('mission-control-empty-priority')
     expect(resolveResponsiveSource(def.sources)).toBe(def.sources.tablet)
@@ -79,6 +72,19 @@ describe('Mission M-022: environment registry', () => {
     expect(isEnvironmentUsable(def)).toBe(true)
     expect(def.sources.desktop).toBe('/assets/environments/decision-center/decision-center.webp')
   })
+
+  it.each(['decision-center', 'mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'] as const)(
+    'EWO-095A: %s presentation renders crisp and unblurred — zero blur, and only a very light uniform wash (opacity 0.95, brightness/contrast/saturation neutral) rather than the heavier pre-EWO-095A values',
+    (id) => {
+      const def = getEnvironmentDefinition(id)
+      expect(def.presentation.blurPx).toBe(0)
+      expect(def.presentation.opacity).toBe(0.95)
+      expect(def.presentation.brightness).toBe(1.0)
+      expect(def.presentation.contrast).toBe(1.0)
+      expect(def.presentation.saturation).toBe(1.0)
+      expect(isValidPresentation(def.presentation)).toBe(true)
+    }
+  )
 
   it('EWO-035A: mission-control presentation is tuned brighter/more visible than the shared dormant default, and still validates', () => {
     const def = getEnvironmentDefinition('mission-control')
