@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import CaptainsLog from '../CaptainsLog'
 import { useFleetStore } from '../../store/useFleetStore'
@@ -49,5 +49,66 @@ describe("CWO-005 (Task 5) / BP-001: Captain's Log — version/certification pre
     } else {
       expect(screen.getByText(/Not yet certified/)).toBeInTheDocument()
     }
+  })
+})
+
+/**
+ * EWO-093 — "Fleet Export Architecture." The Export button is the one
+ * Commander-facing piece of this work order — everything else is the
+ * shared serialization module underneath it (see
+ * src/utils/__tests__/fleetSerialization.test.ts and
+ * src/store/__tests__/fleetExportSnapshot.test.ts for the schema/
+ * no-parallel-implementation proofs). This suite proves the button
+ * itself actually triggers a real browser download with the expected
+ * content, using the standard Blob/object-URL/anchor-click mocks jsdom
+ * doesn't implement natively.
+ */
+function stubDownload(): { getCapturedBlob: () => Blob | null; createObjectURL: ReturnType<typeof vi.fn>; revokeObjectURL: ReturnType<typeof vi.fn>; clickSpy: ReturnType<typeof vi.spyOn> } {
+  let capturedBlob: Blob | null = null
+  const createObjectURL = vi.fn((blob: Blob) => {
+    capturedBlob = blob
+    return 'blob:mock-url'
+  })
+  const revokeObjectURL = vi.fn()
+  URL.createObjectURL = createObjectURL
+  URL.revokeObjectURL = revokeObjectURL
+  const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+  return { getCapturedBlob: () => capturedBlob, createObjectURL, revokeObjectURL, clickSpy }
+}
+
+describe('EWO-093: Fleet Export button', () => {
+  it('downloads a JSON file, revokes the object URL, and shows a confirmation with the filename', () => {
+    const { getCapturedBlob, createObjectURL, revokeObjectURL, clickSpy } = stubDownload()
+
+    renderCaptainsLog()
+    fireEvent.click(screen.getByRole('button', { name: /Export Fleet Data/ }))
+
+    expect(clickSpy).toHaveBeenCalledTimes(1)
+    expect(createObjectURL).toHaveBeenCalledTimes(1)
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+    expect(getCapturedBlob()).not.toBeNull()
+    expect(getCapturedBlob()!.type).toBe('application/json')
+    expect(screen.getByText(/Exported as sfm-fleet-export-\d{4}-\d{2}-\d{2}\.json/)).toBeInTheDocument()
+
+    clickSpy.mockRestore()
+  })
+
+  it('the downloaded file is a valid FleetExportEnvelope reflecting the current fleetAssets — not a second, independently-shaped export', async () => {
+    const def = useFleetStore.getState().shipDefinitions.find((d) => d.displayName === 'Gladius')!
+    useFleetStore.getState().addFleetAsset(def.id, 'OWNED', 'Export Content Test Titan')
+
+    const { getCapturedBlob, clickSpy } = stubDownload()
+    renderCaptainsLog()
+    fireEvent.click(screen.getByRole('button', { name: /Export Fleet Data/ }))
+
+    const text = await getCapturedBlob()!.text()
+    const envelope = JSON.parse(text)
+
+    expect(typeof envelope.schemaVersion).toBe('number')
+    expect(typeof envelope.appVersion).toBe('string')
+    expect(typeof envelope.exportedAt).toBe('string')
+    expect(envelope.payload.fleetAssets.some((a: { addedAt?: string; ownershipType: string }) => a.ownershipType === 'OWNED')).toBe(true)
+
+    clickSpy.mockRestore()
   })
 })

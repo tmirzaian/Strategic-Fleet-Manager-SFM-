@@ -29,6 +29,8 @@ import {
   reconcileHangarItemIdentity,
   reconcileReservationIdentity,
 } from './persistedComponentIdentityReconciliation'
+import { buildFleetPersistencePayload, buildFleetExportEnvelope, type FleetPersistenceSource, type FleetExportEnvelope } from '../utils/fleetSerialization'
+import { APP_VERSION } from '../config/appVersion'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -60,6 +62,19 @@ const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // for both collections before validation runs, so no existing vessel
 // (active or already-removed) is lost or reidentified.
 const PERSIST_VERSION = 10
+
+/**
+ * EWO-093 — Fleet Export. `PERSIST_VERSION` is deliberately kept private
+ * to this file (never duplicated into a second "export schema version"
+ * constant — see docs/Beta-2.1-Fleet-Export-Architecture.md §3), so this
+ * is the one place the live store, the persistence version, and the
+ * portable export envelope all meet. `fleetSerialization.ts` itself has
+ * no knowledge of PERSIST_VERSION or the store — it only builds the
+ * payload/envelope shapes from whatever numbers/state it's handed.
+ */
+export function buildFleetExportSnapshot(source: FleetPersistenceSource): FleetExportEnvelope {
+  return buildFleetExportEnvelope(buildFleetPersistencePayload(source), PERSIST_VERSION, APP_VERSION.productVersion)
+}
 
 /**
  * Derives the initial shared Installed Loadout for every ship from the
@@ -2272,47 +2287,12 @@ export const useFleetStore = create<FleetState>()(
       // minimal diff (removed / renamed / re-owned / re-prioritized) a
       // user can apply to a seed ship. Hangar Inventory, Reservations, and
       // the Installed Loadout persist directly in full.
-      partialize: (state) => ({
-        // SW-015C — no longer filtered by lifecycle status. A retired
-        // manual asset must persist in full (Deliverable 1: "the state
-        // must survive restart") — the old `status === 'active'` filter
-        // here is exactly what made the prior "soft delete" a silent
-        // hard delete for manual assets (nothing beyond the bare
-        // FleetAsset record even survived a single reload). Retired and
-        // active manual assets now round-trip identically; only the
-        // seed-migration exclusion (handled separately via
-        // seedAssetOverrides) remains.
-        fleetAssets: state.fleetAssets.filter((a) => a.acquisitionSource !== 'SEED_MIGRATION'),
-        hangarItems: state.hangarItems,
-        reservations: state.reservations,
-        installedLoadouts: state.installedLoadouts,
-        seedAssetOverrides: state.seedAssetOverrides,
-        // EWO-027 — the actual custom Loadout content, for ANY ship (seed
-        // or manually added). Factory builds are deliberately excluded:
-        // they're always correctly, deterministically regenerated fresh
-        // (materializeFleetAsset for manual assets, src/data/seed.ts for
-        // seed ones) — persisting them would only be redundant bytes.
-        customBuilds: state.builds.filter((b) => b.kind !== 'FACTORY'),
-        customBuildHardpoints: state.hardpoints.filter((h) => state.builds.some((b) => b.id === h.buildId && b.kind !== 'FACTORY')),
-        // A ship's actual selected Active Build. For a manually-added
-        // asset this duplicates FleetAsset.activeBuildId (already
-        // persisted above), but a seed ship's Ship object is baked in
-        // fresh every session and previously had no way at all to
-        // remember a Commander's setActiveBuild() choice — this single
-        // small map covers both sources uniformly.
-        activeBuildByShipId: Object.fromEntries(state.ships.map((s) => [s.id, s.activeBuildId])),
-        // EWO-043 — Commander assignments whose port has disappeared
-        // upstream; never rebuilt from anything else, so must round-trip
-        // verbatim like every other real player record.
-        quarantinedAssignments: state.quarantinedAssignments,
-        // CAT-001A — once true (set only by `migrate`, for a save that
-        // already existed before this fix), this must keep round-tripping
-        // forever: after the very first post-fix save/reload, this
-        // installation's stored version already matches PERSIST_VERSION,
-        // so `migrate` never runs again — this field is the only place
-        // that fact survives.
-        seedFleetLegacyInstall: state.seedFleetLegacyInstall,
-      }),
+      // EWO-093 — the field-selection logic itself now lives in
+      // `buildFleetPersistencePayload` (src/utils/fleetSerialization.ts),
+      // not inline here, so Fleet Export can call the exact same function
+      // rather than a second, parallel implementation. See that module's
+      // own doc comment and docs/Beta-2.1-Fleet-Export-Architecture.md.
+      partialize: (state) => buildFleetPersistencePayload(state),
       // Replays every persisted manual Fleet Asset back into ships/builds/
       // hardpoints using the exact same materializeFleetAsset() the live
       // "Add Ship" action uses — `existingAsset` reuses the persisted id

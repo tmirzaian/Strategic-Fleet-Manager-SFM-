@@ -1,5 +1,7 @@
-import { ScrollText, TrendingUp } from 'lucide-react'
-import { useFleetStore } from '../store/useFleetStore'
+import { useState } from 'react'
+import { ScrollText, TrendingUp, Download } from 'lucide-react'
+import { useFleetStore, buildFleetExportSnapshot } from '../store/useFleetStore'
+import { serializeFleetExportEnvelope, suggestFleetExportFilename } from '../utils/fleetSerialization'
 import DevValidationPanel from '../components/DevValidationPanel'
 import { APP_VERSION_LABEL } from '../config/appVersion'
 import { resolveCertifiedGameVersionLabel } from '../utils/scVersion'
@@ -7,6 +9,27 @@ import { resolveCertifiedGameVersionLabel } from '../utils/scVersion'
 export default function CaptainsLog() {
   const log = useFleetStore((s) => s.log)
   const certifiedGameVersion = resolveCertifiedGameVersionLabel()
+  const [lastExportFilename, setLastExportFilename] = useState<string | null>(null)
+
+  // EWO-093 — Fleet Export. Builds the exact same payload
+  // `partialize` already persists to localStorage (via the shared
+  // `buildFleetExportSnapshot`/`buildFleetPersistencePayload`
+  // functions — never a second, parallel serialization), then triggers
+  // a standard browser file download. No Import/Backup/Restore here —
+  // see docs/Beta-2.1-Fleet-Export-Architecture.md for that boundary.
+  function handleExportFleet() {
+    const envelope = buildFleetExportSnapshot(useFleetStore.getState())
+    const json = serializeFleetExportEnvelope(envelope)
+    const filename = suggestFleetExportFilename(envelope)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = filename
+    anchor.click()
+    URL.revokeObjectURL(url)
+    setLastExportFilename(filename)
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -19,6 +42,18 @@ export default function CaptainsLog() {
         <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
         <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified for</p>
         <p className="text-white">{certifiedGameVersion ? `Star Citizen LIVE ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
+      </div>
+
+      <div className="panel p-4 text-sm">
+        <p className="text-white font-medium mb-1">Fleet Data</p>
+        <p className="text-muted text-xs mb-3">Download a portable snapshot of your fleet — Fleet Registry, Loadouts, Hangar Inventory, and Reservations.</p>
+        <button
+          onClick={handleExportFleet}
+          className="inline-flex items-center gap-1.5 border border-cyan/30 text-cyan font-medium text-xs px-3 py-2 rounded-lg hover:bg-cyan/10 hover:border-cyan/50 transition-colors"
+        >
+          <Download size={13} /> Export Fleet Data
+        </button>
+        {lastExportFilename && <p className="text-[11px] text-success mt-2">Exported as {lastExportFilename}</p>}
       </div>
 
       <DevValidationPanel />
