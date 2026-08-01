@@ -10,6 +10,24 @@ export interface EnvironmentBayProps {
    * department reaching for a wider or narrower operational surface can
    * override it without touching the bay's own composition rules. */
   contentClassName?: string
+  /** Chief Architect Asset Handoff — Tailwind min-height class for the
+   * bay's own bounded room. Defaults to the standard `lg:min-h-[560px]`
+   * full "room" size every existing bay (Decision Center) uses. A
+   * sub-panel empty state (e.g. Mission Control's "No Vessels Assigned"
+   * card) is not a full department room and explicitly should NOT take on
+   * that height — pass a smaller value (e.g. `lg:min-h-[300px]`) rather
+   * than forcing every future compact use to fight the 560px default. */
+  minHeightClassName?: string
+  /** Chief Architect Asset Handoff (Revision 2) — 0-1 opacity for the
+   * bay's own edge vignette (the `rgba(7,16,22,X)` end-stop of its radial
+   * gradient below). Defaults to `0.92`, Decision Center's own tuned
+   * value, unchanged. A caller with higher-resolution, already-legible
+   * artwork (e.g. a compact empty-state bay reviewed against its own
+   * new masters) can pass a smaller value — or `0` to remove the
+   * vignette outright — without touching Decision Center's presentation.
+   * `0` skips rendering the vignette layer entirely rather than rendering
+   * a fully-transparent no-op div. */
+  vignetteOpacity?: number
 }
 
 /**
@@ -32,20 +50,23 @@ export interface EnvironmentBayProps {
  * mobile simplification (EWO-035A-R2) rather than fighting a background
  * image at narrow widths.
  */
-export default function EnvironmentBay({ id, children, contentClassName = 'max-w-2xl' }: EnvironmentBayProps) {
+export default function EnvironmentBay({ id, children, contentClassName = 'max-w-2xl', minHeightClassName = 'lg:min-h-[560px]', vignetteOpacity = 0.92 }: EnvironmentBayProps) {
   return (
-    <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:min-h-[560px] lg:flex lg:items-center lg:justify-center lg:py-16 lg:px-10">
+    <div className={`relative overflow-hidden rounded-xl lg:border lg:border-white/15 ${minHeightClassName} lg:flex lg:items-center lg:justify-center lg:py-16 lg:px-10`}>
       <PageEnvironment id={id} />
       {/* Edge treatment (Deliverable 5) — the artwork itself softly
           vignettes toward the bay's own border rather than ending in a
           hard image cutoff; the container's rounded-xl/border shape stays
           consistent with Mission Control's own room, only the image
-          content fades. */}
-      <div
-        className="hidden lg:block absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 75% 70% at 50% 50%, transparent 40%, rgba(7,16,22,0.92) 100%)' }}
-        aria-hidden="true"
-      />
+          content fades. Opacity is configurable (Revision 2) — skipped
+          entirely at 0 rather than rendering a no-op transparent layer. */}
+      {vignetteOpacity > 0 && (
+        <div
+          className="hidden lg:block absolute inset-0 pointer-events-none"
+          style={{ background: `radial-gradient(ellipse 75% 70% at 50% 50%, transparent 40%, rgba(7,16,22,${vignetteOpacity}) 100%)` }}
+          aria-hidden="true"
+        />
+      )}
       <div className={`relative z-10 w-full ${contentClassName} mx-auto space-y-6`}>{children}</div>
     </div>
   )

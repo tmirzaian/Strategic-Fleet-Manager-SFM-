@@ -17,6 +17,7 @@ paths — application code never hardcodes a path into this directory. See
 | Domain | Directory | Owned by |
 |---|---|---|
 | Environment artwork | `environments/<page-id>/` | Chief Architect production art handoff |
+| Card-scoped illustration accents | `illustrations/<accent-id>/` | Chief Architect production art handoff |
 | Decorative overlays/gradients | `overlays/` | Shared across environments |
 | Strategic Fleet Manager branding | `branding/{logo,marks,icons}/` | Product/brand |
 | Fleet Registry ship imagery | `fleet-registry/<manufacturer>/` | Quartermaster Fleet Registry (separate from RSI fallback ship photography) |

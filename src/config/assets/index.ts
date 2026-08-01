@@ -10,3 +10,4 @@ export { BRANDING_ASSETS, getBrandingAsset, resolveBrandingSrc } from './brandin
 export { resolveFleetRegistryImage, manufacturerSlugForCode, FLEET_REGISTRY_PLACEHOLDER, type ResolveFleetRegistryImageParams } from './fleetRegistryAssets'
 export { WORKFLOW_ILLUSTRATIONS, getWorkflowIllustration, resolveWorkflowIllustration } from './workflowAssets'
 export { SHIP_MANAGEMENT_ILLUSTRATIONS, getShipManagementIllustration, resolveShipManagementIllustration } from './shipManagementAssets'
+export { CAPTAINS_LOG_ACCENTS, getCaptainsLogAccent, resolveCaptainsLogAccentSource } from './captainsLogAssets'

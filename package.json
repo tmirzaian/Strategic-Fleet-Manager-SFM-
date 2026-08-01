@@ -18,6 +18,7 @@
     "generate:component-owned-port-constraints": "tsx scripts/generateComponentOwnedPortConstraints.ts",
     "generate:ship-catalog": "tsx scripts/generateShipCatalog.ts",
     "generate:branding-assets": "tsx scripts/generateBrandingAssets.ts",
+    "generate:environment-assets": "tsx scripts/generateEnvironmentAssets.ts",
     "generate:configurable-slot-report": "tsx scripts/generateConfigurableSlotReport.ts",
     "certify:configurable-slots": "tsx scripts/generateConfigurableSlotCertification.ts",
     "generate:configurable-slots-runtime-catalog": "tsx scripts/generateConfigurableSlotRuntimeCatalog.ts",

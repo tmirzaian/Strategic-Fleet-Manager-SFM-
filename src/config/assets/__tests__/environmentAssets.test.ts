@@ -29,13 +29,41 @@ describe('Mission M-022: environment registry', () => {
     expect(isValidPresentation({ ...base, position: '' })).toBe(false)
   })
 
-  it('every definition except mission-control and decision-center ships disabled with no artwork referenced (Mission M-022 is infrastructure only; EWO-035 enabled Mission Control, UX-003B enabled Decision Center)', () => {
+  const ENABLED_IDS = new Set(['mission-control', 'decision-center', 'mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'])
+
+  it('every definition outside the enabled set ships disabled with no artwork referenced (Mission M-022 is infrastructure only; EWO-035 enabled Mission Control, UX-003B enabled Decision Center, Chief Architect Asset Handoff enabled the three empty-state ids)', () => {
     for (const id of ENVIRONMENT_IDS) {
-      if (id === 'mission-control' || id === 'decision-center') continue
+      if (ENABLED_IDS.has(id)) continue
       const def = getEnvironmentDefinition(id)
       expect(def.enabled).toBe(false)
       expect(isEnvironmentUsable(def)).toBe(false)
     }
+  })
+
+  it.each(['mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'] as const)(
+    'Chief Architect Asset Handoff (Revision 2): %s is enabled with real, usable tablet (~1920) and mobile (~1280) sources from the 3344x1882 master — desktop/desktop4k deliberately unpopulated this round (explicit product scope, not an upscale limit)',
+    (id) => {
+      const def = getEnvironmentDefinition(id)
+      expect(def.enabled).toBe(true)
+      expect(isEnvironmentUsable(def)).toBe(true)
+      expect(def.sources.tablet).toMatch(/^\/assets\/environments\/.+-1920\.webp$/)
+      expect(def.sources.mobile).toMatch(/^\/assets\/environments\/.+-1280\.webp$/)
+      expect(def.sources.desktop4k).toBeUndefined()
+      expect(def.sources.desktop).toBeUndefined()
+      expect(isValidPresentation(def.presentation)).toBe(true)
+    }
+  )
+
+  it.each(['mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'] as const)(
+    'Chief Architect Asset Handoff (Revision 2): %s presentation has zero blur — tuned crisp against the new higher-resolution master, no softening needed',
+    (id) => {
+      expect(getEnvironmentDefinition(id).presentation.blurPx).toBe(0)
+    }
+  )
+
+  it('resolveResponsiveSource prefers the new tablet (1920) tier over mobile (1280) for the empty-state environments', () => {
+    const def = getEnvironmentDefinition('mission-control-empty-priority')
+    expect(resolveResponsiveSource(def.sources)).toBe(def.sources.tablet)
   })
 
   it('EWO-035: mission-control is enabled with a real, usable Beta artwork source', () => {

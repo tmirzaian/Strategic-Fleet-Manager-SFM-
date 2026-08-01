@@ -6,6 +6,7 @@ import DevValidationPanel from '../components/DevValidationPanel'
 import FleetImportPreview from '../components/FleetImportPreview'
 import { APP_VERSION_LABEL } from '../config/appVersion'
 import { resolveCertifiedGameVersionLabel } from '../utils/scVersion'
+import { resolveCaptainsLogAccentSource } from '../config/assets'
 
 type FleetImportSuccessOutcome = Extract<FleetImportOutcome, { ok: true }>
 
@@ -20,6 +21,11 @@ export default function CaptainsLog() {
   const log = useFleetStore((s) => s.log)
   const certifiedGameVersion = resolveCertifiedGameVersionLabel()
   const [lastExportFilename, setLastExportFilename] = useState<string | null>(null)
+  // Chief Architect Asset Handoff — a plain CSS background layer inside
+  // the certification card itself, never EnvironmentBay/PageEnvironment:
+  // this card is small and narrow (max-w-2xl), not a bounded department
+  // room, so the room/vignette treatment doesn't apply here.
+  const certificationAccentSrc = resolveCaptainsLogAccentSource('certification')
 
   const importFileInputRef = useRef<HTMLInputElement>(null)
   const [importError, setImportError] = useState<string | null>(null)
@@ -105,10 +111,25 @@ export default function CaptainsLog() {
         <h1 className="text-2xl font-display font-bold text-white">What happened?</h1>
       </div>
 
-      <div className="panel p-4 text-sm">
-        <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
-        <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified for</p>
-        <p className="text-white">{certifiedGameVersion ? `Star Citizen LIVE ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
+      <div className="panel p-4 text-sm relative overflow-hidden">
+        {certificationAccentSrc && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `url(${certificationAccentSrc})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'left center',
+              backgroundRepeat: 'no-repeat',
+              opacity: 0.18,
+            }}
+          />
+        )}
+        <div className="relative z-10">
+          <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
+          <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified for</p>
+          <p className="text-white">{certifiedGameVersion ? `Star Citizen LIVE ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>
+        </div>
       </div>
 
       <div className="panel p-4 text-sm">

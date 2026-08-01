@@ -9,7 +9,23 @@
  */
 
 /** One entry per page this mission establishes environment support for — kept in exact sync with `public/assets/environments/<id>/`. */
-export type EnvironmentId = 'mission-control' | 'fleet-dashboard' | 'ship-detail' | 'hangar-inventory' | 'loadout-manager' | 'decision-center' | 'captain-log'
+export type EnvironmentId =
+  | 'mission-control'
+  | 'fleet-dashboard'
+  | 'ship-detail'
+  | 'hangar-inventory'
+  | 'loadout-manager'
+  | 'decision-center'
+  | 'captain-log'
+  // Chief Architect Asset Handoff — bounded empty-state "room" artwork,
+  // distinct from the whole-page-hero ids above (e.g. 'mission-control'
+  // itself is the existing top-hero Operations Wall; this is the
+  // separate, smaller "No Vessels Assigned" card treatment). Each is
+  // consumed via a compact EnvironmentBay, never the full-page hero
+  // pattern.
+  | 'mission-control-empty-priority'
+  | 'fleet-dashboard-empty'
+  | 'hangar-inventory-empty'
 
 export const ENVIRONMENT_IDS: readonly EnvironmentId[] = [
   'mission-control',
@@ -19,6 +35,9 @@ export const ENVIRONMENT_IDS: readonly EnvironmentId[] = [
   'loadout-manager',
   'decision-center',
   'captain-log',
+  'mission-control-empty-priority',
+  'fleet-dashboard-empty',
+  'hangar-inventory-empty',
 ]
 
 /**
@@ -169,6 +188,38 @@ export interface ShipManagementIllustrationDefinition {
   label: string
   /** Root-relative public path, or undefined until this specific id is wired in. */
   src?: string
+  /** True once this id is both delivered and approved for integration. */
+  enabled: boolean
+}
+
+/**
+ * Chief Architect Asset Handoff — Captain's Log certification card's own
+ * low-opacity CSS background accent. Deliberately a fourth, distinct
+ * registry from `EnvironmentId` (whole-page/bounded-room artwork via
+ * `EnvironmentBay`/`PageEnvironment`) and `ShipManagementIllustrationId`
+ * (a full-cover `<img>` hero inside one panel) — Chief Architect direction
+ * was explicit that this accent must NOT go through `EnvironmentBay`'s
+ * room/vignette treatment, since it decorates one small, narrow
+ * (`max-w-2xl`) card, not a bounded room. Consumed as a plain CSS
+ * `background-image` layer behind existing text, at low opacity, never as
+ * an `<img>` element.
+ */
+export type CaptainsLogAccentId = 'certification'
+
+/** Only the two tiers actually delivered (both at or below the master's
+ * native width — see scripts/generateEnvironmentAssets.ts). `wide` is
+ * preferred when both are present; `narrow` is the graceful-degradation
+ * fallback, matching `resolveResponsiveSource`'s own widest-available-first
+ * convention for environments. */
+export interface CaptainsLogAccentSource {
+  wide?: string
+  narrow?: string
+}
+
+export interface CaptainsLogAccentDefinition {
+  id: CaptainsLogAccentId
+  label: string
+  sources: CaptainsLogAccentSource
   /** True once this id is both delivered and approved for integration. */
   enabled: boolean
 }

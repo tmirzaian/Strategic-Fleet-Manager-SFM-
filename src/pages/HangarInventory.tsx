@@ -4,6 +4,7 @@ import { useFleetStore } from '../store/useFleetStore'
 import { selectActiveShips } from '../utils/fleetLifecycle'
 import SortableHeader from '../components/SortableHeader'
 import CatalogComponentSearch from '../components/CatalogComponentSearch'
+import EnvironmentBay from '../components/layout/EnvironmentBay'
 import type { HangarItem } from '../types'
 import { sortHangarEntries, type HangarSortColumn, type SortDirection } from '../utils/hangarSort'
 import {
@@ -303,11 +304,16 @@ export default function HangarInventory() {
       </div>
 
       {hangarItems.length === 0 ? (
-        <div className="panel p-10 flex flex-col items-center text-center gap-2">
-          <PackageX size={28} className="text-muted/60 mb-1" />
-          <h2 className="font-display font-semibold text-white">No Inventory Recorded</h2>
-          <p className="text-sm text-muted max-w-sm">Quartermaster has no components recorded for this command.</p>
-        </div>
+        // Chief Architect Asset Handoff — genuine zero-recorded-inventory
+        // only; the separate filtered-to-zero branch below (line ~445)
+        // deliberately stays plain/compact, no artwork.
+        <EnvironmentBay id="hangar-inventory-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+          <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-10 flex flex-col items-center text-center gap-2">
+            <PackageX size={28} className="text-muted/60 mb-1" />
+            <h2 className="font-display font-semibold text-white">No Inventory Recorded</h2>
+            <p className="text-sm text-muted max-w-sm">Quartermaster has no components recorded for this command.</p>
+          </div>
+        </EnvironmentBay>
       ) : (
       <>
       {/* EWO-072 (Part E) — compact, collapsible, composable filters,

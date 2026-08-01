@@ -81,6 +81,53 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
     presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 1 },
   }),
   'captain-log': definition('captain-log', "Captain's Log"),
+
+  // Chief Architect Asset Handoff — bounded empty-state "room" artwork,
+  // each consumed via a compact EnvironmentBay (not the full-page hero
+  // pattern 'mission-control' itself uses).
+  //
+  // Revision 2 — masters replaced with 3344x1882 originals (the earlier
+  // 1672x941 masters are retired); `tablet` (~1920) is now a real,
+  // non-upscaled source alongside `mobile` (~1280), so
+  // resolveResponsiveSource() picks the sharper 1920 tier by default.
+  // `desktop`/`desktop4k` remain deliberately unpopulated — 2560/3840
+  // weren't requested this round even though the master could support
+  // 2560 without upscaling (explicit product scope, see
+  // scripts/generateEnvironmentAssets.ts's own comment).
+  //
+  // Presentation tuned against the new, higher-resolution masters
+  // (Chief Architect direction — "use the new masters as the visual
+  // reference," not the values tuned for the old low-res artwork):
+  // blurPx 1 -> 0 (crisp goal; the new masters don't need softening),
+  // opacity/brightness/contrast/saturation unchanged from Revision 1's
+  // 'decision-center'-derived values (not flagged for review). The bay's
+  // own edge vignette (separate from this presentation block — see
+  // EnvironmentBay's `vignetteOpacity` prop) is reduced per-usage at
+  // each page's own EnvironmentBay call site.
+  'mission-control-empty-priority': definition('mission-control-empty-priority', 'Mission Control — Empty Top Priority Ship', {
+    sources: {
+      tablet: assetPath('environments/mission-control-empty-priority/mission-control-empty-priority-background-1920.webp'),
+      mobile: assetPath('environments/mission-control-empty-priority/mission-control-empty-priority-background-1280.webp'),
+    },
+    enabled: true,
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+  }),
+  'fleet-dashboard-empty': definition('fleet-dashboard-empty', 'Fleet Dashboard — Empty Fleet', {
+    sources: {
+      tablet: assetPath('environments/fleet-dashboard-empty/fleet-dashboard-empty-background-1920.webp'),
+      mobile: assetPath('environments/fleet-dashboard-empty/fleet-dashboard-empty-background-1280.webp'),
+    },
+    enabled: true,
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+  }),
+  'hangar-inventory-empty': definition('hangar-inventory-empty', 'Hangar Inventory — Empty Inventory', {
+    sources: {
+      tablet: assetPath('environments/hangar-inventory-empty/hangar-inventory-empty-background-1920.webp'),
+      mobile: assetPath('environments/hangar-inventory-empty/hangar-inventory-empty-background-1280.webp'),
+    },
+    enabled: true,
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 0.55, brightness: 0.95, contrast: 1.05, saturation: 1.05, blurPx: 0 },
+  }),
 }
 
 export function getEnvironmentDefinition(id: EnvironmentId): EnvironmentAssetDefinition {

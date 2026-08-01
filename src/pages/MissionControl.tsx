@@ -30,6 +30,7 @@ import ActionCard from '../components/ActionCard'
 import Badge, { procurementRowStateTone, procurementRowStateLabel } from '../components/Badge'
 import WorkflowDestinationCard from '../components/WorkflowDestinationCard'
 import PageEnvironment from '../components/layout/PageEnvironment'
+import EnvironmentBay from '../components/layout/EnvironmentBay'
 import { colorFor } from '../components/ReadinessBar'
 import { buildProcurementList, buildReservedAwaitingInstallLines, type ProcurementNeededByEntry } from '../utils/procurement'
 import {
@@ -467,17 +468,30 @@ export default function MissionControl() {
             </Link>
           </div>
           {ships.length === 0 ? (
-            <div className="panel p-8 flex flex-col items-center text-center gap-2">
-              <PackageX size={24} className="text-muted/60 mb-1" />
-              <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>
-              <p className="text-sm text-muted">Your fleet manifest is currently empty.</p>
-              <Link
-                to="/fleet"
-                className="mt-2 inline-flex items-center gap-1.5 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
-              >
-                <Plus size={14} /> Add First Ship
-              </Link>
-            </div>
+            // Chief Architect Asset Handoff — genuine empty-fleet state
+            // only (this whole branch already only reaches here when
+            // ships.length === 0). Compact bounded room, not the standard
+            // 560px department room — this is a sub-panel of Mission
+            // Control, not its own department.
+            // Revision 2 — vignetteOpacity reduced from EnvironmentBay's
+            // 0.92 default (Decision Center's own tuned value, left
+            // unchanged) to 0.45: reviewed live against the new
+            // higher-resolution master, "reduce substantially" per Chief
+            // Architect direction, while still keeping the artwork
+            // secondary to the "No Vessels Assigned" messaging.
+            <EnvironmentBay id="mission-control-empty-priority" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+              <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-8 flex flex-col items-center text-center gap-2">
+                <PackageX size={24} className="text-muted/60 mb-1" />
+                <h3 className="font-display font-semibold text-white">No Vessels Assigned</h3>
+                <p className="text-sm text-muted">Your fleet manifest is currently empty.</p>
+                <Link
+                  to="/fleet"
+                  className="mt-2 inline-flex items-center gap-1.5 bg-cyan text-bg font-semibold text-sm px-4 py-2 rounded-lg hover:bg-cyan/90 transition-colors"
+                >
+                  <Plus size={14} /> Add First Ship
+                </Link>
+              </div>
+            </EnvironmentBay>
           ) : (
             <div
               // EWO-033 (Task 3) — the same lg/xl column thresholds Fleet

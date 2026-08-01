@@ -16,6 +16,17 @@ captain-log/
 shared/            (overlays/gradients reused across more than one page)
 ```
 
+Bounded empty-state "room" ids (Chief Architect Asset Handoff) — each a
+separate, smaller EnvironmentBay composition, distinct from the
+full-page-hero id sharing part of its name (e.g. `mission-control` is
+the existing top-hero Operations Wall; `mission-control-empty-priority`
+is the much smaller "No Vessels Assigned" card room):
+
+```
+mission-control-empty-priority/   fleet-dashboard-empty/
+hangar-inventory-empty/
+```
+
 ## Responsive variants
 
 A production environment package may supply up to four raster widths per

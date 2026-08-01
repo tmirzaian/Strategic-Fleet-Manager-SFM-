@@ -8,6 +8,7 @@ import PriorityLabel from '../components/PriorityLabel'
 import Badge, { ownershipTone } from '../components/Badge'
 import ReadinessBar from '../components/ReadinessBar'
 import AddShipModal from '../components/AddShipModal'
+import EnvironmentBay from '../components/layout/EnvironmentBay'
 import { calculateBuildProgress, type BuildProgressResult } from '../utils/buildProgress'
 import { prepareCanonicalHardpoints } from '../utils/canonicalHardpointPreparation'
 import { deriveFleetBuildState } from '../utils/fleetBuildState'
@@ -224,30 +225,36 @@ export default function FleetDashboard() {
       {addShipOpen && <AddShipModal onClose={() => setAddShipOpen(false)} />}
 
       {ships.length === 0 ? (
-        <div className="panel p-10 flex flex-col items-center text-center gap-2">
-          {lifecycleView === 'retired' ? (
-            <>
-              <Archive size={28} className="text-muted/60 mb-1" />
-              <h2 className="font-display font-semibold text-white">No Retired Vessels</h2>
-              <p className="text-sm text-muted max-w-sm">No vessels have been retired from the Fleet Registry.</p>
-            </>
-          ) : retiredCount > 0 ? (
-            // SW-015C — every vessel is currently retired; this is
-            // distinct from a genuinely empty fleet and shouldn't read
-            // as one (Add First Ship would be the wrong call to action).
-            <>
-              <Archive size={28} className="text-muted/60 mb-1" />
-              <h2 className="font-display font-semibold text-white">No Active Vessels</h2>
-              <p className="text-sm text-muted max-w-sm">Every vessel in your Fleet Registry is currently retired.</p>
-              <button
-                onClick={() => setLifecycleView('retired')}
-                className="mt-2 inline-flex items-center gap-2 border border-white/15 text-white font-medium text-sm px-4 py-2 rounded-lg hover:border-white/35 transition-colors"
-              >
-                <Archive size={15} /> View Retired ({retiredCount})
-              </button>
-            </>
-          ) : (
-            <>
+        lifecycleView === 'retired' ? (
+          <div className="panel p-10 flex flex-col items-center text-center gap-2">
+            <Archive size={28} className="text-muted/60 mb-1" />
+            <h2 className="font-display font-semibold text-white">No Retired Vessels</h2>
+            <p className="text-sm text-muted max-w-sm">No vessels have been retired from the Fleet Registry.</p>
+          </div>
+        ) : retiredCount > 0 ? (
+          // SW-015C — every vessel is currently retired; this is
+          // distinct from a genuinely empty fleet and shouldn't read
+          // as one (Add First Ship would be the wrong call to action).
+          // Chief Architect Asset Handoff — deliberately no environment
+          // artwork here: only the true "genuinely zero ships" branch
+          // below gets it.
+          <div className="panel p-10 flex flex-col items-center text-center gap-2">
+            <Archive size={28} className="text-muted/60 mb-1" />
+            <h2 className="font-display font-semibold text-white">No Active Vessels</h2>
+            <p className="text-sm text-muted max-w-sm">Every vessel in your Fleet Registry is currently retired.</p>
+            <button
+              onClick={() => setLifecycleView('retired')}
+              className="mt-2 inline-flex items-center gap-2 border border-white/15 text-white font-medium text-sm px-4 py-2 rounded-lg hover:border-white/35 transition-colors"
+            >
+              <Archive size={15} /> View Retired ({retiredCount})
+            </button>
+          </div>
+        ) : (
+          // Chief Architect Asset Handoff — the one genuine empty-fleet
+          // case: ships.length === 0, not retired-view, and no retired
+          // vessels exist to explain the zero either.
+          <EnvironmentBay id="fleet-dashboard-empty" minHeightClassName="lg:min-h-[300px]" contentClassName="max-w-md" vignetteOpacity={0.45}>
+            <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-10 flex flex-col items-center text-center gap-2">
               <PackageX size={28} className="text-muted/60 mb-1" />
               <h2 className="font-display font-semibold text-white">No Vessels Assigned</h2>
               <p className="text-sm text-muted max-w-sm">Your fleet manifest is currently empty.</p>
@@ -257,9 +264,9 @@ export default function FleetDashboard() {
               >
                 <Plus size={15} /> Add First Ship
               </button>
-            </>
-          )}
-        </div>
+            </div>
+          </EnvironmentBay>
+        )
       ) : (
       <>
       {/* Filters — dedicated to filtering only (Alpha 2.4, Part 6; EWO-053
