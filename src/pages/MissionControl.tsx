@@ -355,12 +355,13 @@ export default function MissionControl() {
         {/* DA-008.1 — the interface explains itself; no instructional copy.
             EWO-061 — Operational Header Standardization: label-above-title,
             same typography every other operational page already uses
-            (§30). Both text strings are unchanged (still "Mission
-            Control"/"Fleet Operations") — only their order, sizing, and
-            positions were brought in line. */}
+            (§30). EWO-100 (Phase 1) — the white status line replaces the
+            prior "Fleet Operations" title with a standardized operational
+            status phrase; the blue compartment label above it is
+            unchanged. */}
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Mission Control</p>
-          <h1 className="text-2xl font-display font-bold text-white">Fleet Operations</h1>
+          <h1 className="text-2xl font-display font-bold text-white">Operations Standing By</h1>
         </div>
 
         {/* UX-001A — Command Briefing Hero. Three columns, one responsibility

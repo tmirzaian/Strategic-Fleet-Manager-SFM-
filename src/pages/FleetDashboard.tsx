@@ -201,8 +201,11 @@ export default function FleetDashboard() {
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
+          {/* EWO-100 (Phase 1) — standardized operational status line,
+              replacing the prior question-form header; the blue
+              compartment label above it is unchanged. */}
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Fleet Dashboard</p>
-          <h1 className="text-2xl font-display font-bold text-white">Which ship needs attention?</h1>
+          <h1 className="text-2xl font-display font-bold text-white">The Fleet Is At Your Command</h1>
           {/* EWO-073 (Commander's optional recommendation) — reinforces,
               right where the Commander lands, why a retired vessel isn't
               affecting readiness/procurement/mission planning, rather

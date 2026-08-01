@@ -109,7 +109,8 @@ export default function CaptainsLog() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Captain's Log</p>
-        <h1 className="text-2xl font-display font-bold text-white">What happened?</h1>
+        {/* EWO-100 (Phase 1) — standardized operational status line. */}
+        <h1 className="text-2xl font-display font-bold text-white">Recent Fleet Activity</h1>
       </div>
 
       <div className="panel p-4 text-sm relative overflow-hidden">

@@ -286,7 +286,8 @@ export default function HangarInventory() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Hangar Inventory</p>
-          <h1 className="text-2xl font-display font-bold text-white">What do I own?</h1>
+          {/* EWO-100 (Phase 1) — standardized operational status line. */}
+          <h1 className="text-2xl font-display font-bold text-white">Warehouse Inventory Available</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <button

@@ -55,7 +55,8 @@ describe('<DecisionCenter /> — EWO-061: standardized operational header', () =
     renderDecisionCenter()
     const label = screen.getByText('Decision Center')
     expect(label.tagName).toBe('P')
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Should I keep this?')
+    // EWO-100 (Phase 1) — standardized operational status line, replacing the prior question-form title.
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Mission Assessment Available')
     expect(screen.queryByText(/Check found loot against your active Loadouts/)).not.toBeInTheDocument()
   })
 })

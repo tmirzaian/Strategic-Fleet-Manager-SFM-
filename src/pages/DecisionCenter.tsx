@@ -182,7 +182,8 @@ export default function DecisionCenter() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Decision Center</p>
-        <h1 className="text-2xl font-display font-bold text-white">Should I keep this?</h1>
+        {/* EWO-100 (Phase 1) — standardized operational status line. */}
+        <h1 className="text-2xl font-display font-bold text-white">Mission Assessment Available</h1>
       </div>
 
       <EnvironmentBay id="decision-center">

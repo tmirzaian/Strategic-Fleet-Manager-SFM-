@@ -93,12 +93,13 @@ describe('<ShipWorkspacePrototype /> (SW-002 — Adaptive Commander Lens)', () =
     expect(screen.queryByText('Ship Workspace')).not.toBeInTheDocument()
   })
 
-  it('EWO-061: the header follows the standardized pattern — small "Ship Management" label above one large operational title, no functional-description paragraph', () => {
+  it('EWO-061/EWO-100: the header follows the standardized pattern — small "Ship Management" label above one large operational title, no functional-description paragraph', () => {
     renderWorkspace()
     const label = screen.getByText('Ship Management')
     expect(label.tagName).toBe('P')
     const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading).toHaveTextContent('What does this ship need?')
+    // EWO-100 (Phase 1) — standardized operational status line, replacing the prior question-form title.
+    expect(heading).toHaveTextContent('Select Vessel For Maintenance')
     expect(screen.queryByText('Assess readiness, configure loadouts, and manage installed components.')).not.toBeInTheDocument()
   })
 

@@ -1953,7 +1953,8 @@ export default function ShipWorkspacePrototype() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Ship Management</p>
-          <h1 className="text-2xl font-display font-bold text-white">What does this ship need?</h1>
+          {/* EWO-100 (Phase 1) — standardized operational status line. */}
+          <h1 className="text-2xl font-display font-bold text-white">Select Vessel For Maintenance</h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* SW-011A (Objective 4) — Developer Mode: local, unpersisted
