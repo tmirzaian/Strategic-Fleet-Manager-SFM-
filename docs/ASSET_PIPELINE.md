@@ -16,6 +16,10 @@ public/assets/
     mission-control/   fleet-dashboard/   ship-detail/
     hangar-inventory/  loadout-manager/   decision-center/
     captain-log/       shared/
+    mission-control-empty-priority/   fleet-dashboard-empty/
+    hangar-inventory-empty/
+  illustrations/
+    captains-log-certification/
   fleet-registry/
     aegis/  anvil/  argo/  consolidated-outland/  crusader/  drake/
     esperia/  gatac/  greycat/  kruger/  misc/  origin/  rsi/  tumbril/
@@ -33,15 +37,22 @@ public-asset convention — nothing here is ever bundled into JavaScript.
 src/config/assets/
   types.ts                 EnvironmentId, EnvironmentAssetDefinition,
                             ResponsiveEnvironmentSource, EnvironmentPresentation,
+                            CaptainsLogAccentId/Source/Definition,
                             FleetRegistry*/BrandingAsset* types
   assetPaths.ts             assetPath() — pure path normalization/guard
   environmentAssets.ts      the environment registry + resolvers
   brandingAssets.ts         the branding registry + resolver
   fleetRegistryAssets.ts    resolveFleetRegistryImage()
+  captainsLogAssets.ts      the Captain's Log accent registry + resolver
   index.ts                  public entry point — import from here
 
 src/components/layout/
-  PageEnvironment.tsx       decorative background layer (not yet mounted)
+  PageEnvironment.tsx       decorative background layer
+  EnvironmentBay.tsx        bounded "room" composition wrapping PageEnvironment
+
+scripts/
+  generateEnvironmentAssets.ts   deterministic PNG-master -> WebP-derivative
+                                  pipeline (Lanczos resize, never upscales)
 ```
 
 ## Semantic asset IDs
@@ -102,6 +113,60 @@ Edition pass may replace any of these three files later with no change
 to `PageEnvironment`, `WorkflowDestinationCard`, or any other consumer;
 same resolution-boundary guarantee as every other registry in this
 pipeline.
+
+## Chief Architect Asset Handoff — bounded empty-state environments & the Captain's Log accent
+
+Three new `EnvironmentId`s and one new registry (`CaptainsLogAccentId`)
+integrate the Commander-approved empty-state artwork package. Unlike
+`mission-control` (a full-page hero), these are all small, bounded "room"
+compositions or card-scoped accents:
+
+- **`mission-control-empty-priority`**, **`fleet-dashboard-empty`**,
+  **`hangar-inventory-empty`** — each wired via `EnvironmentBay`
+  (`src/components/layout/EnvironmentBay.tsx`) with a compact
+  `minHeightClassName="lg:min-h-[300px]"` override (the new prop
+  `EnvironmentBay` gained for this handoff; its default remains the
+  standard 560px "department room" size Decision Center uses,
+  unaffected). Mounted **only** around the genuinely-empty branch of
+  each page's own conditional — Mission Control's "No Vessels Assigned"
+  Top Priority Ship card, Fleet Dashboard's true `ships.length === 0`
+  case (never the all-retired or filtered-to-zero cases, which keep
+  their existing plain-panel treatment), Hangar Inventory's genuine
+  `hangarItems.length === 0` case (never its separate filtered-empty
+  branch).
+- **`captains-log-certification`** (`CaptainsLogAccentId`,
+  `src/config/assets/captainsLogAssets.ts`) — deliberately **not** an
+  `EnvironmentId`/`EnvironmentBay` consumer. The certification card on
+  Captain's Log is small and narrow (`max-w-2xl`), not a bounded
+  department room, so the room/vignette treatment doesn't apply. Instead
+  it's a fourth, distinct registry resolving to a plain CSS
+  `background-image` layer rendered directly inside the card
+  (`src/pages/CaptainsLog.tsx`), at ~18% opacity, `background-position:
+  left center`, `background-size: cover` (crops rather than stretches),
+  with the existing certification text re-stacked above it via
+  `position: relative; z-index`. No `<img>` element, no page code
+  referencing a raw path — resolved through
+  `resolveCaptainsLogAccentSource()` exactly like every other semantic
+  asset id in this pipeline.
+
+**Master resolution note.** The approved masters for this handoff were
+delivered at 1672×941 (the three environments) and 1706×922 (the
+Captain's Log accent) — below several of the originally-requested
+derivative tiers (3840/2560/1920 for environments, 2400 for the accent).
+Per Chief Architect direction, `scripts/generateEnvironmentAssets.ts`
+never upscales: any requested tier wider than a master's native width is
+skipped outright rather than produced as a softened enlargement
+mislabeled with a larger tier name. Only `*-1280.webp` (environments) and
+`*-1600.webp`/`*-1200.webp` (the accent) exist as a result — this is why
+each new `ENVIRONMENT_ASSETS` entry populates only `sources.mobile`
+(`resolveResponsiveSource()` already degrades correctly to whatever's
+actually present, per its own existing widest-available-first contract).
+**The original master PNGs are kept in the repository permanently as
+archival source** (not deleted after WebP generation) — if a
+higher-resolution version of the same scene is ever produced, rerun
+`npm run generate:environment-assets` against the new master to add the
+now-producible wider tiers without touching any semantic asset ID or
+consumer.
 
 ## Future integration point (component already mounted on Mission Control)
 
