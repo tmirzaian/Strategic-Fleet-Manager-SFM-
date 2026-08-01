@@ -735,6 +735,109 @@ describe('<MissionControl /> — UX-001A.4/UX-001A.4A: Action Cards share Fleet 
   })
 })
 
+/**
+ * EWO-098 — "Mission Control Semantic Status Color Authority." Commander
+ * acceptance testing found the Reserved — Awaiting Install Action Card
+ * rendering with the same green accent as Ready to Install, violating the
+ * canonical semantic palette (`Badge.tsx`'s `procurementRowStateTone`:
+ * Reserved -> cyan, `tailwind.config.js`'s `cyan: '#35D0FF'`) that this
+ * exact page's own Procurement Work Queue table already renders correctly
+ * a few hundred lines below. Root cause was a missing entry in this
+ * file's local `PRIORITY_ACTION_PRESENTATION` map, not a token/variant
+ * resolution bug — these tests cover the corrected accent, confirm
+ * Ready/Critical are untouched, and confirm ordering/counts/labels are
+ * unaffected by the color-only fix.
+ */
+describe('<MissionControl /> — EWO-098: Priority Actions semantic color authority', () => {
+  function setThreeCategoryFleet() {
+    const ship = { id: 's1', name: 'Corsair', manufacturer: 'Drake', ownership: 'Owned' as const, career: 'Combat', role: 'Gunship', activeBuildId: 'b1', readiness: 50, priority: 1, missing: [], lifecycleStatus: 'active' as const }
+    const build = { id: 'b1', shipId: 's1', name: 'Loadout', role: 'Gunship', readiness: 50, isActive: true, missing: [] }
+    const hardpoints = [
+      { id: 'hp-reserved', shipId: 's1', buildId: 'b1', slotLabel: 'Slot A', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Mirage', status: 'Missing' as const },
+      { id: 'hp-ready', shipId: 's1', buildId: 'b1', slotLabel: 'Slot B', type: 'Shield', size: 'S1', factoryItem: 'Factory', installedItem: '—', targetItem: 'Basilisk', status: 'Missing' as const },
+      { id: 'hp-missing', shipId: 's1', buildId: 'b1', slotLabel: 'Slot E', type: 'Weapon', size: 'S2', factoryItem: 'Factory', installedItem: '—', targetItem: 'Scorpion', status: 'Missing' as const },
+    ]
+    const hangarItems = [{ id: 'hi-1', name: 'Basilisk', type: 'Shield', size: 'S1', qty: 1, neededBy: 'None', disposition: 'Store' as const }]
+    const reservations = [
+      { id: 'r1', missionConfigurationId: 'b1', fleetAssetId: 's1', targetSlotLabel: 'Slot A', componentName: 'Mirage', quantity: 1, status: 'ACTIVE' as const, createdAt: '', updatedAt: '' },
+    ]
+    useFleetStore.setState({ ships: [ship], builds: [build], hardpoints, hangarItems, reservations, installedLoadouts: [] })
+  }
+
+  it('Reserved — Awaiting Install renders with the canonical Reserved cyan accent (#35D0FF), not Available green', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const reservedCard = screen.getByText('Reserved — Awaiting Install').closest('.panel') as HTMLElement
+    expect(reservedCard.style.borderLeftColor).toBe('rgb(53, 208, 255)')
+    const countEl = reservedCard.querySelector('.font-display.font-bold') as HTMLElement
+    expect(countEl.style.color).toBe('rgb(53, 208, 255)')
+  })
+
+  it('Ready to Install still renders green (#42E695) — unchanged by the Reserved fix', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const readyCard = screen.getByText('Ready to Install').closest('.panel') as HTMLElement
+    expect(readyCard.style.borderLeftColor).toBe('rgb(66, 230, 149)')
+  })
+
+  it('Critical Missing Components still renders red (#FF5F73) — unchanged by the Reserved fix', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const criticalCard = screen.getByText('Critical Missing Components').closest('.panel') as HTMLElement
+    expect(criticalCard.style.borderLeftColor).toBe('rgb(255, 95, 115)')
+  })
+
+  it('Reserved and Ready are now visually distinct — no accidental color collision remains', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const reservedCard = screen.getByText('Reserved — Awaiting Install').closest('.panel') as HTMLElement
+    const readyCard = screen.getByText('Ready to Install').closest('.panel') as HTMLElement
+    expect(reservedCard.style.borderLeftColor).not.toBe(readyCard.style.borderLeftColor)
+  })
+
+  it('ordering is unaffected by the color fix: Reserved renders before Ready, which renders before Critical', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const reservedLabel = screen.getByText('Reserved — Awaiting Install')
+    const readyLabel = screen.getByText('Ready to Install')
+    const criticalLabel = screen.getByText('Critical Missing Components')
+    expect(reservedLabel.compareDocumentPosition(readyLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(readyLabel.compareDocumentPosition(criticalLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('counts and labels are unaffected by the color fix', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const reservedCard = screen.getByText('Reserved — Awaiting Install').closest('.panel') as HTMLElement
+    const readyCard = screen.getByText('Ready to Install').closest('.panel') as HTMLElement
+    const criticalCard = screen.getByText('Critical Missing Components').closest('.panel') as HTMLElement
+    expect((reservedCard.querySelector('.font-display.font-bold') as HTMLElement).textContent).toBe('1')
+    expect((readyCard.querySelector('.font-display.font-bold') as HTMLElement).textContent).toBe('1')
+    expect((criticalCard.querySelector('.font-display.font-bold') as HTMLElement).textContent).toBe('1')
+  })
+
+  it('no zero-state regression: the empty-state message still renders correctly when there are no Priority Actions at all', () => {
+    const { ships, builds, hardpoints } = useFleetStore.getState()
+    const ghost = ships.find((s) => s.id === 'ghost')!
+    useFleetStore.setState({
+      ships: [ghost],
+      builds: builds.filter((b) => b.shipId === 'ghost'),
+      hardpoints: hardpoints.filter((h) => h.buildId === ghost.activeBuildId).map((h) => ({ ...h, status: 'OK' as const, installedItem: h.targetItem })),
+    })
+    renderMissionControl()
+    expect(screen.getByText('No Immediate Priority Actions')).toBeInTheDocument()
+  })
+
+  it('no other semantic presentation regression: Fleet Status tiles (Mission Ready green, Loadouts In Progress amber) remain unaffected by the Priority Actions fix', () => {
+    setThreeCategoryFleet()
+    renderMissionControl()
+    const missionReadyTile = screen.getByText('Mission Ready').closest('.panel') as HTMLElement
+    const inProgressTile = screen.getByText('Loadouts In Progress').closest('.panel') as HTMLElement
+    expect(missionReadyTile.querySelector('div[style*="color"]')).not.toBeNull()
+    expect(inProgressTile.querySelector('div[style*="color"]')).not.toBeNull()
+  })
+})
+
 describe('<MissionControl /> — Mission M-012 empty-state', () => {
   it('9. renders a valid, deliberate empty state with zero ships (not a blank page or crash)', () => {
     useFleetStore.setState({ ships: [], builds: [], hardpoints: [] })

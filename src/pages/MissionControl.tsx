@@ -157,15 +157,41 @@ function describeQuartermasterAssessment(assessment: CategoryWorkQueueAssessment
   return `${assetCount} inventory ${noun} immediately available to improve fleet readiness${categoryFilter ? ` for ${categoryFilter}` : ''}.`
 }
 
+// EWO-098 — the canonical Reserved color, reused verbatim (never
+// reinvented) from the same semantic authority `Badge.tsx`'s
+// `procurementRowStateTone()`/`toneStyles.cyan` and
+// `tailwind.config.js`'s own `cyan: '#35D0FF'` token already establish
+// app-wide — the exact value `HangarInventory.tsx`'s reserved-quantity
+// cell and `LoadoutPortTree.tsx`'s `logisticsTone('Reserved')` already
+// render Reserved in. `ActionCard`'s `accent` prop takes a raw CSS
+// color string (not a Tailwind class or a `Badge` `Tone`), so this is a
+// literal value, not a new mapping system — the same convention this
+// file's own `QUARTERMASTER_CATEGORY_ACCENT` already uses for the same
+// underlying token.
+const RESERVED_ACCENT = '#35D0FF'
+
 /** UX-001A — Glyph Standard v1 (Hero-scoped): one icon, one accent color
  * family, per Priority Actions category. Color communicates state (danger
  * red = a real problem, success green = a zero-friction win available
- * right now, warning gold = an optional improvement); the glyph
- * disambiguates meaning within a shared color. Never reused for another
- * concept within the Hero — see ActionCard's own doc comment. */
+ * right now, warning gold = an optional improvement, Reserved cyan = already
+ * committed but not yet installed — EWO-098); the glyph disambiguates
+ * meaning within a shared color. Never reused for another concept within
+ * the Hero — see ActionCard's own doc comment.
+ *
+ * EWO-098 — Commander acceptance testing found RESERVED_AWAITING_INSTALL
+ * rendering with the same green accent as READY_TO_INSTALL. Root cause:
+ * this map was authored with only three color concepts in mind (the doc
+ * comment above, unchanged since UX-001A, never mentioned a fourth) —
+ * Reserved was never given its own entry, so it silently inherited
+ * Ready's green rather than being deliberately assigned a color at all.
+ * Not a token/variant resolution bug and not a duplicate-styling-instead-
+ * of-canonical-authority bug (this file's own Quartermaster Work Queue
+ * table, a few hundred lines below, already renders Reserved correctly
+ * via `Badge tone={procurementRowStateTone(row.state)}`) — purely a
+ * missing semantic assignment in this one local presentation map. */
 const PRIORITY_ACTION_PRESENTATION: Record<PriorityActionCategory, { label: string; icon: any; accent: string }> = {
   INVALID_TARGET: { label: 'Invalid Targets', icon: AlertOctagon, accent: '#FF5F73' },
-  RESERVED_AWAITING_INSTALL: { label: 'Reserved — Awaiting Install', icon: BookmarkCheck, accent: '#42E695' },
+  RESERVED_AWAITING_INSTALL: { label: 'Reserved — Awaiting Install', icon: BookmarkCheck, accent: RESERVED_ACCENT },
   READY_TO_INSTALL: { label: 'Ready to Install', icon: PackageOpen, accent: '#42E695' },
   UPGRADE_OPPORTUNITY: { label: 'Upgrade Opportunities', icon: ArrowUpCircle, accent: '#FFD166' },
   CRITICAL_MISSING: { label: 'Critical Missing Components', icon: XCircle, accent: '#FF5F73' },
