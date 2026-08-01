@@ -2140,6 +2140,59 @@ describe('<ShipWorkspacePrototype /> — EWO-067: Operations Workspace Visual En
 })
 
 /**
+ * EWO-101 (Phase 1) — Ship Management Workflow Presentation Refinement.
+ * Part A/B: each workstation card gets its own distinct background
+ * accent, the same low-opacity CSS layer philosophy as Captain's Log's
+ * certification card. Part C: the exaggerated hover lift unique to these
+ * two cards is removed in favor of the canonical Fleet Dashboard ShipCard
+ * hover treatment (shadow-glow + border brighten only, no translate).
+ */
+describe('<ShipWorkspacePrototype /> — EWO-101: Ship Management Workflow Presentation Refinement', () => {
+  it('Part A/B: "Manage Loadout" and "Change Installed Components" each render their own distinct background accent image', () => {
+    renderWorkspace('ghost')
+    const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+    const loadoutAccent = loadoutButton.querySelector('div[style*="background-image"]') as HTMLElement | null
+    expect(loadoutAccent).toBeTruthy()
+    expect(loadoutAccent!.style.backgroundImage).toContain('loadout-workstation-accent')
+
+    const installedButton = screen.getByRole('button', { name: /Change Installed Components/ })
+    const maintenanceAccent = installedButton.querySelector('div[style*="background-image"]') as HTMLElement | null
+    expect(maintenanceAccent).toBeTruthy()
+    expect(maintenanceAccent!.style.backgroundImage).toContain('maintenance-bay-accent')
+  })
+
+  it('Part C: the exaggerated lift-on-hover treatment unique to these cards is removed', () => {
+    renderWorkspace('ghost')
+    const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+    const installedButton = screen.getByRole('button', { name: /Change Installed Components/ })
+    expect(loadoutButton.className).not.toContain('-translate-y-0.5')
+    expect(installedButton.className).not.toContain('-translate-y-0.5')
+  })
+
+  it('Part C: the canonical Fleet Dashboard ShipCard hover treatment (shadow-glow + cyan border brighten) is preserved', () => {
+    renderWorkspace('ghost')
+    const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+    expect(loadoutButton.className).toContain('hover:shadow-glow')
+    expect(loadoutButton.className).toContain('hover:border-cyan/30')
+  })
+
+  it('Part E: information hierarchy is preserved — workstation label, primary title, statement, and description all still render for both cards', () => {
+    renderWorkspace('ghost')
+    const loadoutButton = screen.getByRole('button', { name: /Manage Loadout/ })
+    expect(within(loadoutButton).getByText('Loadout Workstation')).toBeInTheDocument()
+    expect(within(loadoutButton).getByText('Manage Loadout')).toBeInTheDocument()
+    expect(within(loadoutButton).getByText("Configure this ship's preferred configuration.")).toBeInTheDocument()
+    expect(within(loadoutButton).getByText(/Target loadout/)).toBeInTheDocument()
+
+    const installedButton = screen.getByRole('button', { name: /Change Installed Components/ })
+    expect(within(installedButton).getByText('Maintenance Bay')).toBeInTheDocument()
+    expect(within(installedButton).getByText('Change Installed Components')).toBeInTheDocument()
+    expect(within(installedButton).getByText('Modify the physical ship.')).toBeInTheDocument()
+    expect(within(installedButton).getByText(/Install, replace, remove/)).toBeInTheDocument()
+  })
+})
+
+/**
  * EWO-068 — Operational Review Table Cleanup & Containment. The read-only
  * default lens (commanderIntent === null) must expose exactly the six
  * approved columns, no editing/workflow controls, and no CONFIGURABLE

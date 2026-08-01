@@ -11,4 +11,5 @@ export { resolveFleetRegistryImage, manufacturerSlugForCode, FLEET_REGISTRY_PLAC
 export { WORKFLOW_ILLUSTRATIONS, getWorkflowIllustration, resolveWorkflowIllustration } from './workflowAssets'
 export { SHIP_MANAGEMENT_ILLUSTRATIONS, getShipManagementIllustration, resolveShipManagementIllustration } from './shipManagementAssets'
 export { CAPTAINS_LOG_ACCENTS, getCaptainsLogAccent, resolveCaptainsLogAccentSource } from './captainsLogAssets'
+export { SHIP_MANAGEMENT_CARD_ACCENTS, getShipManagementCardAccent, resolveShipManagementCardAccentSource } from './shipManagementCardAccents'
 export { CERTIFICATION_BADGES, getCertificationBadge, resolveCertificationBadgeSrc } from './certificationBadgeAssets'

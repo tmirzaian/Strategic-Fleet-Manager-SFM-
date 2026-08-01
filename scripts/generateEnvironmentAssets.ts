@@ -86,6 +86,25 @@ const SPECS: DerivativeSpec[] = [
     // anyway (the never-upscale guard would have skipped it).
     requestedWidths: [1600, 1200],
   },
+  {
+    // EWO-101 — Ship Management "Manage Loadout" workstation card accent.
+    // Master delivered at 1672x940 — 1600/1200 tiers, matching the
+    // Captain's Log accent's own precedent widths for this same low-
+    // opacity card-background visual contract.
+    masterPath: join(ILLUSTRATIONS_ROOT, 'ship-management', 'loadout-workstation-accent.png'),
+    outputDir: join(ILLUSTRATIONS_ROOT, 'ship-management'),
+    outputBaseName: 'loadout-workstation-accent',
+    requestedWidths: [1600, 1200],
+  },
+  {
+    // EWO-101 — Ship Management "Change Installed Components" (Maintenance
+    // Bay) workstation card accent. Master delivered at 1672x940, same
+    // tiers as its sibling card accent above.
+    masterPath: join(ILLUSTRATIONS_ROOT, 'ship-management', 'maintenance-bay-accent.png'),
+    outputDir: join(ILLUSTRATIONS_ROOT, 'ship-management'),
+    outputBaseName: 'maintenance-bay-accent',
+    requestedWidths: [1600, 1200],
+  },
 ]
 
 /** Visually lossless WebP (Chief Architect Approval, Revision 2),

@@ -225,6 +225,35 @@ export interface CaptainsLogAccentDefinition {
 }
 
 /**
+ * EWO-101 — Ship Management's two Commander Intent workstation cards
+ * ("Manage Loadout", "Change Installed Components") own low-opacity CSS
+ * background accents. A fifth, distinct registry — same visual contract
+ * as `CaptainsLogAccentId` (a plain CSS `background-image` layer behind
+ * existing text, at low opacity, never an `<img>` element), but scoped to
+ * a different consumer (two grid cards inside a panel, not the Captain's
+ * Log certification card), matching this codebase's own convention of one
+ * registry per distinct consumer rather than a single shared accent type.
+ */
+export type ShipManagementCardAccentId = 'loadout-workstation' | 'maintenance-bay'
+
+/** Only the two tiers actually delivered (both at or below the master's
+ * native width — see scripts/generateEnvironmentAssets.ts). `wide` is
+ * preferred when both are present; `narrow` is the graceful-degradation
+ * fallback, matching `CaptainsLogAccentSource`'s own convention. */
+export interface ShipManagementCardAccentSource {
+  wide?: string
+  narrow?: string
+}
+
+export interface ShipManagementCardAccentDefinition {
+  id: ShipManagementCardAccentId
+  label: string
+  sources: ShipManagementCardAccentSource
+  /** True once this id is both delivered and approved for integration. */
+  enabled: boolean
+}
+
+/**
  * EWO-095B — semantic variants for `<CertificationBadge>`, the small
  * reusable overlay that renders a certification seal above environmental
  * artwork (never a raw PNG filename in page code). Deliberately its own

@@ -27,7 +27,7 @@ import ComponentAssignmentLabel from '../components/ComponentAssignmentLabel'
 import ReadinessBar, { colorFor } from '../components/ReadinessBar'
 import ShipHeroFrame from '../components/ShipHeroFrame'
 import EditFleetAssetModal from '../components/EditFleetAssetModal'
-import { resolveShipManagementIllustration } from '../config/assets'
+import { resolveShipManagementIllustration, resolveShipManagementCardAccentSource, type ShipManagementCardAccentId } from '../config/assets'
 import { useResolvedShipImage } from '../utils/useResolvedShipImage'
 import { resolveShipStockRoleFocus, resolveShipEntityClass } from '../utils/shipIdentityLine'
 import { getConfigurableSlotsForShip, type ConfigurableSlotRuntimeRecord } from '../generated/configurableSlots'
@@ -95,6 +95,18 @@ const COMMANDER_INTENT_DESCRIPTION: Record<CommanderIntent, string> = {
  * uppercase/letter-spaced section-label language (e.g. the page's own
  * "SHIP MANAGEMENT" header eyebrow). EWO-067A (Part E) explicitly
  * retains this unchanged — it already does its job. */
+/** EWO-101 (Part A/B) — each workstation card's own environmental
+ * background accent, resolved through the dedicated
+ * `ShipManagementCardAccentId` registry (never a raw path) and layered
+ * behind the card's text at low opacity, the same presentation
+ * philosophy Captain's Log's certification card (EWO-095B) established.
+ * "Manage Loadout" gets the planning/engineering workstation artwork;
+ * "Change Installed Components" gets the physical maintenance-bay
+ * artwork. */
+const COMMANDER_INTENT_CARD_ACCENT: Record<CommanderIntent, ShipManagementCardAccentId> = {
+  MANAGE_LOADOUT: 'loadout-workstation',
+  CHANGE_INSTALLED: 'maintenance-bay',
+}
 const COMMANDER_INTENT_WORKSTATION_LABEL: Record<CommanderIntent, string> = {
   MANAGE_LOADOUT: 'Loadout Workstation',
   CHANGE_INSTALLED: 'Maintenance Bay',
@@ -2542,15 +2554,42 @@ export default function ShipWorkspacePrototype() {
                 ] as const
               ).map(({ key, icon: Icon }) => {
                 const isSelected = commanderIntent === key
+                const cardAccentSrc = resolveShipManagementCardAccentSource(COMMANDER_INTENT_CARD_ACCENT[key])
                 return (
                   <button
                     key={key}
                     onClick={() => setCommanderIntent(isSelected ? null : key)}
                     aria-pressed={isSelected}
                     className={`group relative overflow-hidden text-left rounded-lg border px-4 py-3.5 bg-black/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] transition-all duration-200 ${
-                      isSelected ? 'border-cyan/40 shadow-glow' : 'border-white/10 hover:-translate-y-0.5 hover:border-cyan/30 hover:shadow-glow'
+                      isSelected ? 'border-cyan/40 shadow-glow' : 'border-white/10 hover:border-cyan/30 hover:shadow-glow'
                     }`}
                   >
+                    {/* EWO-101 (Part A) — the workstation's environmental
+                        identity: a CSS background-image layer, the same
+                        presentation philosophy Captain's Log's
+                        certification card (EWO-095B) established. No
+                        layout impact — aria-hidden, absolutely positioned,
+                        clipped to the card's own rounded corners by the
+                        button's existing `overflow-hidden`. EWO-101
+                        Amendment 1 (Part H) — opacity raised 0.18 → 0.30,
+                        the canonical Beta 2.1 value for Ship Management
+                        workstation accent imagery, so the scene (blueprint
+                        vs. maintenance bay) reads as recognizable rather
+                        than a generic texture, while staying secondary to
+                        the title/description above it. */}
+                    {cardAccentSrc && (
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          backgroundImage: `url(${cardAccentSrc})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          opacity: 0.3,
+                        }}
+                      />
+                    )}
                     {/* Part D — the one restrained accent: a thin
                         holographic line along the top edge, brightening
                         on hover/selection — replaces EWO-067's own
@@ -2564,24 +2603,32 @@ export default function ShipWorkspacePrototype() {
                     {/* Part E — the workstation identifier, small/letter-
                         spaced/low-emphasis, consistent with this page's
                         own section-label language (the h3 above it).
-                        Explicitly retained unchanged from EWO-067. */}
-                    <span className="absolute top-3 right-3.5 text-[9px] uppercase tracking-[0.15em] text-muted/50 font-mono">
+                        EWO-101 (Part D) — visual presence increased
+                        slightly (9px/50% opacity to 10px/65%) now that it
+                        competes with the new background accent; still
+                        secondary to the title below. */}
+                    <span className="absolute top-3 right-3.5 text-[10px] uppercase tracking-[0.15em] text-muted/65 font-mono">
                       {COMMANDER_INTENT_WORKSTATION_LABEL[key]}
                     </span>
 
                     {/* Part C — typography-first hierarchy: large title,
                         one concise operational statement, smaller
-                        supporting description. No background artwork —
-                        the copy itself is now the primary visual feature. */}
-                    <div
-                      className={`flex items-center gap-2 font-display font-bold text-base transition-colors duration-200 ${
-                        isSelected ? 'text-cyan' : 'text-white group-hover:text-cyan/90'
-                      }`}
-                    >
-                      <Icon size={18} aria-hidden="true" /> {COMMANDER_INTENT_LABEL[key]}
+                        supporting description. EWO-101 — wrapped in its
+                        own stacking context (`relative z-10`) so it stays
+                        above the new background accent regardless of DOM
+                        paint order, the same defensive pattern Captain's
+                        Log's certification card text uses. */}
+                    <div className="relative z-10">
+                      <div
+                        className={`flex items-center gap-2 font-display font-bold text-base transition-colors duration-200 ${
+                          isSelected ? 'text-cyan' : 'text-white group-hover:text-cyan/90'
+                        }`}
+                      >
+                        <Icon size={18} aria-hidden="true" /> {COMMANDER_INTENT_LABEL[key]}
+                      </div>
+                      <p className="text-xs text-white/80 font-medium mt-1.5">{COMMANDER_INTENT_STATEMENT[key]}</p>
+                      <p className="text-[11px] text-muted mt-1">{COMMANDER_INTENT_DESCRIPTION[key]}</p>
                     </div>
-                    <p className="text-xs text-white/80 font-medium mt-1.5">{COMMANDER_INTENT_STATEMENT[key]}</p>
-                    <p className="text-[11px] text-muted mt-1">{COMMANDER_INTENT_DESCRIPTION[key]}</p>
                   </button>
                 )
               })}
