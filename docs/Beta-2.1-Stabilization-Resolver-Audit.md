@@ -32,6 +32,15 @@ written; `git status` was clean.
 | Shared active-build resolution helper (EWO-087 §4.2) | Not started — recommended as EWO-091 |
 | Deprecated `ShipRecordCard`/`PriorityCard` cleanup (EWO-087 §4, optional) | Not started — recommended as EWO-092 |
 
+**Phase 1 (Stabilization) is complete.** EWO-090/EWO-091/EWO-092 remain
+in the engineering backlog but are no longer the active development
+focus, per Chief Architect authorization. **Phase 2 (Feature
+Foundation)** begins below.
+
+| Phase 2 work order | Status |
+|---|---|
+| Fleet Export Architecture | ✅ **Implemented and certified** — EWO-093, commit `09b0de6`. See `docs/Beta-2.1-Fleet-Export-Architecture.md` for the full architecture: the export payload is the exact canonical persistence payload `buildFleetPersistencePayload()` produces (`localStorage` persistence and Fleet Export share one serialization implementation, never a parallel one); `schemaVersion` reuses `PERSIST_VERSION` directly, no separate export-version counter. Adds an "Export Fleet Data" action on Captain's Log. Certified evidence: `tsc --noEmit` clean, full suite 2630/2630 passing (15 new tests), production build clean, real browser download verified live on port 5176 (production port 5173 untouched throughout), export snapshot proven equivalent to the real persistence payload through the persist middleware itself. **Decided by certification:** a future Import will show a Preview of the validated payload before writing anything; the exact Replace-vs-Merge confirmation semantics are deferred to EWO-094. |
+
 The rest of this document is preserved as originally written — the
 point-in-time audit findings — with status notes added inline rather
 than rewritten, so it stays an accurate record of what was found *and*

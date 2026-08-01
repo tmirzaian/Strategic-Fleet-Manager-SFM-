@@ -219,18 +219,31 @@ candidates as long as their `schemaVersion` is recognized.
 
 | Future capability | Mechanism, reusing this architecture |
 |---|---|
-| **Import** | Parse uploaded file → envelope-level check (§4) → `localStorage.setItem(PERSIST_STORAGE_KEY, JSON.stringify({ state: envelope.payload, version: envelope.schemaVersion }))` → reload. The existing `migrate`/`merge` pipeline does everything else, unmodified. |
+| **Import** | Parse uploaded file → envelope-level check (§4) → **Preview** (Commander reviews the validated `envelope.payload` before anything is written — decided by Chief Architect Certification, EWO-093; see the note below this table) → on confirmation, `localStorage.setItem(PERSIST_STORAGE_KEY, JSON.stringify({ state: envelope.payload, version: envelope.schemaVersion }))` → reload. The existing `migrate`/`merge` pipeline does everything else, unmodified. Replace-vs-merge semantics for the confirmation step are deferred to EWO-094. |
 | **Backup** | Call the same `buildFleetExportSnapshot` + `serializeFleetExportEnvelope` pair Export already uses, on a schedule or Commander action, writing to a rotating/dated store (e.g. a small IndexedDB table or a sequence of downloaded files) instead of a single manual download. No new serialization — only a new trigger and destination. |
 | **Restore** | Exactly the Import mechanism above, sourced from a specific stored backup entry instead of a Commander-picked file. |
 | **Cross-device / cross-browser transfer** | Already solved by Export + the future Import — the envelope carries everything `partialize` considers "the Commander's data," independent of which browser/device produced or consumes it. |
 | **Future `PERSIST_VERSION` bumps** | Automatically covered — see §3. No Export/Import-specific migration code is ever written; the existing `migrate` discipline is the only place that changes. |
 
-**Deliberately not decided here, flagged for the Commander when Import
-is scoped:** whether Import should always fully REPLACE the current
-fleet, offer a merge/preview step, or require an explicit confirmation
-given its destructive potential (overwriting `localStorage` wholesale).
-This is a product/UX decision, not an architecture one, and is called
-out here rather than silently assumed.
+**Decided by Chief Architect Certification (EWO-093): Import shows a
+Preview first.** The Commander sees what an uploaded file contains —
+at minimum ship/build/inventory counts, and enough per-record detail to
+recognize the fleet — before anything is written to `localStorage`.
+This directly follows from §4's validation boundary: the envelope-level
+check and the existing per-field validators already produce, as a side
+effect, exactly the information a Preview needs to render (which
+records are present, which would be dropped as malformed). Preview is
+not an additional pass over the data — it is the same validated
+`envelope.payload` the write step would use, just not yet committed.
+
+**Still explicitly deferred to EWO-094 (not decided here):** the exact
+Replace-vs-Merge semantics once a Preview is accepted — whether Import
+always fully replaces the current fleet, offers a field-by-field or
+per-record merge, or requires a distinct confirmation step given its
+destructive potential (overwriting `localStorage` wholesale). This
+remains a product/UX decision, not an architecture one, and is called
+out here rather than silently assumed. EWO-094 should design that
+decision against the Preview step above, not around it.
 
 ---
 
