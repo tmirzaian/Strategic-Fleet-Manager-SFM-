@@ -54,6 +54,37 @@ describe("CWO-005 (Task 5) / BP-001: Captain's Log — version/certification pre
 })
 
 /**
+ * EWO-095B — "Canonical Image Presentation & Environmental Clarity" for
+ * Captain's Log specifically: the certification illustration is artwork
+ * only (no embedded badge assumed), and the Community Certification Seal
+ * is a separate, reusable `<CertificationBadge>` overlay layered above the
+ * artwork but below the certification text.
+ */
+describe("EWO-095B: Captain's Log certification card — reusable badge overlay", () => {
+  it('renders the Community Certified seal as a real <img>, resolved through the semantic registry', () => {
+    renderCaptainsLog()
+    const badge = screen.getByAltText('Community Certified') as HTMLImageElement
+    expect(badge).toBeInTheDocument()
+    expect(badge.src).toContain('/assets/branding/community/community-certified-seal.png')
+  })
+
+  it('badge floats above the artwork but stays below the certification text (z-10 vs. the text wrapper’s z-20) — text is never obscured', () => {
+    renderCaptainsLog()
+    const badge = screen.getByAltText('Community Certified')
+    expect(badge.className).toContain('z-10')
+    const certifiedForLabel = screen.getByText('Certified for')
+    const textWrapper = certifiedForLabel.parentElement as HTMLElement
+    expect(textWrapper.className).toContain('z-20')
+  })
+
+  it('certification text remains present and unchanged alongside the badge', () => {
+    renderCaptainsLog()
+    expect(screen.getByText(`Strategic Fleet Manager ${APP_VERSION_LABEL}`)).toBeInTheDocument()
+    expect(screen.getByText('Certified for')).toBeInTheDocument()
+  })
+})
+
+/**
  * EWO-093 — "Fleet Export Architecture." The Export button is the one
  * Commander-facing piece of this work order — everything else is the
  * shared serialization module underneath it (see

@@ -7,6 +7,7 @@ import FleetImportPreview from '../components/FleetImportPreview'
 import { APP_VERSION_LABEL } from '../config/appVersion'
 import { resolveCertifiedGameVersionLabel } from '../utils/scVersion'
 import { resolveCaptainsLogAccentSource } from '../config/assets'
+import CertificationBadge from '../components/branding/CertificationBadge'
 
 type FleetImportSuccessOutcome = Extract<FleetImportOutcome, { ok: true }>
 
@@ -125,7 +126,13 @@ export default function CaptainsLog() {
             }}
           />
         )}
-        <div className="relative z-10">
+        {/* EWO-095B — the seal is a reusable branding overlay, never
+            embedded in the illustration itself. Layered above the artwork
+            but below the text (z-10 vs. the text wrapper's z-20) so it can
+            never obscure the certification copy even if the card's
+            content ever grows. */}
+        <CertificationBadge variant="community" />
+        <div className="relative z-20">
           <p className="text-white font-medium">Strategic Fleet Manager {APP_VERSION_LABEL}</p>
           <p className="text-[11px] uppercase tracking-widest text-muted/70 mt-2">Certified for</p>
           <p className="text-white">{certifiedGameVersion ? `Star Citizen LIVE ${certifiedGameVersion}` : 'Not yet certified — Golden Fleet catalog not generated locally'}</p>

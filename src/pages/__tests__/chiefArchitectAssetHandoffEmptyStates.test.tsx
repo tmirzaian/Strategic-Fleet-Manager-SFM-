@@ -154,10 +154,11 @@ describe("Chief Architect Asset Handoff — Captain's Log certification accent",
     const certHeading = screen.getByText(/Strategic Fleet Manager/)
     expect(certHeading).toBeInTheDocument()
     expect(screen.getByText('Certified for')).toBeInTheDocument()
-    // The text wrapper sits above the decorative layer (z-index), not
-    // beside or instead of it.
+    // The text wrapper sits above both the decorative accent layer and
+    // the EWO-095B CertificationBadge overlay (z-20 > the badge's z-10),
+    // not beside or instead of them.
     const textWrapper = certHeading.parentElement as HTMLElement
     expect(textWrapper.className).toContain('relative')
-    expect(textWrapper.className).toContain('z-10')
+    expect(textWrapper.className).toContain('z-20')
   })
 })

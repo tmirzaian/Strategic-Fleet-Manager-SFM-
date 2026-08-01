@@ -223,3 +223,34 @@ export interface CaptainsLogAccentDefinition {
   /** True once this id is both delivered and approved for integration. */
   enabled: boolean
 }
+
+/**
+ * EWO-095B — semantic variants for `<CertificationBadge>`, the small
+ * reusable overlay that renders a certification seal above environmental
+ * artwork (never a raw PNG filename in page code). Deliberately its own
+ * registry rather than folded into `BrandingAssetKey` — that registry is
+ * scoped to Strategic Fleet Manager's own identity assets (logo, marks,
+ * app icon); a certification seal is a third-party/community endorsement
+ * mark layered onto a specific card, a different semantic category
+ * entirely, delivered under `public/assets/branding/community/` (and
+ * future sibling directories per issuer).
+ *
+ * Today only `'community'` has approved artwork. The union exists so a
+ * future badge (Beta Certified, LIVE Compatible, PTU Compatible,
+ * Community Verified, Quantum Thread Studio Certified, ...) is added here
+ * and to `CERTIFICATION_BADGES` without `<CertificationBadge>` or any of
+ * its callers changing shape — only ever `<CertificationBadge variant="...">`,
+ * never a hardcoded filename.
+ */
+export type CertificationBadgeVariant = 'community'
+
+export interface CertificationBadgeDefinition {
+  variant: CertificationBadgeVariant
+  label: string
+  /** Root-relative public path, or undefined until this variant's artwork is approved. */
+  src?: string
+  /** Accessible alt text — the seal is substantive certification content, not decorative filler. */
+  alt: string
+  /** True once this variant's artwork is both delivered and approved for integration. */
+  enabled: boolean
+}
