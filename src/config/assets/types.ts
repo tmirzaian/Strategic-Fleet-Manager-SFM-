@@ -26,6 +26,9 @@ export type EnvironmentId =
   | 'mission-control-empty-priority'
   | 'fleet-dashboard-empty'
   | 'hangar-inventory-empty'
+  // EWO-104 Amendment 2 (Part F) — Flight Commander's own whole-page hero,
+  // the same full-strength-artwork pattern 'mission-control' uses.
+  | 'flight-commander'
 
 export const ENVIRONMENT_IDS: readonly EnvironmentId[] = [
   'mission-control',
@@ -38,6 +41,7 @@ export const ENVIRONMENT_IDS: readonly EnvironmentId[] = [
   'mission-control-empty-priority',
   'fleet-dashboard-empty',
   'hangar-inventory-empty',
+  'flight-commander',
 ]
 
 /**

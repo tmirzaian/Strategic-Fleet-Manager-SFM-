@@ -13,7 +13,7 @@ beforeEach(() => {
 })
 afterEach(() => cleanup())
 
-const routes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
+const routes = ['/', '/fleet', '/ship/ghost', '/loadout-manager', '/flight-commander', '/hangar', '/quick-update', '/decision-center', '/roadmap', '/log']
 
 describe('Mission M-011: every existing application route renders without throwing', () => {
   it.each(routes)('%s renders', (route) => {

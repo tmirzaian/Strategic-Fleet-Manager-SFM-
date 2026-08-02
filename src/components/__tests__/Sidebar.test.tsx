@@ -97,7 +97,7 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
 
   it('9. every remaining navigation route, label, and link count remains unchanged (EWO-062A retired Loadout Manager/Quick Update/Ship Detail — see dedicated test below)', () => {
     renderSidebar()
-    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/hangar', '/decision-center', '/roadmap', '/log']
+    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/flight-commander', '/hangar', '/decision-center', '/roadmap', '/log']
     const links = screen.getAllByRole('link')
     const hrefs = links.map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
@@ -106,6 +106,20 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     expect(screen.getByText('Mission Control')).toBeInTheDocument()
     expect(screen.getByText('Fleet Dashboard')).toBeInTheDocument()
     expect(screen.getByText("Captain's Log")).toBeInTheDocument()
+  })
+
+  it('EWO-104: Flight Commander appears in the approved position — immediately after Ship Management, immediately before Hangar Inventory', () => {
+    const { container } = renderSidebar()
+    const nav = container.querySelector('nav') as HTMLElement
+    const list = nav.querySelector('.space-y-1') as HTMLElement
+    const labels = Array.from(list.children).map((el) => el.textContent)
+    const shipManagementIndex = labels.indexOf('Ship Management')
+    const flightCommanderIndex = labels.indexOf('Flight Commander')
+    const hangarIndex = labels.indexOf('Hangar Inventory')
+    expect(flightCommanderIndex).toBe(shipManagementIndex + 1)
+    expect(hangarIndex).toBe(flightCommanderIndex + 1)
+    const link = screen.getByText('Flight Commander').closest('a')!
+    expect(link).toHaveAttribute('href', '/flight-commander')
   })
 
   it('EWO-060: the Ship Management nav item reads "Ship Management", not the retired "Ship Workspace" label — same /ship-workspace route', () => {
@@ -127,16 +141,16 @@ describe('<Sidebar /> — EWO-015 commissioned brand-lockup hardpoint', () => {
     expect(hrefs).not.toContain('/ship')
   })
 
-  it('EWO-062A (Part B): exactly seven navigation links remain, with no leftover gap/divider markup between them', () => {
+  it('EWO-062A (Part B) / EWO-104: exactly eight navigation links remain (seven plus Flight Commander), with no leftover gap/divider markup between them', () => {
     const { container } = renderSidebar()
     const nav = container.querySelector('nav') as HTMLElement
     const links = within(nav).getAllByRole('link')
-    expect(links).toHaveLength(7)
+    expect(links).toHaveLength(8)
     // The nav rail's own bordered console is a single flat list — one
     // rounded panel wrapping a `space-y-1` stack of links, no dividers or
     // spacer elements between individual items.
     const list = nav.querySelector('.space-y-1') as HTMLElement
-    expect(list.children).toHaveLength(7)
+    expect(list.children).toHaveLength(8)
     expect(Array.from(list.children).every((el) => el.tagName === 'A')).toBe(true)
   })
 
@@ -206,9 +220,10 @@ describe('<Sidebar /> — EWO-015B branding presence refinement', () => {
     expect(navConsole.className).toContain('p-1.5')
     // EWO-062A (Part B) retired Loadout Manager/Quick Update/Ship Detail
     // from the Sidebar (navigation retirement, not route destruction —
-    // see the dedicated EWO-062A tests below); the remaining seven are
-    // what "unchanged" now means for this architecture-protection test.
-    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/hangar', '/decision-center', '/roadmap', '/log']
+    // see the dedicated EWO-062A tests below); EWO-104 added Flight
+    // Commander. These eight are what "unchanged" now means for this
+    // architecture-protection test.
+    const expectedRoutes = ['/', '/fleet', '/ship-workspace', '/flight-commander', '/hangar', '/decision-center', '/roadmap', '/log']
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'))
     for (const route of expectedRoutes) {
       expect(hrefs).toContain(route)

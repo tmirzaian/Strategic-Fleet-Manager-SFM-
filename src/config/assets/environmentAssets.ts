@@ -135,6 +135,21 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
     enabled: true,
     presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),
+
+  // EWO-104 Amendment 2 (Part F) — Flight Commander's hero. Same
+  // full-strength, zero-filter treatment 'mission-control' settled on
+  // (EWO-035A-R2): "the goal is zero shading over the loaded image, not a
+  // fallback tone" — legibility for the anchored summary cards comes from
+  // their own glass backdrop (see FlightCommander.tsx), never from
+  // dimming the artwork. blurPx: 0, no vignette layer.
+  'flight-commander': definition('flight-commander', 'Flight Commander', {
+    sources: {
+      tablet: assetPath('environments/flight-commander/flight-commander-background-1920.webp'),
+      mobile: assetPath('environments/flight-commander/flight-commander-background-1280.webp'),
+    },
+    enabled: true,
+    presentation: { ...DEFAULT_PRESENTATION, opacity: 1.0, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
+  }),
 }
 
 export function getEnvironmentDefinition(id: EnvironmentId): EnvironmentAssetDefinition {

@@ -29,7 +29,7 @@ describe('Mission M-022: environment registry', () => {
     expect(isValidPresentation({ ...base, position: '' })).toBe(false)
   })
 
-  const ENABLED_IDS = new Set(['mission-control', 'decision-center', 'mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'])
+  const ENABLED_IDS = new Set(['mission-control', 'decision-center', 'mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty', 'flight-commander'])
 
   it('every definition outside the enabled set ships disabled with no artwork referenced (Mission M-022 is infrastructure only; EWO-035 enabled Mission Control, UX-003B enabled Decision Center, Chief Architect Asset Handoff enabled the three empty-state ids)', () => {
     for (const id of ENVIRONMENT_IDS) {
@@ -99,6 +99,26 @@ describe('Mission M-022: environment registry', () => {
     expect(def.presentation.brightness).toBe(1.0)
     expect(def.presentation.contrast).toBe(1.0)
     expect(def.presentation.saturation).toBe(1.0)
+    expect(isValidPresentation(def.presentation)).toBe(true)
+  })
+
+  it('EWO-104 Amendment 2 (Part F): flight-commander is enabled with real, usable tablet (~1920) and mobile (~1280) sources, and resolves to the wider tier', () => {
+    const def = getEnvironmentDefinition('flight-commander')
+    expect(def.enabled).toBe(true)
+    expect(isEnvironmentUsable(def)).toBe(true)
+    expect(def.sources.tablet).toMatch(/^\/assets\/environments\/flight-commander\/.+-1920\.webp$/)
+    expect(def.sources.mobile).toMatch(/^\/assets\/environments\/flight-commander\/.+-1280\.webp$/)
+    expect(resolveResponsiveSource(def.sources)).toBe(def.sources.tablet)
+  })
+
+  it('EWO-104 Amendment 2 (Part F): flight-commander renders crisp and unblurred at full strength — no vignette/darkening, matching mission-control\'s own established "zero shading over the loaded image" treatment', () => {
+    const def = getEnvironmentDefinition('flight-commander')
+    expect(def.presentation.blurPx).toBe(0)
+    expect(def.presentation.opacity).toBe(1.0)
+    expect(def.presentation.brightness).toBe(1.0)
+    expect(def.presentation.contrast).toBe(1.0)
+    expect(def.presentation.saturation).toBe(1.0)
+    expect(def.presentation.overlay).toBeUndefined()
     expect(isValidPresentation(def.presentation)).toBe(true)
   })
 

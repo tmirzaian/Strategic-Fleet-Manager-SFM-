@@ -151,3 +151,20 @@ body {
 .animate-ship-image-fade-in {
   animation: ship-image-fade-in 250ms ease-out;
 }
+
+/* EWO-104 Amendment 3 (Part G) — a subtle, slow holographic radar sweep
+   for Flight Commander's Operational Briefing empty state. Purely
+   decorative/atmospheric ("mission success, not missing information") —
+   restrained pace (6s) and low opacity, never a dramatic or attention-
+   grabbing effect. */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-radar-sweep {
+  animation: radar-sweep 6s linear infinite;
+}

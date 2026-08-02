@@ -78,6 +78,17 @@ const SPECS: DerivativeSpec[] = [
     requestedWidths: [...ENVIRONMENT_TIERS],
   },
   {
+    // EWO-104 Amendment 2 (Part F) — Flight Commander hero. Master
+    // delivered as "...-background-master.png" (the one master filename in
+    // this pipeline carrying an explicit "-master" suffix — matched
+    // verbatim, not renamed) at 6684x3764, comfortably above the
+    // requested 1920/1280 tiers.
+    masterPath: join(ENVIRONMENTS_ROOT, 'flight-commander', 'flight-commander-background-master.png'),
+    outputDir: join(ENVIRONMENTS_ROOT, 'flight-commander'),
+    outputBaseName: 'flight-commander-background',
+    requestedWidths: [...ENVIRONMENT_TIERS],
+  },
+  {
     masterPath: join(ILLUSTRATIONS_ROOT, 'captains-log-certification', 'captains-log-certification-accent.png'),
     outputDir: join(ILLUSTRATIONS_ROOT, 'captains-log-certification'),
     outputBaseName: 'captains-log-certification-accent',

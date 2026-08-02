@@ -11,6 +11,7 @@ import FleetRoadmap from './pages/FleetRoadmap'
 import CaptainsLog from './pages/CaptainsLog'
 import MissionComposer from './pages/MissionComposer'
 import ShipWorkspacePrototype from './pages/ShipWorkspacePrototype'
+import FlightCommander from './pages/FlightCommander'
 
 export default function App() {
   return (
@@ -39,6 +40,11 @@ export default function App() {
                 from Ship Detail / Loadout Manager, which remain unchanged. */}
             <Route path="/ship-workspace" element={<ShipWorkspacePrototype />} />
             <Route path="/ship-workspace/:shipId" element={<ShipWorkspacePrototype />} />
+            {/* EWO-104 — the terminus of the Mission Control -> Fleet
+                Dashboard -> Ship Management operational chain: "am I ready
+                to launch?" Placed with the principal operational
+                workspaces, immediately after Ship Management. */}
+            <Route path="/flight-commander" element={<FlightCommander />} />
             <Route path="/hangar" element={<HangarInventory />} />
             <Route path="/quick-update" element={<QuickUpdate />} />
             <Route path="/decision-center" element={<DecisionCenter />} />

@@ -9,6 +9,7 @@ import {
   BookText,
   Satellite,
   Wrench,
+  Rocket,
 } from 'lucide-react'
 
 // The sidebar tells the story of the player's workflow (Alpha 2.4, Part 1)
@@ -60,6 +61,12 @@ const navItems = [
   // instead of an inferred/hardcoded ship. Unchanged by SW-013B — this
   // reasoning applies equally to the blank `/ship-workspace` entry below.
   { to: '/ship-workspace', label: 'Ship Management', icon: Wrench },
+  // EWO-104 — the terminus of the operational chain above it ("am I ready
+  // to launch?"). Placed with the principal operational workspaces
+  // (Mission Control / Fleet Dashboard / Ship Management), immediately
+  // after Ship Management and before the supporting/utility pages below
+  // (Hangar Inventory, Decision Center, Fleet Roadmap, Captain's Log).
+  { to: '/flight-commander', label: 'Flight Commander', icon: Rocket },
   { to: '/hangar', label: 'Hangar Inventory', icon: Package },
   { to: '/decision-center', label: 'Decision Center', icon: ScanSearch },
   { to: '/roadmap', label: 'Fleet Roadmap', icon: Map },
