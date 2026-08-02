@@ -10,13 +10,197 @@
     <link rel="apple-touch-icon" href="/assets/branding/logo/sfm-logo-256.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- EWO-107 (Part F) — measured cold-load evidence showed this
+         stylesheet as the single largest render-blocking resource
+         (1.1-2.1s to the external Google Fonts CDN). A render-blocking
+         <link rel="stylesheet"> can't be first paint's dependency once
+         there's a boot splash that must paint immediately (Part B: "no
+         external font dependency for first paint") — so it's loaded via
+         the standard non-blocking pattern (media="print" is ignored for
+         matching at load time, then swapped to "all" once it has
+         actually loaded) with a <noscript> fallback for the no-JS case. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <!-- EWO-107 (Part B/D) — dark base color applied inline, before any
+         other CSS (including the app's own Tailwind bundle) has a chance
+         to load, so html/body/#root can never show through as white
+         during the gap between first paint and the application's own
+         stylesheet arriving. #071016 is the exact `bg-bg` Tailwind token
+         (tailwind.config.js) — the same color the application itself
+         paints, so there is no visible seam at the splash/app handoff. -->
+    <style>
+      html,
+      body {
+        background: #071016;
+        margin: 0;
+      }
+      #root {
+        background: #071016;
+        min-height: 100vh;
+      }
+
+      #sfm-boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        background: #071016;
+        color: #e7edf0;
+        /* System font stack only — Part B: "no external font dependency
+           for first paint." The Google Font swaps in once it has loaded,
+           same as the rest of the application. */
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        text-align: center;
+        padding: 1.5rem;
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+      #sfm-boot-splash[data-hidden='true'] {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .sfm-boot-splash__emblem {
+        width: 3rem;
+        height: 3rem;
+        border: 2px solid #c9a227;
+        border-top-color: transparent;
+        border-radius: 9999px;
+        margin-bottom: 0.5rem;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .sfm-boot-splash__emblem {
+          animation: sfm-boot-splash-spin 1.1s linear infinite;
+        }
+      }
+      @keyframes sfm-boot-splash-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .sfm-boot-splash__title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        color: #ffffff;
+      }
+      .sfm-boot-splash__edition {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        color: #c9a227;
+      }
+      .sfm-boot-splash__status {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        color: #8fb0bd;
+      }
+      .sfm-boot-splash__reload {
+        margin-top: 0.75rem;
+        padding: 0.4rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: #071016;
+        background: #c9a227;
+        border: none;
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #sfm-boot-splash {
+          transition: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- EWO-107 (Part B) — a static, non-React DOM node: paints on the
+         very first frame, before the module script below has even begun
+         fetching. Deliberately a sibling of #root, not a child of it, so
+         React never touches or implicitly clears it — removal is always
+         the explicit, readiness-driven action described in Part D/C
+         (src/bootSplash.ts), never an accidental side effect of the app
+         mounting. -->
+    <div id="sfm-boot-splash" role="status" aria-live="polite">
+      <div class="sfm-boot-splash__emblem" aria-hidden="true"></div>
+      <div class="sfm-boot-splash__title">STRATEGIC FLEET MANAGER</div>
+      <div class="sfm-boot-splash__edition">QUARTERMASTER EDITION</div>
+      <div class="sfm-boot-splash__status" id="sfm-boot-splash-status">INITIALIZING COMMAND SYSTEMS</div>
+      <button type="button" class="sfm-boot-splash__reload" id="sfm-boot-splash-reload" hidden>RELOAD</button>
+    </div>
     <div id="root"></div>
+    <!-- EWO-107 (Part B/H) — a plain classic script, not a module: it runs
+         immediately, synchronously, independent of whether
+         /src/main.tsx ever successfully loads or executes. This is what
+         satisfies "must not block if JS fails" — the long-wait and
+         failure timers below are armed even if the application module
+         graph 404s or throws. src/bootSplash.ts (loaded by main.tsx)
+         calls window.__sfmBootSplash.setStatus/ready as real boot stages
+         happen; this script never fabricates progress on its own, it
+         only relays whatever src/bootSplash.ts tells it and, failing
+         that, degrades honestly after a real elapsed-time threshold. -->
+    <script>
+      (function () {
+        var splash = document.getElementById('sfm-boot-splash')
+        var statusEl = document.getElementById('sfm-boot-splash-status')
+        var reloadBtn = document.getElementById('sfm-boot-splash-reload')
+        var settled = false
+
+        function setStatus(text) {
+          if (settled || !statusEl) return
+          statusEl.textContent = text
+        }
+
+        function showLongWait() {
+          if (settled || !statusEl) return
+          statusEl.textContent = 'COMMAND SYSTEMS ARE TAKING LONGER THAN EXPECTED'
+        }
+
+        function showFailure() {
+          if (settled || !statusEl) return
+          statusEl.textContent = 'COMMAND SYSTEM INITIALIZATION FAILED'
+          if (reloadBtn) {
+            reloadBtn.hidden = false
+            reloadBtn.onclick = function () {
+              window.location.reload()
+            }
+          }
+        }
+
+        function ready() {
+          if (settled || !splash) return
+          settled = true
+          splash.setAttribute('data-hidden', 'true')
+          window.setTimeout(function () {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash)
+          }, 450)
+        }
+
+        window.__sfmBootSplash = { setStatus: setStatus, ready: ready }
+
+        // Part H — thresholds are generous multiples of the measured cold
+        // dev-server load (~3.3s) and measured production preview load
+        // (see docs/EWO-107-Boot-Experience-Performance.md); neither timer
+        // does anything once the real readiness signal has already fired.
+        window.setTimeout(showLongWait, 8000)
+        window.setTimeout(showFailure, 20000)
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

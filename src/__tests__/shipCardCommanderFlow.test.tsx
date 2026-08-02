@@ -26,7 +26,7 @@ afterEach(() => cleanup())
  * by literally observing a live viewport reflow.
  */
 describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Control Ship Card validation', () => {
-  it('walks the full required sequence: Fleet Dashboard Priority display, sort/filter integrity, Mission Control Top 4, uniform cards, and click-through navigation', () => {
+  it('walks the full required sequence: Fleet Dashboard Priority display, sort/filter integrity, Mission Control Top 4, uniform cards, and click-through navigation', async () => {
     const { ships } = useFleetStore.getState()
     expect(ships.length).toBeGreaterThanOrEqual(5)
 
@@ -114,7 +114,11 @@ describe('EWO-033 (Task 11): Commander flow — Fleet Dashboard and Mission Cont
     const firstLink = within(mcWrappers[0]).getByRole('link')
     expect(firstLink).toHaveAttribute('href', `/ship-workspace/${top4[0].id}`)
     fireEvent.click(firstLink)
-    expect(screen.getByTestId('ship-operational-banner')).toBeInTheDocument()
+    // EWO-107 — Ship Workspace (ShipWorkspacePrototype) is now a lazy-loaded
+    // route (Part G); its content resolves through a Suspense boundary
+    // after this in-app navigation, so it must be awaited rather than
+    // asserted on synchronously.
+    expect(await screen.findByTestId('ship-operational-banner')).toBeInTheDocument()
 
     // 16. Manufacturer and stock role/focus display consistently — spot
     // check a known-resolved ship's identity line renders identically to

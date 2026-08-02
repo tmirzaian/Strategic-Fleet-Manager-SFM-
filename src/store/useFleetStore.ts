@@ -32,6 +32,7 @@ import {
 import { buildFleetPersistencePayload, buildFleetExportEnvelope, type FleetPersistenceSource, type FleetExportEnvelope } from '../utils/fleetSerialization'
 import { parseFleetImportFile, buildFleetImportSummary, computeFleetImportWarnings, type FleetImportSummary } from '../utils/fleetImport'
 import { APP_VERSION } from '../config/appVersion'
+import { markBootStage, reportHydrationComplete } from '../bootTelemetry'
 
 const PERSIST_STORAGE_KEY = 'sfm-fleet-store'
 // EWO-027 (Sea Trials Blocker): bumped 5 -> 6 to add customBuilds/
@@ -349,8 +350,24 @@ function buildCanonicalSeedCustomBuilds(): { builds: Build[]; hardpoints: Hardpo
   return { builds, hardpoints }
 }
 
+// EWO-107 (Part G) — `buildSeedFleetBaseline()` is a pure function of
+// module-scope seed data (`shipDefinitionById`/`shipFactoryTemplates`/
+// `seedShips`/`customBuildOverlays`, none of which change at runtime) but
+// was previously called twice on every store initialization when
+// `DEV_SEED_FLEET_ENABLED` is set — once for the store's own initial
+// state (below) and once inside `mergeFleetPersistedState` during
+// hydration — duplicating a real, measured cost (materializing every
+// seed ship's full hardpoint tree via `materializeFleetAsset`, twice).
+// Cached here rather than reworking either call site's own logic. Safe
+// because every consumer of this codebase's own established discipline
+// treats materialized store data as immutable — neither call site
+// mutates the returned arrays/objects in place.
+let cachedSeedFleetBaseline: SeedFleetBaseline | undefined
+
 /** The full Alpha-era demo fleet, materialized fresh — used only when it should actually be shown (see DEV_SEED_FLEET_ENABLED and `merge`'s `includeSeedBaseline` below). */
 function buildSeedFleetBaseline(): SeedFleetBaseline {
+  if (cachedSeedFleetBaseline) return cachedSeedFleetBaseline
+  if (import.meta.env.DEV) performance.mark('sfm-boot:seed-baseline-start')
   const canonicalFactory = buildCanonicalSeedFactoryBuilds()
   const canonicalCustom = buildCanonicalSeedCustomBuilds()
   const factoryBuildById = new Map(canonicalFactory.builds.map((b) => [b.id, b]))
@@ -365,7 +382,7 @@ function buildSeedFleetBaseline(): SeedFleetBaseline {
     return activeBuild ? { ...s, readiness: activeBuild.readiness, missing: activeBuild.missing } : s
   })
   const allHardpoints = [...seedHardpoints, ...canonicalFactory.hardpoints, ...canonicalCustom.hardpoints]
-  return {
+  cachedSeedFleetBaseline = {
     ships,
     builds: [...seedBuilds, ...canonicalFactory.builds, ...canonicalCustom.builds],
     hardpoints: allHardpoints,
@@ -374,6 +391,15 @@ function buildSeedFleetBaseline(): SeedFleetBaseline {
     installedLoadouts: deriveInitialInstalledLoadouts(ships, allHardpoints),
     fleetAssets: migrateSeedFleetToAssets(),
   }
+  markBootStage('store-seed-baseline-built')
+  if (import.meta.env.DEV) {
+    try {
+      performance.measure('sfm-boot:seed-baseline', 'sfm-boot:seed-baseline-start', 'sfm-boot:store-seed-baseline-built')
+    } catch {
+      // Missing start mark (e.g. hot-reloaded module) — never fatal.
+    }
+  }
+  return cachedSeedFleetBaseline
 }
 
 /** A genuinely new Commander's starting state — zero ships, zero inventory, zero log — per CAT-001A's required product behavior. */
@@ -2906,7 +2932,11 @@ export const useFleetStore = create<FleetState>()(
       // option calls, in memory, rather than a second, parallel migration
       // implementation. See that function's own doc comment for the full
       // field-by-field migration history — unchanged.
-      migrate: (persistedState, version) => migrateFleetPersistedState(persistedState, version),
+      migrate: (persistedState, version) => {
+        const result = migrateFleetPersistedState(persistedState, version)
+        markBootStage('migration-complete')
+        return result
+      },
       // Fleet Assets added via "Add Ship" (or any future non-seed source)
       // still round-trip via replay (see merge below). The hardcoded seed
       // fleet is never replayed this way — replaying it through
@@ -2938,7 +2968,23 @@ export const useFleetStore = create<FleetState>()(
       // Replace would actually produce — without ever calling `set()` or
       // touching `localStorage`. See that function's own doc comment for
       // the full reconciliation history — unchanged.
-      merge: (persistedState, currentState) => mergeFleetPersistedState(persistedState, currentState),
+      merge: (persistedState, currentState) => {
+        const result = mergeFleetPersistedState(persistedState, currentState)
+        markBootStage('merge-complete')
+        return result
+      },
+      // EWO-107 (Part A/C) — the outer callback fires right before
+      // hydration begins (whether or not a persisted value exists; `merge`
+      // above only runs when one does), the returned inner callback fires
+      // once hydration has actually finished. Composing this existing
+      // Zustand persist lifecycle hook — rather than a new store or a
+      // polling loop — is the boot-readiness authority's hydration signal.
+      onRehydrateStorage: () => {
+        markBootStage('hydration-start')
+        return () => {
+          reportHydrationComplete()
+        }
+      },
     }
   )
 )
