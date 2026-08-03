@@ -168,3 +168,17 @@ body {
 .animate-radar-sweep {
   animation: radar-sweep 6s linear infinite;
 }
+
+/* EWO-108 (Part L.7) — a real, pre-existing gap: no reduced-motion rule
+   existed anywhere in this file before this EWO, so the radar sweep (and
+   the ship-image fade-in above) spun/animated unconditionally. Standing
+   Watch reuses the sweep to communicate active monitoring, which makes
+   respecting the preference a hard requirement rather than a nice-to-
+   have — disabled outright rather than merely slowed, since a static
+   ring still communicates "monitoring" without any motion at all. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar-sweep,
+  .animate-ship-image-fade-in {
+    animation: none;
+  }
+}
