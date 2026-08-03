@@ -47,6 +47,26 @@ describe('Quartermaster Station Shell — structural regions render (EWO-109 Par
     expect(screen.getByTestId('briefing-probe')).toBeInTheDocument()
   })
 
+  it('EWO-114: StationEnvironmentMount renders an optional secondaryRail after its own auto-filling spacer, for a two-rail Station shape (e.g. Mission Control) — omitting it stays byte-identical to the original one-rail shape (Flight Commander)', () => {
+    const { container } = render(
+      <StationEnvironmentMount environmentId="mission-control" secondaryRail={<div data-testid="secondary-rail-probe">secondary content</div>}>
+        <div data-testid="primary-rail-probe">primary content</div>
+      </StationEnvironmentMount>
+    )
+    expect(screen.getByTestId('primary-rail-probe')).toBeInTheDocument()
+    expect(screen.getByTestId('secondary-rail-probe')).toBeInTheDocument()
+    const mount = container.querySelector('[data-testid="station-environment-mount"]') as HTMLElement
+    const primary = screen.getByTestId('primary-rail-probe')
+    const secondary = screen.getByTestId('secondary-rail-probe')
+    // The auto-filling open-window spacer must sit between the two rails,
+    // not disappear or relocate to either end.
+    expect(primary.compareDocumentPosition(secondary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const spacer = Array.from(mount.children).find((el) => el.getAttribute('aria-hidden') === 'true' && el.className.includes('flex-1'))
+    expect(spacer).not.toBeUndefined()
+    expect(primary.compareDocumentPosition(spacer!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(spacer!.compareDocumentPosition(secondary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('StationBriefingRegion renders its children with no knowledge of what they are', () => {
     render(
       <StationBriefingRegion>

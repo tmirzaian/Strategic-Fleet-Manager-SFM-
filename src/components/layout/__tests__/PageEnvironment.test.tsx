@@ -21,21 +21,26 @@ describe('Mission M-022: <PageEnvironment />', () => {
     }
   })
 
-  it('EWO-035: renders the enabled mission-control environment with its real Beta artwork background, without throwing', () => {
+  it('EWO-114: renders the enabled mission-control environment with its real V2 artwork background, without throwing', () => {
     const { container } = render(<PageEnvironment id="mission-control" />)
     expect(container).not.toBeEmptyDOMElement()
     const layer = container.querySelector('[data-environment-id="mission-control"]')
     expect(layer).not.toBeNull()
-    expect(layer!.querySelector('[style*="mission-control-operations-wall.webp"]')).not.toBeNull()
+    // EWO-114 — the Beta-era "operations wall" plate was replaced with the
+    // Mission Control V2 plate (same adoption pattern as Flight Commander V2, EWO-111).
+    expect(layer!.querySelector('[style*="mission-control-v2.webp"]')).not.toBeNull()
     cleanup()
   })
 
-  it('UX-003B: renders the enabled decision-center environment with its real artwork background, without throwing', () => {
+  it('EWO-116: renders the enabled decision-center environment with its real Technical Evaluation Laboratory V2 artwork background, without throwing', () => {
     const { container } = render(<PageEnvironment id="decision-center" />)
     expect(container).not.toBeEmptyDOMElement()
     const layer = container.querySelector('[data-environment-id="decision-center"]')
     expect(layer).not.toBeNull()
-    expect(layer!.querySelector('[style*="decision-center.webp"]')).not.toBeNull()
+    // EWO-116 — the Beta-era single-tier plate was replaced with the
+    // Technical Evaluation Laboratory V2 plate, the same adoption pattern
+    // EWO-111/EWO-114 used for their own Station's V2 environment plate.
+    expect(layer!.querySelector('[style*="technical-evaluation-laboratory-v2.webp"]')).not.toBeNull()
     cleanup()
   })
 

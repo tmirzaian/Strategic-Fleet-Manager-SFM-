@@ -59,18 +59,18 @@ describe('Mission M-022: environment registry', () => {
     expect(resolveResponsiveSource(def.sources)).toBe(def.sources.tablet)
   })
 
-  it('EWO-035: mission-control is enabled with a real, usable Beta artwork source', () => {
+  it('EWO-114: mission-control is enabled with a real, usable V2 artwork source (tablet tier — the delivered file itself, no desktop tier exists for this plate)', () => {
     const def = getEnvironmentDefinition('mission-control')
     expect(def.enabled).toBe(true)
     expect(isEnvironmentUsable(def)).toBe(true)
-    expect(def.sources.desktop).toBe('/assets/environments/mission-control/mission-control-operations-wall.webp')
+    expect(def.sources.tablet).toBe('/assets/environments/mission-control/mission-control-v2.webp')
   })
 
-  it('UX-003B: decision-center is enabled with a real, usable Commander-supplied artwork source', () => {
+  it('EWO-116: decision-center is enabled with a real, usable V2 artwork source (tablet tier — the delivered file itself, no desktop tier exists for this plate)', () => {
     const def = getEnvironmentDefinition('decision-center')
     expect(def.enabled).toBe(true)
     expect(isEnvironmentUsable(def)).toBe(true)
-    expect(def.sources.desktop).toBe('/assets/environments/decision-center/decision-center.webp')
+    expect(def.sources.tablet).toBe('/assets/environments/decision-center/technical-evaluation-laboratory-v2.webp')
   })
 
   it.each(['decision-center', 'mission-control-empty-priority', 'fleet-dashboard-empty', 'hangar-inventory-empty'] as const)(

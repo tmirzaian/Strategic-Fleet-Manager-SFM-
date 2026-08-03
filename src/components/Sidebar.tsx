@@ -85,7 +85,21 @@ export default function Sidebar() {
   const brandLockupSrc = resolveBrandingSrc('sidebarBrandLockup')
 
   return (
-    <aside className="w-64 shrink-0 h-screen sticky top-0 flex flex-col border-r border-white/5 bg-panel/60 backdrop-blur-sm">
+    // EWO-115 (Part A/E) — the Sidebar was an opaque flex sibling
+    // (`bg-panel/60` reads as nearly solid, plus its own `border-r`) that
+    // made it read as one independent rectangle beside a second
+    // independent rectangle (the routed content). It is now a translucent
+    // structural bulkhead: `bg-bg/70 backdrop-blur-md` keeps branding/nav
+    // legible over any Station environment (including Mission Control's
+    // own bright Bridge plate, `FlagshipEnvironmentLayer`, EWO-115 Part B)
+    // while letting that environment read through at the edges, rather
+    // than stopping hard at a solid panel. Its own `border-r` is removed —
+    // `FlagshipThreshold` (EWO-113) is the one authoritative seam between
+    // the bulkhead and the compartment now; keeping both duplicated the
+    // exact "two independent rectangles" boundary this EWO's own audit
+    // (Part A) flagged. `relative z-10` stacks it above
+    // `FlagshipEnvironmentLayer`'s fixed, full-viewport backdrop (z-0).
+    <aside className="relative z-10 w-64 shrink-0 h-screen sticky top-0 flex flex-col bg-bg/70 backdrop-blur-md">
       {/* Brand lockup — EWO-015, density-tuned EWO-015B, further tightened
           UX-004A (Deliverable 5): reads as a floating operational console
           mounted in the compartment, matching the nav console's
@@ -128,9 +142,21 @@ export default function Sidebar() {
           <Satellite className="text-cyan" size={62} />
         )}
       </div>
-      {/* Navigation reads as a floating operational panel — a restrained bordered
-          surface set inside the rail, not a generic full-height web menu. */}
-      <nav className="flex-1 overflow-y-auto py-5 px-3">
+      {/* EWO-115 (Part D) — the Station Access Panel: the same navigation
+          list, reinterpreted from "page menu" to "access console." Mounted
+          control cells, restrained cyan illumination on the active cell
+          (via NavLink's own `aria-current="page"`, never color alone —
+          Part K), compact and vertically efficient — the rounded-bordered
+          console framing itself was already correct (this is the "mounted
+          console" look Part C/D ask for, not a legacy element to remove,
+          per this EWO's own Part A audit). `aria-label` makes the
+          semantic navigation landmark unambiguous when more than one
+          <nav> exists on a page (Part K). No gold command-attention detail
+          is used on the active cell — EWO-111's own gold-discipline
+          finding ("why is this gold? because the Commander should notice
+          this first") already established that navigation state doesn't
+          warrant it; cyan remains sufficient and consistent. */}
+      <nav className="flex-1 overflow-y-auto py-5 px-3" aria-label="Station Access">
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-1.5 space-y-1">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
@@ -138,7 +164,7 @@ export default function Sidebar() {
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60 ${
                   isActive
                     ? 'bg-cyan/10 text-cyan shadow-[inset_0_0_0_1px_rgba(53,208,255,0.35)]'
                     : 'text-muted hover:text-white hover:bg-white/5'

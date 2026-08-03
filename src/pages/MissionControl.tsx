@@ -29,8 +29,8 @@ import CriticalMetricTile from '../components/CriticalMetricTile'
 import ActionCard from '../components/ActionCard'
 import Badge, { procurementRowStateTone, procurementRowStateLabel } from '../components/Badge'
 import WorkflowDestinationCard from '../components/WorkflowDestinationCard'
-import PageEnvironment from '../components/layout/PageEnvironment'
 import EnvironmentBay from '../components/layout/EnvironmentBay'
+import { CompartmentHeader, StructuralDivider } from '../components/stationKit'
 import { colorFor } from '../components/ReadinessBar'
 import { buildProcurementList, buildReservedAwaitingInstallLines, type ProcurementNeededByEntry } from '../utils/procurement'
 import {
@@ -350,55 +350,78 @@ export default function MissionControl() {
   const buildName = (id: string) => builds.find((b) => b.id === id)?.name ?? 'Unknown Loadout'
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] flex flex-col">
-      <div className="space-y-8 flex-1">
-        {/* DA-008.1 — the interface explains itself; no instructional copy.
-            EWO-061 — Operational Header Standardization: label-above-title,
-            same typography every other operational page already uses
-            (§30). EWO-100 (Phase 1) — the white status line replaces the
-            prior "Fleet Operations" title with a standardized operational
-            status phrase; the blue compartment label above it is
-            unchanged. */}
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Mission Control</p>
-          <h1 className="text-2xl font-display font-bold text-white">Operations Standing By</h1>
+    <div className="min-h-[calc(100vh-4rem)] md:min-h-[calc(100vh-5rem)] flex flex-col relative">
+      {/* EWO-115 (Part H) — Bridge depth-fade scrim. The Bridge environment
+          plate now renders as the app-wide fixed backdrop
+          (FlagshipEnvironmentLayer, EWO-115 Part B), visible behind the
+          entire page regardless of scroll position. Without this, every
+          section below the hero (Top Priority Ship, Quartermaster Report,
+          Execute Orders) would scroll indefinitely over the same bright
+          artwork — "one giant background photograph," exactly what Part H
+          prohibits. One full-height gradient — transparent at the hero,
+          fully resolved to flagship dark by 900px down, then flat for any
+          remaining height (a CSS gradient holds its last stop's color
+          past the final explicit stop) — reads as the Bridge's own depth
+          falloff, the same "architectural continuation, not a hero that
+          stops" principle QDS-006 Part F established, now applied at
+          full-viewport scale rather than a single bordered cell. Painted
+          first (DOM order), so the content wrapper below it — a sibling,
+          not a child, both positioned with default/auto z-index — paints
+          on top without needing an explicit z-index war. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'linear-gradient(to bottom, transparent 0px, #071016 900px)' }}
+        aria-hidden="true"
+        data-testid="bridge-depth-scrim"
+      />
+
+      <div className="space-y-8 flex-1 relative">
+        {/* EWO-115 (Part G) — the Bridge briefing wall. CompartmentHeader
+            (EWO-110 Part D) is unchanged and not duplicated — it now mounts
+            on its own translucent glass placard directly over the Bridge
+            environment, reading as a standing command plate on the
+            threshold rather than a conventional page heading floating in
+            plain space above a bordered hero card (EWO-114's original
+            disposition; superseded here now that the environment itself is
+            full-viewport — see docs/EWO-115-Flagship-Shell-Amendment.md §7). */}
+        <div className="inline-block rounded-lg bg-black/35 backdrop-blur-md border border-white/10 px-5 py-3.5">
+          <CompartmentHeader designation="Mission Control" title="Operations Standing By" />
         </div>
 
-        {/* UX-001A — Command Briefing Hero. Three columns, one responsibility
-            each, in the order a Commander reads them: Fleet Status ("where do
-            I stand"), Operations Center ("what am I commanding" — the visual
-            anchor, unchanged in spirit from the prior cinematic rail), Priority
-            Actions ("what should I do next"). Stacks in that same order below
-            the lg: breakpoint. Height is sized for a meaningful cinematic
-            viewport, not an excessively large empty rectangle, so the
-            environment artwork can dock in later without moving this
-            information architecture (HP-001).
-            EWO-035A-R2 — PageEnvironment's own artwork is opaque, full-cover,
-            rendered at full presentation strength; any background here only
-            ever shows through in the disabled/no-artwork case (today's actual
-            state — every environment definition still ships `enabled: false`),
-            so the center column below carries its own subtle backdrop rather
-            than reading as an empty gap until real artwork lands. */}
-        <div className="relative overflow-hidden rounded-xl lg:border lg:border-white/15 lg:min-h-[380px] flex flex-col lg:flex-row lg:items-stretch">
-          <PageEnvironment id="mission-control" />
-          <div className="hidden lg:block absolute top-3 left-3 w-5 h-5 border-t border-l border-cyan/20 pointer-events-none" aria-hidden="true" />
-          <div className="hidden lg:block absolute bottom-3 left-3 w-5 h-5 border-b border-l border-cyan/10 pointer-events-none" aria-hidden="true" />
+        {/* EWO-115 (Part B/F) — the Bridge hero, now an open composition:
+            no bordered/rounded "image card" boundary (the plate is the
+            app-wide backdrop) — Fleet Status and Priority Actions are
+            mounted rails flanking a genuinely open observation window,
+            not columns inside a Shell-bordered cell (EWO-114's
+            StationEnvironmentMount usage, removed here — see
+            docs/EWO-115-Flagship-Shell-Amendment.md §2 for the full
+            before/after). Three-part structure and every ActionCard/
+            CriticalMetricTile/FleetStatusTile/ReadinessRing usage below
+            are otherwise unchanged in content from UX-001A/EWO-114. */}
+        <div className="relative flex flex-col lg:flex-row lg:items-stretch lg:min-h-[520px]" data-testid="bridge-hero">
+          <div className="hidden lg:block absolute top-0 left-0 w-5 h-5 border-t border-l border-cyan/20 pointer-events-none" aria-hidden="true" />
+          <div className="hidden lg:block absolute bottom-0 left-0 w-5 h-5 border-b border-l border-cyan/10 pointer-events-none" aria-hidden="true" />
 
-          {/* Fleet Status (left) — Deliverable 2 (UX-001A). Relocated verbatim
-              from Quartermaster Logistics: an operational classification of
-              the fleet, not a logistics/inventory metric (which stays put,
-              below). Ships Active has no meaningful per-ship "context" (every
-              ship trivially qualifies), so it renders as a plain metric
-              rather than through FleetStatusTile's own name-list treatment.
-              UX-001A.1 (Deliverable 1) — Ships Active is the parent
-              classification the other three are a breakdown OF, not four
-              independent counts. Advisory Gold (docs/UI_ARCHITECTURE.md §4)
-              marks it as the anchor — explicitly authorized for this one
-              case by this mission's own work order — and the three children
-              sit in a gold-tinted, left-bracketed sub-container beneath it,
-              the same parent/branch visual grammar an org chart or file tree
-              already uses, never a size change (WO's own "avoid increasing
-              card size dramatically"). */}
+          {/* Fleet Status (left) — Deliverable 2 (UX-001A). An operational
+              classification of the fleet, not a logistics/inventory metric
+              (which stays put, below). Ships Active has no meaningful
+              per-ship "context" (every ship trivially qualifies), so it
+              renders as a plain metric rather than through FleetStatusTile's
+              own name-list treatment. UX-001A.1 (Deliverable 1) — Ships
+              Active is the parent classification the other three are a
+              breakdown OF, not four independent counts. Advisory Gold
+              (docs/UI_ARCHITECTURE.md §4) marks it as the anchor, and the
+              three children sit in a gold-tinted, left-bracketed
+              sub-container beneath it, the same parent/branch visual
+              grammar an org chart or file tree already uses.
+              EWO-114 — this partition shape (one anchor metric + three
+              bracketed sub-metrics) does not fit the Station Kit's
+              MountedInstrument, which only represents independent flat
+              metrics (EWO-109 Part I's own compatibility finding). Rather
+              than invent a new Kit partition primitive — explicitly out of
+              scope — Fleet Status stays Station-owned and unextracted,
+              exactly like Flight Commander's own IntelligenceControlRail/
+              SourceVesselDossier (EWO-109 Part E). */}
           <div className="panel lg:bg-panel/55 lg:backdrop-blur-md lg:border-0 lg:border-r lg:border-white/10 lg:rounded-none relative z-10 w-full lg:w-[260px] shrink-0 p-3.5 lg:p-4 flex flex-col gap-3 min-w-0">
             <p className="text-[10px] uppercase tracking-widest text-muted/60">Fleet Status</p>
             <CriticalMetricTile icon={ShipWheel} value={ships.length} label="Ships Active" className="border-gold/40" />
@@ -409,29 +432,15 @@ export default function MissionControl() {
             </div>
           </div>
 
-          {/* Operations Center (center) — UX-001A.1 Deliverable 2/5. Purely
-              atmospheric: command context and visual identity, no
-              operational instrumentation of any kind (Fleet Readiness moved
-              below, into Priority Actions — see that column's own doc
-              comment for why). The EWO-035A-R2 philosophy this restores:
-              "the goal is zero shading over the loaded image, not a
-              fallback tone" — the dimmed glass backdrop UX-001A added here
-              existed only to keep the readiness ring legible; with no
-              instrument left to protect, the artwork shows at full
-              presentation strength again. Kept as its own flex column
-              (rather than collapsed away) so the Hero's three-part
-              proportions and min-height are unchanged from UX-001A. */}
-          <div className="relative z-10 flex-1 min-w-0 min-h-[120px] lg:min-h-0" aria-hidden="true" />
+          <div className="relative z-10 flex-1 min-w-0 min-h-[80px] lg:min-h-0" aria-hidden="true" />
 
           {/* Priority Actions (right) — UX-001A.1 Deliverable 2/3/5. Fleet
-              Readiness (the Hero metric — "how healthy is my fleet?") now
-              docks at the top of this same column, directly above Priority
-              Actions ("what can I do about it?") — one operational unit,
-              per this mission's own explicit relationship, rather than
-              split across two columns the way UX-001A first shipped it.
-              Below it: the operational action queue, ranked by Commander
-              value (lowest effort / highest readiness impact first, not
-              severity alone — see priorityActions.ts's own reordered
+              Readiness (the Hero metric — "how healthy is my fleet?") docks
+              at the top of this same column, directly above Priority Actions
+              ("what can I do about it?") — one operational unit. Below it:
+              the operational action queue, ranked by Commander value (lowest
+              effort / highest readiness impact first, not severity alone —
+              see priorityActions.ts's own reordered
               PRIORITY_ACTION_CATEGORY_ORDER). Every row deep-links into the
               ship(s) it concerns, in fleet priority order (Deliverable 4 —
               already the case via buildTileContextNames' own sort; see
@@ -463,14 +472,14 @@ export default function MissionControl() {
               // 4) — `flex-1` lets this stack absorb whatever vertical
               // space the Hero row's `items-stretch` gives the Priority
               // Actions panel beyond its own content height (the panel
-              // otherwise matches Operations Center/Fleet Status's
-              // height); `justify-between` then distributes that leftover
-              // space as extra gaps between cards rather than leaving it
-              // as dead space below the last card — gap-2.5 remains the
-              // floor when there's little or no leftover space (1-2 short
-              // cards) or when there are enough cards to fill the panel
-              // on its own (justify-between never compresses below the
-              // cards' own compact height either way).
+              // otherwise matches the open window/Fleet Status's height);
+              // `justify-between` then distributes that leftover space as
+              // extra gaps between cards rather than leaving it as dead
+              // space below the last card — gap-2.5 remains the floor when
+              // there's little or no leftover space (1-2 short cards) or
+              // when there are enough cards to fill the panel on its own
+              // (justify-between never compresses below the cards' own
+              // compact height either way).
               <div className="flex-1 flex flex-col justify-between gap-2.5">
                 {priorityActionGroups.map((group) => {
                   const p = PRIORITY_ACTION_PRESENTATION[group.category]
@@ -484,6 +493,12 @@ export default function MissionControl() {
             )}
           </div>
         </div>
+
+        {/* EWO-115 (Part H) — structural divider language marking the
+            transition from the Bridge's own open observation window into
+            the workspace deck below, rather than an abrupt cut from
+            artwork straight into ship cards. */}
+        <StructuralDivider variant="section-break" />
 
         {/* Top Priority Ship — the operational centerpiece; its own section between
             Fleet Readiness and Quartermaster Logistics per the approved eye flow. */}

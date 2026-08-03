@@ -45,20 +45,25 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   // may replace this file later without any consumer change (same
   // resolution boundary as src/data/shipImageRegistry.ts's own
   // Beta-vs-Release-2.0 note).
+  // EWO-114 (Mission Control Bridge Prototype) — the Mission Control V2
+  // plate replaces the Beta-era "Operations Wall" image, the same
+  // adoption pattern EWO-111 used for Flight Commander V2: a web-ready
+  // .webp delivered directly (no PNG master), registered as the `tablet`
+  // source since no larger derivative exists, with `mobile` as its one
+  // generated derivative.
   'mission-control': definition('mission-control', 'Mission Control', {
-    sources: { desktop: assetPath('environments/mission-control/mission-control-operations-wall.webp') },
+    sources: {
+      tablet: assetPath('environments/mission-control/mission-control-v2.webp'),
+      mobile: assetPath('environments/mission-control/mission-control-v2-background-1280.webp'),
+    },
     enabled: true,
-    // EWO-035A-R2 — full-strength, Commander-approved final state. The
-    // shared DEFAULT_PRESENTATION (0.16/0.7) and the two intermediate
-    // corrections (EWO-035A: 0.4/0.85; EWO-035A-R1: 0.85/1.0, which also
-    // fixed a second compounding darkening layer — the hero-root gradient
-    // in src/pages/MissionControl.tsx, since removed entirely, see that
-    // file) were all still muting this specific, now-live production image
-    // more than the Commander wants. No filtering at all now — opacity,
-    // brightness, contrast, and saturation are each neutral/unchanged
-    // (1.0/1/1), so the artwork renders exactly as supplied. Legibility for
-    // the Fleet Readiness column is handled entirely by its own glass
-    // backdrop (src/pages/MissionControl.tsx), not by dimming the hero.
+    // EWO-035A-R2 — full-strength, Commander-approved final state,
+    // carried forward unchanged for the V2 plate: no filtering — opacity,
+    // brightness, contrast, and saturation are each neutral (1.0/1/1/1),
+    // so the artwork renders exactly as supplied. Legibility for the
+    // Fleet Status/Priority Actions rails is handled entirely by their
+    // own glass backdrop (src/pages/MissionControl.tsx), not by dimming
+    // the hero.
     presentation: { ...DEFAULT_PRESENTATION, opacity: 1.0, brightness: 1.0, contrast: 1.0, saturation: 1.0 },
   }),
   'fleet-dashboard': definition('fleet-dashboard', 'Fleet Dashboard'),
@@ -83,8 +88,20 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   // light, deliberately near-imperceptible uniform wash (0.95/1/1/1)
   // rather than the heavier 0.55 — "preserve a configurable wash only
   // where needed," not remove the mechanism outright.
+  // EWO-116 (Decision Center Station Migration) — the Technical Evaluation
+  // Laboratory V2 plate replaces the Beta-era single-tier image, the same
+  // adoption pattern EWO-111/EWO-114 used: a web-ready .webp delivered
+  // directly (no PNG master), registered as the `tablet` source since no
+  // larger derivative exists, with `mobile` as its one generated
+  // derivative. Now consumed full-viewport via FlagshipEnvironmentLayer
+  // (App.tsx, route-gated on "/decision-center") rather than the bounded
+  // EnvironmentBay this Station used before — a viewport into the
+  // laboratory, never a hero banner (EWO-116 Part C).
   'decision-center': definition('decision-center', 'Decision Center', {
-    sources: { desktop: assetPath('environments/decision-center/decision-center.webp') },
+    sources: {
+      tablet: assetPath('environments/decision-center/technical-evaluation-laboratory-v2.webp'),
+      mobile: assetPath('environments/decision-center/technical-evaluation-laboratory-v2-background-1280.webp'),
+    },
     enabled: true,
     presentation: { ...DEFAULT_PRESENTATION, opacity: 0.95, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
   }),

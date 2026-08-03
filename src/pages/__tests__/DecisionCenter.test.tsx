@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import DecisionCenter from '../DecisionCenter'
 import { useFleetStore } from '../../store/useFleetStore'
 import { catalogComponentsByName } from '../../generated/componentCatalog'
@@ -225,5 +227,95 @@ describe('<DecisionCenter /> — UX-003A (Deliverable 9): no navigation away dur
     checkItem('Mirage')
     expect(screen.queryByRole('link', { name: /hangar/i })).not.toBeInTheDocument()
     expect(document.querySelector('a[href="/hangar"]')).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * EWO-116 (Part L) — Decision Center Station Migration test checklist.
+ * Items 6/7/8/12 (existing evaluation/recommendation/workflow authorities
+ * and existing behavioral tests remain unchanged/green) are proven by
+ * every describe block above this one passing completely unmodified —
+ * not duplicated here. Item 1 (Flagship Frame) and item 5 (laboratory
+ * environment behaves as a viewport, not a hero cell) are App-shell-level
+ * concerns covered in src/__tests__/App.test.tsx.
+ */
+describe('<DecisionCenter /> — EWO-116 (Part L, items 2/3/4): Station Shell/Kit adoption', () => {
+  it('item 3: renders inside the Station Shell threshold wrapper (StationShell)', () => {
+    const { container } = renderDecisionCenter()
+    expect(container.querySelector('.max-w-5xl.space-y-4')).not.toBeNull()
+  })
+
+  it('item 2: CompartmentHeader is mounted on its own glass placard, not floating in plain space', () => {
+    renderDecisionCenter()
+    expect(screen.getByTestId('compartment-header')).toBeInTheDocument()
+    const heading = screen.getByRole('heading', { level: 1 })
+    const placard = heading.closest('.bg-black\\/35') as HTMLElement
+    expect(placard).not.toBeNull()
+    expect(placard.className).toContain('backdrop-blur-md')
+    expect(within(placard).getByText('Decision Center').tagName).toBe('P')
+  })
+
+  it('item 4: Loot Lookup and Item Assessment are both MountedWorkspacePanel (Station Kit), not ad hoc `.panel` divs', () => {
+    renderDecisionCenter()
+    const panels = screen.getAllByTestId('mounted-workspace-panel')
+    expect(panels.length).toBe(2)
+    expect(within(panels[0]).getByText('Loot Lookup')).toBeInTheDocument()
+    expect(within(panels[1]).getByText('Item Assessment')).toBeInTheDocument()
+  })
+
+  it('item 4: the Quartermaster briefs the Commander via the canonical OfficerBriefingBlock (Station Kit)', () => {
+    renderDecisionCenter()
+    expect(screen.getByTestId('officer-briefing-block')).toBeInTheDocument()
+    expect(screen.getByTestId('officer-briefing-summary')).toHaveTextContent(/evaluated here before they rejoin the fleet/)
+  })
+
+  it('item 4: the action-row section break composes StructuralDivider (Station Kit), not a raw border div', () => {
+    if (!catalogComponentsByName.has('Mirage')) return
+    renderDecisionCenter()
+    checkItem('Mirage')
+    expect(screen.getByTestId('assessment-action-divider')).toBeInTheDocument()
+  })
+})
+
+describe('<DecisionCenter /> — EWO-116 (Part L, item 9): empty state conforms to Quartermaster Edition empty-state authority', () => {
+  it('the pre-lookup state composes StandingReportRegion (Station Shell) — calm and operational, no warning language, no dead page', () => {
+    const { container } = renderDecisionCenter()
+    const region = screen.getByTestId('item-assessment-standing-report')
+    expect(region).toBeInTheDocument()
+    expect(within(region).getByText('Awaiting Item Assessment')).toBeInTheDocument()
+    // No warning/danger styling anywhere in the empty state — "operational
+    // even with nothing awaiting evaluation," never an error/dead-page tone.
+    expect(region.querySelector('.text-danger')).toBeNull()
+    expect(region.querySelector('.text-warning')).toBeNull()
+    // The monitoring visual (reused radar-sweep, EWO-109) is present —
+    // the laboratory reads as actively watching, not idle.
+    expect(container.querySelector('.animate-radar-sweep')).not.toBeNull()
+  })
+})
+
+describe('<DecisionCenter /> — EWO-116 (Part L, items 10/11): no new business logic, no duplicated primitives', () => {
+  const source = readFileSync(resolve(__dirname, '../DecisionCenter.tsx'), 'utf-8')
+
+  it('item 11: no longer imports EnvironmentBay — the bounded/bordered room primitive is fully retired from this Station', () => {
+    const importLines = source.split('\n').filter((line) => line.trim().startsWith('import'))
+    expect(importLines.some((line) => line.includes('EnvironmentBay'))).toBe(false)
+  })
+
+  it('item 10: still calls the exact same canonical resolvers, never a second/divergent implementation', () => {
+    expect(source).toContain('resolveNeededByBuilds')
+    expect(source).toContain('resolveReservationEligibility')
+    expect(source).toContain('calculateComponentAvailability')
+    expect(source).toContain('addHangarItem')
+    expect(source).toContain('reserveComponent')
+  })
+
+  it('item 10: introduces no new top-level function beyond the two pre-existing business-logic helpers', () => {
+    const topLevelFunctions = source.match(/^function \w+/gm) ?? []
+    expect(topLevelFunctions.sort()).toEqual(['function evaluate', 'function recommendationTone'].sort())
+  })
+
+  it('item 11: composes Station Shell/Kit primitives via import, never redefines an equivalent locally', () => {
+    expect(source).toContain("from '../components/stationShell'")
+    expect(source).toContain("from '../components/stationKit'")
   })
 })

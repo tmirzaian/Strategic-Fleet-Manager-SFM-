@@ -7,7 +7,8 @@ import { catalogComponentsByName } from '../generated/componentCatalog'
 import { calculateComponentAvailability } from '../engine/logistics/availability'
 import { resolveNeededByBuilds, type NeededByEntry } from '../utils/inventoryDependencies'
 import { resolveReservationEligibility } from '../utils/hangarReservationEligibility'
-import EnvironmentBay from '../components/layout/EnvironmentBay'
+import { StationShell, StandingReportRegion } from '../components/stationShell'
+import { CompartmentHeader, OfficerBriefingBlock, MountedWorkspacePanel, StructuralDivider, QuartermasterIconHousing } from '../components/stationKit'
 
 /**
  * UX-003A — "Decision Center Loot Intake: Lookup-to-Inventory Workflow &
@@ -175,83 +176,117 @@ export default function DecisionCenter() {
   }
 
   return (
-    // UX-003B Amendment A — header lives outside the Technical Evaluation
-    // Bay entirely, exactly like Mission Control's own Command Briefing
-    // Hero (Deliverable 4): no artwork behind "Decision Center" / "Should
-    // I keep this?".
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-cyan/70 mb-1">Decision Center</p>
-        {/* EWO-100 (Phase 1) — standardized operational status line. */}
-        <h1 className="text-2xl font-display font-bold text-white">Mission Assessment Available</h1>
-      </div>
-
-      <EnvironmentBay id="decision-center">
-      {/* Deliverable 6 — Loot Lookup panel. Deliverable 1: the search
-          interaction itself (input, suggestions, Check Item, Enter-to-
-          check) is unchanged from the pre-existing implementation.
-          UX-003B Amendment A (Deliverable 2) — floats as a glass panel
-          over the environment at lg:, matching Mission Control's own
-          `lg:bg-panel/55 lg:backdrop-blur-md` treatment; below lg it
-          keeps the plain opaque `.panel` styling (no bay border/glass at
-          that width either — see EnvironmentBay's own doc comment). */}
-      <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-6 space-y-4">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted">
-          <Search size={13} className="text-cyan/70" /> Loot Lookup
+    // EWO-116 — Decision Center's Station migration. StationShell (EWO-109)
+    // provides the compartment threshold; a narrower inner column preserves
+    // this Station's own deliberately measured, non-executive-width reading
+    // column (Part F — "measured, analytical, intentional," never Mission
+    // Control's own full-width openness) as Station-owned content choice
+    // inside the Shell's general area, not a duplicate Shell implementation.
+    // The Technical Evaluation Laboratory environment plate now renders as
+    // the app-wide FlagshipEnvironmentLayer backdrop (App.tsx, route-gated
+    // on "/decision-center") rather than a bounded EnvironmentBay — a
+    // viewport into the laboratory, never a hero banner (Part C).
+    <StationShell>
+      <div className="max-w-2xl space-y-5">
+        {/* EWO-116 (Part D) — CompartmentHeader (EWO-110) mounted on its own
+            translucent glass placard directly over the laboratory
+            environment, the same treatment EWO-115 gave Mission Control's
+            own header: a standing placard on the threshold, not a
+            conventional page heading floating in plain space. Designation
+            and title text are unchanged — "Technical Evaluation Laboratory"
+            is this Station's architectural identity (matching how "the
+            Bridge"/"Combat Information Center" were never literal Mission
+            Control/Flight Commander copy either); the real, tested,
+            Commander-facing text stays "Decision Center." */}
+        <div className="inline-block rounded-lg bg-black/35 backdrop-blur-md border border-white/10 px-5 py-3.5">
+          <CompartmentHeader designation="Decision Center" title="Mission Assessment Available" />
         </div>
-        <div className="relative">
-          <div className="flex gap-2">
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value)
-                setShowSuggestions(true)
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
-              onKeyDown={(e) => e.key === 'Enter' && check(query)}
-              placeholder="Start typing — e.g. M, Mi, Mirage…"
-              className="flex-1"
-            />
-            <button
-              onClick={() => check(query)}
-              className="inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-cyan/90 transition-colors shrink-0"
-            >
-              <Search size={15} /> Check Item
-            </button>
-          </div>
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 mt-1.5 w-full max-w-[calc(100%-6.5rem)] bg-black border border-cyan/30 rounded-lg overflow-hidden shadow-glow">
-              {suggestions.map((name) => (
-                <button
-                  key={name}
-                  onMouseDown={() => selectItem(name)}
-                  className="w-full text-left px-3 py-2 text-sm text-white hover:bg-cyan/15 transition-colors"
-                >
-                  {name}
-                </button>
-              ))}
+
+        {/* EWO-116 (Part G) — the Quartermaster's own briefing, consuming
+            QDS-003's Officer Briefing grammar directly (OfficerBriefingBlock,
+            EWO-110): a single, evergreen, always-true summary of what this
+            compartment does — never per-item, never fabricating certainty
+            about a specific component. Per-item findings remain entirely
+            inside the Item Assessment panel below, exactly as QDS-003 Part
+            C.1 requires (Station Identification/Condition never duplicated
+            outside the header it belongs to). */}
+        <OfficerBriefingBlock summary="Recovered components are evaluated here before they rejoin the fleet's active inventory — retention, fleet demand, and disposition are all assessed in one pass." />
+
+        {/* EWO-116 (Part E) — Loot Lookup, now a MountedWorkspacePanel
+            (EWO-110 Part G's own canonical replacement for an ad hoc
+            `.panel div`) rather than a hand-rolled glass panel. The search
+            interaction itself (input, suggestions, Check Item, Enter-to-
+            check) is byte-for-byte unchanged (Part J — no duplicated logic,
+            no business-authority change). */}
+        <MountedWorkspacePanel
+          title={
+            <span className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted">
+              <Search size={13} className="text-cyan/70" /> Loot Lookup
+            </span>
+          }
+        >
+          <div className="relative">
+            <div className="flex gap-2">
+              <input
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+                onKeyDown={(e) => e.key === 'Enter' && check(query)}
+                placeholder="Start typing — e.g. M, Mi, Mirage…"
+                className="flex-1"
+              />
+              <button
+                onClick={() => check(query)}
+                className="inline-flex items-center gap-2 bg-cyan text-bg font-semibold text-sm px-4 py-2.5 rounded-lg hover:bg-cyan/90 transition-colors shrink-0"
+              >
+                <Search size={15} /> Check Item
+              </button>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Deliverable 4/6/7 — Item Assessment panel, always visible: a
-          purposeful empty state before lookup, a real assessment after.
-          UX-003B Amendment A (Deliverable 2) — same glass-panel treatment
-          as Loot Lookup above. */}
-      <div className="panel lg:bg-panel/55 lg:backdrop-blur-md p-6 space-y-4">
-        <div className="text-xs uppercase tracking-widest text-muted">Item Assessment</div>
-
-        {!lookedUpName && (
-          <div className="flex flex-col items-center text-center gap-2 py-8">
-            <ScanLine size={26} className="text-muted/50 mb-1" />
-            <h2 className="font-display font-semibold text-white">Awaiting Item Assessment</h2>
-            <p className="text-sm text-muted max-w-sm">Search for a recovered component to review fleet demand, inventory status, and retention value.</p>
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 mt-1.5 w-full max-w-[calc(100%-6.5rem)] bg-black border border-cyan/30 rounded-lg overflow-hidden shadow-glow">
+                {suggestions.map((name) => (
+                  <button
+                    key={name}
+                    onMouseDown={() => selectItem(name)}
+                    className="w-full text-left px-3 py-2 text-sm text-white hover:bg-cyan/15 transition-colors"
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </MountedWorkspacePanel>
 
-        {verdict?.kind === 'UNKNOWN' && (
+        {/* EWO-116 (Part E/H/I) — Item Assessment, also a
+            MountedWorkspacePanel, so it reads as physically mounted into
+            the laboratory rather than a floating rectangle (Part H). The
+            pre-lookup state now composes StationShell's own
+            StandingReportRegion (EWO-109 Part B/E) — the same "calm,
+            operational, nothing wrong" surface Flight Commander's Standing
+            Watch already uses — directly satisfying Part I's "the
+            laboratory should appear operational even with nothing awaiting
+            evaluation, no warning language, no dead page." Its monitoring
+            visual (a radar sweep) is kept on: the pre-existing `ScanLine`
+            icon this empty state already used independently establishes a
+            scanning/sweep metaphor genuinely fits this Station's own
+            domain, not a forced reuse. */}
+        <MountedWorkspacePanel title={<span className="text-xs uppercase tracking-widest text-muted">Item Assessment</span>}>
+          {!lookedUpName && (
+            <StandingReportRegion monitoringVisual testId="item-assessment-standing-report">
+              <div className="flex flex-col items-center text-center gap-2">
+                <QuartermasterIconHousing icon={ScanLine} label="Awaiting Item Assessment" />
+                <h2 className="font-display font-semibold text-white mt-1">Awaiting Item Assessment</h2>
+                <p className="text-sm text-muted max-w-sm">Search for a recovered component to review fleet demand, inventory status, and retention value.</p>
+              </div>
+            </StandingReportRegion>
+          )}
+
+          {verdict?.kind === 'UNKNOWN' && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <HelpCircle size={18} className="text-danger" />
@@ -335,9 +370,14 @@ export default function DecisionCenter() {
 
             {/* Deliverable 2/3 — Add to Inventory, then the optional,
                 canonically-gated post-add reservation step, entirely in
-                place. */}
+                place. EWO-116 (Part E) — the section break ahead of this
+                action row now composes StructuralDivider (EWO-110 Part C)
+                instead of a raw `border-t` — the exact same shipped
+                `.scanline-divider` CSS, reached through the canonical
+                component. */}
+            <StructuralDivider testId="assessment-action-divider" />
             {!added ? (
-              <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+              <div className="flex items-center gap-2 pt-1">
                 <input
                   type="number"
                   min={1}
@@ -360,7 +400,7 @@ export default function DecisionCenter() {
                 {addResult && !addResult.success && <p className="text-xs text-danger">{addResult.message}</p>}
               </div>
             ) : (
-              <div className="pt-1 border-t border-white/5 space-y-2">
+              <div className="pt-1 space-y-2">
                 <div className="flex items-center gap-2 text-success text-sm">
                   <CheckCircle2 size={16} /> {addResult?.message ?? 'Item added to Hangar Inventory.'}
                 </div>
@@ -400,8 +440,8 @@ export default function DecisionCenter() {
             )}
           </div>
         )}
+        </MountedWorkspacePanel>
       </div>
-      </EnvironmentBay>
-    </div>
+    </StationShell>
   )
 }

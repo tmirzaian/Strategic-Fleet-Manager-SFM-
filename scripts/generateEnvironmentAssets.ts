@@ -106,6 +106,31 @@ const SPECS: DerivativeSpec[] = [
     requestedWidths: [...ENVIRONMENT_TIERS],
   },
   {
+    // EWO-114 (Mission Control Bridge Prototype) — Mission Control V2
+    // environment plate, delivered the same way as flight-commander-v2
+    // (a web-ready .webp at 1672x941, no PNG master). Same tier request
+    // for consistency; the never-upscale guard skips 1920 and only the
+    // 1280 tier is produced — the delivered 1672-wide file is registered
+    // directly as the `tablet` source in environmentAssets.ts.
+    masterPath: join(ENVIRONMENTS_ROOT, 'mission-control', 'mission-control-v2.webp'),
+    outputDir: join(ENVIRONMENTS_ROOT, 'mission-control'),
+    outputBaseName: 'mission-control-v2-background',
+    requestedWidths: [...ENVIRONMENT_TIERS],
+  },
+  {
+    // EWO-116 (Decision Center Station Migration) — Technical Evaluation
+    // Laboratory V2 environment plate, delivered the same way as
+    // mission-control-v2/flight-commander-v2 (a web-ready .webp at
+    // 1672x941, no PNG master). Same tier request for consistency; the
+    // never-upscale guard skips 1920 and only the 1280 tier is produced —
+    // the delivered 1672-wide file is registered directly as the `tablet`
+    // source in environmentAssets.ts.
+    masterPath: join(ENVIRONMENTS_ROOT, 'decision-center', 'technical-evaluation-laboratory-v2.webp'),
+    outputDir: join(ENVIRONMENTS_ROOT, 'decision-center'),
+    outputBaseName: 'technical-evaluation-laboratory-v2-background',
+    requestedWidths: [...ENVIRONMENT_TIERS],
+  },
+  {
     masterPath: join(ILLUSTRATIONS_ROOT, 'captains-log-certification', 'captains-log-certification-accent.png'),
     outputDir: join(ILLUSTRATIONS_ROOT, 'captains-log-certification'),
     outputBaseName: 'captains-log-certification-accent',

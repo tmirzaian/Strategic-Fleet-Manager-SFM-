@@ -361,12 +361,16 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
     expect(screen.getByText('Modify Ship').closest('a')).toHaveAttribute('href', '/ship-workspace')
   })
 
-  it('mounts PageEnvironment for "mission-control" without any runtime failure, rendering the EWO-035 Beta hero artwork', () => {
+  it('EWO-115: no longer mounts its own local PageEnvironment layer — the Bridge plate moved to the app-wide FlagshipEnvironmentLayer (Part B), rendered once in App.tsx, not per-Station. Verified without throwing.', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { container } = renderMissionControl()
-    const layer = container.querySelector('[data-environment-id="mission-control"]')
-    expect(layer).not.toBeNull()
-    expect(layer!.querySelector('[style*="mission-control-operations-wall.webp"]')).not.toBeNull()
+    // In isolation (renderMissionControl renders <MissionControl /> alone,
+    // not the full App shell), no `[data-environment-id]` node exists at
+    // all — proof the environment is genuinely owned one layer up now,
+    // not just visually relocated. See src/__tests__/App.test.tsx for the
+    // real, full-shell assertion that FlagshipEnvironmentLayer renders the
+    // mission-control-v2 plate specifically on "/".
+    expect(container.querySelector('[data-environment-id]')).toBeNull()
     expect(consoleError).not.toHaveBeenCalled()
     consoleError.mockRestore()
   })
@@ -394,16 +398,17 @@ describe('<MissionControl /> — UX-001A Command Briefing Hero (supersedes EWO-0
     expect(priorityActionsColumn!.className).toContain('lg:backdrop-blur-md')
   })
 
-  it('EWO-035A-R2: the hero region\'s own gradient background is removed entirely — no deliberate shading, tint, or dark gradient remains over the main artwork region', () => {
+  it('EWO-115 (Part B): the hero region carries no bordered/rounded "image card" boundary and no deliberate shading/tint/gradient of its own — the Bridge plate is the app-wide backdrop, not a hero cell', () => {
     const { container } = renderMissionControl()
-    const heroRoot = container.querySelector('[data-environment-id="mission-control"]')?.parentElement
+    const heroRoot = container.querySelector('[data-testid="bridge-hero"]') as HTMLElement
     expect(heroRoot).not.toBeNull()
-    expect(heroRoot!.className).not.toContain('bg-gradient-to-br')
-    expect(heroRoot!.className).not.toContain('from-panel')
-    expect(heroRoot!.className).not.toContain('to-bg')
-    // Framing (border/rounding), not shading, remains untouched.
-    expect(heroRoot!.className).toContain('lg:border')
-    expect(heroRoot!.className).toContain('rounded-xl')
+    expect(heroRoot.className).not.toContain('bg-gradient-to-br')
+    expect(heroRoot.className).not.toContain('from-panel')
+    expect(heroRoot.className).not.toContain('to-bg')
+    // EWO-115 Part B — no bordered/rounded hero-cell framing either,
+    // unlike the EWO-114 StationEnvironmentMount-based hero it replaces.
+    expect(heroRoot.className).not.toContain('lg:border')
+    expect(heroRoot.className).not.toContain('rounded-xl')
   })
 
   it('never renders a second decorative SFM logo inside the page content — the one official mark lives in the sidebar identity area', () => {
@@ -458,10 +463,9 @@ describe('<MissionControl /> — UX-001A.1 Commander Review Amendments', () => {
     const priorityActionsLabel = within(priorityActionsColumn).getByText('Priority Actions')
     expect(readinessNode.compareDocumentPosition(priorityActionsLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     // Operations Center itself is now a bare, content-free spacer.
-    const environmentLayer = document.querySelector('[data-environment-id="mission-control"]') as HTMLElement
-    const operationsCenter = environmentLayer.parentElement as HTMLElement
-    const centerColumn = Array.from(operationsCenter.children).find(
-      (el) => el.getAttribute('aria-hidden') === 'true' && !el.className.includes('border-t') && !el.className.includes('border-b')
+    const bridgeHero = document.querySelector('[data-testid="bridge-hero"]') as HTMLElement
+    const centerColumn = Array.from(bridgeHero.children).find(
+      (el) => el.getAttribute('aria-hidden') === 'true' && el.className.includes('flex-1') && !el.className.includes('border-t') && !el.className.includes('border-b')
     ) as HTMLElement
     expect(centerColumn).not.toBeNull()
     expect(centerColumn.textContent).toBe('')
