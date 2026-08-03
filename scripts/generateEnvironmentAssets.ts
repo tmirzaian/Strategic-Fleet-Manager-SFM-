@@ -89,6 +89,23 @@ const SPECS: DerivativeSpec[] = [
     requestedWidths: [...ENVIRONMENT_TIERS],
   },
   {
+    // EWO-111 (Part A) — Flight Commander V2 environment plate: a
+    // genuine second, distinct scene (a visible bulkhead threshold on
+    // the left, the CIC beyond it), delivered directly as a
+    // web-ready .webp at 1672x941 rather than an oversized archival
+    // master — no PNG master exists for this plate. Requesting the same
+    // [1920, 1280] tier set as every other environment for consistency;
+    // the never-upscale guard above skips 1920 automatically (1672 <
+    // 1920) and only the 1280 tier is actually produced — the delivered
+    // 1672-wide file itself is registered directly as the `tablet`
+    // source in environmentAssets.ts, since generating a same-or-smaller
+    // "1920" derivative from it would be pointless.
+    masterPath: join(ENVIRONMENTS_ROOT, 'flight-commander', 'flight-commander-v2.webp'),
+    outputDir: join(ENVIRONMENTS_ROOT, 'flight-commander'),
+    outputBaseName: 'flight-commander-v2-background',
+    requestedWidths: [...ENVIRONMENT_TIERS],
+  },
+  {
     masterPath: join(ILLUSTRATIONS_ROOT, 'captains-log-certification', 'captains-log-certification-accent.png'),
     outputDir: join(ILLUSTRATIONS_ROOT, 'captains-log-certification'),
     outputBaseName: 'captains-log-certification-accent',

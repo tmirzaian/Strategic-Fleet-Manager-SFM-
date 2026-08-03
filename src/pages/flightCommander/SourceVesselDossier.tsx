@@ -29,18 +29,22 @@ export default function SourceVesselDossier({ ship, definition }: { ship: Target
   const imageSrc = definition ? resolveShipImage({ id: definition.id, imageUrl: definition.imageUrl, image: definition.image }) : undefined
 
   return (
-    <div className="bg-black/25 border border-white/10 rounded-md p-3" data-testid={`dossier-${ship.shipDefinitionId}`}>
+    <div className="bg-black/25 border border-white/10 rounded-md p-3.5" data-testid={`dossier-${ship.shipDefinitionId}`}>
       {/* Source Vessel identity row. EWO-108 (Part O) — `flex-wrap` lets
           the category-glyph strip drop to its own line at narrow widths
           instead of forcing horizontal overflow (confirmed via live
           390px-viewport measurement); at `sm:` and up it stays a single
-          row, unchanged from the desktop-first design intent. */}
+          row, unchanged from the desktop-first design intent.
+          EWO-111 (Part F) — image grew 48px -> 56px for more tactical-
+          dossier presence; the component block's own indent below grew
+          to match (60px -> 68px = 56px image + 12px gap), so it still
+          lines up under the name column exactly as before. */}
       <div className="flex flex-wrap items-center gap-3">
         <ShipImage
           src={imageSrc}
           image={definition?.image}
           alt={ship.displayName}
-          className="w-12 h-12 shrink-0 rounded-sm overflow-hidden border border-white/10 relative"
+          className="w-14 h-14 shrink-0 rounded-sm overflow-hidden border border-white/10 relative"
           overlay={false}
         />
         <div className="min-w-0 flex-1">
@@ -73,7 +77,7 @@ export default function SourceVesselDossier({ ship, definition }: { ship: Target
       </div>
 
       {/* Useful Factory Equipment -> Required By Commander Fleet. */}
-      <div className="mt-2.5 pl-[60px] space-y-2">
+      <div className="mt-3 pl-[68px] space-y-2.5">
         {ship.matches.map((m) => {
           const identity = describeComponentIdentity(m.componentName, m.componentEntityClass, m.category)
           return (

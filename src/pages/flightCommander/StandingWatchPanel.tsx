@@ -10,6 +10,14 @@ import { StandingReportRegion } from '../../components/stationShell'
  * monitoring-visual (radar sweep) presentation moved to the shell's
  * `StandingReportRegion` (EWO-109 Part B/E) — this file supplies content,
  * not the report's own architecture.
+ *
+ * EWO-111 (Part G) — gold discipline audit: the "all clear" checkmark
+ * keeps gold (it is the one thing on this panel the Commander should
+ * notice first). The "Intelligence Status" section label and its three
+ * bullet markers were gold before this EWO and are corrected to cyan —
+ * a list heading and its bullets are structural, not a strategic value
+ * or a recommendation, and gold used there was decoration, not command
+ * attention.
  */
 export default function StandingWatchPanel() {
   return (
@@ -27,22 +35,22 @@ export default function StandingWatchPanel() {
       <p className="text-sm text-muted mt-2 max-w-md mx-auto">Flight Commander will identify new target opportunities when fleet procurement requirements change.</p>
 
       <div className="mt-6 pt-5 border-t border-white/10 max-w-sm mx-auto text-left">
-        <p className="text-[11px] uppercase tracking-widest text-gold/70 mb-2 text-center">Intelligence Status</p>
+        <p className="text-[11px] uppercase tracking-widest text-cyan/60 mb-2 text-center">Intelligence Status</p>
         <ul className="space-y-1.5">
           <li className="text-[11px] text-cyan/70 uppercase tracking-widest flex items-start gap-2">
-            <span className="text-gold/60 mt-0.5" aria-hidden="true">
+            <span className="text-cyan/40 mt-0.5" aria-hidden="true">
               &bull;
             </span>
             Monitoring known factory configurations
           </li>
           <li className="text-[11px] text-cyan/70 uppercase tracking-widest flex items-start gap-2">
-            <span className="text-gold/60 mt-0.5" aria-hidden="true">
+            <span className="text-cyan/40 mt-0.5" aria-hidden="true">
               &bull;
             </span>
             Monitoring Commander procurement requirements
           </li>
           <li className="text-[11px] text-cyan/50 uppercase tracking-widest flex items-start gap-2">
-            <span className="text-gold/60 mt-0.5" aria-hidden="true">
+            <span className="text-cyan/40 mt-0.5" aria-hidden="true">
               &bull;
             </span>
             Awaiting actionable target opportunities

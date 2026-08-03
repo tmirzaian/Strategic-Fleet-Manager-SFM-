@@ -8,10 +8,18 @@ import { CANONICAL_STABLE_CATEGORY_KEYS, CANONICAL_COMPONENT_CATEGORY_LABEL } fr
  * logic — all owned by the parent, this component is presentation only).
  * Restyled as a compact mounted rail (recessed dark housing, matching the
  * instrument/glyph housing language) rather than a plain `.panel` card.
+ *
+ * EWO-111 (Part G) — active-filter pills reverted from gold to cyan.
+ * EWO-108 reasoned gold was a legitimate "command-attention accent" for
+ * the Commander's own current selection; under this EWO's stricter test
+ * ("why is this gold? because the Commander should notice this first")
+ * that doesn't hold — a selected filter pill is informational UI state,
+ * not a strategic value or a recommendation, so it belongs in cyan
+ * alongside every other informational accent on this rail.
  */
 function pillClass(active: boolean): string {
   return `text-xs font-medium rounded-full px-3 py-1 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan/60 focus-visible:outline-offset-1 ${
-    active ? 'border-gold/40 bg-gold/10 text-gold' : 'border-white/10 text-muted hover:text-white hover:border-cyan/30'
+    active ? 'border-cyan/40 bg-cyan/10 text-cyan' : 'border-white/10 text-muted hover:text-white hover:border-cyan/30'
   }`
 }
 

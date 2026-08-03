@@ -88,7 +88,7 @@ export default function FlightCommander() {
           mount/fade/region mechanics now live in
           `src/components/stationShell/` — this page supplies only its
           own `environmentId` and content. */}
-      <StationEnvironmentMount environmentId="flight-commander">
+      <StationEnvironmentMount environmentId="flight-commander" minHeightClassName="lg:min-h-[576px]">
         <StationBriefingRegion>
           <StationBriefingHeader active={active} sourceShipsIdentifiedCount={presentation.sourceShipsIdentifiedCount} matchedDemandComponentCount={presentation.matchedDemandComponentCount} />
           {presentation.factoryDataAvailable && <TacticalInstruments presentation={presentation} />}
@@ -139,7 +139,7 @@ function SourceVesselDossierList({
     )
   }
   return (
-    <div className="space-y-2" data-testid="target-roster">
+    <div className="space-y-3" data-testid="target-roster">
       {sourceShips.map((ship) => (
         <SourceVesselDossier key={ship.shipDefinitionId} ship={ship} definition={definitionById.get(ship.shipDefinitionId)} />
       ))}

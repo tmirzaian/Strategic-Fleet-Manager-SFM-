@@ -382,7 +382,11 @@ describe('EWO-108 (Part O / R.20) — responsive classes present', () => {
     withMock(richResult)
     const { container } = renderPage()
     const shell = container.querySelector('[data-environment-id="flight-commander"]')?.parentElement as HTMLElement
-    expect(shell.className).toContain('lg:min-h-[560px]')
+    // EWO-111 (Part A) — 560px -> 576px: the crossover height at which the
+    // V2 environment plate's own full width (including the Part B
+    // threshold doorway) renders with zero horizontal crop at the
+    // 1600px reference viewport. See docs/QDS-005-Quartermaster-Visual-Baseline.md.
+    expect(shell.className).toContain('lg:min-h-[576px]')
     expect(shell.className).toContain('flex-col')
     expect(shell.className).toContain('lg:flex-row')
   })

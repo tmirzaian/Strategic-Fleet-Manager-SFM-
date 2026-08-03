@@ -102,11 +102,15 @@ describe('Mission M-022: environment registry', () => {
     expect(isValidPresentation(def.presentation)).toBe(true)
   })
 
-  it('EWO-104 Amendment 2 (Part F): flight-commander is enabled with real, usable tablet (~1920) and mobile (~1280) sources, and resolves to the wider tier', () => {
+  it('EWO-111 (Part A): flight-commander is enabled with real, usable tablet and mobile sources, and resolves to the wider tier', () => {
     const def = getEnvironmentDefinition('flight-commander')
     expect(def.enabled).toBe(true)
     expect(isEnvironmentUsable(def)).toBe(true)
-    expect(def.sources.tablet).toMatch(/^\/assets\/environments\/flight-commander\/.+-1920\.webp$/)
+    // EWO-111 — the tablet source is now the V2 plate, used directly
+    // (delivered at 1672px, already web-ready — no separate "-1920"
+    // derivative exists or is needed for it, unlike the original v1
+    // plate's own generated tiers).
+    expect(def.sources.tablet).toMatch(/^\/assets\/environments\/flight-commander\/flight-commander-v2\.webp$/)
     expect(def.sources.mobile).toMatch(/^\/assets\/environments\/flight-commander\/.+-1280\.webp$/)
     expect(resolveResponsiveSource(def.sources)).toBe(def.sources.tablet)
   })

@@ -142,10 +142,23 @@ export const ENVIRONMENT_ASSETS: Record<EnvironmentId, EnvironmentAssetDefinitio
   // fallback tone" — legibility for the anchored summary cards comes from
   // their own glass backdrop (see FlightCommander.tsx), never from
   // dimming the artwork. blurPx: 0, no vignette layer.
+  // EWO-111 (Part A) — the V2 plate: a genuine second, distinct scene
+  // (a visible bulkhead threshold on the left, opening into the CIC)
+  // delivered directly as a web-ready 1672-wide .webp — no archival PNG
+  // master exists for this one (see scripts/generateEnvironmentAssets.ts's
+  // own comment on this spec). The delivered file is used directly as
+  // the `tablet` source (already at web resolution, resizing it down
+  // and calling that "1920" would be meaningless); `mobile` is the one
+  // real derivative the pipeline could produce from it (1280, the only
+  // requested tier at or below the source's own 1672px width). Same
+  // full-strength, zero-filter treatment as before — the new plate's
+  // own left-dark/right-detail composition already gives the Mounted
+  // Briefing Wall the same legible negative space the original plate
+  // did, so no shading is needed to compensate for it either.
   'flight-commander': definition('flight-commander', 'Flight Commander', {
     sources: {
-      tablet: assetPath('environments/flight-commander/flight-commander-background-1920.webp'),
-      mobile: assetPath('environments/flight-commander/flight-commander-background-1280.webp'),
+      tablet: assetPath('environments/flight-commander/flight-commander-v2.webp'),
+      mobile: assetPath('environments/flight-commander/flight-commander-v2-background-1280.webp'),
     },
     enabled: true,
     presentation: { ...DEFAULT_PRESENTATION, opacity: 1.0, brightness: 1.0, contrast: 1.0, saturation: 1.0, blurPx: 0 },
