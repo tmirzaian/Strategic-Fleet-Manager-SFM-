@@ -7,12 +7,12 @@ import {
   StationEnvironmentMount,
   StationBriefingRegion,
   MountedInstrumentRegion,
-  MountedInstrument,
   OperationalRailMount,
   PrimaryWorkspace,
   SupportingWorkspace,
   StandingReportRegion,
 } from '../index'
+import { MountedInstrument } from '../../stationKit'
 
 /**
  * EWO-109 (Part J) — every test here uses generic, invented content
@@ -56,11 +56,11 @@ describe('Quartermaster Station Shell — structural regions render (EWO-109 Par
     expect(screen.getByTestId('identity-probe')).toBeInTheDocument()
   })
 
-  it('MountedInstrumentRegion + MountedInstrument render generic label/value pairs', () => {
+  it('MountedInstrumentRegion + the Station Kit MountedInstrument render generic title/value pairs', () => {
     render(
       <MountedInstrumentRegion>
-        <MountedInstrument label="Widgets Tracked" value={7} testId="instrument-widgets" />
-        <MountedInstrument label="Gizmos Ready" value="N/A" testId="instrument-gizmos" />
+        <MountedInstrument title="Widgets Tracked" value={7} testId="instrument-widgets" />
+        <MountedInstrument title="Gizmos Ready" value="N/A" testId="instrument-gizmos" />
       </MountedInstrumentRegion>
     )
     expect(screen.getByTestId('summary-cards')).toBeInTheDocument()
